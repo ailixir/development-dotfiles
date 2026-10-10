@@ -1,0 +1,405 @@
+{
+  "storyId": "STUDIO-OBS-005",
+  "phase": "apply_qa_fixes",
+  "iteration": "r1",
+  "recordedAt": "2026-10-09T04:35:18.770658+00:00",
+  "executor": "Dex (@dev), original OBS-005 executor /root/obs005_arch",
+  "status": "InProgress",
+  "qaVerdict": null,
+  "originalQaGate": "FAIL; unchanged",
+  "independentReReviewPending": true,
+  "designReview": ".ai/STUDIO-OBS-005-fix-design-review-r1.json",
+  "designReviewVerdict": "APPROVE for implementation with ten mandatory conditions; not final QA approval",
+  "findings": [
+    {
+      "id": "SEC-001",
+      "severity": "high",
+      "resolution": "FIXED",
+      "review": "Pending independent re-review",
+      "change": "Immutable exact step+occurrence+operation+slot source choice; initial plan/replan/action use validation; coordinate-keyed re-question refusal; unchanged public answer DTO; phase-specific closed model/context/provider/output/source-selection pins.",
+      "evidence": [
+        "Both source choices produce distinct independent actual navigation receipts",
+        "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed",
+        "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation",
+        "sourceChoiceConstrainsItsExactOccurrenceSlotOperationAndReferenceUse",
+        "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference"
+      ]
+    },
+    {
+      "id": "REL-001",
+      "severity": "high",
+      "resolution": "FIXED",
+      "review": "Pending independent re-review",
+      "change": "Durable bootstrap progress/scanner routing before inference; stable one-time materialization/dependencies, original context snapshot and authenticated callback; prior callback requires same-context metadata ACK; READY is one-time and preserves post-action continuation.",
+      "evidence": [
+        "actualScannerRecoversEveryCommittedBootstrapWindow: plan/materialized/allocation/next/lost-context-response/prior-bootstrap all PASS",
+        "One SOURCE_PLAN send, stable context/binding IDs, one bootstrap callback and no repeated navigation across all six cases",
+        "Repeated READY plans after action preserve continuation; direct proposals recover bootstrap and ambient transaction fails before I/O"
+      ]
+    },
+    {
+      "id": "REL-002",
+      "severity": "high",
+      "resolution": "FIXED",
+      "review": "Pending independent re-review",
+      "change": "Locked late accounting on every reservation/claim/repair/recovery; combined capacity refusal commits delta/stop; pin failure preserves rolled-back accounting through fresh reconciliation; cancellation accounting cannot revive authority.",
+      "evidence": [
+        "lateUsageCommitsBeforeEveryReservationAndSendClaim: entry/reservation/repair actual SDK counts PASS",
+        "underCeilingLateDeltaSurvivesRefusedNextReservation: input/output/proposals PASS",
+        "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority",
+        "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop",
+        "Existing thought/tool/cache and immediate/stale reported-overage cases PASS"
+      ]
+    },
+    {
+      "id": "TEST-001",
+      "severity": "high",
+      "resolution": "FIXED",
+      "review": "Pending independent re-review",
+      "change": "Shared frozen source-and-hostile-evidence-v2 corpus has four SOURCE_PLAN and four NEXT_ACTION cases, typed unsafe operation/target/value/assertion mutations, independent expected results, and actual hostile-page browser effect receipts.",
+      "evidence": [
+        "hostileCurrentEvidenceCorpusOraclesRejectEverySchemaValidUnsafeSubstitution PASS",
+        "hostileCurrentPageCannotSubstituteAnotherPermittedEffect: all four variants PASS",
+        "Opt-in approved provider harness explicitly UNAVAILABLE_NOT_RUN (one skip); no live-quality result invented"
+      ]
+    }
+  ],
+  "backend": {
+    "fullRun": {
+      "test": {
+        "tests": 1755,
+        "failures": 1,
+        "errors": 0,
+        "skipped": 19
+      },
+      "crossReplicaTest": {
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      }
+    },
+    "fullRunExitCode": 1,
+    "fullRunFailure": "Only retryAfterZeroCannotAddUnaccountedHttpRetriesToCompile returned TIMEOUT at5.115s under5s fixture wall deadline; full run remains FAIL.",
+    "unchangedReproduction": {
+      "tests": 1,
+      "passed": 1,
+      "elapsedSeconds": 3.723
+    },
+    "correctiveGatewayRun": {
+      "tests": 24,
+      "passed": 24,
+      "failures": 0,
+      "skips": 0,
+      "fixtureChange": "Only retry-count test wall allowance5s\u219220s. Exact three budgeted attempts, three HTTP requests and TRANSPORT outcome remain; dedicated deadline/cancellation tests and production limits unchanged."
+    },
+    "fullRunJoinedPasses": 32,
+    "migrationConcurrencyPasses": 9,
+    "providerPrivacyPasses": 22,
+    "sourceChoiceAndModelUnitPasses": 7,
+    "noRuntimeStructuralPasses": 5,
+    "ordinaryDualGatewayZeroCallPasses": 8,
+    "liveProviderSkipped": 1,
+    "currentProductionClassIdentitiesUnchangedAfterFullRun": true
+  },
+  "coverage": {
+    "bundle": {
+      "covered": 14381,
+      "missed": 1874,
+      "percent": 88.47
+    },
+    "com/citi/put/checks/studio/guided/session": {
+      "covered": 1653,
+      "missed": 51,
+      "percent": 97.01
+    },
+    "com/citi/put/checks/studio/compile/gateway": {
+      "covered": 982,
+      "missed": 69,
+      "percent": 93.43
+    },
+    "com/citi/put/checks/studio/compile/validator": {
+      "covered": 211,
+      "missed": 32,
+      "percent": 86.83
+    },
+    "com/citi/put/checks/studio/validation": {
+      "covered": 70,
+      "missed": 2,
+      "percent": 97.22
+    },
+    "com/citi/put/checks/studio/dispatch": {
+      "covered": 787,
+      "missed": 89,
+      "percent": 89.84
+    },
+    "com/citi/put/checks/studio/evidence": {
+      "covered": 226,
+      "missed": 89,
+      "percent": 71.75
+    },
+    "com/citi/put/checks/studio/guided/bridge": {
+      "covered": 627,
+      "missed": 12,
+      "percent": 98.12
+    },
+    "com/citi/put/checks/studio/compile/incremental": {
+      "covered": 137,
+      "missed": 9,
+      "percent": 93.84
+    },
+    "com/citi/put/checks/studio/scheduling": {
+      "covered": 647,
+      "missed": 72,
+      "percent": 89.99
+    },
+    "com/citi/put/checks/studio/secrets": {
+      "covered": 479,
+      "missed": 56,
+      "percent": 89.53
+    },
+    "com/citi/put/checks/studio/authoring": {
+      "covered": 125,
+      "missed": 11,
+      "percent": 91.91
+    },
+    "com/citi/put/checks/studio/compile": {
+      "covered": 1303,
+      "missed": 104,
+      "percent": 92.61
+    },
+    "com/citi/put/checks/studio/recovery": {
+      "covered": 232,
+      "missed": 29,
+      "percent": 88.89
+    },
+    "com/citi/put/checks/studio/guided/translation": {
+      "covered": 2187,
+      "missed": 173,
+      "percent": 92.67
+    },
+    "com/citi/put/checks/studio/readiness": {
+      "covered": 88,
+      "missed": 6,
+      "percent": 93.62
+    },
+    "com/citi/put/checks/studio/sse": {
+      "covered": 237,
+      "missed": 19,
+      "percent": 92.58
+    },
+    "com/citi/put/checks/studio/internal": {
+      "covered": 447,
+      "missed": 44,
+      "percent": 91.04
+    }
+  },
+  "coverageProvenance": "Current R1 full unfiltered test/cross-replica execution plus successful legacy gateway correction run, with identical production class identities. Original broad run remains FAIL. No pre-R1 coverage data or reduced thresholds. Exact inputs and init script are archived.",
+  "quality": "PASS: SpotBugsMain, assemble, RDS parity, antiRegression, Testcontainers alignment, 41-file scoped Checkstyle/GoogleJavaFormat and whitespace",
+  "contracts": {
+    "v1Fixtures": 124,
+    "v1Examples": 109,
+    "v2Fixtures": 219,
+    "v2Examples": 57,
+    "v2Schemas": 31,
+    "canonicalVectors": 6,
+    "obs005StructuralFixtures": 42
+  },
+  "controlledProviderMetrics": {
+    "scope": "controlled-provider integration; not real-model cost or accuracy",
+    "providerRequests": 8,
+    "selectedChoiceIndex": 1,
+    "independentSubmitReceipts": 1,
+    "adversarialRepeatedSelections": 1,
+    "realProviderEvaluation": "UNAVAILABLE_NOT_RUN",
+    "requestsByKind": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 7,
+      "VERIFY_STEP": 0
+    },
+    "repairRequests": 0,
+    "reservedCounters": {
+      "actions": 5,
+      "observations": 8,
+      "modelProposals": 8,
+      "modelInputTokens": 121589,
+      "modelOutputTokens": 16384,
+      "sanitizedEvidenceBytes": 30224
+    },
+    "immutableLimits": {
+      "maxActions": 200,
+      "maxSourceSteps": 100,
+      "maxObservations": 400,
+      "maxRuntimeValues": 32,
+      "maxModelProposals": 100,
+      "maxSessionSeconds": 600,
+      "maxObservationBytes": 32768,
+      "maxObservationDepth": 8,
+      "maxObservationNodes": 500,
+      "maxRuntimeValueBytes": 4096,
+      "maxStatementsPerStep": 8,
+      "maxModelInputTokensTotal": 128000,
+      "maxModelOutputTokensTotal": 32000,
+      "maxRuntimeValuesBytesTotal": 65536,
+      "maxSanitizedEvidenceBytesTotal": 1048576
+    },
+    "schemaPins": {
+      "strictSchemaHash": "df5afc09ea758d705ecd5bc772f92b2d33616df1d9e46b389b4ce441f855808a",
+      "outputContractHash": "60d57376de032f14236401935484339c0ecf218464751850efbdded98fdd7557",
+      "planningContextHash": "ae838316bc4a540e373015a06b14312725e788f1acab6924059de11f98e26b0e",
+      "providerSchemaHashes": {
+        "NEXT_ACTION": "7dcf5a072d6ab591c83553a6768d29f1cc8dedb27c0d9ab79ba9a861635f3a7e",
+        "SOURCE_PLAN": "e759562c7ec2808082f0dc0f42788ff283ad0addaad5178426b36440facfd753",
+        "VERIFY_STEP": "c3e022ad7c56fd8ab3092dea0220d64801df74644ce6b43ed87f12600fd98da1"
+      },
+      "sourceSelectionSchemaHash": "f71564afc90f85fe30827b8b8dd5cc6e3d95a23c5d2f1251438b612000352dc9"
+    },
+    "workerSnapshot": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/guided-translation-1726383638718595303/worker-dist"
+  },
+  "worker": {
+    "files": 236,
+    "sha256": "2d44b410e04a12af930b6f2ecd20a7d4ecefeb27a4e4596307312e8d16c9688b",
+    "equalPriorTestedAndClosed004": true,
+    "details": "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/worker-manifest.json",
+    "runnerChecksReused": "No runner source/build changes; exact bytes verified against1269-unit/273-fixture passing evidence with existing29/10 skips and passing build/typecheck/lint/pins. Current joined tests execute same worker again."
+  },
+  "codeRabbit": {
+    "available": false,
+    "claimedPass": false,
+    "fallback": "Independent re-review pending through root"
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualSpendTelemetry": "UNKNOWN",
+    "productionLimitsChanged": false,
+    "liveProviderRequests": 0
+  },
+  "limits": [
+    "No arbitrary-English semantic proof or universal secret-detection guarantee.",
+    "Account connection OBS-007 and publication OBS-006 remain explicit later fail-closed ports.",
+    "Local Chromium exercised; Docker image/Chromium build not asserted by local pin checker.",
+    "No migration or runner product changes, commit/push/deployment, Done, gate or QA Results edit.",
+    "Source frozen and Gradle lane released only after final verification; coordinator owns subsequent metadata and independent QA."
+  ],
+  "sourceManifest": "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/source-manifest.json",
+  "sourceAggregateSha256": "6d58509de1df4450a00bcac0450cff19630e6ec53b164743e700f670c4a7ab32",
+  "testedSourceAggregateSha256": "2aef89398b4ff4dcbd0fbbfaa3003b175393e484a408d9b2d472eaa3b724a33b",
+  "evidenceRoot": "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/",
+  "dod": ".ai/STUDIO-OBS-005-dod.md",
+  "decisions": ".ai/decision-log-STUDIO-OBS-005.md",
+  "fileList": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelProjection.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedStepVerifier.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedLlmGatewayClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelRequest.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelResponse.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedCallBudget.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedResponseParser.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GenAiGuidedLlmGatewayClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedWireBodyAdvice.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiGatewayTransport.java",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayConfig.java",
+    "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+    "backend/src/main/resources/studio/guided-output-contract.md",
+    "docs/specs/studio-observed-authoring/contracts/v2/planning-context.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/guided-planning-commands.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/clarification.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/planning-fixtures.json",
+    "docs/specs/studio-observed-authoring/openapi-v2.yaml",
+    "docs/specs/studio-observed-authoring/contracts/README.md",
+    "tools/check-studio-observed-contracts.cjs",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolverTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifierTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedStepVerifierTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConcurrencyTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedProviderEvaluationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClientTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/NoRuntimeLlmTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java",
+    "docs/specs/studio-observed-authoring/translation-design.md",
+    "docs/specs/studio-observed-authoring/consensus-plan.md",
+    "docs/specs/studio-observed-authoring/bridge-design.md",
+    "docs/architecture/ADR-SC-004-observed-authoring.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/qa/evidence/STUDIO-OBS-005/backend-before-usage-fix-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/backend-before-usage-fix-results.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/backend-build-manifest.json",
+    "docs/qa/evidence/STUDIO-OBS-005/before-usage-fix-source.json",
+    "docs/qa/evidence/STUDIO-OBS-005/correction-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/correction-results.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/coverage-data.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/joined-metrics.json",
+    "docs/qa/evidence/STUDIO-OBS-005/quality-logs.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/quality-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/runner-logs.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/runner-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/worker-manifest.json",
+    "docs/qa/evidence/STUDIO-OBS-005/source-manifest.json",
+    ".ai/STUDIO-OBS-005-development.json",
+    ".ai/STUDIO-OBS-005-dod.md",
+    ".ai/decision-log-STUDIO-OBS-005.md",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/build-manifest.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/coverage-data.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/focused-history.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/full-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/full-run-before-retry-followup.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/full-run-summary.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/gateway-correction-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/gateway-correction-results.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/joined-metrics.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/preserved-history.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/quality-logs.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/quality-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/runner-reuse.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/summary.md",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/tested-source.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/worker-manifest.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/source-manifest.json",
+    ".ai/STUDIO-OBS-005-fixes-r1.json"
+  ],
+  "evidenceSha256": {
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/build-manifest.json": "cdcedbca58d8fc448f505c6a5dcde8761034f3bc860e0aa4654f1fa4315d473e",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/coverage-data.tar.gz": "05e9feec14c3d037c073362f57ba7bc97be6596e129b2664b544acad3174f771",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/focused-history.tar.gz": "4f940ce450891d1d67c7ec495922c92e1c006593d3c1d7ec44dec381376409f9",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/full-results.json": "49de5e79a4ec8e5ca0ae3ede45c579725c49c8003979d7e4a4177f064b523d6b",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/full-run-before-retry-followup.tar.gz": "3dca6500fefb83d872824013819733e259f845ce873342082a5b7644e3cad0fe",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/full-run-summary.json": "aeed51ed0b98be2f9854aa1d25af5620cce782505c9a761ba55ead339b492320",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/gateway-correction-results.json": "177c55221bf63fa459f9f576e25fa679d551aaa7cd3a28b827c5a98750904d6b",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/gateway-correction-results.tar.gz": "09ff7eaaec4f5a672e1e839f035de7a26ea1c3ac72e4b6c75c005d771bd20ac7",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/joined-metrics.json": "f51f3c834868377d409615201ce3f8621d209afb22b4d535c88f7c4df4865a2c",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/preserved-history.json": "cf8bc4f94be4c6470e9db43c06ecc07201ed8503b71a20b04c4bfcfa546ef35f",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/quality-logs.tar.gz": "a151dc4789c9c06e5aad9f28e39a61fa28168aa2534c515a78a3e30bcb374fa3",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/quality-results.json": "fd1b6be4405f005f2548923349b3d3207e5d3b584ad8743eb0cdc563806a6f4c",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/runner-reuse.json": "6c80128f936ebec6a8cfa1f9a94777e012856083e3ed9525048d919789e5efbe",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/source-manifest.json": "e3e6f0481173566b9606d4d4115e21bc28c77e63a4bb501dff052b575e74c60c",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/summary.md": "5497fdcd82c1da85c44977d3527afdb3d8e52a3e3d557b975dcc212af36e2148",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/tested-source.json": "7247670f495e50d13f9a27c0d77358e7d3c0c31a7460eb26c147e2d3f57b28da",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r1/worker-manifest.json": "66d82b06f0a37f321e8f5c439d98dde8344be9cf1b993b022b49cfbd06c78fd9"
+  }
+}

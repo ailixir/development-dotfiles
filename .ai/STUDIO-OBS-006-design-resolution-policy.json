@@ -1,0 +1,67 @@
+{
+  "story": "STUDIO-OBS-006",
+  "recordedAt": "2026-10-09T07:46:41.984413+00:00",
+  "scope": "Single documentation-only R2-POLICY-001 correction; no implementation/build/test/lifecycle decision.",
+  "status": "DESIGN_CORRECTED_PENDING_TARGETED_RUNTIME_VERIFICATION",
+  "finding": "R2-POLICY-001",
+  "reviewOrigins": [
+    ".ai/STUDIO-OBS-006-runtime-design-review-r2.json",
+    ".ai/STUDIO-OBS-006-qa-design-review-r2.json"
+  ],
+  "resolution": {
+    "C1": "32 application read grants; retain proposed stricter 128 optional field-override cap.",
+    "C8": "applicationPolicy:null or closed {policyRuleId,allowStructuralDiscovery:true,readGrants[0..32]}.",
+    "C12": "Null maps to omitted ObservationConfig.applicationPolicy; present false refuses; ReadGrant IDs unique across full grant list; valid optional field overrides may reuse policyRuleId under unchanged testId/accessibility/classification checks. Exact effective absent/present form is hashed.",
+    "oracles": [
+      "Field-only configuration survives null-to-omitted projection without synthetic discovery/read permission.",
+      "Valid application/region grant works without per-control mapping.",
+      "Present false, 33 grants, duplicate grant IDs across distinct selectors refuse.",
+      "Valid field overrides may repeat policyRuleId; duplicate testId and invalid accessibleName/classification refuse.",
+      "currentPolicyHash binds exact absent/present and unchanged grant/type/override semantics."
+    ]
+  },
+  "sourceVerified": {
+    "path": "studio-runner/src/run/observationSanitizer.ts",
+    "sha256": "389b94dae82bdefe6519cb7c7ae3f23382430d2de31043220374f954d7a39d8c",
+    "lines": "23-39"
+  },
+  "changedFiles": [
+    "docs/specs/studio-observed-authoring/publication-contracts.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+    ".ai/STUDIO-OBS-006-design-resolution-policy.json"
+  ],
+  "priorChangedDocumentSha256": {
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "d03bda578b22fa9991a52bd1b31ccf244a16ddf0aadd48196b7389ddc35939de",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "87123a86eda1b1a7933004fb65c167c543850f2021ec42c711acd7f6e4386173"
+  },
+  "frozenDocumentsSha256": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "516ced4f8084e955d904e103580a7b5d63fc53757c973b8effaeede9af1ab5c3",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "1ab026994489107a01befe7d20bdea778e040da2da7d5fc910f3aeadbd5bc6c4",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "75aed332d39e2ff67e0b8d0056a651c9906995b8c0020dffa1f30abf090f3e7f",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "6b8237daf96cf2e98d629087a72500d0a84eda844272ee54cd37b3da86b613a8"
+  },
+  "unchangedReviewAndResolutionSha256": {
+    ".ai/STUDIO-OBS-006-runtime-design-review.json": "5351f3b870c9672026f94062b826156dafa4e262679c40a23b6c964ac075cf80",
+    ".ai/STUDIO-OBS-006-qa-design-review.json": "20ede22259ea1175527334383d35a84b55184d23113fbd4bf05bfca0a1645390",
+    ".ai/STUDIO-OBS-006-qa-design-review-r2.json": "6ff73492df659f0e03b33d5a08faf624d132bb5dc716f761eada115da774dd3f",
+    ".ai/STUDIO-OBS-006-data-design-review-r1.json": "b5aa0887aab66bc923bd9233d02c74f2164b6f784bbd7edf594d8f386a9e75dd",
+    ".ai/STUDIO-OBS-006-runtime-design-review-r2.json": "54aed9c9077715a57cf273d719b4a7827c5ba0ab60e7fa30732c130e9bd5e1da",
+    ".ai/STUDIO-OBS-006-data-design-review-r2.json": "ce8913038de1eeb1f50336309fedbf8acd01b21d9cca0c4fbd6d0b1f3efb2863",
+    ".ai/STUDIO-OBS-006-runtime-design-review-r1.json": "5eddfd75103b10d912896e497af222ad2a365ab89447d8916d74b5b378e076b1",
+    ".ai/STUDIO-OBS-006-data-design-review.json": "23481702cf7009e650722b80b83811863be82b172dc62e089209df41a0be43c3",
+    ".ai/STUDIO-OBS-006-qa-design-review-r1.json": "a429113585fa83d01b65f2d86b659ecc95f21d62c70af12f9b588c3edacc4b15",
+    ".ai/STUDIO-OBS-006-design-resolution-r1.json": "ef34aec2cf27c8671fca0421be54076e0c30de5b6652e93ef0f621b272b6303c",
+    ".ai/STUDIO-OBS-006-design-resolution-r2.json": "9fe48609ec225f93a8fb0d638d316109f0d92db3897a868dd8cc351c69fb5c4d"
+  },
+  "ownership": {
+    "literalUniquePaths": 155,
+    "onlyAddedPath": ".ai/STUDIO-OBS-006-design-resolution-policy.json"
+  },
+  "checks": [
+    "Only C1/C8/C12 changed in contract appendix.",
+    "Story changed only File List and mechanical Change Log; Draft and QA Results unchanged.",
+    "Main design and data appendix remain byte-identical to reviewed R2.",
+    "All prior review/resolution artifacts unchanged; no product edits, tests or builds."
+  ],
+  "remainingTechnicalChoices": []
+}

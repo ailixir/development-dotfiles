@@ -39,6 +39,15 @@ public class AdmissionCasService {
   private final StudioExecutionProperties properties;
   private final Clock clock;
 
+  @Autowired(required = false)
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
+
+  @Autowired(required = false)
+  private org.springframework.jdbc.core.JdbcTemplate observedJdbc;
+
+  @Autowired(required = false)
+  private com.citi.put.checks.studio.guided.session.GuidedContracts observedContracts;
+
   @Autowired
   public AdmissionCasService(
       StudioDispatchLedgerStatements statements, StudioExecutionProperties properties) {
@@ -67,9 +76,11 @@ public class AdmissionCasService {
    */
   @Transactional(noRollbackFor = InternalCallbackException.class)
   public AdmissionResponse claim(UUID pathExecutionId, AdmissionRequest request) {
-    validate(pathExecutionId, request);
-    Instant now = clock.instant();
+    return claimAt(pathExecutionId, request, clock.instant());
+  }
 
+  private AdmissionResponse claimAt(UUID pathExecutionId, AdmissionRequest request, Instant now) {
+    validate(pathExecutionId, request);
     Instant startDeadlineAt = now.plus(properties.startDeadlineOrDefault());
     // A different origin from pending_deadline_at, which acceptance set from the acceptance
     // instant: queue time and browser runtime are separate budgets (AC-19). An implementation
@@ -113,6 +124,99 @@ public class AdmissionCasService {
     }
 
     throw refusal(pathExecutionId, request, now);
+  }
+
+  /**
+   * The original CAS and its immutable observed receipt commit together under the real ledger lock.
+   */
+  @Transactional(noRollbackFor = InternalCallbackException.class)
+  public com.fasterxml.jackson.databind.JsonNode claimObserved(
+      UUID id,
+      com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization.AdmissionPermit
+          permit) {
+    if (observed == null || observedJdbc == null || observedContracts == null) {
+      throw InternalCallbackException.conflict(
+          InternalCallbackCodes.ADMISSION_OWNED, "Observed execution is unavailable");
+    }
+    var request = permit.request();
+    var locked =
+        observedJdbc.queryForList(
+            "SELECT l.execution_id FROM studio_dispatch_ledger l JOIN ui_test_executions e ON"
+                + " e.id=l.execution_id AND e.started_at=l.execution_accepted_at WHERE"
+                + " l.execution_id=? FOR UPDATE OF l,e",
+            id);
+    if (locked.isEmpty()) {
+      throw InternalCallbackException.conflict(
+          InternalCallbackCodes.EXECUTION_UNKNOWN, "Execution unavailable");
+    }
+    java.time.Instant wall =
+        observedJdbc
+            .queryForObject("SELECT clock_timestamp()", java.sql.Timestamp.class)
+            .toInstant();
+    com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+        permit.expiresAt().isAfter(wall), "AUTHORIZATION_EXPIRED", 409);
+    var binding =
+        observed
+            .binding(id)
+            .orElseThrow(
+                () ->
+                    new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+                        "FORBIDDEN_SCOPE", 403));
+    com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+        binding.equals(permit.binding()), "FORBIDDEN_SCOPE", 403);
+    observed.check(binding);
+    var response =
+        claimAt(
+            id,
+            new AdmissionRequest(
+                id,
+                UUID.fromString(request.path("attemptId").asText()),
+                request.path("runnerInstanceId").asText(),
+                UUID.fromString(request.path("admissionId").asText()),
+                java.util.Map.of()),
+            com.citi.put.checks.studio.guided.publication.PublicationContracts.millisecond(wall));
+    var previous =
+        observedJdbc.queryForList(
+            "SELECT e.observed_admission_receipt::text FROM ui_test_executions e JOIN"
+                + " studio_dispatch_ledger l ON l.execution_id=e.id AND"
+                + " l.execution_accepted_at=e.started_at WHERE l.execution_id=?",
+            String.class,
+            id);
+    if (!previous.isEmpty() && previous.getFirst() != null) {
+      var receipt = observedContracts.parse(previous.getFirst());
+      com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+          receipt.path("request").equals(request), "FORBIDDEN_SCOPE", 403);
+      return receipt;
+    }
+    var receipt =
+        observedContracts
+            .object()
+            .put("schemaVersion", 2)
+            .put("kind", "observed")
+            .put("admissionId", response.admissionId().toString())
+            .put(
+                "admittedAt",
+                com.citi.put.checks.studio.guided.publication.PublicationContracts.time(wall))
+            .put(
+                "startDeadlineAt",
+                com.citi.put.checks.studio.guided.publication.PublicationContracts.time(
+                    response.startDeadlineAt()))
+            .put(
+                "runDeadlineAt",
+                com.citi.put.checks.studio.guided.publication.PublicationContracts.time(
+                    response.runDeadlineAt()));
+    receipt.set("request", request);
+    observedContracts.validate("v2/replay-job#/definitions/AdmissionReceipt", receipt);
+    int written =
+        observedJdbc.update(
+            "UPDATE ui_test_executions e SET observed_admission_receipt=?::jsonb FROM"
+                + " studio_dispatch_ledger l WHERE l.execution_id=? AND e.id=l.execution_id AND"
+                + " e.started_at=l.execution_accepted_at AND e.observed_admission_receipt IS NULL",
+            receipt.toString(),
+            id);
+    com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+        written == 1, "FORBIDDEN_SCOPE", 403);
+    return receipt;
   }
 
   private void validate(UUID pathExecutionId, AdmissionRequest request) {

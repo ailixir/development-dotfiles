@@ -1,0 +1,246 @@
+{
+  "storyId": "STUDIO-OBS-006",
+  "reviewType": "Independent runtime/contract design review; not implementation QA or lifecycle readiness",
+  "reviewer": "/root/sdc_bridge_arch",
+  "at": "2026-10-09T06:25:29.059289+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "reviewedDocumentHashes": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "bbb967c08d425fbe557cd0c813db5e97f4b08db62d2e8078bf95eecb8eee8aa5",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "d1f6142c7fb41423af311ab11584c4b691bbd050c726bc6ec6cc894ee5603f9f"
+  },
+  "proposedOwnershipPathCount": 121,
+  "summary": "The selected declarative artifact2 branch through ordinary admission/recorded child is sound and preserves the intended legacy separation. The frozen document is not yet a sufficiently closed implementation contract: historical guard evidence is not retained by the current code, the independent validator lacks a trusted facts input, exact wire/profile/byte contracts and account consumption ABI are unfinished, and one operation-equivalence statement contradicts the actual guided primitive. These are bounded design/ownership corrections within OBS-006, not demands to implement OBS-007 or the later benchmark/pilot.",
+  "acceptedDecisions": [
+    "Choose closed typed artifact2 rather than new executable JavaScript grammar or a second guided run. Keep artifact1 AST/reference-policy2/locator fallback and ordinary RUN auto-accept behavior unchanged.",
+    "Keep database revision UUID distinct from cryptographic revisionDigest. Original Run/admission identities are publication provenance; each explicit later run obtains its own execution/attempt/current authorization.",
+    "Keep captured values entirely execution-local and fresh; the existing ordinary run admission, cancellation, confined child, recording/timeline and evidence path remain authoritative.",
+    "Observed profile matching must be exact and separately catalogued, without feeding observed-2 into legacy semver comparisons or globally flipping legacy CompilePins.",
+    "Publication is browser-free, gateway-free and does not claim replay verification or create an ordinary successful run. Production account connection remains the only deliberately unavailable later port."
+  ],
+  "blockers": [
+    {
+      "id": "RUNTIME-001",
+      "severity": "high",
+      "title": "Missing retained evidence and independent guard-validation basis",
+      "finding": "Design section3 assumes retained observations for each successful preparation. Current observe() overwrites progress.observation; the ordinary observation command stores a session response, not that observation; GuidedPreparationStore persists proof/hash/expiry but no node facts. Learned-plan2 stores locator/operation/read/graph identities, not the role/element/control facts used for guards. The proposed /v2/validate-observed request includes source/reference names, artifact and policy only. Node cannot independently derive those facts from that request and would only validate/hash lowerer-produced guards.",
+      "requiredResolution": [
+        "Define append-only per-preparation/admission observation evidence capture for newly publication-base-enabled sessions, while the exact matching observation is still current. Under the existing session/source lock verify full observationHash, proposal target document/generation/node, proof requestDigest/evidenceHash, source/context/fence and later immutable admission association. Store the complete sanitized observation once by hash, or an equally independently verifiable immutable selected-node snapshot plus its full-hash provenance. Never reconstruct earlier facts from the final page or current policy; missing historical facts refuse adoption.",
+        "Add a separate closed validationBasis input to the pure Node endpoint, populated from original immutable source/materialization/preparation/observation records by the snapshot reader, not from ObservedArtifactLowerer output. Bind basisHash into snapshotHash, persisted validation identity/receipt and final CAS. Node resolves each proposal target into that independent observation, checks hashes/identities and derives guards and input-recipe mappings itself before comparing artifact/IR/policy/equivalenceHash.",
+        "Retained audit evidence may include historical node/document/generation IDs for pure verification. Strip them from executable artifact guard/IR authority and all child IPC. Do not mutate the existing learned-plan2 schema merely to smuggle current-node authority into replay.",
+        "Only freeze facts actually recorded. Observation controlType=other does not prove a precise original native checkbox/radio/number subtype; either constrain guards to recorded facts plus current operation-compatible checks, or explicitly version/capture any stronger needed attestation. Do not infer missing type/policy-file facts."
+      ],
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-design.md:53",
+        "docs/specs/studio-observed-authoring/publication-design.md:76",
+        "docs/specs/studio-observed-authoring/publication-design.md:80",
+        "docs/specs/studio-observed-authoring/publication-design.md:118",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:619",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:689",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1410",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java:98",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java:21",
+        "docs/specs/studio-observed-authoring/contracts/v2/learned-plan.schema.json"
+      ],
+      "regressions": [
+        "Execute at least two different documents/generations, then prove the publisher reads each action original immutable facts after latest progress is overwritten.",
+        "Mutate guard role/type/classification/locator and recompute every artifact-local hash: Node must reject against unchanged independent basis. Mutating the basis or its joins must fail snapshot/final-CAS binding.",
+        "Old session with no base/evidence refuses; no synthetic backfill or another browser execution."
+      ]
+    },
+    {
+      "id": "RUNTIME-002",
+      "severity": "high",
+      "title": "Closed artifact/policy/IR/profile/job/IPC and composite byte bounds remain undefined",
+      "finding": "The artifact lists top-level names but inputRecipes, guards, replayPolicy, ObservedReplayProfile and operations remain unspecified types. The job observed-only component, admission observed subdocument, protocol2 launch/execute/ready/result branches and validation request/verdict lack exact fields and discriminators. Only max-artifact-bytes=1MiB and max-envelope-bytes=2MiB are named. That is insufficient to implement mutually strict Java/Node/IPC boundaries or to ensure the artifact + source + independent evidence + resolved inputs fit their actual readers.",
+      "requiredResolution": [
+        "Freeze exact closed definitions and discriminator placement before parallel implementation: artifact version2/kind observed, policy version3, profile version/catalog ID, /v2 job observed metadata, and launch/execute protocolVersion2 with mode observed. Specify no null/absent fallback into legacy parsing; /v1 refuses the observed family and /v2 refuses mixed or legacy shapes.",
+        "Define operation IR as the exact ordered source coordinate/origin/locator/typed operation plus deterministic guard association; specify input recipe variants and producer/consumer graph projection. Give max steps/actions/statements/input recipes/guards/bindings/edges/string sizes and require exact cardinality/order and graph coverage. No historical availability/proposal/ledger/context permissions in child IR.",
+        "Define request, response and IPC UTF-8 byte caps, JSON depth, integer/Unicode rules, collection cardinalities and serialized resolved-input/handle budgets; apply bounded body reads before JSON parse and parent/child frame checks before traversal. Preserve legacy body/64KiB artifact rules. Distinguish pure-validator request cap from artifact and run-job cap because it contains independent source/evidence data.",
+        "Account for the full composed request/job, not only artifact bytes: publication validation and acceptance must reject an over-cap serialization explicitly, without truncation, uncapped buffering or marking a structurally valid artifact executable under incompatible body limits. Preserve existing ordinary per-step/total runtime limits.",
+        "Specify child ready/result family/profile echo and parent verification, including finite measured timing numbers separately from the canonical integer-only artifact domain. Existing protocol1 child messages do not carry this family proof."
+      ],
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-design.md:65",
+        "docs/specs/studio-observed-authoring/publication-design.md:118",
+        "docs/specs/studio-observed-authoring/publication-design.md:152",
+        "docs/specs/studio-observed-authoring/publication-design.md:156",
+        "docs/specs/studio-observed-authoring/publication-design.md:164",
+        "docs/specs/studio-observed-authoring/publication-design.md:188",
+        "studio-runner/src/reporting/envelope.ts",
+        "studio-runner/src/run/protocol.ts",
+        "studio-runner/src/server/routes.ts:131",
+        "studio-runner/src/validator/bounds.ts",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java"
+      ],
+      "regressions": [
+        "Cross-family/mixed protocol and profile mutations fail before capacity/browser.",
+        "Every body/frame limit at limit-1/limit/limit+1 using escaped Unicode and worst-case bounded arrays.",
+        "Whole-artifact, source, originalText, code, functions, undeclared bindings and prefilled capture values are rejected by both parent and child.",
+        "Recorded child with mismatched observed profile/ready echo cannot execute."
+      ]
+    },
+    {
+      "id": "RUNTIME-003",
+      "severity": "high",
+      "title": "Account-handle and trusted policy installation ABI is not yet implementable",
+      "finding": "Section7 names AccountAccess.authorizeReplay and worker consumption but leaves wire shape, issuer/consumer, resolution location, one-use scope, failure timing and production startup wiring open. Current AccountAccess is nested in GuidedProductionSessionAccess and has only resolve/checkCurrent; ordinary child entry supplies only browser factory. An opaque string alone cannot establish current account authorization or define how the same recorded browser receives setup.",
+      "requiredResolution": [
+        "Freeze a neutral replay-account SPI and closed ephemeral grant/handle DTO binding grantId, executionId, attemptId, revisionDigest, current scopeHash/principal/CSI/environment/application/accountRef, allowed origins, required initialContext/entry-policy identity, issuedAt/expiresAt and opaque handle/provider ID. Bound the handle; classify it as sensitive capability data, never publish/log/hash its bytes into immutable revision evidence.",
+        "Specify authorize at current acceptance/dispatch, recheck at admission/consume, and consume at most once for the addressed admitted attempt. The consumer is a trusted configured worker-side provider, not a job-selected URL, module, source, cookie import or account guess. Define exact injected prepare/apply/dispose methods and their same-recorded-page capability. A default provider refuses before browser work; OBS-007 supplies actual account connection implementation.",
+        "Separate current trusted read/egress policy installation from artifact claims: load a versioned mounted catalog selected by authorized app/account/policy identities and validate required recipe/guard against that catalog. Freeze a bounded typed policy snapshot into protocol2, or declare a fixed allowlisted child configuration path; never permit arbitrary artifact rules/paths/modules or broad service credentials in the child.",
+        "Name the production startup wiring path and controlled-account test seam. Define how blank-start remains genuinely blank, and how observedDocument entry requires an explicit replayable entry policy rather than inventing a URL from origin. Failure/lost consume acknowledgement cannot repeat account setup or application effects."
+      ],
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-design.md:154",
+        "docs/specs/studio-observed-authoring/publication-design.md:180",
+        "docs/specs/studio-observed-authoring/publication-design.md:182",
+        "studio-runner/src/run/child.ts",
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/src/server/config.ts",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java:19"
+      ],
+      "regressions": [
+        "Missing/unconfigured/expired/wrong-execution/wrong-account/wrong-origin handle refuses before browser application work.",
+        "Only account seam is controlled while actual production dispatcher/child/recording execute.",
+        "Stop between grant and apply, duplicated handle consumption, and replayable-entry mismatch never import another context or repeat setup.",
+        "Revoke mounted read policy while preserving artifact bytes; dependent read refuses without model fallback."
+      ]
+    },
+    {
+      "id": "RUNTIME-004",
+      "severity": "medium",
+      "title": "Operation semantics table contradicts the exercised fill/select primitive",
+      "finding": "Section7 groups fill/selectOption with native input and says not DOM dispatch. Actual guided collector intentionally implements fill and selectOption with a fixed isolated DOM value assignment plus input/change events, while click/check/uncheck/hover/press use dispatchNativeInput. Replacing the former with generic Playwright/native entry changes focus/event/default behavior and is not automatically equivalent to the exercised path.",
+      "requiredResolution": [
+        "Split the operation table: pointer/key operations reuse nativeInput plus retained-target checks and uncertainty classification; fill/selectOption reuse their existing fixed trusted isolated primitive and exact type/value/origin checks. This does not authorize arbitrary artifact DOM evaluation or event construction.",
+        "If different fill/select semantics are desired, treat that as an explicit algorithm/profile amendment with independent equivalence evidence, not an implementation detail or a legacy adapter fallback. Retain no-effect refusal versus post-focus/scroll/input UNKNOWN_OUTCOME distinctions and acknowledge residual native focus/coordinate races."
+      ],
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-design.md:170",
+        "studio-runner/src/run/observationCollector.ts:619",
+        "studio-runner/src/run/observationCollector.ts:627",
+        "studio-runner/src/run/observationCollector.ts:633",
+        "studio-runner/src/run/nativeInput.ts"
+      ],
+      "regressions": [
+        "Reactive form fixtures verify exact input/change event behavior and final server receipts for guided and replay fill/select.",
+        "Native Tab/Arrow/Enter/hover/trusted click and below-fold reveal remain actual browser tests, with focus theft/overlay/replacement/cancel fault cases."
+      ]
+    },
+    {
+      "id": "RUNTIME-005",
+      "severity": "medium",
+      "title": "Hash field definitions and opaque configuration recipe joins need reconciliation",
+      "finding": "The existing contract defines admissionProvenanceHash as an ordered ledger tuple array, whereas the design reuses that name for a broader publication evidence object. Existing readiness sourceHash is H(ordered source string array), while source/configuration/authoring identity wording does not fix that exact representation. Config source references are opaque cfg-UUID IDs; reference names alone are not an independent mapping from those IDs. Java canonical permits printable ASCII object keys and Node guided canonical accepts a narrower key grammar.",
+      "requiredResolution": [
+        "Keep existing operation/learned-plan/admission-provenance algorithms unchanged, or explicitly give the broader publication evidence hash a new name/version (for example publicationEvidenceHash) and bind both in revisionDigest. Do not silently reinterpret an established hash label.",
+        "Freeze sourceHash as the existing ordered-source hash for common readiness compatibility; bind stable source UUID/order and authoring identity separately. Freeze configurationHash to the explicit CompileInputs configuration representation and bind configurationRevision/reference metadata separately; do not send saved variable values to the pure validator.",
+        "Supply immutable value-free configuration mappings {referenceId,referenceName,stepId,kind,intendedSlot} and inputId/provenance mappings in validationBasis. Node must derive recipes from those mappings, not trust renamed lowerer recipes. Backend independently checks the original authoredInputsHash against its immutable private table; do not claim Node recomputes a private-value table hash without those bytes.",
+        "Freeze the common canonical domain for the new artifact/basis/profile: arrays for opaque-ID keyed collections, fixed closed field names, well-formed Unicode without normalization, safe integer range, negative-zero/float/duplicate-key/BOM handling. Prove ArtifactCanonicalizer roundtrip and Node bytes agree for persisted JSONB snapshots, rather than changing legacy canonical semantics globally."
+      ],
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-design.md:83",
+        "docs/specs/studio-observed-authoring/contracts/README.md:131",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/ArtifactCanonicalizer.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompileInputs.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java:147",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java:154",
+        "studio-runner/src/guided/contracts.ts:8",
+        "studio-runner/src/guided/json.ts"
+      ],
+      "regressions": [
+        "Java/Node fixed vectors with accented text, astral characters, combining sequences, quotes/backslashes/control escaping, maximum safe integer, invalid surrogate/negative-zero/duplicate-key refusals and JSONB serialization roundtrip.",
+        "Swap opaque configuration reference/name/step/slot while recomputing artifact hashes: independent immutable mapping check refuses.",
+        "Old golden admissionProvenanceHash remains unchanged; broad publication evidence changes its separately named/versioned digest."
+      ]
+    }
+  ],
+  "recommendedIndependentValidationBasis": {
+    "requestEnvelope": "Closed {schemaVersion, snapshotHash, requiredProfile, artifact, validationBasis}; exact source/reference metadata belongs inside the independently assembled basis rather than unbound parallel parameters.",
+    "basisContents": [
+      "Immutable ordered sourceSteps {stepId,text} and original source/configuration/authoring identities.",
+      "Original source-input IDs and value-free exact sourceSpan/configuration provenance; declared configuration-reference ID-to-name/step/kind/slot mapping.",
+      "Original run authorization identity/hash, accepted translation revision/hash and complete exercised learned-plan identity.",
+      "Ordered action joins with immutable proposal/ledger/preparation identities and hashes, and retained sanitized observations deduplicated by observationHash.",
+      "Trusted frozen replay scope/policy requirements from server snapshots, not lowerer output."
+    ],
+    "nodeAlgorithm": [
+      "Validate closed schemas and canonical bounds for basis and artifact, recompute basisHash/snapshot linkage and each supplied observation/proposal/operation hash.",
+      "Join successful admission/preparation to its original target in the corresponding immutable observation using audit node/document/generation identifiers. Validate exact locator correspondence metadata and read recipe/classification/type relationships. These are historical source facts; live DOM proof remains the original authenticated preparation.",
+      "Derive the expected stable guard and input/operation/graph projection independently, dropping historical node/document/context/availability authority. Compare exact cardinality/order/fields to artifact guards, steps, recipes and policy3, then compute equivalence hash.",
+      "Return a hash-bound verdict including basisHash, artifactHash, learnedPlanHash, referencePolicyHash, operationEquivalenceHash and actual immutable profile. The publisher rechecks original DB snapshot/basis and verdict identity at final CAS."
+    ],
+    "trustLimit": "Node validates the deterministic transformation against independently fetched trusted server evidence. It does not re-run the browser or independently establish arbitrary-English meaning, original private saved-input bytes, policy-file digests never recorded, or protection against a malicious authority replacing both original DB evidence and all attestations."
+  },
+  "wireAndRuntimeMandatoryConditions": [
+    "Policy3 binds learnedPlanHash, original Run/admission/publication-evidence identity, exact input recipes, earlier producer definitions and concrete consumer slots/origins. It is required for artifact2; omission cannot fall back to source-token policy2. Keep v1 default/optional policy behavior untouched.",
+    "Keep executable graph separate from original producerAvailability/contextId/fence/admission rights and sampled values. Child value map starts empty for each execution/attempt, accepts only successful local reads once, and is cleared on every termination path.",
+    "Observed adapter resolves the frozen locator uniquely using the same private collector/masking/native primitives; no legacy visible-only or textbox-role alternatives, no new locator, no sample literal, no model or implicit relearning.",
+    "Bind the exact observed profile to artifact, validation result, accepted execution record, job, backend admission runtime subdocument, parent launch and child ready/result. Add an observed catalog alongside existing legacy fields, not new meaning for executor2.1.0 or global ARTIFACT_VERSION. Exact missing/stale profile refusal precedes browser work.",
+    "Configure observed-only body limits and typed branch before route parse/coordinator validation. Keep existing /v1 JSON/body/key limits and AST semantics. Declare whether DELETE /v1/runs/{id} deliberately controls both admitted families or add a corresponding v2 cancel route and backend transport selection; do not leave cancel pointing at an unregistered family.",
+    "Select data-free diagnostics before spawn/browser start, including parent relay/raw output, child errors, page URL/title/locator/hosts, result/manifest and account errors. Preserve identity/status/timing/step indexes and authorized video/seek metadata. Captured values never cross IPC; authorized per-run inputs still may cross their explicit private typed channel.",
+    "Keep sandbox enabled, one page/context, scratch isolation, environment/execArgv allowlists and existing total/per-step deadline/kill behavior. Account wiring may not import vault/identity/LLM clients or a job-selected module/URL into the child.",
+    "Keep deployment disabled until the exact profile is installed fleet-wide and conformance/real replay gates pass. Drain before removing a supported profile; rollback must refuse observed jobs/revisions without reinterpretation while preserving legacy runs and immutable evidence."
+  ],
+  "ownershipReview": {
+    "status": "121 literal paths verified; major planned domains are covered, but unresolved ABI/basis definitions prevent a complete ownership freeze.",
+    "alreadyCovered": [
+      "Normal RunJob/HTTP dispatcher/admission/coordinator, profile build scripts, validator/executor/adapter, protocol/launcher/childRuntime/browser, diagnostics/evidence classes and substantial dual-family tests are reserved.",
+      "GuidedSessionService and GuidedSessionConfiguration are reserved, allowing a publication-evidence capture hook if its repository/interface is explicitly assigned.",
+      "GuidedProductionSessionAccess is reserved, but its nested AccountAccess currently lacks replay authorization; ordinary replay should not acquire a dependency on translation orchestration merely to obtain an account port."
+    ],
+    "necessaryOrExplicitlyResolve": [
+      {
+        "path": "docs/specs/studio-observed-authoring/contracts/v2/replay-validation.schema.json",
+        "reason": "Suggested missing literal path for the independent validationBasis request/receipt contract. Alternatively explicitly own these closed definitions in publication.schema.json before coding."
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/contracts/v2/replay-job.schema.json",
+        "reason": "Suggested missing literal path for the observed metadata/current-scope/account/profile discriminated job. It may instead be explicitly defined and drift-tested in the already-owned OpenAPI, but not left as prose."
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/contracts/v2/replay-ipc.schema.json",
+        "reason": "Suggested missing literal path for exact protocol2 frame schemas/fixtures; alternatively freeze these closed definitions in owned protocol.ts with cross-language fixtures."
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+        "reason": "Suggested explicit owner for append-only original prepared-observation capture/read. Could be a named capability of existing reserved GuidedPublicationRepository instead, but capture-before-loss and persistence tests must be allocated."
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/account/ReplayAccountAccess.java",
+        "reason": "Suggested neutral SPI/records outside translation orchestration for authorizeReplay. Can be nested in an already-owned neutral pure contract file if architect explicitly chooses that; actual OBS-007 provider remains deferred."
+      },
+      {
+        "path": "studio-runner/src/run/child.ts",
+        "reason": "Not in121; this is the actual process entry binding browser factory to childRuntime. Reserve it if account/policy provider wiring or controlled account injection changes the entry. Otherwise specify the concrete default provider factory constructed wholly inside already-owned childRuntime/observedAccount and test that exact production path."
+      },
+      {
+        "path": "backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java",
+        "reason": "Existing raw-wire legacy body conformance seam is not in121. Run unchanged to prove legacy serialization; add ownership only if new v2 assertions are placed there rather than in existing reserved observed tests."
+      },
+      {
+        "path": "studio-runner/src/reporting/snapshot.ts",
+        "reason": "Not in121; result runtime map is currently open. Can remain untouched if observed admission identity is independently immutable and existing output framing remains compatible. If adding a family-specific terminal payload/identity or tighter byte behavior, explicitly reserve this plus reporting tests/bounds."
+      }
+    ],
+    "doNotExpandByDefault": [
+      "No need to edit v1 AST/language, StepReferencePolicyDeriver or legacy referencePolicy parser for the chosen declarative branch.",
+      "Do not widen eslint/dependency allowlists. Existing test/run/confinement.test.ts and test/isolation.test.ts are the real regression gates; proposed test/run/playwright-confinement.test.ts is a new file, not an existing gate to replace.",
+      "Do not assume listed new classes/schemas already exist; observedAccount.ts and build-studio-observed-schemas.cjs are proposals."
+    ]
+  },
+  "requiredProofBeforeImplementationQa": [
+    "One actual guided submit and zero browser/gateway actions during finalization, including conflicts/retries; two explicit normal admitted recorded child replays with identical artifact/plan/policy hashes and independent fresh-value receipts. Both gateway HTTP counters stay zero after authoring.",
+    "Independent guard mutation with all artifact-local hashes recomputed; original evidence/basis stays fixed. Missing per-action historical snapshots must refuse publication.",
+    "Current scope/account/policy/initial-state mutations, no hidden-source/state repair, native/isolated fill-select equivalence, runtime value lifetime/isolation and data-free parent/child canaries with playable recording/seek evidence.",
+    "Exact family/profile/hash/byte/canonical boundary refusals before capacity/browser plus legacy AST/policy/locator/profile/RUN-auto-accept/manual-confirm/cancel/evidence regression coverage."
+  ],
+  "scopeNotes": [
+    "This corrects my earlier reconnaissance shorthand: ordinary compilation already has guarded RUN auto-accept; preserve that real behavior as the frozen design correctly states.",
+    "No fresh user permission/privacy question is required; authored-source privacy A remains settled.",
+    "No demand to implement production account provider, live model benchmark or human pilot in006.",
+    "No tests/builds/browser execution, production/schema/design/story/gate/CLI changes or subagents were performed."
+  ],
+  "writtenFile": ".ai/STUDIO-OBS-006-runtime-design-review.json"
+}

@@ -1,0 +1,200 @@
+{
+  "storyId": "STUDIO-OBS-001",
+  "at": "2026-10-08",
+  "phase": "develop",
+  "scope": "Contract verification only; independent QA pending",
+  "result": "PASS",
+  "schemaCount": 20,
+  "fixtureAndReadCases": 91,
+  "openapiExamples": 109,
+  "checks": [
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "stdout": "PASS: 91 fixture cases; 109 OpenAPI request/response examples; all schemas compiled; canonical hash vector verified.",
+      "stderr": ""
+    },
+    {
+      "command": "node --check tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "Whitespace scan of all new/modified OBS-001 files (including untracked files)",
+      "exitCode": 0
+    }
+  ],
+  "versions": {
+    "node": "v23.10.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "yaml": "2.9.0"
+  },
+  "codeRabbit": {
+    "available": false,
+    "checked": [
+      "~/.local/bin/coderabbit",
+      "PATH"
+    ],
+    "fallback": "Configured skip_if_not_installed; independent QA required"
+  },
+  "acTraceability": {
+    "AC-1": [
+      "ADR-SC-004",
+      "contracts/README.md lifecycle/finalization"
+    ],
+    "AC-2": [
+      "20 closed JSON Schemas",
+      "canonical revision/plan/admission hashes",
+      "durable correspondence contract"
+    ],
+    "AC-3": [
+      "README state machines/idempotency/fencing/atomic publication",
+      "negative terminal/identity fixtures"
+    ],
+    "AC-4": [
+      "binding/limits schemas",
+      "positive nonsecret/password/order fixtures",
+      "Unicode byte cases",
+      "HTTP/HTTPS localhost origin cases"
+    ],
+    "AC-5": [
+      "openapi.yaml",
+      "commands/session-view/proposal-result schemas",
+      "auth roles and owner fence checks",
+      "shared MSW examples"
+    ],
+    "AC-6": [
+      "fixtures.json",
+      "tools/check-studio-observed-contracts.cjs",
+      "README mapping/version rollout"
+    ]
+  },
+  "peerResolutions": [
+    "Fenced and role-bound internal calls",
+    "Typed proposal result alternatives",
+    "Preliminary dependency planning and stable server allocation before observed reads",
+    "Immutable authored input table and trusted runner materialization"
+  ],
+  "limitations": [
+    "No application runtime endpoints implemented by this story",
+    "Fixture checker is an executable contract oracle, not production authorization or proof of live DOM identity",
+    "Artifact hash in fixtures is synthetic; observed artifact-v2 restricted lowering remains OBS-006",
+    "No live model/browser/auth/privacy-wire-byte/recovery/pilot evidence",
+    "No application build/lint/typecheck/regression executed for docs/contracts-only scope",
+    "Independent QA and PM technical/product gate remain outside executor self-assessment"
+  ],
+  "files": [
+    {
+      "path": "docs/architecture/ADR-SC-004-observed-authoring.md",
+      "sha256": "fd277ccf8321d0bbff4a17ce05832ef61a2bf403111eb01e47b2acc2954a5c18"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/README.md",
+      "sha256": "4c98dd8ca10efbbc02ef3653dcd6474fa1f0acd9f66db08a1353c8663d21a6ff"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/action.schema.json",
+      "sha256": "afdab0fee11c77dcbd5b341d3c749a33c497dbd5467f6293bd0aac2ab09daab7"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/authored-inputs.schema.json",
+      "sha256": "2e03f48526a23325c31ac1ceb666bda95efe52628a55acbfbccbd01d72267da0"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/binding.schema.json",
+      "sha256": "044e82d87e067ef4249af6a478baffb2cfd20031b6c78063561fcbface7783f9"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/clarification.schema.json",
+      "sha256": "4fa9203f04bc7051bf5f8babb85f69d538ea56540bfea21af6bbc675f7f77c20"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/commands.schema.json",
+      "sha256": "6cd0b4171b1f54ff76258d995c342cc5e485f63172bfdeed3f36e6b6eef7aaff"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/common.schema.json",
+      "sha256": "a8d8d005f045a66669f282ac0a8f245b84be37e4cbfbc3a96643d597f662f660"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/dependency-proposal.schema.json",
+      "sha256": "a4237535b6bc2fe86f8d9b60e51b901465f9cf580e7887e6fff7499ab21035d4"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/error.schema.json",
+      "sha256": "fc41286bca80b55ca951d10e881e4cf1334fd2ad9d7829767fda8aa9cbc88381"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/fixtures.json",
+      "sha256": "bff438ee53daafa6db2956e4ebad50f7dbb1b78e7fcf3d0256970cb1b3828366"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/learned-plan.schema.json",
+      "sha256": "10767692b8187c81301517825c56947697c6aaac52d0b5b6c5fa3756998a0d43"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/ledger.schema.json",
+      "sha256": "f3e20720805a8c699fb343330edc70960758347ce46ff74eb78948403f71f988"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/limits.schema.json",
+      "sha256": "70405b35a78eff845d31c63413f64700b196325e0e72be9ba199912a20abc4aa"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/observation.schema.json",
+      "sha256": "95a53053d719dcfc884745aac8c27abe45e405b6d509f70bf0eb96382d3c5de4"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/pending-bindings.schema.json",
+      "sha256": "210d179d21f25a3194989618c9f976e637d05464de02ae802f38c7bde9dfa331"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/planning-context.schema.json",
+      "sha256": "0dc0a89af05c68187b2adb1e7f7488ff3880634647ca3ada30ffa8d6994c4144"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/proposal-result.schema.json",
+      "sha256": "325e6d6a30b0bd9124b5da3763b5ca835dc5b4b286ba2f2da7e61a1979579ef3"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/result.schema.json",
+      "sha256": "de52045b184098afafe82335ce94231fc05b797b592bbcbfd608c2221b0fb3bd"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/revision.schema.json",
+      "sha256": "fd21b1adb65c15d8d8c7f0809ac9f0be7c71f8de47b677f840c266bbdaf1a0f7"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/runner-context.schema.json",
+      "sha256": "ea4869f43f5f6c9246c7c110390a20cfd84841135944c8b9374b4078e7f34eec"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/session-view.schema.json",
+      "sha256": "a9ae9effae38fdc95fcb54369af5f08a6aa4df094ac469874162dc42d538bb48"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/session.schema.json",
+      "sha256": "983e3adf45c1fbf9336166092d8048be7a5f84709ac2261faa47fb9cdaa1fb6c"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/openapi.yaml",
+      "sha256": "9807f8fa4644975cfc8fbadd4eea40251a830cf4001d95f6b6740df544f9d2c5"
+    },
+    {
+      "path": "tools/check-studio-observed-contracts.cjs",
+      "sha256": "caf655d8258b37ece7aeb6c988fa5b40bac88989f6d47a11f637ebeedc41a92b"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md",
+      "sha256": "1b52f3a1f5bcf3b460794baf2bcb381a29a3cc84fcf7b6ec96147ec9033aba2c"
+    }
+  ]
+}

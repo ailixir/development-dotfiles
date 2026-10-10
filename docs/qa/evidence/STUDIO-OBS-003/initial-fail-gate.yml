@@ -1,0 +1,230 @@
+schema: 1
+story: STUDIO-OBS-003
+gate: FAIL
+status_reason: The durable ledger, security isolation and focused regressions
+  pass, but clarification answers are discarded and lease renewal bypasses the
+  mandatory user-answer pause. Two independent real-PostgreSQL probes reproduce
+  these AC-2/AC-4 failures.
+reviewer: Quinn (@qa), independent agent /root/sdc_obs003_qa
+reviewed_revision: sha256:472044d3e2f354922ee4a87876ec0203e063dcc231a1efb970ba6d316d85e3ce
+updated: 2026-10-08T03:41:00.619986+00:00
+top_issues:
+  - id: REQ-001
+    severity: high
+    finding: "Accepted clarification choices are discarded: clarify removes the
+      question and persists OBSERVING without the chosen choice or a durable
+      resolved-choice handoff. The command table contains only the request
+      digest and public response. A restart/downstream planner cannot consume
+      the user answer, so the advertised clarify command has no durable semantic
+      effect."
+    location: backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:206
+    suggested_action: Persist a safe scoped selection (question, chosen
+      identity/mapping, coordinate, document and generation) atomically before
+      removing the pending question; expose a trusted consumption seam for
+      OBS-005 and prove restart/idempotent answer recovery without persisting
+      runtime values.
+    test: GuidedIndependentQAProbeIT.acceptedClarificationMustPersistSelectedChoiceForRecovery
+  - id: REL-001
+    severity: high
+    finding: A same-owner lease renewal unconditionally overwrites
+      AWAITING_CLARIFICATION with OBSERVING. The worker can then submit a new
+      observation without a user answer, while the pending answer is rejected as
+      STALE_GENERATION because its required session state disappeared. Ownership
+      maintenance bypasses the frozen clarification state-machine guard.
+    location: backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:307
+    suggested_action: Separate lease/fence maintenance from workflow transitions.
+      Preserve clarification/auth/finalizing pauses or explicitly
+      invalidate/reissue them through their guarded transition; do not use claim
+      as an unconditional OBSERVING reset. Cover renewal and recoverable
+      takeover during each pause and after finalizing.
+    test: GuidedIndependentQAProbeIT.leaseRenewalMustNotBypassPendingClarification
+  - id: DOC-001
+    severity: medium
+    finding: Frozen OpenAPI and normative README describe public PlatformBearer JWT
+      authentication, while the public implementation deliberately preserves
+      existing BFF authentication and rejects bearer-only identity. Package
+      README documents the mismatch, but generated consumers still receive an
+      inaccurate contract. No authentication widening was found.
+    location: docs/specs/studio-observed-authoring/openapi.yaml:1173
+    suggested_action: Have the contract owner reconcile the public authentication
+      wording/scheme with the established BFF transport before client
+      integration; preserve the current isolation and do not add JWT auth merely
+      to satisfy the stale wording.
+waiver:
+  active: false
+review_iteration: 1
+scope: OBS-003 backend persistence/security/transition boundaries; no live
+  browser, model, account handoff, exact-plan publication or deployment claim.
+evidence:
+  provenance: docs/qa/evidence/STUDIO-OBS-003/reviewed-revision.json
+  focused_command: cd backend && ./gradlew spotlessCheck checkstyleMain
+    checkstyleTest rdsParityLint test --rerun-tasks --tests
+    'com.citi.put.checks.studio.guided.session.*' --tests
+    'com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest' --tests
+    'com.citi.put.checks.studio.scheduling.StudioScheduleApiIT' --tests
+    'com.citi.put.checks.studio.StudioAuthorizationIT' --console=plain
+  focused_exit_code: 0
+  focused_tests: 90
+  focused_failures: 0
+  focused_skips: 0
+  migration_count: 29
+  focused_log: docs/qa/evidence/STUDIO-OBS-003/focused-gradle.log
+  contracts:
+    command: node tools/check-studio-observed-contracts.cjs
+    exit_code: 0
+    fixtures: 114
+    openapi_examples: 109
+  independent:
+    reproduction: Copy evidence GuidedIndependentQAProbeIT.java to
+      /tmp/obs003-qa-probe/ and qa-probe.init.gradle to
+      /tmp/obs003-qa.init.gradle. From backend run the following command.
+    command: ./gradlew -I /tmp/obs003-qa.init.gradle test --tests
+      '*GuidedIndependentQAProbeIT.acceptedClarificationMustPersistSelectedChoiceForRecovery'
+      --tests
+      '*GuidedIndependentQAProbeIT.leaseRenewalMustNotBypassPendingClarification'
+      --console=plain
+    exit_code: 1
+    tests: 2
+    failures: 2
+    errors: 0
+    skips: 0
+    log: docs/qa/evidence/STUDIO-OBS-003/independent-probe-gradle.log
+    note: QA-only source is outside backend source sets by default. Initial probe
+      name lacked required Test/IT suffix and failed discovery; renaming to IT
+      produced these actual two assertion failures.
+  suites:
+    - suite: com.citi.put.checks.studio.StudioAuthorizationIT
+      tests: 27
+      failures: 0
+      errors: 0
+      skipped: 0
+      report: docs/qa/evidence/STUDIO-OBS-003/TEST-com.citi.put.checks.studio.StudioAuthorizationIT.xml
+    - suite: com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest
+      tests: 6
+      failures: 0
+      errors: 0
+      skipped: 0
+      report: docs/qa/evidence/STUDIO-OBS-003/TEST-com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest.xml
+    - suite: com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT
+      tests: 5
+      failures: 0
+      errors: 0
+      skipped: 0
+      report: docs/qa/evidence/STUDIO-OBS-003/TEST-com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT.xml
+    - suite: com.citi.put.checks.studio.guided.session.GuidedIndependentQAProbeIT
+      tests: 2
+      failures: 2
+      errors: 0
+      skipped: 0
+      report: docs/qa/evidence/STUDIO-OBS-003/TEST-com.citi.put.checks.studio.guided.session.GuidedIndependentQAProbeIT.xml
+    - suite: com.citi.put.checks.studio.guided.session.GuidedSecurityTest
+      tests: 8
+      failures: 0
+      errors: 0
+      skipped: 0
+      report: docs/qa/evidence/STUDIO-OBS-003/TEST-com.citi.put.checks.studio.guided.session.GuidedSecurityTest.xml
+    - suite: com.citi.put.checks.studio.guided.session.GuidedSessionIT
+      tests: 23
+      failures: 0
+      errors: 0
+      skipped: 0
+      report: docs/qa/evidence/STUDIO-OBS-003/TEST-com.citi.put.checks.studio.guided.session.GuidedSessionIT.xml
+    - suite: com.citi.put.checks.studio.scheduling.StudioScheduleApiIT
+      tests: 21
+      failures: 0
+      errors: 0
+      skipped: 0
+      report: docs/qa/evidence/STUDIO-OBS-003/TEST-com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.xml
+  coderabbit:
+    available: false
+    checked:
+      - PATH
+      - ~/.local/bin/coderabbit
+    fallback: Independent deep source review and real PostgreSQL regression probes
+      per configured graceful degradation; no CodeRabbit PASS claimed.
+requirements_traceability:
+  - criterion: AC-1
+    verdict: PASS
+    given: Existing V29 data and a fresh PostgreSQL database
+    when: V30 migration and transaction tests execute
+    then: Existing data survives, identities are immutable, coordinate uniqueness
+      and scoped opaque evidence constraints hold; no raw
+      observation/value/credential persistence was found.
+    evidence:
+      - migrationPreservesExistingDataAndFreshInstallWorks
+      - conflictingAdmissionAndUniqueCoordinatesFail
+      - evidenceReferencesAreScopedAndDoNotClaimReplay
+  - criterion: AC-2
+    verdict: FAIL
+    given: Authenticated public/internal commands and a pending current clarification
+    when: The user answers or the owner renews
+    then: Security/scope checks pass, but choice semantics are not durable and
+      renewal bypasses the required pause.
+    evidence:
+      - GuidedHttpSecurityIT (5)
+      - GuidedSecurityTest (8)
+      - accessIsolationRechecksPrincipalCsiAccountAndScope
+      - REQ-001
+      - REL-001
+  - criterion: AC-3
+    verdict: PASS
+    given: Concurrent repeated/conflicting requests and lost dispatch acknowledgments
+    when: Start/admit/advance/outcome transactions race or roll back
+    then: One durable admission/dispatch is retained, changed digests and
+      coordinates are rejected, rollback restores counters, and uncertainty
+      stops further work.
+    evidence:
+      - concurrentIdenticalStartsAndChangedDigestAreDurable
+      - concurrentConflictingStartsHaveOneWinner
+      - duplicateAdmissionAndConcurrentConsumptionNeverRedispatch
+      - rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge
+      - lostAckNeverRetriesAndDelayedCallbackCannotRevive
+  - criterion: AC-4
+    verdict: FAIL
+    given: Immutable ceilings/deadline, worker fence and pending clarification
+    when: Budgets exhaust, callbacks are stale, or ownership renews
+    then: Budget/expiry/cancellation/stale-worker protections pass, but claim
+      changes paused workflow state; REL-001 must be fixed.
+    evidence:
+      - entireSessionBudgetsAreReservedAndMissingUsageIsConservative
+      - gatewayOverrunIsDurablyChargedAndStopsFurtherWork
+      - workerSubjectFenceAndLeaseAreIndependent
+      - cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence
+      - expiryCannotBeExtendedAndTrustedReaperRevokes
+      - REL-001
+  - criterion: AC-5
+    verdict: PASS
+    given: Successful ledger/source steps or terminal/conflicting sessions
+    when: Finalization is requested without OBS-006 exact verification
+    then: Publication remains closed, source conflict is durable, guided evidence
+      never claims replay/ready/schedule activation.
+    evidence:
+      - noStateCanPublishWithoutExactVerifier
+      - successfulLedgerStillCannotPublishWithoutExactPlanVerifier
+  - criterion: AC-6
+    verdict: PASS_WITH_GAPS
+    given: Real PostgreSQL and legacy authorization/execute/schedule contracts
+    when: The full focused lane is independently rerun
+    then: All 90 tests pass without skips, including required
+      races/recovery/migrations; two additional QA cases expose clarification
+      coverage gaps.
+    evidence:
+      - focused-gradle.log
+      - independent-probe-gradle.log
+accepted_dependency_seams:
+  - GuidedSessionAccess unavailable-account adapter fails closed until OBS-007;
+    this is not a fabricated account success.
+  - authorizeAction and StepVerifier ports are trusted DOM/policy and
+    semantic-completeness seams for OBS-004/005.
+  - OBS-006 exact-plan/lowering verifier is intentionally absent; finalization
+    cannot publish.
+  - Runner-side durable consume/browser invocation and runtime value limits
+    remain OBS-004; OBS-003 freezes their ceilings and persists no values.
+limitations:
+  - mTLS tests verify the required container certificate attribute/filter
+    behavior; no deployed TLS connector/certificate-chain handshake was
+    exercised.
+  - HTTP controller tests mock the service; service/database integration is
+    independently exercised with real PostgreSQL.
+  - No full backend check aggregate, full-repository coverage, live
+    browser/model flow or human pilot claimed.

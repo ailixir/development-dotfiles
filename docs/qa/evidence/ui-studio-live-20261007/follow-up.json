@@ -1,0 +1,30 @@
+{
+  "at": "2026-10-07T21:37:49.679608+00:00",
+  "checks": [
+    {
+      "testId": "f15bacaa-8c42-4416-8b56-7a9eabb69813",
+      "operation": "validate-variables",
+      "httpStatus": 200,
+      "body": {
+        "testId": "f15bacaa-8c42-4416-8b56-7a9eabb69813",
+        "isValid": true,
+        "valid": true,
+        "hasVariables": true,
+        "missing": [],
+        "undeclared": [],
+        "unvalued": [],
+        "conflicting": [],
+        "unused": []
+      }
+    },
+    {
+      "testId": "da9e3555-a0bc-44e6-848a-de0868af44cd",
+      "operation": "execute",
+      "httpStatus": 409,
+      "body": {
+        "error": "COMPILE_REQUIRED",
+        "message": "This test has never been confirmed. Compile it, review the compiled steps and confirm them before running it."
+      }
+    }
+  ]
+}

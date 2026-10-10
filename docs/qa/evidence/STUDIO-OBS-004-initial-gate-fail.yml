@@ -1,0 +1,170 @@
+schema: 1
+story: STUDIO-OBS-004
+story_title: Runner guided control and execution-local dataflow
+gate: FAIL
+status_reason: Independent Chromium probes reproduce a prior-document password
+  disclosure and false successful native toggle outcomes. Broad existing tests
+  pass, but AC-2/6/7 remain unmet and wire/schema parity also needs correction.
+reviewer: Quinn (@qa /root/sdc_obs004_qa; independent from implementers)
+reviewed_revision: sha256:be37fefaad1d9873be7e3cece8c23bb5f1dd541b9a84ac643f1b97554bced84f
+updated: 2026-10-08T15:57:54.426Z
+top_issues:
+  - id: SEC-001
+    severity: high
+    priority: P0
+    finding: "Previously inventoried password bytes escape in the next document
+      observation. Independent Chromium probe first observes a password field,
+      then navigates to a page whose button echoes that value:
+      firstContains=false, secondContains=true. The exported name/locator can
+      enter the backend observation and future model context."
+    suggested_action: Retain a bounded session-private masking inventory across
+      observations and document replacement, including known
+      sensitive/input/source bytes and normalized aliases; clear it only at
+      confirmed teardown. Add process/callback canary tests for uncaptured
+      password and ordinary input echoes on subsequent documents and after
+      removal in the same document. No raw inventory may become public IPC,
+      callback, diagnostic or manifest data.
+    suggested_owner: dev
+    refs: &a1
+      - studio-runner/src/run/observationCollector.ts:231
+      - studio-runner/src/run/browser.ts:195
+      - docs/qa/evidence/STUDIO-OBS-004-independent-edge-probe.json
+  - id: REL-001
+    severity: high
+    priority: P1
+    finding: Native check/uncheck reports success without verifying the requested
+      checked state. A checkbox onclick preventDefault leaves checked=false
+      after check; uncheck on a checked radio leaves checked=true. Both invoke
+      calls return successfully, so GuidedRuntime emits SUCCEEDED/OK even though
+      the typed operation did not complete.
+    suggested_action: Check the actual postcondition on the retained original
+      element after the single native attempt, without re-resolving or retrying.
+      Reject inherently unsupported native uncheck targets before effects. After
+      an effect has begun, preserve honest failure/uncertainty if state or
+      identity cannot be confirmed. Add independent receipt/state tests for
+      prevented toggles, radio targets, handlers that revert state, no-op and no
+      second attempt.
+    suggested_owner: dev
+    refs: &a2
+      - studio-runner/src/run/nativeInput.ts:28
+      - studio-runner/src/run/browser.ts:327
+      - studio-runner/src/run/observationCollector.ts:521
+      - studio-runner/src/guided/runtime.ts:212
+      - docs/qa/evidence/STUDIO-OBS-004-independent-edge-probe.json
+  - id: SEC-002
+    severity: medium
+    priority: P2
+    finding: Wire/auth parsing is not consistently closed. Real mTLS runner /assign
+      accepts duplicate schemaVersion keys and reaches the claim port.
+      GuidedContracts.parse accepts a second trailing JSON object. The Java JWT
+      verifier accepts an unknown signed claim that the Node verifier rejects.
+    suggested_action: Use duplicate-key rejecting, trailing-data rejecting and fatal
+      UTF-8 JSON parsing on each applicable wire boundary, and agree/enforce the
+      same closed JWT claim set and integer policy in Java/Node. Add malformed
+      raw-byte transport tests rather than only validating already-parsed
+      objects.
+    suggested_owner: dev
+    refs: &a3
+      - studio-runner/src/guided/transport.ts:49
+      - backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java:32
+      - backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java:185
+      - docs/qa/evidence/STUDIO-OBS-004-independent-wire-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-independent-parity-probe.log
+  - id: REL-002
+    severity: medium
+    priority: P2
+    finding: "Custom runner date-time validation differs from the frozen schema
+      validators: 2026-10-08T24:00:00Z is accepted by runner assignment
+      validation but rejected by Java and Ajv. Runner also rejects the
+      leap-second form accepted by the Ajv contract oracle. The custom resolver
+      silently substitutes an empty schema for an unresolved definition and does
+      not detect unsupported validation keywords."
+    suggested_action: Establish tested Java/Node parity for the currently enforced
+      wire schemas, including date-time edge cases. Validate the schema subset
+      at load time and reject unresolved references/pointers or unsupported
+      validation keywords. No OBS-006 learned-plan runtime support is demanded
+      by this finding.
+    suggested_owner: dev
+    refs: &a4
+      - studio-runner/src/guided/contracts.ts:17
+      - studio-runner/src/guided/contracts.ts:32
+      - docs/qa/evidence/STUDIO-OBS-004-schema-parity-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-independent-parity-probe.log
+waiver:
+  active: false
+evidence:
+  review: docs/qa/evidence/STUDIO-OBS-004-independent-review.json
+  source_manifest: docs/qa/evidence/STUDIO-OBS-004-qa-source-manifest.json
+  tested_worker: docs/qa/evidence/STUDIO-OBS-004-qa-tested-worker.json
+  tests_reviewed: 1600
+  independent_probes: 8
+  trace:
+    ac_covered:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+    ac_gaps:
+      - 2
+      - 6
+      - 7
+nfr_validation:
+  security:
+    status: FAIL
+    notes: SEC-001 prior-document sensitive echo disclosure; SEC-002 wire/auth
+      acceptance differences.
+  performance:
+    status: PASS
+    notes: Bounded resources, lowered limits, lease scheduling and bounded viewport
+      reveal exercised; no performance benchmark claim.
+  reliability:
+    status: FAIL
+    notes: REL-001 false success; dispatch durability/refresh/renewal fault tests
+      pass; REL-002 schema parity differs.
+  maintainability:
+    status: CONCERNS
+    notes: Custom schema subset silently ignores unsupported semantics and requires
+      explicit fail-closed support checking.
+coderabbit:
+  available: false
+  wsl: false
+  configuredBinaryExists: false
+  fallback: Configured graceful_degradation.skip_if_not_installed. Fresh
+    independent QA source review, real reruns and adversarial probes used; no
+    CodeRabbit PASS claimed.
+recommendations:
+  immediate:
+    - action: Retain a bounded session-private masking inventory across observations
+        and document replacement, including known sensitive/input/source bytes
+        and normalized aliases; clear it only at confirmed teardown. Add
+        process/callback canary tests for uncaptured password and ordinary input
+        echoes on subsequent documents and after removal in the same document.
+        No raw inventory may become public IPC, callback, diagnostic or manifest
+        data.
+      refs: *a1
+    - action: Check the actual postcondition on the retained original element after
+        the single native attempt, without re-resolving or retrying. Reject
+        inherently unsupported native uncheck targets before effects. After an
+        effect has begun, preserve honest failure/uncertainty if state or
+        identity cannot be confirmed. Add independent receipt/state tests for
+        prevented toggles, radio targets, handlers that revert state, no-op and
+        no second attempt.
+      refs: *a2
+    - action: Use duplicate-key rejecting, trailing-data rejecting and fatal UTF-8
+        JSON parsing on each applicable wire boundary, and agree/enforce the
+        same closed JWT claim set and integer policy in Java/Node. Add malformed
+        raw-byte transport tests rather than only validating already-parsed
+        objects.
+      refs: *a3
+    - action: Establish tested Java/Node parity for the currently enforced wire
+        schemas, including date-time edge cases. Validate the schema subset at
+        load time and reject unresolved references/pointers or unsupported
+        validation keywords. No OBS-006 learned-plan runtime support is demanded
+        by this finding.
+      refs: *a4
+  future:
+    - action: Keep semantic model planning/question production, exact publication and
+        production account ports explicitly gated in005/006/007.

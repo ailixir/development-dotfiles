@@ -1,0 +1,219 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v2/source-selection.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "sourceReferences": {
+      "type": "array",
+      "items": {
+        "$ref": "https://checks.citi.example/contracts/observed/v2/source-reference.schema.json"
+      },
+      "minItems": 0,
+      "maxItems": 200
+    },
+    "obligations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "stepId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "occurrence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 7
+          },
+          "operationKind": {
+            "enum": [
+              "navigate",
+              "click",
+              "fill",
+              "press",
+              "selectOption",
+              "check",
+              "uncheck",
+              "hover",
+              "read",
+              "assert"
+            ]
+          },
+          "targetIntent": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 500
+          },
+          "referenceIndex": {
+            "oneOf": [
+              {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "needId": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "predicate": {
+            "oneOf": [
+              {
+                "enum": [
+                  "visible",
+                  "containsText",
+                  "hasValue",
+                  "url",
+                  "title"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "stepId",
+          "occurrence",
+          "operationKind",
+          "targetIntent",
+          "referenceIndex",
+          "needId",
+          "predicate"
+        ]
+      },
+      "minItems": 1,
+      "maxItems": 800
+    },
+    "needs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "needId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "producerStepId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "consumers": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "stepId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 256
+                },
+                "argumentSlot": {
+                  "enum": [
+                    "fill.value",
+                    "selectOption.value",
+                    "assert.expected"
+                  ]
+                }
+              },
+              "required": [
+                "stepId",
+                "argumentSlot"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 200
+          }
+        },
+        "required": [
+          "needId",
+          "producerStepId",
+          "consumers"
+        ]
+      },
+      "minItems": 0,
+      "maxItems": 32
+    }
+  },
+  "required": [
+    "sourceReferences",
+    "obligations",
+    "needs"
+  ],
+  "definitions": {
+    "sourceQuestionNeed": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "occurrence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 7
+        },
+        "operationKind": {
+          "enum": [
+            "navigate",
+            "fill",
+            "selectOption",
+            "assert"
+          ]
+        },
+        "argumentSlot": {
+          "enum": [
+            "navigate.destination",
+            "fill.value",
+            "selectOption.value",
+            "assert.expected"
+          ]
+        }
+      },
+      "required": [
+        "stepId",
+        "occurrence",
+        "operationKind",
+        "argumentSlot"
+      ]
+    },
+    "sourceQuestionMeaning": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "need": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/source-selection.schema.json#/definitions/sourceQuestionNeed"
+        },
+        "reference": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/source-reference.schema.json"
+        }
+      },
+      "required": [
+        "need",
+        "reference"
+      ]
+    }
+  }
+}

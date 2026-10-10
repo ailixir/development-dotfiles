@@ -148,3 +148,30 @@ describe('fetch-backed HTTP client', () => {
     expect(outcome.kind).toBe('transport');
   });
 });
+
+describe('bounded observed response transport',()=>{
+  it('counts streamed bytes without Content-Length and cancels at the bound',async()=>{
+    const responder=await listen((_req,res)=>{res.writeHead(200);res.write('1234');res.write('5678');res.end('9');});
+    expect(await createFetchHttpClient().send({...request(responder.port),maxResponseBytes:8})).toMatchObject({kind:'transport'});
+    expect(responder.hits).toHaveLength(1);
+  });
+  it('accepts exact UTF-8 byte boundary across split multibyte chunks',async()=>{
+    const responder=await listen((_req,res)=>{const bytes=Buffer.from('é🧪');res.writeHead(200,{'content-length':6});res.write(bytes.subarray(0,3));res.end(bytes.subarray(3));});
+    expect(await createFetchHttpClient().send({...request(responder.port),maxResponseBytes:6})).toEqual({kind:'response',status:200,body:'é🧪'});
+  });
+  it('refuses invalid UTF-8 while preserving the legacy replacement behavior',async()=>{
+    const responder=await listen((_req,res)=>{res.writeHead(200);res.end(Buffer.from([0xc3,0x28]));});
+    const client=createFetchHttpClient();expect(await client.send({...request(responder.port),maxResponseBytes:8})).toMatchObject({kind:'transport'});
+    expect(await client.send(request(responder.port))).toMatchObject({kind:'response',body:'�('});
+  });
+  it('does not trust a large declared length over actual streamed bounded bytes',async()=>{
+    const responder=await listen((_req,res)=>{res.writeHead(200,{'content-length':100000});res.write('123456789');});
+    expect(await createFetchHttpClient().send({...request(responder.port),maxResponseBytes:8})).toMatchObject({kind:'transport'});
+    expect(responder.hits).toHaveLength(1);
+  });
+  it('times out and aborts a stalled chunked response once',async()=>{
+    const responder=await listen((_req,res)=>{res.writeHead(200);res.write('a');});
+    expect(await createFetchHttpClient().send({...request(responder.port),timeoutMs:30,maxResponseBytes:8})).toEqual({kind:'timeout'});
+    expect(responder.hits).toHaveLength(1);
+  });
+});

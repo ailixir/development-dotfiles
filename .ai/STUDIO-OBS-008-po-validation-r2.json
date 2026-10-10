@@ -1,0 +1,156 @@
+{
+  "story": "STUDIO-OBS-008",
+  "task": "validate-next-story",
+  "round": "r2 (first validation of the 2026-10-09 rescoped draft 0.2.0; r1 = pre-rescope intake, superseded)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T02:40:38Z",
+  "validationDate": "2026-10-09",
+  "verdict": "GO",
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "High",
+  "scoreRationale": "Nine testable ACs trace to design §10 OBS-008 rows, GA plan C-1/C-5/C-7 and consensus §9 as amended by §8.1; every path:line anchor spot-checked is accurate; File List is complete and sequenced against OBS-007/009/011. Deductions: the server-provided vaultSecrets capability route shape is deferred to a T0 ruling rather than pinned in AC-6a; risks are implicit in Dev Notes rather than listed; the cited 2026-10-09 UX review is an in-session artifact summarized in the story, not a file on disk.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-09 | 0.2.1 | Validated GO (8/10) — Status: Draft → Ready | @po |",
+  "storySha256Before": "fd19ce65f4a4ec7837cabc51eb8b0877c2748afde23b709cbbbc8e8435a07576",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS", "note": "User story plus 'What exists and what does not' with verified anchors"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Enumerated, not Given/When/Then; AC-9 names the oracle per AC"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "'Not owned here' names review/**, features/studio/authoring/**, studio-runner/**, guided backend services"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "OBS-007 Done; shared files sequenced with OBS-009 (playwright.config.ts, e2e/) and OBS-011 (studioWcagAudit.test.tsx, studioSlice.ts, handlers.ts)"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size L"},
+    {"n": 7, "item": "Business value", "status": "PASS"},
+    {"n": 8, "item": "Risks documented", "status": "PARTIAL", "note": "Dead studioSlice.testSteps, unmounted review cluster, no Playwright config and no capability route are stated as facts; no explicit Risks block"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "T6 record + independent @qa; only @qa sets Done"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "design §10 rows for OBS-008; GA plan §4.C C-1/C-5/C-7, §7 knock-on; consensus §9 as amended §8.1"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention (table metadata, top-level File List/Testing) retained as in OBS-001…007."
+  },
+  "executorAssignment": {
+    "executor": "ux-design-expert",
+    "quality_gate": "dev",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "accessibility-audit"],
+    "status": "PASS",
+    "note": "Design/UI → @ux-design-expert / @dev per the type-to-executor table; distinct; @dev co-executes the single backend capability route (AC-6a)."
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "CAP-001", "acs": ["AC-6"], "action": "T0 must record the @architect ruling on the vaultSecrets capability route (path, response shape, per-test vs global, controller placement) before T4; quote old/new openapi.yaml BASE_SHA256 and StudioContractTest op-count after OBS-007's re-anchor."},
+    {"id": "STATE-001", "acs": ["AC-2"], "action": "Name the Redux slice keys for guided session state in T1 so the studioSlice.ts edit stays 'guided session state only' and does not collide with OBS-011 CLN-14 (testSteps removal)."}
+  ],
+  "niceToHaveImprovements": [
+    "Record the 2026-10-09 UX review recommendations verbatim in guidedNarratives.ts comments so each state string cites its source.",
+    "Coordinator: regenerate wave-plan.json (2026-10-08) whose OBS-008 fileList still carries the pre-rescope paths (e.g. components/studio/evidence/GuidedEvidence.tsx)."
+  ],
+  "goConditions": [
+    "T0 capability-route ruling recorded before T4 (CAP-001).",
+    "Implementation starts only after OBS-007 is Done (contracts/v3/fixtures.json, openapi-v3.yaml, LOGIN_REQUIRED codes do not exist today; contracts/v3 holds only publication-fixtures.json, result.schema.json, session-view.schema.json).",
+    "Every state string cites consensus §9 (amended), design §5 or the UX review summary in this story; no state beyond AC-4.",
+    "AC-6c canaries assert the secret value is absent and the ID present in every rendered/mocked payload (design C-7/C-12 UI halves)."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "frontend/src/utils/config/studioCapabilities.ts:3 vaultSecrets: false",
+      "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx:1280,1294 readers",
+      "frontend/src/components/checks/wizard/configs/UiTestConfig.tsx:132,140 readers",
+      "docs/specs/studio/openapi.yaml:1857 /tests/{id}/schedule/capabilities (only capability route)",
+      "frontend/src/services/api/apiClient.ts:43-46 redactBody; secretsApi.ts:39 redactBody: true",
+      "helm-chart/put-checks/values.yaml:133 Vault adapter implemented-not-connected",
+      "frontend/package.json:18 test:e2e = playwright test; no frontend/playwright.config.*; no frontend/e2e/",
+      "grep -rn guided-sessions frontend/src = 0; no components/studio/guided; no studioGuidedApi.ts",
+      "GuidedSessionController: POST /, GET /{id}, GET /{id}/result, GET /{id}/clarification, POST /{id}/clarify, POST /{id}/cancel; GuidedPublicationController: POST /{id}/finalize",
+      "docs/runbooks/studio-guided-authoring.md:31 finalize body {schemaVersion, expectedSourceRevision, expectedConfigurationRevision} + Idempotency-Key + put_session",
+      "StudioSecretsController: GET /tests/{id}/secrets, POST /tests/{id}/secrets only (no read-value, no PUT)",
+      "backend studio/secrets/DisabledStudioVaultProvider.java exists",
+      "SecretInput.tsx type=password autoComplete=new-password (security review, verified)"
+    ],
+    "unverifiedButSourced": [
+      "'UX review 2026-10-09 (coordinator brief)' is an in-session review; its recommendations are summarized in GA plan §6–7 and in this story's Dev Notes — accepted as a source per the coordinator."
+    ],
+    "corrections": []
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Frontend/UX; secondary API client contract; complexity high — correct",
+    "agents": "@ux-design-expert executor / @dev technical gate + capability route / independent @qa",
+    "qualityGates": "Three checkboxes (pre-commit, independent SDC QA, @devops handoff) — wave convention, not the template's literal Pre-Commit/Pre-PR/Pre-Deployment wording",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "WCAG 2.1 AA, centralized transport, no secret value in rendered/mocked payloads, no hidden second execution, honest readiness — match frontend/security type",
+    "fallback": "graceful_degradation.skip_if_not_installed documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped (isCodeIntelAvailable() = false)"},
+  "epicContextEnrichment": {"attempted": true, "result": "EpicContextAccumulator.buildAccumulatedContext('STUDIO-OBSERVED', 8) returned empty (no epic file matches docs/prd/epic-{n}*.md for this wave); wave README and design §10 used instead"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "40 existing paths verified; new paths marked; backend touch limited to one route; shared-file order with OBS-007/009/011 stated"},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "PASS", "details": "Nine states with copy, two LOGIN_REQUIRED narratives with two actions, picker behavior, a11y (live region, focus, keyboard, no color-only), narrow layout, integration points (seven routes + capability route)"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS", "findingIds": ["CAP-001"]},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "Vitest+RTL+MSW per flow, axe suite with pinned baseline keys, Playwright config + flow; fixtures derived from contracts/v3"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "I-B6 UI half, I-C11 UI half, never-echo canaries, SecretInput clear-after-submit, capability 'disabled means unavailable, never simulated'"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 contract/ownership → T1 transport → T2 run gate → T3 surface → T4 references → T5 tests → T6 record"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL", "details": "Section complete under wave convention; three iterations / 30 minutes stated"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS"},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "8/10; self-contained given OBS-007 Done; one T0 ruling pending"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "consensus §§1,4,7,9; OBS-006 runbook :31", "readiness": "READY"},
+    {"ac": "AC-2", "testable": true, "source": "design §3 openapi-v3 row; AGENTS.md transport rule", "readiness": "READY_AFTER_OBS-007"},
+    {"ac": "AC-3", "testable": true, "source": "consensus §§1,6", "readiness": "READY"},
+    {"ac": "AC-4", "testable": true, "source": "consensus §9 as amended §8.1; UX review", "readiness": "READY"},
+    {"ac": "AC-5", "testable": true, "source": "design §5; GA C-5", "readiness": "READY_AFTER_OBS-007"},
+    {"ac": "AC-6", "testable": true, "source": "GA C-1, C-7; design I-B6, I-C11, §10", "readiness": "READY_WITH_T0_RULING", "findingIds": ["CAP-001"]},
+    {"ac": "AC-7", "testable": true, "source": "consensus §9; OBS-006 runbook :37", "readiness": "READY"},
+    {"ac": "AC-8", "testable": true, "source": "consensus §10; GA §4.I I-1", "readiness": "READY"},
+    {"ac": "AC-9", "testable": true, "source": "consensus §11 UI evidence; GA H-2", "readiness": "READY"}
+  ],
+  "dependencyVerification": {
+    "OBS-007": "Draft at validation time (validated in parallel by another @po); this story's implementation cannot start until OBS-007 is Done",
+    "OBS-001…006": "Done; administratively closed (wave README)",
+    "sharedFilesSequencedAfterThisStory": ["frontend/playwright.config.ts + frontend/e2e/ (OBS-009 extends)", "frontend/src/test/a11y/studioWcagAudit.test.tsx + docs/qa/accessibility/axe-results.json (OBS-011 CLN-11)", "frontend/src/store/slices/studioSlice.ts (OBS-011 CLN-14)", "frontend/src/services/mocks/studio/handlers.ts (OBS-011 rulings)"],
+    "sharedFilesSequencedBeforeThisStory": ["docs/specs/studio/openapi.yaml + confinement.test.ts BASE_SHA256 + StudioContractTest op-count (OBS-007 re-anchors first)"]
+  },
+  "crossStoryIssues": [
+    "GA plan §4.C C-1 (server-provided vaultSecrets capability), C-5 UI message and C-7 picker are legacy-path P0/P1 items now carried by this GA+1 story; if D-1 = legacy-only GA, GA either waits on OBS-007+008 or @pm carves the legacy halves into a legacy-path story.",
+    "wave-plan.json on disk (2026-10-08) is pre-rescope for OBS-007…010 and has no OBS-011 node; coordinator regenerates before dispatch."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md", "sha256": "fd19ce65f4a4ec7837cabc51eb8b0877c2748afde23b709cbbbc8e8435a07576", "note": "before PO edits"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "f0e40fa531e65be94216cb10ccf0794171e4782cb70d21d7fbea9f61063b234f"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-security-review.md", "sha256": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49"},
+    {"path": "docs/epics/UI-STUDIO-GA-PLAN.md", "sha256": "533d258e93ea0bb8496fe6415a549ef190ba1a51c9c7a0c4ad6e53a3ac140eec"},
+    {"path": "docs/specs/studio-observed-authoring/consensus-plan.md", "sha256": "d9e3fc28e6cbc982b3719df676cf059abed124ebab72cf272a19e591f8c64617"},
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md", "sha256": "d762e79a2af541f4d97aa5171267ddd46bd5f2f665fa4a268a2ec606260e1aa2"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "7310713a7b79da816c9878f6911e1a392802005582fa05b4ac2e6477b37aade8"},
+    {"path": "docs/runbooks/studio-guided-authoring.md", "sha256": "54c0a9171f4e5628ddf621b4551aaf1bdacd7057c9988f6427aebc75dc4ee8fc"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".aiox-core/product/checklists/po-master-checklist.md", "sha256": "506a3032f461c7ae96c338600208575be4f4823d2fe7c92fe304a4ff07cc5390"},
+    {"path": ".aiox-core/product/templates/story-tmpl.yaml", "sha256": "0b64b49e5332cbce7d36da1ff40495628cb6ce650855b752dc82372706d41e13"},
+    {"path": ".aiox-core/core-config.yaml", "sha256": "7bd8694cded2a845882f29e9c7b11d18ae531ad492a3cefb53a71100eb29bc31"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ],
+  "proposedFileList": [
+    {"path": "frontend/src/utils/config/studioCapabilities.ts", "exists": true},
+    {"path": "frontend/src/components/studio/SecretInput.tsx", "exists": true},
+    {"path": "frontend/src/components/studio/guided/", "exists": false, "classification": "new"},
+    {"path": "frontend/src/components/studio/references/", "exists": false, "classification": "new"},
+    {"path": "frontend/src/services/api/studioGuidedApi.ts", "exists": false, "classification": "new"},
+    {"path": "frontend/src/services/mocks/studio/guidedHandlers.ts", "exists": false, "classification": "new"},
+    {"path": "frontend/src/types/studio/studioGuidedTypes.ts", "exists": false, "classification": "new"},
+    {"path": "frontend/playwright.config.ts", "exists": false, "classification": "new"},
+    {"path": "frontend/e2e/studio-guided.spec.ts", "exists": false, "classification": "new"},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/StudioController.java", "exists": true, "classification": "alternative to a new StudioSecretsCapabilityController (T0 ruling)"},
+    {"path": "docs/specs/studio/openapi.yaml", "exists": true, "classification": "pin re-anchor after OBS-007"}
+  ]
+}

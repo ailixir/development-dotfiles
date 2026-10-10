@@ -78,6 +78,60 @@ public final class RunnerReportProjection {
           RunnerEvidence.FAILED,
           RunnerEvidence.UNAVAILABLE);
 
+  /** Validate the original coordinates before projection can deduplicate or synthesize entries. */
+  static void requireObservedPreReadyFailure(RunnerReport report, int sourceCount) {
+    Set<String> reasons =
+        Set.of(
+            "INVALID_CONTRACT",
+            "PROFILE_MISMATCH",
+            "POLICY_REFUSED",
+            "AUTHORIZATION_EXPIRED",
+            "ACCOUNT_UNAVAILABLE",
+            "ACCOUNT_UNKNOWN",
+            "TARGET_DRIFT",
+            "TIMEOUT",
+            "CANCELLED",
+            "INTERNAL_ERROR");
+    boolean valid =
+        RunnerReport.FINAL.equals(report.kind())
+            && report.browserStartedAt() == null
+            && report.outcome() != null
+            && "ERROR".equals(report.outcome().result())
+            && "RUN_ERROR".equals(report.outcome().errorCode())
+            && report.outcome().errorMessage() != null
+            && reasons.contains(report.outcome().errorMessage())
+            && sourceCount >= 1
+            && sourceCount <= 100
+            && report.steps() != null
+            && report.steps().size() == sourceCount;
+    if (valid) {
+      Set<Integer> coordinates = new java.util.HashSet<>();
+      for (RunnerStepState step : report.steps()) {
+        if (step == null
+            || step.stepIndex() == null
+            || step.stepIndex() < 0
+            || step.stepIndex() >= sourceCount
+            || !coordinates.add(step.stepIndex())
+            || !StepResult.SKIPPED.equals(step.status())
+            || step.failure() != null
+            || step.startedAtMs() != null
+            || step.finishedAtMs() != null
+            || step.durationMs() != null) {
+          valid = false;
+          break;
+        }
+      }
+    }
+    if (report.logs() != null
+        && report.logs().stream().anyMatch(log -> log == null || log.atMs() != null)) {
+      valid = false;
+    }
+    if (!valid) {
+      throw InternalCallbackException.badRequest(
+          InternalCallbackCodes.INVALID_REPORT, "Invalid observed pre-Ready terminal report");
+    }
+  }
+
   private RunnerReportProjection() {}
 
   /** Everything one report projects onto the history row. */

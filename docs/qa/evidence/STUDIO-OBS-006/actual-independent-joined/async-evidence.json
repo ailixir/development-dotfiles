@@ -1,0 +1,42 @@
+{
+  "learningSubmits" : 1,
+  "finalizationEffects" : 0,
+  "freshReplays" : 2,
+  "sourcePlanCalls" : 1,
+  "nextActionCalls" : 5,
+  "verifyStepCalls" : 0,
+  "replayModelCalls" : 0,
+  "artifactHash" : "2beed21fd7116e356107dda8cbba0ef51e225c52a994c592019e983926bc3616",
+  "committedMissingCheckpoint" : {
+    "generation" : 7,
+    "extraPolls" : 1,
+    "observationHash" : "cb533d359024d873066674a23de135917db4564340a6f8685ddf422e466d2bc4"
+  },
+  "passiveLearning" : {
+    "active" : {
+      "stepId" : "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+      "usedMs" : 668,
+      "window" : null,
+      "pending" : null,
+      "planHash" : "633d137fd6ae191b9509adfd1950c20e4c28e97816399208476084efac731e22",
+      "workerId" : "worker-1",
+      "stepIndex" : 2,
+      "extraPolls" : 2,
+      "nextPollAt" : "2026-10-09T17:05:07.622Z",
+      "ownerFence" : 1,
+      "obligationId" : "ac447bfe-d0f1-4546-af06-bd17bdc041da",
+      "planRevision" : "2",
+      "lastGeneration" : 8,
+      "targetIntentHash" : "8e69e4813f95b32c6736b696cc805d819121a15e3b6cee4b41eb52bf0c1f0c8c",
+      "lastObservationHash" : "bf4e29208f10b925f4a4878cbc0227c4f31eafb31741a2965b459736c8b17e6e"
+    },
+    "policy" : "passive-target-1",
+    "version" : 1,
+    "allowanceMs" : 30000,
+    "sourceRevision" : "1",
+    "totalExtraPolls" : 2,
+    "configurationRevision" : "1"
+  },
+  "passiveReplayStates" : [ "ABSENT", "READY", "ABSENT", "READY" ],
+  "nativeInvocations" : [ "read", "fill", "click", "assert", "read", "fill", "click", "assert" ]
+}

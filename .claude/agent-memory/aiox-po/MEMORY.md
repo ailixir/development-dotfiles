@@ -1,1 +1,3 @@
 - [Epic 10 manifest convention](project_epic10_manifest_convention.md) — @po adds manifest entries at validation; `blocks` criterion-backed vs sequencing
+- [STUDIO-OBSERVED wave PO conventions](project_studio_observed_wave_po_conventions.md) — PO section placement, r2 report naming, Q2/Q4 conditional GO, C-1/C-5/C-7 ownership tension
+- [OBS-007 secret-login decisions](project_obs007_secret_login_decisions.md) — binding 2026-10-09 rescope (no provider/handoff/UI); Q1/Q3 at defaults; GO 9/10 Ready

@@ -82,8 +82,78 @@ class DeReadyCarryForwardTest {
     }
   }
 
+  static final class CountingGuidedGateway
+      implements com.citi.put.checks.studio.guided.translation.GuidedLlmGatewayClient {
+    final AtomicInteger calls = new AtomicInteger();
+
+    @Override
+    public com.citi.put.checks.studio.guided.translation.GuidedModelResponse propose(
+        com.citi.put.checks.studio.guided.translation.GuidedModelRequest request,
+        com.citi.put.checks.studio.guided.translation.GuidedCallBudget budget) {
+      calls.incrementAndGet();
+      return new com.citi.put.checks.studio.guided.translation.GuidedModelResponse(
+          com.citi.put.checks.studio.guided.translation.GuidedModelResponse.Code.DISABLED,
+          null,
+          null,
+          null,
+          null);
+    }
+  }
+
+  static final class RuntimeReceipt implements AutoCloseable {
+    final com.sun.net.httpserver.HttpServer server;
+    final AtomicInteger calls = new AtomicInteger();
+
+    RuntimeReceipt() throws java.io.IOException {
+      server =
+          com.sun.net.httpserver.HttpServer.create(
+              new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+      server.createContext(
+          "/v1/runs",
+          exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            calls.incrementAndGet();
+            exchange.sendResponseHeaders(202, -1);
+            exchange.close();
+          });
+      server.start();
+    }
+
+    @Override
+    public void close() {
+      server.stop(0);
+    }
+  }
+
   @TestConfiguration
   static class StubGateway {
+    @Bean
+    @Primary
+    CountingGuidedGateway countingGuidedGateway() {
+      return new CountingGuidedGateway();
+    }
+
+    @Bean(destroyMethod = "close")
+    RuntimeReceipt runtimeReceipt() throws java.io.IOException {
+      return new RuntimeReceipt();
+    }
+
+    @Bean
+    @Primary
+    com.citi.put.checks.studio.dispatch.RunnerDispatchClient ordinaryRunner(
+        RuntimeReceipt receipt,
+        com.fasterxml.jackson.databind.ObjectMapper mapper,
+        com.citi.put.checks.studio.StudioExecutionProperties properties) {
+      return new com.citi.put.checks.studio.dispatch.HttpRunnerDispatchClient(
+          mapper,
+          properties,
+          new com.citi.put.checks.studio.compile.validator.StudioRunnerProperties(
+              "http://127.0.0.1:" + receipt.server.getAddress().getPort(),
+              "controlled-runtime",
+              java.time.Duration.ofSeconds(5),
+              java.time.Duration.ofSeconds(2)));
+    }
+
     @Bean
     @Primary
     CountingFailingGateway countingFailingGateway() {
@@ -96,6 +166,10 @@ class DeReadyCarryForwardTest {
   @Autowired private RuntimePinProperties pin;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private CountingFailingGateway gateway;
+  @Autowired private CountingGuidedGateway guided;
+  @Autowired private RuntimeReceipt receipt;
+  @Autowired private com.citi.put.checks.studio.StudioService studio;
+  @Autowired private com.citi.put.checks.studio.dispatch.StudioDispatcher dispatcher;
 
   private UUID testId;
   private UUID confirmedRevisionId;
@@ -105,8 +179,10 @@ class DeReadyCarryForwardTest {
     ReadinessFixtures.seedUser(jdbc, ReadinessFixtures.OWNER);
     ReadinessFixtures.seedCsi(jdbc, ReadinessFixtures.CSI_ID);
     testId = ReadinessFixtures.seedDraft(jdbc, STEPS);
-    confirmedRevisionId = ReadinessFixtures.confirm(states, jdbc, testId, STEPS);
+    confirmedRevisionId = confirmRunnableRevision();
     gateway.reset();
+    guided.calls.set(0);
+    receipt.calls.set(0);
 
     assertThat(compileStatus()).isEqualTo(CompileState.READY.name());
     assertThat(readiness.evaluate(testId).ready())
@@ -247,6 +323,47 @@ class DeReadyCarryForwardTest {
   }
 
   @Test
+  void ordinaryAcceptanceReadinessAndRealHttpDispatchCallNeitherProvider() {
+    var identity =
+        com.citi.put.checks.studio.StudioExecutionFixtures.identity(
+            ReadinessFixtures.OWNER, ReadinessFixtures.CSI_ID, "owner");
+    for (CompileState state :
+        List.of(
+            CompileState.READY,
+            CompileState.STALE,
+            CompileState.COMPILING,
+            CompileState.NEEDS_REVISION)) {
+      jdbc.update("UPDATE ui_tests SET compile_status=? WHERE id=?", state.name(), testId);
+      assertThat(readiness.requireReady(testId)).isEqualTo(confirmedRevisionId);
+      var accepted = studio.executeTest(testId, identity, UUID.randomUUID().toString());
+      assertThat(accepted.revisionId()).isEqualTo(confirmedRevisionId);
+      int before = receipt.calls.get();
+      assertThat(dispatcher.dispatch(accepted.executionId())).isTrue();
+      assertThat(receipt.calls.get()).isEqualTo(before + 1);
+      assertNoProviders();
+      // Fixture cleanup after the independently received dispatch; avoid carrying active capacity.
+      jdbc.update(
+          "DELETE FROM studio_dispatch_ledger WHERE execution_id=?", accepted.executionId());
+    }
+  }
+
+  @Test
+  void injectedProviderCallsFalsifyTheZeroCallOracle() {
+    guided.propose(null, null);
+    org.assertj.core.api.Assertions.assertThatThrownBy(this::assertNoProviders)
+        .isInstanceOf(AssertionError.class);
+    guided.calls.set(0);
+    gateway.propose(null);
+    org.assertj.core.api.Assertions.assertThatThrownBy(this::assertNoProviders)
+        .isInstanceOf(AssertionError.class);
+  }
+
+  private void assertNoProviders() {
+    assertThat(gateway.calls()).as("ordinary compile calls").isZero();
+    assertThat(guided.calls.get()).as("ordinary guided calls").isZero();
+  }
+
+  @Test
   void theRuntimePinIsRealConfigurationAndNotASwitch() {
     // Guards the premise of every case above: the gate is comparing something.
     assertThat(pin.validatorSchemaVersion()).isEqualTo("2.0.0");
@@ -254,6 +371,41 @@ class DeReadyCarryForwardTest {
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────
+
+  private UUID confirmRunnableRevision() {
+    CompileRequest request = states.beginCompile(testId);
+    var original =
+        ReadinessFixtures.candidate(
+            STEPS,
+            request.configurationRevision(),
+            ReadinessFixtures.provenance(
+                com.citi.put.checks.studio.compile.CompilePins.SYNTAX_REFERENCE_VERSION, "2.0.0"),
+            com.citi.put.checks.studio.compile.CompilePins.SUPPORTED_ARTIFACT_VERSION);
+    var candidate =
+        new com.citi.put.checks.studio.compile.CandidateRevision(
+            original.configurationRevision(),
+            original.source(),
+            original.sourceHash(),
+            original.artifact(),
+            original.artifactHash(),
+            original.artifactSchemaVersion(),
+            com.citi.put.checks.studio.StudioExecutionFixtures.DEFAULT_CONFIGURATION,
+            original.references(),
+            original.provenance(),
+            original.createdBy());
+    states.publishCandidate(testId, request, candidate);
+    UUID revision =
+        jdbc.queryForObject(
+            "SELECT current_candidate_revision_id FROM ui_tests WHERE id=?", UUID.class, testId);
+    states.confirm(
+        testId,
+        revision,
+        candidate.artifactHash(),
+        request.sourceRevision(),
+        request.configurationRevision(),
+        ReadinessFixtures.OWNER);
+    return revision;
+  }
 
   private String compileStatus() {
     return jdbc.queryForObject(

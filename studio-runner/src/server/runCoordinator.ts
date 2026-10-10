@@ -1,3 +1,9 @@
+import type { AdmissionReceipt, AdmissionRequest, BuildIdentity, ObservedJob, TrustedPolicy, ValidationVerdict } from '../executor/observedOperations.js';
+import { validateObservedJob, validateObservedRequest } from '../validator/observedReplay.js';
+import { demand, ObservedRefusal, validateObserved, validateTrustedPolicy } from '../validator/observedReferencePolicy.js';
+import { accountProvider } from '../run/observedAccount.js';
+import type { ObservedAccountRegistry } from '../run/observedAccount.js';
+import { admitObserved } from '../reporting/admissionClient.js';
 /**
  * `POST /v1/runs`: order of operations, admission and the run itself (AC-6..AC-10, AC-12..AC-21).
  *
@@ -71,6 +77,7 @@ import { executeSteps } from '../executor/index.js';
 import { RUNNER_VERSIONS, isCompatible } from '../compat/index.js';
 import type { ArtifactProvenance, RuntimeVersions } from '../compat/index.js';
 import {
+  ObservedPreReadyFailure,
   RUNNER_ERROR_CODES,
   RUN_FAILURE_KINDS,
   errorCodeFor,
@@ -205,7 +212,9 @@ interface RunControl {
   end: ((reason: SessionKillReason) => void) | null;
 }
 
+export interface ObservedRunnerSupport { readonly build:BuildIdentity; readonly policies:readonly TrustedPolicy[]; readonly accounts:ObservedAccountRegistry; readonly validationEnabled:boolean; readonly replayEnabled:boolean; }
 export interface RunCoordinatorOptions {
+  readonly observed?: ObservedRunnerSupport;
   readonly pool: CapacityPool;
   readonly admission: AdmissionClient;
   readonly launcher: BrowserLauncher;
@@ -278,6 +287,8 @@ export interface RunCoordinatorOptions {
 }
 
 export interface RunCoordinator {
+  validateObserved?(body:unknown): ValidationVerdict;
+  submitObserved?(body:unknown): Promise<RunDecision>;
   /**
    * The whole of `POST /v1/runs` after the body has been read and parsed.
    *
@@ -512,6 +523,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     admissionId: string,
     admittedAtMs: number,
     control: RunControl,
+    observed?: {job:ObservedJob;admission:AdmissionReceipt;policy:TrustedPolicy},
   ): Promise<void> {
     const identity = {
       executionId: job.executionId,
@@ -520,11 +532,15 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       runnerInstanceId: options.runnerInstanceId,
     };
     const resolver = createJobResolver(job);
-    const redactor = createRedactor(knownValuesOf(job));
+    // Observed producers are closed/data-free before serialization; raw child output is discarded.
+    // Scrubbing arbitrary input substrings here would corrupt protocol keys/statuses such as PASS.
+    const redactor = createRedactor(observed ? [] : knownValuesOf(job));
+    const reportRuntimeVersions = observed ? {...options.runtimeVersions,observedProfile:JSON.stringify(observed.job.binding.requiredProfile),observedBuild:JSON.stringify(observed.job.binding.requiredBuild)} : options.runtimeVersions;
     const snapshot = createRunSnapshot({
+      ...(observed ? {allowUnstartedSkippedSteps:true} : {}),
       identity,
       bounds: options.bounds,
-      runtimeVersions: options.runtimeVersions,
+      runtimeVersions: reportRuntimeVersions,
       wallClock: options.wallClock,
       // The call-site guard over the truncating log buffer (AC-22). Every producer reachable from
       // this run reaches `logs.append` through `snapshot.appendLog`, and this is what makes
@@ -554,7 +570,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
      * and a closure assignment is invisible to the type-checker's narrowing at the read below.
      */
     const stopped: { reason: SessionKillReason | null } = { reason: null };
-    const stepReporter = stopAwareReporter(reporter, () => stopped.reason === 'cancel');
+    const stepReporter = stopAwareReporter(reporter, () => !observed && stopped.reason === 'cancel');
 
     /**
      * The child's stdout and stderr, redacted by **this run's** redactor (AC-8).
@@ -630,6 +646,11 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // created" is only true if the refusal happens before the spawn seam is touched, and the
       // child cannot refuse a spawn that has already happened. It is also what keeps AC-3 easy —
       // the artifact source never leaves this process at all.
+      if(observed){
+        const support=options.observed;demand(support?.replayEnabled,'PROFILE_MISMATCH');
+        // Grant freshness was established at admission; no renewal/regrant is made after it.
+        validateObservedJob(observed.job,support.build,observed.policy,Date.parse(observed.admission.admittedAt));
+      }else{
       const revalidation = validateArtifact(
         job.artifact,
         job.source,
@@ -650,6 +671,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         throw new RunFailure('runtime-incompatible', compatibility.reason ?? 'Runtime incompatible.');
       }
 
+      }
       // ── The start deadline is a refusal, not a race (AC-4, §5.2). ──────────────────────────
       const elapsedSinceAdmission = options.now() - admittedAtMs;
       if (elapsedSinceAdmission >= job.deadlines.admittedStartMs) {
@@ -664,6 +686,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       refuseIfCancelled(control, 'before its browser was launched');
 
       let session: BrowserSession;
+      const launchAbort=new AbortController();
+      const stopLaunch=():void=>{launchAbort.abort();};
+      if(observed){control.end=stopLaunch;terminators.add(stopLaunch);}
       try {
         session = await launcher.launch({
           browser: job.configuration.browser,
@@ -673,15 +698,24 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
           stepTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima),
           scratchPath: runScratch.path,
           diagnostics,
+          ...(observed ? {observed,signal:launchAbort.signal} : {}),
         });
       } catch (error) {
+        if(observed&&error instanceof ObservedPreReadyFailure){
+          recordingPath=error.recording.path;evidence={...evidenceKeys,state:error.recording.state,partial:error.recording.partial};
+          // ADMITTED ownership permits FINAL, but not PROGRESS before a real STARTED.
+          // Record unexecuted coordinates locally; sendFinal delivers the cumulative snapshot.
+          for(const step of observed.job.artifact.steps)snapshot.stepFinished({stepIndex:step.stepIndex,status:'SKIPPED',startedAtMs:null,finishedAtMs:null,durationMs:null,failure:null});
+          throw new RunFailure(control.cancelled?'cancelled':'run-fault',error.code);
+        }
         throw new RunFailure(
           launchFailureKind(error),
           error instanceof Error ? error.message : 'The browser did not start.',
         );
-      }
+      } finally {if(observed){terminators.delete(stopLaunch);if(control.end===stopLaunch)control.end=null;}}
 
       // ── The origin: one instant, observed twice, at the browser start (AC-10, AC-11.2). ────
+      if(observed&&!session.run){await session.close();throw new RunFailure('run-fault','OBSERVED_CHILD_REQUIRED');}
       const origin: SessionOrigin =
         session.run?.origin ?? asSessionOrigin(options.takeOrigin?.() ?? takeRunOrigin(options.originSource));
       // Only now. Not on admission, not when the launch call began (AC-14a, AC-20).
@@ -883,6 +917,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // redactor and the resolved values in scope at the moment the manifest bytes are produced —
       // exactly where §9.2's "never persist them in manifests" has to be enforced.
       evidence = await settleEvidence({
+        runtimeVersions: reportRuntimeVersions,
         job,
         admissionId,
         outcome,
@@ -909,6 +944,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // this closure when the run returns, which is the same instant the report client does.
       await runScratch.clear();
       resolver.wipe();
+      if(observed){for(const input of observed.job.inputs)(input as {value:string}).value='';(observed.job.accountHandle as {opaqueHandle:string}).opaqueHandle='';}
       // The wipe is observable, so AC-3's asserted sequence is read off captured runtime output
       // rather than off the order of statements in this file (AC-23).
       childLogger.info('run.values_wiped', {
@@ -937,6 +973,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
    * recovery path.
    */
   async function settleEvidence(input: {
+    runtimeVersions:Readonly<Record<string,unknown>>;
     job: JobEnvelope;
     admissionId: string;
     outcome: RunOutcome;
@@ -993,7 +1030,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         outcome: input.outcome,
         browserStartedAt: input.browserStartedAtIso,
         endedAt: options.wallClock().toISOString(),
-        runtimeVersions: options.runtimeVersions,
+        runtimeVersions: input.runtimeVersions,
         videoKey: settled.videoKey ?? input.job.videoKey,
         manifestKey: settled.manifestKey ?? input.job.manifestKey,
         evidenceState: settled.state,
@@ -1106,6 +1143,31 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       }
     },
 
+    ...(options.observed?.validationEnabled ? {validateObserved(body:unknown):ValidationVerdict {
+      const support=options.observed;demand(support?.validationEnabled,'PROFILE_MISMATCH');return validateObservedRequest(body,support.build);
+    }} : {}),
+    async submitObserved(body:unknown):Promise<RunDecision>{
+      const support=options.observed;if(!support?.replayEnabled)return {status:503,code:'OBSERVED_REPLAY_DISABLED'};
+      let observedJob:ObservedJob,policy:TrustedPolicy;
+      try{
+        observedJob=validateObserved<ObservedJob>('replay-job',body,4194304);
+        const selected=support.policies.find(p=>p.policyId===observedJob.binding.scope.policyId&&p.policyVersion===observedJob.binding.scope.policyVersion);demand(selected,'POLICY_REFUSED');policy=validateTrustedPolicy(selected,observedJob.binding.scope);
+        validateObservedJob(observedJob,support.build,policy);demand(observedJob.runtime.stepTimeoutMs<=options.maxima.stepTimeoutMs,'LIMIT_EXCEEDED');accountProvider(support.accounts,observedJob.accountHandle);
+        demand(/^[A-Za-z0-9_-]{1,20}$/u.test(observedJob.binding.csiId),'INVALID_CONTRACT');
+      }catch(error){const code=error instanceof ObservedRefusal?error.code:'INVALID_CONTRACT';return {status:['PROFILE_MISMATCH','AUTHORIZATION_EXPIRED','POLICY_REFUSED','ACCOUNT_UNAVAILABLE','REFERENCE_REFUSED'].includes(code)?409:400,code};}
+      if(pool.draining)return {status:503,code:'RUNNER_DRAINING'};
+      const slot=pool.tryAcquire();if(!slot)return {status:429,code:'CAPACITY_SATURATED',retryAfterSeconds:options.retryAfterSeconds};
+      const b=observedJob.binding,identity=newAdmissionIdentity(options.runnerInstanceId);
+      const request:AdmissionRequest={schemaVersion:2,kind:'observed',executionId:b.executionId,startedAt:b.startedAt,attemptId:b.attemptId,runnerInstanceId:identity.runnerInstanceId,admissionId:identity.admissionId,revisionId:b.revisionId,revisionDigest:b.revisionDigest,artifactHash:b.artifactHash,configurationHash:b.configurationHash,learnedPlanHash:b.learnedPlanHash,referencePolicyHash:b.referencePolicyHash,publicationEvidenceHash:b.publicationEvidenceHash,scopeHash:b.scopeHash,currentPolicyHash:b.currentPolicyHash,grantId:b.replayGrant.grantId,accountGrantId:b.accountAuthorization.grantId,profile:b.requiredProfile,build:b.requiredBuild};
+      let receipt:AdmissionReceipt;
+      try{receipt=await admitObserved({http:options.http,baseUrl:options.callbackBaseUrl,identityToken:options.callbackIdentityToken,timeoutMs:options.reportTimeoutMs,logger},request);}catch{slot.release();return {status:503,code:'ADMISSION_NOT_ACKNOWLEDGED'};}
+      const prefix=`studio/${b.csiId}/${b.testId}/${b.executionId}/${b.attemptId}`;
+      // Internal evidence metadata only. No legacy artifact/source validator sees this projection.
+      const job:JobEnvelope={executionId:b.executionId,attemptId:b.attemptId,revisionId:b.revisionId,artifactHash:b.artifactHash,artifact:null,source:[],configuration:observedJob.configuration,csi:b.csiId,references:{variables:[],secrets:[]},resolvedVars:{},resolvedSecrets:{},deadlines:{admittedStartMs:Math.max(0,Date.parse(receipt.startDeadlineAt)-Date.now()),totalRuntimeMs:observedJob.runtime.totalRuntimeMs},videoKey:prefix+'.webm',manifestKey:prefix+'.result.json'};
+      const control:RunControl={cancelled:false,end:null};controls.set(b.executionId,control);
+      const task=execute(job,[],identity.admissionId,options.now(),control,{job:observedJob,admission:receipt,policy}).catch(()=>{logger.error('observed.run.failed',{code:'INTERNAL_ERROR'});}).finally(()=>{slot.release();inFlight.delete(task);});inFlight.add(task);
+      return {status:202,code:'ADMITTED'};
+    },
     async submit(body: unknown): Promise<RunDecision> {
       // ── 1. Envelope. An invalid job consumes no capacity and reaches no API. ───────────────
       const envelope = validateEnvelope(body);

@@ -204,6 +204,25 @@ public class StudioDispatchLedgerStatements {
    * attempt is written by this statement and by nothing else, and {@code attempt_id IS NULL} is
    * part of the predicate so an attempt can never be silently replaced on a claimed row.
    */
+  /**
+   * Observed one-send authority also requires its preallocated attempt and live immutable grant.
+   */
+  public int beginObservedDispatch(UUID executionId, String owner, UUID attemptId) {
+    return jdbc.update(
+        """
+UPDATE studio_dispatch_ledger l SET state='DISPATCHING',attempt_id=?,updated_at=now()
+FROM ui_test_executions e
+WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_id IS NULL
+  AND l.cancel_requested_at IS NULL AND e.id=l.execution_id AND e.started_at=l.execution_accepted_at
+  AND e.observed_revision_binding->>'attemptId'=?
+  AND (e.observed_revision_binding->'replayGrant'->>'expiresAt')::timestamptz>clock_timestamp()
+""",
+        attemptId,
+        executionId,
+        owner,
+        attemptId.toString());
+  }
+
   public int beginDispatch(UUID executionId, String owner, UUID attemptId) {
     return jdbc.update(
         """
@@ -544,6 +563,132 @@ public class StudioDispatchLedgerStatements {
             admissionId,
             runnerInstanceId,
             runnerSequence,
+            status,
+            errorCode,
+            endedAt == null ? null : Timestamp.from(endedAt),
+            durationMs,
+            stepResultsJson,
+            logsJson,
+            logsTruncated,
+            runtimeVersionsJson,
+            videoKey,
+            videoStatus,
+            videoError,
+            videoPartial,
+            videoExpiresAt == null ? null : Timestamp.from(videoExpiresAt),
+            runnerSequence,
+            manifestKey);
+    return applied == null ? 0 : applied;
+  }
+
+  /**
+   * Records only an immutable observed admission failing before Ready; grants no start authority.
+   */
+  public int applyObservedPreReadyFailure(
+      UUID executionId,
+      UUID attemptId,
+      UUID admissionId,
+      String runnerInstanceId,
+      long runnerSequence,
+      String status,
+      String errorCode,
+      Instant endedAt,
+      Integer durationMs,
+      String stepResultsJson,
+      String logsJson,
+      boolean logsTruncated,
+      String runtimeVersionsJson,
+      String videoKey,
+      String videoStatus,
+      String videoError,
+      Boolean videoPartial,
+      Instant videoExpiresAt,
+      String manifestKey,
+      String expectedBinding,
+      String expectedReceipt) {
+    if (!"ERROR".equals(status)
+        || durationMs != null
+        || expectedBinding == null
+        || expectedReceipt == null) {
+      return 0;
+    }
+    Integer applied =
+        jdbc.queryForObject(
+            "WITH owner AS (\n"
+                + "  SELECT d.execution_id, d.execution_accepted_at, d.state\n"
+                + "    FROM studio_dispatch_ledger d\n"
+                + "    JOIN ui_test_executions e ON e.id=d.execution_id AND"
+                + " e.started_at=d.execution_accepted_at\n"
+                + "    JOIN ui_test_revisions r ON r.id=e.revision_id AND r.test_id=e.ui_test_id"
+                + " AND r.csi_id=e.csi_id\n"
+                + "   WHERE d.execution_id = ? AND d.attempt_id = ? AND d.admission_id = ?\n"
+                + "     AND d.runner_instance_id = ? AND ? = 1\n"
+                + "     AND d.last_runner_sequence = 0 AND d.state = 'ADMITTED'\n"
+                + "     AND d.cancel_requested_at IS NULL\n"
+                + "     AND e.status = 'PENDING' AND e.browser_started_at IS NULL\n"
+                + "     AND e.observed_revision_binding = CAST(? AS jsonb)\n"
+                + "     AND e.observed_admission_receipt = CAST(? AS jsonb)\n"
+                + "     AND e.observed_revision_binding->>'executionId'=e.id::text\n"
+                + "     AND (e.observed_revision_binding->>'startedAt')::timestamptz=e.started_at\n"
+                + "     AND e.observed_revision_binding->>'attemptId'=d.attempt_id::text\n"
+                + "     AND e.observed_revision_binding->>'revisionId'=e.revision_id::text\n"
+                + "     AND e.observed_revision_binding->>'testId'=e.ui_test_id::text\n"
+                + "     AND e.observed_revision_binding->>'csiId'=e.csi_id\n"
+                + "     AND e.observed_revision_binding->>'principalId'=e.principal\n"
+                + "     AND e.observed_revision_binding->>'environment'=e.environment\n"
+                + "     AND e.observed_admission_receipt->>'admissionId'=d.admission_id::text\n"
+                + "     AND"
+                + " e.observed_admission_receipt->'request'->>'admissionId'=d.admission_id::text\n"
+                + "     AND"
+                + " e.observed_admission_receipt->'request'->>'runnerInstanceId'=d.runner_instance_id\n"
+                + "     AND"
+                + " (e.observed_admission_receipt->>'startDeadlineAt')::timestamptz=d.start_deadline_at\n"
+                + "     AND"
+                + " (e.observed_admission_receipt->>'runDeadlineAt')::timestamptz=d.run_deadline_at\n"
+                + "     AND r.publication_kind='GUIDED_RUN' AND r.artifact_schema_version=2\n"
+                + "   FOR UPDATE OF d,e\n"
+                + "),\n"
+                + "history AS (\n"
+                + "  UPDATE ui_test_executions e\n"
+                + "     SET status = ?,\n"
+                + "         error_code = CAST(? AS varchar),\n"
+                + "         ended_at = CAST(? AS timestamptz),\n"
+                + "         duration_ms = CAST(? AS integer),\n"
+                + "         step_results = CAST(? AS jsonb),\n"
+                + "         logs = CAST(? AS jsonb),\n"
+                + "         logs_truncated = ?,\n"
+                + "         runtime_versions = CAST(? AS jsonb),\n"
+                + "         video_key = CAST(? AS text),\n"
+                + "         video_status = CAST(? AS varchar),\n"
+                + "         video_error = CAST(? AS text),\n"
+                + "         video_partial = CAST(? AS boolean),\n"
+                + "         video_expires_at = CAST(? AS timestamptz),\n"
+                + "         snapshot_revision = e.snapshot_revision + 1\n"
+                + "    FROM owner o\n"
+                + "   WHERE e.id = o.execution_id\n"
+                + "     AND e.started_at = o.execution_accepted_at\n"
+                + "     AND (e.status = 'RUNNING' OR (e.status = 'PENDING' AND o.state ="
+                + " 'ADMITTED'))\n"
+                + "  RETURNING e.id\n"
+                + "),\n"
+                + "ledger AS (\n"
+                + "  UPDATE studio_dispatch_ledger d\n"
+                + "     SET state = 'FINALIZING', last_runner_sequence = ?,\n"
+                + "         manifest_key = CAST(? AS text),\n"
+                + "         updated_at = now()\n"
+                + "    FROM history h\n"
+                + "   WHERE d.execution_id = h.id\n"
+                + "  RETURNING d.execution_id\n"
+                + ")\n"
+                + "SELECT count(*) FROM ledger\n",
+            Integer.class,
+            executionId,
+            attemptId,
+            admissionId,
+            runnerInstanceId,
+            runnerSequence,
+            expectedBinding,
+            expectedReceipt,
             status,
             errorCode,
             endedAt == null ? null : Timestamp.from(endedAt),

@@ -1,0 +1,246 @@
+{
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Uma — independent UX and production-client boundary reviewer",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "recordedAt": "2026-10-09T19:11:08.261588+00:00",
+  "reviewType": "BOUNDED_LOCAL_ACCOUNT_UX_R2_DESIGN",
+  "verdict": "PASS",
+  "scope": "Local frozen design only. This resolves the two UX design findings; it is not implementation acceptance, a provider capability claim, an overall SDC QA/readiness verdict or a lifecycle transition.",
+  "summary": "Normative R2 §§12.6–12.8 select concrete mechanisms for both prior UX gaps. Persisted guided-only activation metadata and scoped start-intent recovery prevent remount/login/uncertain-start from creating a new Run automatically. Typed existing session-view3/result3 reads establish whole-session terminal, publication/readiness and evidence state independently of command status. The proposed production page entry and minimal007 ownership remain acyclic with008 full presentation, recording and automatic finalize. No remaining blocking local UX design defect was found; the listed implementation and real-page oracles remain mandatory and unexecuted.",
+  "reviewedFrozenHashes": {
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "bfb20783c483fc260e61d609c25b6f7530ae96852bb64931232c2cc1fcdfab24",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r2.json": "974139a56f41fea4249bc06f87e5028156400bdad30bef5aaf3e2a8ce46e9a21",
+    ".ai/STUDIO-OBS-007-account-ux-review-r1.json": "f348d3b24c127c17ac6ff8e9cb9de7ef03bb890c44f59fd2783a14c376fd6bc1"
+  },
+  "reviewedSourceHashes": {
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "bfb20783c483fc260e61d609c25b6f7530ae96852bb64931232c2cc1fcdfab24",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r2.json": "974139a56f41fea4249bc06f87e5028156400bdad30bef5aaf3e2a8ce46e9a21",
+    ".ai/STUDIO-OBS-007-account-ux-review-r1.json": "f348d3b24c127c17ac6ff8e9cb9de7ef03bb890c44f59fd2783a14c376fd6bc1",
+    "AGENTS.md": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+    ".codex/skills/aiox-ux-design-expert/SKILL.md": "2aab08e49e4afc4bb789fac255f4c451099138a0b81b70464259b35a29e19e4c",
+    "docs/specs/studio-observed-authoring/consensus-plan.md": "8f97af78155a57ee32127f4e2433a94f5e134d47896655743df65292cb12f44b",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "61518ec9553f3515bd7d8b95d3705cba0244f5bf36e9629a37f3454b2d26af59",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "42b4dbe36ca52975ec7f7871255205248c3727e0483fdf32f5a5c5ef50ebfffe",
+    "frontend/src/components/studio/run/RunControl.tsx": "30a9a8a22983ebbb5e27047cb38e30908660dd416cf721638519184fef7fbd81",
+    "frontend/src/components/studio/run/useRunGate.ts": "34759dbfa3a63b35144499e5188d8f0b1b42b7ddecf50b577b48874388aa570f",
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "51c9b0457505d1705533402328bae2e414f26b33257ed21ff8a2b9746e5a1f8e",
+    "frontend/src/services/api/studioApi.ts": "53fac77740bb640c796d744255c315a34c1229791261e3ceaeef1b819871e720",
+    "frontend/src/services/api/apiClient.ts": "06659b78e595366a257801faa585cb02a7c974c18f3d23405a72fb66fb339c68",
+    "frontend/src/utils/constants/appConfig.ts": "ce2574cad55f9515042910063ceb0a1ac0af5da3fed6dd5ac46b47c1cbed530a",
+    "frontend/src/services/mocks/studio/handlers.ts": "2be063afef6c9d27ebfe9c04e5bda0d8b1b48db105c890cca237c4bcc2db4859",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java": "c559709955d6803ba634e5b1c51e9653a43ec7bd7c5b81a2bfaf077a141cb4a2",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java": "7f5180715e50bb9f304cf0f9675223638064606e2b09590476b05549f14bbe4c",
+    "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json": "1fd9967ac84fe8b38a232ec61929e3a2e5f759ac245dd58453b9c4d95c4654ac",
+    "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": "667337ab123d511b8f64672b8b7a9113faa5c2bff2c3202ae73b1217313d518c"
+  },
+  "frozenInputVerification": {
+    "protectedFilesCompared": 229,
+    "mismatches": [],
+    "authorizedRootStoryReservationOverlaysApplied": true,
+    "allProtectedInputsUnchanged": true,
+    "priorUxR1ReportUnchanged": true
+  },
+  "findingDisposition": [
+    {
+      "id": "UX-007-R1-01",
+      "disposition": "RESOLVED_IN_LOCAL_DESIGN",
+      "implementedOrProven": false,
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "sectionOrSymbol": "§12.6 guided activation locator and one-shot origin",
+          "line": 514
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "sectionOrSymbol": "§12.6 start-intent transaction/recovery",
+          "line": 518
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "sectionOrSymbol": "§12.6 uncertain/login/explicit later Run",
+          "line": 522
+        },
+        {
+          "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+          "sectionOrSymbol": "current mount reapplies autorun",
+          "line": 365
+        },
+        {
+          "path": "frontend/src/components/studio/run/RunControl.tsx",
+          "sectionOrSymbol": "current servedRunRequest is per mounted control",
+          "line": 176
+        },
+        {
+          "path": "frontend/src/services/api/apiClient.ts",
+          "sectionOrSymbol": "synchronous unauthorized event before platform login",
+          "line": 86
+        }
+      ],
+      "assessment": "R2 now confronts the actual mount-time autorun and per-instance latch behavior. It selects a nonsecret sessionStorage locator, exact activation origin and consumed guided autorun marker before start network work, removes only autorun=1 through history/router replacement and retains a completion tombstone. Storage failure refuses safely; cached metadata is routing only and cannot grant authority. New scoped start-intent metadata plus read-only recovery resolves lost intent/start ACK without retry, key rotation or fabricated absence while the start namespace is busy. Client START_SENT/UNCERTAIN precedes/records ambiguous send; login/remount permits fresh recovery/session/result reads only. A new manual Run/run-again requires authoritative prior terminal or conclusive expired/refused unaccepted intent with no writer. Test/account/source switching cancels/persists the old locator without reusing its scope. Legacy intent behavior remains a separate branch.",
+      "sourceBacked401Integration": "The existing central interceptor dispatches put:auth:unauthorized synchronously before __PUT_AUTH__.login. The proposed client can therefore stop automatic work at this existing event boundary without adding credential lookup or a new Axios client. The future implementation must own listener lifetime, abort/disable work synchronously and guard reentrant cancellation; waiting only for the rejected promise would occur after login.",
+      "requiredProof": "Actual rendered page manual/autorun/run-again, StrictMode/remount/reload/401-login and lost start/advance ACK cases must count start intents/sessions/authority posts/effects at the server. Forged/missing/cross-principal/scope metadata must not restore rights. New deliberate Run and unchanged legacy autorun are separate positive controls."
+    },
+    {
+      "id": "UX-007-R1-02",
+      "disposition": "RESOLVED_IN_LOCAL_DESIGN",
+      "implementedOrProven": false,
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "sectionOrSymbol": "§12.7 exact existing typed session/result API",
+          "line": 528
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "sectionOrSymbol": "§12.7 command versus session terminal/publication",
+          "line": 530
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "sectionOrSymbol": "§12.7 gated metadata read without current effect permit",
+          "line": 532
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "sectionOrSymbol": "§12.7 friendly state table, stale proof and accessibility",
+          "line": 534
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+          "sectionOrSymbol": "existing session and result routes",
+          "line": 45
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+          "sectionOrSymbol": "existing v3 projection and genuine video:null",
+          "line": 53
+        }
+      ],
+      "assessment": "R2 names getGuidedSession/getGuidedResult against the actual existing v3 routes and closed schemas, requires v3 producer support before gated eligibility and distinguishes Guidedsession identity from ordinary ExecutionId even when strings coincide. One bounded cycle/one outstanding request never treats204, SETUP/ACTION COMPLETED or account CONNECTED as whole Run completion. Only authoritative session terminal settles once; FINALIZING with successful checks stops further action grants and shows pending saving while retaining lifecycle/editor lock. Stop202 remains Stopping until actual terminal. Disconnect/local deadline becomes status unknown/unavailable rather than fabricated success/expiry. Source-backed authorizeGuidedStatusRead for newly gated sessions separates fresh same-principal CSI read rights from expired/revoked effect/account authority while preserving historical and ungated006 read paths.",
+      "publicationAndEvidence": "The mapping separates completed checks from publication/readiness, permits learned readiness only from an actual PUBLISHED/current-ready receipt, retains replayVerified=false, and never calls finalize/execute to repair status. Current projector supplies guidedLedger evidence with video:null; accepting guided identity clears ordinary current snapshot/video/logs and may keep prior evidence only as explicitly historical. Minimal pause/auth/clarification/status and accessible Stop belong to007; full008 presentation, actual first-guided recording/upload/seek and automatic finalize remain separate.",
+      "requiredProof": "Real session/result projections must hold the editor/latch after setup or one action, settle exact terminal state once, preserve Stopping through delayed cancellation, remain readable under permitted metadata access after account expiry/revocation, reject wrong principal/non-v3/malformed replies and show publication pending/conflict/no-video without stale ordinary proof or extra work."
+    }
+  ],
+  "blockingFindings": [],
+  "boundaryAssessments": [
+    {
+      "topic": "Real production wiring and acyclic ownership",
+      "assessment": "§8.1 plus normative§12.8 name the existing page RunControl mount→useRunGate save/reread→studioApi/central typed transport→guidedAuthorityClient and distinct guided callbacks/cancel. The class is a proposed production controller, not a test-only driver.007 owns minimum intent/recovery/lifecycle states and their contracts/oracles;008 consumes them later for full UI/media/finalize. Root still must reserve the proposed paths and amend the generic tasks/File List before Ready."
+    },
+    {
+      "topic": "Legacy and redundant compilation",
+      "assessment": "Route selection remains before current hook prepare at line452. GuidedFirst must exit through the guided controller and never enter old compile/execute retry. Compatible savedReplay uses ordinary execute/subscription; an observed saved-replay refusal must not enter old COMPILE_REQUIRED/RUNTIME_INCOMPATIBLE recompile path at lines469–488. Legacy alone retains that existing behavior, dirty save/conflict, once-per-activation key and ordinary live transport. This remains a required implementation regression, not a proven code change."
+    },
+    {
+      "topic": "Current scope and recovery authority",
+      "assessment": "Server-authoritative capability/start descriptor, fresh BFF/Core reads and exact stored owner/test/account/source/config scope remain controlling. sessionStorage phase/sessionId/accountRef/requestDigest/consumed flag are nonsecret metadata only; forged TERMINAL or changed principal cannot unlock a new Run or restore a command. A403/unknown/busy read does not prove no prior accepted start. Switching scope does not retarget existing work; eligible new Run is deliberate and independently scoped."
+    },
+    {
+      "topic": "Central API and MSW",
+      "assessment": "Retained same configured API host/deployment prefix, per-call v1→v3 baseURL rewrite, credentials and apiClient singleton avoid a second transport or global config mutation. New GET calls are no-store, __doNotRetry, abortable and finitely timed; POSTs have no automatic retry. Proposed exact authority/start-intent/session/result types and MSW cases belong to007; existing v1 handlers are preserved. Source has not yet implemented any of these new methods/routes/fixtures."
+    },
+    {
+      "topic": "Friendly and accessible state",
+      "assessment": "§12.7 now explicitly defines preparing/running, bounded auth or clarification pause, stopping, disconnected/unknown, terminal failure/cancel/expiry and completed-not-ready states. Visible MUI Alert/status text, polite live status, assertive failure/unknown, focusable Stop and aria-describedby lock explanation support a minimal accessible surface without tooltip-only prerequisites. Account labels must remain configured safe labels; no selectors, credential field or extra per-action confirmation is introduced."
+    },
+    {
+      "topic": "Capability/provider and handoff honesty",
+      "assessment": "Configured account eligibility still requires documented mechanism plus guided/current-authority/profile/later replay support. Advisory green discovery is not authority; unavailable/expired/loading/transport failure differ and fresh Run rechecks scope. Sign-in/view/element selection remain unsupported unless actual provider and matching same-session/profile facts exist. EXT-001 is still unanswered; bounded local design PASS supplies none of those facts."
+    },
+    {
+      "topic": "No fabricated publication/media/user-flow evidence",
+      "assessment": "007 may read and truthfully show successful checks awaiting saving or completed-not-ready. It performs no automatic finalize or extra execution. Current public v3 result fixes replayVerified=false and evidence.video=null; neither a mocked clip nor later ordinary replay proves first-guided recording.008 full UX/media,009 live model evidence and010 human pilot remain later unproven work."
+    }
+  ],
+  "mandatoryImplementationConditions": [
+    "Persist/validate the guided locator and consume its typed activation origin before start work. Local metadata is never authority: recover through exact scoped server reads before replacement, including wrong principal, tampered TERMINAL, busy namespace or uncertain delivery. No automatic start or authority mint resumes after remount/401; only later deliberate eligible Run creates a new activation.",
+    "Use the existing synchronous put:auth:unauthorized event before platform login to abort automatic work, or an equally tested integration preserving central client behavior. Own listener/timer/AbortController lifetime; one cancel guard prevents reentrant401 cancellation loops. Test late responses after Stop/unmount/hash or scope change cannot revive the old activation.",
+    "Keep guiding activation/editor/account/test locks until authoritative session terminal or truthful unresolved state. A command completion,204, auth CONNECTED, local latch timeout or Stop202 cannot release them or claim whole-session success. Recovery and terminal reads use finite read budgets independently of effect rights; absent/denied evidence stays unknown, not a manufactured terminal result.",
+    "Gated session/status read authorization must use fresh current original-principal CSI read rights and exact stored scope even after account/effect expiry, without granting execution or returning private observations. Unsupported v3 projector/protocol, malformed data, changed principal or lost read rights cannot restore action rights.",
+    "Guide and observed saved replay stay outside legacy prepare/recompile retry. Preserve dirty auto-save/conflict, feature-off and legacy autorun/run-again/compile/execution behavior and ordinary compatible replay; count zero redundant compile/execute/finalize in guided path.",
+    "Clear current ordinary proof on guided acceptance and keep any old proof explicitly historical. Show only actual receipt/readiness/evidence; null guided video means no playable recording. No hidden finalize/newRun to obtain a green label.",
+    "Render fixed bounded safe narratives instead of raw normalized exception/server message, internal permission/hash/provider diagnostics or secrets. Verify actual DTO/error/console/wire producer boundaries because central apiClient logs bodies before caller parsing; it remains a shared transport, not a privacy filter for arbitrary provider payloads.",
+    "Implement accessible MUI account labels, visible disabled prerequisites, live bounded pause/progress/unknown state and focusable early Stop. No unsupported handoff link or element-picking claim. Full008 UX and actual first-guided video remain separate; real provider conformance is still required."
+  ],
+  "plannedOracles": [
+    {
+      "id": "UX-R2-INTENT-RECOVERY",
+      "owners": [
+        "frontend/src/components/studio/run/guidedAuthorityClient.test.ts",
+        "frontend/src/pages/ChecksStudioPage/studioGuidedAuthorityTransport.node.test.tsx",
+        "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx"
+      ],
+      "assertions": "Manual/autorun/run-again/StrictMode/remount/reload and central401-login preserve one intent/session and perform read-only recovery; lost intent/start/advance ACK, storage failure/forgery and changed caller/scope cannot create another Run or mint authority. Held start namespace202 is inconclusive; exact acceptedUUID survives restart. Deliberate later Run and legacy autorun are explicit positive controls.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "id": "UX-R2-WHOLE-SESSION",
+      "owners": [
+        "frontend/src/pages/ChecksStudioPage/studioGuidedAuthorityTransport.node.test.tsx",
+        "frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/auth/GuidedCurrentAuthorityIT.java"
+      ],
+      "assertions": "SETUP/one ACTION completion/204 with PROPOSING retains latch/editor; authoritative session/result decide terminal. Delayed cancellation202 stays Stopping. FINALIZING or terminal publicationPENDING/CONFLICT/readinessfalse/video:null yields pending/completed-not-ready without stale ordinary proof, extra finalize, execute or gateway work. Account-only expiry/revocation permits scoped read when CSI canRead remains; wrong principal/read denial stays unavailable.",
+      "status": "PLANNED_NOT_RUN"
+    },
+    {
+      "id": "UX-R2-CENTRAL-CONTRACT-MSWA11Y",
+      "owners": [
+        "frontend/src/services/mocks/studio/handlers.ts",
+        "frontend/src/components/studio/run/runGate.test.tsx",
+        "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx"
+      ],
+      "assertions": "Exact closed capability/start-intent/recovery/session3/result3 types, API prefix/credentials/abort/no-store/no autoPOSTretry, bounded errors and no private material; safe account choices/unavailable capability, keyboard/focus/live status and early Stop; dirty-save/conflict/legacy/compatible saved replay regressions.",
+      "status": "PLANNED_NOT_RUN",
+      "limit": "RTL/MSW demonstrate UI and contract behavior, not real provider availability, physical session continuity or actual effects."
+    },
+    {
+      "id": "UX-R2-REAL-PRODUCTION-PAGE",
+      "owners": [
+        "frontend/src/pages/ChecksStudioPage/studioGuidedAuthorityTransport.node.test.tsx",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/auth/GuidedCurrentAuthorityIT.java",
+        "studio-runner/test/fixtures-tier/guided-authority.test.ts"
+      ],
+      "assertions": "Actual rendered production page/control/hook and central transport/controller join controlled real BFF/Core/backend and owning sandboxed Chromium/protected HTTPS fixture. One Run automatically advances exact prepared command once; independent server counters prove Stop/revocation/expiry and restart do not create later effects. All five authorityP0 cases still required; command/status helpers or backend-only drivers cannot substitute for this call path.",
+      "status": "PLANNED_NOT_RUN",
+      "limit": "Controlled joined proof does not establish the still-unknown selected real provider, handoff capability, first-guided video, live-model accuracy or human pilot."
+    }
+  ],
+  "readinessPreserved": {
+    "story007": "Draft",
+    "story008": "Draft",
+    "poVerdict": "NO-GO",
+    "poReadinessScore": "4/10",
+    "EXT-001": "UNRESOLVED real provider identity/documentation/nonsecret configuration and capabilities",
+    "rootAloneRevalidatesReplans": true,
+    "newPermissionFlowIntroduced": false
+  },
+  "evidenceLimits": {
+    "implementedUxAccepted": false,
+    "providerAcceptedOrAvailable": false,
+    "sameSessionHandoffProven": false,
+    "firstGuidedVideoProven": false,
+    "testsBuildsRenderingBrowserDbExternalCallsRun": false,
+    "wholeStoryQaGate": false,
+    "readinessOrLifecyclePromotion": false,
+    "CodeRabbit": "Not run; source/design-only local review, no automated or implementation QA verdict claimed."
+  },
+  "preservation": {
+    "onlyOwnedNewR2ReportWritten": true,
+    "all229ProtectedInputsUnchanged": true,
+    "initialAndR1ReportsAndArchivesPreserved": true,
+    "sourceSchemaSQLUITestsStoriesRuntimeFrozenDocsUnchanged": true,
+    "rootCliExecuted": false,
+    "subagentsSpawned": false,
+    "commitsPushDeploy": false,
+    "externalMessagesCalls": false
+  },
+  "budget": {
+    "sharedWholeWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  },
+  "nextAction": "Root combines independent R2 security/data/UX results and controls any amendment, exact ownership/task replan and PO revalidation. Local UX PASS does not remove EXT-001 or change Draft/NO-GO."
+}

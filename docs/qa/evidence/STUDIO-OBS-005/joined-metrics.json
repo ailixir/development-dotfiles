@@ -1,0 +1,50 @@
+{
+  "scope" : "controlled-provider integration; not real-model cost or accuracy",
+  "providerRequests" : 8,
+  "selectedChoiceIndex" : 1,
+  "independentSubmitReceipts" : 1,
+  "adversarialRepeatedSelections" : 1,
+  "realProviderEvaluation" : "UNAVAILABLE_NOT_RUN",
+  "requestsByKind" : {
+    "SOURCE_PLAN" : 1,
+    "NEXT_ACTION" : 7,
+    "VERIFY_STEP" : 0
+  },
+  "repairRequests" : 0,
+  "reservedCounters" : {
+    "actions" : 5,
+    "observations" : 8,
+    "modelProposals" : 8,
+    "modelInputTokens" : 124722,
+    "modelOutputTokens" : 16384,
+    "sanitizedEvidenceBytes" : 30224
+  },
+  "immutableLimits" : {
+    "maxActions" : 200,
+    "maxSourceSteps" : 100,
+    "maxObservations" : 400,
+    "maxRuntimeValues" : 32,
+    "maxModelProposals" : 100,
+    "maxSessionSeconds" : 600,
+    "maxObservationBytes" : 32768,
+    "maxObservationDepth" : 8,
+    "maxObservationNodes" : 500,
+    "maxRuntimeValueBytes" : 4096,
+    "maxStatementsPerStep" : 8,
+    "maxModelInputTokensTotal" : 128000,
+    "maxModelOutputTokensTotal" : 32000,
+    "maxRuntimeValuesBytesTotal" : 65536,
+    "maxSanitizedEvidenceBytesTotal" : 1048576
+  },
+  "schemaPins" : {
+    "strictSchemaHash" : "2ce35681665bc727ef86c8a90e6c1b9ff33c0f39272fd3a0d54b3b9b284cdbd2",
+    "outputContractHash" : "798dac88a0c55ed7fe5032f0a75ea34cc74a9c13a7d59b25bd83d8fe4dc51f7d",
+    "planningContextHash" : "03bf7be83eee3b4760a2960230b979c6dd8c0f8fdcefdad0837d63b3ef029bb7",
+    "providerSchemaHashes" : {
+      "NEXT_ACTION" : "3e72d8ffc9103e16d0955facb0585140c9330995b8281edcbe169867163ef393",
+      "SOURCE_PLAN" : "3d45475ddf4dd9739921e00d379e11f07e78b07922d6e21028c82fe19d7ebc36",
+      "VERIFY_STEP" : "c3e022ad7c56fd8ab3092dea0220d64801df74644ce6b43ed87f12600fd98da1"
+    }
+  },
+  "workerSnapshot" : "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/guided-translation-351375190274664796/worker-dist"
+}

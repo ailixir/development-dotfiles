@@ -1,0 +1,190 @@
+schema: 1
+story: STUDIO-OBS-001
+gate: PASS
+status_reason: All three prior findings are resolved within the contract
+  verifier and shared fixtures. Independent QA confirmed 114 shared cases, 109
+  API examples and the unchanged 30-case reproducer pass; all six OBS-001
+  contract acceptance criteria are met.
+reviewer: Quinn (@qa), independent agent /root/sdc_obs001_qa
+reviewed_revision: sha256:30a72a8a5ccef6aab482080668e921e08334ed22fd566bd8efbf9865436b305d
+updated: 2026-10-08T03:02:53.984Z
+top_issues: []
+waiver:
+  active: false
+scope: Contract-only independent deep review. No product implementation,
+  browser/model run, account test or runtime gate is claimed.
+review_iteration: 2
+quality_score: 100
+evidence:
+  baseline:
+    command: node tools/check-studio-observed-contracts.cjs
+    exit_code: 0
+    fixture_cases: 114
+    openapi_examples: 109
+    schemas_compiled: 20
+  syntax:
+    command: node --check tools/check-studio-observed-contracts.cjs
+    exit_code: 0
+  independent:
+    command: node docs/qa/evidence/STUDIO-OBS-001-independent-review.cjs
+    exit_code: 0
+    total: 30
+    passed: 30
+    false_accepts: 0
+    report: docs/qa/evidence/STUDIO-OBS-001-independent-rereview-1.json
+    reproducer_sha256: fcfa7ee3262d50e258a83e38bbafed7006fa219d85252eb5d8a8f79f9c3a4b50
+    unchanged: true
+  provenance: docs/qa/evidence/STUDIO-OBS-001-reviewed-revision.json
+  whitespace:
+    command: git diff --check
+    exit_code: 0
+  coderabbit:
+    available: false
+    checked:
+      - PATH
+      - ~/.local/bin/coderabbit
+    fallback: Independent deep review per .aiox-core/core-config.yaml
+      graceful_degradation.skip_if_not_installed; no automated CodeRabbit PASS.
+  remediation: docs/qa/evidence/STUDIO-OBS-001-qa-fixes-verification.json
+  reviewed_delta:
+    - tools/check-studio-observed-contracts.cjs
+    - docs/specs/studio-observed-authoring/contracts/fixtures.json
+    - docs/specs/studio-observed-authoring/contracts/README.md
+  unchanged_contracts: ADR, all 20 JSON Schemas and OpenAPI match the initial reviewed manifest.
+requirements_traceability:
+  - criterion: AC-1
+    verdict: PASS
+    given: The new guided path is selected
+    when: Run authorization and finalization are specified
+    then: ADR-SC-004 preserves existing manual/replay behavior and prohibits replay,
+      model calls or schedule activation during finalization.
+    evidence:
+      - docs/architecture/ADR-SC-004-observed-authoring.md
+      - "contracts/README.md: Finalization and immutable identity"
+  - criterion: AC-2
+    verdict: PASS
+    given: Typed versioned observations/proposals/ledger/plan/revision contracts
+    when: Hashes, source inputs and dependency identities are examined
+    then: All required versioned shapes, immutable hashes and locator correspondence
+      rules exist; bidirectional allocation/consumer checking now rejects
+      missing admitted dependencies.
+    evidence:
+      - 20 closed JSON Schemas
+      - independent plan/provenance/artifact substitution rejections
+      - TEST-001
+      - TEST-002
+  - criterion: AC-3
+    verdict: PASS
+    given: Cancellation, expiry, failed assertion or unknown action result
+    when: Publication is attempted by the static bundle verifier
+    then: Cancellation, expiry, unknown-outcome and failed-assertion negatives
+      reject. Normative CAS, ownership, lease, atomic publication and
+      terminal-callback constraints remain specified; generation rollback and
+      document freshness negatives now reject.
+    evidence:
+      - "contracts/README.md: Session and action state machines"
+      - independent stale-owner-fence, stale-materialization-fence,
+        cancelled-session, expired-session, unknown-outcome-ledger,
+        failed-required-assertion
+      - TEST-002
+  - criterion: AC-4
+    verdict: PASS
+    given: Local data reads and configured limits
+    when: Read rules, shared byte tests and HTTP/HTTPS/local origins are checked
+    then: Positive read policy, byte preservation, origins and configurable limits
+      remain specified. Lowered source-step, observation, value and statement
+      limits are now covered by executable positive/negative checks.
+    evidence:
+      - "contracts/README.md: Local dataflow and origin policy"
+      - shared runtimeReadCases
+      - independent localhost/IPv4/IPv6/HTTP and rehashed password/hidden
+        negatives
+      - TEST-003
+  - criterion: AC-5
+    verdict: PASS
+    given: Public clients, owning workers and controller callers
+    when: All 16 declared API operations and proposal outcomes are inspected
+    then: Public/internal identity roles, owner fences, typed errors/commands, MSW
+      examples and guided/replay evidence separation are defined.
+      Action/clarification/stepComplete/unsupported union accepts valid shapes
+      and rejects mixed outcomes.
+    evidence:
+      - openapi.yaml
+      - contracts/proposal-result.schema.json
+      - contracts/commands.schema.json
+      - 109 schema-checked API examples
+      - independent proposal-union tests
+  - criterion: AC-6
+    verdict: PASS
+    given: Shared valid/invalid fixtures intended as cross-language contract evidence
+    when: Shared fixtures and the unchanged independent reproducer are rerun against
+      the reviewed fixes
+    then: 114 shared fixture/read cases, 109 API examples and all 30 independent
+      cases pass. Former false accepts are rejected; legitimate generation
+      reuse, cumulative allocations and exact bounds retain positive coverage.
+      Mapping and deployment strategy remain documented.
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-001-independent-review.cjs
+      - docs/qa/evidence/STUDIO-OBS-001-independent-rereview-1.json
+      - docs/qa/evidence/STUDIO-OBS-001-qa-fixes-verification.json
+      - "contracts/README.md: Files and verification; Deployment/version
+        strategy"
+limitations:
+  - No later-story runtime endpoints, lowering, live DOM identity, real auth,
+    production policy lookup, privacy wire-byte proof, benchmarks or human pilot
+    are required or claimed for OBS-001.
+  - Lease-time enforcement, trusted immutable source snapshot lookup and
+    authenticated worker-subject matching are specified runtime obligations;
+    this static review does not claim to execute those services.
+  - No implementation refactoring, commit, push, story close, CLI phase
+    verification or agent delegation was performed.
+recommendations:
+  immediate: []
+  future:
+    - Carry runtime safety/privacy/recovery/parity/live-proof obligations into
+      OBS-002–010 as already specified.
+previous_reviews:
+  - review_iteration: 1
+    gate: FAIL
+    reviewed_revision: sha256:2e5b29fcdad6fa122f6e20879ba3fe6924223b0183dd292290e347209abe2bc8
+    updated: 2026-10-08T02:54:51.301Z
+    issue_ids:
+      - TEST-001
+      - TEST-002
+      - TEST-003
+    provenance: docs/qa/evidence/STUDIO-OBS-001-reviewed-revision-initial.json
+    independent_report: docs/qa/evidence/STUDIO-OBS-001-independent-review-initial.json
+resolved_issues:
+  - id: TEST-001
+    severity: high
+    status: RESOLVED
+    verified_by: Original independent QA reviewer
+    resolution: Reverse plan-to-allocation checks complement allocation-to-plan
+      checks, with cumulative replanning semantics. Both original
+      counterexamples now reject as DEPENDENCY_PLAN; a valid two-binding
+      cumulative plan passes.
+    evidence:
+      - unallocated-executed-binding
+      - executed-consumer-outside-admitted-needs
+  - id: TEST-002
+    severity: high
+    status: RESOLVED
+    verified_by: Original independent QA reviewer
+    resolution: Generation is monotonic for all consecutive observations; document
+      replacements and state-changing actions require strict advancement.
+      Original counterexamples reject as NODE_GENERATION; unchanged-document
+      read reuse and legitimate advancement still pass.
+    evidence:
+      - generation-regresses-after-read
+      - document-replaced-without-new-generation
+  - id: TEST-003
+    severity: medium
+    status: RESOLVED
+    verified_by: Original independent QA reviewer
+    resolution: Configured source-step count and actual
+      action/observation/runtime-binding counts are enforced, with counter
+      underreporting rejected. Original lowered-step-limit counterexample now
+      rejects as BUDGET, and exact-limit positive plus lowered
+      byte/node/depth/value/statement tests pass.
+    evidence:
+      - configured-source-step-limit-exceeded

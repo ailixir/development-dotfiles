@@ -1,0 +1,87 @@
+schema: 1
+story: STUDIO-OBS-006
+story_title: Exact-plan publication and deterministic replay
+gate: PASS
+status_reason: All seven acceptance criteria and reviewed amendments are met on the frozen handoff;
+  independent targeted checks and actual joined evidence passed with no blocking findings.
+reviewer: Quinn (independent QA) / obs006_qa_61_high
+reviewed_revision: working-tree-sha256:f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab
+updated: 2026-10-09T17:11:31.315465+00:00
+top_issues: []
+waiver:
+  active: false
+quality_score: 100
+evidence:
+  tests_reviewed: 633
+  risks_identified: 0
+  trace:
+    ac_covered:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+    ac_gaps: []
+  report: .ai/STUDIO-OBS-006-qa-review.json
+  manifest: docs/qa/evidence/STUDIO-OBS-006/reviewed-source-manifest.json
+  commands: docs/qa/evidence/STUDIO-OBS-006/commands.json
+  results:
+    independent_backend_passed: 321
+    independent_runtime_unit_passed: 274
+    independent_chromium_passed: 33
+    direct_compiled_oracles_passed: 5
+    independent_skipped: 0
+    independent_failed: 0
+    archived_full_backend_passed: 2048
+    archived_full_backend_skipped: 19
+    archived_cross_replica_passed: 2
+nfr_validation:
+  security:
+    status: PASS
+    notes: PASS scoped fresh authority/exact current ownership/private output/negative filter and raw
+      report probes
+  performance:
+    status: PASS
+    notes: PASS bounded transport/storage/work/count/time accounting; no production latency benchmark
+      claimed
+  reliability:
+    status: PASS
+    notes: PASS transactional rollback, CAS/ABA/expiry/cancel/restart/one-way poison/idempotence exercised
+  maintainability:
+    status: PASS
+    notes: PASS explicit family branches, deterministic closed schema and independently tested
+      derivation; documented rollout
+recommendations:
+  immediate: []
+  future:
+    - action: Complete separately scoped account/client-first-video/live-model/pilot stories and
+        production deployment evidence through their own gates
+      refs:
+        - docs/stories/STUDIO-OBSERVED/
+review_scope:
+  frozen_entry_count: 147
+  algorithm: sha256 of sorted path + NUL + digest + LF for the 147 authoritative File List entries
+    excluding QA-owned story lifecycle/results/changelog metadata; complete 148-entry pre-review
+    snapshot and story SHA retained separately
+  pre_review_story_sha256: 6e88629e9218ef14569a448267d23c859e8e32881f5e124fbdc1ccaabf2f346c
+  post_review_story_provenance: docs/qa/evidence/STUDIO-OBS-006/lifecycle-verification.json
+code_rabbit:
+  status: NOT_RUN_UNAVAILABLE
+  fallback: Configured independent manual review; native CLI and WSL both absent
+limitations:
+  - Actual CoreHTTP/PG/Chromium/authenticated worker paths use controlled protocol-compatible model
+    and account providers; model accuracy/cost and account connectivity are not live-provider
+    evidence.
+  - Local catalog has synthetic image digest; production immutable
+    image/ingress/Sonic/Vault/revocation/co-run external evidence is unavailable and not claimed.
+  - OBS007 approved account provider,OBS008 automatic frontend finalize/poll/reconnect and first
+    guided video,OBS009 live benchmark,OBS010 human pilot remain separate scope; no waiver is used.
+  - 19 backend and29unit/10Chromium historical skips remain exact existing conditions; targeted
+    independent suites had0skips.
+  - Standalone manual fixture opaque sourceManifestHash and independently reconstructed original-row
+    provenance are distinct oracles; no absent historical prompt/manifest preimage fabricated.
+  - Bounded30second Core revocation lag and residual browser event races after last synchronous
+    check are reviewed contract limits; no instantaneous distributed/browser atomicity claim.
+  - Shared wave ceiling USD500; actual billing spend unknown.

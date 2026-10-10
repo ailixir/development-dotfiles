@@ -1,0 +1,419 @@
+{
+  "storyId": "STUDIO-OBS-006",
+  "revision": "runtime-design-review-r2",
+  "reviewer": "/root/sdc_bridge_arch",
+  "at": "2026-10-09T07:43:13.499705+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "reviewType": "Narrow independent design re-review of six R1 findings and eight mandatory conditions; not product execution or implementation approval",
+  "reviewedDocumentHashes": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "516ced4f8084e955d904e103580a7b5d63fc53757c973b8effaeede9af1ab5c3",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "1ab026994489107a01befe7d20bdea778e040da2da7d5fc910f3aeadbd5bc6c4",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "d03bda578b22fa9991a52bd1b31ccf244a16ddf0aadd48196b7389ddc35939de",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "87123a86eda1b1a7933004fb65c167c543850f2021ec42c711acd7f6e4386173"
+  },
+  "resolutionMap": {
+    "path": ".ai/STUDIO-OBS-006-design-resolution-r2.json",
+    "sha256": "9fe48609ec225f93a8fb0d638d316109f0d92db3897a868dd8cc351c69fb5c4d"
+  },
+  "unchangedPriorRecordsSha256": {
+    ".ai/STUDIO-OBS-006-data-design-review.json": "23481702cf7009e650722b80b83811863be82b172dc62e089209df41a0be43c3",
+    ".ai/STUDIO-OBS-006-data-design-review-r1.json": "b5aa0887aab66bc923bd9233d02c74f2164b6f784bbd7edf594d8f386a9e75dd",
+    ".ai/STUDIO-OBS-006-runtime-design-review.json": "5351f3b870c9672026f94062b826156dafa4e262679c40a23b6c964ac075cf80",
+    ".ai/STUDIO-OBS-006-runtime-design-review-r1.json": "5eddfd75103b10d912896e497af222ad2a365ab89447d8916d74b5b378e076b1",
+    ".ai/STUDIO-OBS-006-qa-design-review.json": "20ede22259ea1175527334383d35a84b55184d23113fbd4bf05bfca0a1645390",
+    ".ai/STUDIO-OBS-006-qa-design-review-r1.json": "a429113585fa83d01b65f2d86b659ecc95f21d62c70af12f9b588c3edacc4b15",
+    ".ai/STUDIO-OBS-006-design-resolution-r1.json": "ef34aec2cf27c8671fca0421be54076e0c30de5b6652e93ef0f621b272b6303c"
+  },
+  "summary": "Five R1 findings and the non-policy mandatory conditions are design-resolved. One narrow R1-003 policy projection incompatibility remains with the actual unchanged collector loader: grant count/ID constraints and absent applicationPolicy must be preserved. No architecture restart, new runtime capability, or later-stage account/benchmark work is requested.",
+  "blockingGaps": [
+    {
+      "id": "R2-POLICY-001",
+      "priorFinding": "R1-003",
+      "severity": "medium",
+      "classification": "Design/source-contract mismatch; not a missing implementation test",
+      "finding": "C8 permits0..128 application read grants and requires a nonnull applicationPolicy object with a boolean flag. C12 allows rule-ID reuse across distinct selectors and normalizes absent collections. Actual observationOptions rejects more than32 readGrants, duplicate ReadGrant.policyRuleId anywhere in that grant list, and a present applicationPolicy whose allowStructuralDiscovery is false. Field-only configurations are valid by omitting applicationPolicy while preserving rules. The current R2 snapshot/projection is not explicit enough to preserve those modes without inventing a rejected false-flag object or widening the loader.",
+      "sourceEvidence": [
+        {
+          "path": "studio-runner/src/run/observationSanitizer.ts",
+          "lines": [
+            23,
+            25,
+            28
+          ],
+          "fact": "Present applicationPolicy requires allowStructuralDiscovery; grants.length>32 and repeated grant.policyRuleId reject."
+        },
+        {
+          "path": "studio-runner/src/run/observationTypes.ts",
+          "fact": "ObservationConfig.applicationPolicy is optional; ObservationRule field overrides are an independent array."
+        },
+        {
+          "path": "studio-runner/src/run/observationCollector.ts",
+          "lines": [
+            187,
+            193,
+            205,
+            220
+          ],
+          "fact": "Exact field overrides precede optional application/region grants; highest-priority grant must be the unique candidate and allowed."
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/publication-contracts.md",
+          "sections": [
+            "C8 TrustedPolicy/ReadGrant",
+            "C12 Effective trusted policy"
+          ],
+          "fact": "Frozen R2 representation/normalization does not state the actual32/unique-ID/absent-object constraints."
+        }
+      ],
+      "minimalCorrection": [
+        "Represent TrustedPolicy.applicationPolicy as null OR the closed object {policyRuleId,allowStructuralDiscovery:true,readGrants:[0..32]}. Null means actual absence and projects by omitting ObservationConfig.applicationPolicy, never by creating {allowStructuralDiscovery:false}. A present false flag remains an invalid configuration under the unchanged loader.",
+        "Require ReadGrant.policyRuleId uniqueness within the complete readGrants list, independent of region/origin selector differences. Do not enforce a new global uniqueness rule across field overrides: optional FieldOverride records can share policyRuleId where the current source allows it; their testId stays unique.",
+        "Keep rules/FieldOverride independently available for field-only policies. Preserve existing accessibleName/classification/eligibility validation as well as structuralOnly denial. Empty absent grant arrays confer no permission.",
+        "Align C1/C8/C12 cap and normalization wording, keeping the already-proposed stricter field-override cap if desired. Do not edit/widen observationSanitizer or collector semantics to make the new snapshot fit."
+      ],
+      "focusedVerificationAfterCorrection": [
+        "Check closed nullable policy shape and exact omission projection against actual observationOptions, including valid field-only rules.",
+        "Valid application/region grant with no per-control mapping remains supported;33 grants and duplicate grant IDs reject even with distinct selectors.",
+        "Repeated policyRuleId across otherwise valid field overrides preserves existing behavior; duplicate testId rejects.",
+        "A present false applicationPolicy is refused, and null/absence never becomes broad structural or read permission.",
+        "currentPolicyHash covers the exact effective absent/present representation and unchanged region/type/override semantics."
+      ]
+    }
+  ],
+  "r1FindingDisposition": [
+    {
+      "id": "R1-001",
+      "status": "PASS_DESIGN",
+      "resolution": "C4 explicitly closes AllocatedNeed with server-issued bindingId as well as obligationId, preserves actual persisted translationHash and requires bidirectional allocation/producer/consumer joins. D2 preserves the nonnull original Action2 page target for genuine initialBlank; only observation/origin/derived locator use their existing null branches.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C4",
+        "docs/specs/studio-observed-authoring/publication-data-contract.md D2",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:46",
+        "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json"
+      ],
+      "implementationOracles": [
+        "Actual005 allocated implicit-reference plan accepted unchanged; missing/swapped bindingId refuses.",
+        "Real blank then observed-page proposals survive restart; null page target/fabricated document/observed NULL observation refuses."
+      ]
+    },
+    {
+      "id": "R1-002",
+      "status": "PASS_DESIGN",
+      "resolution": "C7 carries complete Configuration and bound configurationHash in execution/admission; C8 transports exact viewport/browser and configuration-linked wait strategy while recording geometry remains separate. No hash reversal/default substitution; ordinary timeout ceilings retained.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C7-C8",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompileInputs.java",
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/browser.ts"
+      ],
+      "implementationOracles": [
+        "Actual child uses viewport different from recording dimensions.",
+        "Configuration mutation against unchanged artifact/binding refuses before browser; no legacy fallback."
+      ]
+    },
+    {
+      "id": "R1-003",
+      "status": "NEEDS_CHANGES_NARROW_MAPPING_ONLY",
+      "resolution": "Region/application/override types and priority/type/sensitive-source rules are now concrete. R2-POLICY-001 remains to preserve the existing loader count/ID/absence constraints.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C8,C12",
+        "studio-runner/src/run/observationSanitizer.ts",
+        "studio-runner/src/run/observationCollector.ts"
+      ]
+    },
+    {
+      "id": "R1-004",
+      "status": "PASS_DESIGN",
+      "resolution": "C4/D3-D6 replace the mutable current lease in snapshot identity with captured immutable validationDeadline and ownerWorkerId/fence. Same-owner renewal preserves snapshot identity; live current lease and original deadline are checked independently; neither Core nor renewal extends a claim.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C4",
+        "docs/specs/studio-observed-authoring/publication-data-contract.md D3-D4-D6",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:574"
+      ],
+      "implementationOracles": [
+        "Actual validator call crosses same-fence renewal with one send and unchanged snapshot.",
+        "Original deadline expiry, different owner/fence/cancel/source change still refuses without revival."
+      ]
+    },
+    {
+      "id": "R1-005",
+      "status": "PASS_DESIGN",
+      "resolution": "C8 declares PASS/FAIL/SKIPPED and nullable unexecuted timings, nullable unknown recording bytes and a closed common Stop. C6/C12 establish recording/run clock before account apply and Ready echoes rather than resetting it; bounded cancellation/dispose/kill remains normal pipeline behavior.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C6,C8,C12",
+        "studio-runner/src/executor/executor.ts:103",
+        "studio-runner/src/run/protocol.ts:159",
+        "studio-runner/src/run/childRuntime.ts:331"
+      ],
+      "implementationOracles": [
+        "Failure/cancel produces honest skipped remainder/null timings.",
+        "Unknown recording measurement remains null.",
+        "Delayed account apply consumes original runtime/video timeline; Stop works during prepare/apply/execute/drain."
+      ]
+    },
+    {
+      "id": "R1-006",
+      "status": "PASS_DESIGN",
+      "resolution": "C7/C12 now state the actual ordinary static service-token filter and deployment TLS/shared-service trust limit, not fictitious verified-certificate/JWT enforcement. Exact observed tuple and persisted user grant remain checked at CAS; v1 filter behavior unchanged. New real security-chain test ownership is reserved.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C7,C12",
+        "backend/src/main/java/com/citi/put/checks/config/StudioInternalSecurityConfig.java",
+        "backend/src/main/java/com/citi/put/checks/security/ServiceIdentityAuthenticationFilter.java"
+      ],
+      "implementationOracles": [
+        "Actual HTTP chain rejects missing/blank/wrong ordinary token, forged cert headers and guided-only credentials.",
+        "Valid service token with wrong execution/attempt/revision/grant refuses; valid exact tuple passes only actual admission checks."
+      ]
+    }
+  ],
+  "mandatoryConditionDisposition": [
+    {
+      "id": "COND-R1-1",
+      "status": "PASS_DESIGN",
+      "evidence": "D2 explicit original nonnull page target/document/generation0 plus observation-null iff initialBlank."
+    },
+    {
+      "id": "COND-R1-2",
+      "status": "PASS_DESIGN",
+      "evidence": "C12 total source-position/kind/start/end/reference/slot/kind/inputId scalar comparator and fixed[a,c,b,e,d,f] vector; duplicate semantic provenance/input IDs refuse."
+    },
+    {
+      "id": "COND-R1-3",
+      "status": "PASS_DESIGN",
+      "evidence": "C3/C12 retain actionable=false facts and actual primitive-specific live checks; role div click/hover examples retained without historic subtype invention."
+    },
+    {
+      "id": "COND-R1-4",
+      "status": "PASS_DESIGN",
+      "evidence": "Execute2 contains inputId/step/kind/slot/value metadata, not source text or artifact; RuntimeBinding has only stable producer coordinate/recipe/origin and fresh local state. Historic availability/admission/context/fence/value cannot initialize it."
+    },
+    {
+      "id": "COND-R1-5",
+      "status": "PASS_DESIGN",
+      "evidence": "C6/C12 real compiled/startup registry in child.ts, no serialized functions/modules/provider objects, no browser before consume/prepare, same-context apply once and disposal/unknown-outcome stop."
+    },
+    {
+      "id": "COND-R1-6",
+      "status": "PASS_DESIGN",
+      "evidence": "BuildIdentity and trusted catalog bind schema/reference bundle, immutable release image and actual Chromium without circular image self-hash. Validator/job/admission/child compare selected granted build; artifact requires Profile rather than one immutable container forever."
+    },
+    {
+      "id": "COND-R1-7",
+      "status": "PASS_DESIGN_WITH_RETAINED_IMPLEMENTATION_ORACLES",
+      "evidence": "C1/C12 whole composed caps and actual packaged schema conditional validation remain required after added config/policy fields; no truncation or relaxed v1 caps. Runtime tests must exercise actual parser/transport/frame limits, not just static schemas."
+    },
+    {
+      "id": "COND-R1-8",
+      "status": "PASS_DESIGN",
+      "evidence": "C2/C12 nullable configuredModel/providerReturnedModelVersion come only from immutable recorded facts or remain null; current configuration cannot fabricate history. Learning hashes/API format remain outside required execution Profile."
+    }
+  ],
+  "preservedResolvedArchitecture": [
+    "Original guard/input evidence capture before effects and independent ValidationBasis derivation remain accepted; no hash echo of generated guards.",
+    "Exact sourceHash/operationHash/ledger-array admissionProvenanceHash and separately versioned publicationEvidenceHash remain unchanged.",
+    "Typed artifact2 uses normal admission/confined recorded child, not GuidedRuntime or a model loop; legacy AST/policy/locator fallback stays unchanged.",
+    "Native pointer/key and fixed isolated fill/select semantics, residual race/uncertainty and fresh private per-run values remain explicit.",
+    "No finalization browser actions or model calls; guided ledger proof remains distinct from later real replay recording/verification.",
+    "Benign historical prompt/provider/public API changes do not invalidate supported execution Profile; actual unsafe algorithm/build/catalog revocation does."
+  ],
+  "ownership": {
+    "count": 154,
+    "uniqueCount": 154,
+    "matchesResolutionMapExactly": true,
+    "paths": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationProperties.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationBudget.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedWireBodyAdvice.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/entity/UITestRevision.java",
+      "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionErrorCode.java",
+      "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+      "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+      "backend/src/main/resources/application.yml",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionReadinessTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/compile/NoRuntimeLlmTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/compile/RunConfirmationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/internal/AdmissionCasIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "studio-runner/src/validator/observedReplay.ts",
+      "studio-runner/src/validator/observedReferencePolicy.ts",
+      "studio-runner/src/validator/observedSchemas.json",
+      "studio-runner/src/executor/observedReplay.ts",
+      "studio-runner/src/executor/observedOperations.ts",
+      "studio-runner/src/executor/operations.ts",
+      "studio-runner/src/executor/executor.ts",
+      "studio-runner/src/executor/adapters/BrowserAdapter.ts",
+      "studio-runner/src/run/observedReplayAdapter.ts",
+      "studio-runner/src/run/observedAccount.ts",
+      "studio-runner/src/run/protocol.ts",
+      "studio-runner/src/run/launcher.ts",
+      "studio-runner/src/run/childRuntime.ts",
+      "studio-runner/src/run/browserFactory.ts",
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/src/run/outputRelay.ts",
+      "studio-runner/src/run/manifest.ts",
+      "studio-runner/src/run/errors.ts",
+      "studio-runner/src/server/routes.ts",
+      "studio-runner/src/server/runCoordinator.ts",
+      "studio-runner/src/server/config.ts",
+      "studio-runner/src/server/application.ts",
+      "studio-runner/src/server/adapters.ts",
+      "studio-runner/src/reporting/envelope.ts",
+      "studio-runner/src/reporting/admissionClient.ts",
+      "studio-runner/src/versions.ts",
+      "studio-runner/src/compat/compatibility.ts",
+      "studio-runner/src/compat/runtime-versions.ts",
+      "studio-runner/scripts/write-runtime-versions.mjs",
+      "studio-runner/scripts/check-pins.mjs",
+      "studio-runner/test/observedReplayValidation.test.ts",
+      "studio-runner/test/observedReplayEquivalence.test.ts",
+      "studio-runner/test/observedReplayExecutor.test.ts",
+      "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "studio-runner/test/run/confinement.test.ts",
+      "studio-runner/test/run/childRuntime.test.ts",
+      "studio-runner/test/run/protocol.test.ts",
+      "studio-runner/test/compat.test.ts",
+      "studio-runner/test/runtime-versions.test.ts",
+      "studio-runner/test/server/prelaunch.test.ts",
+      "studio-runner/fixtures/observed-reference/manifest.json",
+      "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+      "studio-runner/fixtures/observed-reference/control-value-reference.json",
+      "studio-runner/fixtures/observed-reference/operation-mutations.json",
+      "studio-runner/fixtures/lint/isolation-manifest.json",
+      "studio-runner/README.md",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-artifact.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-policy.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-operation.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-profile.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/revision.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json",
+      "docs/specs/studio-observed-authoring/contracts/README.md",
+      "docs/specs/studio-observed-authoring/openapi-v2.yaml",
+      "docs/specs/studio/openapi.yaml",
+      "tools/check-studio-observed-contracts.cjs",
+      "tools/build-studio-observed-schemas.cjs",
+      "docs/runbooks/studio-guided-authoring.md",
+      "docs/specs/studio-observed-authoring/publication-design.md",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayProperties.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/InternalCallbackCodes.java",
+      "backend/src/test/java/com/citi/put/checks/studio/ExecutionErrorCodeContractEscalationTest.java",
+      "studio-runner/src/executor/refusals.ts",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/account/ReplayAccountAccess.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/StudioInternalController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+      "backend/build.gradle.kts",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java",
+      "studio-runner/src/run/child.ts",
+      "studio-runner/src/reporting/snapshot.ts",
+      "studio-runner/test/isolation.test.ts",
+      "studio-runner/test/run/observedAccount.test.ts",
+      "studio-runner/test/server/observedReplayAuthorization.test.ts",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-validation.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-job.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-ipc.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-account.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication-canonical-vectors.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "docs/specs/studio-observed-authoring/publication-data-contract.md",
+      "docs/specs/studio-observed-authoring/publication-contracts.md",
+      ".ai/STUDIO-OBS-006-design-resolution-r1.json",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+      ".ai/STUDIO-OBS-006-design-resolution-r2.json"
+    ],
+    "addedSecurityTest": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+    "requiredChangeForRemainingGap": "Documentation/schema-projection correction fits the already-owned contract files. No product collector/security widening or new implementation ownership is requested."
+  },
+  "documentChecks": {
+    "allFrozenHashesMatch": true,
+    "allPriorRecordHashesMatch": true,
+    "fixedCanonicalHexShaPairs": [
+      "ordered source",
+      "Unicode composed",
+      "Unicode decomposed",
+      "key/escape/integer ordering",
+      "bigint string"
+    ],
+    "recipeOrderingVector": [
+      "a",
+      "c",
+      "b",
+      "e",
+      "d",
+      "f"
+    ],
+    "storyStatus": "Draft",
+    "scope": "Read-only document/source/JSON/byte inspection, not runtime/unit/build/SQL/browser evidence."
+  },
+  "retainedImplementationOracles": [
+    "Independent Java/Node original-facts/equivalence mutations, real retained allocated plan and blank target, full configuration and policy joins.",
+    "Actual normal recorded child with private fresh values, account/provider cancellation, no historic authority/source/artifact IPC, data-free diagnostics and real timeline/video/unknown-evidence semantics.",
+    "One original submit, zero finalization effects, two later fresh unpredictable values with identical artifact and zero calls to both gateways.",
+    "Actual lease/claim/deadline/owner/source/cancel races, build/profile/mixed-family/size/Unicode failures before browser, and four flag/rollback/legacy regression gates."
+  ],
+  "boundaries": {
+    "writtenFile": ".ai/STUDIO-OBS-006-runtime-design-review-r2.json",
+    "productEdits": false,
+    "buildsOrRuntimeTests": false,
+    "browserExecution": false,
+    "storyGateOrCliChanges": false,
+    "implementationApproval": false,
+    "laterScopeRequired": false,
+    "note": "Only this new review record written. No007 connectivity,008 UI/first-run video,009 benchmark or010 pilot requirement added. SharedUSD500 ceiling unchanged; spend telemetry unavailable."
+  }
+}

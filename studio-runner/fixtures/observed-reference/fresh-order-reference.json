@@ -1,0 +1,1874 @@
+{
+  "description": "Fixed independent original evidence and manually projected expected replay; no production lowerer was used to create expected artifact.",
+  "basis": {
+    "schemaVersion": 1,
+    "sessionId": "session-1",
+    "testId": "00000000-0000-4000-8000-000000000010",
+    "csiId": "CSI-123",
+    "sourceRevision": "1",
+    "configurationRevision": "1",
+    "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+    "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+    "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+    "sourceManifestHash": "575bf6285bfe67a1a4ef6737ab07e5e5cec178f7d6449fdade7cc428f79ecccd",
+    "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+    "configuration": {
+      "browser": "chromium",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "timeoutSeconds": 10,
+      "waitStrategy": "domcontentloaded",
+      "environment": "fixture"
+    },
+    "learningProvenance": {
+      "guidedModelContractHash": "3e76bd6bfa1e07a1e43a85b0fdababe7a486b584e70f248d67c3036b066e82ac",
+      "guidedProviderSchemaHash": "c0ba412a4831bdbc5b5fc75633b0770e1f90ba99d3f5f92956dd7cf8fa462650",
+      "guidedPromptHash": null,
+      "outputContractHash": "571756118144a0129453e5f11d15a8388e88026694498af1b7acf04935d7d717",
+      "publicationResultVersion": 3,
+      "configuredModel": null,
+      "providerReturnedModelVersion": null
+    },
+    "sourceSteps": [
+      {
+        "stepId": "00000000-0000-4000-8000-000000000001",
+        "ordinal": 0,
+        "source": "Open https://orders.example.test/start"
+      },
+      {
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "ordinal": 1,
+        "source": "Read the reference"
+      },
+      {
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "ordinal": 2,
+        "source": "Set label   Café 🧪 é   and reuse the reference"
+      }
+    ],
+    "scope": {
+      "principalId": "user-1",
+      "csiId": "CSI-123",
+      "environmentId": "fixture",
+      "applicationId": "orders",
+      "accountRef": "account-1",
+      "approvedOrigins": [
+        "https://orders.example.test"
+      ],
+      "sourceRevision": "1",
+      "configurationRevision": "1",
+      "modelDataPolicyId": "labels-only-1",
+      "valueTransferPolicyId": null,
+      "capabilities": [
+        "observe",
+        "navigate",
+        "read",
+        "fill",
+        "click",
+        "assert"
+      ]
+    },
+    "runAuthorization": {
+      "authorizationId": "authorization-1",
+      "kind": "scopedRun",
+      "authorizedAt": "2026-10-08T03:00:00Z",
+      "principalId": "user-1",
+      "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16"
+    },
+    "replayRequirements": {
+      "csiId": "CSI-123",
+      "environment": "fixture",
+      "applicationId": "orders",
+      "accountRef": "account-1",
+      "allowedOrigins": [
+        "https://orders.example.test"
+      ],
+      "capabilities": [
+        "navigate",
+        "read",
+        "fill",
+        "click",
+        "assert"
+      ],
+      "policyId": "policy-orders",
+      "policyVersion": "1",
+      "entryPolicyId": "entry-orders",
+      "initialContext": {
+        "kind": "initialBlank"
+      }
+    },
+    "bootstrap": {
+      "contextId": "context-1",
+      "contextRevision": 1,
+      "ownerFence": 1,
+      "materializationRevision": 1,
+      "inputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+      "allocationHash": "9bc8519d38d9add555800b067717ce29db6aee096650f2e227e862f73a6a49ac",
+      "metadataAcknowledged": true,
+      "initialEvidence": {
+        "kind": "initialBlank",
+        "sessionId": "session-1",
+        "contextId": "context-1",
+        "creationId": "creation-1",
+        "documentId": "blank-document-1",
+        "bootstrapId": "bootstrap-1",
+        "url": "about:blank",
+        "origin": null,
+        "generation": 0
+      }
+    },
+    "translationRevision": "1",
+    "translationHash": "44a36d0e14a43117c3269ea834510344f1612384af0993a66661d2de70711801",
+    "translationPlan": {
+      "sourceReferences": [
+        {
+          "referenceKind": "sourceSpan",
+          "sourceRevision": "1",
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "startUtf16": 5,
+          "endUtf16": 38,
+          "kind": "destination",
+          "intendedSlot": "navigate.destination"
+        },
+        {
+          "referenceKind": "sourceSpan",
+          "sourceRevision": "1",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "startUtf16": 10,
+          "endUtf16": 24,
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value"
+        },
+        {
+          "referenceKind": "configuration",
+          "configurationRevision": "1",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "referenceId": "saved-label",
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value"
+        }
+      ],
+      "obligations": [
+        {
+          "obligationId": "00000000-0000-4000-8000-000000000100",
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "occurrence": 0,
+          "operationKind": "navigate",
+          "targetIntent": "page",
+          "referenceIndex": 0,
+          "needId": null,
+          "predicate": null
+        },
+        {
+          "obligationId": "00000000-0000-4000-8000-000000000101",
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "occurrence": 0,
+          "operationKind": "read",
+          "targetIntent": "reference",
+          "referenceIndex": null,
+          "needId": "need-reference",
+          "predicate": null
+        },
+        {
+          "obligationId": "00000000-0000-4000-8000-000000000102",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "occurrence": 0,
+          "operationKind": "fill",
+          "targetIntent": "destination",
+          "referenceIndex": null,
+          "needId": "need-reference",
+          "predicate": null
+        },
+        {
+          "obligationId": "00000000-0000-4000-8000-000000000103",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "occurrence": 1,
+          "operationKind": "fill",
+          "targetIntent": "label-input",
+          "referenceIndex": 1,
+          "needId": null,
+          "predicate": null
+        },
+        {
+          "obligationId": "00000000-0000-4000-8000-000000000104",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "occurrence": 2,
+          "operationKind": "assert",
+          "targetIntent": "destination",
+          "referenceIndex": null,
+          "needId": "need-reference",
+          "predicate": "hasValue"
+        }
+      ],
+      "needs": [
+        {
+          "bindingId": "binding-reference",
+          "needId": "need-reference",
+          "producerStepId": "00000000-0000-4000-8000-000000000002",
+          "consumers": [
+            {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "argumentSlot": "fill.value"
+            },
+            {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "argumentSlot": "assert.expected"
+            }
+          ]
+        }
+      ]
+    },
+    "sourceSelections": [],
+    "obligationAssociations": [
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000100",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "ordinal": 0
+        },
+        "admissionId": "admission-0",
+        "proposalHash": "1a1829d50ce7b750ecbba8b335f121e89eda405addf4767c134517764793abcf"
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000101",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "admissionId": "admission-1",
+        "proposalHash": "e8ad7a4454b71327ce461c5a4ec537da11129e73a62c4649956b0b607071d361"
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000102",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "ordinal": 0
+        },
+        "admissionId": "admission-2",
+        "proposalHash": "f8bcb0e2378485aa1169da6a5d426aaba03076413f849eaa4c587553ad24b1eb"
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000103",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "ordinal": 1
+        },
+        "admissionId": "admission-3",
+        "proposalHash": "956651277db6ecd1214e34941f0f70c2e09c11dc94f779c6ed8da85c29423515"
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000104",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "ordinal": 2
+        },
+        "admissionId": "admission-4",
+        "proposalHash": "1588b0b6991a49b73ecd2a7c75545a899729de608f0d1af5b029d184ca108071"
+      }
+    ],
+    "inputs": [
+      {
+        "inputId": "input-destination",
+        "stepId": "00000000-0000-4000-8000-000000000001",
+        "kind": "destination",
+        "intendedSlot": "navigate.destination",
+        "provenance": {
+          "referenceKind": "sourceSpan",
+          "sourceRevision": "1",
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "startUtf16": 5,
+          "endUtf16": 38,
+          "kind": "destination",
+          "intendedSlot": "navigate.destination"
+        }
+      },
+      {
+        "inputId": "input-label",
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "kind": "nonsecretText",
+        "intendedSlot": "fill.value",
+        "provenance": {
+          "referenceKind": "sourceSpan",
+          "sourceRevision": "1",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "startUtf16": 10,
+          "endUtf16": 24,
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value"
+        }
+      },
+      {
+        "inputId": "input-config",
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "kind": "nonsecretText",
+        "intendedSlot": "fill.value",
+        "provenance": {
+          "referenceKind": "configuration",
+          "configurationRevision": "1",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "referenceId": "saved-label",
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value"
+        }
+      }
+    ],
+    "configurationReferences": [
+      {
+        "referenceId": "saved-label",
+        "referenceName": "saved-label",
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "kind": "nonsecretText",
+        "intendedSlot": "fill.value",
+        "inputId": "input-config"
+      }
+    ],
+    "observations": [
+      {
+        "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192",
+        "observation": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "documentId": "document-1",
+          "generation": 1,
+          "origin": "https://orders.example.test",
+          "observedAt": "2026-10-08T03:00:05Z",
+          "coverage": {
+            "mode": "semantic",
+            "complete": true,
+            "truncated": false,
+            "withheldRegions": 0,
+            "reason": "complete"
+          },
+          "nodes": [
+            {
+              "nodeId": "reference",
+              "documentId": "document-1",
+              "generation": 1,
+              "role": "text",
+              "name": "Reference",
+              "elementType": "text",
+              "controlType": "none",
+              "classification": "permittedBusinessData",
+              "policyRuleId": "business-reference",
+              "visible": true,
+              "actionable": true,
+              "depth": 0,
+              "parentNodeId": null,
+              "regionId": null,
+              "formId": null,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "kind": "testId",
+                  "value": "reference",
+                  "exact": true
+                }
+              ]
+            },
+            {
+              "nodeId": "destination",
+              "documentId": "document-1",
+              "generation": 1,
+              "role": "textbox",
+              "name": "Destination",
+              "elementType": "input",
+              "controlType": "text",
+              "classification": "nonsecretApproved",
+              "policyRuleId": "nonsecret-form",
+              "visible": true,
+              "actionable": true,
+              "depth": 0,
+              "parentNodeId": null,
+              "regionId": null,
+              "formId": null,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "kind": "testId",
+                  "value": "destination",
+                  "exact": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "observationHash": "23a7972615550cacb14d68ffcd51e37a375121442e709dd6a87975e24896da9e",
+        "observation": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "documentId": "document-1",
+          "generation": 2,
+          "origin": "https://orders.example.test",
+          "observedAt": "2026-10-08T03:00:05Z",
+          "coverage": {
+            "mode": "semantic",
+            "complete": true,
+            "truncated": false,
+            "withheldRegions": 0,
+            "reason": "complete"
+          },
+          "nodes": [
+            {
+              "nodeId": "reference",
+              "documentId": "document-1",
+              "generation": 2,
+              "role": "text",
+              "name": "Reference",
+              "elementType": "text",
+              "controlType": "none",
+              "classification": "permittedBusinessData",
+              "policyRuleId": "business-reference",
+              "visible": true,
+              "actionable": true,
+              "depth": 0,
+              "parentNodeId": null,
+              "regionId": null,
+              "formId": null,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "kind": "testId",
+                  "value": "reference",
+                  "exact": true
+                }
+              ]
+            },
+            {
+              "nodeId": "label-input",
+              "documentId": "document-1",
+              "generation": 2,
+              "role": "textbox",
+              "name": "Label",
+              "elementType": "input",
+              "controlType": "text",
+              "classification": "nonsecretApproved",
+              "policyRuleId": "nonsecret-form",
+              "visible": true,
+              "actionable": true,
+              "depth": 0,
+              "parentNodeId": null,
+              "regionId": null,
+              "formId": null,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "kind": "testId",
+                  "value": "label-input",
+                  "exact": true
+                }
+              ]
+            }
+          ]
+        }
+      },
+      {
+        "observationHash": "b21783523a8baa0873265df734216bde628c69a00cc89ed4160d36044fbcf099",
+        "observation": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "documentId": "document-1",
+          "generation": 3,
+          "origin": "https://orders.example.test",
+          "observedAt": "2026-10-08T03:00:05Z",
+          "coverage": {
+            "mode": "semantic",
+            "complete": true,
+            "truncated": false,
+            "withheldRegions": 0,
+            "reason": "complete"
+          },
+          "nodes": [
+            {
+              "nodeId": "reference",
+              "documentId": "document-1",
+              "generation": 3,
+              "role": "text",
+              "name": "Reference",
+              "elementType": "text",
+              "controlType": "none",
+              "classification": "permittedBusinessData",
+              "policyRuleId": "business-reference",
+              "visible": true,
+              "actionable": true,
+              "depth": 0,
+              "parentNodeId": null,
+              "regionId": null,
+              "formId": null,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "kind": "testId",
+                  "value": "reference",
+                  "exact": true
+                }
+              ]
+            },
+            {
+              "nodeId": "destination",
+              "documentId": "document-1",
+              "generation": 3,
+              "role": "textbox",
+              "name": "Destination",
+              "elementType": "input",
+              "controlType": "text",
+              "classification": "nonsecretApproved",
+              "policyRuleId": "nonsecret-form",
+              "visible": true,
+              "actionable": true,
+              "depth": 0,
+              "parentNodeId": null,
+              "regionId": null,
+              "formId": null,
+              "labelNodeIds": [],
+              "locatorHints": [
+                {
+                  "kind": "testId",
+                  "value": "destination",
+                  "exact": true
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "preparations": [
+      {
+        "preparationId": "preparation-0",
+        "proposal": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000001",
+            "ordinal": 0
+          },
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "generation": 0,
+          "target": {
+            "kind": "page",
+            "documentId": "blank-document-1",
+            "generation": 0
+          },
+          "operation": {
+            "kind": "navigate",
+            "destinationInputId": "input-destination"
+          },
+          "executionEvidence": {
+            "kind": "initialBlank",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "creationId": "creation-1",
+            "documentId": "blank-document-1",
+            "bootstrapId": "bootstrap-1",
+            "url": "about:blank",
+            "origin": null,
+            "generation": 0
+          },
+          "evidenceHash": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1
+        },
+        "proof": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "workerId": "worker-1",
+          "ownerFence": 1,
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "contextId": "context-1",
+          "contextRevision": 1,
+          "sourceRevision": "1",
+          "configurationRevision": "1",
+          "versions": {
+            "contract": 2,
+            "learnedPlan": 2,
+            "observation": 2,
+            "guidedPolicy": 2,
+            "referencePolicy": 3,
+            "lowering": 1,
+            "artifact": 2,
+            "language": "observed-2",
+            "executor": "observed-2"
+          },
+          "preparationId": "preparation-0",
+          "requestDigest": "1a1829d50ce7b750ecbba8b335f121e89eda405addf4767c134517764793abcf",
+          "evidenceHash": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "expiresAt": "2026-10-08T03:00:25Z"
+        },
+        "executionEvidence": {
+          "kind": "initialBlank",
+          "sessionId": "session-1",
+          "contextId": "context-1",
+          "creationId": "creation-1",
+          "documentId": "blank-document-1",
+          "bootstrapId": "bootstrap-1",
+          "url": "about:blank",
+          "origin": null,
+          "generation": 0
+        },
+        "observationHash": null
+      },
+      {
+        "preparationId": "preparation-1",
+        "proposal": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          },
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "generation": 1,
+          "target": {
+            "nodeId": "reference",
+            "documentId": "document-1",
+            "generation": 1,
+            "locator": {
+              "kind": "testId",
+              "value": "reference",
+              "exact": true
+            }
+          },
+          "operation": {
+            "kind": "read",
+            "bindingId": "binding-reference",
+            "recipe": {
+              "kind": "visibleText",
+              "classification": "permittedBusinessData",
+              "policyRuleId": "business-reference"
+            }
+          },
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 1,
+            "origin": "https://orders.example.test",
+            "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+          },
+          "evidenceHash": "a316140fefe798cf27b803db7f38f4182d2e87af7b05222263efb79ca78f40f1",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1
+        },
+        "proof": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "workerId": "worker-1",
+          "ownerFence": 1,
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "contextId": "context-1",
+          "contextRevision": 1,
+          "sourceRevision": "1",
+          "configurationRevision": "1",
+          "versions": {
+            "contract": 2,
+            "learnedPlan": 2,
+            "observation": 2,
+            "guidedPolicy": 2,
+            "referencePolicy": 3,
+            "lowering": 1,
+            "artifact": 2,
+            "language": "observed-2",
+            "executor": "observed-2"
+          },
+          "preparationId": "preparation-1",
+          "requestDigest": "e8ad7a4454b71327ce461c5a4ec537da11129e73a62c4649956b0b607071d361",
+          "evidenceHash": "a316140fefe798cf27b803db7f38f4182d2e87af7b05222263efb79ca78f40f1",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "expiresAt": "2026-10-08T03:00:25Z"
+        },
+        "executionEvidence": {
+          "kind": "observedDocument",
+          "sessionId": "session-1",
+          "contextId": "context-1",
+          "documentId": "document-1",
+          "generation": 1,
+          "origin": "https://orders.example.test",
+          "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+        },
+        "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+      },
+      {
+        "preparationId": "preparation-2",
+        "proposal": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 0
+          },
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "generation": 1,
+          "target": {
+            "nodeId": "destination",
+            "documentId": "document-1",
+            "generation": 1,
+            "locator": {
+              "kind": "testId",
+              "value": "destination",
+              "exact": true
+            }
+          },
+          "operation": {
+            "kind": "fill",
+            "value": {
+              "kind": "binding",
+              "bindingId": "binding-reference"
+            }
+          },
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 1,
+            "origin": "https://orders.example.test",
+            "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+          },
+          "evidenceHash": "a316140fefe798cf27b803db7f38f4182d2e87af7b05222263efb79ca78f40f1",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1
+        },
+        "proof": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "workerId": "worker-1",
+          "ownerFence": 1,
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "contextId": "context-1",
+          "contextRevision": 1,
+          "sourceRevision": "1",
+          "configurationRevision": "1",
+          "versions": {
+            "contract": 2,
+            "learnedPlan": 2,
+            "observation": 2,
+            "guidedPolicy": 2,
+            "referencePolicy": 3,
+            "lowering": 1,
+            "artifact": 2,
+            "language": "observed-2",
+            "executor": "observed-2"
+          },
+          "preparationId": "preparation-2",
+          "requestDigest": "f8bcb0e2378485aa1169da6a5d426aaba03076413f849eaa4c587553ad24b1eb",
+          "evidenceHash": "a316140fefe798cf27b803db7f38f4182d2e87af7b05222263efb79ca78f40f1",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "expiresAt": "2026-10-08T03:00:25Z"
+        },
+        "executionEvidence": {
+          "kind": "observedDocument",
+          "sessionId": "session-1",
+          "contextId": "context-1",
+          "documentId": "document-1",
+          "generation": 1,
+          "origin": "https://orders.example.test",
+          "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+        },
+        "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+      },
+      {
+        "preparationId": "preparation-3",
+        "proposal": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 1
+          },
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "generation": 2,
+          "target": {
+            "nodeId": "label-input",
+            "documentId": "document-1",
+            "generation": 2,
+            "locator": {
+              "kind": "testId",
+              "value": "label-input",
+              "exact": true
+            }
+          },
+          "operation": {
+            "kind": "fill",
+            "value": {
+              "kind": "authoredLiteral",
+              "sourceInputId": "input-label"
+            }
+          },
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 2,
+            "origin": "https://orders.example.test",
+            "observationHash": "23a7972615550cacb14d68ffcd51e37a375121442e709dd6a87975e24896da9e"
+          },
+          "evidenceHash": "76d226d352f4eda7123f163592df4cf910b5f34f5b9b76ca912e0cceb210e365",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1
+        },
+        "proof": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "workerId": "worker-1",
+          "ownerFence": 1,
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "contextId": "context-1",
+          "contextRevision": 1,
+          "sourceRevision": "1",
+          "configurationRevision": "1",
+          "versions": {
+            "contract": 2,
+            "learnedPlan": 2,
+            "observation": 2,
+            "guidedPolicy": 2,
+            "referencePolicy": 3,
+            "lowering": 1,
+            "artifact": 2,
+            "language": "observed-2",
+            "executor": "observed-2"
+          },
+          "preparationId": "preparation-3",
+          "requestDigest": "956651277db6ecd1214e34941f0f70c2e09c11dc94f779c6ed8da85c29423515",
+          "evidenceHash": "76d226d352f4eda7123f163592df4cf910b5f34f5b9b76ca912e0cceb210e365",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "expiresAt": "2026-10-08T03:00:25Z"
+        },
+        "executionEvidence": {
+          "kind": "observedDocument",
+          "sessionId": "session-1",
+          "contextId": "context-1",
+          "documentId": "document-1",
+          "generation": 2,
+          "origin": "https://orders.example.test",
+          "observationHash": "23a7972615550cacb14d68ffcd51e37a375121442e709dd6a87975e24896da9e"
+        },
+        "observationHash": "23a7972615550cacb14d68ffcd51e37a375121442e709dd6a87975e24896da9e"
+      },
+      {
+        "preparationId": "preparation-4",
+        "proposal": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 2
+          },
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "generation": 3,
+          "target": {
+            "nodeId": "destination",
+            "documentId": "document-1",
+            "generation": 3,
+            "locator": {
+              "kind": "testId",
+              "value": "destination",
+              "exact": true
+            }
+          },
+          "operation": {
+            "kind": "assert",
+            "predicate": "hasValue",
+            "expected": {
+              "kind": "binding",
+              "bindingId": "binding-reference"
+            }
+          },
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 3,
+            "origin": "https://orders.example.test",
+            "observationHash": "b21783523a8baa0873265df734216bde628c69a00cc89ed4160d36044fbcf099"
+          },
+          "evidenceHash": "8546667a31a4b34cdd8b3161a79b1ea68eec9cf2e791f1e41c3e9ae51999119d",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1
+        },
+        "proof": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "workerId": "worker-1",
+          "ownerFence": 1,
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "contextId": "context-1",
+          "contextRevision": 1,
+          "sourceRevision": "1",
+          "configurationRevision": "1",
+          "versions": {
+            "contract": 2,
+            "learnedPlan": 2,
+            "observation": 2,
+            "guidedPolicy": 2,
+            "referencePolicy": 3,
+            "lowering": 1,
+            "artifact": 2,
+            "language": "observed-2",
+            "executor": "observed-2"
+          },
+          "preparationId": "preparation-4",
+          "requestDigest": "1588b0b6991a49b73ecd2a7c75545a899729de608f0d1af5b029d184ca108071",
+          "evidenceHash": "8546667a31a4b34cdd8b3161a79b1ea68eec9cf2e791f1e41c3e9ae51999119d",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "expiresAt": "2026-10-08T03:00:25Z"
+        },
+        "executionEvidence": {
+          "kind": "observedDocument",
+          "sessionId": "session-1",
+          "contextId": "context-1",
+          "documentId": "document-1",
+          "generation": 3,
+          "origin": "https://orders.example.test",
+          "observationHash": "b21783523a8baa0873265df734216bde628c69a00cc89ed4160d36044fbcf099"
+        },
+        "observationHash": "b21783523a8baa0873265df734216bde628c69a00cc89ed4160d36044fbcf099"
+      }
+    ],
+    "actions": [
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000100",
+        "preparationId": "preparation-0",
+        "ledger": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000001",
+            "ordinal": 0
+          },
+          "idempotencyKey": "admission-request-0",
+          "requestDigest": "1a1829d50ce7b750ecbba8b335f121e89eda405addf4767c134517764793abcf",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "operationHash": "0d468ced1744419c45b238648a1460bdbf53fe961a3f3864429a6292ac365271",
+          "generation": 0,
+          "documentId": "blank-document-1",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "admission-0",
+            "authorizationId": "authorization-1",
+            "admittedAt": "2026-10-08T03:00:10Z",
+            "policyDecisionHash": "4de339bee571a1b7c66627115de7ab365e92cd13c84011a2b45628e7ab8b5a03"
+          },
+          "state": "SUCCEEDED",
+          "dispatchCount": 1,
+          "outcomeCode": "OK",
+          "assertionPassed": null,
+          "executionEvidence": {
+            "kind": "initialBlank",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "creationId": "creation-1",
+            "documentId": "blank-document-1",
+            "bootstrapId": "bootstrap-1",
+            "url": "about:blank",
+            "origin": null,
+            "generation": 0
+          },
+          "evidenceHash": "d0cdaf24158c5890fe6e87f01a554efe5f1b86c8c3ce7b297a689e27ac483262",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1,
+          "preparationId": "preparation-0"
+        }
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000101",
+        "preparationId": "preparation-1",
+        "ledger": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          },
+          "idempotencyKey": "admission-request-1",
+          "requestDigest": "e8ad7a4454b71327ce461c5a4ec537da11129e73a62c4649956b0b607071d361",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "operationHash": "52b94ab1c572f4e4a65de7bf3d33e999a03cb6f74d6e6cb946ed8b274669cdba",
+          "generation": 1,
+          "documentId": "document-1",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "admission-1",
+            "authorizationId": "authorization-1",
+            "admittedAt": "2026-10-08T03:00:10Z",
+            "policyDecisionHash": "0df3becb4c3702c1f1964d578b0ae9c7febbf7c758d7a1687616e8f159997448"
+          },
+          "state": "SUCCEEDED",
+          "dispatchCount": 1,
+          "outcomeCode": "OK",
+          "assertionPassed": null,
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 1,
+            "origin": "https://orders.example.test",
+            "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+          },
+          "evidenceHash": "a316140fefe798cf27b803db7f38f4182d2e87af7b05222263efb79ca78f40f1",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1,
+          "preparationId": "preparation-1"
+        }
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000102",
+        "preparationId": "preparation-2",
+        "ledger": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 0
+          },
+          "idempotencyKey": "admission-request-2",
+          "requestDigest": "f8bcb0e2378485aa1169da6a5d426aaba03076413f849eaa4c587553ad24b1eb",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "operationHash": "7402c4d4d31b3fd5dac6ab5c6e71689ea64eb4e3da0af8be8fa075230e338a6e",
+          "generation": 1,
+          "documentId": "document-1",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "admission-2",
+            "authorizationId": "authorization-1",
+            "admittedAt": "2026-10-08T03:00:10Z",
+            "policyDecisionHash": "e3df8fc8cf7f3ad1bad7fa7288e964f9c7c61fc875319b607fee64bb3398b8ea"
+          },
+          "state": "SUCCEEDED",
+          "dispatchCount": 1,
+          "outcomeCode": "OK",
+          "assertionPassed": null,
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 1,
+            "origin": "https://orders.example.test",
+            "observationHash": "90242eaa750ff99b1a34fff98522862942d0667a2a5301186f815d53b83ee192"
+          },
+          "evidenceHash": "a316140fefe798cf27b803db7f38f4182d2e87af7b05222263efb79ca78f40f1",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1,
+          "preparationId": "preparation-2"
+        }
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000103",
+        "preparationId": "preparation-3",
+        "ledger": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 1
+          },
+          "idempotencyKey": "admission-request-3",
+          "requestDigest": "956651277db6ecd1214e34941f0f70c2e09c11dc94f779c6ed8da85c29423515",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "operationHash": "bbe83609643db3d2755f9199ab3548b94fc5422fdc3cddf0c41d3a522682a637",
+          "generation": 2,
+          "documentId": "document-1",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "admission-3",
+            "authorizationId": "authorization-1",
+            "admittedAt": "2026-10-08T03:00:10Z",
+            "policyDecisionHash": "17e4271c15962aa869a22bb6ea558744e33f99d67634fd5391b34aa5127d53d8"
+          },
+          "state": "SUCCEEDED",
+          "dispatchCount": 1,
+          "outcomeCode": "OK",
+          "assertionPassed": null,
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 2,
+            "origin": "https://orders.example.test",
+            "observationHash": "23a7972615550cacb14d68ffcd51e37a375121442e709dd6a87975e24896da9e"
+          },
+          "evidenceHash": "76d226d352f4eda7123f163592df4cf910b5f34f5b9b76ca912e0cceb210e365",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1,
+          "preparationId": "preparation-3"
+        }
+      },
+      {
+        "obligationId": "00000000-0000-4000-8000-000000000104",
+        "preparationId": "preparation-4",
+        "ledger": {
+          "schemaVersion": 2,
+          "sessionId": "session-1",
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 2
+          },
+          "idempotencyKey": "admission-request-4",
+          "requestDigest": "1588b0b6991a49b73ecd2a7c75545a899729de608f0d1af5b029d184ca108071",
+          "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+          "operationHash": "717d72d7f4cee0a4832da57d732341591fb1fadc37a4e36fd18c38d4ded584f5",
+          "generation": 3,
+          "documentId": "document-1",
+          "ownerFence": 1,
+          "admission": {
+            "admissionId": "admission-4",
+            "authorizationId": "authorization-1",
+            "admittedAt": "2026-10-08T03:00:10Z",
+            "policyDecisionHash": "0c65359f1d804d9b0b2e2557d9bc072315e0afe4535565ac0216c03b7a754683"
+          },
+          "state": "SUCCEEDED",
+          "dispatchCount": 1,
+          "outcomeCode": "OK",
+          "assertionPassed": true,
+          "executionEvidence": {
+            "kind": "observedDocument",
+            "sessionId": "session-1",
+            "contextId": "context-1",
+            "documentId": "document-1",
+            "generation": 3,
+            "origin": "https://orders.example.test",
+            "observationHash": "b21783523a8baa0873265df734216bde628c69a00cc89ed4160d36044fbcf099"
+          },
+          "evidenceHash": "8546667a31a4b34cdd8b3161a79b1ea68eec9cf2e791f1e41c3e9ae51999119d",
+          "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+          "contextRevision": 1,
+          "preparationId": "preparation-4"
+        }
+      }
+    ],
+    "allocations": [
+      {
+        "bindingId": "binding-reference",
+        "needId": "need-reference",
+        "producerStepId": "00000000-0000-4000-8000-000000000002",
+        "consumers": [
+          {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "argumentSlot": "fill.value"
+          },
+          {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "argumentSlot": "assert.expected"
+          }
+        ]
+      }
+    ],
+    "producers": [
+      {
+        "bindingId": "binding-reference",
+        "producerAdmissionId": "admission-1",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "origin": "https://orders.example.test",
+        "recipe": {
+          "kind": "visibleText",
+          "classification": "permittedBusinessData",
+          "policyRuleId": "business-reference"
+        },
+        "availability": {
+          "bindingId": "binding-reference",
+          "producerAdmissionId": "admission-1",
+          "contextId": "context-1",
+          "workerId": "worker-1",
+          "ownerFence": 1
+        }
+      }
+    ],
+    "consumerEdges": [
+      {
+        "bindingId": "binding-reference",
+        "producerAdmissionId": "admission-1",
+        "consumerAdmissionId": "admission-2",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "ordinal": 0
+        },
+        "argumentSlot": "fill.value",
+        "destinationOrigin": "https://orders.example.test",
+        "transferPolicy": "sameOrigin"
+      },
+      {
+        "bindingId": "binding-reference",
+        "producerAdmissionId": "admission-1",
+        "consumerAdmissionId": "admission-4",
+        "coordinate": {
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "ordinal": 2
+        },
+        "argumentSlot": "assert.expected",
+        "destinationOrigin": "https://orders.example.test",
+        "transferPolicy": "sameOrigin"
+      }
+    ],
+    "bindings": [
+      {
+        "schemaVersion": 2,
+        "bindingId": "binding-reference",
+        "valueType": "string",
+        "producer": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "recipe": {
+          "kind": "visibleText",
+          "classification": "permittedBusinessData",
+          "policyRuleId": "business-reference"
+        },
+        "sourceOrigin": "https://orders.example.test",
+        "consumers": [
+          {
+            "bindingId": "binding-reference",
+            "producerAdmissionId": "admission-1",
+            "consumerAdmissionId": "admission-2",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "ordinal": 0
+            },
+            "argumentSlot": "fill.value",
+            "destinationOrigin": "https://orders.example.test",
+            "transferPolicy": "sameOrigin"
+          },
+          {
+            "bindingId": "binding-reference",
+            "producerAdmissionId": "admission-1",
+            "consumerAdmissionId": "admission-4",
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "ordinal": 2
+            },
+            "argumentSlot": "assert.expected",
+            "destinationOrigin": "https://orders.example.test",
+            "transferPolicy": "sameOrigin"
+          }
+        ],
+        "provenance": {
+          "sessionId": "session-1",
+          "producerAdmissionId": "admission-1",
+          "sourceIntentStepId": "00000000-0000-4000-8000-000000000002"
+        },
+        "transferPolicy": "sameOrigin",
+        "preserveBytes": true
+      }
+    ],
+    "transfers": [
+      {
+        "bindingId": "binding-reference",
+        "producer": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "consumer": {
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "ordinal": 0
+        },
+        "slot": "fill.value",
+        "origin": "https://orders.example.test"
+      },
+      {
+        "bindingId": "binding-reference",
+        "producer": {
+          "stepId": "00000000-0000-4000-8000-000000000002",
+          "ordinal": 0
+        },
+        "consumer": {
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "ordinal": 2
+        },
+        "slot": "assert.expected",
+        "origin": "https://orders.example.test"
+      }
+    ]
+  },
+  "artifact": {
+    "version": 2,
+    "kind": "observed",
+    "profile": {
+      "catalog": "observed-replay-1",
+      "playwright": "1.63.0",
+      "browserEngine": "chromium",
+      "contract": 2,
+      "learnedPlan": 2,
+      "observation": 2,
+      "guidedPolicy": 2,
+      "referencePolicy": 3,
+      "lowering": 1,
+      "artifact": 2,
+      "language": "observed-2",
+      "executor": "observed-2",
+      "publicationEvidence": 1,
+      "validationBasis": 1,
+      "validator": "observed-1",
+      "protocol": 2,
+      "replayAuthorization": 1,
+      "accountAbi": 1
+    },
+    "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+    "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+    "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+    "learnedPlan": {
+      "schemaVersion": 2,
+      "planId": "plan-0e34aef57db50c870c3188f1e13967795de212985930e58b2aa5fdcb71c3ca01",
+      "scopeHash": "6a33aedd87683dc35e9d7b6c52fd36ea4d3894e4bf2d5cda02e25894b1968e16",
+      "sourceRevision": "1",
+      "configurationRevision": "1",
+      "authoredInputsHash": "bbc90a6c15e8a5ee3f4ed7ee7e8c929f4f1219ca5fe3ac62d6f1c9d7bdbebe58",
+      "initialContext": {
+        "kind": "initialBlank"
+      },
+      "sourceSteps": [
+        "00000000-0000-4000-8000-000000000001",
+        "00000000-0000-4000-8000-000000000002",
+        "00000000-0000-4000-8000-000000000003"
+      ],
+      "versions": {
+        "contract": 2,
+        "learnedPlan": 2,
+        "observation": 2,
+        "guidedPolicy": 2,
+        "referencePolicy": 3,
+        "lowering": 1,
+        "artifact": 2,
+        "language": "observed-2",
+        "executor": "observed-2"
+      },
+      "actions": [
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000001",
+            "ordinal": 0
+          },
+          "origin": null,
+          "locator": null,
+          "operation": {
+            "kind": "navigate",
+            "destinationInputId": "input-destination"
+          },
+          "admissionId": "admission-0",
+          "operationHash": "0d468ced1744419c45b238648a1460bdbf53fe961a3f3864429a6292ac365271"
+        },
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          },
+          "origin": "https://orders.example.test",
+          "locator": {
+            "kind": "testId",
+            "value": "reference",
+            "exact": true
+          },
+          "operation": {
+            "kind": "read",
+            "bindingId": "binding-reference",
+            "recipe": {
+              "kind": "visibleText",
+              "classification": "permittedBusinessData",
+              "policyRuleId": "business-reference"
+            }
+          },
+          "admissionId": "admission-1",
+          "operationHash": "52b94ab1c572f4e4a65de7bf3d33e999a03cb6f74d6e6cb946ed8b274669cdba"
+        },
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 0
+          },
+          "origin": "https://orders.example.test",
+          "locator": {
+            "kind": "testId",
+            "value": "destination",
+            "exact": true
+          },
+          "operation": {
+            "kind": "fill",
+            "value": {
+              "kind": "binding",
+              "bindingId": "binding-reference"
+            }
+          },
+          "admissionId": "admission-2",
+          "operationHash": "7402c4d4d31b3fd5dac6ab5c6e71689ea64eb4e3da0af8be8fa075230e338a6e"
+        },
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 1
+          },
+          "origin": "https://orders.example.test",
+          "locator": {
+            "kind": "testId",
+            "value": "label-input",
+            "exact": true
+          },
+          "operation": {
+            "kind": "fill",
+            "value": {
+              "kind": "authoredLiteral",
+              "sourceInputId": "input-label"
+            }
+          },
+          "admissionId": "admission-3",
+          "operationHash": "bbe83609643db3d2755f9199ab3548b94fc5422fdc3cddf0c41d3a522682a637"
+        },
+        {
+          "coordinate": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 2
+          },
+          "origin": "https://orders.example.test",
+          "locator": {
+            "kind": "testId",
+            "value": "destination",
+            "exact": true
+          },
+          "operation": {
+            "kind": "assert",
+            "predicate": "hasValue",
+            "expected": {
+              "kind": "binding",
+              "bindingId": "binding-reference"
+            }
+          },
+          "admissionId": "admission-4",
+          "operationHash": "717d72d7f4cee0a4832da57d732341591fb1fadc37a4e36fd18c38d4ded584f5"
+        }
+      ],
+      "bindings": [
+        {
+          "schemaVersion": 2,
+          "bindingId": "binding-reference",
+          "valueType": "string",
+          "producer": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          },
+          "recipe": {
+            "kind": "visibleText",
+            "classification": "permittedBusinessData",
+            "policyRuleId": "business-reference"
+          },
+          "sourceOrigin": "https://orders.example.test",
+          "consumers": [
+            {
+              "bindingId": "binding-reference",
+              "producerAdmissionId": "admission-1",
+              "consumerAdmissionId": "admission-2",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 0
+              },
+              "argumentSlot": "fill.value",
+              "destinationOrigin": "https://orders.example.test",
+              "transferPolicy": "sameOrigin"
+            },
+            {
+              "bindingId": "binding-reference",
+              "producerAdmissionId": "admission-1",
+              "consumerAdmissionId": "admission-4",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 2
+              },
+              "argumentSlot": "assert.expected",
+              "destinationOrigin": "https://orders.example.test",
+              "transferPolicy": "sameOrigin"
+            }
+          ],
+          "provenance": {
+            "sessionId": "session-1",
+            "producerAdmissionId": "admission-1",
+            "sourceIntentStepId": "00000000-0000-4000-8000-000000000002"
+          },
+          "transferPolicy": "sameOrigin",
+          "preserveBytes": true
+        }
+      ]
+    },
+    "learnedPlanHash": "ae762a17a9aef4a9c41d3789c2c6a2163e88fd368f5ea3919efadfe4eb117793",
+    "inputRecipes": [
+      {
+        "inputId": "input-destination",
+        "stepId": "00000000-0000-4000-8000-000000000001",
+        "kind": "destination",
+        "intendedSlot": "navigate.destination",
+        "provenance": {
+          "kind": "sourceSpan",
+          "start": 5,
+          "end": 38,
+          "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+        }
+      },
+      {
+        "inputId": "input-label",
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "kind": "nonsecretText",
+        "intendedSlot": "fill.value",
+        "provenance": {
+          "kind": "sourceSpan",
+          "start": 10,
+          "end": 24,
+          "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+        }
+      },
+      {
+        "inputId": "input-config",
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "kind": "nonsecretText",
+        "intendedSlot": "fill.value",
+        "provenance": {
+          "kind": "configuration",
+          "referenceId": "saved-label",
+          "referenceName": "saved-label"
+        }
+      }
+    ],
+    "guards": [
+      {
+        "guardId": "g0",
+        "origin": null,
+        "target": {
+          "kind": "initialBlank"
+        }
+      },
+      {
+        "guardId": "g1",
+        "origin": "https://orders.example.test",
+        "target": {
+          "kind": "element",
+          "locator": {
+            "kind": "testId",
+            "value": "reference",
+            "exact": true
+          },
+          "role": "text",
+          "elementType": "text",
+          "controlType": "none",
+          "classification": "permittedBusinessData",
+          "visible": true,
+          "actionable": true,
+          "readRuleId": "business-reference"
+        }
+      },
+      {
+        "guardId": "g2",
+        "origin": "https://orders.example.test",
+        "target": {
+          "kind": "element",
+          "locator": {
+            "kind": "testId",
+            "value": "destination",
+            "exact": true
+          },
+          "role": "textbox",
+          "elementType": "input",
+          "controlType": "text",
+          "classification": "nonsecretApproved",
+          "visible": true,
+          "actionable": true,
+          "readRuleId": null
+        }
+      },
+      {
+        "guardId": "g3",
+        "origin": "https://orders.example.test",
+        "target": {
+          "kind": "element",
+          "locator": {
+            "kind": "testId",
+            "value": "label-input",
+            "exact": true
+          },
+          "role": "textbox",
+          "elementType": "input",
+          "controlType": "text",
+          "classification": "nonsecretApproved",
+          "visible": true,
+          "actionable": true,
+          "readRuleId": null
+        }
+      },
+      {
+        "guardId": "g4",
+        "origin": "https://orders.example.test",
+        "target": {
+          "kind": "element",
+          "locator": {
+            "kind": "testId",
+            "value": "destination",
+            "exact": true
+          },
+          "role": "textbox",
+          "elementType": "input",
+          "controlType": "text",
+          "classification": "nonsecretApproved",
+          "visible": true,
+          "actionable": true,
+          "readRuleId": null
+        }
+      }
+    ],
+    "replayPolicy": {
+      "schemaVersion": 3,
+      "learnedPlanHash": "ae762a17a9aef4a9c41d3789c2c6a2163e88fd368f5ea3919efadfe4eb117793",
+      "admissionProvenanceHash": "51a134a3cc8a338e7c10194610b8d5162abbe2d9e7638b0057ccc8d1d90cefb5",
+      "publicationEvidenceHash": "0242a0de63ac448bc68bf37588bac0772f7e14bf3a33e984b81878eff09d9b01",
+      "runAuthorizationHash": "52e9941e6f3ad2ac0b2d661670bc514a3ed7c65d4f7c86d6daa9e89eac56f2a7",
+      "scope": {
+        "csiId": "CSI-123",
+        "environment": "fixture",
+        "applicationId": "orders",
+        "accountRef": "account-1",
+        "allowedOrigins": [
+          "https://orders.example.test"
+        ],
+        "capabilities": [
+          "navigate",
+          "read",
+          "fill",
+          "click",
+          "assert"
+        ],
+        "policyId": "policy-orders",
+        "policyVersion": "1",
+        "entryPolicyId": "entry-orders",
+        "initialContext": {
+          "kind": "initialBlank"
+        }
+      },
+      "inputs": [
+        {
+          "inputId": "input-destination",
+          "stepId": "00000000-0000-4000-8000-000000000001",
+          "kind": "destination",
+          "intendedSlot": "navigate.destination",
+          "provenance": {
+            "kind": "sourceSpan",
+            "start": 5,
+            "end": 38,
+            "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+          }
+        },
+        {
+          "inputId": "input-label",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value",
+          "provenance": {
+            "kind": "sourceSpan",
+            "start": 10,
+            "end": 24,
+            "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055"
+          }
+        },
+        {
+          "inputId": "input-config",
+          "stepId": "00000000-0000-4000-8000-000000000003",
+          "kind": "nonsecretText",
+          "intendedSlot": "fill.value",
+          "provenance": {
+            "kind": "configuration",
+            "referenceId": "saved-label",
+            "referenceName": "saved-label"
+          }
+        }
+      ],
+      "bindings": [
+        {
+          "schemaVersion": 2,
+          "bindingId": "binding-reference",
+          "valueType": "string",
+          "producer": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          },
+          "recipe": {
+            "kind": "visibleText",
+            "classification": "permittedBusinessData",
+            "policyRuleId": "business-reference"
+          },
+          "sourceOrigin": "https://orders.example.test",
+          "consumers": [
+            {
+              "bindingId": "binding-reference",
+              "producerAdmissionId": "admission-1",
+              "consumerAdmissionId": "admission-2",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 0
+              },
+              "argumentSlot": "fill.value",
+              "destinationOrigin": "https://orders.example.test",
+              "transferPolicy": "sameOrigin"
+            },
+            {
+              "bindingId": "binding-reference",
+              "producerAdmissionId": "admission-1",
+              "consumerAdmissionId": "admission-4",
+              "coordinate": {
+                "stepId": "00000000-0000-4000-8000-000000000003",
+                "ordinal": 2
+              },
+              "argumentSlot": "assert.expected",
+              "destinationOrigin": "https://orders.example.test",
+              "transferPolicy": "sameOrigin"
+            }
+          ],
+          "provenance": {
+            "sessionId": "session-1",
+            "producerAdmissionId": "admission-1",
+            "sourceIntentStepId": "00000000-0000-4000-8000-000000000002"
+          },
+          "transferPolicy": "sameOrigin",
+          "preserveBytes": true
+        }
+      ],
+      "transfers": [
+        {
+          "bindingId": "binding-reference",
+          "producer": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          },
+          "consumer": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 0
+          },
+          "slot": "fill.value",
+          "origin": "https://orders.example.test"
+        },
+        {
+          "bindingId": "binding-reference",
+          "producer": {
+            "stepId": "00000000-0000-4000-8000-000000000002",
+            "ordinal": 0
+          },
+          "consumer": {
+            "stepId": "00000000-0000-4000-8000-000000000003",
+            "ordinal": 2
+          },
+          "slot": "assert.expected",
+          "origin": "https://orders.example.test"
+        }
+      ]
+    },
+    "steps": [
+      {
+        "stepIndex": 0,
+        "stepId": "00000000-0000-4000-8000-000000000001",
+        "operations": [
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000001",
+              "ordinal": 0
+            },
+            "guardId": "g0",
+            "operation": {
+              "kind": "navigate",
+              "destinationInputId": "input-destination"
+            }
+          }
+        ]
+      },
+      {
+        "stepIndex": 1,
+        "stepId": "00000000-0000-4000-8000-000000000002",
+        "operations": [
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000002",
+              "ordinal": 0
+            },
+            "guardId": "g1",
+            "operation": {
+              "kind": "read",
+              "bindingId": "binding-reference",
+              "recipe": {
+                "kind": "visibleText",
+                "classification": "permittedBusinessData",
+                "policyRuleId": "business-reference"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "stepIndex": 2,
+        "stepId": "00000000-0000-4000-8000-000000000003",
+        "operations": [
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "ordinal": 0
+            },
+            "guardId": "g2",
+            "operation": {
+              "kind": "fill",
+              "value": {
+                "kind": "binding",
+                "bindingId": "binding-reference"
+              }
+            }
+          },
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "ordinal": 1
+            },
+            "guardId": "g3",
+            "operation": {
+              "kind": "fill",
+              "value": {
+                "kind": "authoredLiteral",
+                "sourceInputId": "input-label"
+              }
+            }
+          },
+          {
+            "coordinate": {
+              "stepId": "00000000-0000-4000-8000-000000000003",
+              "ordinal": 2
+            },
+            "guardId": "g4",
+            "operation": {
+              "kind": "assert",
+              "predicate": "hasValue",
+              "expected": {
+                "kind": "binding",
+                "bindingId": "binding-reference"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "hashes": {
+    "sourceHash": "6ed887e7d7bea77e936a6152bfb4232055ab46fd62dee37789f4f8218a1ad055",
+    "configurationHash": "dc52a6ec856c6e30b512d428302844a530a3dc1b3dcf83ffa27e2e42401e23ee",
+    "authoringHash": "e5e180ed2cfadcd2beaf593b3fe050e22349ae16658b24b7dd00596dee1ca4fe",
+    "learnedPlanHash": "ae762a17a9aef4a9c41d3789c2c6a2163e88fd368f5ea3919efadfe4eb117793",
+    "artifactHash": "6b97c617ffad09f0f1d1c580aeee37805e7aa4316a08a95c36f36f9650a06794",
+    "referencePolicyHash": "c57cc42d8112be3801f6b9a7512c8e6efa1b213723ed57427c9217f04758da5b",
+    "operationEquivalenceHash": "115d138360c8eeba367440059c76c34831009943b30f8235b7fc0b3279d8092f",
+    "admissionProvenanceHash": "51a134a3cc8a338e7c10194610b8d5162abbe2d9e7638b0057ccc8d1d90cefb5",
+    "publicationEvidenceHash": "0242a0de63ac448bc68bf37588bac0772f7e14bf3a33e984b81878eff09d9b01",
+    "runAuthorizationHash": "52e9941e6f3ad2ac0b2d661670bc514a3ed7c65d4f7c86d6daa9e89eac56f2a7",
+    "profileHash": "1df4fdc02c516665bee18e2f6b8f7461c476d4772285b093874ec562ea2572cd"
+  }
+}

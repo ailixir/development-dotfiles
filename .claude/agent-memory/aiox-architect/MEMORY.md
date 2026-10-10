@@ -6,3 +6,4 @@
 - [Run auto-accept ruling](run_auto_accept_ruling.md) — §35: Run=confirm is contract; 554277fcb interim non-conformant; NoAutoConfirmTest vacuous; O-22 execute authz
 - [V19 hazard on V1 writer](v19_hazard_v1_writer.md) — V19 at HEAD breaks V1 compiles; runbook floor row wrong; V1 writes no request row
 - [V1+ scope decision](v1_plus_scope_decision.md) — 2026-10-07: incremental deferred behind T-INC; S1 O-22, S2 §35+request row, S3 R2D2 probe
+- [Guided login = secret refs](guided_login_secret_ref_decision.md) — 2026-10-09: author-written login with <secret ID>; no provider/handoff; EXT-001 dropped; secret-login-design.md canonical

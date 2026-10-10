@@ -81,6 +81,8 @@ export interface ReportBody extends ReportIdentity {
 }
 
 export interface SnapshotOptions {
+  /** Observed pre-Ready failure can report unexecuted coordinates with no clock readings. */
+  readonly allowUnstartedSkippedSteps?: boolean;
   readonly identity: ReportIdentity;
   readonly bounds: ReportBounds;
   readonly runtimeVersions: Readonly<Record<string, unknown>>;
@@ -214,7 +216,7 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
         runnerSequence: sequence,
         reportedAt: wallClock().toISOString(),
         browserStartedAt,
-        steps: started ? boundSteps(ordered, bounds.maxSteps) : [],
+        steps: started ? boundSteps(ordered, bounds.maxSteps) : options.allowUnstartedSkippedSteps ? boundSteps(ordered.filter(step=>step.status==='SKIPPED'&&step.startedAtMs===null&&step.finishedAtMs===null&&step.durationMs===null&&step.failure===null),bounds.maxSteps) : [],
         logs: started ? logs.entries() : logs.entries().map(withoutReading),
         logsTruncated: logs.truncated,
         runtimeVersions,

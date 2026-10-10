@@ -1,0 +1,116 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v1/limits.schema.json",
+  "title": "Studio observed v1 limits",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "maxSessionSeconds": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 600,
+      "default": 600
+    },
+    "maxActions": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 200,
+      "default": 200
+    },
+    "maxObservations": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 400,
+      "default": 400
+    },
+    "maxModelProposals": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 100
+    },
+    "maxModelInputTokensTotal": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 128000,
+      "default": 128000
+    },
+    "maxModelOutputTokensTotal": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32000,
+      "default": 32000
+    },
+    "maxObservationBytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32768,
+      "default": 32768
+    },
+    "maxObservationNodes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500,
+      "default": 500
+    },
+    "maxObservationDepth": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8,
+      "default": 8
+    },
+    "maxSanitizedEvidenceBytesTotal": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 1048576,
+      "default": 1048576
+    },
+    "maxRuntimeValues": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32,
+      "default": 32
+    },
+    "maxRuntimeValueBytes": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 4096,
+      "default": 4096
+    },
+    "maxRuntimeValuesBytesTotal": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 65536,
+      "default": 65536
+    },
+    "maxSourceSteps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 100
+    },
+    "maxStatementsPerStep": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 8,
+      "default": 8
+    }
+  },
+  "required": [
+    "maxSessionSeconds",
+    "maxActions",
+    "maxObservations",
+    "maxModelProposals",
+    "maxModelInputTokensTotal",
+    "maxModelOutputTokensTotal",
+    "maxObservationBytes",
+    "maxObservationNodes",
+    "maxObservationDepth",
+    "maxSanitizedEvidenceBytesTotal",
+    "maxRuntimeValues",
+    "maxRuntimeValueBytes",
+    "maxRuntimeValuesBytesTotal",
+    "maxSourceSteps",
+    "maxStatementsPerStep"
+  ]
+}

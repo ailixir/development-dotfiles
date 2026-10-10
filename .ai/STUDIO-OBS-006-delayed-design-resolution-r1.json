@@ -1,0 +1,72 @@
+{
+  "story": "STUDIO-OBS-006",
+  "kind": "Architect design resolution only; not implementation or QA approval",
+  "recordedAt": "2026-10-09T11:26:51.159940+00:00",
+  "findings": [
+    {
+      "ids": [
+        "DELAY-RUNTIME-R1-001",
+        "DELAY-QA-001"
+      ],
+      "sections": [
+        "delayed-state-design.md \u00a74, \u00a74.1, \u00a74.2, \u00a75"
+      ],
+      "resolution": "Model/human/session budgets unchanged; cumulative per-step passive-only allowance, exact original windows, atomic reservation/settlement, sticky unknown full charge, no reset across same-step operations/restart/replan/clarification; immediate-ready slow-model and long-question regressions."
+    },
+    {
+      "ids": [
+        "DELAY-RUNTIME-R1-002"
+      ],
+      "sections": [
+        "delayed-state-design.md \u00a71, \u00a72, \u00a75"
+      ],
+      "resolution": "Probe caches facts in original bounded collection, performs no new discovery/business capture/raw source read, expressly permits existing bounded private retained field/style-signature freshness rereads. Direct value property mutation and hidden-label/privacy byte oracles required."
+    }
+  ],
+  "mandatoryConditions": {
+    "D-IMPL-1": "\u00a72 cached reasons/exact complete private universe",
+    "D-IMPL-2": "\u00a72 and unchanged C12 original guard facts and operation compatibility",
+    "D-IMPL-3": "\u00a71 conservative count/byte reservations and stricter guided limits",
+    "D-IMPL-4": "\u00a74.1 exact100ms/250ms cadence and no-I/O not-due202",
+    "D-IMPL-5": "\u00a74.2 full immutable pending request/key/hash/expectedGeneration; existing committed refresh result recovery",
+    "D-IMPL-6": "\u00a74.1\u20134.2 original authority/concurrency/recovery and retained late accounting",
+    "D-IMPL-7": "\u00a73 one-way invocation and synchronous poison at every await",
+    "D-IMPL-8": "\u00a72 local fixed closure-free cached probe and public byte privacy",
+    "DELAY-QA-C1": "\u00a75 genuine receipt/observation async barrier and exact effect/model counts",
+    "DELAY-QA-C2": "\u00a72 conservative private eligibility and \u00a75 mutation/privacy oracles",
+    "DELAY-QA-C3": "\u00a73 poison/no reacquisition and \u00a75 late-await/unknown outcomes",
+    "DELAY-QA-C4": "\u00a74.1\u20134.2 exact durable identity/window/request recovery",
+    "DELAY-QA-C5": "\u00a71 and \u00a74.1\u20134.2 conservative reservation/settlement/no unknown refund",
+    "DELAY-QA-C6": "\u00a76 precise ownership and unchanged payload/profile compatibility; renewed build evidence required"
+  },
+  "reviewInputs": {
+    ".ai/STUDIO-OBS-006-delayed-design-runtime-review.json": "ca059582a22f5a8979a4529ce97ca67de8eabadecc1115db3957dd007403913b",
+    ".ai/STUDIO-OBS-006-delayed-design-qa-review.json": "86eb1c60a477ab90b3bbd82d202403db0adad9eed3229b9350ec2095bb20b2ed"
+  },
+  "frozenDocuments": {
+    "docs/specs/studio-observed-authoring/delayed-state-design.md": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "8137183a7c5738bd73fc1a2e34cad150f2827f1c7087ade734847cb9a7cf2d74"
+  },
+  "ownership": {
+    "newProductPathsComparedWith159": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "studio-runner/src/run/observationTypes.ts",
+      "studio-runner/src/run/observationCollector.ts",
+      "studio-runner/test/run/observation.test.ts"
+    ],
+    "alreadyOwnedCollectorWrapper": "studio-runner/src/run/browser.ts",
+    "newDocumentation": [
+      "docs/specs/studio-observed-authoring/delayed-state-design.md",
+      ".ai/STUDIO-OBS-006-delayed-design-resolution-r1.json"
+    ],
+    "delayedProductOwnershipActivated": false
+  },
+  "unresolvedDesignChoices": [],
+  "implementationAndTests": "NOT EXECUTED for delayed-state amendment; existing independent backend work remains separate",
+  "frozenNodeAndPriorReviewBytesChanged": false,
+  "sharedWaveCeilingUsd": 500,
+  "spendTelemetry": "UNKNOWN"
+}

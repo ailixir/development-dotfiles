@@ -136,6 +136,126 @@ tags:
       destination is deployment configuration and is never job-supplied (§8.5).
 
 paths:
+  /v2/validate-observed:
+    servers: [{url: https://runner.example.invalid}]
+    post:
+      operationId: validateObservedPublication
+      tags: [internal, runner]
+      x-served-by: studio-runner
+      x-internal: true
+      x-json-schema-dialect: http://json-schema.org/draft-07/schema#
+      security: [{serviceIdentity: []}]
+      description: Pure independent original-basis validation with no browser/model/account setup. One charged send per fenced backend claim; composed request at most8MiB and verdict64KiB. Historical node facts validate exact guards but never grant replay authority.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../studio-observed-authoring/contracts/v2/replay-validation.schema.json
+            examples:
+              observed:
+                $ref: ../studio-observed-authoring/contracts/v2/publication-fixtures.json#/examples/ValidationRequest
+      responses:
+        "200":
+          description: Closed independently derived verdict; ok=false never grants publication.
+          content:
+            application/json:
+              schema:
+                $ref: ../studio-observed-authoring/contracts/v2/replay-validation.schema.json#/definitions/ValidationVerdict
+              examples:
+                observed:
+                  $ref: ../studio-observed-authoring/contracts/v2/publication-fixtures.json#/examples/ValidationVerdict
+        "401":
+          $ref: '#/components/responses/RunnerUnauthenticated'
+        "403": {description: Restricted service identity refused}
+        "413": {description: Receiving byte ceiling exceeded before parse}
+        "400": {description: Strict JSON/schema or original-evidence validation refused}
+        "503": {description: Observed validator disabled or unavailable}
+  /v2/runs:
+    servers: [{url: https://runner.example.invalid}]
+    post:
+      operationId: runObservedRevision
+      tags: [internal, runner]
+      x-served-by: studio-runner
+      x-internal: true
+      x-json-schema-dialect: http://json-schema.org/draft-07/schema#
+      security: [{serviceIdentity: []}]
+      description: Explicit observed family through ordinary admission, recorded child, reporting and cancellation. Immutable configuration/profile/build/current-policy/execution grant joins precede browser. Job4MiB and strict source-free child frames; initial account connectivity is the only later provider. Neither model gateway is reachable. Existing DELETE /v1/runs/{id} controls both families.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../studio-observed-authoring/contracts/v2/replay-job.schema.json
+            examples:
+              observed:
+                $ref: ../studio-observed-authoring/contracts/v2/publication-fixtures.json#/examples/ObservedJob
+      responses:
+        "202":
+          description: Existing ordinary pipeline accepted this exact admitted run; no replay verification claim yet.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  code: {type: string, enum: [ADMITTED]}
+                required: [code]
+              example: {code: ADMITTED}
+        "401":
+          $ref: '#/components/responses/RunnerUnauthenticated'
+        "403": {description: Restricted service identity refused}
+        "409":
+          description: No executable authority; no browser is launched and no retry is granted by this response.
+          x-conflict-codes: [PROFILE_MISMATCH, AUTHORIZATION_EXPIRED, POLICY_REFUSED, REFERENCE_REFUSED, ACCOUNT_UNAVAILABLE]
+        "413": {description: Whole job receiving byte ceiling exceeded}
+        "400": {description: Mixed family, invalid schema or metadata refused}
+        "429": {description: Capacity refusal; the observed backend does not reuse or replace a committed send}
+        "503": {description: Observed replay disabled, unavailable or admission ambiguous; no retry permission}
+  /internal/studio/executions/{id}/observed-admission:
+    servers: [{url: https://controller.example.invalid}]
+    post:
+      operationId: admitObservedExecution
+      tags: [internal, api-callback]
+      x-served-by: api
+      x-internal: true
+      x-json-schema-dialect: http://json-schema.org/draft-07/schema#
+      security: [{serviceIdentity: []}]
+      description: Actual ordinary static service-token filter over protected deployment TLS; this route does not claim guided-only JWT or client-certificate verification. The exact immutable user grant/account/profile/build/configuration/attempt binds the existing admission CAS and write-once receipt. One HTTP send; ambiguity stops before browser, never resends. Maximum16KiB request/receipt, current cancellation/deadlines rechecked under ledger lock; account I/O precedes that lock.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: {type: string, format: uuid}
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: ../studio-observed-authoring/contracts/v2/replay-job.schema.json#/definitions/AdmissionRequest
+            examples:
+              observed:
+                $ref: ../studio-observed-authoring/contracts/v2/publication-fixtures.json#/examples/AdmissionRequest
+      responses:
+        "200":
+          description: Same exact admission identity and original deadlines; no replacement browser permission from historical receipts.
+          content:
+            application/json:
+              schema:
+                $ref: ../studio-observed-authoring/contracts/v2/replay-job.schema.json#/definitions/AdmissionReceipt
+              examples:
+                observed:
+                  $ref: ../studio-observed-authoring/contracts/v2/publication-fixtures.json#/examples/AdmissionReceipt
+        "400":
+          description: Spring rejects a malformed UUID path or absent required request body before the strict observed contract parser runs.
+        "401":
+          $ref: '#/components/responses/Unauthorized'
+        "403": {description: Service identity, execution scope or current account authority refused}
+        "409":
+          description: Exact claim refused; no browser authority.
+          x-conflict-codes: [RUNTIME_INCOMPATIBLE, AUTHORIZATION_EXPIRED, CANCELLED, AUTH_CONNECTION_REQUIRED, EXECUTION_UNKNOWN, ATTEMPT_SUPERSEDED, ADMISSION_OWNED, ADMISSION_EXPIRED, EXECUTION_SETTLED]
+        "413": {description: Body ceiling exceeded before parsing}
+        "422": {description: Strict UTF-8/JSON/schema contract refused}
   /tests:
     get:
       tags: [tests]

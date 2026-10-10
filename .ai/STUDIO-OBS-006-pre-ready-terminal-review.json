@@ -1,0 +1,257 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewKind": "INDEPENDENT_NARROW_PRE_READY_TERMINAL_DESIGN_SECURITY_REVIEW",
+  "reviewer": "capture_qa_security",
+  "verdict": "PASS",
+  "at": "2026-10-09T12:11:29.520368+00:00",
+  "scope": "Design only: immutable observed admission permits recording a narrowly constrained pre-Ready ERROR; no implementation, whole-story QA, release or lifecycle verdict.",
+  "reviewedDocuments": {
+    "docs/specs/studio-observed-authoring/pre-ready-terminal-design.md": "18126e4107972f3bf4532c1f2b5c815e374cd6999e33f249fa58cd1f17f8b880",
+    ".ai/STUDIO-OBS-006-pre-ready-terminal-design.json": "cc409c6375d7a1492980dd432730e7274471ee7a3b1efa6ff6b0f33068f9a778",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "e3cb5ecbac7ab92f642757f8b0c5dab86e6f5c63b70c6bedd262d67e32dd06d8"
+  },
+  "frozenSourceSnapshot": {
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java": "45eed4c1bf110dcdc934e8b813469ac7e4c2beceacc5897bdb1958c992a00ed0",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "e6eb4024b19216c21cae9059da0981ad967831c88a0fa2970dcb6512bf905cf1",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java": "d464d3db86b5037154b79a974f93e3e497c2618de433853d8f1d90f6df0f1e0e",
+    "studio-runner/src/server/runCoordinator.ts": "616bb068ea4267c062cf63d868ead2e882fe38c824ca83d2686a82a4f2f6029e",
+    "studio-runner/src/run/childRuntime.ts": "fc99aa7c485f6f41b0ded3b031fcf142a1fa19212246c1a265fc79c25e2b532a",
+    "studio-runner/src/run/observedAccount.ts": "28379ecd4383ccd81e94685c0eb931bd931a2a28ff29fed796cd707491cc400f",
+    "studio-runner/src/run/recording.ts": "0a3f3f29feda2d4f2611a1070bd7f03b253a51b26314985925e9725ac531b3bb"
+  },
+  "additionalReadOnlySources": {
+    "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java": "39f1f9afca11a05799062121be1a11d586852ed40e983c86090efc28fb292ff4",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java": "5bb834e793d54bc00c55b80af94528c2c48a35d36535837920cd942d737fdf15",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java": "eae167fa6831a6d6160b03d7ae4b28adab0d784d714871e81515dea9b27f2bdb",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerReport.java": "56e3fe7c5a9a7345a05855c8a0672774358a597979a3fafa04c64a6b50a6e945",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/dto/RunnerStepState.java": "758aa58af160d2eeb4cfcabd53d94c58fede19d4e2af7d34286377cfe207ec25",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "b881d2f49d14380ccb574de39b16510d0c6b9fd9a91a81282cd7da33c3ebfa23",
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1ca47811bb8624003aaf6171e62223d4a65615ad9fe88e7f9a024e46223d92ad",
+    "backend/src/test/java/com/citi/put/checks/studio/internal/ProgressCallbackIT.java": "4aaea7506a712dd9d57cfda9ae5e5a1ecd580ab9e89d88b78d0089ef977d91b9",
+    "backend/src/test/java/com/citi/put/checks/studio/internal/RunnerReportProjectionTest.java": "ee7b143860a2034ba95d83e1d722de454df4539f7dd0f6cb2b6be9f04db04d92",
+    "backend/src/test/java/com/citi/put/checks/studio/internal/EvidencePartialCallbackIT.java": "ee34b5b92d30bef3a7dc806c0f7be34ee58b4f4fd5936c69cdff6f0d3a49d599",
+    "backend/src/test/java/com/citi/put/checks/studio/CancelIT.java": "773870fe279ecc8fbf387aebe87b782f493c9c8b1bf1f9027c7629bebddb5ec3",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "0437a2b2a378afb6ea94312be7c0646addc283b66fb263059129f3c094128fcf",
+    "studio-runner/src/run/launcher.ts": "4f29860634d168753124fae8a289c333493c3778f07b71188b82c0d5f4e2fcb6",
+    "studio-runner/src/run/errors.ts": "005e51bf10d04f3f07d0e127f85dc765265198635679084df5cc73008c2d3b47",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+    ".aiox/sdc/STUDIO-OBS-006/pre-ready-backend-second-failure/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationReplayIT.xml": "15039d411094b5362d00e152ac7623e027fd66cdce6708f1d784d5554cde632f"
+  },
+  "hashVerification": "All three root-final hashes and all seven architect sourceSnapshot hashes match current bytes.",
+  "findings": [],
+  "resolvedFindings": [
+    {
+      "id": "PRE-READY-SEC-DESIGN-001",
+      "severity": "clarification",
+      "finding": "Draft SQL checklist placed admitted deadlines under receipt.request, which has no such fields.",
+      "resolution": "Final design line64 correctly compares top-level expectedReceipt.startDeadlineAt and expectedReceipt.runDeadlineAt to admitted ledger deadlines.",
+      "source": [
+        "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java:191",
+        "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql:393",
+        "docs/specs/studio-observed-authoring/pre-ready-terminal-design.md:64"
+      ]
+    }
+  ],
+  "sourceBackedAssessment": [
+    {
+      "id": "BOUNDARY",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:523",
+        "studio-runner/src/server/runCoordinator.ts:713"
+      ],
+      "conclusion": "Current ADMITTED FINAL requires recorded cancellation. ObservedPreReadyFailure accumulates SKIPPED/null steps without STARTED or PROGRESS and the coordinator sends FINAL. Preserved three-case XML has two passes/one terminal-completion failure; this review did not rerun it."
+    },
+    {
+      "id": "RAW-PREDICATE",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java:221",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java:271"
+      ],
+      "conclusion": "Raw validation before projection is required: projection deduplicates indices and fills omissions; current null-origin validation does not reject durationMs alone. Final design expressly requires exact coordinate coverage, SKIPPED, null failure and every timing null."
+    },
+    {
+      "id": "OWNERSHIP",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java:127",
+        "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql:332"
+      ],
+      "conclusion": "Binding is immutable and admission receipt is write-once after the actual CAS. Complete JSON equality plus execution/acceptedAt/attempt/admission/runner, accepted revision, test/CSI/principal/environment and deadline equality in the locked SQL predicate prevent a claimed family/runtime flag or mismatched rows from granting the new edge."
+    },
+    {
+      "id": "FAILURE-ONLY",
+      "evidence": [
+        "studio-runner/src/run/observedAccount.ts:60",
+        "studio-runner/src/run/childRuntime.ts:839",
+        "studio-runner/src/run/launcher.ts:988",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java:98"
+      ],
+      "conclusion": "Exact outer RUN_ERROR and the ten enumerated inner reasons are source-derived. ERROR/null origin/null duration is terminal accounting only. API error-code mapping stays unchanged; runtime/model provenance remains display data, never report ownership. The ordinary recorded-cancel path remains separate."
+    },
+    {
+      "id": "ATOMICITY",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java:135",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:527",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:1118"
+      ],
+      "conclusion": "Existing transaction/hook, CTE history+ledger update and same-owner/sequence no-write acknowledgement can be reused. The design correctly does not claim payload-hash duplicate detection, and new raw checks precede acknowledgement."
+    },
+    {
+      "id": "EVIDENCE",
+      "evidence": [
+        "studio-runner/src/run/recording.ts:112",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java:591",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java:824"
+      ],
+      "conclusion": "An actual browser/account-apply session can leave a verified recording before Ready reaches the backend. Null reported origin is retained; partiality stays inspection/orderly-close derived. Evidence settlement must preserve the original ERROR and must not invent timing, bytes or a recording."
+    }
+  ],
+  "requiredPositiveOracles": [
+    {
+      "id": "P1",
+      "test": "Actual joined guided learning/publication -> ordinary admission -> controlled account apply failure -> real owning worker FINAL",
+      "assertions": [
+        "Exactly one genuine observed binding and admission receipt; no fixture bypass of SQL guards.",
+        "Committed terminal ERROR; streamComplete true; browserStartedAt and duration null; all immutable source coordinates SKIPPED with every timing/failure null.",
+        "Real WebM exists, valid header and >=512bytes, actual upload/inspection disposition, orderly partial=false.",
+        "Zero extra application navigations/submissions and zero calls to both model gateways; no account/input canary in persisted/surfaced diagnostics."
+      ]
+    },
+    {
+      "id": "P2",
+      "test": "Real pre-Ready prepare and initial-state refusal variants",
+      "assertions": [
+        "Only source-listed fixed reason pairs enter this new edge.",
+        "No browser when prepare refuses; keep genuinely available recording for later setup failure without inventing origin."
+      ]
+    },
+    {
+      "id": "P3",
+      "test": "Commit-hook failure and sender retry",
+      "assertions": [
+        "Failed transaction produces non200 and leaves history/ledger/sequence/evidence/revision unchanged.",
+        "Actual same-owner sender retry commits once without another admission, browser or business action."
+      ]
+    },
+    {
+      "id": "P4",
+      "test": "Idempotence and evidence settlement",
+      "assertions": [
+        "Same owner/sequence valid duplicate acknowledges applied=false with no rewrite/revision bump.",
+        "Subsequent FINALIZING evidence-only settlement preserves ERROR and cannot create STARTED/PASS/readiness.",
+        "Older completion cannot overwrite the newer last-run projection."
+      ]
+    }
+  ],
+  "requiredNegativeOracles": [
+    {
+      "id": "N1",
+      "mutations": [
+        "Legacy ADMITTED without cancel",
+        "Missing or malformed stored binding",
+        "Missing or malformed actual admission receipt",
+        "Forged report preReady/family flag",
+        "Claimed observed/model/runtime labels alone"
+      ],
+      "assertion": "No new transition or authority; unknown wire fields remain refused and legacy behavior stays unchanged."
+    },
+    {
+      "id": "N2",
+      "mutations": [
+        "Wrong path execution",
+        "Wrong attempt",
+        "Wrong admission",
+        "Wrong runner",
+        "Wrong acceptedAt/partition",
+        "Wrong revision/test/CSI/principal/environment",
+        "Contradictory binding/receipt hashes/profile/build/grants",
+        "Nonmatching top-level admitted deadlines",
+        "Absent expected JSON parameters"
+      ],
+      "assertion": "No writes. Use actual negative SQL/schema/admission probes; do not disable immutable triggers to fabricate a positive execution."
+    },
+    {
+      "id": "N3",
+      "mutations": [
+        "First sequence0",
+        "First sequence2",
+        "Nonzero prior runner sequence",
+        "Competing owner",
+        "Concurrent STARTED",
+        "Concurrent cancellation",
+        "Reaper/DONE winner",
+        "Reaper-set expired terminal state race"
+      ],
+      "assertion": "The new ADMITTED edge loses its CAS and cannot overwrite the winner. Existing cancellation/RUNNING/terminal handling retains its prior semantics."
+    },
+    {
+      "id": "N4",
+      "mutations": [
+        "PASSED",
+        "FAILED",
+        "STARTED",
+        "PROGRESS",
+        "Non-null browserStartedAt",
+        "Zero or nonzero raw startedAtMs",
+        "Zero or nonzero raw finishedAtMs",
+        "Zero or nonzero raw durationMs",
+        "Non-null log atMs",
+        "Non-SKIPPED status",
+        "Non-null failure"
+      ],
+      "assertion": "Cannot enter failure exception; ERROR/null duration is additionally constrained by SQL. No manufactured application/step execution."
+    },
+    {
+      "id": "N5",
+      "mutations": [
+        "Absent/null/empty steps",
+        "Duplicate index that Map.put would hide",
+        "Missing index",
+        "Extra/out-of-range/negative/null index",
+        "Incomplete payloadReduced snapshot"
+      ],
+      "assertion": "Inspect raw list against immutable source coordinates before projection; no silent deduplication or PENDING synthesis can authorize it."
+    },
+    {
+      "id": "N6",
+      "mutations": [
+        "RUN_ERROR with arbitrary/concatenated/mixed-case prose",
+        "Unsupported outer code",
+        "READ_REFUSED",
+        "ASSERTION_FAILED",
+        "REFERENCE_REFUSED",
+        "OUTCOME_UNKNOWN",
+        "Generic parent BROWSER_LAUNCH_FAILED/START_DEADLINE_EXCEEDED",
+        "Outer CANCELLED without recorded cancellation"
+      ],
+      "assertion": "No blanket RUN_ERROR or cancellation bypass; fixed data-free refusals. Unsupported residual failures remain outside this amendment."
+    },
+    {
+      "id": "N7",
+      "mutations": [
+        "Malformed/unsupported evidence metadata",
+        "Partial=true when no object exists",
+        "Evidence update attempting outcome rewrite",
+        "Duplicate with malformed raw coordinates/reason",
+        "Different-owner same-sequence retry"
+      ],
+      "assertion": "Preserve existing evidence validation and transaction/idempotence invariants. Same-sequence acknowledgement is not proof of byte-equal payload."
+    }
+  ],
+  "requiredRegressions": [
+    "ProgressCallbackIT STARTED-only RUNNING/origin, acceptedAt immutability, duplicate/monotone/owner, evidence settlement, commit ordering and older-last-run cases",
+    "CancelIT accepted-before-start cancellation and no-cancel legacy refusal",
+    "RunnerReportProjectionTest unknown-version narrowing, API-owned error-code protection and no-origin timing cases",
+    "EvidencePartialCallbackIT evidence/outcome independence and impossible partiality refusal",
+    "Ordinary started observed replay plus legacy ordinary Run and reporting bounds/privacy; exact new implementation source/dist manifest and independent final QA"
+  ],
+  "limits": [
+    "No tests, builds, browser runs or product edits were performed in this review.",
+    "PASS approves this narrow frozen design for implementation; it does not claim the exception or joined regression is implemented or passing.",
+    "Callback authority remains the existing restricted shared runner-service token and recorded ownership, not per-principal BFF authentication or model provenance.",
+    "Generic residual parent launch failures outside the explicit pair set remain unchanged; this is not universal pre-start reporting support.",
+    "Reviewed runner hashes cover this seam only; unrelated concurrent delayed-collector edits are not reviewed here.",
+    "Expiry of a grant after its valid admission is not a new start-authority check for terminal accounting; do not refresh/recreate authority or fabricate a reaper decision merely to record the failure."
+  ],
+  "permittedChangeBoundary": "Small observed raw predicate plus atomic observed-only FINAL SQL path; unchanged public applyFinal behavior, no DTO/IPC/schema/migration or success/start/effect grant."
+}

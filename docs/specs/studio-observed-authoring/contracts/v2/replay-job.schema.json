@@ -1,0 +1,389 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v2/replay-job.schema.json",
+  "title": "Observed replay replay-job",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "kind": {
+      "const": "observed"
+    },
+    "binding": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-job.schema.json#/definitions/ExecutionBinding"
+    },
+    "artifact": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-artifact.schema.json"
+    },
+    "configuration": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/Configuration"
+    },
+    "inputs": {
+      "type": "array",
+      "minItems": 0,
+      "maxItems": 200,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "inputId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "value": {
+            "type": "string",
+            "maxLength": 4096
+          }
+        },
+        "required": [
+          "inputId",
+          "value"
+        ]
+      }
+    },
+    "accountHandle": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-account.schema.json"
+    },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stepTimeoutMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "totalRuntimeMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "stepTimeoutMs",
+        "totalRuntimeMs"
+      ]
+    },
+    "recording": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "binding",
+    "artifact",
+    "configuration",
+    "inputs",
+    "accountHandle",
+    "runtime",
+    "recording"
+  ],
+  "definitions": {
+    "ExecutionBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "executionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "revisionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "revisionDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "testId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "csiId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "principalId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environment": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "artifactHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configurationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "learnedPlanHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "referencePolicyHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publicationEvidenceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "requiredProfile": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json"
+        },
+        "requiredBuild": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/BuildIdentity"
+        },
+        "scope": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/Scope"
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "currentPolicyHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "replayGrant": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-account.schema.json#/definitions/ReplayGrant"
+        },
+        "accountAuthorization": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-account.schema.json#/definitions/AccountAuthorization"
+        }
+      },
+      "required": [
+        "version",
+        "executionId",
+        "startedAt",
+        "attemptId",
+        "revisionId",
+        "revisionDigest",
+        "testId",
+        "csiId",
+        "principalId",
+        "environment",
+        "artifactHash",
+        "configurationHash",
+        "learnedPlanHash",
+        "referencePolicyHash",
+        "publicationEvidenceHash",
+        "requiredProfile",
+        "requiredBuild",
+        "scope",
+        "scopeHash",
+        "currentPolicyHash",
+        "replayGrant",
+        "accountAuthorization"
+      ]
+    },
+    "AdmissionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "kind": {
+          "const": "observed"
+        },
+        "executionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "runnerInstanceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "admissionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "revisionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "revisionDigest": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "artifactHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configurationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "learnedPlanHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "referencePolicyHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publicationEvidenceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "currentPolicyHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "grantId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "accountGrantId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "profile": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json"
+        },
+        "build": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/BuildIdentity"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "executionId",
+        "startedAt",
+        "attemptId",
+        "runnerInstanceId",
+        "admissionId",
+        "revisionId",
+        "revisionDigest",
+        "artifactHash",
+        "configurationHash",
+        "learnedPlanHash",
+        "referencePolicyHash",
+        "publicationEvidenceHash",
+        "scopeHash",
+        "currentPolicyHash",
+        "grantId",
+        "accountGrantId",
+        "profile",
+        "build"
+      ]
+    },
+    "AdmissionReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "kind": {
+          "const": "observed"
+        },
+        "admissionId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "request": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-job.schema.json#/definitions/AdmissionRequest"
+        },
+        "admittedAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "startDeadlineAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        },
+        "runDeadlineAt": {
+          "type": "string",
+          "format": "date-time",
+          "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "admissionId",
+        "request",
+        "admittedAt",
+        "startDeadlineAt",
+        "runDeadlineAt"
+      ]
+    },
+    "RecordingConfiguration1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 8192
+        }
+      },
+      "required": [
+        "width",
+        "height"
+      ]
+    }
+  }
+}

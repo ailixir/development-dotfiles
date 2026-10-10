@@ -1,0 +1,158 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Narrow independent delayed-state design re-review R1; not implementation QA, lifecycle gate or product-edit authorization",
+  "reviewer": "/root/obs005_peer",
+  "recordedAt": "2026-10-09T11:35:46.705970+00:00",
+  "verdict": "PASS",
+  "summary": "The R1 amendment resolves the model/human timeout regression with explicit passive-only cumulative windows and resolves the private freshness wording against actual retained-signature checks. Exact request recovery, sticky unknown charging, current authority/send gates and the genuine async-after-receipt tests are concrete. No blocking design defect remains in this narrow review; all retained implementation oracles remain unexecuted requirements.",
+  "resolvedFindings": [
+    {
+      "ids": [
+        "DELAY-QA-001",
+        "DELAY-RUNTIME-R1-001"
+      ],
+      "status": "DESIGN_RESOLVED",
+      "sections": [
+        "delayed-state-design.md \u00a74",
+        "\u00a74.1",
+        "\u00a74.2",
+        "\u00a75"
+      ],
+      "assessment": "The browser timeout is no longer a model-plus-human learning SLA. Immediately available targets open no acquisition window. Model calls retain callSeconds/cumulative usage/session limits; human clarification retains existing question/session expiry. Guided readiness uses a separately named per-source-step passive allowance from the locked real timeout column, while ordinary replay keeps its existing absolute browser step/run clock. A settled window is not rechecked as a model deadline.",
+      "durability": "usedMs includes reserved time; each original window has immutable ID/open/deadline/reserved amount and a sticky uncertain flag. Known settlement may release only unused reserved duration once. Recovered unsettled work retains its whole reservation; restarts between settled polls retain the same window/deadline and charge downtime. Same-step operations/replans/questions/renewals cannot reset duration or counters. An already-ready obligation can proceed with zero remaining passive allowance."
+    },
+    {
+      "ids": [
+        "DELAY-RUNTIME-R1-002"
+      ],
+      "status": "DESIGN_RESOLVED",
+      "sections": [
+        "delayed-state-design.md \u00a71",
+        "\u00a72",
+        "\u00a75"
+      ],
+      "assessment": "The probe now honestly permits existing bounded private retained field/style-signature rereads, including snapshotField values/selectedOptions, while prohibiting a second DOM discovery, new raw source read or business binding capture. Cached readiness/visibility/hard-denial/type/policy facts and final current retained-target checks preserve privacy; hidden labels/grants requiring unsafe discovery remain refused. This matches current collector freshness behavior."
+    }
+  ],
+  "blockers": [],
+  "mandatoryImplementationConditions": [
+    {
+      "id": "DQA-R1-C1",
+      "area": "Separate budgets and cumulative settlement",
+      "source": "\u00a74\u20134.1",
+      "required": "Implement exact writer-validated private progress, real locked timeout/config identity, cumulative usedMs and per-step/per-session counts. Known settlement is atomic by windowId/poll identity; no double refund, negative counters or replenishment after unknown work. Only verified step completion resets the next step allowance. Keep the hard session/owner/model budgets and the guided 400-observation/1MiB ceilings unchanged.",
+      "oracles": [
+        "timeoutSeconds=1 with an immediately ready target and a controlled model response slower than 1 second but within existing call/session limits succeeds without readiness-time charge.",
+        "Observed human answer after the browser timeout but before question/session expiry resumes its exact meaning without new timeout or reset of prior usage.",
+        "Two known episodes in one compound step fit only when cumulative charge fits; exhausted allowance still permits already-ready work but forbids another unavailable-target window. Unknown recovered reservations cannot be refunded by later success, clarification, replan or restart."
+      ]
+    },
+    {
+      "id": "DQA-R1-C2",
+      "area": "Exact refresh recovery and authority fencing",
+      "source": "\u00a74.1\u20134.2 and existing GuidedDispatchService.observe",
+      "required": "Persist the complete ObservationRefresh2 request, its canonical hash, original key and expectedGeneration before I/O. Recovery must never reconstruct from the advanced current generation. Pending windows freeze their plan/obligation/target/source/worker/fence; model send claim requires both window and pending null and existing current authority. Preserve committed late-model accounting on any readiness refusal.",
+      "oracles": [
+        "Crash before/after refresh intent, callback and settlement; retry uses the same bytes/key and no extra collection/charge. A committed callback can be recovered despite generation advancement when it is still the same current correlated observation.",
+        "Concurrent scanner, changed source/fence/plan/obligation or unrelated newer observation cannot restamp a result, overwrite/refund old pending work or mint another action.",
+        "Update durable lastCheckedAt at claims/checkpoints; backwards DB wall time refuses. Restart between settled polls retains original deadline/downtime; same-owner renewal cannot extend it."
+      ]
+    },
+    {
+      "id": "DQA-R1-C3",
+      "area": "Bounded in-flight work and cancellation",
+      "source": "\u00a73\u20134.1",
+      "required": "Use the original remaining window and 15-second transport ceiling, not an uncancellable longer wait. Virtual-thread interruption is best effort only; late callback/result must still pass durable deadline/identity/terminal checks. After timeout no replacement outstanding poll is started. No network/sleep runs under source/session locks.",
+      "oracles": [
+        "Hold collect/probe/sleep/matches/validate/withhold, then timeout/cancel and release: zero late invocation, binding or PASS.",
+        "Timeout after invocation begins preserves uncertainty/cancellation and never reacquires/retries the operation. Compound replay steps retain one original monotonic step deadline.",
+        "No model/human work begins while a readiness window is open. Multiple available candidates settle a known window before the existing clarification path, with no automatic disambiguation."
+      ]
+    },
+    {
+      "id": "DQA-R1-C4",
+      "area": "Private classification and truthful freshness",
+      "source": "\u00a71\u20132",
+      "required": "ABSENT and VISIBILITY_PENDING come only from the exact complete cached private candidate universe and permitted retained-signature checks. READY must be an exported eligible current node and pass final matches/validateInvocation. Probe enum does not grant a read or expose hidden metadata.",
+      "oracles": [
+        "Direct value/selected-option property mutation without DOM/input/change events refuses stale invocation.",
+        "Duplicate including hidden competitor, incomplete/truncated/unsupported universe, sensitive name/label/ancestry/descendant, wrong origin/type/classification/policy and disabled/readonly incompatibility refuse.",
+        "Hidden visibility-only structural candidate can become ready through a fresh normal observation; hidden labels/grants requiring new unsafe source reads stay refused. Public observation/provider bytes and existing collector fixtures retain their privacy behavior."
+      ]
+    },
+    {
+      "id": "DQA-R1-C5",
+      "area": "Genuine asynchronous correctness and no repeated effects",
+      "source": "\u00a75; consensus \u00a7\u00a77/11",
+      "required": "Preserve the synchronous PASS as limited smoke and the earlier controlled asynchronous failure as history. Add the actual receipt-gated delayed render, proving at least one genuine absent post-submit observation/acquisition before release. The known 006 case is not deferred to a general live-model benchmark.",
+      "oracles": [
+        "One learning submit/independent receipt and unchanged source-plan/semantic obligations; no NEXT_ACTION for absent Confirmation; a later genuine acknowledged node feeds preparation/admission.",
+        "Pure finalization adds zero actions or model calls. Two actual normal recorded replays use the same artifact and distinct unpredictable captured values, exactly one submit each and zero calls to both gateways.",
+        "Never appears/count/bytes/time exhausted: no repeated submit, dependent invocation or binding; truthful FAIL/SKIPPED/null timing/video. Failed assertions and read captures are never retried until they look successful."
+      ]
+    },
+    {
+      "id": "DQA-R1-C6",
+      "area": "Rollout, ownership and future implementation evidence",
+      "source": "\u00a76 and resolution ownership",
+      "required": "Old post-effect sessions may recover completed outcomes/receipts and immediately-ready continuation, but cannot gain a new delayed allowance without provenance. New private markers do not modify immutable source manifests or model/public/protocol schemas. Root must activate the proposed partition after review; source/dist/catalog evidence must be rebuilt and independently validated once implementation exists.",
+      "oracles": [
+        "Fresh source-only initialization uses the actual current locked configuration; old absent-marker delayed continuation refuses without artifact backfill or browser replay.",
+        "Affected collector/native/privacy/child/ordinary dual-gateway mutation and real pipeline suites pass with new exact source/build hashes. Keep earlier synchronous/frozen worker evidence explicitly historical."
+      ]
+    }
+  ],
+  "retainedInitialConditions": {
+    "DELAY-QA-C1": "PRESERVED; mapped to \u00a71\u20136 and DQA-R1-C1..C6",
+    "DELAY-QA-C2": "PRESERVED; mapped to \u00a71\u20136 and DQA-R1-C1..C6",
+    "DELAY-QA-C3": "PRESERVED; mapped to \u00a71\u20136 and DQA-R1-C1..C6",
+    "DELAY-QA-C4": "PRESERVED; mapped to \u00a71\u20136 and DQA-R1-C1..C6",
+    "DELAY-QA-C5": "PRESERVED; mapped to \u00a71\u20136 and DQA-R1-C1..C6",
+    "DELAY-QA-C6": "PRESERVED; mapped to \u00a71\u20136 and DQA-R1-C1..C6"
+  },
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/delayed-state-design.md": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "8137183a7c5738bd73fc1a2e34cad150f2827f1c7087ade734847cb9a7cf2d74",
+    ".ai/STUDIO-OBS-006-delayed-design-resolution-r1.json": "d253858a32555b47f1aa302b18b1a9f97cca3e1dd3f49a4d5baf0d6e90061959",
+    ".ai/STUDIO-OBS-006-delayed-design-runtime-review.json": "ca059582a22f5a8979a4529ce97ca67de8eabadecc1115db3957dd007403913b",
+    ".ai/STUDIO-OBS-006-delayed-design-qa-review.json": "86eb1c60a477ab90b3bbd82d202403db0adad9eed3229b9350ec2095bb20b2ed",
+    ".ai/STUDIO-OBS-006-delayed-state-review.json": "6d6c25821ec579cf0d2dedb38e08702b5ac125f8758665b2d60302ec7a6d75ff",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/TestConfiguration.java": "506aad6327fda6a46483ba70be407da56fca661dee4e9db62f2e1e9ad2ca0c8d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java": "07918c5c4a6cf9c40a4d199930a9e1c44f69dfabdad13710cb656384c0bb76ec",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "576b4fc572dcb568860a4e981e1007c0df015304952bd5383812fc0dc027d930",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "7788e2401ecbd5511c576d30ca7ccd4e1a9fb55bfe65a97296bcf1caf072058b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "4c4d41d0f1bc2bac7e9f4a8aa9881a1066f68ef82a4930167a210a7ecb20aed3",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java": "1045d1a706a34c10791a335e674dd2893f392e77d32086947f68e76d0b2fa876",
+    "studio-runner/src/run/observationCollector.ts": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985",
+    "studio-runner/src/run/observationTypes.ts": "a1bb68ad620612ac3eb456599bfb45af8f4c00ad9d00cc67125bd2035e2572af",
+    "studio-runner/src/executor/observedReplay.ts": "152ce2afc80ff48396c21f6aa4d5532de3390467cea37793e3c0f692bf79a1a5"
+  },
+  "frozenHashesMatch": true,
+  "priorReviewRecordsUnchanged": true,
+  "ownership": {
+    "literalPaths": 167,
+    "uniquePaths": 167,
+    "requiredAddedPathsPresent": true,
+    "currentActiveImplementationPartitionPaths": 159,
+    "delayedPartitionActivatedByReviewer": false
+  },
+  "evidenceTruth": {
+    "synchronousPass": "Preserved limited supplied smoke evidence, not proof of delayed rendering.",
+    "earlierAsyncFailure": "Preserved as historical failure and a required new controlled positive/negative case; no relabelled provider500 or synthetic callback.",
+    "testsRunHere": false,
+    "liveModelAccuracyClaim": false,
+    "futureTestsRemainRequired": true
+  },
+  "constraints": {
+    "onlyWrittenFile": ".ai/STUDIO-OBS-006-delayed-design-qa-review-r1.json",
+    "sourceDocsStorySchemasDistPriorReportsEdited": false,
+    "buildBrowserSqlTests": false,
+    "subagents": false,
+    "lifecycleOrCliChanges": false,
+    "implementationApprovalImplied": false,
+    "wholeWaveCeilingUsd": 500,
+    "spendTelemetry": "UNKNOWN",
+    "userPolicyDecisionPending": false
+  }
+}

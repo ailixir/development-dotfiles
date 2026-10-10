@@ -1,0 +1,119 @@
+schema: 1
+story: STUDIO-OBS-002
+gate: PASS
+status_reason: >-
+  Independent re-review resolves all three original blockers and verifies usable generic discovery,
+  bounded private inventory, sanitized retained-tree depth and exact live-element correspondence.
+  Unchanged probes and all runner, Chromium and shared-contract checks pass on the recorded source revision.
+reviewer: "Quinn (@qa), independent agent /root/sdc_obs002_qa_r1"
+reviewed_revision: "sha256:b4c3161462c8a716ca2118ede0a0a196cdd6450c8a97affd8feb8f949907517f"
+updated: "2026-10-08T05:13:12.589879+00:00"
+review_iteration: 2
+waiver:
+  active: false
+top_issues: []
+scope: >-
+  Trusted collector foundation, exported-byte sanitization, dedicated isolated CDP world,
+  generic application-policy discovery and bounded locator-to-live-Element identity.
+resolved_issues:
+  - id: SEC-001
+    previous_severity: high
+    resolution: >-
+      All text sources apply bounded ancestor, sensitive-field and associated-label eligibility,
+      including ARIA/native references, inline/fallback text, shadow hosts and slots.
+    evidence: Four unchanged original source-leak probes pass; owned cross-root and source regressions pass.
+  - id: SEC-002
+    previous_severity: high
+    resolution: >-
+      Original and normalized current values/configured secrets scrub every page-derived name and hint.
+      Strict provenance dominates short values, late values and shadow aliases; protocol enums/IDs
+      are not copied data. Only eligible implicit toggle defaults use token matching and eligible
+      native action captions do not independently become private data; ARIA roles grant no exemption.
+    evidence: Original normalized-echo probe plus whitespace/Unicode, short-value, default, caption and late-source regressions pass.
+  - id: REL-001
+    previous_severity: high
+    resolution: >-
+      Native defaults/title precedence, deduplicated ARIA references, non-input label candidates and
+      full open-shadow candidates participate in bounded exact correspondence. Uncertainty is scoped
+      to possible matching roles; mutation, replacement and late shadow attachment invalidate evidence.
+    evidence: Five unchanged false-accept probes now refuse; differential unique light/shadow/native cases prove identity.
+evidence:
+  provenance: docs/qa/evidence/STUDIO-OBS-002-rereview1-reviewed-revision.json
+  verification: docs/qa/evidence/STUDIO-OBS-002-rereview1-verification.json
+  independent_probes: docs/qa/evidence/STUDIO-OBS-002-rereview1-probes.json
+  historical_fail_gate: docs/qa/evidence/STUDIO-OBS-002-initial-fail-gate.yml
+  unchanged_probes:
+    privacy_identity: 14/14 PASS
+    usability: 5/5 PASS
+    action_usability: 7/7 PASS
+    preservation: Original scripts and prior reports preserved byte-for-byte; fresh results recorded separately.
+  actual_chromium:
+    command: npm run test:fixtures --prefix studio-runner -- test/fixtures-tier/observed-authoring-snapshot.test.ts
+    passed: 71
+    exit_code: 0
+    sandboxed: true
+    log: docs/qa/evidence/STUDIO-OBS-002-rereview1-chromium.log
+  full_unit:
+    command: npm test --prefix studio-runner
+    passed: 1217
+    preexisting_skipped: 29
+    passed_files: 61
+    preexisting_skipped_files: 1
+    exit_code: 0
+    coverage_thresholds_unchanged: true
+    overall_lines_percent: 93.08
+    overall_branches_percent: 86.55
+    run_lines_percent: 89.08
+    run_branches_percent: 82.05
+    confinement: Browser confinement 19, no-dynamic-evaluation 8, lint-boundary 89 and sandbox 14 passed; one existing sandbox skip.
+    log: docs/qa/evidence/STUDIO-OBS-002-rereview1-unit.log
+  static_and_build: Type-check, lint, build and git diff --check all PASS, independently rerun.
+  shared_contracts:
+    command: node tools/check-studio-observed-contracts.cjs
+    fixture_cases: 124
+    openapi_examples: 109
+    schemas: 20
+    result: PASS
+    compatibility: >-
+      All 20 schemas match the OBS-001 reviewed manifest. Reserved-v1 clarification updates
+      retained-parent depth/examples/checker only; numeric outgoing/session ceilings, canonical
+      vector/algorithm and OBS-003 BFF-cookie wording remain intact. All four coordinated support
+      files are included in this reviewed-source manifest.
+  coderabbit:
+    available: false
+    fallback: Independent deep review per configured skip_if_not_installed; no CodeRabbit PASS claimed.
+requirements_traceability:
+  - criterion: AC-1
+    verdict: PASS
+    given: Trusted application policy without per-control mappings and hostile main-world patches
+    when: The fixed collector runs in its dedicated isolated CDP world
+    then: Generic structural controls are discovered and trusted policy/secrets/DOM primitives remain isolated.
+  - criterion: AC-2
+    verdict: PASS
+    given: Current observation plus raw-work, outgoing-node/depth/byte/time budgets
+    when: Navigation, document/node replacement, field changes, CSSOM or budget exhaustion occurs
+    then: Stale proof refuses, session generation advances, exports remain immutable/canonical and incomplete inventory clears usable nodes.
+  - criterion: AC-3
+    verdict: PASS
+    given: Sensitive references, current values, normalized echoes, configured secrets and competing source provenance
+    when: Final observation bytes are serialized
+    then: Unsafe names/hints and channels are absent while ordinary short/default/caption contexts remain usable.
+  - criterion: AC-4
+    verdict: PASS
+    given: Adjacent term/value structures, ordinary deep layouts, long content and unsupported surfaces
+    when: Bounded generic observation runs
+    then: Safe DOM fallback retains local identities, explicit coverage and sanitized relationships; future pages remain unobserved.
+  - criterion: AC-5
+    verdict: PASS
+    given: Supported exact hints and complete light/open-shadow candidate inventories
+    when: Correspondence is checked against actual Playwright semantics and retained DOM Elements
+    then: Unique supported identities pass and duplicate, unresolved, stale or replaced targets refuse; no fabricated replay selectors are exported.
+  - criterion: AC-6
+    verdict: PASS
+    given: Real sandboxed Chromium and synthetic private-data canaries
+    when: Unchanged independent probes and 71 owned fixture cases exercise final exports
+    then: All pass against exported bytes and frozen schemas, including semantic-tree invariants and positive usability.
+limitations:
+  - Collector foundation only; no gateway-wire, actual dispatch/dataflow, real authentication, replay publication, pilot or production proof.
+  - Supported exact semantic subset only; unsupported names refuse proof and closed shadow surfaces remain unsupported.
+  - Application policy approval remains required; unknown PII in otherwise approved structural text is not universally detected.

@@ -1,0 +1,86 @@
+{
+  "story": "STUDIO-OBS-006",
+  "kind": "ISOLATED_PRE_READY_TERMINAL_IMPLEMENTATION",
+  "result": "FOCUSED_CHECKS_PASS",
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java": "eb201e5bfdd139a6e0844326944b6fc49b904d4cf77fa2ed31ef1faa058ed8e2",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "f03e49cab99c0792365b7ffeeb2f50bf3ef581038a9f0afd46898c608e5db7fc",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java": "ddb5ac71a935d098ce53bca9b4bcaa66c93f090e22519afe1cb46d9aacc40d82",
+    "backend/src/test/java/com/citi/put/checks/studio/internal/AdmissionCasIT.java": "660c8f7e7b1d6d277fb3d08f87e291aee9f4cc149c121164fc2f1b33642f30a9"
+  },
+  "reviewedDesign": {
+    "path": "docs/specs/studio-observed-authoring/pre-ready-terminal-design.md",
+    "sha256": "18126e4107972f3bf4532c1f2b5c815e374cd6999e33f249fa58cd1f17f8b880"
+  },
+  "commands": [
+    {
+      "command": "Owned four files only: Java21 cached google-java-format1.22.0 --replace",
+      "result": "PASS"
+    },
+    {
+      "command": "JAVA_HOME=/Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home backend/gradlew -p backend test --tests '*AdmissionCasIT' --tests '*ProgressCallbackIT' --tests '*RunnerReportProjectionTest' --tests '*EvidencePartialCallbackIT' --tests '*CancelIT' --console=plain",
+      "result": "PASS",
+      "duration": "47s",
+      "compileJava": "PASS",
+      "compileTestJava": "PASS"
+    }
+  ],
+  "xml": [
+    {
+      "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.internal.AdmissionCasIT.xml",
+      "sha256": "edfae9199c3f37c2086d132a05beaa09acd014b80f3b942b613db2472fd917c5",
+      "tests": "15",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.internal.ProgressCallbackIT.xml",
+      "sha256": "5dc17c2290bdd4c97c65bc810ee1adb2bc9086bc71a3f15089c48d55ba97369f",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.internal.RunnerReportProjectionTest.xml",
+      "sha256": "d9f6ed4f311a82730463cbcf26230b00b273cbe1a188794826c168d4028a8f7d",
+      "tests": "22",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.internal.EvidencePartialCallbackIT.xml",
+      "sha256": "060578f017f883be11f8175a057f2adb8004947c9a88e75fca81ee0b8d622e9a",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "path": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.CancelIT.xml",
+      "sha256": "9e2ca5442eec688bf761d6ea7271fe6e93876302643a1b2fa344366dea7aeb33",
+      "tests": "16",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "tests": 85,
+  "failures": 0,
+  "newTests": 5,
+  "implementation": [
+    "Raw exact ERROR/RUN_ERROR/fixed reason and complete unique SKIPPED/null coordinate validation before projection and duplicate acknowledgment.",
+    "Strict immutable schema validation and mutual binding/receipt/grant/scope/profile/build identities; immutable revision source count.",
+    "New observed-only locked partition-aware ADMITTED first-sequence CAS with exact stored JSON, owner, revision, scope and admitted deadlines. Existing applyFinal unchanged.",
+    "Original evidence projection and finalization retained; no start origin, new authority, current source check or payload hash idempotence claim."
+  ],
+  "limitations": [
+    "New local fixtures exercise actual ordinary admission/service/SQL refusal plus raw validation; they do not fabricate a guided publication or actual observed admission.",
+    "Genuine observed positive, observed wrong-owner/state/sequence, rollback/retry and evidence-only settlement are assigned to lead actual joined fixture; not claimed by this report.",
+    "No Node-consuming commands, schema changes, product bypass, lifecycle verdict or independent QA approval."
+  ],
+  "lane": "lease10 build completed; released on handoff",
+  "sourceFreeze": true
+}

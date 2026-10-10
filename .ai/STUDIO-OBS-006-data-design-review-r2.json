@@ -1,0 +1,61 @@
+{
+  "story": "STUDIO-OBS-006",
+  "review": "independent data/transaction design R2 targeted re-review",
+  "verdict": "PASS",
+  "scope": "Data design readiness only; not implementation QA, PO Ready, migration approval to execute or proof of runtime behavior.",
+  "reviewed_sha256": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "516ced4f8084e955d904e103580a7b5d63fc53757c973b8effaeede9af1ab5c3",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "1ab026994489107a01befe7d20bdea778e040da2da7d5fc910f3aeadbd5bc6c4",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "d03bda578b22fa9991a52bd1b31ccf244a16ddf0aadd48196b7389ddc35939de",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "87123a86eda1b1a7933004fb65c167c543850f2021ec42c711acd7f6e4386173"
+  },
+  "resolution_sha256": "9fe48609ec225f93a8fb0d638d316109f0d92db3897a868dd8cc351c69fb5c4d",
+  "prior_records_verified_unchanged": true,
+  "blocking_findings": [],
+  "resolutions": [
+    {
+      "id": "DATA-006-R1-01",
+      "status": "RESOLVED",
+      "evidence": "C4/D3 now preserve the actual allocated V32 shape with obligations[].obligationId and needs[].bindingId; every stored field remains in translationHash, with exact bidirectional allocation/producer/consumer joins. This matches GuidedDependencyPlanner.allocate:58 and GuidedTranslationService plan allocation/persistence around166-178. Model schemas remain unallocated; no capture-token grammar introduced."
+    },
+    {
+      "id": "DATA-006-R1-02",
+      "status": "RESOLVED",
+      "evidence": "D2 now preserves required original page target/documentId/generation0 for genuine first initialBlank navigation. Only original observation_hash/origin/derived-locator null branches remain; explicit iff SQL predicate is guarded IS TRUE. This matches current Action2 and ExecutionEvidence2; no fake blank observation row."
+    },
+    {
+      "id": "RENEWABLE_LEASE_IDENTITY",
+      "status": "CONSISTENT",
+      "evidence": "D3-D6/C4 freeze validationDeadline once as min(claim+15s,session expiry,then-current owner lease). Snapshot hashes ownerWorkerId/fence and frozen deadline, not renewable current lease timestamp. Same-owner renewal leaves identity unchanged; current lease must independently remain live and old deadline cannot be extended. Validated claim reuse is bounded by that original deadline; after expiry a new counted claim is needed."
+    },
+    {
+      "id": "EXECUTION_CONFIGURATION_AND_AUTHORITY",
+      "status": "CONSISTENT",
+      "evidence": "C7/D7 retain actual partitioned execution binding and write-once admission receipt, adding exact configurationHash/build/scope checks. Preallocated observed attempt remains bound to existing dispatch/admission authority; no new ledger. C7 explicitly uses existing restricted service-token trust plus deployment TLS limits and does not claim new mTLS/certificate verification."
+    },
+    {
+      "id": "PRIOR_DATA_006_01_THROUGH_04",
+      "status": "RETAINED_RESOLVED",
+      "evidence": "D1-D8 retain scoped pre-effect base, monotone epoch, older compile_request_id clearing, ordinary-null/guided-required origin, enforceable reciprocal deferred revision/receipt cycle, both actual V19 install orders, V21 copied authoring and V29 immutability, exact session-wide claims, expiry-independent fresh-Core receipt reads and separate partition-safe execution evidence."
+    }
+  ],
+  "mandatory_implementation_oracles": [
+    "Take actual OBS005 implicit-reference plan through allocate and accepted persistence; Java/Node must accept exact stored hash and reject missing/swapped/forged binding IDs even with recomputed artifact-local hashes.",
+    "Actual blank bootstrap\u2192first page navigation\u2192observed page action must preserve original proposal/hash across capture and restart; null page target/fabricated blank document/observed NULL observation FK refuse.",
+    "Hold actual validator HTTP across same-owner/fence lease renewal inside captured deadline: one send, unchanged snapshot. Changed owner/fence, shortened/expired authority, original deadline expiry or cancellation refuse. Reuse never extends claim or resets session-wide max3.",
+    "Original bootstrap proof is compared to original acknowledged context/input/allocation snapshot, not later dependency revisions. Independent evidence store captures facts before effects; missing snapshots refuse preparation.",
+    "Real PostgreSQL fresh V33/V32 upgrade and originalV19\u2192V33 plus V33\u2192updatedV19 preserve old ordinary rows and enforce required guided receipt cycle; direct SQL half-cycle/null/mixed-origin/cross-scope proof fails at immediate/deferred checks.",
+    "Epoch/source/head/ABA races, both older ordinary compile race orders, concurrent sessions and all insert/confirmation/CAS/session crash points preserve one authoritative head and no orphan readiness. Expected conflict cannot overwrite a concurrent terminal winner.",
+    "Current Core receipt canRead authorization after worker/session expiry or head edits does not call active grant/account/validator/browser; stale cached identity cannot override current Core denial.",
+    "Execution configuration different from recording geometry remains exact; immutable binding/admission fields and new-partition triggers preserve V26/V28 and reserved attempt/profile/build/current scope joins. No credentials or account handles persist.",
+    "Actual scheduler old activation/new publication yields ACTIVATION_REVISION_MISMATCH before observed schedule authorization; no activation retarget or unauthorized background grant.",
+    "Actual ordinary service-token HTTP chain accepts only configured service authority and correct execution/attempt identities; deployment TLS remains explicit external trust, no invented certificate verification.",
+    "Finalization has zero application effects and zero model calls; independent later replay evidence remains distinct. OBS007 account connectivity,008 UI/first guided video,009 benchmark and010 human pilot are not additional006 data-design blockers."
+  ],
+  "ownership": {
+    "literal_paths": 154,
+    "unique_paths": 154,
+    "assessment": "Exact story paths remain literal and unique. Current data repositories/evidence hooks/V33/stagedV19/entities/admission/schedule/security tests and contracts cover targeted R2 corrections. No additional data source ownership required by this review; any future unlisted edit still needs coordinator amendment."
+  },
+  "boundary": "Only .ai/STUDIO-OBS-006-data-design-review-r2.json written. No SQL execution, build/runtime tests, implementation/design/story/schema/lifecycle/CLI edits, subagents, commits or push."
+}

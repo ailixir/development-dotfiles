@@ -75,6 +75,9 @@ public class StudioDispatcher {
   private final String instanceId;
   private final Clock clock;
 
+  @Autowired(required = false)
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
+
   @Autowired
   @SuppressWarnings("checkstyle:ParameterNumber")
   public StudioDispatcher(
@@ -271,6 +274,13 @@ public class StudioDispatcher {
       return false;
     }
 
+    if (observed != null) {
+      var binding = observed.binding(executionId);
+      if (binding.isPresent()) {
+        return dispatchObserved(executionId, binding.get(), now);
+      }
+    }
+
     String policyIdentity;
     try {
       policyIdentity = authorization.recheck(executionId, testId, csiId, principal);
@@ -364,6 +374,52 @@ public class StudioDispatcher {
 
     applyOutcome(executionId, attemptId, outcome, pendingDeadline, now);
     return true;
+  }
+
+  private boolean dispatchObserved(
+      UUID id, com.fasterxml.jackson.databind.JsonNode binding, Instant now) {
+    UUID attempt = UUID.fromString(binding.path("attemptId").asText());
+    boolean sendCommitted = false;
+    try {
+      UITestRevision revision =
+          revisions.findById(UUID.fromString(binding.path("revisionId").asText())).orElseThrow();
+      ReferenceDeclarations declared =
+          ExecutionReferences.declared(objectMapper, revision.getReferences());
+      RunJob job = RunJob.observed(observed.job(binding, plainVariablesOf(id, declared)));
+      Integer began =
+          transactions.execute(
+              status -> {
+                observed.check(binding);
+                return statements.beginObservedDispatch(id, instanceId, attempt);
+              });
+      if (began == null || began != 1) {
+        return false;
+      }
+      sendCommitted = true;
+      DispatchOutcome outcome = runnerClient.send(job);
+      // No observed retry can mint/reuse account setup or replace its accepted attempt.
+      if (outcome.kind() == DispatchOutcome.Kind.DEFINITE_REFUSAL) {
+        close(id, ExecutionErrorCode.DISPATCH_FAILED, now);
+      }
+      return true;
+    } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException refusal) {
+      if (sendCommitted) {
+        return true;
+      }
+      close(
+          id,
+          refusal.getMessage().equals("CANCELLED")
+              ? ExecutionErrorCode.CANCELLED
+              : ExecutionErrorCode.AUTHORIZATION_REVOKED,
+          now);
+      return false;
+    } catch (RuntimeException refusal) {
+      if (sendCommitted) {
+        return true;
+      }
+      close(id, ExecutionErrorCode.DISPATCH_FAILED, now);
+      return false;
+    }
   }
 
   /**

@@ -1,0 +1,1 @@
+allprojects { afterEvaluate { if (plugins.hasPlugin('java')) { sourceSets.test.java.srcDir('/tmp/obs003-qa-probe') } } }

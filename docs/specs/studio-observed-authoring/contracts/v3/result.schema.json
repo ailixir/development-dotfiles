@@ -1,0 +1,303 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/result.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 3
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "executionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "scopeHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "mode": {
+      "const": "guided"
+    },
+    "outcome": {
+      "enum": [
+        "PREPARING",
+        "OBSERVING",
+        "PROPOSING",
+        "ACTING",
+        "AWAITING_CLARIFICATION",
+        "AWAITING_AUTH",
+        "FINALIZING",
+        "SUCCEEDED",
+        "PUBLICATION_CONFLICT",
+        "FAILED",
+        "UNKNOWN_OUTCOME",
+        "CANCELLED",
+        "EXPIRED"
+      ]
+    },
+    "assertionsPassed": {
+      "type": "boolean"
+    },
+    "learnedFromThisRun": {
+      "type": "boolean"
+    },
+    "replayVerified": {
+      "const": false
+    },
+    "scheduleActivated": {
+      "const": false
+    },
+    "publication": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "const": "PUBLISHED"
+            },
+            "receipt": {
+              "$ref": "https://checks.citi.example/contracts/observed/v2/publication.schema.json#/definitions/PublicationReceipt"
+            }
+          },
+          "required": [
+            "status",
+            "receipt"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "PENDING",
+                "CONFLICT",
+                "REFUSED"
+              ]
+            },
+            "receipt": {
+              "type": "null"
+            }
+          },
+          "required": [
+            "status",
+            "receipt"
+          ]
+        }
+      ]
+    },
+    "currentReadiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "revisionId": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "uuid",
+              "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "code": {
+          "enum": [
+            "READY",
+            "NOT_PUBLISHED",
+            "HEAD_CHANGED",
+            "SOURCE_CHANGED",
+            "CONFIG_CHANGED",
+            "RUNTIME_INCOMPATIBLE",
+            "REPLAY_DISABLED"
+          ]
+        }
+      },
+      "required": [
+        "revisionId",
+        "ready",
+        "code"
+      ]
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "const": "guidedLedger"
+        },
+        "ref": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "video": {
+          "type": "null"
+        }
+      },
+      "required": [
+        "kind",
+        "ref",
+        "video"
+      ]
+    },
+    "actionTimings": {
+      "type": "array",
+      "maxItems": 0
+    },
+    "errorCode": {
+      "oneOf": [
+        {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sessionId",
+    "executionId",
+    "scopeHash",
+    "mode",
+    "outcome",
+    "assertionsPassed",
+    "learnedFromThisRun",
+    "replayVerified",
+    "scheduleActivated",
+    "publication",
+    "currentReadiness",
+    "evidence",
+    "actionTimings",
+    "errorCode"
+  ],
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "publication": {
+            "properties": {
+              "status": {
+                "const": "PUBLISHED"
+              }
+            },
+            "type": "object",
+            "required": [
+              "status"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "publication"
+        ]
+      },
+      "then": {
+        "properties": {
+          "outcome": {
+            "const": "SUCCEEDED"
+          },
+          "learnedFromThisRun": {
+            "const": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "outcome",
+          "learnedFromThisRun"
+        ]
+      },
+      "else": {
+        "properties": {
+          "learnedFromThisRun": {
+            "const": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "learnedFromThisRun"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "currentReadiness": {
+            "properties": {
+              "ready": {
+                "const": true
+              }
+            },
+            "type": "object",
+            "required": [
+              "ready"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "currentReadiness"
+        ]
+      },
+      "then": {
+        "properties": {
+          "publication": {
+            "properties": {
+              "status": {
+                "const": "PUBLISHED"
+              }
+            },
+            "type": "object",
+            "required": [
+              "status"
+            ]
+          },
+          "currentReadiness": {
+            "properties": {
+              "revisionId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+              },
+              "code": {
+                "const": "READY"
+              }
+            },
+            "type": "object",
+            "required": [
+              "revisionId",
+              "code"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "publication",
+          "currentReadiness"
+        ]
+      }
+    }
+  ]
+}

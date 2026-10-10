@@ -1,0 +1,289 @@
+{
+  "storyId": "STUDIO-OBS-004",
+  "mode": "yolo",
+  "reviewer": "@po",
+  "at": "2026-10-08T05:54:26.583134+00:00",
+  "skillSource": ".aiox-core/development/skills/validate-story-draft/SKILL.md",
+  "taskSource": ".aiox-core/development/tasks/validate-next-story.md",
+  "verdict": "GO",
+  "validation_result": true,
+  "implementationReadinessScore": 9,
+  "confidence": "High",
+  "scope": "Pre-implementation readiness only. No code, model calls, CLI mutation, completed-story/gate edits, QA verdict, Done transition or commit.",
+  "statusTransition": {
+    "from": "Draft",
+    "to": "Ready",
+    "version": "0.1.3"
+  },
+  "authorization": "Existing user approval for complete SDC and necessary corrections under shared USD500 ceiling. No new source-to-model consent inferred.",
+  "previousEvidence": {
+    "path": ".ai/STUDIO-OBS-004-validation-initial-no-go.json",
+    "sha256": "687b8f9f8067f7223b58383931ed715d16a1ffaa08bf9d01efdd955d84fda6e4",
+    "verdict": "NO-GO",
+    "score": 6,
+    "preservedByteForByte": true
+  },
+  "dependencyVerification": [
+    {
+      "storyId": "STUDIO-OBS-001",
+      "storyStatus": "Done",
+      "sdcState": "completed",
+      "closePhase": "passed",
+      "qaGate": "PASS"
+    },
+    {
+      "storyId": "STUDIO-OBS-002",
+      "storyStatus": "Done",
+      "sdcState": "completed",
+      "closePhase": "passed",
+      "qaGate": "PASS"
+    },
+    {
+      "storyId": "STUDIO-OBS-003",
+      "storyStatus": "Done",
+      "sdcState": "completed",
+      "closePhase": "passed",
+      "qaGate": "PASS"
+    }
+  ],
+  "templateComplianceIssues": [],
+  "criticalIssues": [],
+  "shouldFixIssues": [],
+  "niceToHaveImprovements": [
+    "Add a quantitative implementation estimate if useful; current CodeRabbit complexity is high."
+  ],
+  "resolvedFindings": [
+    {
+      "id": "JOIN-001",
+      "decision": "initialBlank is original isolated about:blank attestation with JSON null origin, tagged evidenceHash, first source step/ordinal 0 navigate only; actual pre-action null origin in operation and learned-plan hashes; explicit blank-start replay precondition. Account setup cannot satisfy an authored action.",
+      "owners": [
+        "GuidedSessionService",
+        "GuidedContracts",
+        "contracts/v2",
+        "browser.ts",
+        "guidedProtocol.ts"
+      ],
+      "requiredEvidence": "Real blank start to one destination request and one admitted navigation; reject fake HTTP origin, prior context/action, other first operation, wrong version/hash. No fixture pre-navigation."
+    },
+    {
+      "id": "JOIN-002",
+      "decision": "Authenticated backend context/prepare/dispatch/stop and owning-worker callbacks. Persist prepare proof; authorizeAction verifies it. Only post-commit WonConsumption carries ephemeral send authority; generic idempotency and AlreadyConsumed never replay it. Dispatch stored proposal/ledger and revalidate the retained pinned DOM/page immediately before invocation. Exclusive fsync worker journal outside scratch records consumption before call.",
+      "owners": [
+        "GuidedRunnerClient",
+        "GuidedDispatchService",
+        "GuidedPreparationStore",
+        "GuidedSessionService",
+        "GuidedInternalSecurity",
+        "guidedServiceAuth.ts",
+        "guidedDispatchJournal.ts",
+        "browser.ts"
+      ],
+      "requiredEvidence": "One transaction winner under same/new key races; count=1 alone cannot dispatch; forged identity/audience/fence/tuple rejected; replaced node not acted upon; failures between commit/send/journal/effect/ack/callback never retry."
+    },
+    {
+      "id": "JOIN-003",
+      "decision": "Common immutable UTF-16 span/configuration reference validator checks revision, Unicode boundaries, classification, slot/scope and destination; actual allocation/persistence/hash/materialization. Separate pending allocations, successful producer admission/local availability, and consumer edges at real ordinals; replans retain exercised history and values never leave worker.",
+      "owners": [
+        "GuidedSourceReferenceValidator",
+        "GuidedMaterializationService",
+        "GuidedBindingStore",
+        "GuidedSessionAccess",
+        "guidedValues.ts",
+        "guidedCoordinator.ts"
+      ],
+      "requiredEvidence": "Controlled classified immutable sources/proposals pass actual validator/allocation/storage/auth transport; independent read/consumer receipts; wrong classification/revision/span/slot/order/origin and cumulative replan attempts refused; no fake ready table or future ordinal."
+    }
+  ],
+  "checks": [
+    {
+      "area": "Template/executor",
+      "result": "PASS",
+      "evidence": "All substantive sections; dev != architect; nonempty gate tools; restored empty truthful implementation-record subsections mechanically. Tabular Status and top-level File List accepted."
+    },
+    {
+      "area": "File structure",
+      "result": "PASS",
+      "evidence": "Existing browser/collector/backend seams plus bridge, v2 contract/checker, migration and integration-test ownership explicit. V31 must be reconfirmed free at implementation."
+    },
+    {
+      "area": "UI/frontend",
+      "result": "NOT_APPLICABLE",
+      "evidence": "OBS-008 owns the interface; no UI addition in this story."
+    },
+    {
+      "area": "AC/task coverage",
+      "result": "PASS",
+      "evidence": "All seven unchanged ACs mapped to concrete tasks; joined negative/fault scenarios and legacy path preservation included."
+    },
+    {
+      "area": "Testing",
+      "result": "PASS_READINESS",
+      "evidence": "Real PostgreSQL plus authenticated transport plus Chromium receipts required, with controlled proposal/account seams only; implementation tests not executed in PO review."
+    },
+    {
+      "area": "Security",
+      "result": "PASS_READINESS",
+      "evidence": "mTLS, receiver-specific audience/role, worker/fence/context/revision checks; source classification fail-closed; raw runtime values remain worker-local; no gateway capability."
+    },
+    {
+      "area": "Sequence/dependencies",
+      "result": "PASS",
+      "evidence": "001/002/003 Done/PASS/closed. 004 implements common bridge before 005; pending 005 input policy does not choose or alter common source-reference semantics."
+    },
+    {
+      "area": "CodeRabbit",
+      "result": "PASS_WITH_ADVISORY",
+      "evidence": "High complexity, dev/architect/qa separation, precommit and conditional devops gates, configured full QA 3 iterations/30 minutes, honest unavailable-tool fallback. No tool execution claimed."
+    },
+    {
+      "area": "Anti-hallucination",
+      "result": "PASS",
+      "evidence": "Actual v1 source gaps confirmed; v2 is future implementation, never inferred from historical PASS. Epic context built from verified completed IDs."
+    },
+    {
+      "area": "Implementation readiness",
+      "result": "PASS",
+      "evidence": "JOIN-001–003 have concrete decisions, assigned files and independently verifiable joined tests; no production semantic resolver invented."
+    }
+  ],
+  "acTraceability": [
+    {
+      "ac": "AC-1",
+      "readiness": "READY",
+      "evidence": "Plan §7; bridge Version/Actors/Prepare sections; authenticated bounded lifecycle task and v2 bridge/contract ownership; preserve one-shot."
+    },
+    {
+      "ac": "AC-2",
+      "readiness": "READY",
+      "evidence": "Plan §§4,6; bridge honest bootstrap and pinned prepare/final revalidation; actual ObservationSession.matches is boolean and must be extended, not mistaken for a pin."
+    },
+    {
+      "ac": "AC-3",
+      "readiness": "READY",
+      "evidence": "Plan §6; controlled classified references plus actual trusted materialization; positive read policy and exact local-byte storage; no raw value, digest, length or sample receipts."
+    },
+    {
+      "ac": "AC-4",
+      "readiness": "READY",
+      "evidence": "Plan §§6,8; separate pending/producer/consumer records, real order/slot/origin checks; 32 values, 4096 UTF-8 bytes each, 65536 aggregate ceiling; cancel and isolation."
+    },
+    {
+      "ac": "AC-5",
+      "readiness": "READY",
+      "evidence": "Plan §7; winner-only post-commit authority, durable local consume, lease/deadline, serialized stop; backend cancellation acknowledgement does not prevent an already consumed effect."
+    },
+    {
+      "ac": "AC-6",
+      "readiness": "READY",
+      "evidence": "Plan §§5,11; data-free diagnostics from launch including hosts, faults, adapter errors, IPC/manifests/raw output; video remains separately disclosed."
+    },
+    {
+      "ac": "AC-7",
+      "readiness": "READY",
+      "evidence": "Plan §11; GuidedBridgeIntegrationTest and guided-dataflow Chromium joined receipts/fault cases plus source-reference unit tests; controlled proposals do not claim semantic model quality."
+    }
+  ],
+  "privacyIndependence": {
+    "decision": "INPUT-POLICY-01 remains open and applies to OBS-005 outbound source projection/semantic selection.",
+    "why004Ready": "004 makes no gateway calls; both possible privacy branches provide the same immutable classified source/configuration reference candidates to actual trusted validation/allocation/materialization. Controlled candidates are legitimate input to prove this mechanism.",
+    "limits": [
+      "Span provenance is not nonsecrecy or semantic correctness; unclassified references fail closed.",
+      "No arbitrary-English extraction, local classifier, model selection, fabricated finished table, or happy-path user mapping is assumed.",
+      "005 remains necessary for complete product; must resolve policy and implement concrete semantic candidate production before its own Ready verdict.",
+      "No source/model privacy wording or AC changed by this review."
+    ]
+  },
+  "lifecycleReview": {
+    "authority": "Cancellation commits against new backend admission/consume; runner stop serializes against future local calls. Local lease and immutable deadline enforce teardown when notification fails.",
+    "uncertainty": "Already-consumed/in-flight effects can occur before local stop; keep UNKNOWN_OUTCOME absent trusted definite outcome. Lost stop ack is not confirmed teardown. No late callback revival/publication.",
+    "tests": "Cancellation before consume, after consume/before call and after effect; lease/deadline, dropped stop ack and isolated value destruction."
+  },
+  "clarificationPreservation": "Keep existing clarificationSelection historical identities; 005 owns durable semantic mapping, 004 requires fresh corresponding current target. Old node IDs grant no authority.",
+  "acceptedDownstreamPorts": [
+    "OBS-005 semantic interpretation and policy-dependent model projection.",
+    "OBS-006 exact lowering/publication preserving null-origin blank-start precondition; fail closed until implemented.",
+    "OBS-007 production account setup; controlled real account connection tests do not certify production.",
+    "OBS-009/010 real-provider benchmark and human pilot; no claim from controlled tests."
+  ],
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "configuration": "WSL wrapper; graceful_degradation.skip_if_not_installed=true; QA full max 3 iterations/30 minutes",
+    "execution": "Not run in PO readiness; tool availability must be recorded in implementation/review; no CodeRabbit PASS claimed."
+  },
+  "antiHallucinationFindings": {
+    "sources": [
+      "approved consensus plan",
+      "bridge-design.md",
+      "paired 004/005 ownership/dependencies",
+      "original PO report",
+      "bridge-review.json",
+      "ADR-SC-003/004",
+      "contract README/OpenAPI",
+      "actual collector/browser/session service/access/controller code",
+      "dependency story/state/gate files",
+      "coordinator-accepted data-engineering review and incorporated bridge persistence section; actual repository transaction/V30 trigger/migration test seams"
+    ],
+    "epicContext": "Imported EpicContextAccumulator from core/orchestration; buildAccumulatedContext(STUDIO-OBSERVED, 3) used verified 001/002/003 completed IDs in a read-only in-memory context. Output names three completed stories.",
+    "configurationFallback": "Generic core config docs are stale for this app; repository AGENTS, ARCH, Studio execution/ADRs and approved observed docs used.",
+    "versioning": "Existing v1 contract check proves only historical contracts. observed-v2 bundle/pins, schemas and endpoints are specified future work.",
+    "reviewRecord": "Bridge review status remains design-record-in-progress-input-policy-open and implementationVerdict null; no implemented gate inferred from design consensus."
+  },
+  "evidence": [
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "result": "PASS: 124 fixture cases; 109 OpenAPI request/response examples; all schemas compiled; canonical hash vector verified.",
+      "scope": "Existing v1 only."
+    },
+    {
+      "method": "Read-only Node script parsed .aiox/sdc/STUDIO-OBS-001..003/state.json and story files; rg inspected top-level gate PASS.",
+      "exitCode": 0,
+      "result": "All three Done, completed, close passed, top-level QA PASS."
+    },
+    {
+      "method": "Read-only Node script imported EpicContextAccumulator and called buildAccumulatedContext for index 3.",
+      "exitCode": 0,
+      "result": "Three completed story IDs included; no CLI progress writes."
+    }
+  ],
+  "notRun": [
+    "004 implementation tests",
+    "actual Chromium/PostgreSQL bridge flow",
+    "CodeRabbit",
+    "model/provider calls",
+    "CLI verification (root owns)"
+  ],
+  "mechanicalChanges": [
+    "Archived previous report byte-for-byte.",
+    "Set Draft to Ready and checked completed PO prerequisite.",
+    "Added current PO GO above preserved historical NO-GO, made stale draft wording explicitly historical and linked archive.",
+    "Added truthful empty Dev Agent Record subsections.",
+    "Appended 0.1.3 Change Log; all product AC bytes unchanged.",
+    "Referenced accepted data-engineering handoff and declared its necessary existing migration-test ownership; no new architectural decision."
+  ],
+  "changedFiles": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md",
+    ".ai/STUDIO-OBS-004-validation.json",
+    ".ai/STUDIO-OBS-004-validation-initial-no-go.json"
+  ],
+  "storySha256Before": "8dcfb373b8f66a831134ec064bd150bdfb7df9980b710662412be1e56d0190a0",
+  "storySha256After": "933a8cfa78cbceb4984fa39629ba48407dc5df9faa70b480e96dbbab73559372",
+  "handoff": "Root performs CLI verification, then authorized dev may implement 004 under stated v2 bridge ownership. 005 remains Draft/policy-blocked; no renewed common004 scope approval needed.",
+  "dataEngineeringHandoff": {
+    "source": ".ai/STUDIO-OBS-004-data-review.json",
+    "status": "Coordinator-accepted implementation constraints reviewed after initial GO write; GO unchanged.",
+    "findings": [
+      "Dispatch entry rejects ambient transaction; consume must commit before winner permits transport, no cached/replayed winner.",
+      "Separate producer receipt table preserves V30 immutable admission/outcome JSON; atomically record read success and materialization revision, reject changed duplicate receipt.",
+      "Same-session FKs, explicit NOT NULL/CHECK identity constraints, one consumer slot/binding and single-assignment preparation; consistent authoritative source/configuration/session lock order.",
+      "Actual independent-connection concurrency, commit/rollback/cache replay, producer/cancel/replan races, source locks, fresh install and V30-to-V31 migrations remain required implementation tests."
+    ],
+    "actualCodeConfirmed": [
+      "GuidedSessionRepository.transaction delegates to TransactionTemplate.execute; current action insertion is positional.",
+      "V30 immutable admission trigger permits only state/dispatchCount/outcomeCode/assertionPassed changes, so receipt must be separate.",
+      "GuidedSessionIT contains existing V29-to-V30 and fresh-install count assertions; necessary migration test updates are now explicitly owned."
+    ],
+    "testsRun": false,
+    "privacyDecisionChanged": false
+  }
+}

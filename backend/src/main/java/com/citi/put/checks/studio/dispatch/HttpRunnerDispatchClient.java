@@ -102,11 +102,18 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     HttpRequest request;
     try {
       request =
-          HttpRequest.newBuilder(URI.create(runner.runsUrl()))
+          HttpRequest.newBuilder(
+                  URI.create(
+                      job.observed() == null
+                          ? runner.runsUrl()
+                          : runner.baseUrl().replaceAll("/+$", "") + "/v2/runs"))
               .timeout(properties.admissionTimeoutOrDefault())
               .header("Content-Type", "application/json")
               .header("Authorization", "Bearer " + runner.serviceIdentityToken())
-              .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(body(job))))
+              .POST(
+                  HttpRequest.BodyPublishers.ofString(
+                      objectMapper.writeValueAsString(
+                          job.observed() == null ? body(job) : job.observed())))
               .build();
     } catch (JsonProcessingException e) {
       return DispatchOutcome.refusedTerminal("the run job could not be serialized");

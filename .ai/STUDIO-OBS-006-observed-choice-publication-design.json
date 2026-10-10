@@ -1,0 +1,40 @@
+{
+  "story": "STUDIO-OBS-006",
+  "kind": "Bounded architecture design only; independent reviews pending",
+  "at": "2026-10-09T13:17:18.220515+00:00",
+  "frozenDocuments": {
+    "docs/specs/studio-observed-authoring/observed-choice-publication-design.md": "1b174a901769ef524deb446cb96d031249fb8f7c22f18bdb6a3adba24a2b6c87",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "7a1f003c1e73446d3b0aca2f6ec5d7787560f169121a25a47ff283cbcea9c80a"
+  },
+  "sourceSnapshot": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java": "7e3119500ae77eb8d5cf6f81828b2361b60e65437191924a8a07579f0af7f315",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "5cb65fbf02e80d72c53b1cbdaacc57149ab20e9c6c527f531bd717f0e5ca6753",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "c001b39a64a818637e7c272e238486492cc681f5e5c3ca151a34530a60e60ebb",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "a6ec6f6b5ce65bed3f5a13c1e8a4e465e25b4b57ddc5c6c1b1a117ee0f235d3b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": "7708c9fea3477ff4d2603d939255fbb32906971634b66dcf5d38fc18a47f711d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "47c1f97dfd2a15785f0fddad4769f7647ab93090c68fa8ce2059925efafc450f",
+    "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1ca47811bb8624003aaf6171e62223d4a65615ad9fe88e7f9a024e46223d92ad",
+    "studio-runner/src/validator/observedReplay.ts": "b512c6cf7c626af179ee36ef1037802497914321f0d3b1d20594fc505ee967f1",
+    "docs/specs/studio-observed-authoring/contracts/v2/replay-validation.schema.json": "46bafdfff5f2c3330f42979b5cc2017e26c6edc3542fd34c7e67a08b801627ed",
+    "docs/specs/studio-observed-authoring/contracts/v2/replay-profile.schema.json": "9abfdf6fe26bf3a1047c27fd2eaa9f31f70e3ddded23281e6a2f35d7d7508fff"
+  },
+  "decision": "Prospective immutable questionCapture in V32 context identity; original question observation captured in existing V33 table; optional immutable preparation-time acceptance receipt in V33; optional closed PreparationFact observedChoice witness; unchanged executable Profile with renewed schema/build catalog",
+  "truthLimits": [
+    "No pre-existing immutable acceptedAt/actor or original question-to-attempt FK claimed",
+    "Mutable resolvedAt is frozen only as preparation-time snapshot, never sole permission",
+    "Original full model prompt/request bytes were not retained; projectionHash is opaque audit identity",
+    "Backend checks accepted-row completeness; Node cannot discover omitted database rows",
+    "Old missing observed-choice proof refuses, no backfill; multiple accepted questions per obligation refuse"
+  ],
+  "newProductPath": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+  "schemaMigrationWork": "Proposed only; V33 nullable bounded receipt column plus existing immutability guard; internal optional validation evidence shape; no V32 edit/public/model/IPC change",
+  "requiredReviews": [
+    "data: prospective capture/acceptance snapshot/DDL/joins and no invented chronology",
+    "runtime: independent old/fresh locator and plan reconstruction, used-observation closure, optional proof schema/profile compatibility",
+    "QA: real alternate observed choice and negative proof/mutation/old-zero-choice oracles"
+  ],
+  "budgetCeilingUsd": 500,
+  "spendTelemetry": "UNKNOWN",
+  "implementation": "NOT STARTED for observed-choice amendment"
+}

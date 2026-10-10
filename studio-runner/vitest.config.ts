@@ -30,6 +30,7 @@ export default defineConfig({
       reportsDirectory: 'coverage',
       reporter: ['text', 'json-summary'],
       include: [
+        'src/guided/**',
         'src/validator/**',
         'src/executor/**',
         'src/compat/**',

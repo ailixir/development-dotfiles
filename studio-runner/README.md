@@ -613,3 +613,141 @@ reaches a browser. Server-side enforcement remains authoritative (architecture �
 range rather than `22.x` so the package also installs on a developer machine running a newer Node;
 `engine-strict=true` still rejects anything outside the range, and story 10.3's CI check asserts the
 Node version inside the image against `.nvmrc`.
+
+### Guided observed-2 worker
+
+Build with `npm run build`, then launch the isolated guided service with
+`STUDIO_GUIDED_CONFIG_FILE=/mounted/guided.json npm run start:guided`.
+The trusted mounted JSON configuration contains:
+
+- `workerId`, `host`, `port`, `journalDirectory` (persistent, private, outside disposable replay scratch).
+- `tlsKeyFile`, `tlsCertFile`, `tlsCaFile` for mutually authenticated HTTPS.
+- `controllerIssuer`, `controllerSubject`, `controllerPublicKeyFile`, and
+  `controllerCertificateFingerprint256` to bind controller JWT and certificate identities.
+- `callbackBaseUrl` and `callbackTokenFile`; the issuer-issued worker token is reread for each
+  callback so an external credential mount can rotate it. The worker never signs credentials.
+- `rules` (trusted `ObservationRule` entries), and optional `applicationPolicy` with
+  `policyRuleId` and `allowStructuralDiscovery: true`.
+
+The controller commits the context identity before sending `/context`: the worker creates an
+actual isolated `about:blank` page and sends its bootstrap callback during that request. The
+controller supplies the frozen inputs, cumulative allocations/producer evidence/consumer edges,
+lease and lowered limits from the observed-v2 contract. Successful receiver responses are HTTP
+200; authenticated policy/conflict failures return bounded `{code}` with HTTP409, and failed
+service authentication returns HTTP401. Mutual TLS handshake failures never reach HTTP.
+Callbacks accept HTTP202 and discard a response bounded at1MiB. An outcome acknowledgement
+precedes the next observation; a lost acknowledgement never causes the browser operation to retry.
+
+Permanent exclusive journal ownership markers and fsynced consumption records prevent a second
+process or restarted worker from recreating a consumed session. A missing/corrupt expected journal
+or lost local browser/value context requires a new backend session. Do not delete the journal to
+resume a session. Values remain private to this worker and are cleared on teardown. The guided
+launch has no video, host report or parent IPC; diagnostic environment switches are refused.
+Production account setup, model planning and learned-plan publication are separate fail-closed
+ports owned by the later observed-authoring stories. Existing one-shot replay remains unchanged.
+
+Guided native mouse/keyboard operations retain the isolated-world element, verify current document,
+origin, classification/type, geometry, deep hit target and focus, then issue public Chromium CDP
+input commands. Mouse operations recheck after move and before release. Reads and fills keep their
+final validation and operation in the same isolated-world invocation. A refused check before any
+browser side effect reports `FAILED/TARGET_CHANGED`; uncertainty begins with focus or native input,
+including a lost input acknowledgement, and the worker stops without retry. Public Chromium input
+has no atomic retained-node precondition: the guarantee is immediate checks, no locator reacquisition
+and no retries, not an atomic transaction with arbitrary application scripts.
+
+Positive generic reads are configured once in the trusted application policy, independently of
+structural discovery. Omission means no generic read permission. For example:
+
+```json
+{
+  "policyRuleId": "application-structure",
+  "allowStructuralDiscovery": true,
+  "readGrants": [{
+    "policyRuleId": "operations-business-values",
+    "origin": "https://application.example",
+    "region": {"kind": "role", "role": "main", "name": "Operations", "exact": true},
+    "visibleText": {"classification": "permittedBusinessData"},
+    "controlValue": {"classification": "nonsecretApproved", "types": ["text", "textarea"]}
+  }]
+}
+```
+
+An explicit `{ "kind": "application" }` region grants the named read kinds at the exact approved
+origin. A unique matching semantic region takes precedence; conflicting equally specific grants
+or duplicate region anchors deny reading. Exact field rules remain optional overrides, and an
+explicit `structuralOnly` field rule vetoes broader permission. Visible-text grants support scalar
+business surfaces such as named output/status elements and term/value cells; they never authorize
+arbitrary subtree capture. Hidden, sensitive, password, unsupported or mixed sensitive descendants
+refuse the entire source. The same resolver supplies sanitized metadata, preparation and the final
+retained-node read, and privately inventories business values before any observation is exported.
+
+Before sending context, the controller persists an immutable assignment and posts `/assign` without
+`X-Owner-Fence`. The actual worker uses its mounted owning-worker credential to call the backend
+`/claim`, validates the complete HTTP202 session grant, and returns HTTP200 `OWNED` only while
+that acknowledgement is live. No browser is created at assignment. An exclusive durable assignment
+marker prevents reacquisition after restart. Repeated live assignments return the latest acknowledged
+lease; stopped/expired assignment retries return HTTP409. Confirmed `/stop` returns `STOPPED` for
+assignment-scoped teardown and omits the fence header, including cancellation before context.
+
+The worker renews serially approximately every10 seconds with a fresh key, while waiting for
+context, executing or awaiting clarification. Only acknowledged same-fence grants extend local
+authority. Context timestamps cannot extend that authority or regress a newer acknowledgement;
+preparation expiry is capped to the acknowledged lease. Invalid, stale, failed or late renewal
+stops without replay or resurrection. Assignment and browser share one capacity reservation until
+confirmed teardown. Diagnostic environment switches are rejected before reading credentials or
+performing initial claim traffic.
+
+The authenticated, fenced `/observe` control refreshes actual browser evidence between source steps
+or after a resolved clarification. It requires the current generation and an idle live context,
+invalidates unconsumed preparations, reserves observation capacity before collection, and preserves
+captured bindings, action counts and source-step ordinals. Its HTTP200 envelope is returned only
+after the owning-worker observation callback receives HTTP202. The callback uses the frozen
+`oref-` correlation hash of identity, request key and canonical request digest. Identical concurrent
+requests join one collection; changed payloads conflict, and cached evidence cannot be returned as
+current after a later generation, action, stop or expiry. Remaining cumulative byte capacity also
+bounds the private collector before export. A lost callback acknowledgement stops the worker;
+a committed callback with a lost final response can be recovered by the controller from its durable
+refresh intent without collecting again.
+
+The private observation inventory survives document replacement and same-document removal. It
+retains observed input values, explicitly sensitive text, approved business sources and their
+locator-normalized aliases, with the strictest provenance. Its independent internal limits are
+4,096 distinct entries and 1 MiB total UTF-8; overflow or collection failure permanently refuses
+further export rather than evicting earlier values. The isolated collector transfers this inventory
+only to the trusted worker's private session store over CDP. The public observation facade returns
+only sanitized evidence. Teardown clears the store and rejects late updates/collection results.
+These limits do not raise any public observation or runtime-value cap.
+
+Native check/uncheck verifies the requested checked state on the retained original input after
+one native attempt. Prevented/reverted toggles or post-effect identity/type loss return uncertainty;
+there is no second click or replacement resolution. Native radio uncheck is unsupported and is
+refused during preparation, before effects. Already-satisfied supported toggles remain no-ops.
+
+Guided request bodies, controller responses and JWT segments use fatal UTF-8, duplicate-key and
+trailing-data rejection. Numeric tokens must be canonical safe integers (no fraction, exponent or
+negative zero); JWT claims are closed to `iss/sub/aud/role/iat/exp` and optional nonnegative `nbf`.
+The v2 wire timestamp profile is uppercase UTC `YYYY-MM-DDTHH:mm:ss[.fraction]Z`, with valid
+Gregorian dates, seconds00–59 and optional1–9 fractional digits. Offsets, lowercase, whitespace,
+leap seconds and excess precision are refused without normalizing signed/hashed data. The bundled
+validator audits its supported keywords, formats and resolved references/pointers at startup;
+unknown semantics, missing definitions and recursive references cannot silently become permissive
+schemas. This supports the currently enforced bridge schemas only.
+
+### Observed replay (artifact 2)
+
+Observed artifacts use the separate `observed-replay-1` execution profile. The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Legacy artifact 1 validation, AST semantics and protocol 1 remain separate.
+
+Enable validation and replay independently with `STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED` and `STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED` (both default false). Trusted startup supplies `STUDIO_RUNNER_OBSERVED_CATALOG_FILE` containing exactly `{profile,build}`, `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST`, and `STUDIO_RUNNER_OBSERVED_POLICY_FILE` containing the mounted policy projections. The catalog must match packaged schema/reference hashes, the installed Chromium revision and the independently supplied immutable release image digest. A local build records `observedChromiumBuild` separately; it does not assert container provenance or satisfy `check:pins --require-image`.
+
+The compiled account registry in `run/observedAccount.ts` defaults to unavailable. OBS-007 supplies reviewed account connectivity through consume/prepare/apply/dispose; job data cannot select a module, executable function, credential source or account entry URL. The child consumes and prepares before browser creation, then applies once to that same recorded context. Replay values begin empty and remain private to the child. No model call, guided-session continuation, sampled value or original node/receipt authority is used to execute a saved artifact.
+
+A failed or uncertain account apply never emits Ready or permits an authored action. Real recording evidence may still be retained through the ordinary upload path, with `browserStartedAt` and unavailable timings null. Unexecuted steps are SKIPPED with null readings; no synchronized timeline is claimed for a pre-Ready failure. Captured values, account details and raw child output do not enter diagnostics. Fill/select preserve the fixed isolated DOM primitive; click/check/uncheck/hover/press preserve the retained-target native pointer/key primitive and its uncertainty rules.
+
+Run `node ../tools/build-studio-observed-schemas.cjs` before building after contract changes. `npm run build` packages the closed schemas and fixed independent reference fixtures; `npm run check:pins` rejects stale source/dist bundle hashes. The fixtures tier exercises real Chromium and ordinary recorded replay with a controlled account provider; it does not establish production account connectivity or immutable container identity.
+# Accepted observed choices during publication
+
+An accepted observed target choice carries private `ObservedChoiceWitness1` evidence on its original preparation. The pure validator checks the original model attempt, historical plan, question, immutable mapping, acceptance snapshot, original question observation and later preparation independently. It selects only the exact accepted locator; the original operation, authored argument, binding and read permission stay authoritative. Question node IDs may differ from refreshed preparation node IDs. Missing prospective question capture, acceptance receipt or original observation refuses publication, including old learning histories; no proof is reconstructed.
+
+The optional proof is omitted for zero-choice and source-choice publication. Its limits are 2–10 alternatives, 16,384 canonical UTF-8 receipt bytes and 262,144 witness bytes, with at most 200 witnesses. The basis ceiling remains 6,291,456 bytes and the complete validation request ceiling remains 8,388,608 bytes. Question-only observations count in the exact used observation union and in the existing observation budget.
+
+This schema extension preserves the executable profile but changes the packaged schema bundle hash. Backend, pure validator and build catalog must use the exact supported tuple. A revision pinned to an older schema bundle refuses on the new build, even when its executable profile is identical; it requires its retained or re-enabled compatible build. There is no old-to-new pin translation. An old validator cannot receive or ignore the new witness. Rollback therefore refuses new choice publication while preserving stored receipts and saved replay on its supported exact build. Changing a model or prompt default alone does not require relearning a compatible saved artifact.

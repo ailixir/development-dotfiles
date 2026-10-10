@@ -1,0 +1,170 @@
+{
+  "storyId": "STUDIO-OBS-003",
+  "mode": "interactive",
+  "reviewer": "@po",
+  "at": "2026-10-08T03:09:42.271737+00:00",
+  "taskSource": ".aiox-core/development/tasks/validate-next-story.md",
+  "verdict": "GO",
+  "validation_result": true,
+  "implementationReadinessScore": 8,
+  "confidence": "High",
+  "scope": "Pre-implementation readiness only; no implementation, product acceptance, QA completion or Done verdict.",
+  "statusTransition": {
+    "from": "Draft",
+    "to": "Ready",
+    "version": "0.1.1"
+  },
+  "authorization": "Root-authorized SDC wave with shared USD 500 ceiling; resolved architecture does not require repeat approval.",
+  "inputs": [
+    "AGENTS.md",
+    ".aiox-core/core-config.yaml",
+    ".aiox-core/product/templates/story-tmpl.yaml",
+    ".claude/rules/story-lifecycle.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md",
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/specs/studio-observed-authoring/consensus-plan.md",
+    "docs/specs/studio-observed-authoring/review-record.json",
+    "docs/architecture/ADR-SC-004-observed-authoring.md",
+    "docs/specs/studio-observed-authoring/contracts/README.md",
+    "docs/specs/studio-observed-authoring/openapi.yaml",
+    "docs/specs/studio-observed-authoring/contracts/fixtures.json",
+    "ARCH.md",
+    "docs/architecture/studio-execution.md",
+    ".aiox/sdc/STUDIO-OBS-001/state.json"
+  ],
+  "criticalIssues": [],
+  "templateComplianceIssues": [
+    {
+      "severity": "advisory",
+      "finding": "Main template sections, executor fields and future-agent records exist; status is tabular, File List top-level, Dev Agent Record a truthful not-started notice.",
+      "action": "Executor populates model/debug/completion subsections with actual implementation evidence."
+    }
+  ],
+  "shouldFixIssues": [
+    {
+      "finding": "Current security seams do not yet establish frozen observed audience/role/owner/account enforcement.",
+      "action": "Implement authenticated guided boundaries with negative access tests; legacy provisional dispatch authorization cannot substitute for current entitlement. Any extra security/adapter files must be declared before editing."
+    },
+    {
+      "finding": "Proposed File List names major classes only; exact DTO, configuration, adapter and migration test files remain an implementation decomposition.",
+      "action": "Executor records concrete filenames and coordinates shared seam ownership before changes; V30 currently available, recheck at implementation."
+    }
+  ],
+  "niceToHaveImprovements": [
+    "High complexity is recorded; optional sizing can be added for capacity planning."
+  ],
+  "checks": [
+    {
+      "area": "Template/executor",
+      "result": "PASS_WITH_ADVISORY",
+      "evidence": "Distinct data-engineer -> dev matches database/API work; independent qa owns Done; no requirement placeholders."
+    },
+    {
+      "area": "File structure",
+      "result": "PASS",
+      "evidence": "Guided session package is additive to current Studio boundaries; latest Flyway V29 verified."
+    },
+    {
+      "area": "Frontend",
+      "result": "NOT_APPLICABLE",
+      "evidence": "OBS-008 owns UI; OBS-003 must honor safe session/result DTOs."
+    },
+    {
+      "area": "AC/task coverage",
+      "result": "PASS",
+      "evidence": "Six bounded measurable ACs map to six implementation tasks and approved plan sections 7, 8, 11."
+    },
+    {
+      "area": "Testing",
+      "result": "PASS",
+      "evidence": "PostgreSQL concurrency/rollback/recovery/isolation tests and existing-data migration checks required; executable targeted Gradle and schema commands recorded."
+    },
+    {
+      "area": "Security",
+      "result": "PASS",
+      "evidence": "Scope/authentication, immutable source, confidential persistence and data-free projections explicit; existing security gaps recorded as implementation obligations."
+    },
+    {
+      "area": "Sequence/dependencies",
+      "result": "PASS",
+      "evidence": "OBS-001 state completed, all SDC phases passed; OBS-003 builds ledger only, OBS-004 runner consumption and OBS-006 exact publication remain downstream."
+    },
+    {
+      "area": "Anti-hallucination",
+      "result": "PASS",
+      "evidence": "Frozen schemas/OpenAPI and current Java seams inspected; trusted reaper expiry replaces ambiguous draft reference to expire interfaces; no new public endpoint or arbitrary policy invented."
+    },
+    {
+      "area": "Implementation readiness",
+      "result": "PASS_WITH_ADVISORY",
+      "evidence": "Frozen contracts remove architectural ambiguity; further class decomposition and operational authentication wiring are implementation work."
+    }
+  ],
+  "acTraceability": [
+    {
+      "ac": "AC-1",
+      "source": "Plan section 7; session/ledger/revision schemas",
+      "validation": "Forward-only PostgreSQL migration, no raw values, existing data parity."
+    },
+    {
+      "ac": "AC-2",
+      "source": "Plan sections 7-8; OpenAPI; commands/session-view schemas",
+      "validation": "Authenticated public/internal route separation, server-derived immutable scope, trusted expiry."
+    },
+    {
+      "ac": "AC-3",
+      "source": "Contracts README session/action state machines; ledger schema",
+      "validation": "Unique durable admissions, request digest conflicts, fenced consume, UNKNOWN_OUTCOME, no redispatch."
+    },
+    {
+      "ac": "AC-4",
+      "source": "Session/limits schemas; README limits",
+      "validation": "Session-wide reservation/settlement, lease/deadline CAS, cancellation and callback fencing."
+    },
+    {
+      "ac": "AC-5",
+      "source": "ADR-SC-004; README finalization; revision/result schemas",
+      "validation": "Atomic prerequisites and fail-closed seam for OBS-006; no fake ready/replay proof."
+    },
+    {
+      "ac": "AC-6",
+      "source": "Plan section 11; shared fixtures; existing migration/Testcontainers tests",
+      "validation": "Real PostgreSQL concurrency/isolation/recovery tests and execute/schedule regressions."
+    }
+  ],
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "configuration": "WSL wrapper; graceful_degradation.skip_if_not_installed=true",
+    "agents": "data-engineer executor; dev code/pre-commit gate; independent qa full review",
+    "qualityGates": "Pre-commit, independent QA and eventual devops remote gates present",
+    "selfHealing": "3 iterations, 30 minutes, CRITICAL/HIGH fixes; lower severities per config",
+    "execution": "Not run during readiness review; executor/QA must record actual availability and fallback, never invent a PASS."
+  },
+  "antiHallucinationFindings": {
+    "unverifiableTechnicalClaims": [],
+    "configurationFallback": "Configured generic framework docs are stale/absent; actual AGENTS/ARCH/Studio architecture and approved OBS sources used.",
+    "epicContext": "EpicContextAccumulator.buildAccumulatedContext called for index 2 with verified completed OBS-001 metadata.",
+    "historicalLabels": "ADR QA-pending and plan approval-pending predate verified OBS-001 completion and current user authorization.",
+    "limitations": "Schema PASS is not PostgreSQL runtime, authentication, live browser, model or publication evidence."
+  },
+  "evidence": [
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "result": "114 fixtures; 109 OpenAPI examples; all schemas compile; canonical hash vector verified."
+    }
+  ],
+  "mechanicalChanges": [
+    "Linked frozen OBS-001 sources and current code seams.",
+    "Clarified already-approved idempotency, expiry, budgets, ownership and downstream publication boundaries.",
+    "Added executable verification instructions and configured QA timeout.",
+    "Draft -> Ready plus semver Change Log."
+  ],
+  "changedFiles": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md",
+    ".ai/STUDIO-OBS-003-validation.json"
+  ],
+  "storySha256Before": "2365238f6ba3f3ddf44e5a01097f729ad2f6d4bdaa19a09d69b11043c3c02916",
+  "storySha256After": "4ccff03cd0d3de9ac416f921a3efa8e809b3c7ce98b3653218671b4679415c7f",
+  "handoff": "Root-owned phase verification, then designated data-engineer executor; no CLI progress changed."
+}

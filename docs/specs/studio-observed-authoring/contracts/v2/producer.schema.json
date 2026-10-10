@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v2/producer.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "bindingId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "producerAdmissionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "coordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "stepId",
+        "ordinal"
+      ]
+    },
+    "origin": {
+      "type": "string"
+    },
+    "recipe": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "visibleText"
+            },
+            "classification": {
+              "const": "permittedBusinessData"
+            },
+            "policyRuleId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "kind",
+            "classification",
+            "policyRuleId"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "controlValue"
+            },
+            "classification": {
+              "const": "nonsecretApproved"
+            },
+            "controlType": {
+              "enum": [
+                "text",
+                "search",
+                "email",
+                "tel",
+                "url",
+                "textarea"
+              ]
+            },
+            "policyRuleId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "kind",
+            "classification",
+            "controlType",
+            "policyRuleId"
+          ]
+        }
+      ]
+    },
+    "availability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bindingId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "producerAdmissionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "bindingId",
+        "producerAdmissionId",
+        "contextId",
+        "workerId",
+        "ownerFence"
+      ]
+    }
+  },
+  "required": [
+    "bindingId",
+    "producerAdmissionId",
+    "coordinate",
+    "origin",
+    "recipe",
+    "availability"
+  ]
+}

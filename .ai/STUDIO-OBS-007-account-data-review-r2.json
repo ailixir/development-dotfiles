@@ -1,0 +1,240 @@
+{
+  "story": "STUDIO-OBS-007",
+  "reviewType": "NARROW_DATABASE_STATE_MACHINE_R2_DESIGN",
+  "reviewer": "Dara / obs006_ddl_61_high / independent data reviewer",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "at": "2026-10-09T19:16:50.665494+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "verdictScope": "Local design only; not implementationQA, database/migration approval, PO readiness or whole-story/lifecycle gate.",
+  "summary": "Normative R2 selects and substantially resolves all four original data mechanisms: typed purpose links, session-first locks, durable epochs and activation, precise deadlines, and retained bounded tombstones. Two narrow local corrections remain: a full ownership reply cannot fit the 8,192-byte progress cap for a supported 100-step Session, and the NOT_INVOKED matrix uses an unsupported FAILED/CANCELLED report tuple. Both are prose-level corrections independent of provider facts.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "bfb20783c483fc260e61d609c25b6f7530ae96852bb64931232c2cc1fcdfab24",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r2.json": "974139a56f41fea4249bc06f87e5028156400bdad30bef5aaf3e2a8ce46e9a21",
+    ".ai/STUDIO-OBS-007-account-data-review-r1.json": "f64e4a8607017b41d262f7407d3ef3b376ea249cb82c5470de77fe7a4fcfd78e",
+    ".ai/STUDIO-OBS-007-account-design-review-r1.json": "0ceb8fb2c353537c3402c10e814430f34fc0ba746ec01f2b6eac310b067649bb",
+    ".ai/STUDIO-OBS-007-account-ux-review-r1.json": "f348d3b24c127c17ac6ff8e9cb9de7ef03bb890c44f59fd2783a14c376fd6bc1",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "61518ec9553f3515bd7d8b95d3705cba0244f5bf36e9629a37f3454b2d26af59",
+    ".ai/STUDIO-OBS-007-po-validation.json": "48c0dfd523c1b78676e150ee8fc87fb9290fae07c29e65fac86603e39a655e12"
+  },
+  "normativePrecedence": "Designintro explicitlymakes\u00a712normativeover less-specificR1\u00a7\u00a73\u20139; archivedR1andalloldreports remain immutable. Earlier source-first prose is superseded, not treated as a live R2lockorder.",
+  "frozenVerification": {
+    "expectedDesign": "bfb20783c483fc260e61d609c25b6f7530ae96852bb64931232c2cc1fcdfab24",
+    "expectedResolution": "974139a56f41fea4249bc06f87e5028156400bdad30bef5aaf3e2a8ce46e9a21",
+    "pairMatches": true,
+    "protectedInputsCompared": 229,
+    "mismatches": [],
+    "authorizedRootStoryOverlays": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "beforeSha256": "c13a0739f43899cd215ca5765836f7be59f8cffd416838f7a8b214ce5fb0c66b",
+        "r2BaselineSha256": "61518ec9553f3515bd7d8b95d3705cba0244f5bf36e9629a37f3454b2d26af59",
+        "reason": "Authorized root0.1.4 reservation beforeR2; architect did not edit story."
+      }
+    ],
+    "preservedR1DataReportSha256": "f64e4a8607017b41d262f7407d3ef3b376ea249cb82c5470de77fe7a4fcfd78e"
+  },
+  "originalFindingDisposition": [
+    {
+      "id": "DATA-007-01",
+      "status": "RESOLVED_LOCAL_DESIGN",
+      "section": "12.2",
+      "assessment": "Session\u2192ui_tests order matches actual translationTransaction/claim/consume and publisher prepare/finalcommit. Scanner uses unlocked candidate IDs; start namespace fresh/duplicate exceptions are explicit; referenced parents are prelocked, new FKNOACTION is immediate, timeouts/finalclock checks selected. Existing V33 base/attempt/evidence triggers reacquire the already held same session; existing deferred receipt cycle is not replaced or described as new immediate FK. Negative races and rollback are future proof obligations."
+    },
+    {
+      "id": "DATA-007-02",
+      "status": "RESOLVED_LOCAL_DESIGN",
+      "section": "12.1/12.3/12.8",
+      "assessment": "Typed purpose-specific scalar FKs to actual V31/V32 unique keys, added composite assignment uniqueness, null-safe JSON equality, distinct SETUP descriptor rather than fake preparation, exact authorizeExact, guarded initial scalar/progressmarker and monotone localepochs/authenticated invalidation owner selected. Original APPLIED/kind/request/meaning and actual provider entitlement remain service checks. Gated publication exporter/builder/publisher/repository are unconditional007 owners with final authority-facts digest, legacyfalse bypasses only newcheck."
+    },
+    {
+      "id": "DATA-007-03",
+      "status": "RESOLVED_LOCAL_DESIGN",
+      "section": "12.2/12.4",
+      "assessment": "New exactUTC3fraction times/plain timestamptz CHECK avoid coercion rounding; downward future floors and raw DB final sample after waits/writes preserve deadlines. Before-call DBfreshness sample consumes slowcall latency. Bounded clockproof/offset/RTT/age/defaultfalse and fixed conservative monotonic+absolute checks are selected, with postcommit expiry suppressing send; actual deployment health remains a prerequisite, not proven by the draft."
+    },
+    {
+      "id": "DATA-007-04",
+      "status": "ORIGINAL_GAPS_RESOLVED_LOCAL_DESIGN_WITH_NEW_BOUND_COUPLING",
+      "section": "12.5/12.1",
+      "assessment": "Actual limits support M\u2264200/C\u2264201, all-state SETUPuniqueness, one permit/receipt, bounded aggregate/callback/idempotency counts, zero per-key advance rows and no tombstone/parent deletion selected. Unlimitedaccepted parent history is intentionally retained like immutable existing history; no futureGC/fabricated cleanup claimed. DATA-007-R2-01 remains for the new ownership replycache versus8192combinedprogressbound."
+    },
+    {
+      "id": "DATA-007-N1",
+      "status": "PARTIALLY_RESOLVED_LOCAL_DESIGN",
+      "section": "12.5",
+      "assessment": "Accountedfailure\u2260success, consumed intentcount1 and immutableUNKNOWN/late-accounting pairs are now explicit; REL-007-R2-01 corrects the one unsupported FAILED/CANCELLED tuple."
+    }
+  ],
+  "findings": [
+    {
+      "id": "DATA-007-R2-01",
+      "severity": "HIGH",
+      "blocking": true,
+      "category": "Ownership claim replay-cache bound versus supported Session size",
+      "designReferences": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "lines": [
+            422,
+            428,
+            491,
+            493
+          ]
+        }
+      ],
+      "sourceReferences": [
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/limits.schema.json",
+          "symbols": [
+            "maxSourceSteps:100",
+            "maxActions:200"
+          ]
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v2/session.schema.json",
+          "lines": [
+            259,
+            279,
+            280
+          ],
+          "symbols": [
+            "sourceSteps",
+            "Session"
+          ]
+        },
+        {
+          "path": "studio-runner/src/guided/ownership.ts",
+          "symbols": [
+            "ClaimPort",
+            "checkGrant",
+            "requestClaim"
+          ]
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "symbols": [
+            "claim",
+            "start"
+          ]
+        }
+      ],
+      "finding": "R2 selects OwnershipGrant1 containing the whole unchanged Session and persists last number/request hash/reply to reproduce an original duplicate acknowledgment. Its combined epoch/claim/control progress bound is8192bytes. A supported100-step Session alone exceeds that bound; the selected full-reply cache has no concrete compact representation. Thus a literal implementation either rejects otherwise supported ownership, exceeds its storage cap, or reconstructs a different duplicate reply/lease. This is locally resolvable and independent of provider facts.",
+      "staticByteAnalysis": {
+        "method": "Read-only canonical JSON size calculation based on the existing v2 fixture Session, replacing only sourceSteps with100 unique UUIDs and setting existing maxSourceSteps100. No validator/test/browser/DB was executed; this is a serialization counterexample, not integration evidence.",
+        "baseFixtureSessionBytes": 1854,
+        "session100UuidStepsBytes": 9317,
+        "ownershipGrantBytes": 9710,
+        "minimalNumberHashReplyCacheBytes": 9812,
+        "selectedCombinedProgressLimit": 8192,
+        "scope": "Does not claim every field combination or complete100-step workflow is executable; demonstrates the unchanged supported Session response shape cannot fit the stated full-reply cache.",
+        "additionalEpochAndOtherControlFieldsCounted": false
+      },
+      "requiredCorrection": "Select a bounded compact ownership-cache projection and exact reply reconstruction algorithm: retain every mutable field required to reproduce the accepted original grant (including its original lease/fence/state/counters/account-connection snapshot/dbTime as applicable), use verified immutable parent facts for the large source/scope/version parts, and define stale/terminal/fence behavior without extending lease or dropping mode. Alternatively select a separately justified finite full-response cache bound covering the actual supported Session maximum, adjust aggregate quotas accordingly, and preserve old limits. Do not lower supported source-step count, truncate fields, return current renewed lease on an old duplicate, or infer legacy mode to fit the cap. Specify the selected cache in normative prose rather than leaving this concrete layout choice to implementation.",
+      "plannedOracles": [
+        "At100 source steps and maximum supported bounded IDs/origins/source metadata, acquire and renew new ownership; verify actual stored progress stays under the selected bound and the complete original supported Session/mode response remains intact.",
+        "Move action/counters/state and renew lease after an acknowledgment, then replay the prior renewal counter/body: receive its original grant/deadline semantics without extending rights; changed/old/skipped counter or changed fence cannot recreate accepting authority.",
+        "Restart/lost claim acknowledgment and state overflow refuse safely without original session becoming a downgraded legacy grant, duplicate browser launch, or unbounded arbitrary-key rows."
+      ],
+      "localProviderIndependent": true
+    },
+    {
+      "id": "REL-007-R2-01",
+      "severity": "HIGH",
+      "blocking": true,
+      "category": "Outcome pair incompatible with existing report verifier",
+      "overlap": "Root relayed the security peer finding under this ID; independently confirmed against the actual unchanged GuidedActionLedger.verifyReport source.",
+      "designReferences": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "lines": [
+            502,
+            508
+          ]
+        }
+      ],
+      "sourceReferences": [
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java",
+          "symbol": "verifyReport"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "symbol": "outcomeV2"
+        },
+        {
+          "path": "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql",
+          "symbols": [
+            "studio_guided_immutable_admission",
+            "dispatchCount/state CHECK"
+          ]
+        }
+      ],
+      "finding": "The new matrix specifies authenticated NOT_INVOKED after consumed intent as FAILED/dispatchCount1 with outcomeCode TIMEOUT or CANCELLED. verifyReport permits FAILED only with ASSERTION_FAILED, TARGET_CHANGED, POLICY_DENIED or TIMEOUT; CANCELLED is not a valid FAILED owning-worker report. Merely being present in the wider ledger enum does not grant this tuple. The statement that only existing supported ledger codes are used is therefore not satisfied.",
+      "requiredCorrection": "Select an actually supported existing FAILED tuple for known NOT_INVOKED authority cancellation/expiry, while retaining the precise cancellation/expiry cause in the authority wrapper and session terminal state. Preserve dispatchCount1 as consumed intent. If a terminal cancellation/UNKNOWN/fence change already won, only append the bounded historical receipt and keep existing action/session state. Do not reset to REVOKED/count0, expand the frozen legacy verifier or bypass it merely to implement this prose.",
+      "plannedOracles": [
+        "Valid original immutable DISPATCHING ledger + authenticated exact-consumption NOT_INVOKED report maps to the selected legal FAILED code, commandCOMPLETED(accounted failure)/permitCONSUMED and correct fixed session cause, with zero native/browser effects.",
+        "The existing FAILED/CANCELLED tuple still refuses under the unchanged ledger verifier.",
+        "Race terminal stop/UNKNOWN/new fence before callback; late known-NOT_INVOKED or contradictory receipt cannot rewrite terminal ledger/session or enable publication."
+      ],
+      "localProviderIndependent": true
+    }
+  ],
+  "mandatoryImplementationConditionsNotExecuted": [
+    "Newownershipclaim/renewal must remain read-only ownership\u2014not a missing FreshCaller effect-permit prerequisite that circularly blocks SETUP. Validate trustedexplicitmode/hash before accepting any legacy launch-capable route; newprepare remains read-only aftergenuineSETUP/blankREADY. Old gatedclaim refuses beforeownermutation; legacysupportedbranch remains explicit.",
+    "V34 guardinitialINSERT/linkage/epochs and conditional FK projections must be real typed checks with IS TRUE; no SQLNULL loopholes/JSONFK fiction. Define wire epoch/counter range compatible with existing Java/Node safe-integer canonical codecs even if stored as PostgreSQLbigint; exhaustion refuses.",
+    "Public mint runs uncached liveCore/provider checks outside locks. Commit all originaladmission/attachment/dispatch-intent and command/permit/status changes together; rollback after each write leaves no sender. Only the successful postcommit ephemeral discriminator can send.",
+    "Final DBdeadline check comes after every wait, including implicit referenced-row/unique/trigger paths; postcommit and workeradjacent every native/CDP primitive checks retainabsolute and monotonicrights. Clock-enabled remains false without genuinely healthy documentedbounded deployment clock conditions; a recentcalibration is not an assertion of universal clock health.",
+    "Frozen exactpreparation never switches to latest matching row; actualmodel/plan/meaning/source/context/fence/accountjoins and allgatedpublication associations independently checked. Account/policyrevocation neverreopens oldsession/permit, including afterbackendrestart.",
+    "Counter/key floods stay within actualselectedrow/bytebounds; serializedaccounting projections must be complete/truthful withinbound withouttruncation. No automaticDELETE/TRUNCATE/cascade of authority/parent/journaltombstones; futureGC needsseparate nonreuse/callback/publication horizonreview.",
+    "Late authenticatedexact-consumption callback afterpermitexpiry is historical accountingonly; stillcurrenteligible genuine completion maysettleonce, but anyterminal/fence/epoch/UNKNOWN winner preventsavailability/observation/readiness resurrection. SETUPnever creates fakeACTIONledger.",
+    "Authoritativegatedstatus read uses freshoriginalprincipalandcurrentCSIcanRead outside transaction; lacks effect/account authority withoutlosingreadabilityafteraccount-onlyexpiry/revocation. No cookie persisted orworker impersonation.",
+    "All proposedV34/type/schema/catalog/ownership/pub/frontendpath reservations and task/FileList amendments remain root/PO workbeforeimplementation. Migrateoldmarker-free sessionswithoutdoc/progresschecksummutation; supportedoldreplay/ordinary behavior/pins remainexact."
+  ],
+  "plannedAdditionalOraclesNotRun": [
+    "All R1negativeoracles remain, now against selectedR2mechanisms; actual source/session/scanner/startnamespace/FK/trigger races prove lockgraph and strictpost-waitrefusal.",
+    "ValidACTIONandSETUPbaselines then wrongpurpose/null/type/extra/FK/epoch/marker/APPLIED/request/proposal/preparation/evidence/worker/fence mutations; coherent localhashes cannot hidewrongoriginaljoins.",
+    "At-source-supported100steps and worstlegitimateboundedSessionmetadata, exactownershipreply/cache quotas and duplicateoriginaldeadline are verified; this is the new DATA-007-R2-01 case.",
+    "Correct NOT_INVOKED callback versusexisting ledgerverifier, cancellationrace/lateUNKNOWN and rejectedunsupportedFAILED/CANCELLED tuple; no counterfeitaction/counterrollback.",
+    "Exact UTCms equality/nexttick/submsPGrow/refusedoffset and JavaNode clocks, boundedskew/age/RTT/wallmovement; no newclockcheck/renewalextendspermit.",
+    "M/M+1,1/2SETUPallterminalstates,distinctkeys/contradictorycallbacks/parenttombstonedeletion andrestart/scannerrecovery; boundedmetadata andzeroadditionaleffects."
+  ],
+  "readinessPreserved": {
+    "storyStatus": "Draft",
+    "poVerdict": "NO-GO",
+    "score": "4/10",
+    "EXT-001": "UNRESOLVED; actualapprovedproviderAPI/identity/transport/config andconditionalhandoffmechanismremainunknown/unapproved",
+    "localPassWouldNotAuthorizeImplementation": true,
+    "implementationApproved": false,
+    "migrationApproved": false,
+    "lifecycleChanged": false,
+    "wholeStoryGateIssued": false
+  },
+  "workPerformed": {
+    "writtenOnly": ".ai/STUDIO-OBS-007-account-data-review-r2.json",
+    "sourceInspectionAnd229HashComparison": true,
+    "staticSerializationAnalysis": true,
+    "testsValidatorsBuildsSQLDatabaseBrowserProviderExternalCalls": false,
+    "productSchemaMigrationUIStoryTestLifecycleGateEdits": false,
+    "subagentsRootCliCommitsPush": false
+  },
+  "budget": {
+    "sharedWholeWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  },
+  "narrowSourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java": "c3ce6a43af36602d50d0d34d14ab1d06baa65eaa6282fec9a5abfc76ec00124b",
+    "docs/specs/studio-observed-authoring/contracts/limits.schema.json": "70405b35a78eff845d31c63413f64700b196325e0e72be9ba199912a20abc4aa",
+    "docs/specs/studio-observed-authoring/contracts/v2/session.schema.json": "ed39a56cb60cb8d70960967cb1fc5f18494130a85e263960e146ed8f5a96f16e",
+    "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json": "4c18212ff1bd2accbd51055133b4dcaff8f160e4f4de7e7ddef234ef0901e6d0",
+    "studio-runner/src/guided/ownership.ts": "8e07015062aadf7e338731e4289c6b9db14d63c429425382ef0696014a0f982b",
+    "studio-runner/src/guided/journal.ts": "95705022bde07296e5609ea859809484dc6e7d442ae43489c7f49324855e8b83"
+  },
+  "sourceInventoryReferences": [
+    ".ai/STUDIO-OBS-007-account-data-review-r1.json#/sourceHashes",
+    ".ai/STUDIO-OBS-007-account-design.json#/inputFingerprintsSha256",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r1.json#/preservation/additionalR1InputFingerprintsSha256",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r2.json#/preservation/additionalR2InputsSha256"
+  ],
+  "sourceInventoryNote": "Existing inventories plus the authorized story overlays cover all 229 verified inputs. Product sources remain unchanged; current design/resolution hashes are separately recorded. Only six focused source hashes for the new claim-cache and ledger-pair checks are repeated here."
+}

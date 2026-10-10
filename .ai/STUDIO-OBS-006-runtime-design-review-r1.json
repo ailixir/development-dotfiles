@@ -1,0 +1,442 @@
+{
+  "storyId": "STUDIO-OBS-006",
+  "reviewType": "Independent revised runtime/contract design re-review; not implementation QA/PO/lifecycle verdict",
+  "reviewer": "/root/sdc_bridge_arch",
+  "at": "2026-10-09T07:22:11.158627+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "reviewedDocumentHashes": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "cf031d028efafcf8fa8765c868d303c28704b5e1237a10cca6cee82592788820",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "10dbc05aeaa5812d2faf11c1db22501e8ba02f60081c4473266f396a6ff478ab",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "c044f2dae8522a7b69b33d6c4c8a0318d78ae53ff16fbae1076321048bdad9bf",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "6aaa3942e5719619f8d9d87bd847a81146c8695765a55ba5c5ef1997b875db14"
+  },
+  "resolutionMap": {
+    "path": ".ai/STUDIO-OBS-006-design-resolution-r1.json",
+    "sha256": "ef34aec2cf27c8671fca0421be54076e0c30de5b6652e93ef0f621b272b6303c"
+  },
+  "initialReview": {
+    "path": ".ai/STUDIO-OBS-006-runtime-design-review.json",
+    "sha256": "5351f3b870c9672026f94062b826156dafa4e262679c40a23b6c964ac075cf80",
+    "unchanged": true
+  },
+  "summary": "R1 resolves the central architecture: pre-effect immutable evidence and independent validation basis, real account SPI/startup, explicit dual-family contracts, preserved fill/select primitives and hash algorithms, fresh private values, and correct historical-learning versus execution compatibility separation. Several exact contract joins still contradict the actual source or omit data required by normal execution. These are small bounded design corrections, not a change of architecture or a request for later account/benchmark implementation.",
+  "priorFindingDisposition": [
+    {
+      "id": "RUNTIME-001",
+      "status": "CORE_DESIGN_RESOLVED_WITH_NEW_IMPORTED_TYPE_FIX_REQUIRED",
+      "evidence": "D2/D3 capture original sanitized observation/preparation facts before they are overwritten and join them atomically to actual admissions; C4/C5 independently supplied basis allows Node guard/input derivation. R1-001 below fixes the accepted-plan import shape, which currently rejects real allocated plans."
+    },
+    {
+      "id": "RUNTIME-002",
+      "status": "SUBSTANTIALLY_RESOLVED_WITH_EXACT_WIRE_GAPS",
+      "evidence": "C1-C9 now define closed types, separate composite caps, discriminators and handshakes. R1-002 and R1-005 identify missing normal job configuration and explicit IPC status/control/unknown-evidence semantics."
+    },
+    {
+      "id": "RUNTIME-003",
+      "status": "ACCOUNT_ABI_RESOLVED_POLICY_SNAPSHOT_INCOMPLETE",
+      "evidence": "C6 defines bounded sensitive one-use handle, neutral Java authorize/issue/current SPI, worker consume/prepare/apply/dispose, actual child entry injection and fail-closed default. C8 policy snapshot still cannot represent the actual approved application/region grants; see R1-003. No demand to implement007 connectivity."
+    },
+    {
+      "id": "RUNTIME-004",
+      "status": "RESOLVED",
+      "evidence": "C8 and main section7 correctly distinguish native pointer/key from actual isolated fill/select primitives, preserving retained-target checks, event behavior and post-input uncertainty."
+    },
+    {
+      "id": "RUNTIME-005",
+      "status": "RESOLVED_WITH_HASH_STABILITY_CONDITION",
+      "evidence": "C2-C4 preserve ordered-sourceHash, existing ledger-array admissionProvenanceHash, value-free cfg-ID/name mapping and separately named publicationEvidenceHash. C9 fixed byte/digest examples agree. R1-004 addresses mutable lease timestamps in snapshot identity rather than those canonical algorithms."
+    }
+  ],
+  "findings": [
+    {
+      "id": "R1-001",
+      "severity": "high",
+      "area": "C4 AcceptedTranslationPlan",
+      "finding": "The closed imported type says source-selection.schema.json with the sole extension obligationId, and claims this is the actual persisted V32 shape. Actual GuidedDependencyPlanner.allocate adds bindingId to each need before the allocated plan is persisted; the source-selection needs object is additionalProperties=false and has no bindingId. Any completed workflow with implicit dataflow therefore cannot be represented in the declared ValidationBasis or hashed as its actual persisted translationPlan.",
+      "necessaryChange": "Define a closed accepted allocated-need extension with the existing needId/producerStepId/consumers plus the trusted bindingId (required in final accepted allocated plan). Keep obligationId extension too. Hash the actual immutable stored plan, including its trusted allocations; never strip bindingId merely to make the model-output schema pass. Validate each bindingId bidirectionally against original allocation/producer/consumer records.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C4 AcceptedTranslationPlan",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:46",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:58",
+        "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json#/properties/needs"
+      ],
+      "testOracles": [
+        "Take an actual post-bootstrap accepted plan with one implicit need and its persisted bindingId; the closed basis accepts it and H(translationPlan) equals stored translationHash.",
+        "Remove/change/duplicate that bindingId or bind it to another original allocation; both Java and Node refuse despite recomputed artifact-local hashes."
+      ]
+    },
+    {
+      "id": "R1-002",
+      "severity": "high",
+      "area": "C7 ObservedJob and C8 launch",
+      "finding": "ObservedJob carries artifact, inputs, handle, timeouts and recording geometry, but omits Configuration. Artifact has configurationHash only. Launch2 requires viewport, and normal recorded launch also needs the frozen browser/configuration semantics. Recording dimensions are not the authored viewport. The runner cannot reconstruct the authorized viewport/waitStrategy or recompute configurationHash from the declared job.",
+      "necessaryChange": "Include the closed C2 Configuration in ObservedJob (or an equivalent explicitly bound complete execution configuration). Require H(configuration)=artifact.configurationHash and equality with the accepted immutable revision/configuration identity before admission/launch. Define viewport/runtime/recording projection explicitly, preserving distinction between viewport and recording size and existing runtime ceilings; no reverse-hash reconstruction or default substitution.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C2 Configuration",
+        "docs/specs/studio-observed-authoring/publication-contracts.md C7 ObservedJob",
+        "docs/specs/studio-observed-authoring/publication-contracts.md C8 Launch2",
+        "studio-runner/src/run/browserFactory.ts:18",
+        "studio-runner/src/run/browser.ts:88",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompileInputs.java"
+      ],
+      "testOracles": [
+        "Publish with viewport deliberately different from recording geometry; actual observed child gets the exact viewport and produces correctly timed video.",
+        "Change viewport, browser, environment or waitStrategy while preserving artifactHash; refuse configurationHash/binding mismatch before browser.",
+        "No hidden legacy/default configuration fallback in observed mode."
+      ]
+    },
+    {
+      "id": "R1-003",
+      "severity": "high",
+      "area": "C8 TrustedPolicy read authorization",
+      "finding": "The closed policy has only rules {ruleId,origin,locator,recipe}. It has no application/region grant selector, allowStructuralDiscovery or actual optional field override representation. Existing collector authorization uses ObservationApplicationPolicy.readGrants with application/role region, visibleText permission, control-value type sets and independently optional testId overrides. The new shape does not specify a semantics-preserving mapping and can reintroduce mandatory per-control mappings or flatten away live region membership.",
+      "necessaryChange": "Freeze a bounded snapshot/adapter mapping that preserves the existing structural permission, application/region read-grant union, type allowlists, optional exact overrides and deny/conflict precedence. Prefer projecting the existing actual policy types into the trusted wire snapshot; do not synthesize per-control grants from learned artifact locators. currentPolicyHash must cover the effective region/type/override policy used by the child. Keep pure structural discovery insufficient for reads.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C8 TrustedPolicy",
+        "studio-runner/src/run/observationTypes.ts:29",
+        "studio-runner/src/run/observationCollector.ts:187",
+        "studio-runner/src/run/observationCollector.ts:533"
+      ],
+      "testOracles": [
+        "Actual ordinary replay of a no-testId/no-per-control source and labelled consumer using one application/region grant, preserving fresh-value server receipts.",
+        "No-grant, moved-outside-region, duplicate region, hidden/password/sensitive descendant and narrower structuralOnly override refuse.",
+        "Changing only region anchor/type allowlist/override changes effective policy identity or refuses current-policy compatibility; no stale flattened authorization."
+      ]
+    },
+    {
+      "id": "R1-004",
+      "severity": "medium",
+      "area": "C4/D3 snapshotHash and D4/D6 final CAS",
+      "finding": "snapshotHash includes owner.leaseExpiresAt, and D3/D6 call for recomputing it from current owner/lease. The real worker renews a live same-owner lease in place about every10s. A valid15s validator call or fresh Core call can therefore be invalidated solely by an unrelated successful heartbeat, spending the three session-wide attempts with no evidence/fence change.",
+      "necessaryChange": "Distinguish the captured validation authorization deadline from current lease liveness. Freeze the captured deadline in the attempt/snapshot identity and validate response/commit before that original deadline, while rechecking current same owner/fence and an unexpired current lease; do not rehash a benign later renewal timestamp as changed evidence. Alternatively define an equally precise stable snapshot rule. A renewal must not extend a claimed validation deadline or revive an expired attempt.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C4 snapshotHash",
+        "docs/specs/studio-observed-authoring/publication-data-contract.md D3-D4-D6",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:574"
+      ],
+      "testOracles": [
+        "Hold validation across an actual same-fence renewal while remaining inside original claim deadline; publication can commit with one validator send and unchanged evidence identity.",
+        "Changed fence/owner, shortened or expired authority, response after original claim deadline, cancellation and source/evidence change still refuse; renewal cannot revive the attempt."
+      ]
+    },
+    {
+      "id": "R1-005",
+      "severity": "medium",
+      "area": "C8 normal child reporting/control semantics",
+      "finding": "StepFinished2 exposes only ok/errorCode/atMs, with no defined SKIPPED representation; Result2.recording.bytes is nonnullable although the actual recording pipeline reports null for unavailable/unknown size; no common stop or Stop2 frame is defined. These may be implemented compatibly, but the claimed complete closed IPC currently leaves cancellation/skipped-step/evidence mapping to invention.",
+      "necessaryChange": "Specify an unambiguous PASS/FAIL/SKIPPED mapping (prefer explicit status and nullable skipped timings, or exact documented state-dependent mapping), preserve unknown recording size as null instead of fabricated0, and explicitly retain the closed common {kind:stop} command for both per-run channels or define Stop2. Define the paired recording/run clock origin before account apply and never reset it when Ready2 is finally sent.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C6 launch ordering",
+        "docs/specs/studio-observed-authoring/publication-contracts.md C8 frames",
+        "studio-runner/src/executor/executor.ts:103",
+        "studio-runner/src/run/protocol.ts:159",
+        "studio-runner/src/run/protocol.ts:174",
+        "studio-runner/src/run/childRuntime.ts:157",
+        "studio-runner/src/run/childRuntime.ts:186"
+      ],
+      "testOracles": [
+        "First operation fails or cancels, later steps are honestly SKIPPED with existing null-timing semantics, never false assertion failures.",
+        "Recording unavailable/inspection failure retains unknown byte count and correct evidence state/partial flag.",
+        "Account apply deliberately delays several seconds; video seek/step time remains aligned to recording context origin.",
+        "Parent stop/drain/deadline terminates observed child using the exact declared control frame without changing legacy behavior."
+      ]
+    },
+    {
+      "id": "R1-006",
+      "severity": "medium",
+      "area": "C7 observed-admission authentication and ownership",
+      "finding": "C7 says the new /internal/studio/executions/{id}/observed-admission uses existing mTLS runner authentication. Actual ordinary /internal/** chain uses ServiceIdentityAuthenticationFilter with a static configured service token; verified-cert/JWT checking lives in GuidedInternalSecurity on guided-only matchers. No ordinary security configuration/filter path is reserved in the152 list. The claim of an already-present mTLS guard at this new path is not source-backed.",
+      "necessaryChange": "Name the actual identity/TLS enforcement for the new observed-admission route. Either explicitly use the existing ordinary restricted service identity with the real deployment TLS boundary and describe its trust limit, or add a narrowly scoped verified mTLS/service-auth guard for the new route and reserve its production/test paths. Preserve v1 callbacks. Do not claim mTLS/JWT enforcement based on HTTPS/headers or the unrelated guided chain.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C7 observed-admission route",
+        "backend/src/main/java/com/citi/put/checks/config/StudioInternalSecurityConfig.java",
+        "backend/src/main/java/com/citi/put/checks/security/ServiceIdentityAuthenticationFilter.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java"
+      ],
+      "testOracles": [
+        "Exercise the actual new HTTP security chain with missing/wrong service identity and, if mTLS is required, missing/unverified/wrong certificate.",
+        "A valid guided-only credential does not accidentally bypass the observed execution actor/attempt checks; legacy callback auth behavior remains unchanged."
+      ]
+    }
+  ],
+  "mandatoryClarificationsAndImplementationConditions": [
+    {
+      "id": "COND-R1-1",
+      "condition": "D2 says initialBlank has null observation and target. Preserve the imported Action2 page target {kind:page,documentId,generation}; only the observation/node fact is absent. Do not implement a null proposal.target that contradicts the unchanged bridge schema.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-data-contract.md D2",
+        "docs/specs/studio-observed-authoring/contracts/v2/action.schema.json#/properties/target"
+      ]
+    },
+    {
+      "id": "COND-R1-2",
+      "condition": "Define a total deterministic ordering for mixed input recipes and ties: source-step position, recipe-kind rank, source span start/end or cfg referenceId, slot/kind and stable inputId as needed. C3 first-position/start-or-referenceId alone is not a total order when spans start together or one source step has both recipe kinds. Publish vectors for both lowerers.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C3 ordering"
+      ]
+    },
+    {
+      "id": "COND-R1-3",
+      "condition": "Freeze collector actionable as the recorded fact; do not newly require observation.actionable=true for every mutator. Current collector marks div[role=button] and hoverable text as non-actionable in that metadata while validateInvocation/native dispatch may legitimately execute them. Live operation-specific compatibility/hit/focus/disabled checks remain authoritative in addition to exact recorded-fact equality.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C3 Guard semantics",
+        "studio-runner/src/run/observationCollector.ts:393",
+        "studio-runner/src/run/observationCollector.ts:528"
+      ]
+    },
+    {
+      "id": "COND-R1-4",
+      "condition": "Input values and opaque account handles belong only to the explicit ephemeral job/child channels. Child graph starts empty; no RuntimeBinding can carry old availability/admission/context/fence/value. Parent must validate each supplied input ID against the immutable recipe step/kind/slot, and the typed child projection must retain enough nonsecret metadata to recheck its declared argument placements. No original source/whole artifact is needed or permitted in IPC.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C3,C7,C8"
+      ]
+    },
+    {
+      "id": "COND-R1-5",
+      "condition": "Account registry selection/injection is trusted compiled/startup wiring in the actual child entry; provider objects/functions/modules cannot be serialized through job/IPC. consume/prepare before browser, same-context apply once, dispose on every exit and unknown consume/apply refusal remain required. Only007 connectivity implementation stays unavailable.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C6",
+        "studio-runner/src/run/child.ts"
+      ]
+    },
+    {
+      "id": "COND-R1-6",
+      "condition": "Bind the supported profile catalog to the actual schema/reference bundle and executable image/Chromium checks in build/runtime records. The closed Profile fields alone do not contain those hashes/build IDs; document/test the trusted catalog association so copied catalog strings or stale dist/schema bundles cannot claim support. Keep these execution/proof algorithm identities distinct from learning model/provider/prompt/result-format pins.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C2,C9",
+        "studio-runner/scripts/write-runtime-versions.mjs",
+        "studio-runner/scripts/check-pins.mjs"
+      ]
+    },
+    {
+      "id": "COND-R1-7",
+      "condition": "Retain C1 whole-serialization byte caps at all receiving/sending boundaries, before parse/traversal/spawn. After adding missing Configuration/policy fields, re-evaluate composed fits. All imported closed schemas, including learned-plan conditionals, must be enforced by the actual packaged observed validator, not only a build checker.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C1,C7,C8",
+        "studio-runner/src/guided/contracts.ts:17"
+      ]
+    },
+    {
+      "id": "COND-R1-8",
+      "condition": "Treat providerModel/response modelVersion truthfully. Existing saved provenance supplies schema/provider-shape/output-contract pins; do not invent an unrecorded historical provider-returned version from current configuration. If a known configured model label is retained, keep it historical only and outside required replay compatibility.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md C2 LearningProvenance",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java:83",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelResponse.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GenAiGuidedLlmGatewayClient.java:112"
+      ]
+    }
+  ],
+  "historicalVersusExecutionAssessment": {
+    "status": "DESIGN_RESOLVED",
+    "evidence": [
+      "docs/specs/studio-observed-authoring/publication-contracts.md C2 LearningProvenance",
+      "docs/specs/studio-observed-authoring/publication-contracts.md C9",
+      "docs/specs/studio-observed-authoring/publication-data-contract.md D3",
+      "docs/specs/studio-observed-authoring/publication-design.md section8"
+    ],
+    "reason": "LearningProvenance is bound in basis/publicationEvidenceHash and is not compared with current prompt/model/provider/public-result defaults during replay readiness. Profile contains execution/proof algorithm versions. Historical proof decoder support is checked for publication; later compatible replay does not request its private historical basis. Revocation requires explicit catalog policy, not accidental current-model mismatch.",
+    "requiredOracles": [
+      "Change only current guided prompt/provider response schema/API result-format defaults while keeping the saved artifact and supported execution/proof catalog unchanged: saved replay remains ready and executes with zero gateway calls.",
+      "An explicitly revoked/unsupported execution or proof algorithm/catalog, changed browser/package compatibility or wrong schema bundle refuses before browser without rewriting historical provenance."
+    ]
+  },
+  "independentEvidenceAssessment": {
+    "status": "ARCHITECTURE_RESOLVED_SUBJECT_TO_R1_001",
+    "reason": "D2 captures original sanitized observations and full proof/proposal associations before effects; D3 reads original rows independently; C4 supplies historical node/document/generation identities only to pure validation and derives stable guards/recipes/graph from them. Basis hashes bind claim/verdict/final CAS. Java privately verifies authoredInputsHash while Node receives only value-free opaque reference mappings and original source for exact spans. A lowerer-produced guard no longer proves itself.",
+    "oracles": [
+      "Overwrite latest progress through multiple pages, restart, and publish using each original immutable preparation snapshot; missing old facts refuse.",
+      "Mutate artifact guard/type/slot/recipe/graph and recompute local hashes while basis remains fixed: independent Node refusal.",
+      "Alter basis joins or original DB evidence after validation: snapshot/final CAS refuses.",
+      "No saved values, captured bytes, sample hashes, handles or historical execution rights in artifact executable fields, IPC graph or diagnostic channels."
+    ]
+  },
+  "ownershipCoverage": {
+    "storyPaths": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationProperties.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationBudget.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedWireBodyAdvice.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/entity/UITestRevision.java",
+      "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionErrorCode.java",
+      "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+      "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+      "backend/src/main/resources/application.yml",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionReadinessTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/readiness/ExecutionReadinessTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/compile/NoRuntimeLlmTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/compile/RunConfirmationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/internal/AdmissionCasIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClientTest.java",
+      "studio-runner/src/validator/observedReplay.ts",
+      "studio-runner/src/validator/observedReferencePolicy.ts",
+      "studio-runner/src/validator/observedSchemas.json",
+      "studio-runner/src/executor/observedReplay.ts",
+      "studio-runner/src/executor/observedOperations.ts",
+      "studio-runner/src/executor/operations.ts",
+      "studio-runner/src/executor/executor.ts",
+      "studio-runner/src/executor/adapters/BrowserAdapter.ts",
+      "studio-runner/src/run/observedReplayAdapter.ts",
+      "studio-runner/src/run/observedAccount.ts",
+      "studio-runner/src/run/protocol.ts",
+      "studio-runner/src/run/launcher.ts",
+      "studio-runner/src/run/childRuntime.ts",
+      "studio-runner/src/run/browserFactory.ts",
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/src/run/outputRelay.ts",
+      "studio-runner/src/run/manifest.ts",
+      "studio-runner/src/run/errors.ts",
+      "studio-runner/src/server/routes.ts",
+      "studio-runner/src/server/runCoordinator.ts",
+      "studio-runner/src/server/config.ts",
+      "studio-runner/src/server/application.ts",
+      "studio-runner/src/server/adapters.ts",
+      "studio-runner/src/reporting/envelope.ts",
+      "studio-runner/src/reporting/admissionClient.ts",
+      "studio-runner/src/versions.ts",
+      "studio-runner/src/compat/compatibility.ts",
+      "studio-runner/src/compat/runtime-versions.ts",
+      "studio-runner/scripts/write-runtime-versions.mjs",
+      "studio-runner/scripts/check-pins.mjs",
+      "studio-runner/test/observedReplayValidation.test.ts",
+      "studio-runner/test/observedReplayEquivalence.test.ts",
+      "studio-runner/test/observedReplayExecutor.test.ts",
+      "studio-runner/test/server/observedReplayRoutes.test.ts",
+      "studio-runner/test/server/observedReplayAdmission.test.ts",
+      "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "studio-runner/test/run/confinement.test.ts",
+      "studio-runner/test/run/childRuntime.test.ts",
+      "studio-runner/test/run/protocol.test.ts",
+      "studio-runner/test/compat.test.ts",
+      "studio-runner/test/runtime-versions.test.ts",
+      "studio-runner/test/server/prelaunch.test.ts",
+      "studio-runner/fixtures/observed-reference/manifest.json",
+      "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+      "studio-runner/fixtures/observed-reference/control-value-reference.json",
+      "studio-runner/fixtures/observed-reference/operation-mutations.json",
+      "studio-runner/fixtures/lint/isolation-manifest.json",
+      "studio-runner/README.md",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-artifact.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-policy.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-operation.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-profile.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/revision.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json",
+      "docs/specs/studio-observed-authoring/contracts/README.md",
+      "docs/specs/studio-observed-authoring/openapi-v2.yaml",
+      "docs/specs/studio/openapi.yaml",
+      "tools/check-studio-observed-contracts.cjs",
+      "tools/build-studio-observed-schemas.cjs",
+      "docs/runbooks/studio-guided-authoring.md",
+      "docs/specs/studio-observed-authoring/publication-design.md",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayProperties.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerOutcomeCodes.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/InternalCallbackCodes.java",
+      "backend/src/test/java/com/citi/put/checks/studio/ExecutionErrorCodeContractEscalationTest.java",
+      "studio-runner/src/executor/refusals.ts",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/account/ReplayAccountAccess.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/StudioInternalController.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java",
+      "backend/build.gradle.kts",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorizationIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultIT.java",
+      "backend/src/test/java/com/citi/put/checks/studio/dispatch/InternalBodyContractConformanceTest.java",
+      "studio-runner/src/run/child.ts",
+      "studio-runner/src/reporting/snapshot.ts",
+      "studio-runner/test/isolation.test.ts",
+      "studio-runner/test/run/observedAccount.test.ts",
+      "studio-runner/test/server/observedReplayAuthorization.test.ts",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-validation.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-job.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-ipc.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-account.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication-canonical-vectors.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json",
+      "docs/specs/studio-observed-authoring/publication-data-contract.md",
+      "docs/specs/studio-observed-authoring/publication-contracts.md",
+      ".ai/STUDIO-OBS-006-design-resolution-r1.json"
+    ],
+    "count": 152,
+    "uniqueCount": 152,
+    "matchesResolutionMapExactly": true,
+    "coveredAdditions": [
+      "GuidedPublicationEvidenceRepository and its tests",
+      "Neutral ReplayAccountAccess and real run/child.ts wiring",
+      "Closed replay-validation/job/ipc/account schema reservations",
+      "Strict raw-wire controller paths, actual ordinary result projection and scheduler",
+      "Existing dispatch/InternalBodyContractConformanceTest, isolation and confinement tests"
+    ],
+    "remainingAdjustment": "If R1-006 selects actual new certificate/service-auth enforcement, reserve the specific config/filter and authentication integration-test paths; those are not in152. Other listed fixes fit already-reserved contract/runtime/data files. The current plan import and job/policy issues are definition errors, not missing libraries/infrastructure.",
+    "mustRemainUnchanged": [
+      "Legacy artifact1 AST/reference-policy2/locator fallbacks and64KiB bounds",
+      "Existing ordinary RUN auto-accept/manual confirmation/profile behavior",
+      "Closed001-005 gates/evidence and original design review records"
+    ]
+  },
+  "documentOnlyChecks": {
+    "allFourFrozenHashesMatch": true,
+    "allFiveFixedCanonicalHexShaPairsMatch": true,
+    "initialReviewHashMatchesResolutionRecord": true,
+    "sourceBuildsOrTestsRun": false,
+    "browserExecuted": false,
+    "note": "Hash/JSON/byte inspection only; these are not Java/Node runtime conformance or product test results."
+  },
+  "scopeBoundaries": [
+    "No request to implement007 account connectivity or009/010 live benchmark/pilot.",
+    "No new privacy approval; policyA remains settled.",
+    "No new model/eval grammar, guided-session replay, automatic semantic repair, or legacy capability widening.",
+    "Only this review JSON is written; no production/schema/test/design/story/gate/CLI/lifecycle changes.",
+    "SharedUSD500 wave ceiling acknowledged; actual billing telemetry unavailable."
+  ],
+  "writtenFile": ".ai/STUDIO-OBS-006-runtime-design-review-r1.json"
+}

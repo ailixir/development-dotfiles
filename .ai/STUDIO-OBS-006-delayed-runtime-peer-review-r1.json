@@ -1,0 +1,162 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Narrow independent corrected-byte delayed-runtime source/security re-review R1; supporting development review only",
+  "reviewer": "capture_qa_security",
+  "recordedAt": "2026-10-09T13:00:23.008711+00:00",
+  "verdict": "PASS",
+  "summary": "Both reported fencing defects are resolved in the stable corrected product snapshot. The actual retained CDP acknowledgement tests exercise the previously missing inner-await boundaries rather than substituting safe browser answers. No new execution-authority, retry, schema or privacy bypass found in the touched adjacent helper/control path.",
+  "priorReview": {
+    "path": ".ai/STUDIO-OBS-006-delayed-runtime-peer-review.json",
+    "sha256": "78bdd132f8778d4a3808004c8a665be5482930d6728a3505943e8726920575fa",
+    "preserved": true,
+    "verdict": "NEEDS_CHANGES"
+  },
+  "approvedDesign": {
+    "path": "docs/specs/studio-observed-authoring/delayed-state-design.md",
+    "sha256": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6"
+  },
+  "sourceAtStart": {
+    "studio-runner/src/run/browser.ts": "26bafde12692b584521a136a91d63affb86e2a5f7a1ab24e2741fbb972aa0a3c",
+    "studio-runner/src/run/browserFactory.ts": "8f486488bfbb7690fb014a1daf572d9519ab7ba72ead2cd1e537f78f78c3bcf9",
+    "studio-runner/src/run/observedReplayAdapter.ts": "02b5b79e460a134ae7408ba7029de43f31365c43bf5e7ac3c563431525281006",
+    "studio-runner/src/run/observationTypes.ts": "9f0e379255b85d26a84c25ed23a4c96736dfea3be16681408f3771e8424f1825",
+    "studio-runner/src/run/observationCollector.ts": "d67478b454ee60e8f532513be1c96916f6b14e97ab2f1cf4e55b9a6cfd13407f",
+    "studio-runner/src/executor/observedReplay.ts": "ae7e9cbf9702d255b568f1a1a2d3bf8ffe0fe6771fff814a94c55b6731ac5b46",
+    "studio-runner/src/run/childRuntime.ts": "ba9912ad4d96f236bf555cc18dcc0c97f5c089dc5e6942db798eca1d39b94a75",
+    "studio-runner/src/run/nativeInput.ts": "bdadb16a8920762ff7a9761f538c97086c75d96936b47467c09cb214d650e4e4",
+    "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts": "c38e3617e4aff259e632675ad22d03dc5ab09d45171e6a04e042485ea0022b9d",
+    "studio-runner/test/run/observedReplayProtocol.test.ts": "d87091d065352dd04c04effefe0ec8d8599f7ad04278a87a1d6c840f1733999e"
+  },
+  "sourceAtEnd": {
+    "studio-runner/src/run/browser.ts": "26bafde12692b584521a136a91d63affb86e2a5f7a1ab24e2741fbb972aa0a3c",
+    "studio-runner/src/run/browserFactory.ts": "8f486488bfbb7690fb014a1daf572d9519ab7ba72ead2cd1e537f78f78c3bcf9",
+    "studio-runner/src/run/observedReplayAdapter.ts": "02b5b79e460a134ae7408ba7029de43f31365c43bf5e7ac3c563431525281006",
+    "studio-runner/src/run/observationTypes.ts": "9f0e379255b85d26a84c25ed23a4c96736dfea3be16681408f3771e8424f1825",
+    "studio-runner/src/run/observationCollector.ts": "d67478b454ee60e8f532513be1c96916f6b14e97ab2f1cf4e55b9a6cfd13407f",
+    "studio-runner/src/executor/observedReplay.ts": "ae7e9cbf9702d255b568f1a1a2d3bf8ffe0fe6771fff814a94c55b6731ac5b46",
+    "studio-runner/src/run/childRuntime.ts": "ba9912ad4d96f236bf555cc18dcc0c97f5c089dc5e6942db798eca1d39b94a75",
+    "studio-runner/src/run/nativeInput.ts": "bdadb16a8920762ff7a9761f538c97086c75d96936b47467c09cb214d650e4e4",
+    "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts": "c38e3617e4aff259e632675ad22d03dc5ab09d45171e6a04e042485ea0022b9d",
+    "studio-runner/test/run/observedReplayProtocol.test.ts": "d87091d065352dd04c04effefe0ec8d8599f7ad04278a87a1d6c840f1733999e"
+  },
+  "sourceChangedDuringReview": [],
+  "blockers": [],
+  "resolvedFindings": [
+    {
+      "id": "DELAY-RUNTIME-PEER-001",
+      "status": "RESOLVED",
+      "source": [
+        "studio-runner/src/run/browserFactory.ts:38",
+        "studio-runner/src/run/observedReplayAdapter.ts:25",
+        "studio-runner/src/run/browser.ts:168"
+      ],
+      "assessment": "Adapter no longer begins initialBlank invocation before entering the helper. It passes the same private control. The helper checks before work, remains PREPARING during its actual inner blankMatches await, checks again after that await, and calls beginInvocation immediately before the fixed location.assign CDP send. Post-send/wait checks prevent late success. No wire control or fallback was introduced.",
+      "oracle": [
+        "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts:201"
+      ],
+      "testAssessment": "Interceptor first calls original CDPSession.send with the real receiver and keeps the actual result; it holds only the second blank-check acknowledgement. Timeout/cancel occurs while PREPARING, yields definite TIMEOUT/CANCELLED, then the held result is released before cleanup. Test checks still about:blank, zero independent HTTP navigation receipts and POISONED. It does not inject a fabricated true/safe answer.",
+      "evidence": "Included in hash-verified developer17/17 real fixture log; not executed by reviewer."
+    },
+    {
+      "id": "DELAY-RUNTIME-PEER-002",
+      "status": "RESOLVED",
+      "source": [
+        "studio-runner/src/run/browser.ts:392",
+        "studio-runner/src/run/browser.ts:410",
+        "studio-runner/src/run/browser.ts:441",
+        "studio-runner/src/executor/observedReplay.ts:160"
+      ],
+      "assessment": "The internal1000ms timeout now calls control?.poison(TIMEOUT) synchronously before rejecting. The earlier real scroll has already begun INVOKING, so poison retains OUTCOME_UNKNOWN. Authority retirement precedes held Runtime.releaseObject cleanup; a late scroll acknowledgement hits live()/control.check before any reveal-validation request or native input. It cannot reacquire/retry/finish successfully.",
+      "oracle": [
+        "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts:222"
+      ],
+      "testAssessment": "Offscreen real button requires one actual scroll. Interceptor forwards actual CDP calls, holds the scroll result and separately holds the releaseObject acknowledgement. The source-step deadline is10s, separating it from internal1s timeout. While cleanup is held, test verifies POISONED; releasing scroll causes zero validation/input calls, zero promise success and exactly one scroll. Cleanup release produces OUTCOME_UNKNOWN. This click test does not directly exercise a capture binding; unchanged executor/withhold checks cover late binding insertion separately.",
+      "evidence": "Included in hash-verified developer17/17 real fixture log; not executed by reviewer."
+    }
+  ],
+  "adjacentBoundaryReview": [
+    {
+      "area": "Private helper compatibility",
+      "assessment": "Optional InvocationControl is an in-process type-only helper argument. Calls without control retain prior checks and navigation semantics; the real fixture invokes initialBlank without control for setup, then exercises controlled observed calls. No model/IPC/schema/source-manifest field carries this control."
+    },
+    {
+      "area": "Control ownership",
+      "assessment": "Only executor creates the control and original source-step/run deadline. Adapter forwards the same reference. beginInvocation remains one-way, timeout/cancel poison is sticky, and the executor refuses a successful result unless invocation began. No new authority reset, reacquisition or retry branch appears."
+    },
+    {
+      "area": "Other primitive paths",
+      "assessment": "Normal page navigate/assert dispatch their fixed operation without a hidden asynchronous preparation gap. Native inspect/point/focus/reveal/key/mouse ports retain before/after checks; fixed fill/select/read/assert is a single isolated invocation with post-await fencing. Added reveal poison does not alter the no-control legacy branch."
+    },
+    {
+      "area": "Stable prior assessment",
+      "assessment": "All reviewed collector/types/executor/child/native hashes match the prior initial review. Its cached private-universe, hidden/sensitive denial,32/200/400/13107200 accounting,100/250 cadence, original deadlines, binding/PASS fencing and cleanup assessment therefore remains applicable without borrowing new runtime test results.",
+      "hashMatches": {
+        "studio-runner/src/run/observationTypes.ts": true,
+        "studio-runner/src/run/observationCollector.ts": true,
+        "studio-runner/src/executor/observedReplay.ts": true,
+        "studio-runner/src/run/childRuntime.ts": true,
+        "studio-runner/src/run/nativeInput.ts": true,
+        "docs/specs/studio-observed-authoring/delayed-state-design.md": true
+      }
+    },
+    {
+      "area": "Wire compatibility",
+      "assessment": "Developer pre-blank versus corrected source manifests list only browser, browserFactory, adapter and three test-file changes; no schema/IPC/model/manifest representation changes are present in that correction set. This is inspection of the reported frozen manifests, not a new build attestation.",
+      "manifestChanges": [
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/observedReplayAdapter.ts",
+        "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+        "studio-runner/test/run/observation.test.ts",
+        "studio-runner/test/run/observedAccount.test.ts"
+      ]
+    }
+  ],
+  "advisories": [
+    {
+      "id": "DELAY-RUNTIME-PEER-R1-N1",
+      "severity": "LOW_NONBLOCKING",
+      "source": [
+        "studio-runner/src/run/browser.ts:171",
+        "studio-runner/src/run/observedReplayAdapter.ts:36",
+        "studio-runner/test/run/observedReplayProtocol.test.ts:121"
+      ],
+      "observation": "A plain TARGET_DRIFT from an inner pre-primitive blank check is still conservatively mapped by the generic adapter catch to OUTCOME_UNKNOWN when no timeout/cancel poison exists. The operation remains refused with no retry or effect; this is a diagnostic precision limitation, not a reopened security race. Required timeout/cancel classifications are correct. Do not claim this re-review improved every generic helper-failure classification."
+    }
+  ],
+  "developerEvidence": {
+    "executedByReviewer": false,
+    "developmentRecord": {
+      "path": ".ai/STUDIO-OBS-006-delayed-runtime-development.json",
+      "sha256AtInspection": "cc3a7eb0ed88da51bb7ccc85dbb2097a52af000b8993f934b967e598e40058e0",
+      "statusAtInspection": "SOURCE_FROZEN_PENDING_FINAL_GATES",
+      "sourceTreeSha256Reported": "f04be349b6400c597426235ed7435e3c9cb2f553f5b6f59b6a4c21e7a9066457"
+    },
+    "focusedRealBoundaryLog": {
+      "path": "/tmp/obs006-delayed-reveal-fixture.log",
+      "sha256": "ad093e5ffd778e139e619004bdd40a93b1baaeed909b47486db8f31f60c797a7",
+      "passed": 17
+    },
+    "focusedLogHashVerified": true,
+    "focusedLogSummary": "1 fixture file;17 passed; no skipped cases shown;8.67s. Includes held second blank acknowledgement timeout/cancel and held scroll/held cleanup proof.",
+    "earlierBroadGates": "Pre-fix1477unit/29skip and303Chromium/10skip, and blank-only1480unit/29skip and305Chromium/10skip remain historical. They are not claimed as final full-gate evidence for this corrected browser snapshot."
+  },
+  "pendingOrUnreviewed": [
+    "Renewed complete type/lint/unit/coverage/Chromium/build/source-dist-catalog gates were running at dispatch; this re-review does not certify their final completion.",
+    "Backend durable passive-readiness accounting and full guided-learning/publication/two-replay join remain lead-owned integration proof.",
+    "Independent final whole-story QA remains separate; no lifecycle, release, deployment, production account/provider, benchmark or pilot approval."
+  ],
+  "actionsPerformed": [
+    "Read-only source and existing log/hash inspection",
+    "Wrote only .ai/STUDIO-OBS-006-delayed-runtime-peer-review-r1.json"
+  ],
+  "actionsNotPerformed": [
+    "No tests, browser, Gradle, Node or build commands",
+    "No product/test/story/schema edits",
+    "No subagents, lifecycleCLI, commit or push"
+  ],
+  "budget": {
+    "sharedWaveCeilingUsd": 500,
+    "actualSpend": "unknown"
+  }
+}

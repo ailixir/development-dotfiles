@@ -1,0 +1,337 @@
+{
+  "storyId": "STUDIO-OBS-005",
+  "story": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+  "recordedAt": "2026-10-09T03:18:20.992717+00:00",
+  "phase": "develop-story",
+  "status": "InReview",
+  "executor": "Dex (@dev), original OBS-005 lead with root-coordinated data/gateway partitions handed back before integration",
+  "qaVerdict": null,
+  "independentQaPending": true,
+  "sourceManifest": "docs/qa/evidence/STUDIO-OBS-005/source-manifest.json",
+  "sourceAggregateSha256": "a9cf72b6bcf098386248a9a392e5b973a27ae33cb943405cc9c9408967d29d12",
+  "implementationFiles": 59,
+  "developmentArtifacts": 17,
+  "acceptanceTraceability": {
+    "AC-1": [
+      "GuidedSourceClassifierTest: canonical references, secretId/name, null/missing/type/empty text",
+      "GuidedSourceInputResolverTest: exact source-span selection and real OBS-004 validator",
+      "GuidedTranslationMigrationTest/ConcurrencyTest: current immutable source, snapshot/locking/attempt/answer constraints",
+      "GuidedPlanningIntegrationTest: whole source plan, real materialization, private producer and consumer, dependency plan"
+    ],
+    "AC-2": [
+      "GuidedGatewayPrivacyTest: 22 actual provider HTTP cases, positive authored literals and forbidden resolved canaries, pins/schema/repair/fault/usage metadata",
+      "GuidedSourceClassifierTest: source/config boundaries and policy classification"
+    ],
+    "AC-3": [
+      "GuidedTranslationTest: closed compact result/schema, immutable pins and original-tuple validation",
+      "GuidedTranslationConcurrencyTest: durable claim/single send/CAS/one-live-attempt and immutable results",
+      "GuidedPlanningIntegrationTest: malformed response charges repair; unknown/late/known thought overage cannot extend authority",
+      "GenAiLlmGatewayClientTest + CredentialBudgetTest + StudioGatewayConfigTest: preserved FULL/PATCH, credentials/capacity/deadlines"
+    ],
+    "AC-4": [
+      "GuidedStepVerifierTest + actual final assertion in joined flow: admitted obligations/assertions/producers reconcile actual ledger outcomes",
+      "GuidedPlanningIntegrationTest: both selected destinations independently recorded, exactly one submit after coordinator reconstruction and adversarial repeated selection",
+      "GuidedTranslationTest: stale source/plan/fence/observation cannot be restamped; replan cannot rename fulfilled work"
+    ],
+    "AC-5": [
+      "GuidedPlanningIntegrationTest: pre-materialization source question/public answer and both observed choices/public answer/reconstruction/fresh observation",
+      "GuidedTranslationConcurrencyTest: immutable question/choice meaning and atomic selected mapping"
+    ],
+    "AC-6": [
+      "10 joined PG/authenticated real runner/Chromium cases",
+      "GuidedProductionWiringTest and GuidedDisabledWiringTest: actual enabled/disabled production configuration",
+      "5 NoRuntimeLlmTest and 8 DeReadyCarryForwardTest: exact guided boundary and actual dual-provider zero-call ordinary acceptance/readiness/dispatch, with mutations",
+      "GuidedProviderEvaluationTest: controlled strict schema case passes; real provider explicitly unavailable"
+    ]
+  },
+  "backend": {
+    "historicalBroad": {
+      "command": "./gradlew test crossReplicaTest jacocoTestReport jacocoTestCoverageVerification spotbugsMain assemble --continue --no-daemon --console=plain",
+      "exitCode": 1,
+      "tests": 1726,
+      "passed": 1706,
+      "failures": 1,
+      "skipped": 19,
+      "failure": "GuidedSessionIT.migrationPreservesExistingDataAndFreshInstallWorks expected 30 migrations but unrestricted fresh database installed V32 as the 31st",
+      "crossReplicaPassed": 2,
+      "note": "Broad result stays FAIL; source snapshot and complete XML/log archive retained. Foundation fixture subsequently targets V31, keeping original foundation assertion; fresh V32 separately verified."
+    },
+    "finalAffected": {
+      "tests": 200,
+      "passed": 199,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "joinedPassed": 10,
+      "details": "docs/qa/evidence/STUDIO-OBS-005/correction-results.json"
+    },
+    "coverage": {
+      "bundle": {
+        "covered": 14084,
+        "missed": 1910,
+        "percent": 88.06
+      },
+      "com/citi/put/checks/studio/guided/session": {
+        "covered": 1623,
+        "missed": 54,
+        "percent": 96.78
+      },
+      "com/citi/put/checks/studio/compile/gateway": {
+        "covered": 982,
+        "missed": 69,
+        "percent": 93.43
+      },
+      "com/citi/put/checks/studio/compile/validator": {
+        "covered": 211,
+        "missed": 32,
+        "percent": 86.83
+      },
+      "com/citi/put/checks/studio/validation": {
+        "covered": 70,
+        "missed": 2,
+        "percent": 97.22
+      },
+      "com/citi/put/checks/studio/dispatch": {
+        "covered": 787,
+        "missed": 89,
+        "percent": 89.84
+      },
+      "com/citi/put/checks/studio/evidence": {
+        "covered": 226,
+        "missed": 89,
+        "percent": 71.75
+      },
+      "com/citi/put/checks/studio/guided/bridge": {
+        "covered": 627,
+        "missed": 12,
+        "percent": 98.12
+      },
+      "com/citi/put/checks/studio/compile/incremental": {
+        "covered": 137,
+        "missed": 9,
+        "percent": 93.84
+      },
+      "com/citi/put/checks/studio/scheduling": {
+        "covered": 647,
+        "missed": 72,
+        "percent": 89.99
+      },
+      "com/citi/put/checks/studio/secrets": {
+        "covered": 479,
+        "missed": 56,
+        "percent": 89.53
+      },
+      "com/citi/put/checks/studio/authoring": {
+        "covered": 125,
+        "missed": 11,
+        "percent": 91.91
+      },
+      "com/citi/put/checks/studio/compile": {
+        "covered": 1303,
+        "missed": 104,
+        "percent": 92.61
+      },
+      "com/citi/put/checks/studio/recovery": {
+        "covered": 232,
+        "missed": 29,
+        "percent": 88.89
+      },
+      "com/citi/put/checks/studio/guided/translation": {
+        "covered": 1920,
+        "missed": 206,
+        "percent": 90.31
+      },
+      "com/citi/put/checks/studio/readiness": {
+        "covered": 88,
+        "missed": 6,
+        "percent": 93.62
+      },
+      "com/citi/put/checks/studio/sse": {
+        "covered": 237,
+        "missed": 19,
+        "percent": 92.58
+      },
+      "com/citi/put/checks/studio/internal": {
+        "covered": 447,
+        "missed": 44,
+        "percent": 91.04
+      }
+    },
+    "coverageProvenance": "Current targeted execution data plus preserved pre-correction broad and cross-replica data; current class identities only. No final unfiltered broad rerun claimed. coverage-data.tar.gz contains exact inputs and init script; extract exec files into this evidence directory to rerun. No thresholds changed.",
+    "staticBuild": "PASS: SpotBugsMain, assemble, RDS parity, antiRegression, Testcontainers alignment; 41-file scoped Checkstyle/format and whitespace. Exact final assembled class bytes equal forced coverage recompile.",
+    "fullFinalSourceUnfilteredRerun": false
+  },
+  "runner": {
+    "unitPassed": 1269,
+    "unitPreexistingSkipped": 29,
+    "fixturesPassed": 273,
+    "fixturePreexistingSkipped": 10,
+    "buildTypecheckLintPins": "PASS",
+    "exactWorkerSha256": "2d44b410e04a12af930b6f2ecd20a7d4ecefeb27a4e4596307312e8d16c9688b",
+    "all236FilesEqualTestedAndClosed004": true,
+    "pinsLimitation": "Node v23.10.0, Playwright 1.63.0; pin checker passes with Chromium image/build not asserted outside pinned container. Actual local Chromium exercised by joined tests and 273 browser fixtures."
+  },
+  "contracts": {
+    "v1Fixtures": 124,
+    "v1OpenApiExamples": 109,
+    "v2Fixtures": 219,
+    "v2OpenApiExamples": 57,
+    "v2Schemas": 31,
+    "canonicalVectors": 6,
+    "additionalObs005PlanningFixtures": 26,
+    "result": "PASS; structural evidence distinct from actual provider/browser evidence"
+  },
+  "controlledProviderMetrics": {
+    "scope": "controlled-provider integration; not real-model cost or accuracy",
+    "providerRequests": 8,
+    "selectedChoiceIndex": 1,
+    "independentSubmitReceipts": 1,
+    "adversarialRepeatedSelections": 1,
+    "realProviderEvaluation": "UNAVAILABLE_NOT_RUN",
+    "requestsByKind": {
+      "SOURCE_PLAN": 1,
+      "NEXT_ACTION": 7,
+      "VERIFY_STEP": 0
+    },
+    "repairRequests": 0,
+    "reservedCounters": {
+      "actions": 5,
+      "observations": 8,
+      "modelProposals": 8,
+      "modelInputTokens": 124722,
+      "modelOutputTokens": 16384,
+      "sanitizedEvidenceBytes": 30224
+    },
+    "immutableLimits": {
+      "maxActions": 200,
+      "maxSourceSteps": 100,
+      "maxObservations": 400,
+      "maxRuntimeValues": 32,
+      "maxModelProposals": 100,
+      "maxSessionSeconds": 600,
+      "maxObservationBytes": 32768,
+      "maxObservationDepth": 8,
+      "maxObservationNodes": 500,
+      "maxRuntimeValueBytes": 4096,
+      "maxStatementsPerStep": 8,
+      "maxModelInputTokensTotal": 128000,
+      "maxModelOutputTokensTotal": 32000,
+      "maxRuntimeValuesBytesTotal": 65536,
+      "maxSanitizedEvidenceBytesTotal": 1048576
+    },
+    "schemaPins": {
+      "strictSchemaHash": "2ce35681665bc727ef86c8a90e6c1b9ff33c0f39272fd3a0d54b3b9b284cdbd2",
+      "outputContractHash": "798dac88a0c55ed7fe5032f0a75ea34cc74a9c13a7d59b25bd83d8fe4dc51f7d",
+      "planningContextHash": "03bf7be83eee3b4760a2960230b979c6dd8c0f8fdcefdad0837d63b3ef029bb7",
+      "providerSchemaHashes": {
+        "NEXT_ACTION": "3e72d8ffc9103e16d0955facb0585140c9330995b8281edcbe169867163ef393",
+        "SOURCE_PLAN": "3d45475ddf4dd9739921e00d379e11f07e78b07922d6e21028c82fe19d7ebc36",
+        "VERIFY_STEP": "c3e022ad7c56fd8ab3092dea0220d64801df74644ce6b43ed87f12600fd98da1"
+      }
+    },
+    "workerSnapshot": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/guided-translation-351375190274664796/worker-dist"
+  },
+  "buildManifest": "docs/qa/evidence/STUDIO-OBS-005/backend-build-manifest.json",
+  "workerManifest": "docs/qa/evidence/STUDIO-OBS-005/worker-manifest.json",
+  "codeRabbit": {
+    "available": false,
+    "claimedPass": false,
+    "check": "command -v coderabbit returned no executable; configured local wrapper executable absent",
+    "fallback": "Independent reviewer through root, pending; no self-approval"
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualSpendTelemetry": "UNKNOWN",
+    "ceilingIncreased": false,
+    "liveProviderCalls": 0
+  },
+  "limitations": [
+    "No arbitrary-English semantic proof or universal secret detection claim; deterministic reconciliation enforces the admitted plan and actual observed/ledger evidence.",
+    "Account connection OBS-007 and exact publication OBS-006 remain explicit later fail-closed boundaries.",
+    "Live-provider credentials/corpus unavailable; one test explicitly skipped, no fabricated benchmark/accuracy/token or dollar-cost claim.",
+    "Local pin checker does not assert container image/Chromium build. Actual authenticated local Chromium was used.",
+    "Normal execution/readiness/dispatch provider prohibition retained for both provider paths.",
+    "No frontend change, commit, push, deployment, Done transition or independent QA verdict.",
+    "Historical OBS-001\u2013004 gates/evidence retained untouched."
+  ],
+  "dod": ".ai/STUDIO-OBS-005-dod.md",
+  "decisions": ".ai/decision-log-STUDIO-OBS-005.md",
+  "files": [
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifier.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelProjection.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedStepVerifier.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedLlmGatewayClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelRequest.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedModelResponse.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedCallBudget.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedResponseParser.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GenAiGuidedLlmGatewayClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedWireBodyAdvice.java",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiGatewayTransport.java",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/StudioGatewayConfig.java",
+    "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+    "backend/src/main/resources/studio/guided-output-contract.md",
+    "docs/specs/studio-observed-authoring/contracts/v2/planning-context.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/guided-planning-commands.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/clarification.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/planning-fixtures.json",
+    "docs/specs/studio-observed-authoring/openapi-v2.yaml",
+    "docs/specs/studio-observed-authoring/contracts/README.md",
+    "tools/check-studio-observed-contracts.cjs",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolverTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSourceClassifierTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedStepVerifierTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConcurrencyTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationMigrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedProviderEvaluationTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClientTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/compile/NoRuntimeLlmTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/readiness/DeReadyCarryForwardTest.java",
+    "docs/specs/studio-observed-authoring/translation-design.md",
+    "docs/specs/studio-observed-authoring/consensus-plan.md",
+    "docs/specs/studio-observed-authoring/bridge-design.md",
+    "docs/architecture/ADR-SC-004-observed-authoring.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/qa/evidence/STUDIO-OBS-005/backend-before-usage-fix-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/backend-before-usage-fix-results.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/backend-build-manifest.json",
+    "docs/qa/evidence/STUDIO-OBS-005/before-usage-fix-source.json",
+    "docs/qa/evidence/STUDIO-OBS-005/correction-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/correction-results.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/coverage-data.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/joined-metrics.json",
+    "docs/qa/evidence/STUDIO-OBS-005/quality-logs.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/quality-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/runner-logs.tar.gz",
+    "docs/qa/evidence/STUDIO-OBS-005/runner-results.json",
+    "docs/qa/evidence/STUDIO-OBS-005/worker-manifest.json",
+    "docs/qa/evidence/STUDIO-OBS-005/source-manifest.json",
+    ".ai/STUDIO-OBS-005-development.json",
+    ".ai/STUDIO-OBS-005-dod.md",
+    ".ai/decision-log-STUDIO-OBS-005.md"
+  ]
+}

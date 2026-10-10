@@ -1,1 +1,2 @@
 - [Vertex model access (epicagentai)](vertex_model_access.md) — 3.8-flash and 3.1-pro-preview callable; 3.5-pro/3.8-pro 404; points to 2026-10-04 UI Studio benchmark data
+- [Verification run budgets](verification_run_budgets.md) — backend studio.* suite >14 min (no 10-min fit); corun.sh ~1 min is the best single integration check; one Gradle at a time

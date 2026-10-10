@@ -334,3 +334,11 @@ tasks.register("testcontainersAlignmentCheck") {
     }
 }
 tasks.named("check") { dependsOn("testcontainersAlignmentCheck") }
+
+// Package the frozen observed contract directly; do not maintain a second Java schema copy.
+tasks.processResources {
+    from("../docs/specs/studio-observed-authoring/contracts") {
+        include("*.schema.json", "v2/*.schema.json", "v3/*.schema.json")
+        into("studio/observed-contracts")
+    }
+}

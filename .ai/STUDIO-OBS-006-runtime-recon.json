@@ -1,0 +1,386 @@
+{
+  "storyId": "STUDIO-OBS-006",
+  "phase": "Draft/validate early runtime reconnaissance",
+  "reviewer": "/root/sdc_bridge_arch",
+  "at": "2026-10-09T05:38:49.559291+00:00",
+  "scope": "Read-only runtime/contract design advice. No final architecture approval, readiness/QA/lifecycle verdict, implementation or executed test evidence.",
+  "baseline": "OBS-001..005 closed; supplied OBS-005 reviewed digest b0761908eb0eaca411e75fc824dfaa382d9d90d556ee07b296ee19f9ae61ef57. This reconnaissance does not re-review or alter closed-story evidence.",
+  "recommendation": {
+    "candidate": "A closed declarative artifact-v2 observed-operation language/IR, deterministically lowered from the canonical exercised plan, with an explicit observed-2 validator/executor branch inside the ordinary admitted run/child/recording pipeline.",
+    "why": "This avoids adding a second model or a new hand-written source parser, preserves operation/locator/read/argument identities directly, and leaves artifact-v1 TypeScript AST and reference-policy-v2 semantics untouched. It is a candidate for architect selection, not a frozen new artifact schema.",
+    "notEquivalent": "Do not pass observed actions through legacy createPlaywrightAdapter defaults: its visible-only narrowing and textbox/searchbox/combobox fallback deliberately differ from observed exact locator correspondence. Do not reuse GuidedRuntime as ordinary replay: it owns guided session callbacks, initial authoring admission/fences and no-video browser launch rather than normal replay job/evidence ownership."
+  },
+  "verifiedCurrentGaps": [
+    {
+      "finding": "Ordinary replay validates only artifact version1 with exact {version,steps} and per-step originalText/code. The TypeScript AST emits the legacy Operation union, which has no read or binding arguments. Reference-policy parser only accepts version2 variable/secret sets.",
+      "sources": [
+        "studio-runner/src/validator/schema.ts",
+        "studio-runner/src/validator/index.ts",
+        "studio-runner/src/validator/referencePolicy.ts",
+        "studio-runner/src/validator/language.ts",
+        "studio-runner/src/executor/operations.ts"
+      ]
+    },
+    {
+      "finding": "Observed contracts declare artifact2, referencePolicy3, lowering1, contract/learnedPlan/observation/guidedPolicy2 and language/executor observed-2. Ordinary constants remain artifact1, validator2.0.0, executor2.1.0 and syntaxReference2.1.0. A declared tuple is not ordinary replay support. No contracts/v2/revision.schema.json currently exists.",
+      "sources": [
+        "docs/specs/studio-observed-authoring/contracts/v2/versions.schema.json",
+        "studio-runner/src/versions.ts",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java"
+      ]
+    },
+    {
+      "finding": "RunJob and JobEnvelope are closed and carry no observed scope/plan/provenance/compatibility package. Source-free IPC launch/execute is separately closed and its typed operations cannot carry reads/hidden bindings. All of these production boundaries need coordinated changes, not a fixture-only adapter.",
+      "sources": [
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java",
+        "studio-runner/src/reporting/envelope.ts",
+        "studio-runner/src/run/protocol.ts",
+        "studio-runner/src/run/launcher.ts",
+        "studio-runner/src/run/childRuntime.ts"
+      ]
+    },
+    {
+      "finding": "The ordinary runner prelaunch compatibility check compares its recorded image pins to compiled-in runtime pins; it does not receive revision provenance in the job. Backend admission receives runtimeVersions, while backend readiness compares the persisted revision. An observed exact-tuple handshake must join these facts explicitly.",
+      "sources": [
+        "studio-runner/src/server/runCoordinator.ts:386",
+        "studio-runner/src/server/runCoordinator.ts:647",
+        "studio-runner/src/compat/compatibility.ts",
+        "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java"
+      ]
+    },
+    {
+      "finding": "Current readiness requires confirmed_revision_id and write-once manual confirmation identity, re-derives authoring-v2 reference policy via IntentRevisionVerifier, and refuses artifact versions other than CompilePins.SUPPORTED_ARTIFACT_VERSION=1. Observed scoped-Run publication needs an explicit readiness/provenance branch, not fake manual confirmation or a captured-value token grammar.",
+      "sources": [
+        "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/IntentRevisionVerifier.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/StepReferencePolicyDeriver.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java"
+      ]
+    },
+    {
+      "finding": "The normal BrowserHandle already exposes createObservationSession on the same recorded page. The isolated collector/read/native-input primitives are reusable without creating a separate guided browser. launchGuidedBrowser intentionally starts an unrecorded standalone guided context and is the wrong replay evidence entry point.",
+      "sources": [
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/browser.ts:136",
+        "studio-runner/src/run/guidedBrowser.ts",
+        "studio-runner/src/run/nativeInput.ts",
+        "studio-runner/src/run/observationCollector.ts"
+      ]
+    },
+    {
+      "finding": "Legacy parent redaction is initialized from resolved starting vars/secrets and can include page location/observed-host diagnostics. Fresh captured values never reach that parent, so those redactors cannot protect new runtime values. Observed replay needs data-free textual diagnostics from launch while preserving separately protected video/timeline evidence.",
+      "sources": [
+        "studio-runner/src/executor/executor.ts",
+        "studio-runner/src/run/childRuntime.ts",
+        "studio-runner/src/run/outputRelay.ts",
+        "studio-runner/src/server/runCoordinator.ts",
+        "studio-runner/src/run/manifest.ts"
+      ]
+    }
+  ],
+  "integrationChoices": [
+    {
+      "choice": "Closed declarative artifact2 observed IR",
+      "recommended": true,
+      "mechanism": "Artifact discriminator selects a bounded schema and cross-record validator. Canonical operation records preserve ordered source coordinates, actual origin/null bootstrap precondition, exact durable locator, operation/read recipe and opaque argument/binding IDs. Pure validation emits source-free typed observed operations plus immutable graph/input metadata. Runtime executes the trusted switch, never interprets code text.",
+      "benefits": [
+        "Smallest semantic gap to the exercised plan and easiest independent operation-equivalence comparison.",
+        "No new executable source grammar, eval or source-token dependence.",
+        "Legacy AST, optional legacy policy and role-fallback semantics remain version-dispatched and unchanged."
+      ],
+      "costs": [
+        "Need explicit v2 artifact/policy/job/IPC/result-version branches and observed runtime capabilities.",
+        "Existing code editor/manual code confirmation must not treat the data artifact as legacy Playwright code; a readable code view, if added later, is derived presentation rather than execution authority.",
+        "Per-step/source association still needs exact stable IDs/order for reporting and immutable source verification."
+      ]
+    },
+    {
+      "choice": "Deterministic restricted code artifact2 with a new read/binding DSL",
+      "recommended": false,
+      "mechanism": "Generate only fixed allowed statement forms with typed capture/binding access, parse those through a separately versioned AST path, and compare parsed semantic IR to the exercised plan. No JS declarations, arbitrary functions or page evaluation becomes legal.",
+      "benefits": [
+        "Fits existing code display and AST-based validation architecture.",
+        "Can reuse some existing permitted-statement/reporting machinery."
+      ],
+      "costs": [
+        "Adds grammar/reference-argument/parser work and more ways to lose exact origin/read/edge semantics.",
+        "Generated code still needs the same new trusted read/value runtime, strict adapter, IPC and policy3 guards; it does not avoid the integration work.",
+        "Exact escaping/Unicode and operation-equivalence validation are mandatory; no global widening of v1 allowed identifiers/locators."
+      ]
+    },
+    {
+      "choice": "Replay by resuming guided worker/session or another translator loop",
+      "recommended": false,
+      "reason": "Reject this shortcut. It conflates original admissions/fences/values with a new explicit run, does not preserve ordinary child recording/reporting/admission behavior and risks automatic model calls or re-execution after uncertainty."
+    }
+  ],
+  "deterministicLoweringContract": [
+    "Assemble the learned plan from immutable stored proposals plus successful one-dispatch ledgers, accepted obligations/source choices, cumulative allocations, successful producer metadata and actual consumer edges. Verify each source step and requested assertion, every exact action coordinate/order and bidirectional graph coverage. Model proposals or semantic plan obligations alone are not executed evidence.",
+    "Preserve the exact executed locator with exact=true, operation kind, key/predicate, source-input identity, read recipe policyRuleId/classification/type, origin and edge slot/order. Preserve JSON null as the source origin for only the first blank-start navigation and an explicit initialContext precondition. Destination origin is never substituted for that null origin.",
+    "Lower a fixed canonical semantic projection of that plan to artifact bytes without model calls, browser calls or another submission. Independently decode/validate the produced artifact and compare its ordered semantic projection to the original trusted plan; hashing two copies generated by one faulty lowerer is not an independent equivalence check.",
+    "Keep canonical-v1 and the non-ASCII/combining-character vectors consistent in Java and Node. Choose artifact bytes deterministically so raw UTF-8 artifactHash, DB JSON rehash and runner identity agree. Do not change legacy ArtifactCanonicalizer semantics to accommodate a new path; validate the stricter v2 integer/Unicode/closed-key domain explicitly.",
+    "Derive reference policy3 from the verified learned-plan graph and recorded scoped Run/admission provenance. It must bind plan/provenance/source/configuration/operation identities and exact producer/consumer slots, not from English capture tokens or model-provided references. Validate both missing and extra/reassigned edges.",
+    "Stable authored nonsecret inputs retain exact server-validated source/configuration provenance and opaque input IDs. Deliberately authored literal bytes can be represented as authorized inputs; captured page samples cannot. Saved-variable/secret values remain per-run trusted resolution, never become captured binding initializers or persisted artifact samples.",
+    "Preserve the distinction between a database revision UUID used by current jobs/history and the observed cryptographic revision digest declared by the reserved original revision contract. Bind both explicitly in publication/admission; do not coerce a hash into a UUID or silently replace legacy ID semantics. Persistence mapping belongs to the architect/data review."
+  ],
+  "stableVersusExecutionLocal": {
+    "stableExecutableDefinition": [
+      "Server-issued bindingId as a graph key.",
+      "Producer source coordinate, exact durable locator/read recipe and expected origin.",
+      "Ordered consumer coordinates and allowed argument slots/destination origins; explicit transfer-policy identity where supported.",
+      "Frozen source-input references, initial-context precondition, learned-plan hash and exact compatibility requirements."
+    ],
+    "immutableHistoricalEvidenceNotReplayAuthority": [
+      "Original producer/consumer admission IDs and guided session Run authorization remain publication provenance linked to the learned-plan/revision hash.",
+      "They are not the later run admission, do not prove a later read succeeded, and must not seed local availability or dispatch rights."
+    ],
+    "neverPersistAsReplayTargetsOrValues": [
+      "Original nodeId/documentId/generation or pinned CDP/DOM handles.",
+      "Original worker/context/fence, availability receipts or local capture map.",
+      "Captured value, sample literal, value digest/length or caches from the guided run."
+    ],
+    "freshReplay": "Each explicit execution gets a new admitted execution/attempt identity, isolated browser/context, private masking inventory and empty value map. The same stable producer definition reads fresh bytes at its coordinate. Consumers require that run-local successful producer and exact graph edge. Missing/changed sources stop; no fallback to prior receipts, saved variables or previous-run values."
+  },
+  "replayRuntimeSequence": [
+    "Backend current readiness/authorization validates immutable revision, original plan/provenance hashes, unchanged source/configuration and current principal/CSI/account/application/policy grants. Original Run authorization is provenance, never reusable permission. A changed execution scope needs an explicit compatibility/relearning decision, not silent rebinding.",
+    "Create a fresh ordinary execution/attempt; authenticate dispatch and pass the declared observed tuple plus current scoped execution authority. Runner validates envelope/artifact/reference policy/hash identities before capacity/admission/browser launch. Backend admission compares the actually running observed tuple with immutable revision pins and grants this attempt once.",
+    "Launch through the existing confined recording child with observed mode/data-free diagnostics selected before browser creation. The child receives only validated typed operations/graph/input-reference metadata and authorized per-run inputs, never artifact/source/program text or original captured values. Current account setup uses the authorized same-context port; unavailable production account support remains fail-closed.",
+    "Verify actual initialContext. A blank-start artifact requires genuine fresh about:blank/null origin; configured auth setup that has navigated elsewhere cannot be labelled blank. Execute the first authored navigation once through the frozen destination input and current destination/redirect policy.",
+    "At each operation, use the private observed collector to establish current document/target identity for the frozen exact locator, with unique resolution and current scope/origin/type/actionability/read policy. Local ephemeral node identities may be created for correspondence, but never leave the worker or enter the artifact. Reuse retained-target native input behavior from the guided boundary; do not fall back to legacy role equivalence or visible-only locator reinterpretation.",
+    "For a read, positively authorize the frozen recipe against current configured field/region/application grant and source intent. Preserve exact nonblank valid Unicode bytes; apply count/per-value/aggregate limits and write the binding once in this run. Mask captured data locally. For each consumer, verify successful earlier local producer, allowed exact coordinate/slot and same-origin/current transfer policy before filling/asserting. No value may enter locator, destination, key or prohibited assertion slots.",
+    "After mutations collect fresh local evidence; bounded read-only stabilization may verify the same frozen target, never choose a replacement locator, invoke a model or repeat an uncertain mutation. On drift, target replacement, policy revocation, cancellation, timeout or lost context, stop and clear values. A deliberately initiated later guided relearn is a separate user action.",
+    "Report source-step timing and verdicts through the established run-clock/StepReporter/IPC path. Hidden reads must remain attributed to their source step and consumer actions to theirs. Flush recording/manifest through existing protected evidence workflow. Textual diagnostics remain bounded/data-free; video is explicitly a separate authorized disclosure. Preserve at-most-once run admission and no automatic effect retry."
+  ],
+  "productionSeams": [
+    {
+      "area": "Artifact/policy/equivalence validation",
+      "existing": [
+        "studio-runner/src/validator/index.ts",
+        "studio-runner/src/validator/schema.ts",
+        "studio-runner/src/validator/referencePolicy.ts",
+        "studio-runner/src/validator/bounds.ts",
+        "studio-runner/src/executor/operations.ts",
+        "studio-runner/src/server/routes.ts"
+      ],
+      "candidateNew": [
+        "studio-runner/src/validator/observedReplay.ts",
+        "studio-runner/src/validator/observedReferencePolicy.ts"
+      ],
+      "requirements": "Version dispatch to a strict pure v2 validator and policy3; legacy AST and reference rules remain unchanged. Add parser/language/arguments files only if the architect chooses the code-DSL alternative."
+    },
+    {
+      "area": "Backend browser-free validator and immutable readiness",
+      "existing": [
+        "backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerValidationClient.java",
+        "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/readiness/RuntimePinProperties.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/IntentRevisionVerifier.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/ArtifactCanonicalizer.java",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java"
+      ],
+      "requirements": "Accept observed versioned validation verdict/pins and scoped-Run publication provenance without invoking either compiler/guided gateway or pretending manual confirmation. Keep legacy CompilePins behavior per lane, not a global artifact-version flip."
+    },
+    {
+      "area": "Actual later explicit run dispatch/admission",
+      "existing": [
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioReferenceResolver.java",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/dto/AdmissionRequest.java",
+        "studio-runner/src/reporting/envelope.ts",
+        "studio-runner/src/reporting/admissionClient.ts",
+        "studio-runner/src/server/runCoordinator.ts"
+      ],
+      "requirements": "Wire real observed immutable revision identity, exact required tuple/current scope/policy/input materialization through closed job and admission contracts. No pre-resolved captured bindings in resolvedVars; dynamic values arise only in the child. Preserve dispatch CAS/cancellation/deadlines/evidence IDs."
+    },
+    {
+      "area": "Source-free isolated execution",
+      "existing": [
+        "studio-runner/src/run/protocol.ts",
+        "studio-runner/src/run/launcher.ts",
+        "studio-runner/src/run/childRuntime.ts",
+        "studio-runner/src/run/child.ts",
+        "studio-runner/src/run/sandbox.ts",
+        "studio-runner/src/run/deadline.ts",
+        "studio-runner/src/executor/executor.ts",
+        "studio-runner/src/executor/adapters/BrowserAdapter.ts"
+      ],
+      "candidateNew": [
+        "studio-runner/src/executor/observedReplay.ts",
+        "studio-runner/src/run/observedReplayAdapter.ts"
+      ],
+      "requirements": "Explicit typed observed execution branch with exhaustive child boundary checks; no source-shaped keys, new executable JS or parent-held dynamic values. Reuse step clock/reporting/confinement rather than creating a disconnected replay test runner."
+    },
+    {
+      "area": "Trusted actual browser/dataflow policy",
+      "existing": [
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/observationTypes.ts",
+        "studio-runner/src/run/observationCollector.ts",
+        "studio-runner/src/run/observationInventory.ts",
+        "studio-runner/src/run/nativeInput.ts",
+        "studio-runner/src/guided/runtime.ts"
+      ],
+      "requirements": "Reuse private read, positive region grants, native input and exact correspondence primitives. Extract/share bounded value-map behavior if helpful; do not import guided orchestration/model callbacks into replay. Ordinary recorded browser needs actual approved-origin/redirect/read-policy installation and blank/page capability on its same page. Mounted trusted policy must be resolved for current app/scope, not supplied by the artifact itself."
+    },
+    {
+      "area": "Version handshake and build pins",
+      "existing": [
+        "studio-runner/src/versions.ts",
+        "studio-runner/src/compat/compatibility.ts",
+        "studio-runner/src/compat/runtime-versions.ts",
+        "studio-runner/scripts/write-runtime-versions.mjs",
+        "studio-runner/scripts/check-pins.mjs",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java",
+        "backend/src/main/java/com/citi/put/checks/studio/readiness/RuntimePinProperties.java",
+        "backend/src/main/java/com/citi/put/checks/studio/dto/RuntimeVersions.java"
+      ],
+      "candidateNew": [
+        "studio-runner/src/compat/observedReplay.ts"
+      ],
+      "requirements": "Advertise/check exact observed tuple separately from legacy semver compatibility, plus actual Playwright/Chromium/image pins. observed-2 is not semver and must not be fed into a backwards-compatible-minor comparison or masquerade as the legacy executor."
+    },
+    {
+      "area": "Evidence/confidentiality",
+      "existing": [
+        "studio-runner/src/run/outputRelay.ts",
+        "studio-runner/src/run/childRuntime.ts",
+        "studio-runner/src/run/launcher.ts",
+        "studio-runner/src/run/recording.ts",
+        "studio-runner/src/run/timeline.ts",
+        "studio-runner/src/run/manifest.ts",
+        "studio-runner/src/run/evidenceUpload.ts",
+        "studio-runner/src/reporting/reportingStepReporter.ts",
+        "studio-runner/src/reporting/snapshot.ts",
+        "studio-runner/src/server/runCoordinator.ts"
+      ],
+      "requirements": "Select data-free raw-output/error/host/location handling before launch for observed replay; parent redaction cannot know freshly captured values. Keep readable video, normal timeline origins and evidence cleanup. Mark guided learned-from-run evidence separately from later replay-verified execution identity; no phantom replay result at publication."
+    },
+    {
+      "area": "Versioned contracts and drift fixtures",
+      "existing": [
+        "docs/specs/studio-observed-authoring/contracts/v2/learned-plan.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v2/binding.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v2/versions.schema.json",
+        "tools/check-studio-observed-contracts.cjs",
+        "studio-runner/src/guided/schemas.json",
+        "studio-runner/src/guided/contracts.ts"
+      ],
+      "requirements": "Add explicit artifact2/reference-policy3/revision publication and job/IPC compatibility contracts as the architect selects. Preserve old schemas/fixtures bytewise unless an approved versioned amendment says otherwise. Audit supported runtime schema keywords; standalone shared-checker acceptance is not proof the packaged runtime schema subset supports a new contract."
+    }
+  ],
+  "independentRuntimeEvidenceRequired": [
+    "Start with a real guided execution that submits exactly once. Record independent session-bound server receipts and both gateway HTTP baselines. Complete/publish through the actual backend path; assert no new browser launch, no additional submit/operation receipt and zero calls to either gateway during finalization or duplicate finalize.",
+    "Execute the same immutable artifact via the actual ordinary run job, backend admission, child IPC, real Chromium and evidence reporting twice after publication. Fixture server issues a different unpredictable value per isolated run. Independent receipts must match each run producer value exactly, differ across guided/replay1/replay2, and retain identical artifact/learned-plan hashes. Assert zero legacy compiler-gateway and zero guided-gateway calls for both replays.",
+    "Exercise visibleText and permitted controlValue, exact whitespace/non-ASCII bytes, same-step multiple ordinals, fresh source state, retained binding use and final requested assertions. Verify timeline/recording maps to actual source/consumer steps and no values appear in parent IPC, raw output, logs, errors or manifests.",
+    "Mutate a published locator, operation, read recipe/policyRuleId, input provenance, binding producer, consumer slot/order/origin, original admission provenance, source/configuration or compatibility tuple. Independent validators/readiness/admission must refuse before inappropriate effects; recomputed client hashes cannot authorize altered stored provenance.",
+    "Real drift cases: duplicate/hidden locator twins, replacement between resolution and native invocation, sensitive type/ancestor/descendant change, revoked region grant, changed origin/redirect, absent earlier producer and changed initial-context precondition. No locator-role fallback, model repair or hidden navigation/read-back replay is allowed.",
+    "Cancellation/timeout/crash/lost acknowledgement and overlapping runs prove private value-map destruction/isolation, no reused producer receipt and no duplicate effects. Preserve all existing legacy validator/adapter/job/recording tests instead of redefining their expected behavior."
+  ],
+  "decisionsForArchitect": [
+    "Select declarative IR versus restricted code DSL before allocating schema/AST work; both require a real observed executor and exact equivalence proof.",
+    "Freeze the observed artifact/input-reference/policy3/job/IPC tuple and distinguish storage UUID from cryptographic revision digest.",
+    "Choose the explicit readiness/publication discriminator that honors recorded scoped Run consent while leaving legacy manual confirmation unchanged.",
+    "Specify current account/read/egress policy installation in ordinary child launch and explicit replay initialContext support; production account adapter remains OBS-007.",
+    "Bound and report exact observed runtime diagnostics/evidence/version identity without letting old legacy redaction or fallback semantics weaken the lane."
+  ],
+  "constraints": [
+    "No product/test/schema/story edits; no builds/browser execution or CLI/wave changes performed.",
+    "No final design approval or lifecycle verdict assigned.",
+    "No claim of production account readiness, live provider benchmark or human pilot.",
+    "Shared USD500 ceiling acknowledged; spend telemetry unavailable."
+  ],
+  "evidence": {
+    "sourceFiles": [
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "docs/specs/studio-observed-authoring/consensus-plan.md",
+      "docs/specs/studio-observed-authoring/contracts/v2/versions.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/learned-plan.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/binding.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/revision.schema.json",
+      "studio-runner/src/validator/schema.ts",
+      "studio-runner/src/validator/index.ts",
+      "studio-runner/src/validator/referencePolicy.ts",
+      "studio-runner/src/validator/language.ts",
+      "studio-runner/src/executor/operations.ts",
+      "studio-runner/src/executor/executor.ts",
+      "studio-runner/src/executor/adapters/BrowserAdapter.ts",
+      "studio-runner/src/run/protocol.ts",
+      "studio-runner/src/run/childRuntime.ts",
+      "studio-runner/src/run/launcher.ts",
+      "studio-runner/src/run/browserFactory.ts",
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/src/run/playwrightAdapter.ts",
+      "studio-runner/src/run/nativeInput.ts",
+      "studio-runner/src/run/observationTypes.ts",
+      "studio-runner/src/run/observationCollector.ts",
+      "studio-runner/src/run/observationInventory.ts",
+      "studio-runner/src/guided/runtime.ts",
+      "studio-runner/src/guided/contracts.ts",
+      "studio-runner/src/reporting/envelope.ts",
+      "studio-runner/src/server/routes.ts",
+      "studio-runner/src/server/runCoordinator.ts",
+      "studio-runner/src/run/outputRelay.ts",
+      "studio-runner/src/run/manifest.ts",
+      "studio-runner/src/versions.ts",
+      "studio-runner/src/compat/compatibility.ts",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java",
+      "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/ArtifactCanonicalizer.java",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerValidationClient.java"
+    ],
+    "sha256AtReport": {
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "e36efa28d0c00c94453b7d3a3efd503124e9ce54301b36b7c9bd6983e46667e4",
+      "docs/specs/studio-observed-authoring/consensus-plan.md": "8f97af78155a57ee32127f4e2433a94f5e134d47896655743df65292cb12f44b",
+      "docs/specs/studio-observed-authoring/contracts/v2/versions.schema.json": "6fdb2ab95efb867b06d4ab9204a872a9a522a2002e73467d5edc36d8198f9459",
+      "docs/specs/studio-observed-authoring/contracts/v2/learned-plan.schema.json": "b327b3115166366f20fc679e94cbc4dfbf0de4e9d420240697d5ea6e9c41504d",
+      "docs/specs/studio-observed-authoring/contracts/v2/binding.schema.json": "f09f15972acda3280f240e707fd57388cfb6d537cb6bc4ae4c2cb729099dc64e",
+      "docs/specs/studio-observed-authoring/contracts/revision.schema.json": "fd21b1adb65c15d8d8c7f0809ac9f0be7c71f8de47b677f840c266bbdaf1a0f7",
+      "studio-runner/src/validator/schema.ts": "de1c6fe858e8a7365fa38fbad9cbe7460de13b7aa3ca6fd9d4e8a1e847f05edf",
+      "studio-runner/src/validator/index.ts": "1fcf33a62e00e61a65303eda758f188fc6da29dc8c3e1da2aa5990f7e9459a23",
+      "studio-runner/src/validator/referencePolicy.ts": "772731f6344b1ff9a37bbf48106d4078934f6e05e95c0a1a36b4af25d2db332d",
+      "studio-runner/src/validator/language.ts": "a427f570b75016ae0d11507dea2200ebb9e706bb1bf14bc5cb2d9d46b7380bce",
+      "studio-runner/src/executor/operations.ts": "7ff813b5e3e63ab04d1054f6bccff1ed2b0543e2b57b3b40d2f1289997873e75",
+      "studio-runner/src/executor/executor.ts": "22d7e7d033f27a3d4a787846cb17e8fa0f9c10997e0be7cd0d398fb07e4b06e9",
+      "studio-runner/src/executor/adapters/BrowserAdapter.ts": "2fd2867ca5c038a992ada89e275bb33fb3b5b5967b72efeca04bbade849379e7",
+      "studio-runner/src/run/protocol.ts": "f9a9229ed01d7dbc970a76486490132ace680ce8290758335b7928f740d6e1da",
+      "studio-runner/src/run/childRuntime.ts": "498b242ed2aebd3da92514fd96bd340de391fbb193c97250523ab8fcd788498b",
+      "studio-runner/src/run/launcher.ts": "cb51e36fa8b79ca95fab946a0b60e5238122e78419a69e833753cbcab0618f28",
+      "studio-runner/src/run/browserFactory.ts": "6da8d4a479ca989059792bcc71c38bfa2d72468f28142d276d6ebc349b9f5625",
+      "studio-runner/src/run/browser.ts": "e4985e8ee79f10e007e68a8900aff52f1cf41af0e87c135ddb007d4d45797865",
+      "studio-runner/src/run/playwrightAdapter.ts": "7a8b9a7b0fe866558bb5eada2e82cedc1963684eb8b64fe58ae6147359e6dc4b",
+      "studio-runner/src/run/nativeInput.ts": "bdadb16a8920762ff7a9761f538c97086c75d96936b47467c09cb214d650e4e4",
+      "studio-runner/src/run/observationTypes.ts": "a1bb68ad620612ac3eb456599bfb45af8f4c00ad9d00cc67125bd2035e2572af",
+      "studio-runner/src/run/observationCollector.ts": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985",
+      "studio-runner/src/run/observationInventory.ts": "42732ad738c567f8fc5c513253cf445c0c5e3288958faf9f70677838b5f0d294",
+      "studio-runner/src/guided/runtime.ts": "1aada55b70e769d8a8ede5bf447efef702c5a8b80fe196eadace2e4ad2b0836a",
+      "studio-runner/src/guided/contracts.ts": "90d9050e1162a3c3e5990d5f97337f413b59d7c1217f57603c2fb562b4be7997",
+      "studio-runner/src/reporting/envelope.ts": "ba271314a8800d5953df512f4dc256fae1918b53d402cd131305d1533159fa9d",
+      "studio-runner/src/server/routes.ts": "e96934eb0af848b7efb9e4cf65263efc24bce5f970dde9d98546ff638012bbe7",
+      "studio-runner/src/server/runCoordinator.ts": "63fe9d8c8284c8a8d37dd16fc2759ff509fce685e54eb83f88ddc2a66d9ba603",
+      "studio-runner/src/run/outputRelay.ts": "da65dca4fb1641b71cc5bb1061c9a3a57031cfe1005abab373ba26b5aae51473",
+      "studio-runner/src/run/manifest.ts": "b885e4e4717e0d221fc134c9bf16ba991e97ccec601bf146abe9a9cadc3dc03a",
+      "studio-runner/src/versions.ts": "b5b2080102075f686f3b88992df18468e590db6c758dbd54f292a8391d1d7871",
+      "studio-runner/src/compat/compatibility.ts": "c68244af4c1c3699fae5a744c643b7647e63230be7ad3a15623663bc276f3e3b",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java": "adad4830eef28229f599f3a06ff15f872939086d5b10497b5a7d4ce2e25070fe",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "d4c7e51c892ea6f86799dd173046e408320396893046786ba569ddbe5a59a004",
+      "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java": "71c723137eb9460603608d54f20796231685752ebb6640aa7f8e04a384e88533",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java": "37035ac9534e667c7abca0828cdda8c76b024ea7e4a112ba7407902e2da6ace7",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java": "622f95a5e7f1f3785db8bfa188073bbeeefd956d3418e523a94e94db60796e8d",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/ArtifactCanonicalizer.java": "bf5087daeddafe926c168b7d48984e1abbb1d5cd0738ab9798720097fcf3a88b",
+      "backend/src/main/java/com/citi/put/checks/studio/compile/validator/RunnerValidationClient.java": "608d0df648fbbdffd2d86e21d1569b29834143f7ee12b7732ea53560c4f5741a"
+    },
+    "testsRun": false,
+    "browserExecuted": false,
+    "onlyWrittenFile": ".ai/STUDIO-OBS-006-runtime-recon.json",
+    "note": "Read-only source inspection; architecture/story drafting proceeds concurrently elsewhere. Hashes identify files present at report time, not a final reviewed implementation."
+  }
+}

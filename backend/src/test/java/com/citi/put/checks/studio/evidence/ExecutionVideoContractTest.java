@@ -132,7 +132,23 @@ class ExecutionVideoContractTest {
   private static final Set<String> CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED =
       new TreeSet<>(
           // ADR-002 §29.4 adds the control read, served by the same filter.
-          List.of("claimAdmission", "reportProgress", "readExecutionControl"));
+          // Approved OBS006 adds observed admission under that unchanged service-token filter.
+          List.of(
+              "claimAdmission",
+              "reportProgress",
+              "readExecutionControl",
+              "admitObservedExecution"));
+
+  private static final Set<String> RUNNER_OPERATIONS_DECLARING_UNAUTHENTICATED =
+      new TreeSet<>(
+          List.of(
+              "runnerAdmitRun",
+              "runnerCancelRun",
+              "runnerHealth",
+              "runnerReadiness",
+              "runnerValidateArtifact",
+              "validateObservedPublication",
+              "runObservedRevision"));
 
   private static ContractDocument document;
   private static String raw;
@@ -493,8 +509,8 @@ class ExecutionVideoContractTest {
     assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(23);
     assertThat(callbackRefs)
         .as("the number of internal callbacks declaring a 401 moved")
-        .hasSize(3);
-    assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(5);
+        .hasSize(4);
+    assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(7);
 
     // The pinned second copies, both ways.
     assertThat(publicRefs.keySet())
@@ -509,6 +525,12 @@ class ExecutionVideoContractTest {
     assertThat(CALLBACK_OPERATIONS_DECLARING_UNAUTHENTICATED)
         .as("an operation this pin names that is no longer an internal callback declaring a 401")
         .containsExactlyElementsOf(callbackRefs.keySet());
+    assertThat(runnerRefs.keySet())
+        .as("a runner operation declares a 401 that this independent pin does not name")
+        .containsExactlyElementsOf(RUNNER_OPERATIONS_DECLARING_UNAUTHENTICATED);
+    assertThat(RUNNER_OPERATIONS_DECLARING_UNAUTHENTICATED)
+        .as("a pinned runner operation no longer declares its producer's 401")
+        .containsExactlyElementsOf(runnerRefs.keySet());
   }
 
   /**

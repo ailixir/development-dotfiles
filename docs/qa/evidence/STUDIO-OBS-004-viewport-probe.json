@@ -1,0 +1,47 @@
+{
+  "kind": "independent-root-development-probe",
+  "results": [
+    {
+      "name": "visible",
+      "nodeFound": true,
+      "reportedVisible": true,
+      "reportedActionable": true,
+      "prepared": true,
+      "failure": null,
+      "receipts": [
+        {
+          "case": "visible",
+          "event": "down",
+          "buttons": "1",
+          "trusted": "true"
+        },
+        {
+          "case": "visible",
+          "event": "click",
+          "trusted": "true"
+        }
+      ]
+    },
+    {
+      "name": "offscreen",
+      "nodeFound": true,
+      "reportedVisible": true,
+      "reportedActionable": true,
+      "prepared": true,
+      "failure": null,
+      "receipts": [
+        {
+          "case": "offscreen",
+          "event": "down",
+          "buttons": "1",
+          "trusted": "true"
+        },
+        {
+          "case": "offscreen",
+          "event": "click",
+          "trusted": "true"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+  "story": "STUDIO-OBS-006",
+  "partition": "GuidedPublicationRaceTest only",
+  "status": "OWNED_RELATIONAL_RACE_AND_FAULT_TESTS_PASS_HANDED_BACK",
+  "ownedFile": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java",
+    "sha256": "3238dc80f425a14912d143faebc1d1187b8f6054ab543c154c946c10d70b2df0"
+  },
+  "command": "cd backend && ./gradlew test --tests '*GuidedPublicationRaceTest' --console=plain",
+  "formatting": "Only owned test: cached google-java-format1.22 under explicit Java21; no global formatter.",
+  "result": {
+    "compileJava": "PASS",
+    "compileTestJava": "PASS",
+    "build": "BUILD SUCCESSFUL in50s",
+    "tests": 17,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      "[1] edit=source",
+      "[2] edit=configuration",
+      "actualCompileAndSweeperProducePointerAbaButEpochStillFences()",
+      "twoSessionsContendOnActualTestLockOnlyOnePublishes()",
+      "sameOwnerRenewalKeepsOriginalClaimAndStillPublishesOnce()",
+      "olderRealCompilerIsDiscardedAfterGuidedCommitClearsItsPointer()",
+      "olderCompilerWinningFirstInvalidatesGuidedBaseWithoutSourceEdit()",
+      "actualManualConfirmationAfterBaseIsANewerHead()",
+      "[1] change=cancel",
+      "[2] change=fence",
+      "[3] change=lease",
+      "grantExpiringWhileWaitingForTheRealSourceLockRollsBackAllWrites()",
+      "[1] point=revision_and_confirmation",
+      "[2] point=receipt",
+      "[3] point=head",
+      "[4] point=session",
+      "[5] point=deferred_commit"
+    ],
+    "xml": ".aiox/sdc/STUDIO-OBS-006/race-tests-handoff/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationRaceTest.xml",
+    "xmlSha256": "0c3acad6d3cda15d852902b97ee60d57aac19f1bc5daa5e8ae741c172b6fc8d1",
+    "execSession": 12172
+  },
+  "sourceHashesAtHandback": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "b0b5232f7a20704e367a3198f4f995e001abe733ef1824424c05e79e3e3f581a",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java": "13b254432278614fb0e51d7dd17320eac5b57f64aa81754f786c676980a02788",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java": "8734a1c03af6698e8bc8c5cce59f36d9d13437c3a01e7fa99f30a6d4974c7881",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioRepository.java": "7ff3123adad8cd1fb10e27c92d874adb124a2fdb5839d6d627a2d70749bd7a3d",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioRepositoryCustomImpl.java": "84ba078becfb38d0c024edce04ceb862a7eca86401b6c8c79fae96629f796712",
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "cfb14657f15b8104be603bc359f283331fb1d2ea9604ab72e7f7f9161c710cbf",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "aa715150e5285490cccaa215c81d53f13f1fee5e2ecb2530e969df9c0347e029"
+  },
+  "evidencePreservation": "Root preserved XML before the subsequent shared build cleared build/test-results. This report uses the verified preserved copy; no rerun or invented XML metadata.",
+  "productionCalls": [
+    "Actual GuidedPublicationRepository.reserve/claim/finish/commit/conflict and BaseRepository.capture/requireCurrent with PostgreSQL locks, epoch trigger and deferred receipt constraints.",
+    "Actual CompileStateService.beginCompile/publishCandidate/publishError/sweepAbandoned/confirm, actual Spring Data JpaRepositoryFactory/StudioRepository and production custom fragment with EntityManager/JpaTransactionManager. No mocked lifecycle or copied publication CAS."
+  ],
+  "outcomes": [
+    "Two independent transactions hold separate session locks and contend on one test row: one receipt/revision, one persistent conflict; late conflict cannot overwrite success.",
+    "Older real compiler result/error discards after guided commit clears its pointer; ordinary-first publication preserves its head and fences guided adoption.",
+    "Actual compile plus sweeper creates pointer ABA with epoch2, refusing old base despite restored null heads.",
+    "Actual ordinary manual confirmation after base capture invalidates old guided adoption, preserving MANUAL/null-request ordinary provenance.",
+    "Independent PostgreSQL source/config writers fence validated candidates.",
+    "Cancellation, changed owner fence and expired lease cannot publish; late conflict does not overwrite CANCELLED. Same-owner renewal reuses one immutable claim and commits once.",
+    "pg_stat_activity verifies an actual publisher lock wait; grant expiry during it rolls back all new ready-state writes.",
+    "Injected database faults after revision+first confirmation, receipt, head, session-success and deferred commit roll back every ready-state artifact; dropping fault permits same claim/revision retry."
+  ],
+  "fixtureLimits": [
+    "Original successful learning/validator evidence and in-memory grant are labelled synthetic relational inputs at the writer boundary; not fresh Core, actual browser execution or independent Node equivalence.",
+    "Controlled ordinary candidate inputs use actual source/reference-policy derivation. Source/config edits are independent SQL workloads rather than StudioService HTTP saves; all tested publication predicates and writers are production implementations.",
+    "First confirmation is in the same INSERT as guided revision, so fault boundary is revision_and_confirmation, not an invented separate statement.",
+    "Old compiler tests cover both serialized outcomes; actual contention is separately proven by two guided publishers and blocked grant expiry.",
+    "Actual scheduler and real learning\u2192publication\u2192recorded fresh-value replay proof remain lead-owned; no extra fixture invented here."
+  ],
+  "priorDiagnostics": {
+    "path": "/tmp/studio-obs006-joined-history-diagnostic.log",
+    "issue": "Lead compilation found14 generic AssertJ inference errors at7 tx.execute assertions in in-progress test. Explicit transaction return types resolved them without product edits.",
+    "sha256": "bacab8d90a60c429ae8885c845f1ea0b25ea0b57a631f694aace1f4a87f015a4"
+  },
+  "lane": "Released after12172 exit0; no active Gradle/formatter.",
+  "writeScope": "Only owned RaceTest and this report changed. No product, other test, story/schema/migration, CLI/wave/gate edits, subagents, commits or push."
+}

@@ -1,0 +1,71 @@
+{
+  "story": "STUDIO-OBS-006",
+  "partition": "ObservedProfileDriftTest only",
+  "status": "REAL_APPLICATION_COMPOSITION_PASS_PUBLISHED_REVISION_ORACLE_PENDING_LEAD_HARNESS",
+  "ownedFile": {
+    "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java",
+    "sha256": "8675f560fef2f0fc5dd36bb02b0b2427654eed3efb0b8c84f1e79c3f8c46787a"
+  },
+  "command": "cd backend && ./gradlew test --tests '*ObservedProfileDriftTest' --console=plain",
+  "runtime": "Explicit Java21 for owned-file cached google-java-format1.22; Gradle uses existing Java21 project setting.",
+  "result": {
+    "compileJava": "PASS",
+    "compileTestJava": "PASS",
+    "build": "BUILD SUCCESSFUL in37s",
+    "tests": 4,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "cases": [
+      "ChecksApplication publication=false replay=false",
+      "ChecksApplication publication=false replay=true",
+      "ChecksApplication publication=true replay=false",
+      "ChecksApplication publication=true replay=true"
+    ],
+    "xml": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.ObservedProfileDriftTest.xml",
+    "xmlSha256": "ed607b647c73b2aa73e6f81d90b1e9978061d8b144147293799208f56cee0d7a",
+    "execSession": 12464
+  },
+  "testedProductSources": {
+    "backend/src/main/java/com/citi/put/checks/ChecksApplication.java": "2d5925bc037bf51d36c35789aaa7a0399bfca270262281ad404ac335bd7b5580",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java": "4226fb262872eb12bd3c4692a9a2fa557056d15d984f393d9aa42e188abfb96b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java": "fd5913d1b8ff48e70830384d81970ca4b681bded8d62adbb5d7c42c469a01dd8",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationProperties.java": "ef2f28e02e544357bf6aa964a239a347c3eae05977fd8d217581c9958e4e0eea",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayProperties.java": "1ea307b97959b1a8fab215fb339d4cd7d2d6db845e3267823523d9a7a713dfd4",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java": "d8f8c18ceb873129ebaa2412bae1c6609a686198160da310bb2f30c31a4093ce",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "5b26c4b6d0262a6eafd15184261a09180f9fd1d627f96ea76af8314d62683cb5",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java": "2193ad4c6fd32a5706eb7b6dd03b7645f97320df22674f6ccbdc47b3d5639ec8",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "04cd868bd8e2cf62b7ea955ec64db43b204a32031ca09b32e70c197b5a8f3b22",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java": "8d16743ee9244302233530b287cf24559b927cbe980c9fba3945ac328028f893"
+  },
+  "fixture": {
+    "path": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+    "sha256": "d145057d8c8809c94340ef5534590960fa65fb53ccbb7a1b8f7ee90bc19b95fb",
+    "use": "Independent execution Profile only; synthetic trusted test BuildIdentity/catalog is not a runtime image attestation."
+  },
+  "composition": [
+    "Actual ChecksApplication through standard SpringBootTest/TestContextManager, with no copied publication/replay configuration and no mocked production service or handler.",
+    "Four isolated PostgreSQL15 containers and real application HTTP listeners; only additional bean is intended GuidedProductionSessionAccess.AccountAccess controlled connection SPI.",
+    "BFF cookie authentication uses actual CoreServiceClient HTTP to counted local identity peer; all identity/core/CSI bypass switches explicitly false.",
+    "Both actual GenAi compile/guided gateway adapters enabled against counted loopback provider endpoint with supported credentials.mode=none; zero generation/validator/unexpected HTTP requests.",
+    "Actual public guided start persists canonical source and scoped Run; publication flag controls immutable pre-effect base and result3 versus no-base result2. Actual public GET of no-base sessions remains schema2.",
+    "Actual finalize guards yield PUBLICATION_DISABLED, REPLAY_DISABLED, or pre-effect PUBLICATION_CONFLICT as appropriate. No claims of completed execution/publication; durable compile/model/action/publication/ordinary execution tables remain empty.",
+    "Observed runtime beans are present in all combinations, disabled replay denies, unsupported execution profile/build refuses; distinct real configured learning-model defaults do not affect the same execution catalog. Default unconfigured replay account remains unavailable."
+  ],
+  "pendingBehavioralOracle": {
+    "requires": "Trustworthy published revision/session from lead actual learning\u2192authenticated validation\u2192publication harness.",
+    "assertions": [
+      "Published historical receipt remains readable with fresh current canRead after publication/replay flag disable and worker/session expiry.",
+      "Otherwise supported saved observed revision remains ready/replayable with benign current learning-model/provider/prompt/API defaults changed, with zero model calls.",
+      "Actual execution identity revocation/capability disable refuses that same real saved artifact; no fake ready revision or synthetic receipt inserted for these assertions."
+    ],
+    "coordination": "Requested reusable genuine fixture/oracle or explicit placement of these assertions in lead joined suite; no fabricated confirmed readiness. Composition can be handed back independently, but this report does not claim those behavioral checks passed."
+  },
+  "limits": [
+    "Controlled pre-effect application composition and catalog tests are not joined browser/publication/replay proof.",
+    "No real model, real account provider, human pilot or live deployment capability claim.",
+    "Historical configuredModel null is preserved in the independent fixture; compatibility assertion is at catalog/configuration layer until genuine published-revision fixture is available."
+  ],
+  "lane": "Released after process12464 exit0. No active build or formatter.",
+  "writeScope": "Only the owned profile test and this JSON report were written. All earlier DATA and builder/lowerer files remain handed back/read-only; no product, story, schema, migration, gate, CLI or wave edits."
+}

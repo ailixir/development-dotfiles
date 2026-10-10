@@ -1,0 +1,118 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewer": "data-engineer",
+  "verdict": "NEEDS_CHANGES",
+  "scope": "Technical implementation-readiness review of data design; not PO Ready or implementation QA",
+  "reviewed": {
+    "design": "docs/specs/studio-observed-authoring/publication-design.md",
+    "design_sha256": "bbb967c08d425fbe557cd0c813db5e97f4b08db62d2e8078bf95eecb8eee8aa5",
+    "story": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+    "story_sha256": "d1f6142c7fb41423af311ab11584c4b691bbd050c726bc6ec6cc894ee5603f9f"
+  },
+  "summary": "Architecture and transaction ordering are sound, including earlier-compile invalidation. Section5 explicitly leaves material schema/claim/FK mechanics unresolved; freeze the following before implementation. No application, schema, database or lifecycle changes were made.",
+  "accepted_findings": [
+    "Pre-effect immutable base, session\u2192ui_tests\u2192translation\u2192bridge order, sourceSteps ordering, original scoped Run principal and fresh post-validation Core authorization are correct.",
+    "publication_epoch covers newer compile/head changes and ABA; setting compile_request_id=NULL in the same guided head CAS correctly fences an older in-flight ordinary publisher. CompileStateService.lockCurrentRequest/publish already compare that request identity.",
+    "V21 authoring trigger must remain; locked current authoring is compared against immutable source identity before and after insert. V29 deny-by-default revision immutability must remain.",
+    "Canonical exercised evidence is built from obligation/admission/proposal/preparation/outcome/producer/consumer joins, not a supplied or model hash; validation occurs outside locks then snapshot digest is rechecked.",
+    "Schedules already compare current ready revision to activated_revision_id and return ACTIVATION_REVISION_MISMATCH (StudioScheduleProcessor.java:262). Leaving schedule/activation rows untouched is correct; an old activation must not silently use new head.",
+    "Guided evidence remains distinct from actual partitioned ui_test_executions rows; publication creates no fake replay success."
+  ],
+  "required_changes": [
+    {
+      "id": "DATA-006-01",
+      "severity": "HIGH",
+      "location": "publication-design.md section5 tables/identity-cutover",
+      "problem": "The proposal does not yet specify exact origin nullability, scoped composite keys or the reciprocal receipt/revision FK cycle. Deferred constraints may join is not a complete insert/commit contract. Ordinary historical rows may have null compile_request_id, so an unconditional XOR would reject legitimate data; staged V19 currently rejects every guided insert.",
+      "remediation": [
+        "Freeze a compatibility branch: ordinary/legacy publication_kind NULL (or explicitly chosen ordinary discriminator), guided_session_id/learned_plan_hash/revision_digest NULL, confirmation_source not GUIDED_RUN; preserve historical null compile_request_id. Guided branch has explicit kind, all guided identities NOT NULL, compile_request_id NULL, artifact_schema_version2, confirmation_source GUIDED_RUN and nonnull confirmation pair. Use IS TRUE/explicit null checks; never backfill fabricated guided origin.",
+        "Give bases session_id PK/FK, typed UUID test_id and CSI, UNIQUE(session_id,test_id,csi_id), frozen source/config/auth/head fields. Require revisions(guided_session_id,test_id,csi_id) FK to that composite base.",
+        "Concrete cycle option: revision UNIQUE(guided_session_id,id) and UNIQUE(id,test_id,csi_id,guided_session_id); publications session_id PK, revision_id UNIQUE NOT NULL, test_id/CSI NOT NULL, UNIQUE(session_id,revision_id). Receipt FK(revision_id,test_id,csi_id,session_id) references matching revision; revision FK(guided_session_id,id) references receipt(session_id,revision_id) DEFERRABLE INITIALLY DEFERRED. Ordinary null guided_session_id skips only that FK, while guided CHECK prevents null escape. Insert revision first, receipt second, commit validates both. No placeholder null receipt link.",
+        "Receipt must reference the exact accepted validation attempt/claim and hashes, plus original Run/base/translation provenance. Freeze which fields are constrained relationally and which are recomputed by trusted verifier; a scoped base alone must not satisfy guided proof.",
+        "For noncutover schema replace V24 identity index with an ordinary-only partial unique index preserving its exact prior expression and separate guided-session/revision-digest identities. In V19-installed schema do not recreate the old ordinary dedup index. Freeze exact catalog detection.",
+        "V33 replaces the installed V19 require-request function only when that capability exists, retaining ordinary request checks and permitting guided rows whose mandatory deferred receipt constraints complete at commit. Updated staged V19 must feature-detect V33: safely drop ordinary identity index if present, preserve guided indexes and install matching function. Both installation orders and original pre-V33 V19 must remain supported."
+      ]
+    },
+    {
+      "id": "DATA-006-02",
+      "severity": "HIGH",
+      "location": "publication-design.md section5 publication_attempts; section4 persisted validation lease",
+      "problem": "Bounded immutable identities with a fenced active lease leaves the actual attempt key/status/claim/retry budget and conditional acceptance undefined. Concurrent idempotency keys or restart could reset the three-attempt ceiling or apply another claimant result.",
+      "remediation": [
+        "Freeze columns: session_id, attempt_id, attempt_number, finalize request digest/key, snapshot_hash, expected base epoch/translation revision/hash/owner fence, artifact/plan/equivalence/profile hashes, claim UUID, lease_expires_at, status, bounded validation receipt/closed failure and timestamps. Specify required/nonrequired columns by status and SQL checks.",
+        "Define RESERVED\u2192VALIDATING\u2192VALIDATED/REJECTED/SUPERSEDED/UNKNOWN, with one-live-attempt/session partial unique index and UNIQUE(session_id,attempt_number), CHECK attempt_number1..3. Count all claims across request keys/restarts for this session, not per HTTP call. Claim/send transition and valid-result acceptance use status+claim+lease+snapshot CAS under session lock.",
+        "Persist response identity only through authenticated validator client; immutable terminal results and append-only attempts. Unknown validation can be retried read-only only by a new budgeted claim. No old claim may publish. Bind immutable publication receipt to the chosen validated attempt, not an arbitrary supplied hash.",
+        "Specify no claim/snapshot writes after terminal session except idempotent receipt reads; snapshot creation checks no active translation model/clarification/actions and remains digest-rechecked at final commit."
+      ]
+    },
+    {
+      "id": "DATA-006-03",
+      "severity": "MEDIUM",
+      "location": "publication-design.md section4 AuthorizationGrant.refresh and section5 phase1",
+      "problem": "Publication grants are capped by worker/session expiry, but the successful-receipt path expressly must work after worker expiry. The text says current authorized access without specifying whether it bypasses cached BFF identity through fresh Core. Reusing refresh(snapshot) would either reject legitimate receipts or weaken active publication grants.",
+      "remediation": [
+        "Specify separate READ_PUBLISHED_RECEIPT authorization: uncached CoreServiceClient.getUserMe with current cookie, same original/caller principal and current CSI entitlement, outside all locks; it has no active-worker/session-expiry requirement and grants only reading an immutable matching receipt.",
+        "Active publish grant remains in-memory and capped at min(session expiry,worker lease,Core refresh time+TTL), checked at final SQL CAS with clock_timestamp after bounded lock acquisition. No cookie/grant credential persistence. Core retry latency may exhaust the deadline; this returns no publication without reviving work.",
+        "Persist/publicly expose a safe request identity sufficient to reject changed expected source/config or changed idempotency body on receipt retry; do not require recomputing a new mutable snapshot to retrieve an old receipt."
+      ]
+    },
+    {
+      "id": "DATA-006-04",
+      "severity": "MEDIUM",
+      "location": "publication-design.md section5 execution JSON fields versus section6 runtimeVersions metadata",
+      "problem": "The design names new immutable observed execution binding and write-once admission receipt but does not freeze column names/nullability/mutation guards, while section6 also suggests embedding the receipt inside existing mutable runtimeVersions. Those are materially different persistence guarantees.",
+      "remediation": [
+        "Choose explicit nullable observed_revision_binding and observed_admission_receipt JSONB on ui_test_executions (or fully specified equivalent). Legacy rows remain NULL; observed binding is set only on acceptance INSERT and immutable thereafter. Admission receipt changes once NULL\u2192bounded validated document in the actual AdmissionCas transaction, then is immutable including terminal projections.",
+        "Constrain required identity keys/types/nulls and match revision_id/CSI/principal/environment/execution+attempt and exact profile/hash fields. Avoid trusting terminal five-field projections as admission evidence. Existing runtime_versions may remain display data derived from receipt.",
+        "Create a separate trigger on partitioned execution parent, like V28, rather than replacing existing V26/V28 guards. If a separate relation is chosen instead, its execution FK must include started_at because V7 execution PK is (id,started_at), not id alone."
+      ]
+    }
+  ],
+  "mandatory_implementation_conditions": [
+    "Epoch trigger computes NEW.publication_epoch=OLD+1 exactly for null-safe pointer changes; rejects/manual ignores attempted epoch override on unrelated updates and rejects overflow. No writer can regress epoch. Test legacy ORM full-row updates.",
+    "Capture base in start/source initialization transaction before assign; test no base or late inserted base on already-effectful sessions is refused. Base capture does not alter source_revision.",
+    "At final CAS check both captured epoch and null-safe compile/candidate/confirmed heads, source/config/authoring hash, active session/fence/lease, grant expiry and database wall clock. Set compile_request_id=NULL atomically with new heads/READY; keep ordinary request history.",
+    "On expected conflict roll back candidate transaction then commit only PUBLICATION_CONFLICT under fresh session/test locks after checking no winning receipt/terminal state appeared. Never overwrite a concurrent success/cancel with conflict. Unexpected DB failure stays retryable.",
+    "Deadlock rule remains session\u2192test\u2192translation/bridge\u2192publication/revision. Ordinary writers/schedule paths must not acquire session locks while holding test rows.",
+    "Published receipt is immutable, session outcome references its real UUID revision, no schedule mutation and no synthetic replay row. No real provider/account/human-pilot claim."
+  ],
+  "ownership": {
+    "covered": [
+      "V33__studio_observed_publication.sql",
+      "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+      "GuidedPublicationBaseRepository.java",
+      "GuidedPublicationRepository.java",
+      "GuidedPlanPublisher.java",
+      "GuidedPublicationAuthorization.java",
+      "GuidedSessionService.java",
+      "GuidedProductionSessionAccess.java",
+      "CompileStateService.java",
+      "UITestRevision.java",
+      "UITestExecution.java",
+      "AdmissionCasService.java",
+      "GuidedPublicationMigrationTest.java",
+      "GuidedPublicationRaceTest.java",
+      "GuidedPublicationAuthorizationIT.java",
+      "GuidedPublicationReplayIT.java",
+      "InferenceMigrationLatestIT.java",
+      "ObservedRevisionReadinessTest.java"
+    ],
+    "conditions": [
+      "No extra source path is inherently required if epoch and base are JDBC-owned; if implementation exposes epoch through UITest or StudioRepository, those paths are not currently listed and require ownership amendment first.",
+      "Add schedule activation mismatch coverage to existing owned GuidedPublicationRaceTest/ReplayIT, calling real schedule processor; otherwise reserve the exact scheduling test file before changing it.",
+      "Existing staged-cutover runbook docs/runbooks/studio-inference-rollout.md is not listed. If changed install-order instructions live there, reserve it; alternatively explicitly put complete compatible-V19 instructions in the already-owned studio-guided-authoring.md and update any references without editing unowned files."
+    ]
+  },
+  "acceptance_tests": [
+    "Fresh V33, V32\u219233 with legacy null/ordinary RUN/MANUAL rows, actual original V19\u2192V33 and V33\u2192updated stagedV19; all prior immutable rows byte-preserved.",
+    "Direct SQL guided no base/no receipt/null origin/hash/mixed compile-guided/cross-test receipt; force SET CONSTRAINTS ALL IMMEDIATE and verify incomplete cycle fails while valid revision-first receipt-second transaction commits.",
+    "Both older compile race orders: ordinary finishes first invalidates guided base; guided commits first clears request so older ordinary result discards. Newer compile start/newer publication/manual confirmation/head ABA loses guided CAS.",
+    "Two sessions one base; concurrent finalization keys; expired validation claim/restart/third-attempt budget; stale validator receipt; plan/head/evidence mutation after validation; sourceSteps UUID lexical-order trap.",
+    "Faults after revision/confirmation/receipt/CAS/session writes leave zero orphan ready state. Conflict marker survives its own failed candidate transaction without overriding concurrent terminal success.",
+    "Fresh Core after long validation; revoked principal/CSI, missing cookie, Core timeout, grant expires during blocked DB lock. Committed receipt retrieval after session/worker expiry uses fresh current authority and performs no validator/browser calls.",
+    "Observed binding immutable at acceptance, receipt single-assignment at admission, cross-execution/attempt/profile refusal, unchanged legacy updates, partition-parent triggers inherited by new partitions.",
+    "Activate schedule on old revision, publish observed revision, run actual scheduler: old activation stays unchanged and returns ACTIVATION_REVISION_MISMATCH, zero schedule dispatch to new revision.",
+    "Finalization zero application effects; two independent later real recorded replays use new unpredictable captures and identical frozen artifact hashes, zero calls to both gateways."
+  ],
+  "no_mutations": "Only this review JSON was written. No builds, database commands, product/schema/story/design/lifecycle edits or subagents."
+}

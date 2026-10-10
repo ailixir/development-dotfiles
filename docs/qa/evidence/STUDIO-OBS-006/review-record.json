@@ -1,0 +1,373 @@
+{
+  "story": "STUDIO-OBS-006",
+  "gate": "PASS",
+  "status_reason": "All seven acceptance criteria and reviewed amendments are met on the frozen handoff; independent targeted checks and actual joined evidence passed with no blocking findings.",
+  "reviewer": "Quinn (independent QA) / obs006_qa_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "reviewedAt": "2026-10-09T17:09:59.471606+00:00",
+  "reviewed_revision": "working-tree-sha256:f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+  "independence": {
+    "implementedProductOrTests": false,
+    "subagents": false,
+    "productTestEdits": false,
+    "rootLifecycleCli": false,
+    "commitPushDeploy": false,
+    "preservedUnrelatedChanges": true
+  },
+  "handoff": {
+    "preReviewStorySha256": "6e88629e9218ef14569a448267d23c859e8e32881f5e124fbdc1ccaabf2f346c",
+    "developerReportSha256": "44825888e277756fb7889e628622735dbfd8ef37beed99a458b17447fe83276d",
+    "sourceFilesVerified": 148,
+    "runtimeSourceFilesVerified": 77,
+    "frozenDistFilesVerified": 256,
+    "javaClassFilesVerifiedBeforeAfter": 1115,
+    "sourceOrBuildMismatches": [],
+    "revisionScopeCount": 147,
+    "revisionScope": "147 frozen authoritative source/docs/schema/test entries; story separately bound by exact pre-review/post-review SHA and permitted-section verification",
+    "historicalPreReview148EntryDigest": "e717ec4bad8a345bfc17ce9221f069ef9f311d444b094bace1eca3ef59d93757"
+  },
+  "requirementsTraceability": [
+    {
+      "ac": "AC-1",
+      "status": "PASS",
+      "assessment": "Base-enabled pre-effect capture preserves original immutable observations/proofs and exact admission links; original allocated plan/source order/bootstrap/materialization and all graph joins reconstructed rather than re-observed. Missing/uncertain/extra history refuses.",
+      "source": [
+        "GuidedSessionService.storePreparation/admit",
+        "GuidedPublicationEvidenceRepository.read/captureObservation",
+        "GuidedPlanBuilder.basis/learnedPlan"
+      ],
+      "oracles": [
+        "GuidedPlanBuilderTest:103",
+        "GuidedPublicationEvidenceTest:5",
+        "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "originalQuestionDriftAndSqlCaptureRefusalRollbackAndCommitUsageWithoutAnotherCall"
+      ]
+    },
+    {
+      "ac": "AC-2",
+      "status": "PASS",
+      "assessment": "Pure declarative lowering and independently implemented Java/Node derivation agree on operation/guard/input/read/binding/source identities and hashes. Private captures/ephemeral node rights never become replay arguments. Coherent mutation and UTF-8 aggregate bounds reject.",
+      "source": [
+        "ObservedArtifactLowerer",
+        "GuidedPlanBuilder.effectiveObservedObligation",
+        "validator/observedReplay.deriveObservedArtifact/selectedOriginalLocator",
+        "ObservedReferencePolicyDeriver"
+      ],
+      "oracles": [
+        "ObservedArtifactLowererTest:26 (compiled Node paired proof)",
+        "observedReplayValidation:90",
+        "observedReplayEquivalence:34",
+        "packaged-proof:5"
+      ]
+    },
+    {
+      "ac": "AC-3",
+      "status": "PASS",
+      "assessment": "Publication re-reads pure original basis, validates once under a fenced claim, then obtains uncached current Core authorization outside locks; database clock and null-safe base/epoch/source/head/owner/claim guards atomically commit receipt/revision/head/session. Legacy compiler pointer clearing fences its late writer. Cancellation/unknown/expiry/edits cannot regain readiness.",
+      "source": [
+        "GuidedPlanPublisher.finalizeForUser",
+        "GuidedPublicationRepository.claim/finish/commit",
+        "GuidedPublicationBaseRepository",
+        "V33__studio_observed_publication.sql",
+        "ObservedReplayAuthorization",
+        "AdmissionCasService"
+      ],
+      "oracles": [
+        "GuidedPublicationRaceTest:17",
+        "GuidedPublicationMigrationTest:11",
+        "GuidedPublicationAuthorizationIT:7",
+        "ObservedAdmissionSecurityIT:103 (actual HTTP filters, report service controlled)",
+        "GuidedPublicationReplayIT:8",
+        "AdmissionCasIT:15"
+      ]
+    },
+    {
+      "ac": "AC-4",
+      "status": "PASS",
+      "assessment": "Finalization is pure and performs zero action/model/submission effects; historical learned receipt is distinct from actual replay evidence/readiness. Conflict keeps evidence; fresh Core canRead recovers receipt after expiry/head edit. Actual scheduler activation mismatch and unattended refusal prevent automatic replay. Null-origin preReady ERROR retains real recorded evidence.",
+      "source": [
+        "GuidedPlanPublisher",
+        "GuidedPublicationResultProjector",
+        "ProgressReportService",
+        "RunnerReportProjection",
+        "StudioDispatchLedgerStatements",
+        "StudioScheduleProcessor"
+      ],
+      "oracles": [
+        "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "editedSourceKeepsHistoricalReceiptWithoutRegainingReplayReadiness",
+        "queuedAndPreReadyRefusals",
+        "scheduler-history-evidence.json"
+      ]
+    },
+    {
+      "ac": "AC-5",
+      "status": "PASS",
+      "assessment": "Later explicit ordinary acceptance/admission/recorded child runs pin immutable behavior and fresh grants, start empty private binding maps and capture new values without either gateway. Exact private inventory detects drift/duplicates/sensitivity/type/policy conflicts. Acquisition only polls passive absence/visibility; one-way poison and source-step/run absolute budgets prevent late effects/PASS or retries.",
+      "source": [
+        "ObservedReplayAuthorization",
+        "StudioAcceptanceService/StudioDispatcher",
+        "run/childRuntime",
+        "executor/observedReplay",
+        "run/observedReplayAdapter",
+        "run/browser",
+        "run/observationCollector"
+      ],
+      "oracles": [
+        "actualLearningPublishesWithoutEffectsThenTwoOrdinaryRunsRecaptureFreshValues",
+        "asynchronousReceiptRequiresPassiveLearningAndTwoFreshRecordedReplays",
+        "absentTargetStopsOnAllowanceOrCancellationWithoutRepeatingSubmittedWork",
+        "observedAlternateChoiceSurvivesHumanAndModelDelayAndTwoFreshRecordedReplays",
+        "observedReplayExecutor:31",
+        "frozen Chromium replay/privacy:33",
+        "observedReplayProtocol:34",
+        "observedAccount:16"
+      ]
+    },
+    {
+      "ac": "AC-6",
+      "status": "PASS",
+      "assessment": "Strict execution Profile and exact trusted compatible build/schema/reference catalog joins are separated from historical model provenance. Unsupported/mixed/old build refuses. Four flags, old artifacts/Run auto-accept, schema fixtures and both staged V19 orders remain guarded. Runbook prescribes rollout/drain/rollback/compatible-build restoration or deliberate relearn.",
+      "source": [
+        "ObservedReplayPins",
+        "ObservedRevisionVerifier",
+        "versions/runtime-versions",
+        "protocol/routes",
+        "contracts/v2 and v3",
+        "studio-guided-authoring.md"
+      ],
+      "oracles": [
+        "ObservedProfileDriftTest:4",
+        "GuidedPublicationMigrationTest:11",
+        "observedReplayRoutes:15",
+        "observedReplayAuthorization:16",
+        "compiled stale-build refusal",
+        "contracts.log",
+        "preserved full backend and runtime gates"
+      ]
+    },
+    {
+      "ac": "AC-7",
+      "status": "PASS",
+      "assessment": "Independent rerun of actual application/PG/CoreHTTP/authenticated guided worker/pure compiled validator/ordinary admitted recorded Chromium child supplies required joined proof plus source/ownership/rollback/mutation cases. Full regressions/coverage archives independently hashed and XML/JaCoCo totals parsed.",
+      "source": [
+        "all authoritative 148 File List entries plus documented unchanged targets"
+      ],
+      "oracles": [
+        "321 independent backend tests",
+        "274 independent runner units",
+        "33 independent Chromium cases",
+        "5 compiled proof oracles",
+        "3597 preserved full-backend files verified",
+        "252 prior joined files verified"
+      ]
+    }
+  ],
+  "reviewConditions": {
+    "delayedAcquisition": {
+      "status": "PASS",
+      "assessment": "Closed numeric-version passive-target-1 marker; locked exact current timeout/source/config; cumulative source-step usedMs/poll accounting, sticky unknown reservation and durable database time; exact original full pending request/key/hash/generation recovered after committed callback. Source/fence/lease/plan/obligation/clock mismatches stop; NEXT_ACTION send requires closed window/pending. Immediate-ready model/human time stays outside allowance.",
+      "oracles": [
+        "GuidedTranslationTest:22 including restart/concurrent scanner/late usage/compound allowance/current fence tests",
+        "real HTTP receipt-gated async joined case",
+        "real never-appears/cancellation case",
+        "source-question and observed-choice1250ms model/human delays beyond1000ms browser timeout"
+      ]
+    },
+    "preReadyTerminal": {
+      "status": "PASS",
+      "assessment": "Raw FINAL/ERROR/RUN_ERROR with fixed exact reason, unique complete SKIPPED coordinates and all timing/readings null checked before projection. Exact stored binding/receipt schemas and partition execution tuple, owner, first sequence1/last0, ADMITTED/PENDING/no-browser/no-cancel and immutable whole JSON checked atomically. Same-owner sequence duplicate is acknowledged without rewrite; no payload-hash idempotence asserted. Ordinary cancellation/started paths retain old guards.",
+      "oracles": [
+        "genuine queuedAndPreReadyRefusals:43 negative callback/immutable probes,1 actual commit rollback then real worker retry, duplicate changed-payload no rewrite, late sequence refusal, actual WebM>=512 with authenticated Range206",
+        "AdmissionCasIT raw/ordinary negatives",
+        "review of applyObservedPreReadyFailure and evidence settlement SQL"
+      ],
+      "limit": "Real sender uploads before its one FINAL; no fabricated producer PROCESSING-to-later-FINAL evidence transition claimed."
+    },
+    "observedChoice": {
+      "status": "PASS",
+      "assessment": "Original question observation captured prospectively before REFRESH, tied to actual original APPLIED NEXT_ACTION attempt and immutable original plan/obligation. Immutable preparation-time receipt freezes original resolved answer without invented accepted timestamp/actor. Java and Node independently derive only accepted exact locator while preserving raw plan/operation/input/read/binding meaning. All accepted DB rows reconcile to successful witnesses; duplicates and missing old proof refuse without backfill/last-wins; source/no-choice witness omitted. Closed cardinality2..10 and unchanged basis/request ceilings/build hashes tested.",
+      "oracles": [
+        "genuine observed-phase Alternate destination after1250ms human and1250ms model delay vs1000ms step timeout; one initial submit/zero finalization effects/two fresh same-artifact model-free recordings",
+        "actualAcceptedSameTargetAndAlternateTargetRowsCannotDisappearWithoutProspectiveProof",
+        "actualEqualTargetAcceptedDecisionsAreAmbiguousAndCannotBackfillAnOldPreparation",
+        "SQL/domain capture fault rollback and separately committed REJECTED usage",
+        "Java103/Node90/paired lowerer26 coherent mutation cases"
+      ]
+    },
+    "privacyAndEffects": {
+      "status": "PASS",
+      "assessment": "Private values/inventory/account capabilities remain local; current field/style signatures include direct value/selection mutation. Complete bounded candidate universe includes hidden duplicates/hard denial. Native pointer/key and isolated fixed fill/select semantics preserved. Controls check inner awaits and invoke boundary; uncertain started effects fail without reacquisition/resampling/retry. Runtime/report data-free output and authenticated video are separate channels.",
+      "oracles": [
+        "33 real Chromium/privacy tests",
+        "executor/protocol/account unit groups",
+        "actual joined canary checks and independent HTTP submission/value receipts",
+        "preserved legacy/confined-child/dual-gateway regression archives"
+      ]
+    }
+  },
+  "findings": [],
+  "commandsManifest": "docs/qa/evidence/STUDIO-OBS-006/commands.json",
+  "results": {
+    "independentBackend": {
+      "tests": 321,
+      "passed": 321,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "independentRunnerUnit": 274,
+    "independentChromium": 33,
+    "compiledOracles": 5,
+    "fullBackendArchive": {
+      "tests": 2067,
+      "passed": 2048,
+      "skipped": 19,
+      "failed": 0,
+      "errors": 0,
+      "crossReplicaPassed": 2,
+      "lineCoverage": {
+        "covered": 18048,
+        "missed": 2033,
+        "ratio": 0.8987600219112594
+      },
+      "actualJacocoThresholdVerification": "PASS unchanged thresholds; parsed archived XML and actual gradle task log",
+      "spotbugsMain": "PASS",
+      "spotbugsTest": "SKIPPED by existing build policy",
+      "archiveFilesVerified": 3597
+    },
+    "runtimePreservedFullGate": {
+      "unitPassed": 1546,
+      "unitExistingSkips": 29,
+      "chromiumPassed": 306,
+      "chromiumExistingSkips": 10,
+      "lineCoverage": 91.24,
+      "exactFinalAffectedChromiumPassed": 33,
+      "scope": "Broader runtime snapshots and final affected exact-byte rerun distinguished in producer report; no whole-live-provider assertion."
+    }
+  },
+  "codeRabbit": {
+    "platform": "Darwin",
+    "configuredMode": "wsl",
+    "nativeExists": false,
+    "path": null,
+    "wsl": null,
+    "result": "NOT_RUN_UNAVAILABLE; independent manual review fallback"
+  },
+  "limitations": [
+    "Actual CoreHTTP/PG/Chromium/authenticated worker paths use controlled protocol-compatible model and account providers; model accuracy/cost and account connectivity are not live-provider evidence.",
+    "Local catalog has synthetic image digest; production immutable image/ingress/Sonic/Vault/revocation/co-run external evidence is unavailable and not claimed.",
+    "OBS007 approved account provider,OBS008 automatic frontend finalize/poll/reconnect and first guided video,OBS009 live benchmark,OBS010 human pilot remain separate scope; no waiver is used.",
+    "19 backend and29unit/10Chromium historical skips remain exact existing conditions; targeted independent suites had0skips.",
+    "Standalone manual fixture opaque sourceManifestHash and independently reconstructed original-row provenance are distinct oracles; no absent historical prompt/manifest preimage fabricated.",
+    "Bounded30second Core revocation lag and residual browser event races after last synchronous check are reviewed contract limits; no instantaneous distributed/browser atomicity claim.",
+    "Shared wave ceiling USD500; actual billing spend unknown."
+  ],
+  "existingBackendSkips": [
+    {
+      "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+      "test": "AC-18b \u2014 ranged reads against real Sonic (ED-03 / SPK-03 / 10.18 / 10.19)"
+    },
+    {
+      "class": "com.citi.put.checks.studio.evidence.ExecutionVideoExternallyGatedCriteriaTest",
+      "test": "AC-19b \u2014 the media route through the real ingress (ED-06 / SPK-02 / 10.18 / 10.19)"
+    },
+    {
+      "class": "com.citi.put.checks.studio.readiness.ExecutionReadinessTest",
+      "test": "targetPolicySelectionAdvancesTheConfigurationRevision()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "theRunnerIsUpEnforcesItsIdentityAndAcceptsTheCredentialTheApiWasGiven()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "theApiCompilesADraftThroughTheRealRunnerValidateRoute()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "theApiDispatchesAConfirmedRevisionToTheRealRunner()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "theRunnerReportsBackAndTheApiAcceptsWhatItSends()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "aTrivialPassingTestRunsToPassedAndItsLedgerSettlesDone()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "aLiveMidStepRunIsStoppedByTheControlReadAloneAfterAnHttpCancel()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "aLiveMidStepRunIsStoppedByTheDeleteRelayTheDispatcherSends()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "aQueuedCancelIsClosedByTheApiAndNoBrowserIsEverLaunched()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "aCancelBetweenTheSendAndTheAdmissionIsRefusedAdmissionAndNoBrowserStarts()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "aCancelRightAfterTheAdmissionEndsCancelledOnWhicheverBranchTheRunnerTook()"
+    },
+    {
+      "class": "com.citi.put.checks.corun.StudioCoRunIT",
+      "test": "aTrivialPassingTestStillRunsToPassedAfterEveryCancel()"
+    },
+    {
+      "class": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+      "test": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)"
+    },
+    {
+      "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+      "test": "AC-13b \u2014 canaries through the integrated path with real material (ED-02 / 10.19)"
+    },
+    {
+      "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+      "test": "AC-7b \u2014 real revocation through a non-bypassed session (ED-02 / 10.18 / 10.19)"
+    },
+    {
+      "class": "com.citi.put.checks.studio.secrets.ExternallyGatedCriteriaTest",
+      "test": "AC-5b \u2014 resolution confined by the real vault's own policy (ED-02 / 10.18 / 10.19)"
+    },
+    {
+      "class": "com.citi.put.checks.studio.compile.TargetPolicyGapTest",
+      "test": "achangedTargetPolicyAdvancesTheConfigurationRevision()"
+    }
+  ],
+  "preservedFailures": [
+    ".aiox/sdc/STUDIO-OBS-006/broad-gates-attempt1",
+    ".aiox/sdc/STUDIO-OBS-006/joined-attempts/observed-choice-attempt1",
+    "all historical component red/green reports retained",
+    "QA-only browser config and stale-build assertion errors preserved in evidence; corrected harness only"
+  ],
+  "nfr": {
+    "security": "PASS scoped fresh authority/exact current ownership/private output/negative filter and raw report probes",
+    "performance": "PASS bounded transport/storage/work/count/time accounting; no production latency benchmark claimed",
+    "reliability": "PASS transactional rollback, CAS/ABA/expiry/cancel/restart/one-way poison/idempotence exercised",
+    "maintainability": "PASS explicit family branches, deterministic closed schema and independently tested derivation; documented rollout"
+  },
+  "gatePath": "docs/qa/gates/STUDIO-OBS-006-exact-plan-publication-and-deterministic-replay.yml",
+  "evidenceDirectory": "docs/qa/evidence/STUDIO-OBS-006",
+  "requiredFixes": [],
+  "lifecycle": {
+    "from": "InReview",
+    "to": "Done",
+    "owner": "@qa",
+    "version": "0.2.1",
+    "persistedAndVerified": true
+  },
+  "laterWorkflow": "Root alone verifies review phase and performs PO administrative close/advance; no dependent story dispatch here.",
+  "postReviewStorySha256": "e201c03db45bbd0da2c0cbc868d424d23e5f6e11350f243c103fc50d6f0b9653",
+  "gateSha256": "d14cdc5125c971c2ae98805ba1fdb1cec5a3cef28c538c0f38acd1c3961f4a03",
+  "persistedAt": "2026-10-09T17:11:31.315465+00:00",
+  "storySubstantiveSha256": "891d3adb2fd83f67fc030deedad2bcc605ee0ed12ab5ce4efe233a6d34ad6286",
+  "storySubstantiveVerification": "python3 docs/qa/evidence/STUDIO-OBS-006/story-substance.py"
+}

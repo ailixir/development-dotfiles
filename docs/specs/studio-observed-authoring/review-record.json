@@ -1,0 +1,82 @@
+{
+  "status": "CONSENSUS_REACHED_AWAITING_USER_IMPLEMENTATION_APPROVAL",
+  "at": "2026-10-08T01:13:37.181815+00:00",
+  "canonicalPlan": "consensus-plan.md",
+  "sha256": "2e2dbd3d715513c5b4c3a09b1898e282e207b5e804bb4fdefdef51c64f2327ee",
+  "objective": "Plain-language Studio experience using automatically observed HTML/DOM context, no required capture commands, expert consensus and validated solution plan.",
+  "implementationStarted": false,
+  "experts": [
+    {
+      "agent": "capture_arch_review",
+      "role": "Architecture/backend/runtime",
+      "skill": "aiox-architect",
+      "verdict": "APPROVE_FOR_USER_REVIEW",
+      "finalNote": "Bind learned-plan hash into immutable revision identity; derive hidden-reference policy from bound plan and admission provenance. Incorporated."
+    },
+    {
+      "agent": "capture_acceptance_review",
+      "role": "UX/product",
+      "skill": "aiox-ux-design-expert",
+      "verdict": "APPROVE_FOR_USER_REVIEW",
+      "finalNote": "Single Run, no required tokens or DOM uploads, no hidden replay, honest same-session authentication and future usability gates."
+    },
+    {
+      "agent": "capture_qa_security",
+      "role": "QA/security",
+      "skill": "aiox-qa",
+      "verdict": "APPROVE_FOR_USER_REVIEW",
+      "finalNote": "Sanitized gateway bytes, durable locator binding, at-most-once dispatch and learned-versus-replay evidence; no blocking corrections."
+    }
+  ],
+  "rounds": [
+    {
+      "round": 1,
+      "method": "Independent repository-backed designs and direct peer challenges",
+      "disagreements": [
+        "Separate Learn/confirm/Run versus first Run learning execution",
+        "Mandatory save/confirmation versus automatic adoption within original scope",
+        "Raw/accessibility-only snapshots versus locally sanitized semantic DOM",
+        "Token authorization versus inferred hidden dataflow"
+      ],
+      "resolution": "Adopt one actual first guided Run, exact-plan auto-publication on unchanged successful scope, local sanitized observation, internal versioned dataflow; explicit lifecycle ADR required."
+    },
+    {
+      "round": 2,
+      "method": "Coordinator synthesis circulated; experts challenged details and converged",
+      "refinements": [
+        "Freeze durable locator+operation hashes instead of ephemeral refs",
+        "Fresh observation per state-changing internal action",
+        "Look ahead for values before leaving source state",
+        "Positive nonsecret policy for input-value reads",
+        "No assumed interactive authentication or session-sharing capability",
+        "At-most-once dispatch terminology; no uncertain action retries",
+        "Data-free diagnostics and explicit video/data-policy limits"
+      ]
+    },
+    {
+      "round": 3,
+      "method": "All three reviewers read saved consensus-plan.md",
+      "result": "Unanimous APPROVE_FOR_USER_REVIEW; implementation identity clarification incorporated."
+    }
+  ],
+  "validationPerformed": [
+    "Current repo implementation and historical specification reconciliation.",
+    "Pinned Playwright 1.63 real sandboxed Chromium snapshot probe on a synthetic page: AI refs and JSON API work; raw snapshot exposes password value and injection text.",
+    "Primary Playwright documentation checked for snapshots, locators and actionability.",
+    "Independent final review of the saved design by architecture, UX/product and QA/security."
+  ],
+  "notYetValidated": [
+    "Feature implementation",
+    "Real-model end-to-end interpretation success",
+    "Gateway sanitizer wire-byte leakage tests",
+    "First-run action ledger and recovery",
+    "Authenticated same-session handoff",
+    "Nontechnical human usability and proposed benchmark gates"
+  ],
+  "filesPreserved": [
+    "backend/src/test/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClientTest.java"
+  ],
+  "remainingDecision": "User approval to start implementation; requested plan/design objective is complete.",
+  "finalCheckout": "c767efbe70f0a05555d77b2a589ca19414a4e8b4",
+  "concurrentChangeAudit": "Rechecked final HEAD. Concurrent cleanup removed legacy frontend interpreters and unused validator/helper code; inspected affected runner/reference diffs. Reviewed browser/compile/session gaps and chosen architecture remain applicable. No application changes made by this planning task."
+}

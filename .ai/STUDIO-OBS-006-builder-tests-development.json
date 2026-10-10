@@ -1,0 +1,177 @@
+{
+  "story": "STUDIO-OBS-006",
+  "partition": "builder-and-lowerer-tests",
+  "status": "OWNED_TESTS_IMPLEMENTED_VERIFIED_AND_HANDED_BACK",
+  "ownedFiles": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java"
+  ],
+  "initialRun": {
+    "command": "./gradlew test --tests '*GuidedPlanBuilderTest' --tests '*ObservedArtifactLowererTest' --console=plain",
+    "cwd": "backend",
+    "compile": "PASS",
+    "tests": 41,
+    "failures": 4,
+    "meaningfulNegativeCoverage": "Not yet established: baseline fixture is rejected before deeper mutation paths. Each mutation test now explicitly asserts unaltered baseline passes first.",
+    "findings": [
+      {
+        "type": "independent-fixture-source-mismatch",
+        "detail": "targetIntent='label' versus original target testId='label-input' violates actual GuidedProposalValidator.action:317"
+      },
+      {
+        "type": "Java-Node-projection-mismatch",
+        "detail": "Nonread guards2/3/4 readRuleId: Java 'nonsecret-form', independent Node expectation null; both visible/control fixtures differ."
+      }
+    ]
+  },
+  "lane": "Explicitly released to root after final process27141 exit0; no active Gradle/formatter.",
+  "boundaries": [
+    "Only two reassigned test files and this report modified. Earlier seven DATA files and every product class remain read-only.",
+    "Fixtures are independent manually authored original-fact vectors. These tests do not replace real joined application/Node/browser evidence.",
+    "No story/gate/CLI/schema/migration edits or implementation/QA verdict."
+  ],
+  "ownedFileHashes": {
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": "705716334043bc6fa8f48de9d0aedfebf6f435e0bfb092bfb8e85e2d424b1e8f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": "236f9e0ccd9c4eb21cbbeb86d4f49eb170233212cfe478d20820daff8da77ceb"
+  },
+  "pendingActions": [],
+  "sourceState": "Two test files frozen at successful final45-case run; all product source remained lead-owned.",
+  "secondRun": {
+    "command": "./gradlew test --tests '*GuidedPlanBuilderTest' --tests '*ObservedArtifactLowererTest' --console=plain",
+    "compile": "PASS",
+    "tests": 42,
+    "passed": 37,
+    "failed": 5,
+    "positiveOracles": "PASS: full reconstructed basis, UUID/source order, both exact independent Node artifact/hash comparisons, canonical/provenance/recipe/defensive-copy cases",
+    "failures": [
+      "producer availability names another binding",
+      "producer availability names another context",
+      "producer availability names another owner",
+      "wrong bootstrap receipt owner",
+      "missing bootstrap receipt"
+    ],
+    "failureMeaning": "Original unaltered baseline explicitly passes before each mutation; product accepted each of these altered original facts instead of refusing.",
+    "testXmlHashes": {
+      "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.xml": "1746fb75160d75ec62953ec2f4397371cf4236a27ef1793d2823e28a84ea7e0b",
+      "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.xml": "53a4a88dbf6d936e34412eaa6dc3a817d55c17e07bec7a50e5c522296818c402"
+    }
+  },
+  "testedProductSources": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "80f0872b4ed13f25f45adcd75d950ad89f4e58884cdb4008a8c07faef737fed6",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java": "af01f833a0f0be346e869536428ac77abb7efb7c43934a8e177bb6df892a42b9",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java": "9711944510a641acc40673d703d97cb2f7590b84a6535c32f503a789bce26048",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "379ca405c82a4203b63699e2a3c2b5c96a3add8f734732455248f28b027cfa58"
+  },
+  "compiledProductClasses": {
+    "backend/build/classes/java/main/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.class": "0a40c47b6559fe44cca3e6aad96b677cbfb67aee5fe86b7800817958badb3832",
+    "backend/build/classes/java/main/com/citi/put/checks/studio/guided/publication/PublicationContracts.class": "1eea6ba05afc68c41e5df75931be657a96307d0821c270cdfc1af5d71c91a079",
+    "backend/build/classes/java/main/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.class": "4c42a6746779c0cf8f330f183948e5bf10078ba239dc54d1c4d28aeb61455845",
+    "backend/build/classes/java/main/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.class": "9f7e18be1c4c40e5869d779a62ac6e990a9f9d3a9158430251b4cf042b9e478e"
+  },
+  "fixtureFreeze": {
+    "purpose": "Corrected original target intent and operation-specific guard agreement; Node91 focused tests passed",
+    "files": [
+      {
+        "path": "studio-runner/fixtures/observed-reference/fresh-order-reference.json",
+        "sha256": "d145057d8c8809c94340ef5534590960fa65fb53ccbb7a1b8f7ee90bc19b95fb"
+      },
+      {
+        "path": "studio-runner/fixtures/observed-reference/control-value-reference.json",
+        "sha256": "75a7d82a31adfbf694a6da22a19fcd1403cb9d3adeecfc29d040e07f6b6a1cdd"
+      }
+    ]
+  },
+  "finalRun": {
+    "command": "./gradlew test --tests '*GuidedPlanBuilderTest' --tests '*ObservedArtifactLowererTest' --console=plain",
+    "cwd": "backend",
+    "compileJava": "PASS",
+    "compileTestJava": "PASS",
+    "result": "BUILD SUCCESSFUL in17s",
+    "session": 27141,
+    "tests": 45,
+    "failures": 0,
+    "errors": 0,
+    "skips": 0,
+    "suites": [
+      {
+        "class": "GuidedPlanBuilderTest",
+        "tests": 39,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "testCases": [
+          "missingImmutableOutputOrSchemaPinsCannotBecomeInventedProvenance()",
+          "missing admission",
+          "duplicate admission",
+          "missing preparation",
+          "duplicate preparation",
+          "missing original observation",
+          "missing obligation",
+          "unexecuted assertion",
+          "missing producer",
+          "missing consumer",
+          "extra consumer",
+          "forged allocation",
+          "producer coordinate differs from read receipt",
+          "producer availability names another binding",
+          "producer availability names another context",
+          "producer availability names another worker",
+          "producer availability names another owner",
+          "consumer coordinate differs from effect receipt",
+          "wrong original authorization",
+          "wrong original worker fence",
+          "wrong private input identity",
+          "blank target absent",
+          "changed intent conflicts with original locator after plan hashes resealed",
+          "coherent wrong locator",
+          "original read target structural only",
+          "wrong original read policy",
+          "proof altered while hashes resealed",
+          "wrong original policy decision",
+          "missing source input",
+          "resolved input value leaked",
+          "wrong bootstrap receipt owner",
+          "bootstrap receipt names another context",
+          "bootstrap receipt names another source scope",
+          "missing bootstrap receipt",
+          "bad metadata acknowledgement",
+          "ordersOriginalActionsBySourceRatherThanUuidOrRepositoryOrder()",
+          "controlReadRejectsPasswordReplacementWithCoherentObservationAndAdmissionHashes()",
+          "historicalOutputContractIsNotInventedFullPromptOrProviderVersion()",
+          "reconstructsOriginalFiveActionsAndAllocatedGraphWithoutValueMaterialization()"
+        ],
+        "xml": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPlanBuilderTest.xml",
+        "xmlSha256": "74d542cb0b2f9c5eae885179dbe2fa2309b6ac5994828b0af5774aed4c051997"
+      },
+      {
+        "class": "ObservedArtifactLowererTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "testCases": [
+          "recipeBoundariesAndAuthoritativePlacementAreNotSilentlyNormalized()",
+          "defensiveCandidateCannotBeChangedThroughCallerJson()",
+          "reproducesIndependentCanonicalUnicodeAndNumericVectors()",
+          "policyUsesOriginalAdmissionTupleHashAndSeparateEvidenceBundle()",
+          "[1] name=fresh-order-reference",
+          "[2] name=control-value-reference"
+        ],
+        "xml": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.ObservedArtifactLowererTest.xml",
+        "xmlSha256": "9b19995e2b947a17aa01f2bcbd9dd572992b141431e8410dc909eaa6a3073e8f"
+      }
+    ]
+  },
+  "formatting": "Only two owned Java test files, cached google-java-format1.22 under explicit /Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home/bin/java; no global formatter.",
+  "preservedFailures": [
+    "Initial41/4 at builder-tests-initial remains historical: fixture label/testId mismatch and Java nonread readRuleId projection.",
+    "Corrected42/5 at builder-tests-r1 remains historical: availability binding/context/fence and missing/mismatched bootstrap receipt accepted.",
+    "Original negative assertions preserved; no expected artifact rewritten by Java test specialist. Lead fixed product; runner corrected original fixture and independently regenerated golden hashes."
+  ],
+  "limitations": [
+    "These are pure Java original-evidence reconstruction/lowering tests against independent manually authored Node fixtures and canonical vectors, not real browser/site execution.",
+    "Each mutation explicitly requires its unaltered original evidence baseline to pass; coherent mutations reseal surrounding hashes to reach deep joins.",
+    "Actual joined PostgreSQL/learning/Core/Node validator/publication/two-recorded-replay/application-receipt proof remains lead/integration/independent-QA work.",
+    "No live provider/account/pilot or story/PO/QA gate PASS claimed. Earlier seven DATA files and product classes were not edited in this test partition."
+  ]
+}

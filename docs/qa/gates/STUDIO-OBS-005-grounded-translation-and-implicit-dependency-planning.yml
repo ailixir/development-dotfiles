@@ -1,0 +1,98 @@
+schema: 1
+story: STUDIO-OBS-005
+story_title: Grounded translation and implicit dependency planning
+gate: PASS
+status_reason: All four original high findings are independently resolved. The
+  genuine delayed-callback race now requires exact metadata acknowledgement, and
+  all 50 independent cases plus the verified current affected regressions pass
+  within the approved OBS-005 scope.
+reviewer: Quinn (@qa /root/obs005_peer; independent R2 reviewer, not an implementer)
+reviewed_revision: sha256:b0761908eb0eaca411e75fc824dfaa382d9d90d556ee07b296ee19f9ae61ef57
+updated: 2026-10-09T05:27:13.351162+00:00
+review_iteration: 2
+prior_gate:
+  path: docs/qa/evidence/STUDIO-OBS-005/independent-review-r2/prior-gate-r1-fail.yml
+  sha256: e46551efb7d66244c0f77f64797b8fcb7ebe45d72fc90f241513974926a6cd52
+  gate: FAIL
+  reviewed_revision: sha256:2d755932a4615f4ae88b4ea2c34408091579d3a426a17fc356b232c6606b5076
+resolved_findings:
+  - id: SEC-001
+    status: RESOLVED
+    verification: R1 exact chosen-use fix remains unchanged and passes again. The
+      independently ported include-chosen-unused attack is valid under the
+      current model schema and ordinary plan admission, then rejects on exact
+      selected meaning. Both source choices produce only their selected
+      independent navigation receipt; future/nonzero coordinate and changed-need
+      re-question guards remain. Initial plan/replan/action selected-use and
+      immutable pin enforcement retain passing current evidence.
+  - id: REL-001
+    status: RESOLVED
+    verification: The original genuine mTLS worker callback race now requires one
+      actual final same-context metadata delivery. The stored acknowledgement
+      hash matches the exact pending context/materialization/input/allocation
+      snapshot, with stable context and binding identity, one SOURCE_PLAN and
+      one initial bootstrap callback. The 50-case independent run also passes
+      before/after callback timing with/without lost response, all six scanner
+      restart windows, retry-cap committed failure, old unproved READY refusal
+      before/after effects, harmless proved READY repeats, and rejection when
+      metadata changes after acknowledgement. Six additional after-ACK
+      source/configuration/pin/fence/lease/cancel mutations cannot grant READY
+      or add model/browser/action effects. No worker evidence or dispatch right
+      was manufactured.
+  - id: REL-002
+    status: RESOLVED
+    verification: Locked reconciliation at reservation and committed send claim
+      remains unchanged and passes again, including original entry race,
+      reserve-to-claim, settlement-to-repair, under-ceiling delta plus
+      input/output/proposal refusal, persisted exactly-once accounting, pin
+      failure and terminal cancellation. Thought/tool/cache usage cases retain
+      current passing evidence. No provider/runner I/O is held in an ambient
+      transaction.
+  - id: TEST-001
+    status: RESOLVED
+    verification: Frozen hostile current-page operation/target/value/assertion
+      substitutions and independent oracles remain in both controlled tests and
+      the opt-in provider harness. Schema-valid unsafe replies refuse through
+      production validation; baselines and independent effect/field receipts
+      pass. Live evaluation remains explicitly unavailable; no real-model
+      quality claim.
+top_issues: []
+waiver:
+  active: false
+evidence:
+  report: docs/qa/evidence/STUDIO-OBS-005/independent-review-r2/review-report.json
+  independent_tests: 50
+  independent_passed: 50
+  independent_failed: 0
+  verified_affected_tests: 232
+  verified_affected_passed: 231
+  verified_affected_unavailable_skip: 1
+  trace:
+    ac_covered:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+    ac_gaps: []
+  code_rabbit: UNAVAILABLE; independent fallback completed
+nfr_validation:
+  security:
+    status: PASS
+    notes: Private data projection, exact source choice, current authority,
+      same-snapshot readiness and no-runtime-LLM boundaries verified.
+  reliability:
+    status: PASS
+    notes: Real delayed/lost callbacks, scanner restarts, conservative delivery cap,
+      old-proof refusal and exact-once budget/effect recovery pass.
+  performance:
+    status: PASS
+    notes: Existing time/token/response bounds and shared capacity preserved; no
+      live-model performance claim.
+  maintainability:
+    status: PASS
+    notes: Correction scoped to translation service and owned tests/docs; immutable
+      evidence lineage and exact reuse recorded.
+recommendations:
+  immediate: []

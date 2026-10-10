@@ -1,0 +1,145 @@
+{
+  "story": "STUDIO-OBS-003",
+  "phase": "apply-qa-fixes",
+  "status": "InProgress",
+  "qaGate": "FAIL preserved pending independent re-review",
+  "timestamp": "2026-10-08T03:51:08.068102+00:00",
+  "findings": [
+    {
+      "id": "REQ-001",
+      "severity": "high",
+      "disposition": "FIXED",
+      "summary": "Atomically retain bounded value-free resolved clarification mapping in private progress; fenced trusted planning read handoff survives restarts and idempotent delivery."
+    },
+    {
+      "id": "REL-001",
+      "severity": "high",
+      "disposition": "FIXED",
+      "summary": "Live same-owner renewal preserves fence, workflow state and outstanding admissions. True acquisition increments fence, preserves protected pauses and cannot recover prior dispatched effects."
+    },
+    {
+      "id": "DOC-001",
+      "severity": "medium",
+      "disposition": "FIXED",
+      "summary": "Root-authorized public authentication erratum changes only documentation to PlatformSession apiKey cookie put_session; normative README supersedes prior public bearer wording. Internal ServiceBearer unchanged."
+    }
+  ],
+  "baselineProbes": {
+    "tests": 2,
+    "failures": 2,
+    "skipped": 0,
+    "unchangedSources": true
+  },
+  "regressionSuites": [
+    {
+      "suite": "com.citi.put.checks.studio.StudioAuthorizationIT",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "d0a199f621678d83f108eba0aa32689bbe329f629512d1e90f520075905c87a7"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "54729ad93734266b1a6377fef7d7ba73fa0af1b2f850058ea69630c789db7054"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "ccdcc12e484bc520278a11b87eaa6ef31066220a671306711cc4e2acb8b4ff87"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.guided.session.GuidedSecurityTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "4dfe51b2553a9be57f27a6bfc80b74318f42c932e68979e1ff086115529bb9a0"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "9e11b50f846c19e1ca880c27781be6ac2c76728ef6ff3d0bd2989c7743ca9298"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "reportSha256": "38d2ac3914d8392718aaeeb84acf5e3bf5bc398cc3537b915761502f6cc110fd"
+    }
+  ],
+  "regressionTests": 97,
+  "quality": {
+    "spotlessCheck": "PASS",
+    "checkstyleMain": "PASS",
+    "checkstyleTest": "PASS",
+    "rdsParityLint": "PASS: 29 migration files"
+  },
+  "contracts": {
+    "status": "PASS",
+    "fixtures": 114,
+    "openapiExamples": 109,
+    "publicCookieOperations": 6,
+    "unchangedServiceAuthOperations": 10
+  },
+  "schemaChanges": false,
+  "probeSourceSha256": "531fd9e858af9ec5a491dec395fc4302625dffecd5363b8feb366942c1d0ceb5",
+  "probeInitSha256": "72ddc591fd65c6aa7d15fd92517779164f3ca7964088f2372ecfdf8f7e64ea2c",
+  "commands": {
+    "regression": "./gradlew spotlessApply spotlessCheck checkstyleMain checkstyleTest rdsParityLint test --tests 'com.citi.put.checks.studio.guided.session.*' --tests 'com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest' --tests 'com.citi.put.checks.studio.scheduling.StudioScheduleApiIT' --tests 'com.citi.put.checks.studio.StudioAuthorizationIT' --console=plain",
+    "probes": "./gradlew -I /tmp/obs003-qa.init.gradle test --tests '*GuidedIndependentQAProbeIT.acceptedClarificationMustPersistSelectedChoiceForRecovery' --tests '*GuidedIndependentQAProbeIT.leaseRenewalMustNotBypassPendingClarification' --console=plain",
+    "contracts": "node tools/check-studio-observed-contracts.cjs"
+  },
+  "limitations": [
+    "Existing disabled feature and downstream account/DOM/semantic/exact-plan gates remain",
+    "No deployed TLS handshake, live browser, model or publication claim",
+    "CodeRabbit unavailable; independent review remains coordinator-owned"
+  ],
+  "noCommitOrRemoteGit": true,
+  "finalIndependentProbes": {
+    "tests": 2,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exitCode": 0,
+    "cases": [
+      {
+        "name": "leaseRenewalMustNotBypassPendingClarification()",
+        "classname": "com.citi.put.checks.studio.guided.session.GuidedIndependentQAProbeIT",
+        "time": "0.267"
+      },
+      {
+        "name": "acceptedClarificationMustPersistSelectedChoiceForRecovery()",
+        "classname": "com.citi.put.checks.studio.guided.session.GuidedIndependentQAProbeIT",
+        "time": "0.12"
+      }
+    ],
+    "xmlSha256": "da6d553c6adb14c5ee6dc8fb6dcb2c83eece8f9147275412df066f434b11c208"
+  },
+  "changedFiles": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "a0c3cc681f18d2fc714ef5955f90217721e0686501bb1828eeef54a744b1a4df",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md": "fc59cbd07991cad9fa7ed774ca6326b551dafd1dac810c4471d1cd40c197d05a",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "99db60dbf19b01e16abb224603743267ea19973445bf14efc6ee51a0c5cce7e7",
+    "docs/specs/studio-observed-authoring/contracts/README.md": "dc59a9dd2784769e76e7009c5534d2105a18b0f4175ce6ce58de6ef973abfd4f",
+    "docs/specs/studio-observed-authoring/openapi.yaml": "0e51d265e4cb7003f6c54a86c4018b27ab032dd067b25bbe1f7960813ed4845e",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md": "13925d49cf59ba8a3ed34c5beeb1e2178174f09fa8ce38e7c75488719f185638"
+  },
+  "preservedQaSourceHashes": {
+    "docs/qa/gates/STUDIO-OBS-003-durable-guided-session-and-action-ledger.yml": "cf35ba25e397bae85a5a4787e28a7ef8542e29772078e744e7222deba4ceab02",
+    "docs/qa/evidence/STUDIO-OBS-003/GuidedIndependentQAProbeIT.java": "531fd9e858af9ec5a491dec395fc4302625dffecd5363b8feb366942c1d0ceb5",
+    "docs/qa/evidence/STUDIO-OBS-003/qa-probe.init.gradle": "72ddc591fd65c6aa7d15fd92517779164f3ca7964088f2372ecfdf8f7e64ea2c"
+  },
+  "completedAt": "2026-10-08T03:52:15.759104+00:00"
+}

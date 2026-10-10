@@ -1,0 +1,21 @@
+{
+  "unit": {
+    "passed": 1269,
+    "preexistingSkipped": 29,
+    "command": "npm run test",
+    "exitCode": 0
+  },
+  "fixtures": {
+    "passed": 273,
+    "preexistingSkipped": 10,
+    "command": "npm run test:fixtures",
+    "exitCode": 0
+  },
+  "quality": {
+    "command": "npm run build && npm run type-check && npm run lint && npm run check:pins",
+    "exitCode": 0
+  },
+  "pins": "Playwright 1.63.0 / Node v23.10.0; Docker image and Chromium build explicitly NOT ASSERTED by local pin checker.",
+  "workerManifest": "worker-manifest.json",
+  "runnerSourceChanges": false
+}

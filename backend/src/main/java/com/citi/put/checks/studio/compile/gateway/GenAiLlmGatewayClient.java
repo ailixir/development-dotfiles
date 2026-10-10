@@ -1,9 +1,6 @@
 package com.citi.put.checks.studio.compile.gateway;
 
 import com.citi.put.checks.studio.compile.CompileBudget;
-import com.google.auth.oauth2.GoogleCredentials;
-import com.google.genai.Client;
-import com.google.genai.types.ClientOptions;
 import com.google.genai.types.Content;
 import com.google.genai.types.GenerateContentConfig;
 import com.google.genai.types.GenerateContentResponse;
@@ -14,33 +11,27 @@ import com.google.genai.types.ThinkingConfig;
 import com.google.genai.types.ThinkingLevel;
 import java.io.IOException;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.Semaphore;
 import okhttp3.OkHttpClient;
 
 /**
  * Maintained Google Gen AI adapter. Live R2D2 compatibility remains an explicit enablement gate.
  */
 public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoCloseable {
-  public static final String SDK_VERSION = "1.71.0";
+  public static final String SDK_VERSION = GenAiGatewayTransport.SDK_VERSION;
   private final StudioGatewayProperties properties;
   private final GatewayResponseParser parser;
   private final GatewayAuditLogger audit;
-  private final Semaphore capacity;
-  private final Client client;
-  private final BoundedCredentialProvider credentialProvider;
-  private final ThreadLocal<CallContext> active = new ThreadLocal<>();
-
-  private record CallContext(CompileBudget budget, List<Runnable> removals, String token) {}
+  private final GenAiGatewayTransport transport;
+  private final boolean ownsTransport;
 
   public GenAiLlmGatewayClient(
       StudioGatewayProperties properties, GatewayResponseParser parser, GatewayAuditLogger audit)
       throws IOException {
-    this(properties, parser, audit, credentialProvider(properties));
+    this(properties, parser, audit, new GenAiGatewayTransport(properties), true);
   }
 
   GenAiLlmGatewayClient(
@@ -49,93 +40,39 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
       GatewayAuditLogger audit,
       BoundedCredentialProvider credentialProvider)
       throws IOException {
-    properties.validateForVertex();
-    this.credentialProvider = credentialProvider;
+    this(
+        properties, parser, audit, new GenAiGatewayTransport(properties, credentialProvider), true);
+  }
+
+  /** Production compiler and guided authoring share the same transport and capacity. */
+  public GenAiLlmGatewayClient(
+      StudioGatewayProperties properties,
+      GatewayResponseParser parser,
+      GatewayAuditLogger audit,
+      GenAiGatewayTransport transport) {
+    this(properties, parser, audit, transport, false);
+  }
+
+  private GenAiLlmGatewayClient(
+      StudioGatewayProperties properties,
+      GatewayResponseParser parser,
+      GatewayAuditLogger audit,
+      GenAiGatewayTransport transport,
+      boolean ownsTransport) {
+    if (!properties.equals(transport.properties())) {
+      throw new IllegalArgumentException(
+          "Compiler settings must match the shared gateway transport");
+    }
     this.properties = properties;
     this.parser = parser;
     this.audit = audit;
-    capacity = new Semaphore(properties.maxConcurrency());
-    OkHttpClient http =
-        transportBuilder(properties)
-            .addInterceptor(
-                chain -> {
-                  CallContext context = active.get();
-                  if (context == null) {
-                    throw new IllegalStateException("missing compile budget");
-                  }
-                  context.budget().remaining();
-                  context.removals().add(context.budget().onCancel(chain.call()::cancel));
-                  okhttp3.Request outgoing = chain.request();
-                  if (context.token() == null) {
-                    outgoing =
-                        outgoing
-                            .newBuilder()
-                            .removeHeader("Authorization")
-                            .removeHeader("x-goog-api-key")
-                            .build();
-                  } else {
-                    outgoing =
-                        outgoing
-                            .newBuilder()
-                            .header("Authorization", "Bearer " + context.token())
-                            .build();
-                  }
-                  return chain.proceed(outgoing);
-                })
-            .build();
-    GoogleCredentials staticCredentials =
-        GoogleCredentials.create(
-            new com.google.auth.oauth2.AccessToken("", new java.util.Date(Long.MAX_VALUE)));
-    if (credentialProvider != null && credentialProvider.quotaProjectId() != null) {
-      staticCredentials =
-          staticCredentials.createWithQuotaProject(credentialProvider.quotaProjectId());
-    }
-    Client.Builder builder =
-        Client.builder()
-            .vertexAI(true)
-            .project(properties.project())
-            .location(properties.location())
-            .credentials(staticCredentials);
-    client =
-        builder
-            .clientOptions(ClientOptions.builder().customHttpClient(http).build())
-            .httpOptions(
-                HttpOptions.builder()
-                    .baseUrl(properties.endpoint())
-                    .apiVersion("v1")
-                    .retryOptions(HttpRetryOptions.builder().attempts(1).build())
-                    .build())
-            .build();
+    this.transport = transport;
+    this.ownsTransport = ownsTransport;
   }
 
-  /**
-   * The transport defaults for the custom OkHttp client.
-   *
-   * <p>With a {@code customHttpClient} the SDK (1.71.0) reuses this client's connect, read and
-   * write timeouts as-is and only overrides {@code callTimeout} per request from {@link
-   * HttpOptions#timeout()}. Left unset, OkHttp's 10s read default cut every slower model response
-   * short (VAL-004), so every socket deadline is the configured request timeout. The compile budget
-   * still caps each call through the per-request call timeout and cancels it on expiry.
-   *
-   * @param properties the gateway properties
-   * @return a builder with timeouts and no connection-failure retry
-   */
+  /** Socket deadlines derive from deployment configuration, not OkHttp's short defaults. */
   static OkHttpClient.Builder transportBuilder(StudioGatewayProperties properties) {
-    Duration timeout = properties.requestTimeout();
-    return new OkHttpClient.Builder()
-        .retryOnConnectionFailure(false)
-        .connectTimeout(timeout)
-        .readTimeout(timeout)
-        .writeTimeout(timeout)
-        .callTimeout(timeout);
-  }
-
-  private static BoundedCredentialProvider credentialProvider(StudioGatewayProperties properties)
-      throws IOException {
-    properties.validateForVertex();
-    return StudioGatewayProperties.MODE_NONE.equalsIgnoreCase(properties.credentials().mode())
-        ? null
-        : new BoundedCredentialProvider(properties);
+    return GenAiGatewayTransport.transportBuilder(properties);
   }
 
   @Override
@@ -187,6 +124,7 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
         GatewayPayloadSerializer.utf8Size(payload)
             + (systemInstruction ? GatewayPayloadSerializer.utf8Size(staticPrefix) : 0);
     CompileResponse response;
+    GenAiGatewayTransport.Lease lease = null;
     if (bytes > properties.maxInputBytes()) {
       response =
           failure(
@@ -196,7 +134,7 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
               0,
               start,
               bytes);
-    } else if (!capacity.tryAcquire()) {
+    } else if ((lease = transport.tryAcquire(GenAiGatewayTransport.budget(budget))) == null) {
       response =
           failure(
               GatewayOutcome.BUSY,
@@ -206,14 +144,11 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
               start,
               bytes);
     } else {
-      List<Runnable> removals = new ArrayList<>();
-      active.set(new CallContext(budget, removals, null));
       int attempts = 0;
       try {
         budget.proposal();
-        String token = credentialProvider == null ? null : credentialProvider.token(budget);
+        lease.authenticate();
         budget.remaining();
-        active.set(new CallContext(budget, removals, token));
         while (true) {
           budget.transport();
           budget.accountInput(bytes);
@@ -227,8 +162,7 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
                             Integer.MAX_VALUE, budget.cap(properties.requestTimeout()).toMillis()));
             GenerateContentConfig config =
                 generationConfig(request, systemInstruction ? staticPrefix : null, timeout);
-            GenerateContentResponse raw =
-                client.models.generateContent(properties.model(), payload, config);
+            GenerateContentResponse raw = lease.generate(payload, config, false);
             budget.remaining();
             response = interpret(request, raw, attempts - 1, start, bytes);
             budget.accountOutput(
@@ -277,10 +211,8 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
                 start,
                 bytes);
       } finally {
-        removals.forEach(Runnable::run);
-        active.remove();
-        // The synchronous transport has returned before capacity is released.
-        capacity.release();
+        // The synchronous transport has returned before shared capacity is released.
+        lease.close();
       }
     }
     audit.audit(request, properties.model(), response);
@@ -525,9 +457,8 @@ public final class GenAiLlmGatewayClient implements LlmGatewayClient, AutoClosea
 
   @Override
   public void close() {
-    client.close();
-    if (credentialProvider != null) {
-      credentialProvider.close();
+    if (ownsTransport) {
+      transport.close();
     }
   }
 }

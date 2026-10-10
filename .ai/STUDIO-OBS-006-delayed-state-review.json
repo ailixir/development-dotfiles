@@ -1,0 +1,265 @@
+{
+  "story": "STUDIO-OBS-006",
+  "kind": "read-only runtime/architecture consultation; not implementation QA",
+  "createdAt": "2026-10-09T10:43:48.673Z",
+  "assessment": "The synchronous joined baseline is useful but does not discharge the existing delayed-state requirement. A concrete replay gap and a related learning orchestration gap remain.",
+  "constraints": {
+    "sourceChanged": false,
+    "schemasChanged": false,
+    "distChanged": false,
+    "buildsOrBrowserProbesRun": false,
+    "onlyWrittenFile": ".ai/STUDIO-OBS-006-delayed-state-review.json",
+    "sharedWaveCeilingUsd": 500,
+    "spendTelemetry": "unknown"
+  },
+  "sourceEvidence": [
+    {
+      "path": "docs/specs/studio-observed-authoring/consensus-plan.md",
+      "lines": [
+        124,
+        136,
+        138,
+        218
+      ],
+      "sha256": "8f97af78155a57ee32127f4e2433a94f5e134d47896655743df65292cb12f44b"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "lines": [
+        26,
+        28,
+        42,
+        46
+      ],
+      "sha256": "536362c47cb9b614da759724528741e64da87b267b75e19dec0385f120d26ec7"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/publication-contracts.md",
+      "lines": [
+        254,
+        315,
+        323,
+        327
+      ],
+      "sha256": "ceb14e09b84078443cc184d5cb14c8586e90796a85b28495576e6af654dde004"
+    },
+    {
+      "path": "studio-runner/src/run/observedReplayAdapter.ts",
+      "lines": [
+        19,
+        39,
+        58,
+        70
+      ],
+      "sha256": "ff0cb9108809294c75c5a9bd95a1e3eea7700fed350fbc22f8075f5725ea7c75"
+    },
+    {
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "lines": [
+        124,
+        137,
+        140,
+        155
+      ],
+      "sha256": "152ce2afc80ff48396c21f6aa4d5532de3390467cea37793e3c0f692bf79a1a5"
+    },
+    {
+      "path": "studio-runner/src/run/childRuntime.ts",
+      "lines": [
+        855,
+        870,
+        871
+      ],
+      "sha256": "fe45c60a175706f6dc25505869efcc5ba437f9f7e41fcc34a16311917faa1963"
+    },
+    {
+      "path": "studio-runner/src/run/observationCollector.ts",
+      "lines": [
+        89,
+        185,
+        484,
+        494,
+        510,
+        526
+      ],
+      "sha256": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985"
+    },
+    {
+      "path": "studio-runner/src/run/observationTypes.ts",
+      "lines": [
+        71,
+        80
+      ],
+      "sha256": "a1bb68ad620612ac3eb456599bfb45af8f4c00ad9d00cc67125bd2035e2572af"
+    },
+    {
+      "path": "studio-runner/src/guided/runtime.ts",
+      "lines": [
+        205,
+        214,
+        228,
+        241
+      ],
+      "sha256": "1aada55b70e769d8a8ede5bf447efef702c5a8b80fe196eadace2e4ad2b0836a"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "lines": [
+        484,
+        497,
+        532,
+        853,
+        894,
+        989,
+        1421
+      ],
+      "sha256": "576b4fc572dcb568860a4e981e1007c0df015304952bd5383812fc0dc027d930"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "lines": [
+        290,
+        318
+      ],
+      "sha256": "e0d97069d72f5aceb3f8b5ad2cd79ae644f4411edc9794ed0af3dda7b042c593"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "lines": [
+        41,
+        47,
+        59
+      ],
+      "sha256": "4c4d41d0f1bc2bac7e9f4a8aa9881a1066f68ef82a4930167a210a7ecb20aed3"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "lines": [
+        1505,
+        1547,
+        1562
+      ],
+      "sha256": "dc55996c0761beafa3d3130fe96c887a80c7156dbb0d20cdea722d9e6f0c037d"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+      "lines": [
+        31,
+        32
+      ],
+      "sha256": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json",
+      "lines": [
+        188,
+        196,
+        1338,
+        1360
+      ],
+      "sha256": "f409823c0e2817bf11c85adb91b5303548e2ad43c87378a8e3c7d281c68fe54f"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "lines": [
+        108,
+        116,
+        287
+      ],
+      "sha256": "cdf34e3397bb86a56ae31bb5d547cae6b2b7234b7df6793244eb47dde44960a3"
+    }
+  ],
+  "findings": [
+    {
+      "id": "DELAY-001",
+      "finding": "Replay samples each element guard once. Zero visible/exported candidates is immediately TARGET_DRIFT even if the expected confirmation will appear after the already-issued submission response.",
+      "evidence": "observedReplayAdapter.perform waits only for navigation, then observe() once and demand(candidates.length===1). The joined HTML currently clears hidden synchronously before fetch(/receipt), so it avoids this condition.",
+      "consequence": "Timing-dependent false refusal of an otherwise supported frozen plan. The synchronous baseline cannot establish delayed result grounding or deterministic replay tolerance."
+    },
+    {
+      "id": "DELAY-002",
+      "finding": "An outer Promise.race timeout alone is not a fence against a late poll continuing into invocation.",
+      "evidence": "executeObservedReplay races adapter.perform with a timer that raises OUTCOME_UNKNOWN; it does not pass a per-operation deadline/signal to the adapter. The adapter guardLive checks child cancellation/finish, while the child overall deadline is separate.",
+      "consequence": "Simply adding an await/sleep loop inside perform can leave a late continuation with permission to invoke after the step timer won. Deadline/stage fencing is a necessary part of the change."
+    },
+    {
+      "id": "DELAY-003",
+      "finding": "Current sanitized observation and boolean matches/validateInvocation cannot classify every zero-node case.",
+      "evidence": "Collector eligibleSource merges hidden/display:none/aria-hidden with sensitive/unsupported exclusions; truncated collection clears all nodes. Private resolutions count competitors, while matches returns only boolean.",
+      "consequence": "Do not equate nodes.length===0 with proven absence, or turn any failed match/permission/type check into wait. A narrow private readiness classification is needed to promise immediate distinction between visibility-only pending and hard drift/denial."
+    },
+    {
+      "id": "DELAY-004",
+      "finding": "Learning has a real refresh primitive but no current bounded target-availability continuation before NEXT_ACTION.",
+      "evidence": "GuidedRuntime emits one observation after the durable outcome. GuidedTranslationService refreshes on REFRESH/OBSERVING, then requests NEXT_ACTION; a provider transport failure is rejected and stopped, not a legal WAIT. Existing response status union has no WAIT/REFRESH.",
+      "consequence": "Do not relabel provider500 as waiting, retry the submission, ask an unnecessary user question, or emit a new model response variant. Restore a genuine asynchronous learning case and add a reviewed trusted pre-proposal refresh policy if existing orchestration cannot pass it."
+    }
+  ],
+  "recommendedReplayTreatment": {
+    "decision": "Bounded passive acquisition of the already-frozen expected target before the one operation invocation; no model call, locator fallback, replan, new authored action or binding re-read.",
+    "internalApi": "Give perform an execution-local control object with the existing source-step absolute monotonic deadline, composed cancellation signal, and a one-way preInvocation -> invoking marker. Reuse the same deadline for every operation/poll in a compound source step; do not reset it after a refresh.",
+    "algorithm": [
+      "Check current owner context/scope/origin, cancellation and remaining source-step/run deadline before each collection and after every awaited collection/probe/sleep. Reserve passive collection count/bytes before collection.",
+      "Use a narrow private collector readiness probe over the existing exact locator universe and expected guard. Suggested closed local states are READY, ABSENT, VISIBILITY_PENDING and REFUSED. This is not a new model/IPC DTO and returns no hidden text/value/locator alternative. READY still requires an exported authorized node and full existing policy checks.",
+      "ABSENT means no exact candidate in a sufficiently complete bounded universe. VISIBILITY_PENDING may cover a uniquely known visibility-only exclusion; sensitive ancestry/descendants, unsupported controls, unknown/incomplete universe, denied policy and ambiguity must never be certified as visibility-only. If this distinction cannot be proved, refuse rather than relax collector eligibility.",
+      "Repeatedly observe only ABSENT/VISIBILITY_PENDING. Duplicate/ambiguous targets, wrong origin, wrong role/element/control type, changed classification/read rule, disabled/readonly incompatibility, policy refusal and unsupported/sensitive surfaces remain terminal. Do not reinterpret a general false matches()/validateInvocation() as readiness.",
+      "Once a compatible target is acquired, pin that exact node/document/generation. Run existing matches and validateInvocation immediately before invocation; a post-acquisition replacement or failed revalidation stops. There is no second locator choice or replacement after selection.",
+      "Make the last deadline/cancel check and transition to invoking synchronously before calling the retained-node primitive. Do not promise atomicity with page handlers/native input dispatch.",
+      "A timeout/cancel before invocation is a definite no-invocation TIMEOUT/CANCELLED; after entering the primitive, retain existing conservative OUTCOME_UNKNOWN/cancellation semantics and close the attempt without reissuing that operation. Poison the local control on timeout so a late observation promise cannot invoke, publish a binding or emit a late PASS.",
+      "Collector polling is read-only. A read operation captures/binds once only after acquisition; fill/click/submit/check/select/press/hover are never invoked in the polling loop. This narrow fix does not retry failed assertions or sample successive binding values until one looks suitable."
+    ],
+    "limits": "Freeze an internal poll cadence/count cap in the amendment, bounded by the existing absolute step/run deadline and existing collector node/depth/byte/time caps. A concrete starting choice is 100ms then capped250ms, at most32 extra observations per source step and200 extra per run (in addition to at most200 original action observations); account for total bytes, with a derived hard upper bound400*32768 per run, never retained unboundedly. These are proposed trusted constants requiring review, not already-approved wire changes or a resettable per-call budget. Guided polling must instead consume the already-enforced session observation/evidence budgets.",
+    "compatibility": "Preserve artifact/operation/binding hashes, original locators and existing v1 behavior. No new executable operation or public model schema is necessary. This is completion of promised pre-dispatch observation behavior in the unreleased observed family, but source/build/catalog hashes and affected regression evidence must be renewed after review."
+  },
+  "learningSide": {
+    "minimalExistingPort": "Use GuidedDispatchService.observe -> sessions.beginObservationRefresh -> runner /observe -> owning-worker /observations202 durable acknowledgement -> committedObservationRefresh. Each legitimate fresh poll uses the current expectedGeneration and a new generation-bound intent/key; a transport retry of the same refresh uses its existing idempotent recovery rather than another collection.",
+    "orchestratorPlacement": "After recovering existing obligation/admission state and before reserving/sending the next NEXT_ACTION request, use the already-accepted next obligation to decide whether its exact required named target is currently available. Reuse the existing locator name/value versus targetIntent simple-case equality; do not parse English or invent a locator. Page/navigation obligations require their existing separate handling. Zero availability can trigger bounded read-only refresh before another model proposal. This readiness gate grants no action authority; the model still proposes from a real current snapshot and ordinary materialization/prepare/admit checks remain mandatory.",
+    "durability": "Keep the original wait deadline and used poll count across scanner ticks/reconnects in reviewed existing internal progress under the same source/plan/obligation/owner-fence transaction. Reuse existing REFRESH/NEXT continuation values; V32 explicitly checks a finite continuation set, so adding WAIT would require a separate contract/migration review and is not recommended. Do not hold a DB lock while sleeping/collecting/networking; recheck authority on each continuation. No observations while ADMITTED/DISPATCHING/unknown action or unresolved clarification.",
+    "guardrails": "A provider500 remains a provider failure with existing accounting; it is not readiness evidence. CLARIFICATION and UNSUPPORTED/MISSING_SOURCE remain their existing meanings, not invented wait tokens. Do not blindly call the LLM repeatedly against the same old snapshot or reset model/observation/session budgets. TargetIntent is a stored admission constraint, not general English understanding; if it does not identify the required future target, that is the existing semantic/clarification problem, not permission to choose another target automatically.",
+    "reviewNeeded": "Backend lead must review exact availability selection, durable deadline storage and scanner integration; runner/collector expert must review private readiness classification. Root must reconcile newly affected paths before any frozen source/dist edit. No public source projection, live-provider benchmark, generic scheduler, new account connectivity or schema WAIT branch is required."
+  },
+  "requiredTests006": [
+    "Preserve the synchronous baseline as a separate smoke case and restore a genuine asynchronous confirmation fixture. The submit handler must await the real /receipt response, then asynchronously append/reveal Confirmation. Arrange the controlled response/render gate so at least one real post-submit observation lacks the target; do not merely choose a small sleep that may finish before collection.",
+    "One guided learning submit has an independent session-bound server receipt. Confirmation is grounded from a later acknowledged real observation and its actual node enters preparation/admission. Finalization emits zero browser actions/receipts. Keep the failed asynchronous/provider500 evidence as prior evidence.",
+    "Two later normal recorded replays use the identical immutable artifact and fresh producer values. Each creates exactly one independent submit receipt, eventually sees the actual asynchronous confirmation, has zero calls to both LLM gateways, and never repeats a submit during polls.",
+    "Never appears: bounded timeout, no dependent invocation/binding, no repeated prior submit; accurate FAIL/SKIPPED/null timings.",
+    "Cancel/step timeout while observe/probe/sleep is pending: release the late result after cancellation/timeout and assert zero late invocation, zero binding publication/PASS, bounded cleanup. Include a compound source step so its budget cannot restart per operation.",
+    "Duplicate (including hidden competitors), wrong origin/type/policy, sensitive subtree, and post-acquisition replacement refuse without waiting for a different acceptable target. Visibility-only pending must not grant a read until normal eligibility/policy checks pass.",
+    "Record passive observation counts/bytes independently of action/invocation/receipt counts; only one mutation/read-binding invocation is allowed for an admitted/planned operation. Regenerate source/dist identity and rerun affected normal/legacy/native/privacy gates."
+  ],
+  "later009": "Broad live-model accuracy, site diversity, repeated latency distributions and benchmark thresholds belong009. The known controlled delayed-confirmation learning/replay scenario, exact receipts/no-hidden-replay and timeout/cancel/no-repair invariants are current006 correctness evidence and cannot be silently deferred to009.",
+  "minimalAffectedPaths": {
+    "replayCore": [
+      "studio-runner/src/run/observedReplayAdapter.ts",
+      "studio-runner/src/executor/observedReplay.ts",
+      "studio-runner/src/run/childRuntime.ts",
+      "studio-runner/test/observedReplayExecutor.test.ts",
+      "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts"
+    ],
+    "privateClassificationSeamRequiringExplicitOwnershipReview": [
+      "studio-runner/src/run/observationTypes.ts",
+      "studio-runner/src/run/observationCollector.ts",
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/test/run/observation.test.ts"
+    ],
+    "learningIfAvailabilityContinuationAdded": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+    ],
+    "documentationAfterAcceptance": [
+      "docs/specs/studio-observed-authoring/publication-contracts.md",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md"
+    ],
+    "notProposed": [
+      "No original v1 schema/API or legacy adapter edit",
+      "No guided-model-response WAIT/REFRESH variant",
+      "No V32 enum alteration or new migration by default",
+      "No publication/finalization browser action",
+      "No frozen dist/source changes during this consultation"
+    ]
+  }
+}

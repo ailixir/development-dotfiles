@@ -1,0 +1,40 @@
+{
+  "storyId": "STUDIO-OBS-005",
+  "phase": "executor R2 review metadata handoff",
+  "recordedAt": "2026-10-09T05:18:03.081529+00:00",
+  "executor": "Original OBS-005 executor /root/obs005_arch (@dev)",
+  "coordinatorVerification": "Parent /root dispatched this task after apply_qa_fixes verification PASS; qgIterations2.",
+  "transition": {
+    "from": "InProgress",
+    "to": "InReview",
+    "date": "2026-10-09",
+    "changeLogVersion": "0.1.14"
+  },
+  "submissionTaskComplete": true,
+  "independentR2ReviewPending": true,
+  "qaResultsUnchanged": true,
+  "qaResultsSha256": "b816aca8c1a40034ec1a30dba6b3c17ea0e9b10a5c63674e6631238fb20d931f",
+  "historicalEvidenceUnchanged": true,
+  "reviewSourceManifest": "docs/qa/evidence/STUDIO-OBS-005/fixes-r2/review-source-manifest.json",
+  "reviewSourceManifestFileSha256": "fbb08489cdc94794bb5ac7ea0b679be1668288076be0c78f8a4513b1ae26f393",
+  "reviewAggregateSha256": "b0761908eb0eaca411e75fc824dfaa382d9d90d556ee07b296ee19f9ae61ef57",
+  "priorRemediationAggregateSha256": "dd0031b0c471975388fdac14965e02510cc8269889b3389d3b04f31d34dd16fd",
+  "testedSourceAggregateSha256": "6ea63533a638183e614c0a4f3e18d9a0975ac7a278ad81be67374c16e22135a9",
+  "onlyChangedPreviouslyExistingFile": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+  "identicalImplementationDesignAndTestFiles": 58,
+  "newArtifacts": [
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r2/review-source-manifest.json",
+    "docs/qa/evidence/STUDIO-OBS-005/fixes-r2/review-handoff.json"
+  ],
+  "fileListPaths": 116,
+  "testsRerun": false,
+  "reason": "Lifecycle metadata only; all non-story bytes match the frozen tested R2 snapshot.",
+  "sourceFrozen": true,
+  "sourceAndTestLaneReleased": true,
+  "noDoneNoQaApprovalNoCommitPushDeploy": true,
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN",
+    "unchanged": true
+  }
+}

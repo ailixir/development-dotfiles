@@ -1,0 +1,200 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewer": "obs005_peer (independent QA/architecture adviser)",
+  "reviewType": "NARROW_OBSERVED_CHOICE_PUBLICATION_R1_DESIGN",
+  "recordedAt": "2026-10-09T13:43:19.393631+00:00",
+  "verdict": "PASS",
+  "scope": "Frozen design readiness only. No product implementation permission, test execution, whole-story QA gate or lifecycle decision.",
+  "summary": "Prospective original-question capture and an immutable preparation-time acceptance snapshot close the concrete publication evidence gap without rewriting the original plan or granting new read/operation authority. Cardinality and separate byte ceilings now match actual contracts. No remaining blocking design defect; the implementation and joined observed-phase proof remain mandatory.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/observed-choice-publication-design.md": "2121de85179799ba76aa6420255dcdd13d618ac25a29f029f5a9f3cce21581b0",
+    ".ai/STUDIO-OBS-006-observed-choice-design-resolution-r1.json": "fd95c9a31b34edd5743e7d6037b52011c70cde7c9d8d9f1920ad6ad131b229c5",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "50c6462b01057f287f1d5b40d9f23da71725e7e0efeb4861b9f4554fb2663150",
+    ".ai/STUDIO-OBS-006-observed-choice-publication-design.json": "8636942886c3a489623b063aac2b2afb72d4f05b0af3b456dc7af02c5426e1b2",
+    ".ai/STUDIO-OBS-006-observed-choice-data-review.json": "4c38e2a2d9f027d81e6eda4b05e73720057bce9bb1325928a86f21e30a600232",
+    ".ai/STUDIO-OBS-006-observed-choice-runtime-review.json": "b1daeb518475aa67f6861cf8ba7bf692ff5ee96369c6521dd2918c052e471e13",
+    ".ai/STUDIO-OBS-006-observed-choice-data-review-r1.json": "eaa4b1e8111e62f6a494b6112c23ea2d38de38070baaf55d6ea5eaf710a4ac24",
+    ".ai/STUDIO-OBS-006-observed-choice-runtime-review-r1.json": "aecfd216825db8ad20ff4dd1090fa527f46b539d95f60efa48e0b3542714530f"
+  },
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "5cb65fbf02e80d72c53b1cbdaacc57149ab20e9c6c527f531bd717f0e5ca6753",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java": "7e3119500ae77eb8d5cf6f81828b2361b60e65437191924a8a07579f0af7f315",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "a6ec6f6b5ce65bed3f5a13c1e8a4e465e25b4b57ddc5c6c1b1a117ee0f235d3b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java": "2d76607e4b98ac7554ebef7ba32815efa6b8cf0f438985512bec4cfcac9590bf",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": "7708c9fea3477ff4d2603d939255fbb32906971634b66dcf5d38fc18a47f711d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "47c1f97dfd2a15785f0fddad4769f7647ab93090c68fa8ce2059925efafc450f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+    "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1ca47811bb8624003aaf6171e62223d4a65615ad9fe88e7f9a024e46223d92ad",
+    "studio-runner/src/validator/observedReplay.ts": "b512c6cf7c626af179ee36ef1037802497914321f0d3b1d20594fc505ee967f1",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "a77ba19d8f0bb097211539f108d4155c6d0de2811c9fa28dfbea50a4af07452b",
+    "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json": "f409823c0e2817bf11c85adb91b5303548e2ad43c87378a8e3c7d281c68fe54f"
+  },
+  "frozenHashVerification": "Design, resolution and story match the exact dispatched hashes; prior original and R1 peer review records are retained.",
+  "blockers": [],
+  "sourceBackedAssessment": [
+    {
+      "boundary": "Original evidence before loss",
+      "source": [
+        "GuidedTranslationService.java:543",
+        "GuidedTranslationService.java:940",
+        "GuidedSessionService.java:170",
+        "GuidedPublicationEvidenceRepository.java:24"
+      ],
+      "assessment": "Current question path omits attempt identity and current preparation-only capture happens too late. Design adds the original reserved attempt/projection, immutable question plan and current acknowledged observation before AWAITING_CLARIFICATION, atomically with APPLIED settlement. No latest-response search or reconstructed prompt is accepted."
+    },
+    {
+      "boundary": "Acceptance and SQL trust",
+      "source": [
+        "GuidedSessionService.java:437",
+        "GuidedSessionService.java:477",
+        "GuidedClarificationContextStore.java:24",
+        "V32 clarification/model immutability triggers",
+        "V33 publication preparation immutability trigger"
+      ],
+      "assessment": "Current accepted_choice is single assignment; resolvedAt belongs to mutable progress. New receipt truthfully freezes existing acceptance facts at preparation. It is not a historical acceptance actor/timestamp table. SQL protects closed receipt shape, row identity and immutability; application joins remain responsible for JSON attempt/plan/choice associations and authenticated acceptance."
+    },
+    {
+      "boundary": "Exact effective operation",
+      "source": [
+        "GuidedTranslationService.java:1167",
+        "GuidedPlanBuilder.java:259",
+        "studio-runner/src/validator/observedReplay.ts:171"
+      ],
+      "assessment": "Existing learning changes only targetIntent/selectedLocator. Publication currently validates raw intent and loses this choice. Independent Java and Node derivation may resolve only the selected target while retaining immutable raw obligation, actual proposal/hash and operation/predicate/input/read/binding/scope constraints. Old question node and fresh preparation node are independently proved; node identity is not carried across refresh."
+    },
+    {
+      "boundary": "Completeness and duplicates",
+      "source": [
+        "GuidedTranslationService.java:1167",
+        "GuidedPublicationEvidenceRepository.java:328",
+        "studio-runner/src/validator/observedReplay.ts:218"
+      ],
+      "assessment": "Current learning iteration can effectively pick the last matching accepted question and exporter retains only source choices. Design explicitly replaces this with refusal of multiple accepted observed decisions and actual DB-row completeness. Node verifies supplied proof but cannot discover an omitted same-target DB row; Java must independently enforce that case."
+    },
+    {
+      "boundary": "Wiring and limits",
+      "source": [
+        "GuidedSessionService.java:38",
+        "GuidedPublicationConfiguration.java:141",
+        "PublicationContracts.java",
+        "studio-runner/src/validator/observedReferencePolicy.ts",
+        "guided-model-response.schema.json"
+      ],
+      "assessment": "Existing lifecycle hooks are explicitly transactional/no-network and the configuration owner is reserved for the new question hook. Proposed 2..10 alternatives, receipt16384, witness262144/count200, basis6291456/request8388608 and independent observation400/1MiB constraints are concrete and bounded."
+    },
+    {
+      "boundary": "Exact build compatibility is stricter than executable-profile compatibility",
+      "source": [
+        "studio-runner/src/validator/observedReferencePolicy.ts:232",
+        "studio-runner/src/validator/observedReplay.ts:283",
+        "studio-runner/src/validator/observedReplay.ts:343",
+        "observed-choice-publication-design.md section5"
+      ],
+      "assessment": "assertBuild requires the expected schemaBundleHash to equal the currently packaged OBSERVED_SCHEMA_BUNDLE_HASH, for publication and replay. Adding optional proof changes that bundle. Preserving Profile and zero-choice canonical fixture bytes therefore does not automatically let an old build-pinned revision execute on the new bundle. Design retain/re-enable compatible build is the concrete supported boundary; no old-to-new build translation, pin relaxation or new deployment router is promised. Without the required compatible build available, refusal is correct. Avoiding unnecessary model relearning means retaining/re-enabling that supported combination, not assuming semantic compatibility bypasses exact pins."
+    }
+  ],
+  "mandatoryImplementationConditions": [
+    {
+      "id": "CHOICE-QA-C1",
+      "requirement": "Pass the actual reserved attempt and original request projection into question creation. Validate source/config/scope/worker/fence/context/materialization/plan/obligation against the current locked state without restamping. Capture the original acknowledged question observation before refresh, with context creation and APPLIED result in the same transaction. Keep network/model work outside locks.",
+      "oracles": [
+        "Inject failures/drift at each write boundary and verify full rollback; no orphan question, observation or terminal application.",
+        "Wrong attempt/request/status/kind/plan/hash/context/owner/evidence and old histories without prospective capture refuse.",
+        "Ordinary same-owner lease renewal is compatible with preserved historical lease bytes; historical lease freshness is not current publication authority."
+      ]
+    },
+    {
+      "id": "CHOICE-QA-C2",
+      "requirement": "Receipt is an immutable preparation-time snapshot of actual accepted_choice plus matching answer/context/meanings, created before admission/effect. No fabricated acceptedAt/actor/request bytes; resolvedAt alone is not authority.",
+      "oracles": [
+        "Direct SQL missing/extra/null/type/row-session/preparation/UTF8-bound mutations fail; SQL NULL remains valid absence and JSON null does not bypass IS TRUE.",
+        "Whole-row update/delete and NULL-to-receipt backfill fail; no accepted observed row without original receipt can publish.",
+        "Premature/fake progress answer or unaccepted choice fails even with internally recomputed hashes."
+      ]
+    },
+    {
+      "id": "CHOICE-QA-C3",
+      "requirement": "Independently prove selected old node in original observation and later fresh preparation node/generation under exact full locator equality, current operation guard and unchanged semantic constraints. Choice mapping bindingId never overrides an allocation, input or read grant.",
+      "oracles": [
+        "Valid alternate target differing from raw targetIntent and fresh node/generation passes both validators first.",
+        "Coherently rehash wrong locator kind/role/name/value/exact, old/fresh node, source/config/scope/origin, predicate/operation/reference/read/binding substitutions; effective validators must reject.",
+        "Unchanged historical obligation with unrelated later plan refinement passes; changed obligation meaning refuses without mutating original plan or operation/admission hashes."
+      ]
+    },
+    {
+      "id": "CHOICE-QA-C4",
+      "requirement": "Learning and publication reject multiple accepted questions for one obligation, including equal-target duplicates; no timestamp or iteration last-wins. Java exports every actual accepted observed row with successful preparation/action association; Node checks every supplied witness and exact used observation union.",
+      "oracles": [
+        "Real DB tests omit same-target and alternate-target accepted proof, duplicate/supersede decisions, move coordinates/obligations and remove successful associations; publication refuses.",
+        "Node rejects missing alternate-target proof, unused/duplicate witnesses, missing question snapshots and unrelated observation extras.",
+        "Do not claim Node can detect same-target DB rows that were never supplied."
+      ]
+    },
+    {
+      "id": "CHOICE-QA-C5",
+      "requirement": "Preserve 2..10 original provider alternatives with equal ordered complete server mappings; retain provider IDs/labels only as untrusted audit data. Enforce all per-field and composed canonical UTF8 ceilings independently.",
+      "oracles": [
+        "Start from valid two-choice witness; coherently remove unselected alternative and reseal all hashes, then require both validators to reject singleton.",
+        "Test exact/over caps, multibyte and aggregate many-witness composition; oversized6291456 basis must fail inside a sub8388608 request.",
+        "No raw prompt/resolved config/secret/runtime business value/account handle enters proof, public DTO, diagnostics or replay arguments."
+      ]
+    },
+    {
+      "id": "CHOICE-QA-C6",
+      "requirement": "Optional observedChoice omitted entirely for zero/source-only evidence; preserve executable profile and canonical bytes for those paths. Regenerate schema/build/catalog together and fail exact unsupported validator handshake. Keep old published compatible replay and history distinct from missing-proof new publication.",
+      "oracles": [
+        "Independent Java/Node canonical vectors cover optional omission versus null, JSONB order, Unicode, original timestamp precision and revisions.",
+        "Old validator/new witness, stripped witness and unsupported rollback combination refuse; compatible published artifacts need no model relearning for benign defaults.",
+        "Run prior no-choice/source-choice/legacy regressions and public answer compatibility; preserve current three-argument create(session,question,meanings) API while adding internal overload (design two-argument wording is a nonblocking wording slip).",
+        "Explicitly test old build-pinned artifact against new schema bundle refuses despite identical executable Profile; the artifact executes only with its retained/re-enabled compatible exact build. No automatic old-to-new build translation or relaxed schema hash. Document unavailable-compatible-build refusal honestly."
+      ]
+    },
+    {
+      "id": "CHOICE-QA-C7",
+      "requirement": "Prove the actual observed-phase public answer flow with alternate target after model/human timing beyond browser timeout, refresh, real preparation/admission/effect and pure publication. Then execute two fresh-value recorded ordinary replays of exactly the same artifact.",
+      "oracles": [
+        "Independent chosen and unchosen field receipts for the learning run and both replays, one submit per explicit run, zero finalization effects, no binding-read retry.",
+        "Assert identical replay artifact/hash, fresh producer values and zero calls to both gateway APIs during publication/replay.",
+        "Source-phase timing and passing non-choice async receipt-barrier cases remain separate limited evidence, never substitute for observed-choice proof.",
+        "Keep genuine async/cancel/late-result/drift/unknown-outcome and schedule-off/refusal boundaries from original006 requirements."
+      ]
+    }
+  ],
+  "acToRequiredEvidence": {
+    "AC-1": "C1-C4: exact original attempt/plan/question/acceptance/preparation/admission joins, immutable actual operations and full successful obligations/assertions/producers/consumers.",
+    "AC-2": "C3-C6: separate Java/Node effective target derivation and equivalence; unchanged executable operation, original source graph, exact hashes and private fresh reference policy.",
+    "AC-3": "C1-C4: atomic capture/receipt and existing publication transaction gates; source/config/owner/cancel/unknown drift refuses readiness without backfill.",
+    "AC-4": "C7: pure publication zero browser/model/effect calls; learned evidence distinct from two later replay receipts; schedules stay off and conflicts preserve evidence.",
+    "AC-5": "C3,C5-C7: same artifact with fresh producer values, exact selected target, no runtime LLM and deterministic refusal on policy/target drift.",
+    "AC-6": "C5-C6: real schema/cardinality/cap/build/catalog compatibility plus rollback and old historical replay behavior; no model-default relearning requirement.",
+    "AC-7": "All conditions: valid independently authored baseline before coherent mutations, real public observed-choice joined case, SQL trust tests, no/source/legacy regression and two independent replay receipts."
+  },
+  "ownership": {
+    "proposedLiteralPaths": 174,
+    "uniquePaths": 174,
+    "nonliteralPaths": [],
+    "coverage": "Question/context/session/configuration hook; V33; evidence exporter; Java lowerer/builder/contracts/tests; Node validator/schema/build/catalog/fixtures/tests and joined replay test are present. The only added product owner is GuidedClarificationContextStore.java.",
+    "activePathsReportedByCoordinator": 170,
+    "activation": "Not activated by this review."
+  },
+  "evidenceLimits": {
+    "testsRun": false,
+    "buildsBrowserSqlRun": false,
+    "observedChoiceImplementedOrProven": false,
+    "priorProof": "Parent reports synchronous and non-choice genuine async proofs; those are retained limited evidence and do not prove this amendment.",
+    "liveModelAccuracyClaim": false,
+    "laterBoundaries": "OBS007 accounts; OBS008 automatic UI/first guided recording; OBS009 live benchmark; OBS010 human pilot remain outside this amendment."
+  },
+  "workPerformed": {
+    "writtenOnly": ".ai/STUDIO-OBS-006-observed-choice-qa-design-review.json",
+    "productSchemaFixtureStoryEdits": false,
+    "lifecycleCliChanges": false,
+    "subagents": false,
+    "commitsPush": false
+  },
+  "budget": {
+    "sharedWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  }
+}

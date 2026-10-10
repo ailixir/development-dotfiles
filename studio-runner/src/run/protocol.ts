@@ -1,3 +1,4 @@
+import type { Launch2, Execute2, Ready2, StepStarted2, StepFinished2, Result2 } from '../executor/observedOperations.js';
 /**
  * The parent↔child protocol (AC-3, AC-5).
  *
@@ -443,3 +444,7 @@ export function parseChildMessage(value: unknown): ChildMessage | null {
       return null;
   }
 }
+
+/** Separate family: legacy parsers and limits above remain unchanged. */
+export type ObservedParentMessage = Launch2 | Execute2;
+export type ObservedChildMessage = Ready2 | StepStarted2 | StepFinished2 | Result2;

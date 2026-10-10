@@ -1,0 +1,241 @@
+{
+  "story": "STUDIO-OBS-007",
+  "task": "bounded-account-design-required-findings-resolution-r1",
+  "actor": "Aria / obs007_arch_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "at": "2026-10-09T18:09:47.235173+00:00",
+  "status": "FROZEN_R1_PROPOSAL_FOR_INDEPENDENT_RE_REVIEW",
+  "storyStatus": "Draft",
+  "poStatus": "NO-GO",
+  "lifecycleChanged": false,
+  "implementationApproved": false,
+  "gateVerdict": null,
+  "finalGateIssued": false,
+  "scope": "Correct AUTH-007-01 and SEQ-007-02 locally in design only. Provider/bootstrap/privacy/conditional-handoff boundaries retained; no provider selected or new permission request.",
+  "artifacts": {
+    "changedDesign": {
+      "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+      "initialSha256": "7bb3048b9f34b36429cab0a7c681b1005510aa0177912546ea41c971e614a0c5",
+      "r1Sha256": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2"
+    },
+    "newResolution": {
+      "path": ".ai/STUDIO-OBS-007-account-design-resolution-r1.json",
+      "selfHashPolicy": "No recursive self-hash; frozen JSON SHA-256 supplied in final handoff."
+    },
+    "unchangedInitialArchitecture": {
+      "path": ".ai/STUDIO-OBS-007-account-design.json",
+      "sha256": "01f27650177bb672c8081cff3c6d4f3d9846d54a2b6232d91f772b760e656d6c"
+    },
+    "unchangedInitialReview": {
+      "path": ".ai/STUDIO-OBS-007-account-design-review.json",
+      "verdict": "NEEDS_CHANGES",
+      "sha256": "24a4061216420d75ac7f0aa3f189245794099733fbb1a595650c61d05f14fdf4"
+    },
+    "initialArchive": {
+      "directory": ".aiox/sdc/STUDIO-OBS-007/design-initial/",
+      "fileHashes": {
+        ".aiox/sdc/STUDIO-OBS-007/design-initial/STUDIO-OBS-007-account-design-review.json": "24a4061216420d75ac7f0aa3f189245794099733fbb1a595650c61d05f14fdf4",
+        ".aiox/sdc/STUDIO-OBS-007/design-initial/STUDIO-OBS-007-account-design.json": "01f27650177bb672c8081cff3c6d4f3d9846d54a2b6232d91f772b760e656d6c",
+        ".aiox/sdc/STUDIO-OBS-007/design-initial/account-provider-readiness-design.md": "7bb3048b9f34b36429cab0a7c681b1005510aa0177912546ea41c971e614a0c5"
+      }
+    }
+  },
+  "findingToSectionClosures": [
+    {
+      "finding": "AUTH-007-01",
+      "disposition": "REQUIRED_LOCAL_CORRECTION_DRAFTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "proposedClosureSections": [
+        "3. Local capability API and UI-consumer semantics (FreshCaller argument)",
+        "4.1 Exact current-authority boundary and post-model sequence",
+        "4.2 Repository-owned public and private contracts",
+        "4.3 Selected durable storage and atomic consumption",
+        "4.4 Worker enforcement through final invocation",
+        "4.5 Expiry, callbacks, duplicate/scanner/client/restart behavior",
+        "4.6 Preservation and protocol gates",
+        "9.1 Required five current-authority P0 oracles and actual client proof"
+      ],
+      "correctionSummary": [
+        "prepareCurrent receives live FreshCaller from the current request's uncached Core/CSI check; no stored cookie/cached identity/controller impersonation.",
+        "Model APPLIED/validated selection and real worker preparation precede pending command publication and five-second authority mint.",
+        "Defines public pending-command/advance/status and internal authority-dispatch/account-context/account-setup/authorized-dispatch/authorized-outcome routes and closed value-free identities/receipts.",
+        "Separates logical registered context/no browser from authorized setup/actual original blank bootstrap, and setup rights from authored ACTION rights.",
+        "Selects two PostgreSQL authorization metadata tables and proposed V34 migration; unique command permit, immutable identities/deadlines, monotone pending/consumed/expired/unknown and one-write accounting.",
+        "One authoritative transaction joins current source/config/plan/model/preparation/evidence/account/revocation/worker/fence to existing admission and dispatch consumption; ephemeral postcommit winner alone sends.",
+        "Worker journal and monotonic+absolute InvocationControl enforce authority adjacent to each final native/renderer invocation; expired first invocation has zero effect, uncertain begun compound work stops UNKNOWN.",
+        "Duplicates/client/scanner/restart/disconnect/lost ACK cannot remint/resend; expired callbacks use accounting-only historical correlation and cannot revive readiness.",
+        "Five exact requested P0 oracles mapped to concrete production DB/runner/client tests."
+      ],
+      "existingSourceGrounding": [
+        "GuidedTranslationCoordinator.continueRuns",
+        "GuidedTranslationService.advance/recover/admitAndDispatch/bootstrap",
+        "GuidedTranslationStore.reserveObligation/continuation/runnable",
+        "GuidedDispatchService.prepareAndAdmit/dispatch",
+        "GuidedSessionService.admit/consume/outcomeV2/lostAcknowledgment",
+        "GuidedOwnership.context",
+        "GuidedRuntime.start/prepare/dispatch",
+        "browser/native InvocationControl hooks"
+      ],
+      "dataReviewRequired": true,
+      "approvedOrImplemented": false
+    },
+    {
+      "finding": "SEQ-007-02",
+      "disposition": "COORDINATOR_SELECTED_ACYCLIC_SPLIT_SPECIFIED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "proposedClosureSections": [
+        "3. Local capability API and UI-consumer semantics",
+        "4.1 Exact current-authority boundary and post-model sequence",
+        "8. Proposed ownership and dependency order (D2/D6a/D6b)",
+        "8.1 Acyclic production client and exact additional ownership",
+        "9.1 Required five current-authority P0 oracles and actual client proof",
+        "11. Independent review questions"
+      ],
+      "correctionSummary": [
+        "007 owns minimal real RunControl/useRunGate->central API->automatic authority client production call path and supporting backend/runner/storage/contracts/tests.",
+        "008 owns subsequent full three-panel guided presentation, first-guided recording/upload/seek, human-facing poll/reconnect presentation and automatic finalize; DAG006->007->008->009 has no reverse readiness dependency.",
+        "Maps actual frontend single Run entry point/save/reread/legacy prepare/execute/accepted latch/ordinary subscription before proposing a distinct guided branch.",
+        "Defines same-host/versioned central API transport, closed generated types, actual client loop, command-scoped stable keys, no automatic resend after uncertain POST and bounded Stop/unmount/expiry.",
+        "Feature-gated server-declared runSelection occurs before legacy prepare; preserves ordinary legacy/saved replay and excludes redundant guided+compile dispatch.",
+        "Defines minimal account choice/Run/Stop/editor-lock/fixed-status UX review boundary and real production-page joined oracle; test-only driver or unused helper cannot satisfy007 acceptance.",
+        "Adds exact Coordinator/Service/Store, routes/schema/runtime/data/frontend/test owner recommendations; root still reserves/replans all product files."
+      ],
+      "uxReviewRequired": true,
+      "story007Modified": false,
+      "story008Modified": false,
+      "approvedOrImplemented": false
+    }
+  ],
+  "selectedLocalMechanisms": {
+    "storage": {
+      "proposal": "PostgreSQL studio_guided_authority_commands + studio_guided_current_permits, metadata joins to existing ledger",
+      "migration": "backend/src/main/resources/db/migration/V34__studio_guided_current_authority.sql",
+      "actualFileWritten": false,
+      "numberReservation": "Proposed currently unused; root must reserve/reconfirm",
+      "dataEngineerApproval": "PENDING"
+    },
+    "contract": "Closed current-authority version1 namespace and separate registered-context/setup/authorized-dispatch/outcome envelopes; old routes reject negotiated gated sessions",
+    "currentAuthority": "Single live BFF request after prepared command selection, uncached Core/provider checks outside locks, exact DB-time CAS/one-use receipt without cookies",
+    "productionClient": "007 minimal real single-Run capability/start/automatic-authority/status/Stop branch through existing central API;008 consumes it for full UX/evidence",
+    "duplicateAndUnknown": "Unique command permit and monotone terminal state; recovered consumed send-intent cannot send; expired callback only accounts historical consumption",
+    "preservation": "Original initialBlank/first preparation/learned plan/replay/version/recording identities are not reset"
+  },
+  "requiredPermitOracles": [
+    {
+      "id": "AUTH-P0-1",
+      "requirement": "Model delay greater than permit TTL; fresh post-selection mint and one intended effect",
+      "section": "9.1",
+      "executed": false
+    },
+    {
+      "id": "AUTH-P0-2",
+      "requirement": "Cached BFF green but uncached Core revoked/mismatched refuses before effect",
+      "section": "9.1",
+      "executed": false
+    },
+    {
+      "id": "AUTH-P0-3",
+      "requirement": "Concurrent client/scanner for one pending command has one permit/admission/consume/dispatch",
+      "section": "9.1",
+      "executed": false
+    },
+    {
+      "id": "AUTH-P0-4",
+      "requirement": "Wrong exact binding or expiry between admit and final worker invocation yields no new effect",
+      "section": "9.1",
+      "executed": false
+    },
+    {
+      "id": "AUTH-P0-5",
+      "requirement": "Disconnect/reconnect/restart/lost ACK never remints rights or repeats uncertain mutation",
+      "section": "9.1",
+      "executed": false
+    }
+  ],
+  "independentReviewQuestions": [
+    "Does the selected durable command/permit CAS, identity immutability and single-winner postcommit discriminator enforce the existing action ledger without a second dispatch path?",
+    "Does gated registration/setup timing preserve actual original blank bootstrap while preventing browser/provider work before SETUP authority?",
+    "Do worker controls check after awaits and immediately before each final send, with accurate NOT_INVOKED/UNKNOWN and delayed accounting semantics?",
+    "Does live request minting and protected source/account/plan/current-epoch comparison avoid cached BFF, stored cookie and scanner impersonation?",
+    "Does the exact minimal007 production client split remove the reverse dependency, preserve single Run/legacy behavior, and give UX/QA an actual callable integration to review?",
+    "Do the five P0 and real production page/DB/Chromium/server/wire oracles falsify the protocol instead of proving only a harness?"
+  ],
+  "remainingReviewDependencies": [
+    "Independent security/test-design re-review of AUTH-007-01 and SEQ-007-02.",
+    "Data-engineer review of proposed V34 authorization metadata/constraints/lock ordering/joint existing-ledger CAS/retention.",
+    "UX review of minimal007 account choice, Run/Stop/editor lock, guided-vs-ordinary identity, fixed terminal/unavailable states.",
+    "Root actual File List/task/schema/runtime/data/frontend/test reservations/replan and PO revalidation before Ready."
+  ],
+  "remainingConditionalExternalFacts": {
+    "EXT001": "UNANSWERED: approved real account/session provider identity/contract/configuration location and genuinely supported mechanisms",
+    "provider": "Transport/narrow identity mounts, current account entitlement/revocation, one-use server proof/unknown cleanup and non-navigating entry remain conditional",
+    "handoff": "Actual trusted same-context view/controls/completion, immutable transition storage/profile and deterministic replay parity remain conditional",
+    "gateway": "Live gateway configuration/accuracy/cost belongs to later009; not independently a007 blocker",
+    "liveProof": "No real provider/model/pilot/browser implementation evidence produced by this design"
+  },
+  "preservation": {
+    "initialInventoryReference": ".ai/STUDIO-OBS-007-account-design.json#/inputFingerprintsSha256",
+    "authorizedPreR1BaselineAdjustments": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "beforeSha256": "a114e501060be5ef91e4d8f78a5e377c0e43b602fae9788a3f120876a13ac84f",
+        "r1BaselineSha256": "c13a0739f43899cd215ca5765836f7be59f8cffd416838f7a8b214ce5fb0c66b",
+        "reason": "Authorized coordinator story reservation/replan before R1; not mutated by architect."
+      }
+    ],
+    "additionalR1InputFingerprintsSha256": {
+      ".ai/STUDIO-OBS-007-account-design-review.json": "24a4061216420d75ac7f0aa3f189245794099733fbb1a595650c61d05f14fdf4",
+      ".ai/STUDIO-OBS-007-account-design.json": "01f27650177bb672c8081cff3c6d4f3d9846d54a2b6232d91f772b760e656d6c",
+      ".aiox/sdc/STUDIO-OBS-007/design-initial/STUDIO-OBS-007-account-design-review.json": "24a4061216420d75ac7f0aa3f189245794099733fbb1a595650c61d05f14fdf4",
+      ".aiox/sdc/STUDIO-OBS-007/design-initial/STUDIO-OBS-007-account-design.json": "01f27650177bb672c8081cff3c6d4f3d9846d54a2b6232d91f772b760e656d6c",
+      ".aiox/sdc/STUDIO-OBS-007/design-initial/account-provider-readiness-design.md": "7bb3048b9f34b36429cab0a7c681b1005510aa0177912546ea41c971e614a0c5",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java": "a54596c9c59947c685a5420f4d7eef79615af9491928aa7e4de5e3514b2fc4ec",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java": "6ad67fd62e12f589df5c0e918584e0a903f4deb7a8c8124ddfb6089798b1835d",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "42b4dbe36ca52975ec7f7871255205248c3727e0483fdf32f5a5c5ef50ebfffe",
+      "frontend/src/components/studio/run/RunControl.tsx": "30a9a8a22983ebbb5e27047cb38e30908660dd416cf721638519184fef7fbd81",
+      "frontend/src/components/studio/run/useRunGate.ts": "34759dbfa3a63b35144499e5188d8f0b1b42b7ddecf50b577b48874388aa570f",
+      "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "51c9b0457505d1705533402328bae2e414f26b33257ed21ff8a2b9746e5a1f8e",
+      "frontend/src/pages/ChecksStudioPage/studioRunTransport.node.test.tsx": "97650640f27937c709a890a46ac8f034f451fece1bf59e7720bca3ee23de4f5c",
+      "frontend/src/services/api/apiClient.ts": "06659b78e595366a257801faa585cb02a7c974c18f3d23405a72fb66fb339c68",
+      "frontend/src/services/api/studioApi.ts": "53fac77740bb640c796d744255c315a34c1229791261e3ceaeef1b819871e720",
+      "frontend/src/utils/constants/appConfig.ts": "ce2574cad55f9515042910063ceb0a1ac0af5da3fed6dd5ac46b47c1cbed530a",
+      "studio-runner/src/run/nativeInput.ts": "bdadb16a8920762ff7a9761f538c97086c75d96936b47467c09cb214d650e4e4"
+    },
+    "r1BaselineFilesCompared": 216,
+    "changedBaselinePaths": [],
+    "allR1InputsUnchanged": true,
+    "reviewed006Revision": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+    "reviewed006SourceMismatches": [],
+    "reviewed006RuntimeMismatches": [],
+    "initialArchitectureReviewAndArchiveUnchanged": true,
+    "story007And008UnchangedByR1": true,
+    "productSchemaRuntimeTestsUnchanged": true,
+    "sourceScope": "Only design document changed; new R1 resolution record created. Prior initial inventory changed before R1 only by explicitly authorized root reservation listed above."
+  },
+  "verification": {
+    "sourceInspectionAndHashComparison": true,
+    "designOnly": true,
+    "buildsRun": false,
+    "testsRun": false,
+    "browserRuns": false,
+    "providerCalls": false,
+    "gatewayCalls": false,
+    "externalCallsMessages": false,
+    "internalCoordinatorProgress": true,
+    "subagentsSpawned": false,
+    "rootCliExecuted": false,
+    "productTestSchemaRuntimeStoryEdits": false,
+    "initialArchitectureRecordReviewEdits": false,
+    "commitPushDeploy": false,
+    "credentialsOrLocalBrowserStorageInspected": false,
+    "implementationApprovalOrFinalGate": false
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  },
+  "filesChanged": [
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r1.json"
+  ],
+  "nextHandoff": "Freeze R1 documents for independent QA/security, data and UX re-review;007 remainsDraft/NO-GO and no implementation path is activated."
+}

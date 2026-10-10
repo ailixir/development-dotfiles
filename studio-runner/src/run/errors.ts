@@ -1,3 +1,4 @@
+import type { SessionRecording } from '../server/adapters.js';
 /**
  * The real runner error-code set (AC-17, ADR-002 open item **O-5**).
  *
@@ -208,4 +209,12 @@ export function failureKindForRefusal(code: StepRefusalCode): RunFailureKind {
  */
 export function resultFor(kind: RunFailureKind): RunFailureResult {
   return kind === 'step' ? 'FAILED' : 'ERROR';
+}
+
+/** Internal evidence carrier only; it never grants an executable session or invents a run origin. */
+export class ObservedPreReadyFailure extends Error {
+  constructor(readonly code: string, readonly recording: SessionRecording) {
+    super(code);
+    this.name = 'ObservedPreReadyFailure';
+  }
 }

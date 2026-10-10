@@ -187,6 +187,26 @@ class GenAiLlmGatewayClientTest {
   }
 
   @Test
+  void retryAfterZeroCannotAddUnaccountedHttpRetriesToCompile() throws Exception {
+    server.stubFor(
+        post(urlPathMatching(".*generateContent"))
+            .willReturn(
+                aResponse()
+                    .withStatus(503)
+                    .withHeader("Retry-After", "0")
+                    .withHeader("Content-Type", "application/json")
+                    .withBody("{\"error\":{\"code\":503,\"message\":\"unavailable\"}}")));
+    try (GenAiLlmGatewayClient client = client()) {
+      // This is a retry-count oracle, not a cold-SDK/full-suite latency assertion.
+      // Dedicated deadline tests retain the timeout boundary; exact attempts and sends stay three.
+      CompileBudget budget = new CompileBudget(Duration.ofSeconds(20));
+      assertThat(client.propose(request(), budget).outcome()).isEqualTo(GatewayOutcome.TRANSPORT);
+      assertThat(budget.transports()).isEqualTo(3);
+      server.verify(3, postRequestedFor(urlPathMatching(".*generateContent")));
+    }
+  }
+
+  @Test
   void cancellationStopsActualTransportAndRecoversSingleCapacity() throws Exception {
     CompileRequest request = request();
     server.stubFor(

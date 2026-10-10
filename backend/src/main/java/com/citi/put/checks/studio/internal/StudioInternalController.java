@@ -42,6 +42,12 @@ public class StudioInternalController {
   private final StrictInternalBodyReader bodyReader;
   private final ExecutionControlService controlService;
 
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private com.citi.put.checks.studio.guided.session.GuidedContracts observedContracts;
+
   public StudioInternalController(
       AdmissionCasService admissionService,
       ProgressReportService progressService,
@@ -60,6 +66,22 @@ public class StudioInternalController {
   @GetMapping("/{id}/control")
   public ResponseEntity<ExecutionControl> control(@PathVariable UUID id) {
     return ResponseEntity.ok(controlService.control(id));
+  }
+
+  @PostMapping("/{id}/observed-admission")
+  public ResponseEntity<?> claimObservedAdmission(@PathVariable UUID id, @RequestBody byte[] body) {
+    try {
+      com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+          observed != null && observedContracts != null, "RUNTIME_INCOMPATIBLE", 409);
+      com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+          body != null && body.length <= 16384, "INVALID_CONTRACT", 413);
+      var request = observedContracts.parseWire(body);
+      var permit = observed.prepareAdmission(id, request);
+      return ResponseEntity.ok(admissionService.claimObserved(id, permit));
+    } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException refusal) {
+      return ResponseEntity.status(refusal.status())
+          .body(java.util.Map.of("code", refusal.getMessage()));
+    }
   }
 
   /** CAS exclusive ownership of an attempt. No browser starts without a {@code 200} here. */

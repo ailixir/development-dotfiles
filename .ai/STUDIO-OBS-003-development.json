@@ -1,0 +1,107 @@
+{
+  "story": "STUDIO-OBS-003",
+  "phase": "develop",
+  "status": "InReview",
+  "executor": "data-engineer",
+  "timestamp": "2026-10-08T03:34:53.254219+00:00",
+  "baseRevision": "c767efbe70f0a05555d77b2a589ca19414a4e8b4",
+  "tests": [
+    {
+      "suite": "com.citi.put.checks.studio.StudioAuthorizationIT",
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.StudioAuthorizationIT.xml"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest.xml"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT.xml"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.guided.session.GuidedSecurityTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedSecurityTest.xml"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "tests": 23,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.session.GuidedSessionIT.xml"
+    },
+    {
+      "suite": "com.citi.put.checks.studio.scheduling.StudioScheduleApiIT",
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.scheduling.StudioScheduleApiIT.xml"
+    }
+  ],
+  "totalTests": 90,
+  "commands": [
+    {
+      "cwd": "backend",
+      "command": "./gradlew spotlessApply spotlessCheck checkstyleMain checkstyleTest rdsParityLint test --tests 'com.citi.put.checks.studio.guided.session.*' --tests 'com.citi.put.checks.studio.StudioServiceExecuteAuthorizationTest' --tests 'com.citi.put.checks.studio.scheduling.StudioScheduleApiIT' --tests 'com.citi.put.checks.studio.StudioAuthorizationIT' --console=plain",
+      "exitCode": 0
+    },
+    {
+      "cwd": ".",
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "fixtures": 114,
+      "openapiExamples": 109
+    }
+  ],
+  "files": {
+    "backend/build.gradle.kts": "106f1203293919113a264a28fa16db7abdb8494c0c4ffa63f969957c3536696e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java": "f104ab92677c4adef3bf36bc13324cae81c6bdf2dc2164ef4cf85b96752a3c6e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "23a58886d2cc7641056553f91a4e8163e5cfbd3311aae09760959619f288c170",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java": "dbd127aa2fda2b930f13343408a3255c8bf884815e0241b31e42e8be13e29bce",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java": "800baf6067ce0a926701b55c3db128139e8b1c525970526639e2d206c2103227",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionAccess.java": "ca2d0a36aff0f3060db1bf94a3dc11120c6d0b40918dd9be020004ad48191db5",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java": "f584d5c403b2e0a7b2bcdc3790678141e1f4e7e4aec48f0e66cbb79d24488ade",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java": "57103d5646e3866e552724323dadd965701a797a521f35fb8a06d9cd47ebf0fe",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionException.java": "e11d9f178909d9c7b7b610e2e564183e35aba0671249db17c4efae8f2da4a20f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java": "5d1230cad0322b3799928c7cdfbf02cccf5a6afe979f4ff0c9213954ac310197",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java": "67c62defc8411c77c62dabc4f66ff83997fe8daeb81d307e78d8011bebb3f48e",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "87bc4cf6099c019f932c47841742c9f37a2f6ff798c8673bce261c1c6e9bd75a",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "060b47358608fd89d193690485cd248f8564ea1f8b2f3b84dedf87021a590c33",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md": "173b073d363d107117b12b84e3cd82a35e3306fd71d62cbd1e89a7e584973a4d",
+    "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql": "859c27578e24ad4eeaad0c5a16cb42ee11ac82b94d04ab0fa11644ba4c36502a",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java": "ff2545959d33f2b07e8829d431cfd5be5566e227a20bf1f7e682e69bd96b5412",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSecurityTest.java": "da2f9a3d44bca1de4df6035ab2185ea2ceecd4351c7eef40e634212984b4565f",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java": "2c5e564fa6f67fdc0ab479f25fcb45982fc7e33fb1fc31adbcf8c6c3e03a801c",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md": "6df4d0d4033035b02151303df9f3194a9b12aa4b7ef82f1275b31533e3ee3969"
+  },
+  "codeRabbit": {
+    "available": false,
+    "fallback": "Independent coordinator-owned dev/QA review pending; configured graceful degradation"
+  },
+  "limitations": [
+    "Feature disabled by default",
+    "Real account/current DOM/semantic completeness/exact-plan adapters remain downstream fail-closed gates",
+    "No live browser/model/human pilot claimed",
+    "No full repository check aggregate or full-suite coverage claimed"
+  ],
+  "dodSelfAssessment": "Applicable backend implementation checks passed; independent gate pending",
+  "noCommits": true,
+  "noRemoteGit": true
+}

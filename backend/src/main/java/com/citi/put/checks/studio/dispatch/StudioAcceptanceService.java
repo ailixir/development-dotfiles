@@ -16,6 +16,7 @@ import com.citi.put.checks.studio.entity.UITestRevision;
 import com.citi.put.checks.studio.scheduling.StudioScheduleException;
 import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -81,6 +82,9 @@ public class StudioAcceptanceService {
   private final JdbcTemplate jdbc;
   private final Clock clock;
   @PersistenceContext private EntityManager entityManager;
+
+  @Autowired(required = false)
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
 
   /** Trusted internal identity, independent of client-supplied manual idempotency strings. */
   public record ScheduledIdentity(
@@ -232,6 +236,35 @@ public class StudioAcceptanceService {
       String idempotencyKey,
       ScheduledIdentity scheduled,
       Runnable beforeWrite) {
+    return acceptCore(testId, principal, idempotencyKey, scheduled, beforeWrite, null);
+  }
+
+  @Transactional
+  public UUID acceptObserved(
+      UUID testId,
+      String principal,
+      String key,
+      com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization.Prepared
+          authorization) {
+    return acceptCore(
+        testId,
+        principal,
+        key,
+        null,
+        () -> {
+          /* No additional acceptance guard. */
+        },
+        authorization);
+  }
+
+  private UUID acceptCore(
+      UUID testId,
+      String principal,
+      String idempotencyKey,
+      ScheduledIdentity scheduled,
+      Runnable beforeWrite,
+      com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization.Prepared
+          observedGrant) {
     if (!properties.enabledOrDefault()) {
       throw new StudioDispatchDisabledException("Studio execution is currently disabled");
     }
@@ -283,6 +316,20 @@ public class StudioAcceptanceService {
                         ExecutionReadiness.Verdict.COMPILE_REQUIRED,
                         "The confirmed revision for this draft is no longer available"));
 
+    boolean observedFamily = revision.getArtifactSchemaVersion() == 2;
+    if (observedFamily && scheduled != null) {
+      throw new StudioConflictException(
+          "OBSERVED_SCHEDULE_AUTH_REQUIRED",
+          "Observed schedules require fresh execution authority");
+    }
+    if (observedFamily && (observedGrant == null || observed == null)) {
+      throw new StudioConflictException(
+          "AUTHORIZATION_REQUIRED", "Observed replay needs fresh explicit Run authorization");
+    }
+    if (!observedFamily && observedGrant != null) {
+      throw new StudioConflictException("RUNTIME_INCOMPATIBLE", "Execution family changed");
+    }
+
     List<String> steps = LegacyStudioAdapter.parseSteps(revision.getSource());
     int maxSteps = properties.quotasOrDefault().maxStepsPerTestOrDefault();
     if (steps.size() > maxSteps) {
@@ -313,9 +360,29 @@ public class StudioAcceptanceService {
     // The schedule supplies a fresh injected-clock/grant check at the final write boundary.
     beforeWrite.run();
 
-    Instant acceptedAt = clock.instant();
+    Instant acceptedAt =
+        observedFamily
+            ? com.citi.put.checks.studio.guided.publication.PublicationContracts.millisecond(
+                clock.instant())
+            : clock.instant();
+    JsonNode observedBinding =
+        observedFamily ? observed.bind(observedGrant, test, revision, acceptedAt) : null;
+    if (observedBinding != null
+        && !observedBinding.path("principalId").asText().equals(principal)) {
+      throw new StudioConflictException("AUTHORIZATION_REQUIRED", "Execution principal changed");
+    }
     UITestExecution execution =
-        new UITestExecution(testId, ExecutionStatus.PENDING, acceptedAt, test.getCsiId());
+        observedFamily
+            ? new UITestExecution(
+                UUID.fromString(observedBinding.path("executionId").asText()),
+                testId,
+                ExecutionStatus.PENDING,
+                acceptedAt,
+                test.getCsiId())
+            : new UITestExecution(testId, ExecutionStatus.PENDING, acceptedAt, test.getCsiId());
+    if (observedBinding != null) {
+      execution.setObservedRevisionBinding(observedBinding.toString());
+    }
     execution.markFullExecution();
     execution.setPrincipal(principal);
     execution.setEnvironment(test.getEnvironment());

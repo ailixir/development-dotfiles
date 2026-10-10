@@ -1,0 +1,713 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v1/common.schema.json",
+  "title": "Studio observed v1 common",
+  "definitions": {
+    "hash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "counter": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "origin": {
+      "type": "string",
+      "pattern": "^https?://(?:[a-z0-9.-]+|\\[[0-9a-f:]+\\])(?::[1-9][0-9]{0,4})?$",
+      "maxLength": 256
+    },
+    "coordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "stepId",
+        "ordinal"
+      ]
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "principalId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "csiId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "environmentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "applicationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "accountRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "approvedOrigins": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^https?://(?:[a-z0-9.-]+|\\[[0-9a-f:]+\\])(?::[1-9][0-9]{0,4})?$",
+            "maxLength": 256
+          },
+          "minItems": 1,
+          "maxItems": 10
+        },
+        "sourceRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "configurationRevision": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "modelDataPolicyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "valueTransferPolicyId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "observe",
+              "navigate",
+              "click",
+              "fill",
+              "press",
+              "check",
+              "uncheck",
+              "selectOption",
+              "hover",
+              "read",
+              "assert"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 12
+        }
+      },
+      "required": [
+        "principalId",
+        "csiId",
+        "environmentId",
+        "applicationId",
+        "accountRef",
+        "approvedOrigins",
+        "sourceRevision",
+        "configurationRevision",
+        "modelDataPolicyId",
+        "valueTransferPolicyId",
+        "capabilities"
+      ]
+    },
+    "versions": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "contract": {
+          "const": 1
+        },
+        "learnedPlan": {
+          "const": 1
+        },
+        "observation": {
+          "const": 1
+        },
+        "guidedPolicy": {
+          "const": 1
+        },
+        "referencePolicy": {
+          "const": 3
+        },
+        "lowering": {
+          "const": 1
+        },
+        "artifact": {
+          "const": 2
+        },
+        "language": {
+          "const": "observed-1"
+        },
+        "executor": {
+          "const": "observed-1"
+        }
+      },
+      "required": [
+        "contract",
+        "learnedPlan",
+        "observation",
+        "guidedPolicy",
+        "referencePolicy",
+        "lowering",
+        "artifact",
+        "language",
+        "executor"
+      ]
+    },
+    "locator": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "role"
+            },
+            "role": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "name": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "exact": {
+              "const": true
+            }
+          },
+          "required": [
+            "kind",
+            "role",
+            "name",
+            "exact"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "label",
+                "testId",
+                "text",
+                "placeholder"
+              ]
+            },
+            "value": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "exact": {
+              "const": true
+            }
+          },
+          "required": [
+            "kind",
+            "value",
+            "exact"
+          ]
+        }
+      ]
+    },
+    "argument": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "authoredLiteral"
+            },
+            "sourceInputId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "kind",
+            "sourceInputId"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "binding"
+            },
+            "bindingId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "kind",
+            "bindingId"
+          ]
+        }
+      ]
+    },
+    "read": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "visibleText"
+            },
+            "classification": {
+              "const": "permittedBusinessData"
+            },
+            "policyRuleId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "kind",
+            "classification",
+            "policyRuleId"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "controlValue"
+            },
+            "classification": {
+              "const": "nonsecretApproved"
+            },
+            "controlType": {
+              "enum": [
+                "text",
+                "search",
+                "email",
+                "tel",
+                "url",
+                "textarea"
+              ]
+            },
+            "policyRuleId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "kind",
+            "classification",
+            "controlType",
+            "policyRuleId"
+          ]
+        }
+      ]
+    },
+    "operation": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "enum": [
+                "click",
+                "check",
+                "uncheck",
+                "hover"
+              ]
+            }
+          },
+          "required": [
+            "kind"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "fill"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "authoredLiteral"
+                    },
+                    "sourceInputId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "sourceInputId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "binding"
+                    },
+                    "bindingId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "bindingId"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "press"
+            },
+            "key": {
+              "enum": [
+                "Enter",
+                "Tab",
+                "Escape",
+                "ArrowDown",
+                "ArrowUp"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "key"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "selectOption"
+            },
+            "value": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "authoredLiteral"
+                    },
+                    "sourceInputId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "sourceInputId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "binding"
+                    },
+                    "bindingId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "bindingId"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "value"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "navigate"
+            },
+            "destinationInputId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            }
+          },
+          "required": [
+            "kind",
+            "destinationInputId"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "read"
+            },
+            "bindingId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "recipe": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "visibleText"
+                    },
+                    "classification": {
+                      "const": "permittedBusinessData"
+                    },
+                    "policyRuleId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "classification",
+                    "policyRuleId"
+                  ]
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "kind": {
+                      "const": "controlValue"
+                    },
+                    "classification": {
+                      "const": "nonsecretApproved"
+                    },
+                    "controlType": {
+                      "enum": [
+                        "text",
+                        "search",
+                        "email",
+                        "tel",
+                        "url",
+                        "textarea"
+                      ]
+                    },
+                    "policyRuleId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    }
+                  },
+                  "required": [
+                    "kind",
+                    "classification",
+                    "controlType",
+                    "policyRuleId"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "bindingId",
+            "recipe"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "kind": {
+              "const": "assert"
+            },
+            "predicate": {
+              "enum": [
+                "visible",
+                "containsText",
+                "hasValue",
+                "url",
+                "title"
+              ]
+            },
+            "expected": {
+              "oneOf": [
+                {
+                  "oneOf": [
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "const": "authoredLiteral"
+                        },
+                        "sourceInputId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "sourceInputId"
+                      ]
+                    },
+                    {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "kind": {
+                          "const": "binding"
+                        },
+                        "bindingId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 256
+                        }
+                      },
+                      "required": [
+                        "kind",
+                        "bindingId"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "predicate",
+            "expected"
+          ],
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "predicate": {
+                    "const": "visible"
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "expected": {
+                    "type": "null"
+                  }
+                }
+              },
+              "else": {
+                "properties": {
+                  "expected": {
+                    "not": {
+                      "type": "null"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "if": {
+                "properties": {
+                  "predicate": {
+                    "enum": [
+                      "url",
+                      "title"
+                    ]
+                  }
+                }
+              },
+              "then": {
+                "properties": {
+                  "expected": {
+                    "type": "object",
+                    "required": [
+                      "kind"
+                    ],
+                    "properties": {
+                      "kind": {
+                        "const": "authoredLiteral"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

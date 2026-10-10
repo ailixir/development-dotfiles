@@ -1,0 +1,92 @@
+{
+  "positive": [
+    {
+      "name": "historical-publication-is-not-current-readiness",
+      "schema": "v3/result",
+      "value": {
+        "schemaVersion": 3,
+        "sessionId": "sample-session",
+        "executionId": "sample-session",
+        "scopeHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "mode": "guided",
+        "outcome": "SUCCEEDED",
+        "assertionsPassed": true,
+        "learnedFromThisRun": true,
+        "replayVerified": false,
+        "scheduleActivated": false,
+        "publication": {
+          "status": "PUBLISHED",
+          "receipt": {
+            "schemaVersion": 3,
+            "sessionId": "sample-session",
+            "revisionId": "11111111-1111-4111-8111-111111111111",
+            "revisionDigest": "1111111111111111111111111111111111111111111111111111111111111111",
+            "learnedPlanHash": "2222222222222222222222222222222222222222222222222222222222222222",
+            "artifactHash": "3333333333333333333333333333333333333333333333333333333333333333",
+            "publicationEvidenceHash": "4444444444444444444444444444444444444444444444444444444444444444",
+            "publishedAt": "2026-10-09T12:00:00.000Z",
+            "learnedFromThisRun": true,
+            "replayVerified": false
+          }
+        },
+        "currentReadiness": {
+          "revisionId": "11111111-1111-4111-8111-111111111111",
+          "ready": false,
+          "code": "HEAD_CHANGED"
+        },
+        "evidence": {
+          "kind": "guidedLedger",
+          "ref": "sample-session",
+          "video": null
+        },
+        "actionTimings": [],
+        "errorCode": null
+      }
+    }
+  ],
+  "negative": [
+    {
+      "name": "uuid-does-not-replace-digest",
+      "schema": "v3/result",
+      "value": {
+        "schemaVersion": 3,
+        "sessionId": "sample-session",
+        "executionId": "sample-session",
+        "scopeHash": "0000000000000000000000000000000000000000000000000000000000000000",
+        "mode": "guided",
+        "outcome": "SUCCEEDED",
+        "assertionsPassed": true,
+        "learnedFromThisRun": true,
+        "replayVerified": false,
+        "scheduleActivated": false,
+        "publication": {
+          "status": "PUBLISHED",
+          "receipt": {
+            "schemaVersion": 3,
+            "sessionId": "sample-session",
+            "revisionId": "11111111-1111-4111-8111-111111111111",
+            "revisionDigest": "11111111-1111-4111-8111-111111111111",
+            "learnedPlanHash": "2222222222222222222222222222222222222222222222222222222222222222",
+            "artifactHash": "3333333333333333333333333333333333333333333333333333333333333333",
+            "publicationEvidenceHash": "4444444444444444444444444444444444444444444444444444444444444444",
+            "publishedAt": "2026-10-09T12:00:00.000Z",
+            "learnedFromThisRun": true,
+            "replayVerified": false
+          }
+        },
+        "currentReadiness": {
+          "revisionId": "11111111-1111-4111-8111-111111111111",
+          "ready": false,
+          "code": "HEAD_CHANGED"
+        },
+        "evidence": {
+          "kind": "guidedLedger",
+          "ref": "sample-session",
+          "video": null
+        },
+        "actionTimings": [],
+        "errorCode": null
+      }
+    }
+  ]
+}

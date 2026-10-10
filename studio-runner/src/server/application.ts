@@ -1,3 +1,8 @@
+import { loadObservedBuild } from '../compat/runtime-versions.js';
+import { compiledObservedAccountRegistry } from '../run/observedAccount.js';
+import type { ObservedRunnerSupport } from './runCoordinator.js';
+import { readFileSync } from 'node:fs';
+import { demand, projectMountedPolicy, parseObservedBytes } from '../validator/observedReferencePolicy.js';
 /**
  * Wiring (AC-11, AC-12). `main.ts` is the thin shell around this; everything testable lives here.
  *
@@ -41,6 +46,7 @@ import { createRunnerServer } from './server.js';
 import type { RunnerServer } from './server.js';
 
 export interface ApplicationDependencies {
+  readonly observed?: ObservedRunnerSupport;
   readonly launcher: BrowserLauncher;
   readonly runtimeVersions: Readonly<Record<string, unknown>>;
   readonly http?: HttpClient | undefined;
@@ -152,7 +158,9 @@ export function createApplication(
 
   const now = dependencies.now ?? ((): number => performance.now());
 
+  const observed = dependencies.observed ?? loadObservedRunnerSupport({STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED:String(config.observedValidationEnabled),STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED:String(config.observedReplayEnabled),STUDIO_RUNNER_OBSERVED_CATALOG_FILE:config.observedCatalogFile,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:config.observedImageDigest,STUDIO_RUNNER_OBSERVED_POLICY_FILE:config.observedPolicyFile,PLAYWRIGHT_BROWSERS_PATH:process.env.PLAYWRIGHT_BROWSERS_PATH});
   const coordinator = createRunCoordinator({
+    ...(observed ? {observed} : {}),
     pool,
     admission,
     launcher: dependencies.launcher,
@@ -254,4 +262,16 @@ export function createApplication(
       return { completed };
     },
   };
+}
+
+export function loadObservedRunnerSupport(env:Readonly<Record<string,string|undefined>>=process.env):ObservedRunnerSupport|undefined {
+  const validationEnabled=env.STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED==='true',replayEnabled=env.STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED==='true';
+  for(const flag of [env.STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED,env.STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED])demand(flag===undefined||flag==='true'||flag==='false','INVALID_CONTRACT');
+  if(!validationEnabled&&!replayEnabled)return undefined;
+  const build=loadObservedBuild(env);demand(build,'PROFILE_MISMATCH');
+  const raw:unknown=env.STUDIO_RUNNER_OBSERVED_POLICY_FILE?parseObservedBytes(readFileSync(env.STUDIO_RUNNER_OBSERVED_POLICY_FILE),2097152):[];
+  demand(Array.isArray(raw)&&raw.length<=32,'POLICY_REFUSED');
+  const policies=raw.map(projectMountedPolicy);
+  demand(new Set(policies.map(p=>p.policyId+':'+p.policyVersion)).size===policies.length,'POLICY_REFUSED');
+  return {build,policies,accounts:compiledObservedAccountRegistry,validationEnabled,replayEnabled};
 }

@@ -1,0 +1,164 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Independent narrow delayed-state security/QA design review; not a final implementation QA or lifecycle gate",
+  "reviewer": "/root/obs005_peer",
+  "recordedAt": "2026-10-09T11:16:05.621833+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "summary": "Private exact-target acquisition, no-retry/late-result fencing, durable passive refresh and the genuine asynchronous receipt barrier are coherent. One budget-policy defect remains: reusing the 1..120-second browser timeout as a learning deadline before NEXT_ACTION charges model/human time and regresses valid existing guided runs, including cases with no acquisition wait. Clarify the minimal separate guided acquisition policy before implementation; no new user policy decision is needed.",
+  "blockers": [
+    {
+      "id": "DELAY-QA-001",
+      "priority": "P1",
+      "severity": "high",
+      "classification": "New budget-semantics regression in the design, not a missing test or request for live-model accuracy",
+      "finding": "Section4 starts a 1..120-second TestConfiguration source-step deadline before the first NEXT_ACTION request and charges model and human clarification time to it. The current configuration describes per-step browser execution; replay starts that clock at stepStarted. Guided inference separately allows a default 60-second model call and the immutable 600-second session, while human pauses expire under that session. The proposed default 30-second or minimum 1-second end-to-end learning clock can reject a previously valid run even when its target is already present and its actual browser operation is immediate. It also silently shortens an existing observed clarification whose question expiry is still the session expiry.",
+      "design_refs": [
+        "docs/specs/studio-observed-authoring/delayed-state-design.md:78",
+        "docs/specs/studio-observed-authoring/delayed-state-design.md:93"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/studio/dto/TestConfiguration.java:18",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java:16",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:764",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1266",
+        "studio-runner/src/executor/observedReplay.ts:124",
+        "docs/specs/studio-observed-authoring/consensus-plan.md:155"
+      ],
+      "required_minimal_policy": "Keep ordinary replay on the existing absolute browser source-step/run clocks. For guided learning, leave model/human time on the existing immutable session, per-call and cumulative model budgets. Explicitly bound passive acquisition separately: the minimal option is the existing session expiry plus retained per-step/per-session extra-poll and 400-observation/1MiB caps; if an acquisition-time cap is wanted, define a durable cumulative acquisition-only budget/episode policy that never replenishes spent time across operations, scanner restart, replan or clarification. Do not reinterpret the browser timeout as a new model/human SLA. If timeoutSeconds is used for acquisition-only duration, capture the real locked ui_tests value/configuration identity in private progress, not an invented source-manifest field. State exactly when that acquisition clock starts/stops and how original session expiry and in-flight monotonic poison fencing bound it. No new user approval is necessary to restore the already-authorized semantics.",
+      "required_oracles": [
+        "Configured browser timeout 1 second, target already present, controlled NEXT_ACTION response delayed beyond 1 second but within configured model/session budgets, immediate browser operation: delayed-readiness logic must not introduce an end-to-end timeout. This is a deterministic latency-boundary test, not a live-model benchmark.",
+        "Observed clarification answer arrives after the browser timeout but before the existing question/session expiry: preserve accepted answer meaning and normal bounded continuation; no new short hidden timeout merely for human response time.",
+        "A genuinely absent target exhausts the explicitly chosen passive-acquisition budget without extending session/model/observation limits, invoking an operation or restarting the budget on the next operation/replan/reconnect.",
+        "Compound-step/browser execution timeout during replay still uses one original absolute deadline, and delayed collection/matches/withhold results cannot commit invocation/binding/PASS after poison."
+      ]
+    }
+  ],
+  "implementationConditions": [
+    {
+      "id": "DELAY-QA-C1",
+      "area": "Evidence scope and actual asynchronous barrier",
+      "assessment": "The design correctly preserves synchronous smoke and previous controlled asynchronous failure as separate historical evidence. Current test HTML reveals Confirmation before fetch(/receipt), so that synchronous PASS cannot demonstrate delayed grounding.",
+      "required_oracles": [
+        "Submit handler awaits the real independent receipt response; hold that response until a genuine post-submit guided observation or replay private acquisition event proves Confirmation absent, then release and render. Do not use a small sleep or injected callback/metadata as proof.",
+        "One guided submit, original semantic obligations and one SOURCE_PLAN; no NEXT_ACTION while the required target is unavailable. Finalization produces zero effects/gateway calls; two recorded replays retain identical artifact and distinct unpredictable captured values, exactly one receipt each and both gateways zero."
+      ]
+    },
+    {
+      "id": "DELAY-QA-C2",
+      "area": "Private classification and permission",
+      "assessment": "READY/ABSENT/VISIBILITY_PENDING/REFUSED is an appropriately narrow private seam. Enum-only pending classification cannot grant a read or expose hidden candidate data. Safe absence requires complete private universe; sanitized empty nodes or false matches never establish it.",
+      "required_oracles": [
+        "Unchanged public observation/provider JSON retains existing byte/privacy canaries and existing collector fixture behavior. No hidden text/value/alternative locator/node escapes pending results.",
+        "Sensitive ancestry/descendants/label sources, unsupported or truncated universe, hidden competitor/duplicates, wrong origin/role/type/policy/classification and disabled/readonly incompatibility refuse rather than wait for a different target.",
+        "Visibility-only becomes READY only after normal export eligibility and exact positive grant/type checks; prospective hidden read permissions that cannot be established remain REFUSED."
+      ]
+    },
+    {
+      "id": "DELAY-QA-C3",
+      "area": "One-way invocation and late continuation fencing",
+      "assessment": "Replay absolute step/run control and synchronous poison before Promise.race rejection address the actual unfenced adapter continuation. Polling must be confined to PREPARING ABSENT/VISIBILITY_PENDING; acquisition cannot resume after target selection or invocation.",
+      "required_oracles": [
+        "Expire or cancel during observe/probe/sleep/matches/validate/withhold, release the late promise, and assert zero late invocation, binding insertion or PASS.",
+        "After READY, post-acquisition replacement is terminal; no locator fallback or reacquisition. Once invocation begins, timeout/ambiguous failure preserves unknown outcome and closes rather than retrying submit/fill/read-binding/assertion.",
+        "Failed assertions run once; captured read value is withheld and bound once or discarded after poison. Remaining steps preserve SKIPPED/null timing and honest video metadata."
+      ]
+    },
+    {
+      "id": "DELAY-QA-C4",
+      "area": "Durable guided continuation and immutable identities",
+      "assessment": "Existing authenticated observe/refresh, REFRESH/NEXT values and stored pending key are suitable. Recovery must precede fresh observation/proposal and every late completion must compare its originally pinned identities.",
+      "required_oracles": [
+        "Crash/concurrent scanner before/after pending claim and callback recovers the same key/generation/reservation, never another poll charge or duplicate effect. No sleep/network under session/source locks.",
+        "Source/configuration/plan/obligation/owner-fence changes reject the old poll/model result; same-owner renewal cannot reset budget. Do not overwrite the active pinned plan/obligation while its pending refresh remains unresolved.",
+        "No polling while admission/dispatch/unknown outcome or clarification is unresolved. Resume clarification through existing stored selection and fresh correspondence. Preserve old outcome/receipt recovery without inventing a new clock for already-effected sessions."
+      ]
+    },
+    {
+      "id": "DELAY-QA-C5",
+      "area": "Counts, bytes, accounting and provenance",
+      "assessment": "Per-step 32/per-run 200 additional polls and total 400 remain bounded; replay aggregate cap is explicit and current snapshot only is retained. Guided polling must still fit its actual 400-observation/1048576-byte session ceiling and existing model counters.",
+      "required_oracles": [
+        "Reserve before collection; actual-byte settlement and retained unknown reservations occur once, without duplicate refunds or negative counters. Tightened persisted limits win.",
+        "Compound operations, replan, reconnect and multiple scanners cannot reset per-step/session counters or replenish spent wait budget. Byte/count/session exhaustion commits known accounting and terminal stop before outward refusal.",
+        "Provider500 remains provider failure, not WAIT/readiness; late-usage reconciliation stays committed. Locked timeout provenance is actual ui_tests/configuration identity in private progress only."
+      ]
+    },
+    {
+      "id": "DELAY-QA-C6",
+      "area": "Ownership, compatibility and final verification scope",
+      "assessment": "All 166 literal paths are unique and the required additional translation/private-collector/test paths are present. No new public model/protocol/observation schema, migration, account capability or executable operation is required.",
+      "required_oracles": [
+        "Rebuild changed source/dist/catalog identity only after root authorizes the corrected design; earlier synchronous/frozen runner evidence remains historical, not proof of new acquisition code.",
+        "Rerun affected real pipeline, collector/privacy/native/confinement and dual-gateway mutation tests; preserve current operation/plan/binding hashes and source-free IPC.",
+        "No general live-model accuracy claim,009 benchmark or later007/008/010 work is required for this existing controlled asynchronous correctness case."
+      ]
+    }
+  ],
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/delayed-state-design.md": "2c83a7aa1ba08388517b0f1eee03c12362668466c6013cba2db144d3ed7d5c62",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "8a2f9f5f9f9570fb82ce5b64c2bf9bcf35af9103816a4094e67d684a89f1acf7",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "0fc9f264408daaf49d60ab3d0446928ed9a228310c58ec03c25964adaf8c1786",
+    ".ai/STUDIO-OBS-006-delayed-state-review.json": "6d6c25821ec579cf0d2dedb38e08702b5ac125f8758665b2d60302ec7a6d75ff",
+    "docs/specs/studio-observed-authoring/consensus-plan.md": "8f97af78155a57ee32127f4e2433a94f5e134d47896655743df65292cb12f44b",
+    "backend/src/main/java/com/citi/put/checks/studio/dto/TestConfiguration.java": "506aad6327fda6a46483ba70be407da56fca661dee4e9db62f2e1e9ad2ca0c8d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java": "07918c5c4a6cf9c40a4d199930a9e1c44f69dfabdad13710cb656384c0bb76ec",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "576b4fc572dcb568860a4e981e1007c0df015304952bd5383812fc0dc027d930",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "7788e2401ecbd5511c576d30ca7ccd4e1a9fb55bfe65a97296bcf1caf072058b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "1d79d04284a9f999b3fb18d96b2131325342297a01a1b22a6059c6b2f105e0f7",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java": "5d1230cad0322b3799928c7cdfbf02cccf5a6afe979f4ff0c9213954ac310197",
+    "studio-runner/src/run/observedReplayAdapter.ts": "ff0cb9108809294c75c5a9bd95a1e3eea7700fed350fbc22f8075f5725ea7c75",
+    "studio-runner/src/executor/observedReplay.ts": "152ce2afc80ff48396c21f6aa4d5532de3390467cea37793e3c0f692bf79a1a5",
+    "studio-runner/src/run/observationTypes.ts": "a1bb68ad620612ac3eb456599bfb45af8f4c00ad9d00cc67125bd2035e2572af",
+    "studio-runner/src/run/observationCollector.ts": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985",
+    "studio-runner/src/run/observationSanitizer.ts": "389b94dae82bdefe6519cb7c7ae3f23382430d2de31043220374f954d7a39d8c",
+    "studio-runner/src/guided/runtime.ts": "1aada55b70e769d8a8ede5bf447efef702c5a8b80fe196eadace2e4ad2b0836a",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "51359047b52f8832ecf99689080ca16a491255c5dcebf8ad482f53b78f43792e"
+  },
+  "frozenHashesMatch": true,
+  "ownership": {
+    "literalPaths": 166,
+    "uniquePaths": 166,
+    "requiredAffectedPathsCovered": [
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "studio-runner/src/run/observedReplayAdapter.ts",
+      "studio-runner/src/executor/observedReplay.ts",
+      "studio-runner/src/run/childRuntime.ts",
+      "studio-runner/src/run/observationTypes.ts",
+      "studio-runner/src/run/observationCollector.ts",
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/test/run/observation.test.ts",
+      "studio-runner/test/observedReplayExecutor.test.ts",
+      "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts"
+    ],
+    "missingRequiredPaths": [],
+    "noOwnershipChangesPerformed": true
+  },
+  "earlierFindingAssessment": {
+    "DELAY-001": "Addressed in design by bounded pre-invocation acquisition; async fixture still requires real implementation evidence.",
+    "DELAY-002": "Addressed in design by shared absolute replay deadline, synchronous poison and one-way invocation control; late-await tests required.",
+    "DELAY-003": "Addressed in design by private classification over existing bounded universe with fail-closed sensitivity/permission/ambiguity.",
+    "DELAY-004": "Real refresh/scanner continuation is specified, but its new model/human-inclusive learning timeout is blocked by DELAY-QA-001."
+  },
+  "evidenceTruth": {
+    "synchronousBaseline": "Preserved as supplied limited smoke evidence; current HTML reveals before receipt completion and does not cover delayed target availability.",
+    "historicalAsyncFailure": "Preserve the earlier controlled failure and provider-failure record; the design correctly requires a separate real async-after-receipt positive and negative oracle rather than relabeling the smoke or deferring to009.",
+    "executedHere": false,
+    "noRuntimeResultClaim": "No build, browser, SQL, model, integration or runtime test was executed in this design review."
+  },
+  "constraints": {
+    "writtenFile": ".ai/STUDIO-OBS-006-delayed-design-qa-review.json",
+    "implementationOrPriorReportsEdited": false,
+    "schemaDistStoryGateLifecycleCliChanges": false,
+    "subagents": false,
+    "commitPush": false,
+    "wholeWaveCeilingUsd": 500,
+    "spendTelemetry": "UNKNOWN",
+    "newUserPolicyApprovalNeeded": false
+  }
+}

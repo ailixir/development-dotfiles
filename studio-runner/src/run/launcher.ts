@@ -1,3 +1,4 @@
+import { ObservedPreReadyFailure } from './errors.js';
 /**
  * The real `BrowserLauncher`: the parent half of the killable child (AC-1, AC-4, AC-5, AC-20).
  *
@@ -54,10 +55,15 @@
  *   See `src/run/tree.ts`.
  */
 
+import type { Execute2, Launch2, Ready2, Result2 } from '../executor/observedOperations.js';
+import { demand, equalObserved, hashObserved, isRecord, OBSERVED_LIMITS, validateObserved } from '../validator/observedReferencePolicy.js';
+import { validateObservedExecute } from '../executor/observedReplay.js';
+import type { ObservedChildMessage, ObservedParentMessage } from './protocol.js';
+import type { StepReporter } from '../executor/adapters/StepReporter.js';
 import { fork } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
-import { readdir, readFile, stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readdir, readFile, stat, realpath } from 'node:fs/promises';
+import { join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import type { BrowserAdapter } from '../executor/adapters/BrowserAdapter.js';
@@ -82,7 +88,7 @@ import { PROTOCOL_VERSION, parseChildMessage } from './protocol.js';
 
 /** A spawned child, reduced to what the launcher needs. Injected so the unit tier spawns none. */
 export interface ChildProcessHandle {
-  send(message: ParentMessage): void;
+  send(message: ParentMessage | ObservedParentMessage): void;
   onMessage(listener: (value: unknown) => void): void;
   onExit(listener: (code: number | null, signal: string | null) => void): void;
   /**
@@ -418,6 +424,7 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
 
   return {
     async launch(launchOptions: LaunchOptions): Promise<BrowserSession> {
+      if(launchOptions.observed) return launchObservedChild(options,launchOptions,spawner,modulePath,parentEnv,stopTimeoutMs);
       // Chromium's temp directory has to exist before it is pointed at (AC-22).
       mkdirSync(join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), { recursive: true });
 
@@ -881,4 +888,130 @@ function createInbox(child: ChildProcessHandle): Inbox {
       });
     },
   };
+}
+
+/** Observed family uses the same confined spawner, recorded child and bounded process-group stop. */
+async function launchObservedChild(options: ChildLauncherOptions, launchOptions: LaunchOptions, spawner: ChildSpawner, modulePath: string, parentEnv: Readonly<Record<string, string | undefined>>, stopTimeoutMs: number): Promise<BrowserSession> {
+    const observed = launchOptions.observed;
+    demand(observed);
+    const { job, admission, policy } = observed, b = job.binding;
+    const execute: Execute2 = { kind: 'execute', protocolVersion: 2, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, profileHash: hashObserved(b.requiredProfile), configurationHash: b.configurationHash, waitStrategy: job.configuration.waitStrategy, stepTimeoutMs: launchOptions.stepTimeoutMs ?? job.runtime.stepTimeoutMs, steps: job.artifact.steps, guards: job.artifact.guards, bindings: job.artifact.replayPolicy.bindings.map(x => ({ bindingId: x.bindingId, producer: x.producer, recipe: x.recipe, origin: x.sourceOrigin })), transfers: job.artifact.replayPolicy.transfers, inputs: job.artifact.inputRecipes.map(i => { const v = job.inputs.find(x => x.inputId === i.inputId); demand(v); return { inputId: i.inputId, stepId: i.stepId, kind: i.kind, intendedSlot: i.intendedSlot, value: v.value }; }) };
+    validateObservedExecute(execute, b.scope);
+    const launch: Launch2 = { kind: 'launch', protocolVersion: 2, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, admission, profile: b.requiredProfile, build: b.requiredBuild, scopeHash: b.scopeHash, configurationHash: b.configurationHash, browser: 'chromium', viewport: job.configuration.viewport, recording: job.recording, seekOriginCalibrationMs: options.seekOriginCalibrationMs, scratchPath: launchOptions.scratchPath, totalRuntimeMs: launchOptions.totalRuntimeMs, accountHandle: job.accountHandle, policy };
+    validateObserved('replay-ipc#/definitions/Launch2', launch, OBSERVED_LIMITS.launch);
+    mkdirSync(join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), { recursive: true });
+    const env = childEnvironment(parentEnv, launchOptions.scratchPath);
+    for (const key of ['STUDIO_RUNNER_OBSERVED_CATALOG_FILE', 'STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST'])
+        if (parentEnv[key])
+            env[key] = parentEnv[key] ?? '';
+    demand(!launchOptions.signal?.aborted,'CANCELLED');
+    const child = spawner.spawn({ modulePath, args: [], env });
+    // Drain and discard all raw output from BEFORE the first launch/account message.
+    child.onOutput(() => undefined);
+    let result: Result2 | null = null, ready: Ready2 | null = null, exited = false, violation = false, executed = false, reporter: StepReporter | null = null, killReason: SessionKillReason | null = null;
+    const startedSteps = new Map<number, number>(), completedSteps = new Map<number, string>();
+    const waiters = new Set<() => void>();
+    const wake = (): void => { for (const f of waiters)
+        f(); };
+    child.onExit(() => { exited = true; wake(); });
+    child.onMessage(raw => {
+        try {
+            const kind = isRecord(raw) && typeof raw.kind === 'string' ? raw.kind : '';
+            const names: Readonly<Record<string, string>> = { ready: 'Ready2', result: 'Result2', 'step-started': 'StepStarted2', 'step-finished': 'StepFinished2' };
+            const name = names[kind];
+            demand(name);
+            const m = validateObserved<ObservedChildMessage>('replay-ipc#/definitions/' + name, raw, OBSERVED_LIMITS.result);
+            demand(m.runId === b.executionId && m.attemptId === b.attemptId);
+            if (m.kind === 'ready' || m.kind === 'result')
+                demand(m.admissionId === admission.admissionId && m.profileHash === hashObserved(b.requiredProfile) && equalObserved(m.build, b.requiredBuild), 'PROFILE_MISMATCH');
+            if (m.kind === 'ready') {
+                demand(!ready && !result);
+                validateObserved('replay-ipc#/definitions/Ready2', m, OBSERVED_LIMITS.ready);
+                ready = m;
+            }
+            else if (m.kind === 'result') {
+                demand(!result && (m.ok ? m.errorCode === null : m.errorCode !== null));
+                if (executed)
+                    demand(completedSteps.size === execute.steps.length && (!m.ok || execute.steps.every(s => completedSteps.get(s.stepIndex) === 'PASS')));
+                result = m;
+            }
+            else {
+                validateObserved(m.kind === 'step-started' ? 'replay-ipc#/definitions/StepStarted2' : 'replay-ipc#/definitions/StepFinished2', m, OBSERVED_LIMITS.step);
+                demand(executed && reporter && job.artifact.steps[m.stepIndex]?.stepId === m.stepId && !result);
+                if (m.kind === 'step-started') {
+                    demand(!startedSteps.has(m.stepIndex) && !completedSteps.has(m.stepIndex) && m.stepIndex === completedSteps.size);
+                    startedSteps.set(m.stepIndex, m.startedAtMs);
+                    reporter.stepStarted({ stepIndex: m.stepIndex, startedAtMs: m.startedAtMs });
+                }
+                else {
+                    demand(!completedSteps.has(m.stepIndex) && m.stepIndex === completedSteps.size);
+                    demand(m.status === 'SKIPPED' ? !startedSteps.has(m.stepIndex) : startedSteps.get(m.stepIndex) === m.startedAtMs);
+                    demand(m.status === 'SKIPPED' ? m.startedAtMs === null && m.finishedAtMs === null && m.durationMs === null && m.errorCode === null : m.startedAtMs !== null && m.finishedAtMs !== null && m.durationMs !== null && m.finishedAtMs >= m.startedAtMs && Math.abs(m.durationMs - (m.finishedAtMs - m.startedAtMs)) < 0.001 && (m.status === 'PASS' ? m.errorCode === null : m.errorCode !== null));
+                    completedSteps.set(m.stepIndex, m.status);
+                    reporter.stepFinished({ stepIndex: m.stepIndex, status: m.status, startedAtMs: m.startedAtMs, finishedAtMs: m.finishedAtMs, durationMs: m.durationMs, failure: m.errorCode });
+                }
+            }
+            wake();
+        }
+        catch {
+            violation = true;
+            child.kill();
+            wake();
+        }
+    });
+    const wait = async (predicate: () => boolean, timeoutMs: number): Promise<boolean> => {
+        if (predicate())
+            return true;
+        return new Promise(resolve => { const check = (): void => { if (predicate()) {
+            clearTimeout(timer);
+            waiters.delete(check);
+            resolve(true);
+        } }; const timer = setTimeout(() => { waiters.delete(check); resolve(false); }, Math.max(1, timeoutMs)); waiters.add(check); check(); });
+    };
+    let stopping: Promise<void> | null = null, ordered = false;
+    const performStop = async (): Promise<void> => { const requestedWhileLive=!exited;if (requestedWhileLive)
+        child.send({ kind: 'stop' }); ordered = requestedWhileLive&&await wait(() => exited, stopTimeoutMs); if (!ordered)
+        child.kill(); };
+    const stop = (): Promise<void> => { stopping ??= performStop(); return stopping; };
+    const cancelLaunch=():void=>{killReason??='cancel';void stop();};
+    launchOptions.signal?.addEventListener('abort',cancelLaunch,{once:true});
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Cancellation can arrive after the pre-spawn check.
+    if(launchOptions.signal?.aborted)cancelLaunch();else child.send(launch);
+    await wait(() => ready !== null || result !== null || exited || violation, Math.min(options.launchTimeoutMs, Date.parse(admission.startDeadlineAt) - Date.now()));
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
+    if (!ready || violation || launchOptions.signal?.aborted) {
+        await stop();
+        launchOptions.signal?.removeEventListener('abort',cancelLaunch);
+        const final=result as Result2|null;
+        const recording=await settleRecording({reported:final?{...final.recording,error:final.recording.errorCode}:{path:null,bytes:null,error:null,state:'UNAVAILABLE',partial:false},sawChildResult:final!==null,killed:!final,orderedStopCompleted:ordered,scratchPath:launchOptions.scratchPath});
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Abort/IPC callbacks settle independently of the launch await.
+        throw new ObservedPreReadyFailure(final?.errorCode??(launchOptions.signal?.aborted?'CANCELLED':'ACCOUNT_OR_LAUNCH_UNKNOWN'),await confineObservedRecording(recording,launchOptions.scratchPath));
+    }
+    launchOptions.signal?.removeEventListener('abort',cancelLaunch);
+    const origin = ready as Ready2;
+    return { adapter: createChildOwnedAdapter(), close: stop, run: { origin: { browserStartedAt: new Date(origin.browserStartedAt), startedAtMs: origin.startedAtMs, clock: null, ...(origin.calibrationOffsetMs === null ? {} : { calibrationOffsetMs: origin.calibrationOffsetMs }) }, async kill(reason) { killReason ??= reason; await stop(); return { orderedStopCompleted: ordered }; }, async execute(request) {
+                demand(!executed && !result && !violation);
+                executed = true;
+                reporter = request.reporter;
+                child.send(execute);
+                await wait(() => result !== null || exited || violation, Math.min(launchOptions.totalRuntimeMs, Date.parse(admission.runDeadlineAt) - Date.now()));
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
+                if (!result && !exited) {
+                    killReason ??= 'total-runtime';
+                    await stop();
+                }
+                else
+                    await stop();
+                const final = result as Result2 | null;
+                const recording = await settleRecording({ reported: final ? { ...final.recording, error: final.recording.errorCode } : { path: null, bytes: null, error: null, state: 'UNAVAILABLE', partial: false }, sawChildResult: final !== null, killed: killReason !== null, orderedStopCompleted: ordered, scratchPath: launchOptions.scratchPath });
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
+                return { ok: killReason === null && !violation && final?.ok === true, failureKind: killReason ? KILL_FAILURE_KINDS[killReason] : final?.errorCode === 'ASSERTION_FAILED' ? 'step' : final?.ok ? null : 'run-fault', failureMessage: killReason ? KILL_MESSAGES[killReason] : final?.errorCode ?? (violation ? 'INVALID_CONTRACT' : null), recording: await confineObservedRecording(recording,launchOptions.scratchPath), observedHosts: [] };
+            } } };
+}
+
+/** A child-supplied path is never an unrestricted file-upload capability. */
+async function confineObservedRecording(recording:SessionRecording,scratchPath:string):Promise<SessionRecording>{
+    if(recording.path===null)return recording;
+    try{const root=await realpath(scratchPath),file=await realpath(recording.path);if(!file.startsWith(root+sep)||!(await stat(file)).isFile())throw new Error('RECORDING_FAILED');return {...recording,path:file};}
+    catch{return {path:null,bytes:null,error:'RECORDING_FAILED',state:'FAILED',partial:false};}
 }

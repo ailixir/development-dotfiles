@@ -1,3 +1,4 @@
+import type { AdmissionReceipt, ObservedJob, TrustedPolicy } from '../executor/observedOperations.js';
 /**
  * The two seams `POST /v1/runs` needs beyond the ones 10.2 already provides (AC-6, AC-12, AC-21).
  *
@@ -167,6 +168,8 @@ export interface ChildDiagnosticsSink {
 }
 
 export interface LaunchOptions {
+  readonly signal?: AbortSignal;
+  readonly observed?: { readonly job: ObservedJob; readonly admission: AdmissionReceipt; readonly policy: TrustedPolicy };
   readonly browser: string;
   readonly viewport: { readonly width: number; readonly height: number };
   /**

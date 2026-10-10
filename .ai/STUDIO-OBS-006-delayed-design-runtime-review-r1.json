@@ -1,0 +1,212 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "narrow delayed-design R1 runtime re-review; not implementation QA",
+  "createdAt": "2026-10-09T11:34:13.436Z",
+  "verdict": "PASS",
+  "scope": {
+    "onlyWrittenFile": ".ai/STUDIO-OBS-006-delayed-design-runtime-review-r1.json",
+    "sourceDocsStorySchemasDistChanged": false,
+    "buildsTestsBrowserSqlRun": false,
+    "lifecycleDecision": false,
+    "sharedWaveCeilingUsd": 500,
+    "actualSpend": "unknown"
+  },
+  "frozenHashes": [
+    {
+      "path": "docs/specs/studio-observed-authoring/delayed-state-design.md",
+      "expected": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6",
+      "actual": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6",
+      "match": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/publication-contracts.md",
+      "expected": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+      "actual": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+      "match": true
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "expected": "8137183a7c5738bd73fc1a2e34cad150f2827f1c7087ade734847cb9a7cf2d74",
+      "actual": "8137183a7c5738bd73fc1a2e34cad150f2827f1c7087ade734847cb9a7cf2d74",
+      "match": true
+    },
+    {
+      "path": ".ai/STUDIO-OBS-006-delayed-design-resolution-r1.json",
+      "expected": "d253858a32555b47f1aa302b18b1a9f97cca3e1dd3f49a4d5baf0d6e90061959",
+      "actual": "d253858a32555b47f1aa302b18b1a9f97cca3e1dd3f49a4d5baf0d6e90061959",
+      "match": true
+    }
+  ],
+  "priorReview": {
+    "path": ".ai/STUDIO-OBS-006-delayed-design-runtime-review.json",
+    "sha256": "ca059582a22f5a8979a4529ce97ca67de8eabadecc1115db3957dd007403913b",
+    "preserved": true
+  },
+  "blockers": [],
+  "resolvedFindings": [
+    {
+      "id": "DELAY-RUNTIME-R1-001",
+      "disposition": "RESOLVED",
+      "rationale": "Sections4–4.2 remove the model/human end-to-end deadline. Immediately ready targets create no readiness window; calls remain on existing callSeconds/token/session limits, and answers remain on question/session expiry. A locked per-source-step allowance charges only open passive acquisition windows and remains cumulative across later operations/replan/clarification/restart.",
+      "concreteAccounting": "A window pre-reserves min(remaining allowance, session lifetime, acknowledged owner lease), persists original openedAt/deadline/id and increments usedMs. Known exact settlement releases only unused reserved duration once using window/poll CAS. Unsettled-pending recovery first makes uncertain sticky, retaining its complete reservation even after late evidence. Between-poll restart preserves the same window/deadline and charges downtime. Exhaustion/authority loss retains pending charges. Zero remaining readiness allowance does not reject an already-ready obligation or impose a stale window deadline on a model call.",
+      "sourceJoin": "The unchanged GuidedTranslationProperties callSeconds default60 and actual GuidedTranslationService model deadline remain independent, resolving the timeoutSeconds default30 conflict. Existing question/session expiry is untouched."
+    },
+    {
+      "id": "DELAY-RUNTIME-R1-002",
+      "disposition": "RESOLVED",
+      "rationale": "Sections1–2 now expressly permit the existing bounded private field/style-signature rereads, including snapshotField value/selected-option signatures, over the last retained inventory. New discovery, new raw sources, business capture, public nodes and model/IPC export remain forbidden. This matches actual matches() behavior and detects direct value mutation without DOM/input/change events.",
+      "sourceJoin": "Existing observationCollector.matches checks document/revision, structure, private snapshotField signatures and style signatures. R1 no longer promises a zero-value-read freshness check while requiring that same inventory. READY still requires an exported snapshot node and final matches/validateInvocation, so the diagnostic probe grants no execution authority."
+    }
+  ],
+  "retainedConditions": [
+    {
+      "id": "D-IMPL-1",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§2 cached reasons/exact complete private universe",
+      "rationale": "Retained cached reasons and complete bounded exact private universe; neither zero public nodes nor an unsafe unresolved name proves ABSENT.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "D-IMPL-2",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§2 and unchanged C12 original guard facts and operation compatibility",
+      "rationale": "Retained original recorded guard facts and operation-specific compatibility; READY pins the exported node of the exact snapshot, with no post-selection reacquisition.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "D-IMPL-3",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§1 conservative count/byte reservations and stricter guided limits",
+      "rationale": "Retained32 extra per source step,200 extra per run/session,400 total replay observations,13,107,200 replay bytes; pre-reserve32768 bytes and settle actual once, retaining unknown reservations. Guided400/1MiB remain stricter.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "D-IMPL-4",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§4.1 exact100ms/250ms cadence and no-I/O not-due202",
+      "rationale": "Guided cadence is now explicit: first extra refresh openedAt+100ms, subsequent refreshes acknowledged-settlement+250ms; not-due202 produces no I/O or count.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "D-IMPL-5",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§4.2 full immutable pending request/key/hash/expectedGeneration; existing committed refresh result recovery",
+      "rationale": "Pending state now holds the complete original ObservationRefresh2/requestHash/key/expectedGeneration. Recovery is expressly forbidden from using old refresh() current-generation reconstruction.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "D-IMPL-6",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§4.1–4.2 original authority/concurrency/recovery and retained late accounting",
+      "rationale": "Recover effects first; session/source/plan/obligation/worker/fence joins remain; one logical pending reservation is idempotent, and accounting survives outward refusal.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "D-IMPL-7",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§3 one-way invocation and synchronous poison at every await",
+      "rationale": "Retained synchronous poison before timeout rejection, check after every await, composed cancel/run deadlines and one-way beginInvocation; no late value/PASS or primitive retry.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "D-IMPL-8",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§2 local fixed closure-free cached probe and public byte privacy",
+      "rationale": "Private probe reuses cached facts and explicitly permitted existing retained field/style-signature checks; no new discovery/raw source/capture/export, and no public observation/model/IPC shape change.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "DELAY-QA-C1",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§5 genuine receipt/observation async barrier and exact effect/model counts",
+      "rationale": "Genuine asynchronous-after-receipt barrier retained, with separate observations/invocations/receipts/gateway counts and one guided plus two immutable-artifact replays.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "DELAY-QA-C2",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§2 conservative private eligibility and §5 mutation/privacy oracles",
+      "rationale": "Conservative eligibility, hidden competitor and unsafe hidden-label/grant refusal retained; direct property-value freshness and public-byte privacy tests are explicit.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "DELAY-QA-C3",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§3 poison/no reacquisition and §5 late-await/unknown outcomes",
+      "rationale": "Late-await poison, post-invocation uncertainty, compound-step clock and no reacquisition/assertion/capture/submit retry retained.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "DELAY-QA-C4",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§4.1–4.2 exact durable identity/window/request recovery",
+      "rationale": "Durable window/poll/source/plan/obligation/owner joins and exact callback-committed recovery are concrete; unrelated newer observation fails stale.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "DELAY-QA-C5",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§1 and §4.1–4.2 conservative reservation/settlement/no unknown refund",
+      "rationale": "usedMs includes reserved duration; known closure releases unused reservation once, recovered unsettled pending sets sticky uncertain and keeps full charge. Restart between settled polls retains original window/deadline/downtime; no reset/refund.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    },
+    {
+      "id": "DELAY-QA-C6",
+      "designDisposition": "SATISFIED",
+      "resolutionSection": "§6 precise ownership and unchanged payload/profile compatibility; renewed build evidence required",
+      "rationale": "167 literal ownership paths cover required implementation/test seams; no schema/protocol/migration/new-account expansion, and new source/dist/catalog evidence is required.",
+      "implementationEvidence": "PENDING; must be proved after implementation"
+    }
+  ],
+  "ownership": {
+    "literalCount": 167,
+    "uniqueCount": 167,
+    "allPriorRequiredPathsStillPresent": true,
+    "missingPriorRequiredPaths": [],
+    "resolutionRecordReserved": true,
+    "productOwnershipActivation": "Not inferred from design PASS; root retains implementation dispatch and current159-path partition until activation."
+  },
+  "actualSourceJoins": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+      "sha256": "1045d1a706a34c10791a335e674dd2893f392e77d32086947f68e76d0b2fa876",
+      "assessment": "Existing synchronous no-transaction one-send client can be called through the specified bounded virtual-thread task without a wire/client retry change. Cancellation remains best effort; late results require durable checks."
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "1d79d04284a9f999b3fb18d96b2131325342297a01a1b22a6059c6b2f105e0f7",
+      "assessment": "Existing begin/committed observation refresh stores exact request and correlation and accepts recovery only if its generation/hash remains current. R1 uses this existing anchor rather than synthesizing a refresh from current generation."
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "7788e2401ecbd5511c576d30ca7ccd4e1a9fb55bfe65a97296bcf1caf072058b",
+      "assessment": "Existing REFRESH/NEXT continuation values remain valid; private progress is the proposed accounting store. No new WAIT enum or V32 migration is required."
+    },
+    {
+      "path": "studio-runner/src/run/observationCollector.ts",
+      "sha256": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985",
+      "assessment": "New cached reason classification is still real implementation work. Existing bounded inventories/freshness checks provide the permitted sources; hidden unsafe names/grants must remain REFUSED."
+    },
+    {
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "sha256": "152ce2afc80ff48396c21f6aa4d5532de3390467cea37793e3c0f692bf79a1a5",
+      "assessment": "Current Promise.race alone is not the future fence. R1 explicitly requires control poisoning before rejection, same source-step deadline and guarded capture/PASS settlement."
+    }
+  ],
+  "implementationOracles": [
+    "With browser timeout1s, a ready target survives a valid model call longer than1s but within existing call/session limits; a human answer within existing question/session expiry retains exact meaning without resetting readiness usage.",
+    "Two known readiness windows in one compound source step share cumulative charge. Crash before/after exact refresh/callback, concurrent recovery and renewal cannot create another duration/poll reservation or refund unknown time. Ready targets can proceed after all readiness allowance was charged; unavailable targets cannot.",
+    "Use database-backed current time and fail closed on now<lastCheckedAt. Keep a monotonic in-flight ceiling bounded by the original window and15s existing HTTP ceiling; interrupt/late return must not enable a model send or semantic admission. Do not hold database locks over I/O.",
+    "Callback committed before readiness settlement must recover using the original full request/key/hash/old expectedGeneration. A newer unrelated observation must not be overwritten or used to refund/rebuild that old pending request.",
+    "Genuine submit response is held until an actual missing-Confirmation observation/probe occurs, then released before asynchronous render. Count one initial receipt, zero finalization effects, two later fresh-value receipts, identical artifact, and zero both replay gateways.",
+    "Private classification proves complete safe absence, handles hidden competitors and denies unknown/truncated/sensitive/unsupported candidates without new raw reads. Direct value/selected-option mutations invalidate freshness. Public observation/provider privacy bytes remain unchanged.",
+    "Compose source-step/run cancellation, poison before timeout rejection, fence every awaited collection/probe/matches/validate/withhold and binding/PASS commit. Once acquired/invoking, no reacquisition, repeated read binding, assertion or mutation.",
+    "Renew actual frozen source/dist/catalog and affected legacy/native/normal-pipeline evidence; preserve prior failed asynchronous and synchronous proofs. Broader live-model/site benchmarks remain009, while controlled delayed-state correctness stays006."
+  ],
+  "acceptedTradeoffs": [
+    "A concurrent recovery may conservatively retain an entire pending window even without a process crash; this intentionally sacrifices available waiting time rather than refunds unknown work.",
+    "The initial window is capped by the then-current owner lease as well as session/allowance. Same-owner renewal does not move that existing window deadline.",
+    "Hidden candidates whose names or prospective grants require unsafe/new raw reads remain unsupported/refused; visibility-only waiting is not a blanket hidden-content exception.",
+    "This design PASS resolves the two identified blockers; it is not proof that the unimplemented private probe, duration accounting or async flow already works."
+  ]
+}

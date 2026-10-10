@@ -217,6 +217,30 @@ public class UITestExecution {
   @Column(name = "created_at", nullable = false, updatable = false)
   private Instant createdAt;
 
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(name = "observed_revision_binding", columnDefinition = "jsonb", updatable = false)
+  private String observedRevisionBinding;
+
+  @JdbcTypeCode(SqlTypes.JSON)
+  @Column(
+      name = "observed_admission_receipt",
+      columnDefinition = "jsonb",
+      insertable = false,
+      updatable = false)
+  private String observedAdmissionReceipt;
+
+  public String getObservedRevisionBinding() {
+    return observedRevisionBinding;
+  }
+
+  public void setObservedRevisionBinding(String binding) {
+    this.observedRevisionBinding = binding;
+  }
+
+  public String getObservedAdmissionReceipt() {
+    return observedAdmissionReceipt;
+  }
+
   protected UITestExecution() {}
 
   /**
@@ -230,6 +254,11 @@ public class UITestExecution {
     this.startedAt = acceptedAt;
     this.csiId = csiId;
     this.createdAt = Instant.now();
+  }
+
+  public UITestExecution(UUID id, UUID testId, String status, Instant acceptedAt, String csiId) {
+    this(testId, status, acceptedAt, csiId);
+    this.id = java.util.Objects.requireNonNull(id);
   }
 
   public UUID getId() {

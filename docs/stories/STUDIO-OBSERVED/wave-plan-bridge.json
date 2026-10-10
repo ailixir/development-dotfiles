@@ -1,0 +1,730 @@
+{
+  "version": 1,
+  "kind": "wave-execute",
+  "waveId": "STUDIO-OBSERVED",
+  "status": "planned",
+  "mode": "interactive",
+  "stories": [
+    {
+      "storyId": "STUDIO-OBS-001",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md",
+      "status": "Done",
+      "dependsOn": [],
+      "fileList": [
+        "docs/architecture/ADR-SC-004-observed-authoring.md",
+        "docs/specs/studio-observed-authoring/contracts/README.md",
+        "docs/specs/studio-observed-authoring/contracts/action.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/authored-inputs.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/binding.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/clarification.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/commands.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/common.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/dependency-proposal.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/error.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/fixtures.json",
+        "docs/specs/studio-observed-authoring/contracts/learned-plan.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/ledger.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/limits.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/observation.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/pending-bindings.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/planning-context.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/proposal-result.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/result.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/revision.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/runner-context.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/session-view.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/session.schema.json",
+        "docs/specs/studio-observed-authoring/openapi.yaml",
+        "tools/check-studio-observed-contracts.cjs",
+        "docs/qa/evidence/STUDIO-OBS-001-contract-verification.json",
+        "docs/qa/evidence/STUDIO-OBS-001-qa-fixes-verification.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-002",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md",
+      "status": "Done",
+      "dependsOn": [
+        "STUDIO-OBS-001"
+      ],
+      "fileList": [
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/observationCollector.ts",
+        "studio-runner/src/run/observationSanitizer.ts",
+        "studio-runner/src/run/observationTypes.ts",
+        "studio-runner/test/run/observation.test.ts",
+        "docs/qa/evidence/STUDIO-OBS-002-dev-fixes-verification.json",
+        "docs/specs/studio-observed-authoring/contracts/README.md",
+        "docs/specs/studio-observed-authoring/contracts/fixtures.json",
+        "docs/specs/studio-observed-authoring/openapi.yaml",
+        "tools/check-studio-observed-contracts.cjs",
+        "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-003",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md",
+      "status": "Done",
+      "dependsOn": [
+        "STUDIO-OBS-001"
+      ],
+      "fileList": [
+        "docs/specs/studio-observed-authoring/openapi.yaml",
+        "docs/specs/studio-observed-authoring/contracts/README.md",
+        ".ai/STUDIO-OBS-003-qa-fixes.json",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+        ".ai/STUDIO-OBS-003-development.json",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionException.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionAccess.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+        "backend/build.gradle.kts",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSecurityTest.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java",
+        "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-004",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md",
+      "status": "Draft",
+      "dependsOn": [
+        "STUDIO-OBS-001",
+        "STUDIO-OBS-002",
+        "STUDIO-OBS-003"
+      ],
+      "fileList": [
+        "docs/specs/studio-observed-authoring/bridge-design.md",
+        "docs/specs/studio-observed-authoring/contracts/README.md",
+        "docs/specs/studio-observed-authoring/contracts/v2/",
+        "docs/specs/studio-observed-authoring/openapi.yaml",
+        "tools/check-studio-observed-contracts.cjs",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionAccess.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidator.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+        "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidatorTest.java",
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/observationCollector.ts",
+        "studio-runner/src/run/observationTypes.ts",
+        "studio-runner/src/run/guidedProtocol.ts",
+        "studio-runner/src/run/guidedDispatchJournal.ts",
+        "studio-runner/src/compat/guidedCompatibility.ts",
+        "studio-runner/src/run/childRuntime.ts",
+        "studio-runner/src/run/protocol.ts",
+        "studio-runner/src/run/launcher.ts",
+        "studio-runner/src/run/playwrightAdapter.ts",
+        "studio-runner/src/run/outputRelay.ts",
+        "studio-runner/src/executor/operations.ts",
+        "studio-runner/src/executor/executor.ts",
+        "studio-runner/src/executor/adapters/BrowserAdapter.ts",
+        "studio-runner/src/executor/guidedValues.ts",
+        "studio-runner/src/server/guidedCoordinator.ts",
+        "studio-runner/src/server/guidedRoutes.ts",
+        "studio-runner/src/server/guidedServiceAuth.ts",
+        "studio-runner/src/server/routes.ts",
+        "studio-runner/src/server/config.ts",
+        "studio-runner/src/server/application.ts",
+        "studio-runner/test/run/guidedDispatchJournal.test.ts",
+        "studio-runner/test/run/observation.test.ts",
+        "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+        "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-005",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+      "status": "Draft",
+      "dependsOn": [
+        "STUDIO-OBS-001",
+        "STUDIO-OBS-002",
+        "STUDIO-OBS-003",
+        "STUDIO-OBS-004"
+      ],
+      "fileList": [
+        "docs/specs/studio-observed-authoring/bridge-design.md",
+        "docs/specs/studio-observed-authoring/contracts/v2/planning-context.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v2/planning-fixtures.json",
+        "docs/specs/studio-observed-authoring/openapi.yaml",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java",
+        "backend/src/main/resources/studio/guided-output-contract.md",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolverTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-006",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "status": "Draft",
+      "dependsOn": [
+        "STUDIO-OBS-004",
+        "STUDIO-OBS-005"
+      ],
+      "fileList": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/GuidedRunOrchestrator.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/GuidedPlanPublisher.java",
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java",
+        "studio-runner/src/validator/index.ts",
+        "studio-runner/src/validator/ast.ts",
+        "studio-runner/src/validator/referencePolicy.ts",
+        "studio-runner/src/versions.ts",
+        "docs/runbooks/studio-guided-authoring.md",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-007",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "status": "Draft",
+      "dependsOn": [
+        "STUDIO-OBS-006"
+      ],
+      "fileList": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/auth/GuidedAccountService.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/auth/GuidedAuthCapabilities.java",
+        "studio-runner/src/run/guidedAuthentication.ts",
+        "studio-runner/src/run/browser.ts",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/auth/GuidedAuthenticationIT.java",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-008",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+      "status": "Draft",
+      "dependsOn": [
+        "STUDIO-OBS-007"
+      ],
+      "fileList": [
+        "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+        "frontend/src/components/studio/run/useRunGate.ts",
+        "frontend/src/components/studio/guided/GuidedRunStatus.tsx",
+        "frontend/src/components/studio/guided/GuidedClarification.tsx",
+        "frontend/src/services/api/studioGuidedApi.ts",
+        "frontend/src/services/mocks/studio/guidedHandlers.ts",
+        "frontend/src/types/studio/studioGuidedTypes.ts",
+        "frontend/src/components/studio/evidence/GuidedEvidence.tsx",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-009",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+      "status": "Draft",
+      "dependsOn": [
+        "STUDIO-OBS-008"
+      ],
+      "fileList": [
+        "studio-runner/evaluation/observed-authoring/manifest.json",
+        "studio-runner/evaluation/observed-authoring/fixture-server.mjs",
+        "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+        "frontend/e2e/studio-observed-authoring.spec.ts",
+        "docs/qa/evidence/studio-observed-authoring/acceptance.json",
+        "docs/qa/evidence/studio-observed-authoring/benchmark.json",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md"
+      ]
+    },
+    {
+      "storyId": "STUDIO-OBS-010",
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+      "status": "Draft",
+      "dependsOn": [
+        "STUDIO-OBS-009"
+      ],
+      "fileList": [
+        "docs/qa/evidence/studio-observed-authoring/usability-pilot.md",
+        "docs/qa/evidence/studio-observed-authoring/release-readiness.md",
+        "docs/runbooks/studio-guided-authoring.md",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md"
+      ]
+    }
+  ],
+  "batches": [
+    {
+      "index": 1,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-001",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md",
+          "status": "Done",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [],
+          "fileList": [
+            "docs/architecture/ADR-SC-004-observed-authoring.md",
+            "docs/specs/studio-observed-authoring/contracts/README.md",
+            "docs/specs/studio-observed-authoring/contracts/action.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/authored-inputs.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/binding.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/clarification.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/commands.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/common.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/dependency-proposal.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/error.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/fixtures.json",
+            "docs/specs/studio-observed-authoring/contracts/learned-plan.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/ledger.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/limits.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/observation.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/pending-bindings.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/planning-context.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/proposal-result.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/result.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/revision.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/runner-context.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/session-view.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/session.schema.json",
+            "docs/specs/studio-observed-authoring/openapi.yaml",
+            "tools/check-studio-observed-contracts.cjs",
+            "docs/qa/evidence/STUDIO-OBS-001-contract-verification.json",
+            "docs/qa/evidence/STUDIO-OBS-001-qa-fixes-verification.json",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 2,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-002",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md",
+          "status": "Done",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-001"
+          ],
+          "fileList": [
+            "studio-runner/src/run/browser.ts",
+            "studio-runner/src/run/browserFactory.ts",
+            "studio-runner/src/run/observationCollector.ts",
+            "studio-runner/src/run/observationSanitizer.ts",
+            "studio-runner/src/run/observationTypes.ts",
+            "studio-runner/test/run/observation.test.ts",
+            "docs/qa/evidence/STUDIO-OBS-002-dev-fixes-verification.json",
+            "docs/specs/studio-observed-authoring/contracts/README.md",
+            "docs/specs/studio-observed-authoring/contracts/fixtures.json",
+            "docs/specs/studio-observed-authoring/openapi.yaml",
+            "tools/check-studio-observed-contracts.cjs",
+            "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 3,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-003",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md",
+          "status": "Done",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-001"
+          ],
+          "fileList": [
+            "docs/specs/studio-observed-authoring/openapi.yaml",
+            "docs/specs/studio-observed-authoring/contracts/README.md",
+            ".ai/STUDIO-OBS-003-qa-fixes.json",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+            ".ai/STUDIO-OBS-003-development.json",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionException.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionAccess.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+            "backend/build.gradle.kts",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSecurityTest.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java",
+            "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 4,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-004",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md",
+          "status": "Draft",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-001",
+            "STUDIO-OBS-002",
+            "STUDIO-OBS-003"
+          ],
+          "fileList": [
+            "docs/specs/studio-observed-authoring/bridge-design.md",
+            "docs/specs/studio-observed-authoring/contracts/README.md",
+            "docs/specs/studio-observed-authoring/contracts/v2/",
+            "docs/specs/studio-observed-authoring/openapi.yaml",
+            "tools/check-studio-observed-contracts.cjs",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionAccess.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionProperties.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionReaper.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedRunnerClient.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidator.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedBindingStore.java",
+            "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedBridgeIntegrationTest.java",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/bridge/GuidedSourceReferenceValidatorTest.java",
+            "studio-runner/src/run/browser.ts",
+            "studio-runner/src/run/browserFactory.ts",
+            "studio-runner/src/run/observationCollector.ts",
+            "studio-runner/src/run/observationTypes.ts",
+            "studio-runner/src/run/guidedProtocol.ts",
+            "studio-runner/src/run/guidedDispatchJournal.ts",
+            "studio-runner/src/compat/guidedCompatibility.ts",
+            "studio-runner/src/run/childRuntime.ts",
+            "studio-runner/src/run/protocol.ts",
+            "studio-runner/src/run/launcher.ts",
+            "studio-runner/src/run/playwrightAdapter.ts",
+            "studio-runner/src/run/outputRelay.ts",
+            "studio-runner/src/executor/operations.ts",
+            "studio-runner/src/executor/executor.ts",
+            "studio-runner/src/executor/adapters/BrowserAdapter.ts",
+            "studio-runner/src/executor/guidedValues.ts",
+            "studio-runner/src/server/guidedCoordinator.ts",
+            "studio-runner/src/server/guidedRoutes.ts",
+            "studio-runner/src/server/guidedServiceAuth.ts",
+            "studio-runner/src/server/routes.ts",
+            "studio-runner/src/server/config.ts",
+            "studio-runner/src/server/application.ts",
+            "studio-runner/test/run/guidedDispatchJournal.test.ts",
+            "studio-runner/test/run/observation.test.ts",
+            "studio-runner/test/fixtures-tier/observed-authoring-snapshot.test.ts",
+            "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 5,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-005",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+          "status": "Draft",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-001",
+            "STUDIO-OBS-002",
+            "STUDIO-OBS-003",
+            "STUDIO-OBS-004"
+          ],
+          "fileList": [
+            "docs/specs/studio-observed-authoring/bridge-design.md",
+            "docs/specs/studio-observed-authoring/contracts/v2/planning-context.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json",
+            "docs/specs/studio-observed-authoring/contracts/v2/planning-fixtures.json",
+            "docs/specs/studio-observed-authoring/openapi.yaml",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/gateway/GenAiLlmGatewayClient.java",
+            "backend/src/main/resources/studio/guided-output-contract.md",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolverTest.java",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningIntegrationTest.java",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedGatewayPrivacyTest.java",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 6,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-006",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+          "status": "Draft",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-004",
+            "STUDIO-OBS-005"
+          ],
+          "fileList": [
+            "backend/src/main/java/com/citi/put/checks/studio/guided/GuidedRunOrchestrator.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/GuidedPlanPublisher.java",
+            "backend/src/main/java/com/citi/put/checks/studio/StudioService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/compile/CompilePins.java",
+            "studio-runner/src/validator/index.ts",
+            "studio-runner/src/validator/ast.ts",
+            "studio-runner/src/validator/referencePolicy.ts",
+            "studio-runner/src/versions.ts",
+            "docs/runbooks/studio-guided-authoring.md",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 7,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-007",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+          "status": "Draft",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-006"
+          ],
+          "fileList": [
+            "backend/src/main/java/com/citi/put/checks/studio/guided/auth/GuidedAccountService.java",
+            "backend/src/main/java/com/citi/put/checks/studio/guided/auth/GuidedAuthCapabilities.java",
+            "studio-runner/src/run/guidedAuthentication.ts",
+            "studio-runner/src/run/browser.ts",
+            "backend/src/test/java/com/citi/put/checks/studio/guided/auth/GuidedAuthenticationIT.java",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 8,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-008",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "status": "Draft",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-007"
+          ],
+          "fileList": [
+            "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+            "frontend/src/components/studio/run/useRunGate.ts",
+            "frontend/src/components/studio/guided/GuidedRunStatus.tsx",
+            "frontend/src/components/studio/guided/GuidedClarification.tsx",
+            "frontend/src/services/api/studioGuidedApi.ts",
+            "frontend/src/services/mocks/studio/guidedHandlers.ts",
+            "frontend/src/types/studio/studioGuidedTypes.ts",
+            "frontend/src/components/studio/evidence/GuidedEvidence.tsx",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 9,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-009",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md",
+          "status": "Draft",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-008"
+          ],
+          "fileList": [
+            "studio-runner/evaluation/observed-authoring/manifest.json",
+            "studio-runner/evaluation/observed-authoring/fixture-server.mjs",
+            "studio-runner/evaluation/observed-authoring/evaluate.mjs",
+            "frontend/e2e/studio-observed-authoring.spec.ts",
+            "docs/qa/evidence/studio-observed-authoring/acceptance.json",
+            "docs/qa/evidence/studio-observed-authoring/benchmark.json",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md"
+          ]
+        }
+      ]
+    },
+    {
+      "index": 10,
+      "stories": [
+        {
+          "storyId": "STUDIO-OBS-010",
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+          "absPath": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md",
+          "status": "Draft",
+          "partition": "parallel",
+          "partition_source": "file-ownership",
+          "dependsOn": [
+            "STUDIO-OBS-009"
+          ],
+          "fileList": [
+            "docs/qa/evidence/studio-observed-authoring/usability-pilot.md",
+            "docs/qa/evidence/studio-observed-authoring/release-readiness.md",
+            "docs/runbooks/studio-guided-authoring.md",
+            "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-010.story.md"
+          ]
+        }
+      ]
+    }
+  ],
+  "graph": {
+    "nodes": [
+      "STUDIO-OBS-001",
+      "STUDIO-OBS-002",
+      "STUDIO-OBS-003",
+      "STUDIO-OBS-004",
+      "STUDIO-OBS-005",
+      "STUDIO-OBS-006",
+      "STUDIO-OBS-007",
+      "STUDIO-OBS-008",
+      "STUDIO-OBS-009",
+      "STUDIO-OBS-010"
+    ],
+    "edges": [
+      {
+        "from": "STUDIO-OBS-001",
+        "to": "STUDIO-OBS-002"
+      },
+      {
+        "from": "STUDIO-OBS-001",
+        "to": "STUDIO-OBS-003"
+      },
+      {
+        "from": "STUDIO-OBS-001",
+        "to": "STUDIO-OBS-004"
+      },
+      {
+        "from": "STUDIO-OBS-002",
+        "to": "STUDIO-OBS-004"
+      },
+      {
+        "from": "STUDIO-OBS-003",
+        "to": "STUDIO-OBS-004"
+      },
+      {
+        "from": "STUDIO-OBS-001",
+        "to": "STUDIO-OBS-005"
+      },
+      {
+        "from": "STUDIO-OBS-002",
+        "to": "STUDIO-OBS-005"
+      },
+      {
+        "from": "STUDIO-OBS-003",
+        "to": "STUDIO-OBS-005"
+      },
+      {
+        "from": "STUDIO-OBS-004",
+        "to": "STUDIO-OBS-005"
+      },
+      {
+        "from": "STUDIO-OBS-004",
+        "to": "STUDIO-OBS-006"
+      },
+      {
+        "from": "STUDIO-OBS-005",
+        "to": "STUDIO-OBS-006"
+      },
+      {
+        "from": "STUDIO-OBS-006",
+        "to": "STUDIO-OBS-007"
+      },
+      {
+        "from": "STUDIO-OBS-007",
+        "to": "STUDIO-OBS-008"
+      },
+      {
+        "from": "STUDIO-OBS-008",
+        "to": "STUDIO-OBS-009"
+      },
+      {
+        "from": "STUDIO-OBS-009",
+        "to": "STUDIO-OBS-010"
+      }
+    ]
+  },
+  "errors": [],
+  "createdAt": "2026-10-08T05:50:32.532Z",
+  "updatedAt": "2026-10-08T05:50:32.532Z"
+}

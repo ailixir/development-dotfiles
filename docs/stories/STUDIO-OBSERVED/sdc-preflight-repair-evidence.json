@@ -1,0 +1,22 @@
+{
+  "passed": 32,
+  "failed": 0,
+  "method": "node --test tools/tests/aiox-sdc-preflight.test.cjs; exercises actual repository module and workspace CLI",
+  "patch": "sdc-preflight-repair.patch",
+  "applied": true,
+  "budgetCeilingUsd": 500,
+  "checksCovered": [
+    "Draft validation with plain and Markdown status",
+    "Draft development/fix/unknown task refusal",
+    "Ready/InProgress/InReview implementation",
+    "Done implementation refusal",
+    "Done closure only",
+    "Review phase status",
+    "Already Ready validation refusal",
+    "Absent/nonpositive budget rejection",
+    "Unsafe prompt rejection",
+    "Missing story rejection"
+  ],
+  "cliPreflight": "PASS for STUDIO-OBS-001 validate; Draft develop remains refused",
+  "globalInstallChanged": false
+}

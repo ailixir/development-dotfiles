@@ -173,3 +173,56 @@ describe('runtime-versions generation', () => {
     ).toThrow(/does not match the pinned typescript dependency/);
   });
 });
+
+// Observed startup authorizes a separate family using actual packaged schema/reference identities.
+import {loadObservedBuild} from '../src/compat/runtime-versions.js';
+import {OBSERVED_PROFILE,OBSERVED_SCHEMA_BUNDLE_HASH,hashObserved} from '../src/validator/observedReferencePolicy.js';
+it('refuses missing/tampered observed release catalogs independently of legacy runtime compatibility',()=>{
+  expect(loadObservedBuild({})).toBeNull();
+  expect(()=>loadObservedBuild({STUDIO_RUNNER_OBSERVED_CATALOG_FILE:'/definitely/missing',STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:'a'.repeat(64)})).toThrow('PROFILE_MISMATCH');
+});
+
+it('checks observed bundle/image/installed revision joins with a controlled startup filesystem',()=>{
+  const root=mkdtempSync(join(tmpdir(),'observed-support-'));directories.push(root);
+  const browsers=JSON.parse(readFileSync(join(packageRoot,'node_modules/playwright-core/browsers.json'),'utf8')) as {browsers:{name:string;revision:string}[]};
+  const revision=browsers.browsers.find(b=>b.name==='chromium')?.revision;if(!revision)throw Error('missing package revision');
+  const executable=process.platform==='darwin'?'chrome-mac-'+process.arch+'/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing':process.platform==='linux'?'chrome-linux64/chrome':'chrome-win64/chrome.exe';
+  const browserRoot=join(root,'browsers'),directory=join(browserRoot,'chromium-'+revision),binary=join(directory,executable);
+  const references={controlled:'reference'},build={profileHash:hashObserved(OBSERVED_PROFILE),schemaBundleHash:OBSERVED_SCHEMA_BUNDLE_HASH,referenceBundleHash:hashObserved(references),executableImageDigest:'a'.repeat(64),chromiumBuild:revision};
+  const catalog=join(root,'catalog.json'),runtime=join(root,'runtime.json'),ref=join(root,'references.json');
+  writeFileSync(catalog,JSON.stringify({profile:OBSERVED_PROFILE,build}));writeFileSync(runtime,JSON.stringify({observedSchemaBundleHash:build.schemaBundleHash,observedReferenceBundleHash:build.referenceBundleHash,observedChromiumBuild:revision}));writeFileSync(ref,JSON.stringify(references));
+  const env={STUDIO_RUNNER_OBSERVED_CATALOG_FILE:catalog,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:build.executableImageDigest,PLAYWRIGHT_BROWSERS_PATH:browserRoot};
+  expect(()=>loadObservedBuild(env,runtime,ref)).toThrow('PROFILE_MISMATCH');
+  mkdirSync(join(binary,'..'),{recursive:true});writeFileSync(binary,'controlled executable presence fixture; never executed');writeFileSync(join(directory,'INSTALLATION_COMPLETE'),'');
+  expect(loadObservedBuild(env,runtime,ref)).toEqual(build);
+  expect(()=>loadObservedBuild({...env,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:'b'.repeat(64)},runtime,ref)).toThrow('PROFILE_MISMATCH');
+  writeFileSync(ref,JSON.stringify({controlled:'tampered'}));expect(()=>loadObservedBuild(env,runtime,ref)).toThrow('PROFILE_MISMATCH');
+});
+
+import {checkPins} from '../scripts/check-pins.mjs';
+import publicationReferences from '../../docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json' with {type:'json'};
+it('packages independently authored choice evidence without rewriting previous reference bytes',()=>{
+  const workspace=mkdtempSync(join(tmpdir(),'observed-choice-package-'));directories.push(workspace);const root=join(workspace,'studio-runner');mkdirSync(root);
+  for(const file of ['package.json','package-lock.json','Dockerfile','.nvmrc'])cpSync(join(packageRoot,file),join(root,file));
+  for(const dir of ['src/validator','dist/validator','fixtures/observed-reference'])mkdirSync(join(root,dir),{recursive:true});
+  const source=join(packageRoot,'src','validator','observedSchemas.json');cpSync(source,join(root,'src','validator','observedSchemas.json'));cpSync(source,join(root,'dist','validator','observedSchemas.json'));
+  const original=JSON.stringify({controlled:'untouched-é🧪'});writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),original);
+  const choiceDir=join(workspace,'docs','specs','studio-observed-authoring','contracts','v2');mkdirSync(choiceDir,{recursive:true});const choiceFile=join(choiceDir,'publication-fixtures.json');writeFileSync(choiceFile,JSON.stringify(publicationReferences));
+  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'});
+  expect(checkPins(root).ok).toBe(true);expect(readFileSync(join(root,'fixtures','observed-reference','fixture.json'),'utf8')).toBe(original);
+  const packaged=JSON.parse(readFileSync(join(root,'dist','observed-reference.json'),'utf8')) as Record<string,unknown>;expect(packaged['accepted-observed-choice.json']).toEqual(publicationReferences.observedChoice);
+  const stale=structuredClone(publicationReferences);stale.observedChoice.description+='changed';writeFileSync(choiceFile,JSON.stringify(stale));expect(checkPins(root).failures).toContain('Observed packaged reference bundle is stale.');
+  writeFileSync(choiceFile,'{}');expect(checkPins(root).failures).toContain('Observed packaged support files are missing or invalid.');
+  expect(()=>writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'})).toThrow('Observed choice reference evidence is missing or invalid.');
+});
+it('builds packaged observed bundles and refuses a stale schema/reference artifact independently',()=>{
+  const root=mkdtempSync(join(tmpdir(),'observed-package-'));directories.push(root);
+  for(const file of ['package.json','package-lock.json','Dockerfile','.nvmrc'])cpSync(join(packageRoot,file),join(root,file));
+  mkdirSync(join(root,'src','validator'),{recursive:true});mkdirSync(join(root,'dist','validator'),{recursive:true});mkdirSync(join(root,'fixtures','observed-reference'),{recursive:true});
+  const schemaFile=join(packageRoot,'src','validator','observedSchemas.json');cpSync(schemaFile,join(root,'src','validator','observedSchemas.json'));cpSync(schemaFile,join(root,'dist','validator','observedSchemas.json'));
+  writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'reference'}));
+  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'});
+  expect(checkPins(root).ok).toBe(true);
+  writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'mutated'}));expect(checkPins(root).failures).toContain('Observed packaged reference bundle is stale.');
+  writeFileSync(join(root,'dist','validator','observedSchemas.json'),'{}');expect(checkPins(root).failures).toContain('Observed packaged schema bundle is stale.');
+});

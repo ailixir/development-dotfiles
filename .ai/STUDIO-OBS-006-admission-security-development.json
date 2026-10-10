@@ -1,0 +1,117 @@
+{
+  "story": "STUDIO-OBS-006",
+  "partition": "admission-security-test",
+  "role": "dev/security",
+  "status": "TEST_SLICE_PASS_HANDOFF_TO_LEAD",
+  "at": "2026-10-09T09:27:22.283319+00:00",
+  "ownedFiles": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java",
+    ".ai/STUDIO-OBS-006-admission-security-development.json"
+  ],
+  "testSourceSha256": "40c89ef6e7305110d55fbf04737bcf8edbbf9f365654ea73a3fb5054eeacaa8d",
+  "productionFilesEdited": [],
+  "method": "Random-port Spring HTTP; unchanged ordinary service-token SecurityFilterChain, real controller/reader/admission/observed authorization/pin/schema guards; no authentication override",
+  "testDoubles": {
+    "jdbc": "Read-only synthetic immutable binding and cancellation projection; no successful write/CAS",
+    "account": "Spy of production ReplayAccountAccess.unavailable; never authorizes",
+    "ledger": "Mock observed for zero side effects",
+    "revisionAndCore": "Unused mocks asserted not called on rejected admission"
+  },
+  "limitations": [
+    "No successful PostgreSQL observed admission or browser start is claimed; lead owns full joined success oracle.",
+    "Local fixture HTTP does not establish deployment TLS or guided mutual TLS.",
+    "Real service token sharing is one trust boundary; runnerInstanceId is not certificate-attested."
+  ],
+  "anticipatedFinding": {
+    "status": "SOURCE_INSPECTED_NOT_YET_EXECUTED",
+    "file": "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java",
+    "issue": "Parser exception includes e.getOriginalMessage; malformed UUID values can be quoted in legacy error response. Strict canary regression retained; production fix belongs lead."
+  },
+  "checks": [
+    {
+      "name": "compileJava/compileTestJava",
+      "result": "PASS"
+    },
+    {
+      "name": "owned-test Checkstyle10.18.1",
+      "result": "PASS",
+      "output": "Starting audit...\nAudit done.\n"
+    },
+    {
+      "name": "owned-test google-java-format1.22",
+      "result": "PASS"
+    },
+    {
+      "name": "Unchanged103-case HTTP rerun after lead parser fix",
+      "result": "PASS",
+      "command": "./gradlew test --tests '*ObservedAdmissionSecurityIT' --console=plain --max-workers=1",
+      "compilation": "compileJava and compileTestJava PASS"
+    }
+  ],
+  "independentQaVerdict": null,
+  "testSourceAtFailureSha256": "9fcda6c4e97463ae03c3fbd384c636eb059073eafac00ed276ba0f0d91860bd1",
+  "formatChangeAfterRun": null,
+  "testCommand": "./gradlew test --tests '*ObservedAdmissionSecurityIT' --console=plain --max-workers=1",
+  "cwd": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend",
+  "testResult": {
+    "tests": 103,
+    "passed": 103,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "buildSeconds": 21
+  },
+  "failureEvidence": {
+    "path": "/tmp/studio-obs006-admission-security/red-legacy-parser-leak.xml",
+    "sha256": "5861f1c42136f3c9e8118481dd193b27dbe538dc48282c63b67f23d842d91a19"
+  },
+  "productFinding": {
+    "id": "OBS006-ADMISSION-SEC-001",
+    "status": "LEAD_FIXED_VERIFIED_BY_UNCHANGED_REAL_HTTP_REGRESSION",
+    "test": "legacyStrictParserMustNotQuotePrivateMalformedIdentityValues",
+    "source": "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java",
+    "cause": "Appending Jackson getOriginalMessage includes the submitted malformed UUID string; production ChecksExceptionHandler returns it in HTTP400 INVALID_REPORT.",
+    "requiredFixOwner": "lead",
+    "expected": "Fixed data-free INVALID_REPORT response without submitted values; retain regression unchanged",
+    "fixedSourceSha256": "f0bfc5f187f768dea1bd6bd6831bd43c6b817c892ad8c700098d7c2cba258339"
+  },
+  "lane": "RELEASED",
+  "testedReadOnlySources": {
+    "backend/src/main/java/com/citi/put/checks/config/StudioInternalSecurityConfig.java": "7a5e836b567cc46ebd8ec48f495dc5b5d3c5a2332268e59e031941d36b03ae67",
+    "backend/src/main/java/com/citi/put/checks/security/ServiceIdentityAuthenticationFilter.java": "f83ddb5c5a7d6540879616a1498e02a8890aa25551b2d0c4889baeb9ee43aca5",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/StudioInternalController.java": "f71d7b92cf187b103191087f24c04e32e6d0b9cf5f3d6ac7f7d45d48aa45ddb4",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java": "f0bfc5f187f768dea1bd6bd6831bd43c6b817c892ad8c700098d7c2cba258339",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java": "2bc6f3f603b809bcc240e6ea78bf17202831005276c5f730ebf3f616fba0acd5",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "9ae3c432bcb1183fe5dae5874fe8a8e263dd30170d0d5f0a02c06a1d7460680e",
+    "docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json": "8aaa8ba6e98b3884aa347ef3faf5d8ade3b664fc9ed81c96c95be9ee0467af28"
+  },
+  "originalDevelopmentReport": {
+    "path": "/tmp/studio-obs006-admission-security/red-development-report.json",
+    "sha256": "6ee693753cb9f828ac40079088a8df4d8ac183ffbecf9d34b2ab589659dce244"
+  },
+  "originalTestResult": {
+    "tests": 103,
+    "passed": 102,
+    "failures": 1,
+    "errors": 0,
+    "skipped": 0,
+    "buildSeconds": 22
+  },
+  "originalTestedReadOnlySources": {
+    "backend/src/main/java/com/citi/put/checks/config/StudioInternalSecurityConfig.java": "7a5e836b567cc46ebd8ec48f495dc5b5d3c5a2332268e59e031941d36b03ae67",
+    "backend/src/main/java/com/citi/put/checks/security/ServiceIdentityAuthenticationFilter.java": "f83ddb5c5a7d6540879616a1498e02a8890aa25551b2d0c4889baeb9ee43aca5",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/StudioInternalController.java": "f71d7b92cf187b103191087f24c04e32e6d0b9cf5f3d6ac7f7d45d48aa45ddb4",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java": "db2f6f438a049f38d58afd4caacbf5c14d01ba90b5887343541f1824293e774a",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java": "2bc6f3f603b809bcc240e6ea78bf17202831005276c5f730ebf3f616fba0acd5",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "9ae3c432bcb1183fe5dae5874fe8a8e263dd30170d0d5f0a02c06a1d7460680e",
+    "docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json": "8aaa8ba6e98b3884aa347ef3faf5d8ade3b664fc9ed81c96c95be9ee0467af28"
+  },
+  "successEvidence": {
+    "path": "/tmp/studio-obs006-admission-security/green-parser-fix.xml",
+    "sha256": "d988f5c53535d10f77b78676671d835511bde2c403000ee4b5ee44ad03c08db4"
+  },
+  "testUnchangedForFixVerification": true,
+  "handedBackFiles": [
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java"
+  ]
+}

@@ -1,0 +1,56 @@
+--- a/.aiox-core/core/permissions/dispatch-governance.js
++++ b/.aiox-core/core/permissions/dispatch-governance.js
+@@ -18,6 +18,21 @@
+ 
+ /** @type {ReadonlySet<string>} Story statuses accepted for implementation dispatch. */
+ const VALID_IMPLEMENTATION_STATUSES = new Set(['Ready', 'InProgress', 'InReview']);
++
++/** SDC validation precedes implementation; close follows QA's Done transition. */
++function statusesForTask(task) {
++  const name = String(task || '').replace(/\.md$/i, '').toLowerCase();
++  if (['validate', 'validate-story-draft', 'validate-next-story'].includes(name)) {
++    return new Set(['Draft']);
++  }
++  if (['review', 'review-story', 'qa-gate'].includes(name)) {
++    return new Set(['InProgress', 'InReview']);
++  }
++  if (['close', 'close-story', 'po-close-story'].includes(name)) {
++    return new Set(['Done']);
++  }
++  return VALID_IMPLEMENTATION_STATUSES;
++}
+ 
+ /** @type {Array<{ id: string, name: string, pattern: RegExp }>} Blocking intent signatures. */
+ const INTENT_PATTERNS = [
+@@ -102,7 +117,7 @@
+ }
+ 
+ function normalizeStatus(raw) {
+-  const status = String(raw || '').trim().toLowerCase().replace(/\s+/g, '');
++  const status = String(raw || '').replace(/[*`]/g, '').trim().toLowerCase().replace(/\s+/g, '');
+   if (status === 'ready') return 'Ready';
+   if (status === 'inprogress') return 'InProgress';
+   if (status === 'inreview' || status === 'readyforreview') return 'InReview';
+@@ -186,10 +201,11 @@
+     );
+   }
+   const story = parseStory(file);
+-  if (!VALID_IMPLEMENTATION_STATUSES.has(story.status)) {
++  const allowedStatuses = statusesForTask(options.task);
++  if (!allowedStatuses.has(story.status)) {
+     throw new DispatchGovernanceError(
+       'DISPATCH_STORY_STATUS',
+-      `Automated implementation dispatch blocked: story ${story.storyId} is ${story.status}; expected Ready, InProgress, or InReview.`,
++      `Automated implementation dispatch blocked: story ${story.storyId} is ${story.status}; expected ${[...allowedStatuses].join(', ')} for ${options.task || 'implementation'}.`,
+       story,
+     );
+   }
+@@ -223,7 +239,7 @@
+   }
+   const requiresStory = options.requiresStory ?? IMPLEMENTATION_TASK_PATTERN.test(options.task || '');
+   const story = requiresStory
+-    ? validateStoryBinding(options.story, { projectRoot: options.projectRoot })
++    ? validateStoryBinding(options.story, { projectRoot: options.projectRoot, task: options.task })
+     : null;
+   return { budgetCeilingUsd, story, scan };
+ }

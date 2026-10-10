@@ -74,6 +74,9 @@ public class StudioService {
   private final UserProvisioningService userProvisioningService;
   private final StudioDispatchLedgerStatements ledgerStatements;
 
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
   /**
    * Used for one thing: to refresh the draft the authorized save has just locked (ADR-002 §27.2,
    * steps 2 and 4). Hibernate hands an entity it already holds back to a later query unchanged,
@@ -969,13 +972,37 @@ public class StudioService {
    */
   @Transactional(propagation = Propagation.NOT_SUPPORTED)
   public ExecutionSnapshotDto executeTest(UUID testId, Authentication auth, String idempotencyKey) {
+    return executeTest(testId, auth, idempotencyKey, null);
+  }
+
+  @Transactional(propagation = Propagation.NOT_SUPPORTED)
+  public ExecutionSnapshotDto executeTest(
+      UUID testId,
+      Authentication auth,
+      String idempotencyKey,
+      jakarta.servlet.http.HttpServletRequest request) {
     UITest test = studioRepository.findById(testId).orElseThrow(StudioAccessDeniedException::new);
     requireExecute(auth, test.getCsiId());
     String principal = principalOf(auth);
 
     UUID executionId;
     try {
-      executionId = acceptanceService.accept(testId, principal, idempotencyKey);
+      UITestRevision current =
+          test.getConfirmedRevisionId() == null
+              ? null
+              : revisionRepository.findById(test.getConfirmedRevisionId()).orElse(null);
+      if (current != null && current.getArtifactSchemaVersion() == 2) {
+        if (observedReplay == null) {
+          throw new StudioConflictException(
+              "RUNTIME_INCOMPATIBLE", "Observed replay is unavailable");
+        }
+        var grant = observedReplay.authorize(testId, auth, request);
+        executionId =
+            acceptanceService.acceptObserved(
+                testId, grant.binding().path("principalId").asText(), idempotencyKey, grant);
+      } else {
+        executionId = acceptanceService.accept(testId, principal, idempotencyKey);
+      }
     } catch (StudioAcceptanceService.IdempotencyRaceException race) {
       executionId =
           acceptanceService.resolveIdempotencyRace(

@@ -1,0 +1,197 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Independent narrow delayed-runtime source/security development review; not final story QA",
+  "reviewer": "capture_qa_security",
+  "recordedAt": "2026-10-09T12:53:24.192937+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "summary": "The start snapshot has one high-risk initialBlank late-navigation gap and one medium internal-reveal timeout poisoning gap. Runtime owner began correcting moving files during review; revised browser/adapter bytes are explicitly unreviewed pending a corrected freeze and targeted evidence. No other blocker found in stable collector/executor/native sequencing source inspected.",
+  "sourceAtStart": {
+    "studio-runner/src/run/observationTypes.ts": "9f0e379255b85d26a84c25ed23a4c96736dfea3be16681408f3771e8424f1825",
+    "studio-runner/src/run/observationCollector.ts": "d67478b454ee60e8f532513be1c96916f6b14e97ab2f1cf4e55b9a6cfd13407f",
+    "studio-runner/src/run/browser.ts": "9326edd42f7c52570361294770fb6f9141e2b925ccd7d0428582ba6639f15f29",
+    "studio-runner/src/run/observedReplayAdapter.ts": "f30a28e7b31b8a82ac98a8191f1a03a8aaaf3236d7c8eb2c4dc84a70beaee042",
+    "studio-runner/src/executor/observedReplay.ts": "ae7e9cbf9702d255b568f1a1a2d3bf8ffe0fe6771fff814a94c55b6731ac5b46",
+    "studio-runner/src/run/childRuntime.ts": "ba9912ad4d96f236bf555cc18dcc0c97f5c089dc5e6942db798eca1d39b94a75",
+    "studio-runner/src/run/nativeInput.ts": "bdadb16a8920762ff7a9761f538c97086c75d96936b47467c09cb214d650e4e4",
+    "docs/specs/studio-observed-authoring/delayed-state-design.md": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6"
+  },
+  "sourceAtEnd": {
+    "studio-runner/src/run/observationTypes.ts": "9f0e379255b85d26a84c25ed23a4c96736dfea3be16681408f3771e8424f1825",
+    "studio-runner/src/run/observationCollector.ts": "d67478b454ee60e8f532513be1c96916f6b14e97ab2f1cf4e55b9a6cfd13407f",
+    "studio-runner/src/run/browser.ts": "f258d55b85a223837a8c4d1e13937b0eceb4f1df57b98b039c23824b7338f7a2",
+    "studio-runner/src/run/observedReplayAdapter.ts": "02b5b79e460a134ae7408ba7029de43f31365c43bf5e7ac3c563431525281006",
+    "studio-runner/src/executor/observedReplay.ts": "ae7e9cbf9702d255b568f1a1a2d3bf8ffe0fe6771fff814a94c55b6731ac5b46",
+    "studio-runner/src/run/childRuntime.ts": "ba9912ad4d96f236bf555cc18dcc0c97f5c089dc5e6942db798eca1d39b94a75",
+    "studio-runner/src/run/nativeInput.ts": "bdadb16a8920762ff7a9761f538c97086c75d96936b47467c09cb214d650e4e4",
+    "docs/specs/studio-observed-authoring/delayed-state-design.md": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6"
+  },
+  "changedDuringReview": [
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "status": "CORRECTED_BYTES_UNREVIEWED",
+      "startSha256": "9326edd42f7c52570361294770fb6f9141e2b925ccd7d0428582ba6639f15f29",
+      "endSha256": "f258d55b85a223837a8c4d1e13937b0eceb4f1df57b98b039c23824b7338f7a2"
+    },
+    {
+      "path": "studio-runner/src/run/observedReplayAdapter.ts",
+      "status": "CORRECTED_BYTES_UNREVIEWED",
+      "startSha256": "f30a28e7b31b8a82ac98a8191f1a03a8aaaf3236d7c8eb2c4dc84a70beaee042",
+      "endSha256": "02b5b79e460a134ae7408ba7029de43f31365c43bf5e7ac3c563431525281006"
+    }
+  ],
+  "testSourcesInspectedAtEnd": {
+    "studio-runner/test/observedReplayExecutor.test.ts": "1896e83dff1602803a6b05b6fb3a68bad3aa3f5c58e3dccf73a2899f79fdc0da",
+    "studio-runner/test/run/observation.test.ts": "f466e43b6d6263ee3a26d2612ff18e7d89580e69775e30313f7a0ed5444a692c",
+    "studio-runner/test/run/observedReplayProtocol.test.ts": "d87091d065352dd04c04effefe0ec8d8599f7ad04278a87a1d6c840f1733999e",
+    "studio-runner/test/fixtures-tier/observed-replay.test.ts": "92ac2718749644f0095f3aa51de810b199ddcf19fc5e9e923c54dba6a688800f",
+    "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts": "bed1b8d10848cafc815c19261791f1ecf6834559564e675476889f7c40292f7d"
+  },
+  "testHashLimit": "Test files were being extended; their listed hashes identify inspected current text, not a stable start/end freeze or a test run by this reviewer.",
+  "findings": [
+    {
+      "id": "DELAY-RUNTIME-PEER-001",
+      "severity": "HIGH",
+      "status": "FIX_REQUESTED_CORRECTED_SOURCE_REVIEW_PENDING",
+      "sourceSnapshot": "sourceAtStart",
+      "locations": [
+        "studio-runner/src/run/observedReplayAdapter.ts:27",
+        "studio-runner/src/run/observedReplayAdapter.ts:30",
+        "studio-runner/src/run/browser.ts:167",
+        "studio-runner/src/run/browser.ts:169",
+        "studio-runner/src/run/browser.ts:170"
+      ],
+      "finding": "Initial blank navigation marks INVOKING at adapter entry, then actual browser helper awaits a second blankMatches without control and sends location.assign afterward. A held second check can resolve after operation timeout/cancel; outer adapter live check occurs only after helper returns, permitting late navigation while the control is already poisoned. It also classifies a timeout before the first effect as uncertain rather than definite.",
+      "requiredCorrection": "Thread optional InvocationControl through the actual observedNavigateBlank seam; retain PREPARING throughout final read-only blank checks, check immediately after each inner await, beginInvocation immediately before the fixed location.assign CDP dispatch, and keep absent-control legacy behavior. Do not rely on subsequent browser close to prevent the effect.",
+      "requiredOracles": [
+        "Hold the real CDPSession acknowledgement for the inner second blank check after its real response; expire deadline or cancel; assert PREPARING until poison and definite TIMEOUT/CANCELLED.",
+        "Release the acknowledgement before teardown; assert zero independent navigation receipts, still about:blank, POISONED and no PASS.",
+        "Verify valid initialBlank navigation and ordinary/guided absent-control compatibility still pass; rebuild and bind source/dist/catalog."
+      ],
+      "evidenceLimit": "Source-derived finding; reviewer did not execute a reproduction. Runtime owner confirmed seam and started correction during review."
+    },
+    {
+      "id": "DELAY-RUNTIME-PEER-002",
+      "severity": "MEDIUM",
+      "status": "FIX_REQUESTED",
+      "sourceSnapshot": "sourceAtStart",
+      "locations": [
+        "studio-runner/src/run/browser.ts:391",
+        "studio-runner/src/run/browser.ts:403",
+        "studio-runner/src/run/browser.ts:405",
+        "studio-runner/src/run/browser.ts:435",
+        "studio-runner/src/executor/observedReplay.ts:214"
+      ],
+      "finding": "The internal 1000ms reveal Promise.race rejects UNKNOWN_OUTCOME without synchronously poisoning control. Browser invoke finally then awaits Runtime.releaseObject before outer control finally can poison. During held cleanup, a late reveal may pass live() and send its validation continuation. No second business input was demonstrated, but the reviewed poison-before-race-rejection invariant is not met.",
+      "requiredCorrection": "Poison the active invocation synchronously in the internal reveal timeout callback before rejection, preserving absent-control legacy behavior and OUTCOME_UNKNOWN after the scroll primitive. Cleanup must not delay authority retirement.",
+      "requiredOracles": [
+        "Hold real scroll/reveal acknowledgement beyond the internal1s timeout while the original source-step deadline is longer; also hold releaseObject cleanup.",
+        "Assert POISONED as soon as timeout wins; release scroll and prove no new guard-validation/input, capture binding or PASS; no reacquisition or repeated scroll.",
+        "Assert normal reveal/focus/native primitives and legacy calls without InvocationControl remain compatible."
+      ],
+      "evidenceLimit": "Source/design invariant finding; no exploit or business-effect duplication was executed by reviewer."
+    }
+  ],
+  "stableSourceAssessments": [
+    {
+      "area": "Private acquisition universe",
+      "sources": [
+        "studio-runner/src/run/observationCollector.ts:234",
+        "studio-runner/src/run/observationCollector.ts:293",
+        "studio-runner/src/run/observationCollector.ts:371",
+        "studio-runner/src/run/observationCollector.ts:512"
+      ],
+      "assessment": "Candidates derive from the same bounded collector traversal, include hidden competitors and unresolved role/label facts, and are never exported. Budget truncation invalidates the universe. acquire does not use empty sanitized nodes as absence proof; exact duplicates/unresolved names and sensitive/incompatible candidates refuse. Unsupported surfaces are excluded only where their existing structural identity cannot match the supported locator subset; candidate uncertainty remains refusal."
+    },
+    {
+      "area": "Sensitive and freshness checks",
+      "sources": [
+        "studio-runner/src/run/observationCollector.ts:93",
+        "studio-runner/src/run/observationCollector.ts:289",
+        "studio-runner/src/run/observationCollector.ts:480",
+        "studio-runner/src/run/observationCollector.ts:515",
+        "studio-runner/src/run/observationCollector.ts:535"
+      ],
+      "assessment": "Hard ancestor/descendant/name/type facts are distinct from visibility. Hidden read/grant ambiguity is refused rather than reading hidden data. Cached structure/private field/style signatures are checked, mutation records drained, and only an already exported node can be READY. snapshotField detects property-only value/selectedOptions changes without manufacturing a binding capture."
+    },
+    {
+      "area": "Counts, bytes and cadence",
+      "sources": [
+        "studio-runner/src/executor/observedReplay.ts:114",
+        "studio-runner/src/executor/observedReplay.ts:122",
+        "studio-runner/src/executor/observedReplay.ts:183",
+        "studio-runner/src/executor/observedReplay.ts:251"
+      ],
+      "assessment": "32 additional per source step,200 additional per run,400 total and13,107,200 bytes are explicit. Each reserve charges32768 before collection, settles actual bytes once, and poisoned/unknown collection cannot refund. stepBudget persists across operations in the source step;100ms first extra and250ms later use shared step counter. Acquisition loops only ABSENT/VISIBILITY_PENDING; READY retains one target and later validation refusal is terminal."
+    },
+    {
+      "area": "Original deadlines and result fencing",
+      "sources": [
+        "studio-runner/src/executor/observedReplay.ts:160",
+        "studio-runner/src/executor/observedReplay.ts:191",
+        "studio-runner/src/executor/observedReplay.ts:251",
+        "studio-runner/src/executor/observedReplay.ts:268",
+        "studio-runner/src/run/childRuntime.ts:869"
+      ],
+      "assessment": "Source-step absolute monotonic deadline is shared by all its operations and capped by the original run deadline established before account apply. Outer run timers/cancel poison before rejection; checks around performs and withholding prevent late binding insertion/PASS. Remaining steps are SKIPPED/null; values are execution-local and cleared. The two findings identify browser-helper holes rather than an executor-level budget reset."
+    },
+    {
+      "area": "Native and isolated invocation",
+      "sources": [
+        "studio-runner/src/run/nativeInput.ts:16",
+        "studio-runner/src/run/browser.ts:364",
+        "studio-runner/src/run/browser.ts:407",
+        "studio-runner/src/run/browser.ts:430",
+        "studio-runner/src/run/observationCollector.ts:648"
+      ],
+      "assessment": "At the reviewed start snapshot, native retained-target/state/point/focus/input ports have checks before/after awaits; first focus/scroll/input starts INVOKING. No selector replacement or native retry. Fixed read/fill/select/assert invokes one synchronous isolated program; capture withholding precedes one value-map insertion. Reveal internal timer gap is separately listed. Normal page navigate/assert dispatch a fixed primitive without an intervening awaited preparation; post-send waits cannot trigger another input and outer control blocks PASS after poison."
+    },
+    {
+      "area": "Cleanup/compatibility",
+      "sources": [
+        "studio-runner/src/run/childRuntime.ts:799",
+        "studio-runner/src/run/childRuntime.ts:825",
+        "studio-runner/src/run/observationTypes.ts:71"
+      ],
+      "assessment": "Child completion fences first, closes recording and accounts once through existing ownership, and fills only genuinely unexecuted coordinates as SKIPPED/null. acquire and invocation control are private/local optional additions for legacy/guided interfaces; no new model/wire/schema/manifest authorization was introduced in stable reviewed files. Read-only collector preparation may finish after cancellation, but closed inventory checks and outer poison prevent acquisition/invocation/binding/PASS; this is not a promise that CDP work is synchronously cancellable."
+    }
+  ],
+  "meaningfulTestAssessment": [
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "assessment": "Actual recorded child and HTTP receipt gate force a missing Confirmation acquisition before releasing asynchronous response. Receipts/invocation counts/fresh-value runs test real delayed readiness and never-appears failure, not fixed sleeps alone. Controlled admission receiver does not replace backend joined authority proof."
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "assessment": "Real Chromium tests cover retained hidden/sensitive/property/replacement facts and actual native receipts. Native fencing trips the real control around actual CDP paths; it is stronger than a mock port, but does not substitute for a held inner initialBlank/reveal acknowledgement race. New initialBlank tests appeared during review and remain unreviewed corrected-snapshot work."
+    },
+    {
+      "path": "studio-runner/test/observedReplayExecutor.test.ts",
+      "assessment": "Controlled promises/timers exercise collect/probe/matches/validate/withhold and post-invocation poisoning, exact budgets/cadence and compound deadlines. These prove orchestration seams, not the internal browser-helper await chain; the found initialBlank gap illustrates that limit."
+    },
+    {
+      "path": "studio-runner/test/run/observation.test.ts",
+      "assessment": "Bounded fake DOM tests exercise classification and private freshness deterministically; real Chromium counterparts are necessary for actual name/style/DOM semantics and are inspected separately."
+    }
+  ],
+  "developerEvidence": {
+    "notRunByReviewer": true,
+    "reportedBeforeCorrection": "Preserved logs show1477 unit passes/29 skipped and303 Chromium passes/10 skipped before correction; earlier async2/private9/affected30/targeted97 were developer reports. No result is borrowed for corrected moving browser/adapter bytes.",
+    "logManifest": ".aiox/sdc/STUDIO-OBS-006/delayed-runtime-before-blank-fix/log-manifest.json",
+    "logManifestSha256": "02e1ccfd37162ed44f31007128a2a699b7d28b5e183d9e11a6bf7260f994afaa",
+    "logHashesVerified": true
+  },
+  "requiredNextEvidence": [
+    "Freeze corrected browser/browserFactory/adapter/native-related tests and source/dist/catalog identities; independently re-review both listed findings.",
+    "Run targeted held-acknowledgement races and affected real pipeline before renewed full gates; preserve pre-fix reports.",
+    "Final story QA remains independent obs005_peer; backend durable readiness accounting and full learning/publication/replay join are outside this source slice."
+  ],
+  "noActionsPerformed": [
+    "No tests/builds/browser/Gradle/Node execution",
+    "No product/test/story edits",
+    "No subagents, lifecycle commands, commit or push"
+  ],
+  "budget": {
+    "sharedWaveCeilingUsd": 500,
+    "actualSpend": "unknown"
+  }
+}

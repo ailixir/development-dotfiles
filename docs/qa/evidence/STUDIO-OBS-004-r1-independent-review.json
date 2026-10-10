@@ -1,0 +1,175 @@
+{
+  "schema": 1,
+  "story": "STUDIO-OBS-004",
+  "iteration": 1,
+  "reviewer": "Quinn (@qa /root/sdc_obs004_qa; independent from implementers)",
+  "reviewed_revision": "sha256:765212d573673085c38959683862aca11cda58b7f1998c51885a10975455661d",
+  "updated": "2026-10-08T16:50:14.290Z",
+  "verdict": "PASS",
+  "initial_gate": {
+    "path": "docs/qa/evidence/STUDIO-OBS-004-initial-gate-fail.yml",
+    "sha256": "100965b13f1b66fc3be0761acc6a4b7299d2e3f65be71809f0f55b040860cb96",
+    "verdict": "FAIL"
+  },
+  "source_manifest": "docs/qa/evidence/STUDIO-OBS-004-r1-source-manifest.json",
+  "tested_worker": "docs/qa/evidence/STUDIO-OBS-004-r1-tested-worker.json",
+  "findings": [
+    {
+      "id": "SEC-001",
+      "status": "RESOLVED",
+      "verification": "Unchanged initial Chromium script now reports firstContains=false and secondContains=false. Additional independent real browser probe confirms uncaptured password/input/approved-business values remain masked after same-document removal and navigation; fresh session remains isolated; count/byte overflow poisons further collection and disposed state rejects late withhold. Real37-case Spring/worker/Chromium suite confirms actual backend observation/command persistence excludes uncaptured password/input echoes; process stdout/stderr excludes all canaries.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-edge-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-backend.log"
+      ]
+    },
+    {
+      "id": "REL-001",
+      "status": "RESOLVED",
+      "verification": "Original prevented-check returns UNKNOWN_OUTCOME; radio-uncheck returns TARGET_CHANGED before native effects. Independent reverted/replaced checkbox cases each record one effect attempt and uncertainty. Real joined ledger test commits UNKNOWN_OUTCOME after prevented toggle and refuses dispatch retry; radio refuses preparation with zero toggle attempts. Existing positive/no-op/native/reveal regressions pass.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-edge-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-backend.log",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-fixtures.log"
+      ]
+    },
+    {
+      "id": "SEC-002",
+      "status": "RESOLVED",
+      "verification": "Original real-mTLS duplicate-key request now returns SCHEMA with zero claims. Raw request suites use actual Java and Node HTTPS endpoints for duplicate and escaped/nested keys, fatal UTF8, trailing tokens, exponent/fraction/negativezero integers; zero persisted commands/navigation. Java and Node JWT suites reject extra claims and noncanonical/negative nbf. Real Java runner-response boundary rejects malformed responses. Additional independent real-mTLS Node callback response probe passes all20 raw vectors; it is a controlled parser fixture, not semantic backend evidence.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-wire-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-response-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-backend.log",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-unit.log"
+      ]
+    },
+    {
+      "id": "REL-002",
+      "status": "RESOLVED",
+      "verification": "Actual Java/Node assignment validators and strict Ajv agree with26 shared date vectors under the explicitly approved v2 UTC profile. Independent timestamp cases include hour24, leap second, offset, final newline, ninefractiondigits and century leap rules. Unsupported schema keyword, missing/external refs, pointer to nonschema data and cycle all fail. Java missing definition refuses. Source review confirms ordinary NetworkNT draft7 format remains active; no permissive override or normalization. No006 learned-plan runtime validation claim.",
+      "evidence": [
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-backend.log",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-unit.log",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-contracts.log"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "command": "./gradlew test --tests '*GuidedBridgeIntegrationTest' --tests '*GuidedSessionIT' --tests '*GuidedSecurityTest' --tests '*GuidedHttpSecurityIT' --tests '*GuidedSourceReferenceValidatorTest' --tests '*GuidedWireContractTest' --rerun-tasks --console=plain",
+      "result": "PASS:92 tests,37 joined",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-r1-backend.log"
+    },
+    {
+      "command": "npm run type-check && npm run lint && npm test (studio-runner)",
+      "result": "PASS:1269 tests,29 existing skips",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-r1-unit.log"
+    },
+    {
+      "command": "npm run test:fixtures (studio-runner)",
+      "result": "PASS:273 tests,10 existing skips,19 files; includes realChromium/legacy regression and deterministic boundary fault fixtures",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-r1-fixtures.log"
+    },
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "result": "PASS:v1 124cases/109examples unchanged;v2 219cases/49examples/26schemas/6canonicalvectors;26UTC and20raw parityvectors",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-r1-contracts.log"
+    },
+    {
+      "command": "./gradlew check -x test -x crossReplicaTest -I /tmp/studio-obs004-coverage.init.gradle --console=plain",
+      "result": "PASS:Spotless,Checkstyle,SpotBugs(main),antiRegression,rdsParityLint30migrations,8alignedTestcontainersModules,unchangedJacocoThresholds",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-r1-check.log",
+      "qualification": "Coverage combines this independent92-test current run with explicitly retained historical broad/cross-replica data. This is not an unfiltered current backend/cross-replica rerun."
+    },
+    {
+      "command": "Run original edge/wire/viewport scripts unchanged in isolated output directory",
+      "result": "PASS: originals byte-identical; new outputs use r1 filenames",
+      "artifacts": [
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-edge-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-independent-wire-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-r1-viewport-probe.json"
+      ]
+    },
+    {
+      "command": "node docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.mjs",
+      "result": "PASS:19 additional lifetime/toggle/schema/timestamp cases",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.json"
+    },
+    {
+      "command": "node docs/qa/evidence/STUDIO-OBS-004-r1-response-probe.mjs",
+      "result": "PASS:20 actual mTLS Node callback response raw-byte parser cases",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-r1-response-probe.json"
+    }
+  ],
+  "source_assessment": {
+    "privacy": "Session-owned bounded private inventory is merged before sanitized observation export and seeded into new isolated worlds; normalization and strictest provenance retained. Overflow/error irreversibly refuses future collection. Disposal empties worker and collector inventories; late completed collection cannot repopulate them. Private snapshots remain inside trusted worker/CDP boundary.",
+    "native": "Public native input remains a single attempt on retained identity with documented focus/coordinate race limits. Toggle postcondition checks original node/document/origin/type/policy/state, without locator re-resolution or retry. Radio uncheck is an explicit pre-effect refusal.",
+    "parsing": "Guided-only MVC RequestBodyAdvice inspects original bytes before converter; strict parser checks duplicates, fatalUTF8, trailing records, canonical safe integer lexemes. Java runner client and both Node HTTP directions use strict bytes. Closed JWT claim sets and nonnegative bounded times align. Existing BFF/unrelated JSON converters remain outside this advice.",
+    "schemas": "Runner audits its actually loaded schema subset, references, JSON pointers, nonschema targets and cycles before use. UTC regex narrows all15date-time sites in8v2schemas; ordinary Java date format validation remains. v1 files and historical evidence unchanged."
+  },
+  "trace": [
+    {
+      "ac": 1,
+      "status": "PASS",
+      "evidence": "Real authenticated long-lived worker assignment/renewal, wrongscope/fence/tuple refusal, closed parsing and legacy regression suites."
+    },
+    {
+      "ac": 2,
+      "status": "PASS",
+      "evidence": "Retained target/policy/type checks, native toggle postconditions/refusal, actual completeStep -> observe -> retained-binding continuation, stale/replacement/viewport tests."
+    },
+    {
+      "ac": 3,
+      "status": "PASS",
+      "evidence": "Exact whitespace-preserving classified visible/control reads, opaque local handles, denied sensitivity/type/hidden sources, source/capture/uncaptured masking."
+    },
+    {
+      "ac": 4,
+      "status": "PASS",
+      "evidence": "Earlier producer/order/slot/sameorigin constraints, cumulative allocation and producer receipts, pervalue/count/aggregateUTF8limits, isolation and cancel guards."
+    },
+    {
+      "ac": 5,
+      "status": "PASS",
+      "evidence": "Committed-winner-only authority outside ambient transactions/cache, durable local fsync/tombstones, no second native attempt, cancellation/lease/deadline/lostack/journal restart fixtures."
+    },
+    {
+      "ac": 6,
+      "status": "PASS",
+      "evidence": "Original leak reproduced as fixed; actual private callbacks/persistence/process outputs verified with canaries; inventories clear/refuse late work; no raw value/sample/hash/length metadata added."
+    },
+    {
+      "ac": 7,
+      "status": "PASS",
+      "evidence": "92 backend tests including37 PostgreSQL/Spring HTTPS/mTLS/JWT/actual runner+Chromium joins plus1269 units/273fixture tests and fresh independent adversarial probes."
+    }
+  ],
+  "continuation_evidence": "Current joined suite again exercises actual owning-worker acquisition and beyond30s renewal while paused/busy/beforecontext; nonfinal completeStep followed by correlated durable refresh callback, duplicate joining/lostresponse recovery without recollection, superseding observations and refusals, unchanged action count and retained local binding. v2answer-to-refresh uses explicitly controlled question/StepVerifier fixture; no production question semantics asserted.",
+  "integrity": {
+    "original_qa_artifacts": 20,
+    "original_qa_mismatches": [],
+    "historical_v1_story_gate_artifacts": 29,
+    "historical_mismatches": [],
+    "build_files": 236,
+    "all_snapshot_files_identical": true,
+    "build_aggregate": "2d44b410e04a12af930b6f2ecd20a7d4ecefeb27a4e4596307312e8d16c9688b"
+  },
+  "coderabbit": {
+    "available": false,
+    "wsl": false,
+    "configuredBinaryExists": false,
+    "fallback": "Configured graceful_degradation; fresh independent reviewer source examination, exact reruns and adversarial probes. No CodeRabbit PASS."
+  },
+  "limits": [
+    "PASS covers approved004common mechanism with controlled account/semantic fixture ports only.",
+    "INPUT-POLICY-01 remains pending for005source-to-model construction; no model calls, production question generation or005semantic completion proved.",
+    "006publication/lowering and007production account connection remain fail-closed later ports.",
+    "Native focus/coordinate input is not universally atomic; guarantee is immediate checks, oneattempt and honest uncertainty.",
+    "No implementation fixes, commits/push, agents orCLI/wave-state mutations byQA.",
+    "One independent isolation probe initially used a caption containing the word PASSWORD; it was corrected to neutral canary text because existing sensitivity policy intentionally suppresses that word. The final neutral-canary control proves separate inventories."
+  ]
+}

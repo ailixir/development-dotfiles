@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 /**
  * The browser child's process entry (AC-5).
  *
@@ -13,8 +14,11 @@
 
 import { attachChildRuntime } from './childRuntime.js';
 import type { ChildChannel } from './childRuntime.js';
+import { loadObservedBuild } from '../compat/runtime-versions.js';
+import { compiledObservedAccountRegistry } from './observedAccount.js';
 import { playwrightBrowserFactory } from './browser.js';
-import type { ChildMessage } from './protocol.js';
+import type { ChildMessage, ObservedChildMessage } from './protocol.js';
+import type { ChildRuntimeDependencies } from './childRuntime.js';
 
 /** Binds the runtime to a Node process. Exported so a test can drive it with a fake process. */
 export interface ChildProcessLike {
@@ -23,12 +27,12 @@ export interface ChildProcessLike {
   exit(code?: number): never;
 }
 
-export function startChild(processLike: ChildProcessLike): void {
+export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRuntimeDependencies, 'observedBuild'|'observedAccounts'> = {}): void {
   const channel: ChildChannel = {
     onMessage(listener: (value: unknown) => void): void {
       processLike.on('message', listener);
     },
-    send(message: ChildMessage): void {
+    send(message: ChildMessage | ObservedChildMessage): void {
       processLike.send?.(message);
     },
     exit(code: number): void {
@@ -36,13 +40,14 @@ export function startChild(processLike: ChildProcessLike): void {
       processLike.exit(code);
     },
   };
-  attachChildRuntime({ channel, browsers: playwrightBrowserFactory });
+  attachChildRuntime({ channel, browsers: playwrightBrowserFactory, ...observed });
 }
 
 // Not reachable under vitest: the module is imported by the fixtures tier, never invoked as the
 // entry point there. `src/main.ts` guards its own entry the same way.
 /* v8 ignore start */
-if (process.send !== undefined) {
-  startChild(process as unknown as ChildProcessLike);
+if (process.send !== undefined && process.argv[1] === fileURLToPath(import.meta.url)) {
+  const build=loadObservedBuild();
+  startChild(process as unknown as ChildProcessLike,{...(build?{observedBuild:build}:{}),observedAccounts:compiledObservedAccountRegistry});
 }
 /* v8 ignore stop */

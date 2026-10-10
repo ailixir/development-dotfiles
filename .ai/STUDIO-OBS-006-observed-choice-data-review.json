@@ -1,0 +1,132 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewKind": "INDEPENDENT_OBSERVED_CHOICE_DATA_EVIDENCE_DESIGN_REVIEW",
+  "verdict": "NEEDS_CHANGES",
+  "at": "2026-10-09T13:23:24.464006+00:00",
+  "scope": "Frozen design technical review only; no implementation permission, lifecycle verdict or whole-story QA.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/observed-choice-publication-design.md": "1b174a901769ef524deb446cb96d031249fb8f7c22f18bdb6a3adba24a2b6c87",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "7a1f003c1e73446d3b0aca2f6ec5d7787560f169121a25a47ff283cbcea9c80a",
+    ".ai/STUDIO-OBS-006-observed-choice-publication-design.json": "8636942886c3a489623b063aac2b2afb72d4f05b0af3b456dc7af02c5426e1b2"
+  },
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java": "7e3119500ae77eb8d5cf6f81828b2361b60e65437191924a8a07579f0af7f315",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "5cb65fbf02e80d72c53b1cbdaacc57149ab20e9c6c527f531bd717f0e5ca6753",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "c001b39a64a818637e7c272e238486492cc681f5e5c3ca151a34530a60e60ebb",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "a6ec6f6b5ce65bed3f5a13c1e8a4e465e25b4b57ddc5c6c1b1a117ee0f235d3b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": "7708c9fea3477ff4d2603d939255fbb32906971634b66dcf5d38fc18a47f711d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "47c1f97dfd2a15785f0fddad4769f7647ab93090c68fa8ce2059925efafc450f",
+    "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1ca47811bb8624003aaf6171e62223d4a65615ad9fe88e7f9a024e46223d92ad",
+    "studio-runner/src/validator/observedReplay.ts": "b512c6cf7c626af179ee36ef1037802497914321f0d3b1d20594fc505ee967f1",
+    "docs/specs/studio-observed-authoring/contracts/v2/replay-validation.schema.json": "46bafdfff5f2c3330f42979b5cc2017e26c6edc3542fd34c7e67a08b801627ed",
+    "docs/specs/studio-observed-authoring/contracts/v2/replay-profile.schema.json": "9abfdf6fe26bf3a1047c27fd2eaa9f31f70e3ddded23281e6a2f35d7d7508fff",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json": "f409823c0e2817bf11c85adb91b5303548e2ad43c87378a8e3c7d281c68fe54f",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc"
+  },
+  "frozenHashVerification": "Document, design record, story and all eleven sourceSnapshot entries match root freeze.",
+  "findings": [
+    {
+      "id": "CHOICE-DATA-01",
+      "severity": "blocking narrow contract correction",
+      "design": "docs/specs/studio-observed-authoring/observed-choice-publication-design.md section4 ModelObservedQuestion",
+      "source": "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json:1498",
+      "finding": "Frozen ModelObservedQuestion choices allows1..10, whereas the actual observed NEXT_ACTION CLARIFICATION boundary requires2..10. A closed independent witness decoder accepting a coherently rehashed single-alternative question weakens the original model contract.",
+      "remediation": "Set ModelObservedQuestion choices to2..10 and require the equal ordered server meanings/choices to retain the same cardinality. Keep existing unrelated source/public question behavior unchanged. Re-freeze the bounded design amendment before implementation.",
+      "oracle": "Start from valid original two-choice captured witness. Remove the unselected alternative consistently from modelQuestion, context.question choices and meanings; recompute modelQuestionHash, meaningsHash, contextIdentityHash, questionCaptureHash and all outer basis/artifact hashes. Both Java and Node must refuse the single-choice witness, while the unaltered two-choice baseline passes."
+    }
+  ],
+  "resolvedSourceGaps": [
+    {
+      "finding": "Original question observation can disappear after answer REFRESH; V33 capture previously occurred only at preparation.",
+      "resolution": "Section2 requires original acknowledged question observation captured into existing immutable V33 observation table in the question/model apply transaction before state transition and refresh. No collection or backfill.",
+      "sources": [
+        "GuidedPublicationEvidenceRepository.java:24",
+        "GuidedTranslationService.java:543",
+        "GuidedSessionService.java:479"
+      ]
+    },
+    {
+      "finding": "V32 context lacks a causal attempt/plan association; provider and server question/choice IDs differ.",
+      "resolution": "Prospective immutable questionCapture carries original persisted attempt identity, historical plan/hash and modelQuestionHash, joined to terminalAPPLIED NEXT_ACTION safe_result at publication. No latest-response search.",
+      "sources": [
+        "GuidedClarificationContextStore.java:48",
+        "GuidedTranslationStore.java:886",
+        "GuidedTranslationService.java:943"
+      ]
+    },
+    {
+      "finding": "Mutable answer progress is not an immutable historical acceptedAt/actor record.",
+      "resolution": "Nullable immutable preparation receipt snapshots the existing answer as of original preparation; resolvedAt retains original bytes as audit consistency only. Actual accepted_choice and pre-effect insertion prove acceptance was present before effect.",
+      "sources": [
+        "GuidedSessionService.java:451",
+        "GuidedSessionService.java:477",
+        "V32__studio_guided_translation.sql:97"
+      ]
+    },
+    {
+      "finding": "Learning applies selected target while publication applies raw intent; multiple accepted questions currently have iteration-order ambiguity.",
+      "resolution": "Independent Java/Node derive only targetIntent/selectedLocator from proved explicit human target resolution; raw plan/operation/input/read/binding/scope remain unchanged. Multiple accepted observed questions for one obligation refuse; no timestamp supersession.",
+      "sources": [
+        "GuidedTranslationService.java:1167",
+        "GuidedPlanBuilder.java:258",
+        "studio-runner/src/validator/observedReplay.ts:171"
+      ]
+    }
+  ],
+  "databaseGuarantees": {
+    "existing": [
+      "V32 session-scoped primary key and translation-state FK; context identity/meanings immutable; accepted_choice nullable single assignment, directSQL membership check; no plan/model-attempt FK or historical actor/acceptedAt.",
+      "V32 terminal model attempt identity/safe_result immutable and plans immutable; source/model associations in JSON still need explicit application joins.",
+      "V33 observation capture locks session, checks current progress body/canonical hash and400/1MiB aggregate caps; preparations/admissions retain scoped relational joins and immutable rows."
+    ],
+    "newDDLConditions": [
+      "Add nullable observed_choice_receipt only to unshipped V33 publication preparations; ordinary/old NULL rows remain valid and unmodified.",
+      "CHECK must use observed_choice_receipt IS NULL OR (complete closed typed receipt AND complete closed typed answer AND exact row session/preparation match AND bounds) IS TRUE. JSON null must not pass as SQL NULL; missing keys, wrong scalar types, extras and null required nested fields refuse. bindingId is the only declared nullable answer field.",
+      "Use canonical UTF8 receipt limit16384 with the existing canonical function; verify nested IDs/hashes/coordinate/generation/revisions and original ISO instant without rewriting timestamp bytes.",
+      "Existing whole-row deny-update/delete trigger must cover receipt; attempts to fill a previously NULL receipt after preparation must fail. No new nullable loophole permits application publication because accepted-row completeness requires the original witness."
+    ],
+    "applicationOnlyConditions": [
+      "Same-session originalCALLING attempt/current immutableplan/current materialization/current observation joins are validated before question create; terminalAPPLIED response and historical plan are independently validated when reading. No JSON FK is claimed.",
+      "Existing authenticated clarify source/generation/expiry checks and accepted_choice are authority; mutable resolvedAt alone never supplies authority or chronology.",
+      "Under session/source lock, preparation captures exactly one accepted observed decision, exact context/mappings/answer and proposal locator before admission. Exporter checks all actual accepted observed rows for complete successful witnessed associations.",
+      "Node cannot discover an omitted same-target database decision; that completeness oracle belongs real Java/DB exporter, not a fabricated standalone basis claim."
+    ]
+  },
+  "mandatoryImplementationOracles": [
+    "Atomic rollback at question context creation, original observation capture and APPLIED model settlement; no orphan retained question/capture or caller-selected attempt.",
+    "DirectSQL receipt extra/missing/null/type/count/byte/scope mutations; originalNULL rows accepted; nonnull receipt update/delete/backfill refused; source V30\u201332 unchanged.",
+    "Valid two-choice original question, accepted alternate locator, later fresh preparation generation/node and immutable action association. Raw target differing from selected target is expected human resolution, not a rejection by invented English grammar.",
+    "Wrong source/config/scope/worker/fence/context/attempt/status/kind/plan/hash/obligation/choice/old node/fresh locator/prep/action refuses with unchanged valid baseline first.",
+    "Duplicate meanings/choiceIds/accepted observed questions, unaccepted/missing capture, missing historical observation, missing preparation receipt, and same-target witness omission fail closed. No implicit latest-wins.",
+    "Historical immutable question plan matching unchanged final obligation succeeds; actual altered obligation/read/input/binding/operation/predicate cannot be rewritten by meaning metadata.",
+    "Every witness hash and exact ordered provider-meaning/server-mapping correspondence independently verified; observation pool exactly union of successful preparation and selected question evidence, no extras.",
+    "Real controlled public observed-phase answer after delay beyond browser timeout, preserved through refresh and actual pure publication; two recorded fresh-value model-free ordinary replays with independent chosen/unchosen destination assertions and one submit per explicit run. No source-question replacement or fake callback."
+  ],
+  "compatibilityAndPrivacy": [
+    "Optional internal PreparationFact.observedChoice omitted entirely for zero/source-only paths; preserve their canonical bytes and existing executable Profile. No public/model/IPC DTO expansion.",
+    "Old accepted observed choice without prospective capture or immutable preparation witness refuses even if target matches raw plan; no migration backfill.",
+    "Coordinate regenerated schema bundle/build catalog and required transport handshake; old decoder must not ignore witness; saved compatible artifacts/replay and historical receipt reading remain supported.",
+    "Positive bounded witness projection excludes full prompts, resolved config/secret/runtime values/account handles; projectionHash is opaque historical identity. Provider labels/IDs remain audit-only, never selectors/arguments or diagnostics.",
+    "Witness262144bytes, max200, aggregate8MiB, observation400/1MiB caps all remain independently enforced."
+  ],
+  "ownershipAssessment": {
+    "status": "Design/story proposed173 paths; implementation partition170 not activated, correctly pending reconciliation.",
+    "newProductPath": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+    "implementationDetail": "Existing create overload is three arguments (session,question,meanings), despite design wording two-argument; retain that actual API and add capture overload without changing old behavior.",
+    "tests": "Existing owned Java evidence/migration/builder/lowerer/joined and runner validator/fixtures paths suffice after root activates proposed scope."
+  },
+  "workPerformed": {
+    "writtenOnly": ".ai/STUDIO-OBS-006-observed-choice-data-review.json",
+    "sourceOrSchemaEdits": false,
+    "buildsOrTests": false,
+    "databaseMutation": false,
+    "nodeConsumers": false,
+    "subagents": false
+  },
+  "budget": {
+    "waveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  }
+}

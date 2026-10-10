@@ -1,0 +1,202 @@
+{
+  "story": "STUDIO-OBS-006",
+  "task": "po-close-story",
+  "result": "PASS",
+  "administrativelyClosed": true,
+  "actor": "Pax (@po) / obs006_po_close_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "at": "2026-10-09T17:17:50.415404+00:00",
+  "statusBefore": "Done",
+  "statusAfter": "Done",
+  "statusPreserved": true,
+  "lifecycleTransitionPerformed": false,
+  "closureKey": "STUDIO-OBS-006:digest:working-tree-sha256:f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+  "reviewed_revision": "working-tree-sha256:f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+  "verifiedProvenance": {
+    "reviewer": "Quinn (independent QA) / obs006_qa_61_high",
+    "gate": "PASS",
+    "gatePath": "docs/qa/gates/STUDIO-OBS-006-exact-plan-publication-and-deterministic-replay.yml",
+    "gateSha256": "d14cdc5125c971c2ae98805ba1fdb1cec5a3cef28c538c0f38acd1c3961f4a03",
+    "qaReport": ".ai/STUDIO-OBS-006-qa-review.json",
+    "qaReportSha256": "19b13cd99803c25ef9474a03fc7c3c10dabb7ebc5769d8d3bb801d2398bb3898",
+    "rootReviewVerification": ".aiox/sdc/STUDIO-OBS-006/final-developer-handoff/root-qa-verification.json",
+    "rootReviewVerificationSha256": "46343820367ba5cf2107030d11658178350abade575050a203aa0c24ac2644b1",
+    "rootReviewPhasePassedAt": "2026-10-09T17:13:39.607Z",
+    "reviewedSourceDigestAlgorithm": "sha256 of sorted path + NUL + digest + LF for the 147 authoritative File List entries excluding QA-owned story lifecycle/results/changelog metadata; complete 148-entry pre-review snapshot and story SHA retained separately",
+    "reviewedSourceCount": 147,
+    "currentSourceAggregateSha256": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+    "fileListEntries": 148,
+    "completedDevelopmentTasks": 20,
+    "acceptanceCriteria": [
+      {
+        "ac": "AC-1",
+        "qaStatus": "PASS"
+      },
+      {
+        "ac": "AC-2",
+        "qaStatus": "PASS"
+      },
+      {
+        "ac": "AC-3",
+        "qaStatus": "PASS"
+      },
+      {
+        "ac": "AC-4",
+        "qaStatus": "PASS"
+      },
+      {
+        "ac": "AC-5",
+        "qaStatus": "PASS"
+      },
+      {
+        "ac": "AC-6",
+        "qaStatus": "PASS"
+      },
+      {
+        "ac": "AC-7",
+        "qaStatus": "PASS"
+      }
+    ],
+    "postQaStorySha256": "e201c03db45bbd0da2c0cbc868d424d23e5f6e11350f243c103fc50d6f0b9653",
+    "storyAfterClosureSha256": "34363521b37c3f3f869e0ce70210500320b63676ab00e677ea45e0ed1befe26a",
+    "storySubstantiveSha256": "891d3adb2fd83f67fc030deedad2bcc605ee0ed12ab5ce4efe233a6d34ad6286",
+    "storySubstancePreserved": true,
+    "qaResultsPreserved": true,
+    "qaLifecycleTransitionCount": 1,
+    "sourceRevisionCommitOrPr": null,
+    "preClosureVerification": {
+      "reviewedRevision": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+      "backend": {
+        "tests": 321,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "storySubstantiveSha256": "891d3adb2fd83f67fc030deedad2bcc605ee0ed12ab5ce4efe233a6d34ad6286",
+      "mismatches": []
+    },
+    "postClosureVerification": {
+      "reviewedRevision": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+      "backend": {
+        "tests": 321,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "storySubstantiveSha256": "891d3adb2fd83f67fc030deedad2bcc605ee0ed12ab5ce4efe233a6d34ad6286",
+      "mismatches": []
+    }
+  },
+  "qualityEvidence": {
+    "independentBackend": {
+      "tests": 321,
+      "passed": 321,
+      "skipped": 0,
+      "failed": 0,
+      "errors": 0
+    },
+    "independentRunnerUnit": 274,
+    "independentChromium": 33,
+    "compiledOracles": 5,
+    "fullBackendArchive": {
+      "tests": 2067,
+      "passed": 2048,
+      "skipped": 19,
+      "failed": 0,
+      "errors": 0,
+      "crossReplicaPassed": 2,
+      "lineCoverage": {
+        "covered": 18048,
+        "missed": 2033,
+        "ratio": 0.8987600219112594
+      },
+      "actualJacocoThresholdVerification": "PASS unchanged thresholds; parsed archived XML and actual gradle task log",
+      "spotbugsMain": "PASS",
+      "spotbugsTest": "SKIPPED by existing build policy",
+      "archiveFilesVerified": 3597
+    },
+    "runtimePreservedFullGate": {
+      "unitPassed": 1546,
+      "unitExistingSkips": 29,
+      "chromiumPassed": 306,
+      "chromiumExistingSkips": 10,
+      "lineCoverage": 91.24,
+      "exactFinalAffectedChromiumPassed": 33,
+      "scope": "Broader runtime snapshots and final affected exact-byte rerun distinguished in producer report; no whole-live-provider assertion."
+    }
+  },
+  "qualityCheckboxInterpretation": {
+    "developmentTasks": "All 20 checked Tasks / Subtasks entries verified; CLI count 21 also includes the separate checked pre-commit quality checkbox.",
+    "independentQa": "Existing unchecked quality-section checkbox is stale administrative metadata; independently verified QA PASS, AC trace and root review prove completion. Its reviewed bytes were preserved.",
+    "remoteOperations": "Conditional eventual PR/push/deployment checkbox is inapplicable because none was requested; no unmet acceptance criterion."
+  },
+  "bookkeepingFilesChanged": [
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md"
+  ],
+  "filesChanged": [
+    "docs/stories/STUDIO-OBSERVED/README.md",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+    ".ai/STUDIO-OBS-006-close.json"
+  ],
+  "artifactHashes": {
+    "storyBefore": "e201c03db45bbd0da2c0cbc868d424d23e5f6e11350f243c103fc50d6f0b9653",
+    "storyAfter": "34363521b37c3f3f869e0ce70210500320b63676ab00e677ea45e0ed1befe26a",
+    "indexBefore": "3c349fe84961efe991c7b77f02cf9c242a9235f71733abcc208d97c1902c79c0",
+    "indexAfter": "a6a556aeb219a2886970d21eb0a185c99615d0ca85c64d56dacc31ad89852f10"
+  },
+  "idempotency": {
+    "actualSecondPass": "NO_OP",
+    "markerCounts": {
+      "docs/stories/STUDIO-OBSERVED/README.md": 1,
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": 1
+    },
+    "exactFixtureSecondPass": "NO_OP",
+    "simulatedFailureAfterIndex": "PASS",
+    "partialRetry": "Wrote only missing story entry; index preserved; retry no-op",
+    "atomicWrites": "Same-directory temporary file, fsync, compare prior bytes and os.replace per artifact"
+  },
+  "scope": {
+    "productTestCodeChanged": false,
+    "newQualityVerdictIssued": false,
+    "qaArtifactsChanged": false,
+    "sdcStateChanged": false,
+    "waveStateChanged": false,
+    "commitPushPrDeployment": false,
+    "externalMessages": false,
+    "subagents": false
+  },
+  "limitations": [
+    "Actual CoreHTTP/PG/Chromium/authenticated worker paths use controlled protocol-compatible model and account providers; model accuracy/cost and account connectivity are not live-provider evidence.",
+    "Local catalog has synthetic image digest; production immutable image/ingress/Sonic/Vault/revocation/co-run external evidence is unavailable and not claimed.",
+    "OBS007 approved account provider,OBS008 automatic frontend finalize/poll/reconnect and first guided video,OBS009 live benchmark,OBS010 human pilot remain separate scope; no waiver is used.",
+    "19 backend and29unit/10Chromium historical skips remain exact existing conditions; targeted independent suites had0skips.",
+    "Standalone manual fixture opaque sourceManifestHash and independently reconstructed original-row provenance are distinct oracles; no absent historical prompt/manifest preimage fabricated.",
+    "Bounded30second Core revocation lag and residual browser event races after last synchronous check are reviewed contract limits; no instantaneous distributed/browser atomicity claim.",
+    "Shared wave ceiling USD500; actual billing spend unknown.",
+    "CodeRabbit/WSL unavailable; existing configured independent-review fallback accepted by QA; no automated CodeRabbit PASS claimed.",
+    "STUDIO-OBS-007 remains Draft; approved real account-provider configuration is unidentified and user input remains pending.",
+    "Root owns subsequent close verification and wave advancement; this administrative phase does not dispatch dependent work."
+  ],
+  "nextStory": {
+    "id": "STUDIO-OBS-007",
+    "status": "Draft",
+    "eligibleForImplementation": false,
+    "prerequisite": "Identify approved account-provider configuration, then independent readiness validation.",
+    "automaticDispatch": false
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualSpendUsd": null
+  },
+  "handoff": "Root to verify close; no root-owned SDC/wave command executed.",
+  "indexCurrentStateReconciled": {
+    "at": "2026-10-09T17:18:21.870529+00:00",
+    "authorizedBy": "Root follow-up within assigned epic index scope",
+    "changes": [
+      "Current execution lists OBS-001\u2013006 Done and administratively closed, root close verification pending; OBS-007 Draft awaiting provider identification/readiness; OBS-008\u2013010 Draft.",
+      "Historical bridge-stage OBS-005 Draft claim explicitly dated to that replan stage; historical intake evidence and all earlier closure entries preserved."
+    ]
+  }
+}

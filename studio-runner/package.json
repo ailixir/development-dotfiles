@@ -26,7 +26,8 @@
     "test:fixtures": "vitest run --config vitest.fixtures.config.ts",
     "test:deployment": "vitest run --config vitest.deployment.config.ts",
     "evaluate": "node evaluation/cli.mjs",
-    "browsers:install": "playwright install chromium"
+    "browsers:install": "playwright install chromium",
+    "start:guided": "node dist/run/guidedMain.js"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "3.1136.0",

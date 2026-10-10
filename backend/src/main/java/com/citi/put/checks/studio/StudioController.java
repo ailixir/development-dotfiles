@@ -176,8 +176,9 @@ public class StudioController {
   public ResponseEntity<Map<String, Object>> executeTest(
       @PathVariable UUID id,
       @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
-      Authentication auth) {
-    ExecutionSnapshotDto execution = studioService.executeTest(id, auth, idempotencyKey);
+      Authentication auth,
+      jakarta.servlet.http.HttpServletRequest request) {
+    ExecutionSnapshotDto execution = studioService.executeTest(id, auth, idempotencyKey, request);
     return ResponseEntity.accepted()
         .body(Map.of("executionId", execution.executionId(), "status", execution.status()));
   }
@@ -269,6 +270,14 @@ public class StudioController {
         "size", page.getSize(),
         "totalElements", page.getTotalElements(),
         "totalPages", page.getTotalPages());
+  }
+
+  @org.springframework.web.bind.annotation.ExceptionHandler(
+      com.citi.put.checks.studio.guided.session.GuidedSessionException.class)
+  public ResponseEntity<Map<String, Object>> observedRefusal(
+      com.citi.put.checks.studio.guided.session.GuidedSessionException failure) {
+    return ResponseEntity.status(failure.status())
+        .body(Map.of("code", failure.getMessage(), "message", "Observed execution refused"));
   }
 
   private Map<String, Object> toExecutionEnvelope(Page<ExecutionSnapshotDto> page) {

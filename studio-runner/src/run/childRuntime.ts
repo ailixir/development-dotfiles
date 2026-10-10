@@ -36,6 +36,14 @@
  * last resort when the ordered path itself fails.
  */
 
+import type { Launch2, Execute2, BuildIdentity } from '../executor/observedOperations.js';
+import type { ObservedChildMessage } from './protocol.js';
+import { assertBuild, assertProfile, demand, equalObserved, hashObserved, OBSERVED_LIMITS, validateObserved, validateTrustedPolicy } from '../validator/observedReferencePolicy.js';
+import { executeObservedReplay, replayError, validateObservedExecute } from '../executor/observedReplay.js';
+import type { ReplayError } from '../executor/observedReplay.js';
+import { createObservedReplayAdapter } from './observedReplayAdapter.js';
+import { accountProvider, compiledObservedAccountRegistry, ObservedAccountLifecycle } from './observedAccount.js';
+import type { ObservedAccountRegistry } from './observedAccount.js';
 import { readFile, stat } from 'node:fs/promises';
 
 import type { ValueResolver } from '../executor/adapters/BrowserAdapter.js';
@@ -47,7 +55,7 @@ import type {
 } from '../executor/adapters/StepReporter.js';
 import { executeSteps } from '../executor/index.js';
 import type { ExecutableStep } from '../executor/index.js';
-import type { BrowserFactory, BrowserHandle } from './browserFactory.js';
+import type { BrowserFactory, BrowserHandle, BrowserLaunchRequest } from './browserFactory.js';
 import type { StepRefusalCode } from '../executor/refusals.js';
 import { failureKindForRefusal } from './errors.js';
 import type { RunFailureKind } from './errors.js';
@@ -64,7 +72,7 @@ import { takeRunOrigin } from './timeline.js';
 /** The transport, injected so the whole child runtime runs in-process in the unit tier. */
 export interface ChildChannel {
   onMessage(listener: (value: unknown) => void): void;
-  send(message: ChildMessage): void;
+  send(message: ChildMessage | ObservedChildMessage): void;
   /** Called once the run has reported its result. Every path reaches it (AC-5). */
   exit(code: number): void;
 }
@@ -72,6 +80,8 @@ export interface ChildChannel {
 export interface ChildRuntimeDependencies {
   readonly channel: ChildChannel;
   readonly browsers: BrowserFactory;
+  readonly observedBuild?: BuildIdentity;
+  readonly observedAccounts?: ObservedAccountRegistry;
   /** The two adjacent reads of the run origin. Injected only so a test can drive them. */
   readonly originSource?: OriginSource | undefined;
   /** Reads the produced recording. Injected so the evidence branches are testable. */
@@ -323,6 +333,9 @@ function sendResult(
   channel.send(message);
 }
 
+/** Both protocol families share the single recorded browser creation seam. */
+function launchRecordedBrowser(browsers:BrowserFactory,request:BrowserLaunchRequest):Promise<BrowserHandle>{return browsers.launch(request);}
+
 /** Phase one: start the browser, take the origin, answer `ready`. */
 export async function launchInChild(
   message: LaunchMessage,
@@ -332,7 +345,7 @@ export async function launchInChild(
   const { channel, browsers } = dependencies;
   let handle: BrowserHandle;
   try {
-    handle = await browsers.launch({
+    handle = await launchRecordedBrowser(browsers, {
       browser: message.browser,
       viewport: message.viewport,
       recording: message.recording,
@@ -560,7 +573,7 @@ async function settleTail(
  * *before a browser exists*, which mirrors the ordering AC-2 enforces on the parent side — this
  * one guards the case where the parent's own protocol drifts.
  */
-export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void {
+function attachLegacyChildRuntime(dependencies: ChildRuntimeDependencies): void {
   const { channel } = dependencies;
   const inspect = dependencies.inspectRecording ?? inspectRecordingFile;
   const state: ChildState = {
@@ -756,4 +769,155 @@ function kindOf(value: unknown): string | null {
   if (typeof value !== 'object' || value === null) return null;
   const kind = (value as { kind?: unknown }).kind;
   return typeof kind === 'string' ? kind : null;
+}
+
+/** Family is selected once by the first launch frame, never by an execute payload. */
+export function attachChildRuntime(dependencies: ChildRuntimeDependencies): void {
+    let listener: ((value: unknown) => void) | null = null;
+    dependencies.channel.onMessage(value => {
+        if (listener) {
+            listener(value);
+            return;
+        }
+        const channel: ChildChannel = { ...dependencies.channel, onMessage(next) { listener = next; } };
+        if (typeof value === 'object' && value !== null && 'protocolVersion' in value && value.protocolVersion === 2)
+            attachObservedChildRuntime({ ...dependencies, channel });
+        else
+            attachLegacyChildRuntime({ ...dependencies, channel });
+        (listener as ((value: unknown) => void) | null)?.(value);
+    });
+}
+function attachObservedChildRuntime(dependencies: ChildRuntimeDependencies): void {
+    const { channel } = dependencies;
+    const abort = new AbortController();
+    let launch: Launch2 | null = null, handle: BrowserHandle | null = null, account: ObservedAccountLifecycle | null = null, clock: Clock | null = null;
+    let runDeadlineMs=0;
+    let execution: Execute2 | null = null;
+    const startedSteps = new Map<number, number>(), completedSteps = new Set<number>();
+    let phase: 'NEW' | 'READY' | 'EXECUTING' | 'DONE' = 'NEW', finished = false, closing: Promise<void> | null = null, deadline: ReturnType<typeof setTimeout> | null = null;
+    let queue = Promise.resolve();
+    const finish = async (errorCode: ReplayError | null): Promise<void> => {
+        if (finished)
+            return;
+        finished = true;
+        phase = 'DONE';
+        abort.abort();
+        if (deadline)
+            clearTimeout(deadline);
+        const current = handle;
+        handle = null;
+        let recording: Extract<ObservedChildMessage, {
+            kind: 'result';
+        }>['recording'] = { path: null, bytes: null, errorCode: null, state: 'UNAVAILABLE', partial: false };
+        if (current) {
+            let path: string | null = null, orderly = true;
+            try {
+                path = await current.close();
+            }
+            catch {
+                orderly = false;
+                await current.dispose().catch(() => undefined);
+            }
+            const inspected = await (dependencies.inspectRecording ?? inspectRecordingFile)(path, orderly);
+            const e = evidenceFor(inspected);
+            recording = { path: e.path, bytes: e.bytes, errorCode: e.error === null ? null : 'RECORDING_FAILED', state: e.state, partial: e.partial };
+        }
+        await account?.dispose();
+        if (execution && launch) {
+            for (const step of execution.steps) {
+                if (completedSteps.has(step.stepIndex))
+                    continue;
+                const start = startedSteps.get(step.stepIndex), end = start === undefined ? null : clock?.now() ?? start;
+                channel.send({ kind: 'step-finished', protocolVersion: 2, mode: 'observed', runId: launch.runId, attemptId: launch.attemptId, stepIndex: step.stepIndex, stepId: step.stepId, status: start === undefined ? 'SKIPPED' : 'FAIL', startedAtMs: start ?? null, finishedAtMs: end, durationMs: start === undefined || end === null ? null : end - start, errorCode: start === undefined ? null : errorCode ?? 'INTERNAL_ERROR' });
+                completedSteps.add(step.stepIndex);
+            }
+        }
+        if (launch)
+            channel.send({ kind: 'result', protocolVersion: 2, mode: 'observed', runId: launch.runId, attemptId: launch.attemptId, admissionId: launch.admission.admissionId, profileHash: hashObserved(launch.profile), build: launch.build, ok: errorCode === null, errorCode, recording });
+        channel.exit(0);
+    };
+    const stop = (code: ReplayError): void => { abort.abort(); closing ??= finish(code); };
+    const live = (): void => { demand(!abort.signal.aborted && !finished, 'CANCELLED'); };
+    const dispatch = async (value: unknown): Promise<void> => {
+        if (finished)
+            return;
+        try {
+            if (phase === 'NEW') {
+                const m = validateObserved<Launch2>('replay-ipc#/definitions/Launch2', value, OBSERVED_LIMITS.launch);
+                launch = m;
+                demand(dependencies.observedBuild, 'PROFILE_MISMATCH');
+                assertProfile(m.profile);
+                assertBuild(m.build, dependencies.observedBuild);
+                const r = m.admission.request;
+                demand(m.admission.admissionId === r.admissionId && m.runId === r.executionId && m.attemptId === r.attemptId && m.scopeHash === r.scopeHash && m.configurationHash === r.configurationHash && equalObserved(m.profile, r.profile) && equalObserved(m.build, r.build), 'INVALID_CONTRACT');
+                const scope = m.accountHandle.authorization.scope;
+                demand(equalObserved(validateTrustedPolicy(m.policy, scope), m.policy), 'POLICY_REFUSED');
+                demand(hashObserved(m.policy) === r.currentPolicyHash && hashObserved(scope) === m.scopeHash, 'POLICY_REFUSED');
+                demand(Date.parse(m.admission.startDeadlineAt) > Date.now() && Date.parse(m.admission.runDeadlineAt) > Date.now(), 'AUTHORIZATION_EXPIRED');
+                const provider = accountProvider(dependencies.observedAccounts ?? compiledObservedAccountRegistry, m.accountHandle);
+                account = new ObservedAccountLifecycle(provider, abort.signal);
+                deadline = setTimeout(() => { stop('TIMEOUT'); }, Math.max(1, Date.parse(m.admission.startDeadlineAt) - Date.now()));
+                await account.prepare(m.accountHandle, m.admission);
+                live();
+                const opened = await launchRecordedBrowser(dependencies.browsers, { browser: m.browser, viewport: m.viewport, recording: m.recording, scratchPath: m.scratchPath, observedScope: scope });
+                if (abort.signal.aborted) {
+                    await opened.dispose();
+                    return;
+                }
+                handle = opened;
+                opened.onExtraPage(() => { stop('TARGET_DRIFT'); });
+                const origin = takeRunOrigin(dependencies.originSource, m.seekOriginCalibrationMs);
+                clock = origin.clock;
+                clearTimeout(deadline);
+                runDeadlineMs=clock.now()+Math.max(1,Math.min(m.totalRuntimeMs,Date.parse(m.admission.runDeadlineAt)-Date.now()));
+                deadline = setTimeout(() => { stop('TIMEOUT'); },Math.max(1,runDeadlineMs-clock.now()));
+                demand(opened.observedAccountContext, 'ACCOUNT_UNAVAILABLE');
+                await account.apply(opened.observedAccountContext, scope);
+                live();
+                demand(await opened.observedInitialContextMatches?.(), 'TARGET_DRIFT');
+                live();
+                phase = 'READY';
+                channel.send({ kind: 'ready', protocolVersion: 2, mode: 'observed', runId: m.runId, attemptId: m.attemptId, profileHash: hashObserved(m.profile), build: m.build, admissionId: m.admission.admissionId, browserStartedAt: origin.browserStartedAt.toISOString(), startedAtMs: origin.startedAtMs, calibrationOffsetMs: origin.calibrationOffsetMs });
+                return;
+            }
+            demand(phase === 'READY' && launch && handle && clock, 'INVALID_CONTRACT');
+            const m: Execute2 = validateObservedExecute(value, launch.accountHandle.authorization.scope);
+            demand(m.runId === launch.runId && m.attemptId === launch.attemptId && m.configurationHash === launch.configurationHash && m.profileHash === hashObserved(launch.profile), 'INVALID_CONTRACT');
+            demand(hashObserved({ browser: launch.browser, viewport: launch.viewport, timeoutSeconds: m.stepTimeoutMs / 1000, waitStrategy: m.waitStrategy, environment: launch.accountHandle.authorization.scope.environment }) === launch.configurationHash, 'INVALID_CONTRACT');
+            phase = 'EXECUTING';
+            // Execution now owns the same run ceiling through its invocation-aware control.
+            // Keep the independent timer for account setup/Ready waiting only.
+            if(deadline)clearTimeout(deadline);deadline=null;
+            execution = m;
+            const fixed = launch, steps = m.steps;
+            const reporter: StepReporter = { stepStarted(e) { if (finished)
+                    return; startedSteps.set(e.stepIndex, e.startedAtMs); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-started', protocolVersion: 2, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, startedAtMs: e.startedAtMs }); }, stepFinished(e) { if (finished)
+                    return; completedSteps.add(e.stepIndex); const step = steps[e.stepIndex]; demand(step); channel.send({ kind: 'step-finished', protocolVersion: 2, mode: 'observed', runId: fixed.runId, attemptId: fixed.attemptId, stepIndex: e.stepIndex, stepId: step.stepId, status: e.status, startedAtMs: e.startedAtMs, finishedAtMs: e.finishedAtMs, durationMs: e.durationMs, errorCode: e.failure as ReplayError | null }); } };
+            const adapter = createObservedReplayAdapter(handle, launch.accountHandle.authorization.scope, launch.policy, launch.runId, live, m.waitStrategy, m.stepTimeoutMs);
+            const result = await executeObservedReplay(m, adapter, launch.accountHandle.authorization.scope, clock, reporter, abort.signal,runDeadlineMs);
+            // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Stop can finish the run while execution awaits native browser input.
+            if (!finished) {
+                await (dependencies.sleep ?? defaultSleep)(Math.max(0,Math.min(TAIL_SETTLE_HOLD_MS,runDeadlineMs-clock.now())));
+                closing ??= finish(result.errorCode);
+                await closing;
+            }
+        }
+        catch (error) {
+            closing ??= finish(replayError(error));
+            await closing;
+        }
+    };
+    channel.onMessage(value => {
+        if (typeof value === 'object' && value !== null && 'kind' in value && value.kind === 'stop') {
+            try {
+                validateObserved('replay-ipc#/definitions/Stop', value, 128);
+                stop('CANCELLED');
+            }
+            catch {
+                stop('INVALID_CONTRACT');
+            }
+            return;
+        }
+        queue = queue.then(() => dispatch(value));
+    });
 }

@@ -1,0 +1,185 @@
+{
+  "story": "STUDIO-OBS-006",
+  "status": "SCOPED_IMPLEMENTATION_COMPLETE_TESTED_HANDOFF",
+  "at": "2026-10-09T14:25:01.094850+00:00",
+  "files": {
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+    "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "60b9b62ca760af538ccfd669bf594a15d3917daa7d018704c12bfa29987c29cb"
+  },
+  "remaining": [
+    "Root/lead collect and freeze this scoped handoff; independent QA assesses final implementation with all other lanes. No whole-story verdict or lifecycle promotion is claimed.",
+    "Java production causal joins, accepted-row completeness, actual observed-choice publication and browser/replay proof remain lead/RUNNER responsibilities; these SQL synthetic receipts do not demonstrate those facts."
+  ],
+  "verification": {
+    "targetedMigrationTests": {
+      "tests": 11,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 23.703,
+      "buildSeconds": 38,
+      "command": "JAVA_HOME=/Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home ./gradlew test --tests '*GuidedPublicationMigrationTest' --console=plain",
+      "cwd": "backend",
+      "exitCode": 0
+    },
+    "compileJava": "PASS lease13; UP-TO-DATE same checkpoint lease14",
+    "compileTestJava": "PASS lease13 and after owned formatting corrections lease14",
+    "formatter": "Owned test only cached google-java-format1.22/Java21; final source formatted. Lease13 dry-runPASS, lease14 reformat then real style/testPASS.",
+    "checkstyle": {
+      "toolVersion": "10.18.1",
+      "mode": "Direct CLI against actual repository config with explicit config_loc; exact single owned path",
+      "filesExamined": 1,
+      "errors": 0,
+      "exitCode": 0,
+      "commandArguments": "/tmp/obs006-choice-ddl-style-command.json",
+      "finalXml": "/tmp/obs006-choice-ddl-style-final.xml",
+      "finalCommandDifference": "Same captured arguments, with -o /tmp/obs006-choice-ddl-style-final.xml for final run"
+    },
+    "noNodeConsumers": true,
+    "V19Orders": "Original test bothCutoverOrdersPreserveLegacyRows PASS",
+    "failedStyleAttempt": {
+      "errors": 5,
+      "finding": "4 long SQL strings and1 unbraced loop, corrected owned test only",
+      "xml": "/tmp/obs006-choice-ddl-style-attempt1.xml",
+      "preserved": true
+    },
+    "nonProofGradleStyleAttempt": "Lease13 exited0 but absent report; never treated as substantiated PASS after audit. Log preserved.",
+    "evidenceHashes": {
+      "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "60b9b62ca760af538ccfd669bf594a15d3917daa7d018704c12bfa29987c29cb",
+      "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml": "a3285f8e0bae50c45b4aaf0af0eb85f6000821f1638704e70828e6e2c0ea6a86",
+      "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.class": "e8a319899addc1c5577896719d244fd5667ffb667bd666e34238a734b13d783e",
+      "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest$Database.class": "6e0e74b6363835feb021935a7cf117fa3fafc4106ea5fefff219bd087ef83331",
+      "backend/build/resources/main/db/migration/V33__studio_observed_publication.sql": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+      "/tmp/obs006-choice-ddl-migration-final.log": "e98298aee442d3945a7347e389bc3a5e8c1f02fe5d730d38eea0aa4abaf29d97",
+      "/tmp/obs006-choice-ddl-style-attempt1.xml": "70843133ed446600aac3ac39aa55354233510c9915822f1a85f4294b2959e579",
+      "/tmp/obs006-choice-ddl-style-attempt1.log": "d6696f51b8064315993bb690a60df37c8d9f6d49f21ed3851e7302cdb5e7a436",
+      "/tmp/obs006-choice-ddl-style-final.xml": "ec7d55eb65c8409e348c7c1293c19817394047466d25ab984e19496574903a42",
+      "/tmp/obs006-choice-ddl-style-final.log": "2c58b87a0350a39bb1c3b5f4891defeeb9a785e84aa11a466dc9ddb21253bf58",
+      "/tmp/obs006-choice-ddl-style-command.json": "7e7e4f122b5ae407cb4c805276cebe5a5ff0e1559166c60c8eb9e36b7dc0af85",
+      "/tmp/obs006-choice-ddl-checkstyle.log": "1774c90edcf5f353ca48dc24bc458fde293ccba96d436598705a766abd1546e9"
+    },
+    "preservedFinalManifest": "/tmp/obs006-choice-ddl-final-evidence/manifest.json",
+    "preservedFirstRunManifest": "/tmp/obs006-choice-ddl-lease13-evidence/manifest.json",
+    "unchangedPriorMigrationHashes": {
+      "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql": "859c27578e24ad4eeaad0c5a16cb42ee11ac82b94d04ab0fa11644ba4c36502a",
+      "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql": "909e8d68b1012aa2b88ae2567e93a811c233fa61c8ade6b822d4c3fb585bf85c",
+      "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7"
+    },
+    "preExistingV33PrefixHash": "1ca47811bb8624003aaf6171e62223d4a65615ad9fe88e7f9a024e46223d92ad",
+    "preExistingV33PrefixMatchesFrozenReview": true
+  },
+  "lane": "NONE; lease13 and14 explicitly released, no active consumer; both owned source files held for root handback",
+  "sourceFreeze": true,
+  "budget": {
+    "waveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  },
+  "continuation": {
+    "model": "gpt-6.1-sol",
+    "reasoningEffort": "high",
+    "agent": "/root/obs006_ddl_61_high",
+    "at": "2026-10-09T14:14:34.166732+00:00",
+    "status": "SCOPED_IMPLEMENTATION_COMPLETE_TESTED_HANDOFF",
+    "sourceHashes": {
+      "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "9b7eafc01611fa27e252167dc34c9efc4a78958040083043eb05ccfd4dbe9c73"
+    },
+    "coordinationHistory": [
+      "Original prepared notes above remain historical/unverified.",
+      "UTC Z original v2 instant contract confirmed; removed prepared offset acceptance and added strict hour/calendar rejection tests.",
+      "Provisional UUID Coordinate.stepId tightening matched an unintended local runtime schema but contradicted the frozen generic Coordinate. Root/lead resolved generic ID1..256; SQL tightening removed and runtime corrected/refrozen. No UUIDstep production/test run occurred.",
+      "Superseded provisional 16177-byte fixture/global-maximum discussion used UUIDstep and is not a current contract claim. Timestamp with nine fractional digits is30characters.",
+      "Restored generic-coordinate valid exact16384UTF8 canonical receipt followed by16385 rejection; no scope widening.",
+      "No formatter/build/test/SQL has run. Awaiting exclusive root lease."
+    ],
+    "lease13": {
+      "released": true,
+      "java21": true,
+      "migrationTests": {
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "durationSeconds": 22.903,
+        "buildSeconds": 39
+      },
+      "compileJava": "PASS",
+      "compileTestJava": "PASS",
+      "scopedFormatterCheck": "PASS",
+      "gradleScopedCheckstyle": "EXIT0_BUT_REPORT_ABSENT_NOT_CLAIMED_PASS",
+      "preservedManifest": "/tmp/obs006-choice-ddl-lease13-evidence/manifest.json",
+      "hashes": {
+        "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "dabb794525f7f29cce3e3f70de1567fb130d343e3baf1047d40beea0ac5a9d11",
+        "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml": "1e61c5f87f5cfd433249c4b8fcf86520dcfe0b4e9eb984c25a1af3712e2b1856",
+        "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.class": "6df384df3675ff94ec40a8507b529e43124d386e9147064c109a8bf577585f99",
+        "backend/build/classes/java/test/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest$Database.class": "6e0e74b6363835feb021935a7cf117fa3fafc4106ea5fefff219bd087ef83331",
+        "/tmp/obs006-choice-ddl-migration-attempt1.log": "87904f64c39da0649b3333e03d4072faafe10c3f84cefed22fe73fed13caba3a",
+        "/tmp/obs006-choice-ddl-format-check.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "/tmp/obs006-choice-ddl-checkstyle.log": "1774c90edcf5f353ca48dc24bc458fde293ccba96d436598705a766abd1546e9"
+      },
+      "at": "2026-10-09T14:21:47.596567+00:00"
+    }
+  },
+  "priorPreparedHandoff": {
+    "story": "STUDIO-OBS-006",
+    "status": "PREPARED_UNTESTED_HANDOFF_MODEL_PREFERENCE",
+    "at": "2026-10-09T13:59:40.248152+00:00",
+    "files": {
+      "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "798a6cf68b2f4c5b3c858cfa7c9dea945257401742959e1ab6ef9edf17262b98",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "3628554f60c50b41f190e97fbdc6919477e12dd65ce1f2afcf4621b2d5749bb5"
+    },
+    "reason": "Root directed stop and transfer development to explicitly configured GPT-6.1 Sol high after user preference.",
+    "implementedUnverified": [
+      "Appended nullable observed_choice_receipt column and null-safe CHECK to unshippedV33; dedicated closed typed canonicalUTF8<=16384 receipt/answer validator, row identities, nested identity consistency, only bindingId nullable; original ISO bytes preserved. Existing preparation immutability trigger unchanged.",
+      "Added three migration tests: optional immutable receipt/full relational insertion+rollback; valid baseline then missing/extra/null/wrongtype/scope/coordinate/time/identity mutations; canonical16384/16385 and Unicode scalar/byte bounds. Tests explicitly label receipts synthetic relational evidence."
+    ],
+    "remaining": [
+      "Obtain exclusive backend Java/shared-schema freeze from root/lead before formatter/build; RUNNER owns changing packaged schemas. No lease granted to this agent.",
+      "Format only GuidedPublicationMigrationTest.java with cached google-java-format1.22 under explicitJava21. No global formatter.",
+      "Run full targeted GuidedPublicationMigrationTest with Java21: JAVA_HOME=/Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home backend/gradlew -p backend test --tests '*GuidedPublicationMigrationTest' --console=plain. No Node-consuming suites.",
+      "Resolve any compile/SQL/test failure in these two owned files only, preserve failures and exact tested source/class/XML hashes, request additional ownership for genuine mismatch.",
+      "Coordinate exact receipt shape with lead/RUNNER; lead owns causal Java choice/evidence joins. SQL intentionally does not prove actual human/model/browser causality.",
+      "Review direct shape validator calendar/time regex and canonical-control-character boundary fixture during test verification. They have not been executed."
+    ],
+    "verification": {
+      "formatterRun": false,
+      "buildRun": false,
+      "testsRun": false,
+      "sqlExecuted": false,
+      "knownProductFailures": "None established; source uncompiled/untested.",
+      "priorMigrationConstraints": "Existing V33 content preserved; only append-only amendment. V30-V32 untouched. Existing old migration tests retained."
+    },
+    "lane": "NONE; no lease held or process active",
+    "sourceFreeze": true,
+    "budget": {
+      "waveCeilingUsd": 500,
+      "actualSpend": "UNKNOWN"
+    }
+  },
+  "agent": "/root/obs006_ddl_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "implemented": [
+    "Nullable observed_choice_receipt appended to unshipped V33; SQL NULL remains valid absence. Complete closed typed receipt/answer/coordinate with only bindingId nullable; canonical UTF8<=16384; row session/preparation and nested accepted-choice/question/session identity equality protected by IS TRUE.",
+    "Generic Coordinate.stepId ID1..256 retained; ordinal0..7, generation0..IntMAX, decimal revisions0..LongMAX, lowercase UUID obligation, lowercase hashes, original UTC-Z calendar-valid instant0..9fraction retained byte-for-byte.",
+    "Existing preparation whole-row deny-update/delete guard unchanged and tested against nonnull removal/deletion and NULL-to-receipt backfill. All pre-existing V33 prefix preserved. V30-V32 untouched.",
+    "Three new PostgreSQL migration tests retain all eight original tests; synthetic receipt relational insertion valid baseline then malformed required/extra/missing/null/type/root/identity/coordinate/revision/calendar probes; positive full-row insert + transaction rollback.",
+    "Real PostgreSQL canonical equality with independent Java canonical bytes; shape-valid receipt exactly16384 accepted and16385 rejected using escaped U+0001 scalars and quote replacement, plus astral/combining/ASCII256/257scalar boundaries and valid0/maxgeneration/revisions/binding alternatives."
+  ],
+  "evidenceLimits": {
+    "syntheticRelationalReceipts": true,
+    "observedChoicePublicationOrBrowserProof": false,
+    "newCrossTableApplicationJoinsEnforcedBySql": false,
+    "inventedActorAcceptanceTimeOrFk": false,
+    "schemaPinsRelaxed": false,
+    "guardsDisabled": false,
+    "oldMigrationsChanged": false,
+    "zeroSourceLegacyRows": "SQL NULL compatibility and original relational/migration tests PASS; canonical zero/source-only publication artifact proof belongs other lanes.",
+    "fullStoryQaVerdict": false,
+    "subagents": false,
+    "commitsPush": false,
+    "lifecycleCli": false
+  }
+}

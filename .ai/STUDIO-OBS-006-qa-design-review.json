@@ -1,0 +1,236 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Independent read-only security/QA design review before PO; not an implementation or lifecycle gate",
+  "reviewer": "/root/obs005_peer",
+  "recordedAt": "2026-10-09T06:23:28.521571+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "reviewedDocumentsSha256": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "bbb967c08d425fbe557cd0c813db5e97f4b08db62d2e8078bf95eecb8eee8aa5",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "d1f6142c7fb41423af311ab11584c4b691bbd050c726bc6ec6cc894ee5603f9f",
+    "docs/specs/studio-observed-authoring/consensus-plan.md": "8f97af78155a57ee32127f4e2433a94f5e134d47896655743df65292cb12f44b",
+    ".ai/STUDIO-OBS-006-data-recon.json": "24901865d8385a15f17ac0bb628482b63e2285576bf3078f8c1517f5f9be7e66",
+    ".ai/STUDIO-OBS-006-runtime-recon.json": "00ecdbaad2a21911190b76c64f2311127230a9c1bab1a1eea16b06ebfb224d3b",
+    ".aiox/waves/STUDIO-OBSERVED/publication-reconnaissance.md": "a50c8a443ea52a039c454693bdf88548bbdb940001220fb88fd99058c94dfdb6",
+    "docs/specs/studio-observed-authoring/contracts/v2/result.schema.json": "b499da91b985a542dfd65da97b9ee8cfbf93c665fbc7020e63962d2178ea2841",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "519aeb135304be4fd8be604b16c75dd679deac8e7c8a7e17724981b8de3621a5",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java": "0b58cd9de58d51591282c6ee2078847cf82d1551b8db3667a2d96ccba708e990",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java": "3da9f5b25e98f28097c587488a408abb149deee2496a9cb440d9710fa27111b0",
+    "backend/src/main/java/com/citi/put/checks/security/CoreServiceClient.java": "e689d64d6fb473dcec0dd76b0b3e554dc8a042a72d35ac912c0bb7fe5a06c7fd",
+    "backend/src/main/java/com/citi/put/checks/security/BffSessionAuthenticationFilter.java": "316e55bd24f1df49d6e61e4459ae82351fc3b4d9ae9a005bf6b55835603eb6a9"
+  },
+  "requestedFrozenDesignAndStoryMatch": true,
+  "proposedOwnershipPaths": 121,
+  "summary": "The declarative artifact2 and ordinary recorded replay direction is sound, and the epoch/older-writer invalidation/no-hidden-action design is materially concrete. Four source-grounded gaps remain: durable per-action guard facts, expiry-independent fresh receipt authorization, concrete current replay authorization across queue/admission, and UUID/digest-compatible public polling results. Resolve these before PO readiness; no user policy question or later007/009/010 implementation is required.",
+  "blockers": [
+    {
+      "id": "PUB-001",
+      "priority": "P0",
+      "severity": "high",
+      "area": "Historical guard provenance",
+      "finding": "The design requires retained observations used by every successful preparation, but current persistence does not retain every such observation. GuidedSessionService.observe replaces progress.observation; the generic observations command stores the session document, not the observation. Only explicitly correlated observation-refresh-result records retain full envelopes. GuidedRuntime also collects observations automatically after each action without that refresh correlation, and preparation proofs contain identity/hashes rather than role/control/classification/actionability facts. A later multi-action/multi-page publication cannot reconstruct all proposed guards from the promised baseline.",
+      "design_refs": [
+        "docs/specs/studio-observed-authoring/publication-design.md:59",
+        "docs/specs/studio-observed-authoring/publication-design.md:80",
+        "docs/specs/studio-observed-authoring/publication-design.md:140"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:689",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1679",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1888",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java:112",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java:25",
+        "studio-runner/src/guided/runtime.ts:205",
+        "studio-runner/src/guided/runtime.ts:239"
+      ],
+      "required_correction": "Specify a concrete immutable bounded per-admission guard/evidence capture, or complete sanitized observation history, written at the existing authorized observation/admission boundary before effects. Bind session/scope/source, exact observation hash/generation, chosen preparation/proposal/admission and guard facts atomically; publication must use these records without re-observing or inferring missing facts. Add the V33 storage/trigger/join and exact owner paths. Existing session service/V33 reservation can host this; no historical backfill or reopening closed004 behavior is implied. Sessions missing required provenance must refuse publication.",
+      "required_oracles": [
+        "Use multiple operations in the same authored step and a later navigation that removes the original page. At FINALIZING the current observation no longer contains early targets; exact original guards must still reconstruct from durable production records after backend restart.",
+        "Corrupt/drop/cross-link an earlier guard/evidence record, use a different preparation or matching-hash-only record, and mutate role/control type/policy/locator. Publication refuses with zero validator-induced browser actions and zero gateway calls.",
+        "Fault-inject between action admission and guard record insertion; both commit or roll back. Missing historical evidence never triggers hidden navigation, collector execution or guessed guards."
+      ]
+    },
+    {
+      "id": "PUB-002",
+      "priority": "P1",
+      "severity": "high",
+      "area": "Committed-receipt access after expiry",
+      "finding": "An expired-worker/session retry is promised as a current-authorized read, but the only concrete authorization interface is refresh(request,snapshot), which issues a publication grant whose deadline is capped by those same expired lifetimes. The BFF filter may serve a cached identity. The design does not supply the separate fresh receipt-access path needed to both return a committed result after expiry and refuse a currently revoked caller.",
+      "design_refs": [
+        "docs/specs/studio-observed-authoring/publication-design.md:111",
+        "docs/specs/studio-observed-authoring/publication-design.md:120",
+        "docs/specs/studio-observed-authoring/publication-design.md:139"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/security/BffSessionAuthenticationFilter.java:155",
+        "backend/src/main/java/com/citi/put/checks/security/CoreServiceClient.java:37",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1893"
+      ],
+      "required_correction": "Add an explicit fresh uncached Core receipt-access operation in GuidedPublicationAuthorization, distinct from a mutation PublicationGrant. It must enforce authenticated/same original principal and the chosen current CSI read/access policy outside locks without requiring live worker/session/account execution authority, current source/head equality or an expired publication grant. Recheck immutable receipt/request identity under a read transaction; never republish or revive state. Specify response semantics when the committed revision is historical and the current source/head is no longer ready.",
+      "required_oracles": [
+        "Commit publication, lose the HTTP response, expire worker/session and the old grant, then retry with a fresh authorized BFF cookie: exactly the same revision/receipt, a real new Core call, zero writes/actions/model calls.",
+        "Keep the BFF cache populated but revoke the relevant current permission or change the principal in Core; retry must refuse. Missing/expired cookie or unavailable Core must not fall back to cached/publication authority.",
+        "After a newer head or source edit, authorized receipt retry returns historical publication honestly without claiming current replay readiness, changing the head, or reporting an uncommitted conflict."
+      ]
+    },
+    {
+      "id": "PUB-003",
+      "priority": "P1",
+      "severity": "high",
+      "area": "Concrete current authorization for later replay",
+      "finding": "The design says later principals receive current replay scope/grants, but does not define the production replay authorization minting/revalidation mechanism across acceptance, queue, dispatcher and admission. The current normal path uses BFF-token ownership at StudioService and ProvisionalDispatchAuthorization at dispatch; the latter only checks lifecycle/registered CSI/nonempty principal for manual runs. An account-handle ABI alone does not re-establish current CSI execute entitlement. Thus routing observed jobs through existing normal services can retain a provisional checker unless an explicit observed branch is designed.",
+      "design_refs": [
+        "docs/specs/studio-observed-authoring/publication-design.md:152",
+        "docs/specs/studio-observed-authoring/publication-design.md:154",
+        "docs/specs/studio-observed-authoring/publication-design.md:156",
+        "docs/specs/studio-observed-authoring/publication-design.md:182"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/studio/StudioService.java:971",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java:218",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java:276",
+        "backend/src/main/java/com/citi/put/checks/studio/dispatch/ProvisionalDispatchAuthorization.java:51",
+        "backend/src/main/java/com/citi/put/checks/security/BffSessionAuthenticationFilter.java:155"
+      ],
+      "required_correction": "Define the concrete observed-only current replay authorization interface and its invocation/ownership. For example, fresh API-profile Core authorization can mint a bounded execution-specific grant outside acceptance locks; acceptance stores only noncredential scoped provenance, and dispatch/admission independently enforce exact execution/attempt/revision/principal/scope/expiry with an explicitly documented queue/revocation policy. If authority expires before dispatch, refuse rather than persist/reuse cookies or fall back to ProvisionalDispatchAuthorization/learning consent. Account handoff remains007; do not turn this into a new unavailable generic CSI authorization port. Define observed scheduled attempts as explicitly supported by a real current grant or fail-closed, preserving legacy scheduling.",
+      "required_oracles": [
+        "A second authorized principal can explicitly replay without becoming the learning author; a revoked/non-owner or missing observed grant cannot dispatch even when legacy provisional checks pass.",
+        "Queue a valid observed acceptance until grant expiry or revoke the relevant supported authority before send/admission; zero browser launch and an explicit terminal refusal. Swap execution/attempt/revision/account/scope while preserving the old author provenance: reject.",
+        "No cookie or bearer material is retained in DB/job/model/logs. No unattended refresh cache or permissive test production checker is introduced. Legacy normal execution authorization remains behavior-compatible."
+      ]
+    },
+    {
+      "id": "PUB-004",
+      "priority": "P1",
+      "severity": "high",
+      "area": "Public result identity and OBS-008 polling contract",
+      "finding": "The frozen v2 result success branches require readyRevisionId to be a 64-hex hash, while this design explicitly requires UUID revision IDs plus a separate cryptographic digest. GuidedSessionService.result currently emits learnedFromThisRun=false, readyRevisionId=null and an errorCode even for terminal projection, so publishing SUCCEEDED needs a concrete new success projection. The proposed File List owns new revision/publication schemas but omits the existing v2/result.schema.json that validates the polling surface.",
+      "design_refs": [
+        "docs/specs/studio-observed-authoring/publication-design.md:91",
+        "docs/specs/studio-observed-authoring/publication-design.md:102",
+        "docs/specs/studio-observed-authoring/publication-design.md:144",
+        "docs/specs/studio-observed-authoring/publication-design.md:158"
+      ],
+      "source_refs": [
+        "docs/specs/studio-observed-authoring/contracts/v2/result.schema.json:97",
+        "docs/specs/studio-observed-authoring/contracts/v2/result.schema.json:209",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:2036",
+        "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md:23"
+      ],
+      "required_correction": "Freeze a coherent publication response and existing session/result polling contract with distinct database revision UUID and revisionDigest, including learned/published versus replayVerified and historical-versus-current readiness semantics. Coordinate/version the v2 result schema, examples/checker and owner paths rather than placing a digest in a UUID field or leaving SUCCEEDED projection invalid. Identify where the published UUID lives (receipt/private progress, since the closed session document has no published-revision field). Record this API contract dependency for008 automatic finalize/poll/reconnect. Keep first-run recording implementation in008 and represent its current absence truthfully.",
+      "required_oracles": [
+        "Real public finalize followed by session/result polling validates against the shipped schemas and consistently returns UUID revision identity plus exact digest; replay acceptance consumes that UUID without coercion.",
+        "Publication conflict/cancel/expiry and committed retry preserve learned evidence without inventing a ready revision or replay success; current source edits cannot turn historical green evidence into current readiness.",
+        "The guided first-run result has no fabricated video or PASSED ordinary execution. Two later genuine recorded replays reference their own execution/video and the same immutable published revision."
+      ]
+    }
+  ],
+  "mandatoryImplementationConditions": [
+    {
+      "id": "PUB-C1",
+      "area": "Exercised-plan/equivalence",
+      "condition": "Keep source-order+ordinal canonicalization, complete bidirectional obligation/action/producer/consumer coverage, exact source-choice/materialization provenance and original operation hash formula. Validate initial metadata ACK against its original acknowledged snapshot, not the later dynamically extended materialization. Define active preparation so stale unassociated duplicate proofs cannot be mistaken for pending executable work or current evidence. Java/Node equivalence must independently derive typed operations/recipe/guard references; supplied hashes alone never prove execution.",
+      "tests": [
+        "Reverse lexical UUID order versus source order; remove/add/reorder an operation or edge; alter read kind/type/origin/guard/recipe/argument; recompute all client-side hashes and still require refusal against stored provenance.",
+        "A normal workflow whose materialization revision grew through producers/consumers still publishes using original ACK plus exact subsequent admission evidence. No re-observation is requested."
+      ]
+    },
+    {
+      "id": "PUB-C2",
+      "area": "Atomicity/compile races",
+      "condition": "Retain immutable pre-effect base and monotone head epoch, null-safe head comparison, source/config/authoring checks and final compile_request_id=NULL invalidation. V33 must cover ordinary writers and both staged-V19 installation orders without weakening legacy request-origin or write-once guards. A conflict transition must commit separately from a rolled-back publication; unexpected DB faults remain retryable.",
+      "tests": [
+        "Two guided sessions sharing a base have one publisher winner; newer same-source compile start or pointer ABA invalidates the old base; older pre-base compile finishes after guided commit and is discarded.",
+        "Crash after each revision/confirmation/receipt/head/session write yields all-or-none publication; retry creates no second revision. Direct SQL tests reject cross-scope/null-half/duplicate/mutable origin links."
+      ]
+    },
+    {
+      "id": "PUB-C3",
+      "area": "Actual replay/runtime privacy",
+      "condition": "Preserve strict family-specific artifact/job/profile/admission/IPC joins through the normal recorded child. Captures originate only in the child-local store, never resolvedVars/IPC/artifact or parent diagnostics. Mounted current read/origin/account policy cannot be granted by artifact fields. Retained-target native semantics, unique exact locators, fresh per-run values and stop-on-uncertainty remain mandatory.",
+      "tests": [
+        "One real learning submit and zero finalization navigation/read/mutation receipts; two actual normal replays receive distinct unpredictable values and submit those exact bytes with identical artifact/plan/policy hashes and zero calls to both gateways.",
+        "Mutate revision/profile/job/graph/guard fields and use real duplicate/replaced/sensitive/origin-drift targets; no inappropriate effects. Inspect source-free IPC, stdout/stderr/logs/manifests for fresh capture canaries while separately validating authorized video/timeline."
+      ]
+    },
+    {
+      "id": "PUB-C4",
+      "area": "Feature-off/schedules",
+      "condition": "Make publication and observed replay flags independent. Disabled publication cannot silently replace005 starts with a failing mandatory publisher; disabled replay must refuse artifact2 without entering legacy compile/model fallback while compatible artifact1 remains usable. Publication never enables or retargets schedules. Existing activation mismatch fails through current scheduling guards; observed scheduling must not inherit a provisional authorization loophole.",
+      "tests": [
+        "Exercise all four publication/replay flag combinations, old sessions without a base, unsupported profiles and rollback; no unexpected browser/model calls or history mutation.",
+        "Seed enabled and disabled legacy schedule activations, publish a new observed head, and prove activation/revision/enablement stay unchanged. The old activation refuses revision mismatch rather than silently running the new head."
+      ]
+    },
+    {
+      "id": "PUB-C5",
+      "area": "Evidence and ownership scope",
+      "condition": "Use actual production publication/Core/Node validation/readiness/acceptance/admission/recorded-child wiring with only account connectivity controlled. Preserve ordinary RUN auto-accept, v1 schema/reference/AST behavior and all closed-story evidence. No live provider/benchmark/pilot or first-run recording is required here;008 owns the client/recording integration, and later video is never first-run proof. Reconcile exact ownership for the four corrections before PO/development.",
+      "tests": [
+        "Assert real Core calls outside DB locks and no direct compile/guided gateway path during finalize or ordinary replay; mutation oracles must turn green baselines red on wrong operations/guards/edges.",
+        "Record exact tested source/worker/runtime/schema profiles, unavailable services and controlled-versus-live evidence honestly; do not satisfy tests with a hash-echo validator, mocked readiness or fabricated ordinary execution row."
+      ]
+    }
+  ],
+  "acceptanceCriteriaToRequiredEvidence": [
+    {
+      "ac": "AC-1",
+      "design_assessment": "BLOCKED_BY_PUB-001",
+      "required_evidence": "Pure canonical builder joins complete executed obligations/admissions/preparations/outcomes/assertions and every producer/consumer edge in source order; historical per-action guard facts survive later page changes and backend restart. Missing/extra/tampered joins refuse without model/browser work."
+    },
+    {
+      "ac": "AC-2",
+      "design_assessment": "BLOCKED_BY_PUB-001_AND_PUB-004",
+      "required_evidence": "Independent Java and pure Node lowering/equivalence vectors cover all supported kinds and exact reference/guard semantics. Immutable artifact/plan/policy/provenance/revision hashes and UUID/digest separation verified, including mutations whose caller-supplied hashes were recomputed."
+    },
+    {
+      "ac": "AC-3",
+      "design_assessment": "BLOCKED_BY_PUB-002_AND_PUB-003",
+      "required_evidence": "Real public BFF/fresh Core, no cached/provisional substitute; current source/head/epoch/fence/lease and grant guards; complete PostgreSQL atomicity/cutover/race coverage; committed receipt read after expiry uses separate current access authority."
+    },
+    {
+      "ac": "AC-4",
+      "design_assessment": "BLOCKED_BY_PUB-004",
+      "required_evidence": "Independent initial submit count remains one; finalization/retries/conflicts add zero actions/browser/model calls. Truthful learned/publication/replay/result IDs and recording absence; successful evidence preserved on conflict; schedule activation/head pin untouched."
+    },
+    {
+      "ac": "AC-5",
+      "design_assessment": "BLOCKED_BY_PUB-003",
+      "required_evidence": "Two actual later ordinary replays use new current authorization and fresh private values with identical hashes. Full backend/runner/IPC/profile/current-policy/target guards and zero-both-provider checks; drift, cancellation or unknown outcomes stop without hidden replay/relearning."
+    },
+    {
+      "ac": "AC-6",
+      "design_assessment": "NEEDS_PUB-004_CONTRACT_AMENDMENT",
+      "required_evidence": "Explicit family-specific pins/profile catalog, v2 public result/revision UUID/digest contracts, raw schema fixtures, independently configurable feature flags, rollout/rollback and no legacy weakening.008 poll/reconnect/recording contract explicitly coordinated."
+    },
+    {
+      "ac": "AC-7",
+      "design_assessment": "REQUIRED_AFTER_DESIGN_CORRECTIONS",
+      "required_evidence": "Production joined PG/Core/pure validator/guided worker/normal admission/recorded child test with one learning submit, zero finalization actions and two fresh-value replays. Adversarial race/privacy/equivalence/profile/guard/edge mutations plus current legacy Studio regressions and exact evidence provenance."
+    }
+  ],
+  "approvedDesignElements": [
+    "Closed declarative artifact2 with pure lowering/independent validation rather than new JavaScript or another guided session.",
+    "Complete successful one-dispatch evidence, original Run adoption provenance and separate current replay scope.",
+    "Pre-effect immutable base, monotone epoch including pointer ABA, final clearing of older compile_request_id and atomic receipt/revision/head/session success.",
+    "Preserved ordinary RUN same-principal auto-accept and legacy artifact1/policy2 behavior; no fake compile request or manual confirmation.",
+    "Normal recorded child for replay, exact native target/read/origin guards, child-private fresh values and data-free diagnostics distinct from video.",
+    "Truthful current absence of guided recording, with008 owning automatic finalize/poll/reconnect and first-run recording integration;006 must not fabricate learning video or replay evidence."
+  ],
+  "crossStoryContracts": [
+    {
+      "owner": "OBS-006 + OBS-008 coordinated by root",
+      "contract": "Public finalize/session/result identity, immutable receipt versus current readiness, conflict/pending/auth/unavailable-recording states;006 implements API/schema,008 implements client automatic invocation/poll/reconnect/first-run recording."
+    },
+    {
+      "owner": "OBS-006 + OBS-007 coordinated by root",
+      "contract": "Execution/attempt/account/origin/deadline-scoped account-handle consumption.007 remains the only later account adapter; it does not replace concrete006 publication/CSI replay authorization."
+    }
+  ],
+  "limits": [
+    "Only this JSON review record is written. No product/test/schema/design/story/status/CLI/wave changes, builds, test execution, subagents, commits or pushes.",
+    "Original closed001\u2013005 source/evidence remain unchanged. This review does not revoke their PASS or claim006 implemented.",
+    "Do not demand arbitrary-English semantic proof, live-model quality/cost results, held-out benchmark or human pilot for006.",
+    "Shared USD500 ceiling unchanged; spending telemetry unavailable. No user policy decision or permission request is pending."
+  ]
+}

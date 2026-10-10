@@ -1,0 +1,95 @@
+{
+  "story": "STUDIO-OBS-006",
+  "review": "independent data/transaction re-review R1",
+  "verdict": "NEEDS_CHANGES",
+  "reviewed_sha256": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "cf031d028efafcf8fa8765c868d303c28704b5e1237a10cca6cee82592788820",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "10dbc05aeaa5812d2faf11c1db22501e8ba02f60081c4473266f396a6ff478ab",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "c044f2dae8522a7b69b33d6c4c8a0318d78ae53ff16fbae1076321048bdad9bf",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "6aaa3942e5719619f8d9d87bd847a81146c8695765a55ba5c5ef1997b875db14",
+    ".ai/STUDIO-OBS-006-design-resolution-r1.json": "ef34aec2cf27c8671fca0421be54076e0c30de5b6652e93ef0f621b272b6303c",
+    ".ai/STUDIO-OBS-006-data-design-review.json": "23481702cf7009e650722b80b83811863be82b172dc62e089209df41a0be43c3",
+    ".ai/STUDIO-OBS-006-data-recon.json": "24901865d8385a15f17ac0bb628482b63e2285576bf3078f8c1517f5f9be7e66"
+  },
+  "scope": "Design implementation readiness only; no PO/lifecycle/implementation QA verdict.",
+  "summary": "The four original DATA-006-01..04 persistence/authorization gaps are now concretely resolved by D1-D7. Two newly explicit evidence/basis contracts contradict the actual frozen OBS-004/005 structures and would reject valid blank bootstrap and dynamic-dataflow sessions. Correct those narrow contracts before implementation.",
+  "prior_findings": [
+    {
+      "id": "DATA-006-01",
+      "assessment": "RESOLVED_IN_DESIGN",
+      "evidence": "D1,D5 specify ordinary-null compatibility, guided required identities, typed base/session comparison, reciprocal scoped deferred FK cycle, validated attempt association, V24 ordinary-only identity and actual V19 capability-dependent installation orders. Revision-first/receipt-second is enforceable: deferred revision\u2192receipt allows first insert, immediate receipt\u2192revision sees inserted row, commit/SET CONSTRAINTS then checks both."
+    },
+    {
+      "id": "DATA-006-02",
+      "assessment": "RESOLVED_IN_DESIGN",
+      "evidence": "D4 freezes attempt_number1..3 with per-session uniqueness, one live partial unique, immutable claim/identity, RESERVED\u2192VALIDATING one-send CAS, terminal accepted/rejected/unknown states and recovery without fresh send authority. Acceptance and final hash/profile/claim joins are explicit."
+    },
+    {
+      "id": "DATA-006-03",
+      "assessment": "RESOLVED_IN_DESIGN",
+      "evidence": "D6 and C10 define uncached current Core canRead plus same original/caller principal for READ_PUBLISHED_RECEIPT without worker/session/head freshness. Active grants remain separate, capped by session/worker/Core TTL, with no cookies persisted."
+    },
+    {
+      "id": "DATA-006-04",
+      "assessment": "RESOLVED_IN_DESIGN",
+      "evidence": "D7/C7 freeze observed_revision_binding and observed_admission_receipt columns, insert-only binding, single-assignment real AdmissionCas receipt, current execution/preallocated attempt joins and separate partition-parent trigger preserving V26/V28. Helper FK explicitly includes started_at."
+    }
+  ],
+  "blocking_findings": [
+    {
+      "id": "DATA-006-R1-01",
+      "severity": "HIGH",
+      "location": "publication-contracts.md C4 AcceptedTranslationPlan; publication-data-contract.md D3",
+      "problem": "AcceptedTranslationPlan is declared as exactly source-selection.schema.json with sole extension obligations[].obligationId. That is not the actual immutable accepted V32 plan after dependency allocation: each needs[] has a server-issued bindingId. The referenced source-selection schema closes needs with additionalProperties=false and has no bindingId. A legitimate capture/reuse plan therefore cannot be represented as the proposed ValidationBasis, and stripping the field changes H(translationPlan) away from stored translationHash.",
+      "source_evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:58 adds need.bindingId from actual sessions.allocateBinding",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:166-178 persists the augmented plan as a new accepted revision",
+        "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json:104-153 closes each need without bindingId"
+      ],
+      "required_remediation": "Define the complete persisted accepted-plan extension: obligations[].obligationId plus needs[].bindingId from server allocations (required for every needed allocation in final publication basis). Keep exact persisted plan bytes/canonical hash; validate every needId\u2192bindingId against actual allocation and producer/consumer rows, rather than dropping/reconstructing the ID. Explicitly distinguish preallocation proposal shape from publication-ready accepted shape.",
+      "regression": "Use actual OBS-005 plan\u2192allocate\u2192acceptPlan data with at least one producer/consumer. Independent Java/Node basis validators must accept the unchanged persisted hash and reject missing/swapped/forged bindingId. No no-needs-only fixture may stand in for this."
+    },
+    {
+      "id": "DATA-006-R1-02",
+      "severity": "HIGH",
+      "location": "publication-data-contract.md D2 publication_preparations initialBlank branch",
+      "problem": "D2 states initialBlank navigation has null observation and target, but the frozen Action2 requires a nonnull page target {kind:page,documentId,generation}. InitialBlank evidence has null origin, not a null documentId. The proposed capture rule conflicts with exact preserved action/proof identity and makes real bootstrap publication impossible if implemented literally.",
+      "source_evidence": [
+        "docs/specs/studio-observed-authoring/contracts/v2/action.schema.json properties.target is a closed element|page object union and target is required",
+        "docs/specs/studio-observed-authoring/contracts/v2/execution-evidence.schema.json initialBlank requires documentId string, generation0, origin:null",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:797-822 hashes the original coordinate/origin/locator-or-null/operation; page target is retained in immutable proposal"
+      ],
+      "required_remediation": "Specify observation_hash NULL iff executionEvidence.kind=initialBlank; preserve the required original page target and its genuine blank documentId/generation0. Only observation/locator/origin are nullable as their original branches permit. The evidence check must join that page target to original bootstrap evidence, enforce first navigation, and never manufacture an observation row. ObservedDocument preparation requires nonnull observation_hash and matching real snapshot.",
+      "regression": "Run real blank-bootstrap\u2192first navigation\u2192later observed-page action and retain both exact proposals/hashes across restart; test valid blank branch, null target rejection, fabricated document ID rejection, and observed preparation with NULL observation FK rejection."
+    }
+  ],
+  "mandatory_implementation_conditions": [
+    "Create base/revision/receipt tables first and add reciprocal FK afterwards; keep revision\u2192receipt DEFERRABLE INITIALLY DEFERRED, required guided origin columns, and receipt\u2192same-revision/session/test/CSI mandatory. Test both incomplete halves with SET CONSTRAINTS ALL IMMEDIATE.",
+    "Preserve V29 deny-by-default trigger without adding new immutable columns to mutable allow-list. Ordinary historical null-request rows remain unchanged; guided rows cannot select ordinary-null origin to avoid proof checks.",
+    "V33 capability detection uses actual enabled trigger/function pair. Partial catalogs fail closed. Updated V19 must not drop guided indexes; originalV19\u2192V33 and V33\u2192updatedV19 must both retain ordinary request-only enforcement and valid guided cycle.",
+    "D1 base insertion trigger compares actual varchar session.test_id to UUID test_id::text plus CSI/principal/scope and forbids owner/assignment/materialization/action/model rows. Do not impose nonnull future observed document before bootstrap.",
+    "D2 captures observation/proposal/proof before preparation return and joins admissions in the same existing admission transaction; failure rolls back before any dispatch. Direct SQL requires parent session lock, immutable rows, strict scope joins and count/byte caps; stale unassociated preparations do not permanently block finalization.",
+    "Original bootstrap ACK must retain/check original input/allocation/materialization snapshot; no comparison against later dependency allocation revision. Basis is assembled from original independent evidence, not generated guards.",
+    "Epoch trigger controls monotonicity/overflow/no-op updates. Final CAS checks null-safe base heads and epoch AND clears compile_request_id atomically, fencing older compiler result. Two opposite race orders and ABA need actual ordinary writer tests.",
+    "Final transaction rechecks live FINALIZING authority, exact unchanged evidence/head/claim/profile/flags and database wall deadline after lock wait. No Core, account or validation I/O under locks.",
+    "Expected conflict recording re-locks and cannot override a concurrent receipt/success/cancel; unexpected SQL faults remain retryable. Receipt reads after expiry or new head need only fresh current authorized read, never refreshed execution authority.",
+    "D7 reserved attempt ID must match actual ordinary beginDispatch/admission and immutable grant. Parent triggers inherit to future partitions and preserve original V26/V28 behavior. runtime_versions remains display-only.",
+    "Existing schedule activation is not retargeted. Run the actual processor with old activation/new observed head: ACTIVATION_REVISION_MISMATCH before new-head dispatch. Newly explicit observed schedules also fail OBSERVED_SCHEDULE_AUTH_REQUIRED; these paths must not silently reorder into an unauthorized grant fallback.",
+    "All tests are future implementation requirements; this review executes no SQL/build/provider and claims no implementation passes."
+  ],
+  "ownership_assessment": {
+    "path_count": 152,
+    "unique_path_count": 152,
+    "assessment": "The expanded File List covers evidence repository, parent capture/admission hooks, V33/cutover, execution/admission repositories/entities, result3, schema loaders, schedule processor and required data/race tests. Both blockers are narrow corrections to already-owned design/schema/test paths; no new source ownership appears necessary. Keep epoch JDBC-owned unless a separate UITest/StudioRepository ownership amendment is made. Complete V19 install instructions may reside in already-owned studio-guided-authoring runbook."
+  },
+  "acceptance_tests": [
+    "Real PostgreSQL fresh/upgrade and both actual V19 orders preserve legacy null/RUN/MANUAL bytes and enforce guided proof cycle, original authoring trigger, immutability and all scoped FKs.",
+    "Direct SQL missing/null JSON keys, incorrect origin branch, cross-session context/obligation/preparation/receipt, parent-locking count/byte overflow, unfinished deferred cycle and partition trigger inheritance fail.",
+    "Actual dynamic persisted accepted plan includes bindingId and its hash; exact blank Action2 page target survives initial preparation capture; multipage facts survive progress overwrite/restart.",
+    "Three validation claims total across keys/restarts/unknown transport, old claim cannot apply, accepted verdict reuses only unchanged snapshot, no validator response can rewrite expected identities.",
+    "Source edit, head changes, manual confirmation, ABA, earlier compile late result, two guided sessions/one winner, and all insert/CAS/commit faults preserve correct head and evidence.",
+    "Fresh Core rejection/expiry during waits; authorized historical receipt read after worker/session expiry or head change, no validator/account/browser call; changed body rejected.",
+    "Observed acceptance binding and admission receipt retain exact revision/execution/reserved-attempt/scope/profile and are immutable; scheduling mismatch refuses; later real replay rows are independent evidence."
+  ],
+  "write_scope": "Only .ai/STUDIO-OBS-006-data-design-review-r1.json written; initial reviews and all product/schema/design/story/lifecycle files unchanged."
+}

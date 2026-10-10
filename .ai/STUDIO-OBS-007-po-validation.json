@@ -1,0 +1,868 @@
+{
+  "story": "STUDIO-OBS-007",
+  "task": "validate-next-story",
+  "actor": "Pax (@po) / obs006_po_close_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "at": "2026-10-09T17:25:39.313381+00:00",
+  "verdict": "NO-GO",
+  "readinessScore": 4,
+  "scoreScale": 10,
+  "confidence": "High in NO-GO assessment; low in successful provider implementation without required inputs/design",
+  "scoreRationale": "Approved measurable scope, correct assignment/security principles and closed predecessor provide a usable draft; provider definition and cross-layer contract/ownership/testing are insufficient for implementation. Score below mandatory GO threshold 7.",
+  "statusBefore": "Draft",
+  "statusAfter": "Draft",
+  "statusPreserved": true,
+  "lifecycleTransitionPerformed": false,
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": [
+      "Agent Model Used",
+      "Debug Log References",
+      "Completion Notes List"
+    ],
+    "structure": "Existing wave convention of top-level File List/Testing and table metadata retained; no scope/template rewrite."
+  },
+  "criticalIssues": [
+    {
+      "id": "EXT-001",
+      "severity": "CRITICAL",
+      "category": "external input",
+      "acs": [
+        "AC-1",
+        "AC-2",
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "finding": "Approved account/session provider selection and nonsecret configuration/documentation locations are unidentified; trusted connected-session availability is unknown.",
+      "requiredAction": "Identify approved provider and existing supported mechanism/docs, scope/lifetime/revocation and transport. Supply locations/names only; no secrets.",
+      "canProgressLocally": "Inventory and provider-independent design can proceed; provider choice/contracts cannot be invented.",
+      "owner": "User/platform provider owner input; architect assesses contract",
+      "blocking": true
+    },
+    {
+      "id": "TECH-001",
+      "severity": "CRITICAL",
+      "category": "local technical refinement with external contract dependency",
+      "acs": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5"
+      ],
+      "finding": "No concrete production design joins guided AccountAccess, ordinary ReplayAccountAccess and compiled runner provider lifecycle; guided launch remains blank-only. Capability mode schema is not a discovery/handoff implementation.",
+      "requiredAction": "Expert design and independent review of both production paths, trusted opaque-handle exchange, browser context/evidence identity, capabilities, pause/revocation/cancellation/teardown, version compatibility and rollback; clarify OBS-008 UI boundary.",
+      "canProgressLocally": true,
+      "providerSpecificFinalizationDependsOn": "EXT-001",
+      "owner": "architect with dev/security input",
+      "blocking": true
+    },
+    {
+      "id": "OWN-001",
+      "severity": "HIGH",
+      "category": "local technical refinement",
+      "acs": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "finding": "Six proposed paths (four absent reservations) omit actual account ports/configuration, guided/replay browser/child and schema/test seams; generic AC tasks do not define sequence or ownership.",
+      "requiredAction": "Reconcile exact proposed File List and staged production/test owners with root before implementation; reserve shared paths and any reviewed additive schema changes.",
+      "canProgressLocally": true,
+      "owner": "architect/dev; root controls ownership and sequence",
+      "blocking": true
+    },
+    {
+      "id": "TEST-001",
+      "severity": "HIGH",
+      "category": "local technical refinement",
+      "acs": [
+        "AC-1",
+        "AC-2",
+        "AC-3",
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "finding": "Generic testing paragraph lacks production AC-specific oracle mapping, same-context/server receipts, wire-canary matrix and setup/pause/cancel/expiry/revocation/unknown-outcome scenarios.",
+      "requiredAction": "Specify real controlled authenticated browser/repository path and independent protected-state receipts, isolation and byte-level privacy/cancellation oracles; distinguish controlled coverage from external approved-provider integration acceptance.",
+      "canProgressLocally": true,
+      "owner": "dev with independent QA/security review",
+      "blocking": true
+    }
+  ],
+  "shouldFixIssues": [
+    {
+      "id": "DOC-001",
+      "action": "Expand provider-independent integration notes into an expert-reviewed design and concrete task-to-AC map; current PO inventory is readiness evidence, not architecture approval."
+    },
+    {
+      "id": "CR-001",
+      "action": "Keep the configured full QA review timeout explicitly documented at 30 minutes with three iterations, correct severity handling and unavailable-tool provenance; notes now state this."
+    }
+  ],
+  "niceToHaveImprovements": [
+    "Link safe account display names and actionable unavailable messages in the future OBS-008 UX review; do not expose resolved account/storage values."
+  ],
+  "antiHallucinationFindings": [
+    "Scoped HashiCorp KVv2 resolution is not a connected browser-session broker.",
+    "Account-mode schema, empty registry, unavailable fallbacks and controlled injected providers do not prove real approved account connectivity.",
+    "Historical ARCH/frontend-only and login-document 10.39/manual-confirmation statements are superseded by actual completed source/ADR-SC-003/approved One Run design.",
+    "The pending provider question is unanswered; no provider choice or unsupported secure sign-in is inferred.",
+    "Live translation-gateway configuration remains OBS-009 scope and is not an independent OBS-007 blocker."
+  ],
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "agents": "dev executor / architect technical gate / independent qa; data-engineer/ux-design-expert conditional",
+    "preCommitPlanned": true,
+    "remoteGates": "Conditional; no PR/deployment requested",
+    "selfHealing": {
+      "type": "full",
+      "maxIterations": 3,
+      "timeoutMinutes": 30
+    },
+    "fallback": "Configured skip_if_not_installed; completed OBS006 QA established native/WSL unavailable; no new automated review executed or PASS invented."
+  },
+  "taskChecks": [
+    {
+      "taskStep": "1",
+      "check": "Template completeness",
+      "status": "PASS_WITH_MINOR_GAPS",
+      "details": "All top-level required areas present; no placeholders. File List and Testing are top-level equivalents; future developer-owned record subsections need population during development."
+    },
+    {
+      "taskStep": "1.1",
+      "check": "Executor assignment",
+      "status": "PASS",
+      "details": "dev / architect are distinct supported agents; code-review, requirements-traceability and targeted-tests tools appropriate; independent qa lifecycle owner preserved."
+    },
+    {
+      "taskStep": "2",
+      "check": "File/source structure",
+      "status": "FAIL",
+      "findingIds": [
+        "OWN-001"
+      ]
+    },
+    {
+      "taskStep": "3",
+      "check": "UI/frontend contract completeness",
+      "status": "PARTIAL",
+      "findingIds": [
+        "TECH-001"
+      ],
+      "details": "Capability responses must be designed for OBS-008 consumption; no supported connected-view flow is established. No requirement to implement all OBS-008 UI here."
+    },
+    {
+      "taskStep": "4",
+      "check": "AC coverage/testability",
+      "status": "PARTIAL",
+      "findingIds": [
+        "EXT-001",
+        "TECH-001",
+        "TEST-001"
+      ],
+      "details": "Six ACs are measurable and align with plan; tasks merely repeat AC numbers and do not provide an executable design."
+    },
+    {
+      "taskStep": "5",
+      "check": "Testing instructions",
+      "status": "FAIL",
+      "findingIds": [
+        "TEST-001"
+      ]
+    },
+    {
+      "taskStep": "6",
+      "check": "Security considerations",
+      "status": "PARTIAL",
+      "findingIds": [
+        "TECH-001",
+        "TEST-001"
+      ],
+      "details": "Correct no-credential-paste/local-storage and scoped/privacy constraints, but missing provider-specific trust/transport and pause/revocation threat design."
+    },
+    {
+      "taskStep": "7",
+      "check": "Task sequence",
+      "status": "FAIL",
+      "findingIds": [
+        "EXT-001",
+        "TECH-001",
+        "OWN-001"
+      ],
+      "details": "Provider identification \u2192 reviewed design/ownership/oracles \u2192 implementation of both paths/capabilities \u2192 authenticated/isolation/privacy regressions \u2192 independent QA."
+    },
+    {
+      "taskStep": "8",
+      "check": "CodeRabbit planning",
+      "status": "PARTIAL",
+      "details": "Enabled; gates, agents, focus areas and three-iteration full QA mode present. Story omits explicit 30-minute timeout; config proves value and PO notes record it. Native/WSL unavailability fallback established by completed QA, no current tool run/PASS claimed."
+    },
+    {
+      "taskStep": "9",
+      "check": "Anti-hallucination",
+      "status": "PASS_WITH_FINDINGS",
+      "details": "Claims checked against actual ports and approved consensus; historical plan/ARCH/login notes not treated as current lifecycle/code. No provider library/selection fabricated; unavailable ports and blank-only launch recorded."
+    },
+    {
+      "taskStep": "10",
+      "check": "Implementation readiness",
+      "status": "NO-GO",
+      "findingIds": [
+        "EXT-001",
+        "TECH-001",
+        "OWN-001",
+        "TEST-001"
+      ],
+      "details": "4/10: clear approved product scope, assignments and closed prerequisite, but external provider and concrete cross-layer implementation/test plan missing."
+    }
+  ],
+  "acceptanceCriteriaAssessment": [
+    {
+      "ac": "AC-1",
+      "requirementPreserved": true,
+      "implementedOrApprovedHere": false,
+      "readiness": "BLOCKED",
+      "findingIds": [
+        "EXT-001",
+        "TECH-001",
+        "OWN-001",
+        "TEST-001"
+      ]
+    },
+    {
+      "ac": "AC-2",
+      "requirementPreserved": true,
+      "implementedOrApprovedHere": false,
+      "readiness": "BLOCKED",
+      "findingIds": [
+        "EXT-001",
+        "TECH-001",
+        "OWN-001",
+        "TEST-001"
+      ]
+    },
+    {
+      "ac": "AC-3",
+      "requirementPreserved": true,
+      "implementedOrApprovedHere": false,
+      "readiness": "NEEDS_TECHNICAL_REFINEMENT",
+      "findingIds": [
+        "TECH-001",
+        "OWN-001",
+        "TEST-001"
+      ]
+    },
+    {
+      "ac": "AC-4",
+      "requirementPreserved": true,
+      "implementedOrApprovedHere": false,
+      "readiness": "BLOCKED",
+      "findingIds": [
+        "EXT-001",
+        "TECH-001",
+        "OWN-001",
+        "TEST-001"
+      ]
+    },
+    {
+      "ac": "AC-5",
+      "requirementPreserved": true,
+      "implementedOrApprovedHere": false,
+      "readiness": "BLOCKED",
+      "findingIds": [
+        "EXT-001",
+        "TECH-001",
+        "OWN-001",
+        "TEST-001"
+      ]
+    },
+    {
+      "ac": "AC-6",
+      "requirementPreserved": true,
+      "implementedOrApprovedHere": false,
+      "readiness": "NEEDS_TECHNICAL_REFINEMENT",
+      "findingIds": [
+        "EXT-001",
+        "OWN-001",
+        "TEST-001"
+      ]
+    }
+  ],
+  "prerequisites": {
+    "external": [
+      "EXT-001 approved provider identity, supported mechanism and nonsecret configuration/documentation location; pending user/platform input"
+    ],
+    "local": [
+      "TECH-001 provider-independent design may proceed locally; provider-specific decisions await EXT-001",
+      "OWN-001 reconcile actual interfaces and staged file ownership before code",
+      "TEST-001 map controlled authenticated/session-isolation/privacy oracles to each AC"
+    ],
+    "notAuthenticationStoryBlocker": [
+      "Live translation-gateway setup/accuracy/cost is a later OBS-009 prerequisite."
+    ]
+  },
+  "sourceInventory": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198"
+    },
+    {
+      "path": ".codex/skills/aiox-po/SKILL.md",
+      "sha256": "7e4b06e70fd44658f3a9abb7b20ec0e8a31a2cb41ccddc0ec784c56cb41acff4"
+    },
+    {
+      "path": ".aiox-core/development/tasks/validate-next-story.md",
+      "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"
+    },
+    {
+      "path": ".aiox-core/core-config.yaml",
+      "sha256": "7bd8694cded2a845882f29e9c7b11d18ae531ad492a3cefb53a71100eb29bc31"
+    },
+    {
+      "path": ".aiox-core/product/templates/story-tmpl.yaml",
+      "sha256": "0b64b49e5332cbce7d36da1ff40495628cb6ce650855b752dc82372706d41e13"
+    },
+    {
+      "path": ".aiox-core/product/checklists/po-master-checklist.md",
+      "sha256": "506a3032f461c7ae96c338600208575be4f4823d2fe7c92fe304a4ff07cc5390"
+    },
+    {
+      "path": "ARCH.md",
+      "sha256": "ab3220e90c0c670d4994465f5023eddf70a6d8113f9dba1f46b3fcec6f1a4cae"
+    },
+    {
+      "path": "docs/architecture/studio-execution.md",
+      "sha256": "3ff31f9054e4d55b132658f1b30bc86ef0682a5806d44a5005bff54b4c47d89c"
+    },
+    {
+      "path": "docs/architecture/ADR-SC-003-structural-reference-policy.md",
+      "sha256": "d54e50f22e609700b58b65e79d50695bada9a87b34b1d53c6a5a5958e55badaf"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/consensus-plan.md",
+      "sha256": "8f97af78155a57ee32127f4e2433a94f5e134d47896655743df65292cb12f44b"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/review-record.json",
+      "sha256": "45d1258fe35f0000ce77036233f4433da5cb32d1e83b7e51c1c5005bdcda8104"
+    },
+    {
+      "path": ".aiox/waves/STUDIO-OBSERVED/remaining-integration-notes.md",
+      "sha256": "526c1db04f7da00fb705c7d43c1397be90660d929c1bbef8bf64bf9beaecf46b"
+    },
+    {
+      "path": "docs/specs/studio-context/login-protected-navigation.md",
+      "sha256": "388907fcd937c138ed66d642392d771a524ba17985431a2d93827b74ac550ec5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/account/ReplayAccountAccess.java",
+      "sha256": "e129f6a30fbae6eb09575396a701969afd827100b5243c20fa6c1a73469a27ec"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+      "sha256": "9192b4e1c9822c1f013631a4537bea25acc12beebebdf0449a86b3ecb649326d"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+      "sha256": "8c129bd8c3a97c3f26c5cd967e57bcee18d5eab2cb7c4af439c975faef0a1331"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "sha256": "2e8888cb69628831475a32698d9b7093bef99ba0326e7e46300b468d3e9709a5"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+      "sha256": "1f421b474c5d06e3ee5e441cdce3cfdeeca247961e8db11b0d078d7e6d7fed24"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "faa959d41421b33339c5b168c247a31ae03afb0373596070187b8265d23c1be9"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/secrets/HashicorpStudioVaultProvider.java",
+      "sha256": "baab52e93c9b1b21031b3d4f33dbe1882362739471605efbffe0b3f7071a6634"
+    },
+    {
+      "path": "studio-runner/src/run/observedAccount.ts",
+      "sha256": "28379ecd4383ccd81e94685c0eb931bd931a2a28ff29fed796cd707491cc400f"
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "sha256": "26bafde12692b584521a136a91d63affb86e2a5f7a1ab24e2741fbb972aa0a3c"
+    },
+    {
+      "path": "studio-runner/src/run/browserFactory.ts",
+      "sha256": "8f486488bfbb7690fb014a1daf572d9519ab7ba72ead2cd1e537f78f78c3bcf9"
+    },
+    {
+      "path": "studio-runner/src/run/guidedBrowser.ts",
+      "sha256": "9c9e102bbdd8c75946ec9b0b80d41fae06b14f07ac34d44d06f8dd173e173bf7"
+    },
+    {
+      "path": "studio-runner/src/run/guidedMain.ts",
+      "sha256": "3a2d8d9d83ae2321c2f9f26819f0b9c2294c8ad3a1947df503b41437d7e0dd33"
+    },
+    {
+      "path": "studio-runner/src/run/launcher.ts",
+      "sha256": "4f29860634d168753124fae8a289c333493c3778f07b71188b82c0d5f4e2fcb6"
+    },
+    {
+      "path": "studio-runner/src/run/childRuntime.ts",
+      "sha256": "ba9912ad4d96f236bf555cc18dcc0c97f5c089dc5e6942db798eca1d39b94a75"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/session.schema.json",
+      "sha256": "983e3adf45c1fbf9336166092d8048be7a5f84709ac2261faa47fb9cdaa1fb6c"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/v2/replay-account.schema.json",
+      "sha256": "1025c30837cc50d318e13cd99e8e168ad540b66eb6f424cb2223c7ea3f799ec3"
+    },
+    {
+      "path": "docs/runbooks/studio-guided-authoring.md",
+      "sha256": "54c0a9171f4e5628ddf621b4551aaf1bdacd7057c9988f6427aebc75dc4ee8fc"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/session-view.schema.json",
+      "sha256": "a9ae9effae38fdc95fcb54369af5f08a6aa4df094ac469874162dc42d538bb48"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+      "sha256": "c559709955d6803ba634e5b1c51e9653a43ec7bd7c5b81a2bfaf077a141cb4a2"
+    },
+    {
+      "path": "studio-runner/src/guided/types.ts",
+      "sha256": "a881b3083d2923b72cf62ed354ba2ad93745c3d63dce3589fd20c1fe2d3e8728"
+    },
+    {
+      "path": "studio-runner/test/run/observedAccount.test.ts",
+      "sha256": "b0c5981ab79a2a1e26914dbc634ce16d5e8d938143adb4eefee393fc89b56c59"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+      "sha256": "38bc7a97d421ac7efa67d77b1aabd46cc8c5bcf5ccf9aee03e75a363ba6420fb"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java",
+      "sha256": "cbdf32f0da6c08135ae342acb66fb9875ce2193388c65f468f37e7929fdb5390"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "sha256": "edbd6497b2c31d5b6480b49f5710d951c903c8214eb4c8b4ad9ea45464430cff"
+    },
+    {
+      "path": "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+      "sha256": "148b3e9c482625060c2a1bee3ac736af86d90a1dad9122a9ee9f4bc43d418ee2"
+    }
+  ],
+  "proposedFileList": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/auth/GuidedAccountService.java",
+      "exists": false,
+      "classification": "proposed reservation, not implementation"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/auth/GuidedAuthCapabilities.java",
+      "exists": false,
+      "classification": "proposed reservation, not implementation"
+    },
+    {
+      "path": "studio-runner/src/run/guidedAuthentication.ts",
+      "exists": false,
+      "classification": "proposed reservation, not implementation"
+    },
+    {
+      "path": "studio-runner/src/run/browser.ts",
+      "exists": true,
+      "classification": "existing"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/auth/GuidedAuthenticationIT.java",
+      "exists": false,
+      "classification": "proposed reservation, not implementation"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+      "exists": true,
+      "classification": "existing"
+    }
+  ],
+  "dependencyVerification": {
+    "OBS001Through006": "Done; SDC states completed; QA/administrative records preserved",
+    "OBS006ClosePassedAt": "2026-10-09T17:19:04.891Z",
+    "OBS006ReviewedRevision": "working-tree-sha256:f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+    "rootCloseBeforeValidation": true,
+    "approvedArtifactHashesBefore": {
+      ".ai/STUDIO-OBS-001-validation.json": "51073d9093c5daf6aaf4f5e901a9f8ac1ebab63e46c71a1edc3b8e2e1f6d4c19",
+      ".ai/STUDIO-OBS-002-validation.json": "eb4892278f3a3faa9df065e35ec3309923c9d75d098d0bdd94322e5286e2febb",
+      ".ai/STUDIO-OBS-003-development.json": "3b2c8c822b7930ab70865a653474bf7555c575744f4702d5782505767adbc70f",
+      ".ai/STUDIO-OBS-003-qa-fixes.json": "6095d70b34401f94563ce9d90320a5b2177ca85663047c04d764e626efc53c0c",
+      ".ai/STUDIO-OBS-003-qa.json": "16d339fcb050af672a0d59566cde8928529da490ff647449e82fab38b5b5bb10",
+      ".ai/STUDIO-OBS-003-validation.json": "3e164bdf5413287f29d186a6e0ea0a70c61a02294d91b9cb3e2708b0711eb032",
+      ".ai/STUDIO-OBS-004-005-bridge-review.json": "e1f4cc577806ecacd1c63d09e363b085625219ed928e1ea32de79e71530e706b",
+      ".ai/STUDIO-OBS-004-build-comparison.json": "dcafdb47f870146bbf1fe1a8ba8df2f515bc276caa246daf30f6c2be19f2983a",
+      ".ai/STUDIO-OBS-004-contract-development.json": "87e8e393b37b570e55cc3d66ebf334e2110af5b1a46affec5c9bb560cdaff6e8",
+      ".ai/STUDIO-OBS-004-data-review.json": "d05fc9ea19241ef734a31760f64bcf5dd9dd6aaa75365ad12625d49f7e9145bd",
+      ".ai/STUDIO-OBS-004-development.json": "8861b937b152214a179d17d42503ff3c65a6e3557876afa3c41b0c89aada3f80",
+      ".ai/STUDIO-OBS-004-final-guided.json": "82fcbaf9598fd5e322cac9d6f74b24b5ae9dbe3fd8fbc43e160f36225f235484",
+      ".ai/STUDIO-OBS-004-final-joined.json": "455354118d91d50ebb54b45e3b17f2d0a14f438eb776ca9977147e512e13e174",
+      ".ai/STUDIO-OBS-004-full-regression.json": "60522fc95fd56050a8bf06a70e92dda48d5d3141eab25504f8a63f59edd354df",
+      ".ai/STUDIO-OBS-004-qa-fix-verification.json": "fd203b4341c5edbe2f851998da2b8743868ee57ebe6b80011ab2c809072983a2",
+      ".ai/STUDIO-OBS-004-qa-fixes.json": "5c8264c6eccfd5239bc8a8fa658fe201a15c247a61fc3cec070901f07b88ed50",
+      ".ai/STUDIO-OBS-004-root-review-notes.json": "36c7571bd508c1860c0f4220ecf7e689128c506296855cc68a5e769e26c4da5f",
+      ".ai/STUDIO-OBS-004-runner-development.json": "d7eff4532b0ff4bbae5953cf651cee962d4b327a32f9c6cde3217a536fac1e54",
+      ".ai/STUDIO-OBS-004-runner-qa-fixes.json": "eb058f9a52d9464345ef951607b21fcd127068946f7d3bfc672d019e9f202688",
+      ".ai/STUDIO-OBS-004-validation-initial-no-go.json": "687b8f9f8067f7223b58383931ed715d16a1ffaa08bf9d01efdd955d84fda6e4",
+      ".ai/STUDIO-OBS-004-validation.json": "fced4d3b7e0ef3fc5b78493145a2e943335354bae7ecf9b69e0675c586f4e5a7",
+      ".ai/STUDIO-OBS-005-data-readiness.json": "a5f03f3feac7531f1b516b8e7e5962b87b361f60363a7dd2720f6488be5b87d8",
+      ".ai/STUDIO-OBS-005-design-review.json": "6752d14263452ac71002b66b10b8efc7cb92608edb4c147a0462728e7c59c694",
+      ".ai/STUDIO-OBS-005-development.json": "761a9045ac6c7e7b86f572a0416f1364b9aaa7dff7ca30d7766ecb5fe395dc05",
+      ".ai/STUDIO-OBS-005-fix-design-review-r1.json": "3350df86e16c67e4babd01a27db7d51b00767f5590489edac220700b6298b15c",
+      ".ai/STUDIO-OBS-005-fixes-r1.json": "7bfc0a5abe7c9419071ff74c69275ce1bb4061f6b7bab87377c140d827a48d3a",
+      ".ai/STUDIO-OBS-005-fixes-r2.json": "7c37a0a982072e5dbae9f232fa1d258ef3bfca6bd62c71e245c590e2811fb829",
+      ".ai/STUDIO-OBS-005-model-amendment-review.json": "dfb7b22a06b8cf713925b168d1e067bddf7f06759738e3b9f6c40944e4f12fe3",
+      ".ai/STUDIO-OBS-005-peer-readiness.json": "87440be3d86b013f6e6307b1897dd1cc6f86d27dd600103ae1883589e64bef33",
+      ".ai/STUDIO-OBS-005-qa-review-r1.json": "a521a9a1bb31b60ed894fa3d40fea2705d5517ac1f5cc83366f811251b4dc5bf",
+      ".ai/STUDIO-OBS-005-qa-review-r2.json": "3a3248b3b4cb13cd9717fc35a2d374109baa8a6a3f44e0766911ba588fd9bee1",
+      ".ai/STUDIO-OBS-005-qa-review.json": "b22f7702b0b5df1e062b97eeceedc8c37dd30c0c769f2d69dcf1a962d56f4d1a",
+      ".ai/STUDIO-OBS-005-validation-20261008-no-go.json": "71beba0c4b2c2602a1db9e1755c9047781cb3115352dae55c1f1af59e86bb306",
+      ".ai/STUDIO-OBS-005-validation.json": "1454089a7b0b675cf2577ac4053e67192b9a8638f2771764d5598a32b67fa2ea",
+      ".ai/STUDIO-OBS-006-admission-security-development.json": "cb6d7008d3a0655c79ab933bf113ceef017532411dcd6441025ac726bc9758b6",
+      ".ai/STUDIO-OBS-006-builder-tests-development.json": "609971224c20ce9bacf7c9e6b689e960817bddea8b4ae115cbd30e7c4879caa6",
+      ".ai/STUDIO-OBS-006-close.json": "6367bdcaadb2f27340ce23f1054649bf2da3194e3d5790b45669ccd09c752415",
+      ".ai/STUDIO-OBS-006-data-design-review-r1.json": "b5aa0887aab66bc923bd9233d02c74f2164b6f784bbd7edf594d8f386a9e75dd",
+      ".ai/STUDIO-OBS-006-data-design-review-r2.json": "ce8913038de1eeb1f50336309fedbf8acd01b21d9cca0c4fbd6d0b1f3efb2863",
+      ".ai/STUDIO-OBS-006-data-design-review.json": "23481702cf7009e650722b80b83811863be82b172dc62e089209df41a0be43c3",
+      ".ai/STUDIO-OBS-006-data-development.json": "0d3f21770d1e621a08a58e6ca295ed265b378f3ad504f6030c40289158864e96",
+      ".ai/STUDIO-OBS-006-data-recon.json": "24901865d8385a15f17ac0bb628482b63e2285576bf3078f8c1517f5f9be7e66",
+      ".ai/STUDIO-OBS-006-delayed-design-qa-review-r1.json": "7050a0190cb39640f5a4aab2e960d7829581650075d039bc9fc2d08bba9d1106",
+      ".ai/STUDIO-OBS-006-delayed-design-qa-review.json": "86eb1c60a477ab90b3bbd82d202403db0adad9eed3229b9350ec2095bb20b2ed",
+      ".ai/STUDIO-OBS-006-delayed-design-resolution-r1.json": "d253858a32555b47f1aa302b18b1a9f97cca3e1dd3f49a4d5baf0d6e90061959",
+      ".ai/STUDIO-OBS-006-delayed-design-runtime-review-r1.json": "8b9c69097c864144d6fc9f2bf41693aaef979759b44b8bd49ddc80873b8f05b0",
+      ".ai/STUDIO-OBS-006-delayed-design-runtime-review.json": "ca059582a22f5a8979a4529ce97ca67de8eabadecc1115db3957dd007403913b",
+      ".ai/STUDIO-OBS-006-delayed-learning-tests-development.json": "20e98db163ef8b5891759d01aa8deb8402b786334930dec8ea124e1aca57864e",
+      ".ai/STUDIO-OBS-006-delayed-runtime-development.json": "27339d2e06c4ef0aa297950a00ff512b34aa5ad7344e01f02681c97eb7c6d42f",
+      ".ai/STUDIO-OBS-006-delayed-runtime-peer-review-r1.json": "5f62881d5d8865c002c12bb12505fd68b1862a5b173994bed7780c232d3a47c9",
+      ".ai/STUDIO-OBS-006-delayed-runtime-peer-review.json": "78bdd132f8778d4a3808004c8a665be5482930d6728a3505943e8726920575fa",
+      ".ai/STUDIO-OBS-006-delayed-state-review.json": "6d6c25821ec579cf0d2dedb38e08702b5ac125f8758665b2d60302ec7a6d75ff",
+      ".ai/STUDIO-OBS-006-design-resolution-policy.json": "fc2fba793a3bedbcafe48d3219503b82d85694d6d8c60d7c53329ba9a09650c9",
+      ".ai/STUDIO-OBS-006-design-resolution-r1.json": "ef34aec2cf27c8671fca0421be54076e0c30de5b6652e93ef0f621b272b6303c",
+      ".ai/STUDIO-OBS-006-design-resolution-r2.json": "9fe48609ec225f93a8fb0d638d316109f0d92db3897a868dd8cc351c69fb5c4d",
+      ".ai/STUDIO-OBS-006-observed-choice-backend-development.json": "44825888e277756fb7889e628622735dbfd8ef37beed99a458b17447fe83276d",
+      ".ai/STUDIO-OBS-006-observed-choice-builder-tests-development.json": "e9da176b4e8b28e68fdab5957a3bd13fb626c2558ed04e715db881cce4973f06",
+      ".ai/STUDIO-OBS-006-observed-choice-data-review-r1.json": "eaa4b1e8111e62f6a494b6112c23ea2d38de38070baaf55d6ea5eaf710a4ac24",
+      ".ai/STUDIO-OBS-006-observed-choice-data-review.json": "4c38e2a2d9f027d81e6eda4b05e73720057bce9bb1325928a86f21e30a600232",
+      ".ai/STUDIO-OBS-006-observed-choice-ddl-development.json": "80b99820127acb4ff41fcd74b97e082f32e9b0c41d4e7e3dff1851aa42ce643e",
+      ".ai/STUDIO-OBS-006-observed-choice-design-resolution-r1.json": "fd95c9a31b34edd5743e7d6037b52011c70cde7c9d8d9f1920ad6ad131b229c5",
+      ".ai/STUDIO-OBS-006-observed-choice-publication-design.json": "8636942886c3a489623b063aac2b2afb72d4f05b0af3b456dc7af02c5426e1b2",
+      ".ai/STUDIO-OBS-006-observed-choice-qa-design-review.json": "228a5c277457d8af9a90d4b6dfb2ebfbacbcee159fbb891cd2bd1be547b5b5f7",
+      ".ai/STUDIO-OBS-006-observed-choice-runtime-development.json": "891acae43c8b9440341a981e372b0aa553a3a3a187c00c7dda4a5a3938d64a0e",
+      ".ai/STUDIO-OBS-006-observed-choice-runtime-review-r1.json": "aecfd216825db8ad20ff4dd1090fa527f46b539d95f60efa48e0b3542714530f",
+      ".ai/STUDIO-OBS-006-observed-choice-runtime-review.json": "b1daeb518475aa67f6861cf8ba7bf692ff5ee96369c6521dd2918c052e471e13",
+      ".ai/STUDIO-OBS-006-po-validation.json": "17592a3fc389300d28e6574f78571ce66dd9aa0b4110b201738bcaecfc26976a",
+      ".ai/STUDIO-OBS-006-pre-ready-terminal-design.json": "cc409c6375d7a1492980dd432730e7274471ee7a3b1efa6ff6b0f33068f9a778",
+      ".ai/STUDIO-OBS-006-pre-ready-terminal-development.json": "7dd46d8c0ecddfe7a6e0a42914c03afbb2968c942e8c5f3de74be354410b7c81",
+      ".ai/STUDIO-OBS-006-pre-ready-terminal-review.json": "d201fb3b59791da107def107359a98ef91e2494ccb5d1a71b328b0c9cdbaaf27",
+      ".ai/STUDIO-OBS-006-profile-tests-development.json": "40cd39be0a7354308229a1c8efa21537c6f0c94b9daf156f99192e3d0503b562",
+      ".ai/STUDIO-OBS-006-qa-design-review-r1.json": "a429113585fa83d01b65f2d86b659ecc95f21d62c70af12f9b588c3edacc4b15",
+      ".ai/STUDIO-OBS-006-qa-design-review-r2.json": "6ff73492df659f0e03b33d5a08faf624d132bb5dc716f761eada115da774dd3f",
+      ".ai/STUDIO-OBS-006-qa-design-review.json": "20ede22259ea1175527334383d35a84b55184d23113fbd4bf05bfca0a1645390",
+      ".ai/STUDIO-OBS-006-qa-review.json": "19b13cd99803c25ef9474a03fc7c3c10dabb7ebc5769d8d3bb801d2398bb3898",
+      ".ai/STUDIO-OBS-006-race-tests-development.json": "8c0f264684237033dbff50158091ea9cc5d5540a321647cd17133487d86037e5",
+      ".ai/STUDIO-OBS-006-runner-development.json": "9409a5d3378a3ff4de943a1edca2e28dda6d631a86085763b21a96e3272505d6",
+      ".ai/STUDIO-OBS-006-runner-pre-ready-fix.json": "a172c56b49d9bd2d4550b08c6a0c1c555ca9b59ad226620573a3e4f330f2cdc7",
+      ".ai/STUDIO-OBS-006-runtime-design-review-policy.json": "b0a95f9eb8d6a0e7fa07ba8af4874bb7226cecad5346ddc3d2980452e964de3a",
+      ".ai/STUDIO-OBS-006-runtime-design-review-r1.json": "5eddfd75103b10d912896e497af222ad2a365ab89447d8916d74b5b378e076b1",
+      ".ai/STUDIO-OBS-006-runtime-design-review-r2.json": "54aed9c9077715a57cf273d719b4a7827c5ba0ab60e7fa30732c130e9bd5e1da",
+      ".ai/STUDIO-OBS-006-runtime-design-review.json": "5351f3b870c9672026f94062b826156dafa4e262679c40a23b6c964ac075cf80",
+      ".ai/STUDIO-OBS-006-runtime-recon.json": "00ecdbaad2a21911190b76c64f2311127230a9c1bab1a1eea16b06ebfb224d3b",
+      "backend/build.gradle.kts": "dab809b9129368c1643d80169bcdb773f9290af61e153a1e45069832f5db7289",
+      "backend/db/cutover/V19__studio_inference_candidate_identity.sql": "8ae0c62865a356461d02a7e3623f730ee607b475b0364768f32fe99402178204",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioController.java": "1dd3fa7d8df94e1d499a1581873a6ac90455967d7f5a5746f48b807acd5c4c9c",
+      "backend/src/main/java/com/citi/put/checks/studio/StudioService.java": "b881d2f49d14380ccb574de39b16510d0c6b9fd9a91a81282cd7da33c3ebfa23",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/HttpRunnerDispatchClient.java": "a3db293eacf118569d1b130bb24e867041b69476ad978f81005829eb34a13d37",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/RunJob.java": "3a20dfeefb6550731f4ad79526c23c8e68103a13c14299095123e23617c0766c",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioAcceptanceService.java": "6e988bb5916dc5ef44e5dd3e369f3fca747a0b111b9b8dbfc46e2b14ba185b81",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "632d547800ac4e1ea6c8ace30bfabce34b79fedcea04c3a87c5823ee401b18f8",
+      "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatcher.java": "f35d62a0e26473c61afe61aeda2623809ffd9503a215b33fe90aaa8aa9e4c39e",
+      "backend/src/main/java/com/citi/put/checks/studio/entity/UITestExecution.java": "2196349ba653195b6cfedb7ba6eb1bbd77e19cd64c3175e436264a37be2c8eb7",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/account/ReplayAccountAccess.java": "e129f6a30fbae6eb09575396a701969afd827100b5243c20fa6c1a73469a27ec",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java": "bd3c72b22e19d2facf94607e2c93be0ede405558a53cbcbe55aefe43f2d9211e",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "cef0198a96089050632bb44b504951bd0e80513a1517caca7631371eb27319be",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorization.java": "00cb3006ee0b505390ed23b0fb3ccc09b9169bd67ff1697523dd408edd51a42e",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java": "13b254432278614fb0e51d7dd17320eac5b57f64aa81754f786c676980a02788",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java": "05b07d2a1a54f55895a28e3bea8b4a5e7960c1eced313a959e5ab4e6f368e3aa",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationController.java": "d14534cac5a1d608f7803d25c4cf035e4c98d3955a8ddcf7237bd01096c9ba37",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java": "cd73661f74cf7c9f86b6e77e6f3e0fba9a2ed259c883ffa0f9c556dceae42f28",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationProperties.java": "9970342f57888f1ca56f9d965cf299ecf72a31b6396d3ab50182f4fe69586d2c",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java": "b0b5232f7a20704e367a3198f4f995e001abe733ef1824424c05e79e3e3f581a",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationResultProjector.java": "7f5180715e50bb9f304cf0f9675223638064606e2b09590476b05549f14bbe4c",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowerer.java": "b633bdc3a795f3bd887ed144fff631f1272d6430b126f789de2ecf0505436482",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReferencePolicyDeriver.java": "4d7c76ca16289b056af71f8e6129bbd574c7b4b9cac7bee132f1e9c3051d2f1d",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "8c129bd8c3a97c3f26c5cd967e57bcee18d5eab2cb7c4af439c975faef0a1331",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java": "9192b4e1c9822c1f013631a4537bea25acc12beebebdf0449a86b3ecb649326d",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayPins.java": "ba9c8b1bff682ea7b1969d7155ad19a7656ada6a75fef103b2c746a3fad15c3d",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayProperties.java": "784a7c36d94e6646399c691dde1dacf898bf785ebe36c64eaa071d6a18863aa5",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedRevisionVerifier.java": "204d2fcc66a04e9e1ca476f954189a2b08f9a13ab8ef321f9350b67e7dc4ade7",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedValidationClient.java": "f1a3c09f1b41a5f53314e28e962fa1b996a5ba14090dad99ed20d26339beab87",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationBudget.java": "ccababf7de7f83f6b516496962dd6c1ee419855782a4606fc2bc284a64be4437",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "85435a3aa11d291147e3ccca3afc6f955c146ef0264dd8608a9122d47ed1b5db",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java": "c559709955d6803ba634e5b1c51e9653a43ec7bd7c5b81a2bfaf077a141cb4a2",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "faa959d41421b33339c5b168c247a31ae03afb0373596070187b8265d23c1be9",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedWireBodyAdvice.java": "99343715c7c35bc45fd4c7a2f673e925068757af1c2cf892256262c9f2daf58d",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md": "7ab9b46203f0977e966cf6e1e3e27707c82fd4c75033bd4a98ded8fa16ee13c8",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java": "ae663b81cb0cbb5471d6fbc6a3295153899bb16e23270849d476305bcd8b7720",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": "2e8888cb69628831475a32698d9b7093bef99ba0326e7e46300b468d3e9709a5",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationConfiguration.java": "c7bbf305dc6d9e6acf01cbe836d15af979690ca94ad7b8479aafd442d25c277d",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "f4e7f477dd878633cd61d9a66a1fb7199e6c0829357e316f0c4878036a457684",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "c001b39a64a818637e7c272e238486492cc681f5e5c3ca151a34530a60e60ebb",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java": "39f1f9afca11a05799062121be1a11d586852ed40e983c86090efc28fb292ff4",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java": "f66d98a1a10ce3482d3ebfcbb27b5a5fdd0bf04ee424588afc52f6d7c3dd5e3e",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java": "2093bcdee588bc9529f99c44b0fbec839ee9158155c82429862598ec478a718f",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/StrictInternalBodyReader.java": "eae167fa6831a6d6160b03d7ae4b28adab0d784d714871e81515dea9b27f2bdb",
+      "backend/src/main/java/com/citi/put/checks/studio/internal/StudioInternalController.java": "38616307bf061566295df9b935115d62d0f3a87344ee0aa535c6851c1fbc28a9",
+      "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java": "b9ef35d8902981eef09fc9f7599ed553b874341d1d5d42bc34770bf821b78a28",
+      "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java": "66bc773b4bc651188751e03f295b4adf61e9d852725a5a75ff02497d5f32dcac",
+      "backend/src/main/resources/application.yml": "30dff20c0b6e8e73123ae5cf7079212cb1fdd889389d319b386451c46591383f",
+      "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+      "backend/src/test/java/com/citi/put/checks/studio/InferenceMigrationLatestIT.java": "39cf330859f332236d9755ef12fa536d0e2e3c48ca1e1d5862172beaffd3d8e9",
+      "backend/src/test/java/com/citi/put/checks/studio/StudioContractTest.java": "62813e48d70df5a91fb5fb757bba12528111d9d6929932d226b9f5a011915a51",
+      "backend/src/test/java/com/citi/put/checks/studio/evidence/ExecutionVideoContractTest.java": "9b56230ebd0d01e5b0d79da53c5ec352b3cb7fc2067fc2c1ea3184c278ea57d3",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilderTest.java": "c83e8665f480aaefaeb321011962988fa819c7965c96c3e2904fea9be38f1453",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationAuthorizationIT.java": "e855c2cfd6831f6a8fdc3484c3cb111d0bc081b08992dfa6617858cb3dd871c1",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java": "6ddcd930797def45bb69a4841e42b6e700b7ad91d9a599d0c6a940fbdd7cc1f8",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java": "60b9b62ca760af538ccfd669bf594a15d3917daa7d018704c12bfa29987c29cb",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRaceTest.java": "a18ac12097f1cf993c2932c73bca9c384b51ecdfadda87ff9042f0689194f6be",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java": "38bc7a97d421ac7efa67d77b1aabd46cc8c5bcf5ccf9aee03e75a363ba6420fb",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedAdmissionSecurityIT.java": "40c89ef6e7305110d55fbf04737bcf8edbbf9f365654ea73a3fb5054eeacaa8d",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedArtifactLowererTest.java": "fa2919c74290d80150e0f80a79b53b7cafb784bb3211de8617303c4bc0be9a07",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/ObservedProfileDriftTest.java": "a7e45613bfa919b920412ebf9b4cb058ad98820679ff66e0a42c8be08968a8f1",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java": "cbdf32f0da6c08135ae342acb66fb9875ce2193388c65f468f37e7929fdb5390",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java": "edbd6497b2c31d5b6480b49f5710d951c903c8214eb4c8b4ad9ea45464430cff",
+      "backend/src/test/java/com/citi/put/checks/studio/internal/AdmissionCasIT.java": "660c8f7e7b1d6d277fb3d08f87e291aee9f4cc149c121164fc2f1b33642f30a9",
+      "docs/qa/gates/STUDIO-OBS-001-contracts-and-first-run-lifecycle.yml": "0a48a5d4080a4281100bae37bc127ef36805e6a59a3fb10ffdc44d3b1980ffc4",
+      "docs/qa/gates/STUDIO-OBS-002-trusted-page-observation-and-sanitization.yml": "2e4b4ae665a8834ed6c9ed261c6219818804a40fdce513b76636f120dbe7e2d1",
+      "docs/qa/gates/STUDIO-OBS-003-durable-guided-session-and-action-ledger.yml": "9b38a3ec113a31d932717b45180f9a9c3871ea1e6fba0cc27bd2491971bd7323",
+      "docs/qa/gates/STUDIO-OBS-004-runner-guided-control-and-execution-local-dataflow.yml": "1acce979bd375cf966d965be701e64b0db0b6ec78f3ef562301fe49673efbcee",
+      "docs/qa/gates/STUDIO-OBS-005-grounded-translation-and-implicit-dependency-planning.yml": "d9f934a87d54b99adeb6c82401d66ac9f4ecf6f58bd6443ec730c987167b3446",
+      "docs/qa/gates/STUDIO-OBS-006-exact-plan-publication-and-deterministic-replay.yml": "d14cdc5125c971c2ae98805ba1fdb1cec5a3cef28c538c0f38acd1c3961f4a03",
+      "docs/runbooks/studio-guided-authoring.md": "54c0a9171f4e5628ddf621b4551aaf1bdacd7057c9988f6427aebc75dc4ee8fc",
+      "docs/specs/studio-observed-authoring/contracts/README.md": "6545ccbde617a810af638ca5515eea4debbe333d67852844e0f9da7a237a9fab",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication-canonical-vectors.json": "9d26ba2b23dfbeb8c0b5c6bc09adc6aa2b9d3008036a7f49ad62836940c3d6e6",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json": "85717fa9367b4e9aea35b31a1302cf8d89276c8a3c0297199532614b6bc21423",
+      "docs/specs/studio-observed-authoring/contracts/v2/publication.schema.json": "bcabd4b48079a93c3323fa83de1a9136caa058e0826477d72961a34f3326bfaf",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-account.schema.json": "1025c30837cc50d318e13cd99e8e168ad540b66eb6f424cb2223c7ea3f799ec3",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-artifact.schema.json": "fb9b45a107eea83603645a41d0652551fb7556d60d0dda48431547cacb90c71f",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-ipc.schema.json": "639fa978ddbbd7bde25b64c018090ae34043fdb7ab7a39bc1c1b270bb89e4281",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-job.schema.json": "0f5dad4a4a7bff2b037aa3b9da969a9500d808488a7c34e5623b57b9652544b1",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-operation.schema.json": "a40d1237dad647ed0357e9b0901ea5df72a65d2e9997b850f99271aaf972b985",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-policy.schema.json": "5cb8cbf6b0751bcd2267790ea4461bc84b6af0fcd93fa27d7cc8c04ee0370553",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-profile.schema.json": "9abfdf6fe26bf3a1047c27fd2eaa9f31f70e3ddded23281e6a2f35d7d7508fff",
+      "docs/specs/studio-observed-authoring/contracts/v2/replay-validation.schema.json": "d0342d96004fd65a250d9d810786e13b8ad568aee3390f129b68f9721e120b96",
+      "docs/specs/studio-observed-authoring/contracts/v2/revision.schema.json": "32025d7d3652ab7285cacb6849d7f1612fdd13715e9ade1e25f18b5e5b63b454",
+      "docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json": "7d36381ca762c31b6ce97f790ea29b13901582b0963e64ccb63947af31a51373",
+      "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": "667337ab123d511b8f64672b8b7a9113faa5c2bff2c3202ae73b1217313d518c",
+      "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json": "1fd9967ac84fe8b38a232ec61929e3a2e5f759ac245dd58453b9c4d95c4654ac",
+      "docs/specs/studio-observed-authoring/delayed-state-design.md": "5f0844f49f98b6ac9da99abcc11b650e0ac218c2097fad9950deaee859f629e6",
+      "docs/specs/studio-observed-authoring/observed-choice-publication-design.md": "2121de85179799ba76aa6420255dcdd13d618ac25a29f029f5a9f3cce21581b0",
+      "docs/specs/studio-observed-authoring/openapi-v2.yaml": "f3677e9a0157c144ca19387b119be829804aa167e753f46d34304f1fc6264425",
+      "docs/specs/studio-observed-authoring/pre-ready-terminal-design.md": "18126e4107972f3bf4532c1f2b5c815e374cd6999e33f249fa58cd1f17f8b880",
+      "docs/specs/studio-observed-authoring/publication-contracts.md": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+      "docs/specs/studio-observed-authoring/publication-data-contract.md": "1ab026994489107a01befe7d20bdea778e040da2da7d5fc910f3aeadbd5bc6c4",
+      "docs/specs/studio-observed-authoring/publication-design.md": "516ced4f8084e955d904e103580a7b5d63fc53757c973b8effaeede9af1ab5c3",
+      "docs/specs/studio/openapi.yaml": "1f7902eeacf45eb1c8a7eabc6a0f99b1106b1a43096f4f9697242e3146adc445",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md": "59f1eb6ea9a053a552ca94a742d6ed618f9cfe00b2c6dcb7a46da645bad4e26f",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md": "437a0680384f66b2619d244c83039c5031e5606834e1f01fe775b02c9464222f",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md": "f02499ad4a1515150689c511f3ec2fb9ee9c5a8467cbfd37e329f03a99de7b65",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-004.story.md": "eea724184c1499eb50caf562adf08001cf2e096c385339a7a49ebbc496a480d4",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md": "d408b3029da57573ac41e83516aeee96895ea56e61eb2bcc627fb51683fa3e47",
+      "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "34363521b37c3f3f869e0ce70210500320b63676ab00e677ea45e0ed1befe26a",
+      "studio-runner/README.md": "d1fd4e2771c0732b42259417445a264743a8653acb6cb18d83e6671bd289d95a",
+      "studio-runner/fixtures/observed-reference/control-value-reference.json": "75a7d82a31adfbf694a6da22a19fcd1403cb9d3adeecfc29d040e07f6b6a1cdd",
+      "studio-runner/fixtures/observed-reference/fresh-order-reference.json": "d145057d8c8809c94340ef5534590960fa65fb53ccbb7a1b8f7ee90bc19b95fb",
+      "studio-runner/fixtures/observed-reference/manifest.json": "6f408f2ea1313fe46793a155429d0699bedaafe81a1e62098c1495833d185ea3",
+      "studio-runner/fixtures/observed-reference/operation-mutations.json": "6df9810b016e10eee3be490da2763c97807243649069e57c99fb167f111778c5",
+      "studio-runner/scripts/check-pins.mjs": "54c40a611812c4377572763f83b91046c68964925b76edde36a59f440157d51a",
+      "studio-runner/scripts/write-runtime-versions.mjs": "48331d83778ed27b937867dfe834e6a13fcb382706d72448f8f470df50e92e31",
+      "studio-runner/src/compat/runtime-versions.ts": "de2e257b6fb4f2006c905b7bcac63f404e8497c907f2a31501ab9e675caf476e",
+      "studio-runner/src/executor/observedOperations.ts": "b817787578f88835ca29450b938fd22808784402b1669a8ffa4ca412b9e491b1",
+      "studio-runner/src/executor/observedReplay.ts": "ae7e9cbf9702d255b568f1a1a2d3bf8ffe0fe6771fff814a94c55b6731ac5b46",
+      "studio-runner/src/reporting/admissionClient.ts": "c24f8d857031bbe2dc062ceb0996aed3178b3bbba4b6ebb299b7d2e14947451d",
+      "studio-runner/src/reporting/httpClient.ts": "0bd88480c3176550a85ea687feb69a5101a12c04152c617e2767dfaed6359273",
+      "studio-runner/src/reporting/snapshot.ts": "17abe49ccc665bed51af118e8327924bafd8fd60cbc13746b6c8b0c62a57da0f",
+      "studio-runner/src/run/browser.ts": "26bafde12692b584521a136a91d63affb86e2a5f7a1ab24e2741fbb972aa0a3c",
+      "studio-runner/src/run/browserFactory.ts": "8f486488bfbb7690fb014a1daf572d9519ab7ba72ead2cd1e537f78f78c3bcf9",
+      "studio-runner/src/run/child.ts": "63dc10718b9cf9ce14e137de68f88e6d6174a9ebef4fb74e950779ea1e66713e",
+      "studio-runner/src/run/childRuntime.ts": "ba9912ad4d96f236bf555cc18dcc0c97f5c089dc5e6942db798eca1d39b94a75",
+      "studio-runner/src/run/errors.ts": "005e51bf10d04f3f07d0e127f85dc765265198635679084df5cc73008c2d3b47",
+      "studio-runner/src/run/launcher.ts": "4f29860634d168753124fae8a289c333493c3778f07b71188b82c0d5f4e2fcb6",
+      "studio-runner/src/run/observationCollector.ts": "d67478b454ee60e8f532513be1c96916f6b14e97ab2f1cf4e55b9a6cfd13407f",
+      "studio-runner/src/run/observationTypes.ts": "9f0e379255b85d26a84c25ed23a4c96736dfea3be16681408f3771e8424f1825",
+      "studio-runner/src/run/observedAccount.ts": "28379ecd4383ccd81e94685c0eb931bd931a2a28ff29fed796cd707491cc400f",
+      "studio-runner/src/run/observedReplayAdapter.ts": "02b5b79e460a134ae7408ba7029de43f31365c43bf5e7ac3c563431525281006",
+      "studio-runner/src/run/protocol.ts": "90c363cbff167a52de25a793d55592d4813d611ddf551e51e8c6e981ef24cf06",
+      "studio-runner/src/server/adapters.ts": "8379b3e5059141fe79e29bc0c265827d6c6c52a40121eb24fa9ab8e4d89e1030",
+      "studio-runner/src/server/application.ts": "223edb9dd4ec66157dede13ee439675a5f84f14b51bc9d2cd1ffbd563ff2c646",
+      "studio-runner/src/server/config.ts": "a15802a842c636f2ed470c2ebe4206265e0c1fe2aefc98b46b0e7cd2cf11c284",
+      "studio-runner/src/server/routes.ts": "ea773cb3fad90f6c58fbfe50095296a20dfef0efd05cbc1d9d960042b2abd0b0",
+      "studio-runner/src/server/runCoordinator.ts": "616bb068ea4267c062cf63d868ead2e882fe38c824ca83d2686a82a4f2f6029e",
+      "studio-runner/src/validator/observedReferencePolicy.ts": "a77ba19d8f0bb097211539f108d4155c6d0de2811c9fa28dfbea50a4af07452b",
+      "studio-runner/src/validator/observedReplay.ts": "2a9b8d5e9364de8d5b4133ad7da16c13e996fce0a294fa2a107e1829427ada63",
+      "studio-runner/src/validator/observedSchemas.json": "50ececceed2e512a8187c4f65456423d1f9d3ce8589848f9a0356eba3eb45507",
+      "studio-runner/src/versions.ts": "ad48319984ed771e4b2af18ed84153b7b0ff3b3bbc69d33442ba4b160965459b",
+      "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts": "c38e3617e4aff259e632675ad22d03dc5ab09d45171e6a04e042485ea0022b9d",
+      "studio-runner/test/fixtures-tier/observed-replay.test.ts": "92ac2718749644f0095f3aa51de810b199ddcf19fc5e9e923c54dba6a688800f",
+      "studio-runner/test/helpers/openapi.ts": "6f64ab8f0ad20200fb8c0708c366f93a0fbf653d99f08bd981d82402d5302730",
+      "studio-runner/test/observedReplayEquivalence.test.ts": "4a0d13169760993cc6ef713cbac671d85e2c3b1c865b995f47ec740c0d2e6c6e",
+      "studio-runner/test/observedReplayExecutor.test.ts": "1896e83dff1602803a6b05b6fb3a68bad3aa3f5c58e3dccf73a2899f79fdc0da",
+      "studio-runner/test/observedReplayValidation.test.ts": "4d2219dce2e4f2f7458104315607ea61f76a7aa86503519e62d816acbddd0e6a",
+      "studio-runner/test/reporting/httpClient.test.ts": "a6d19b5dbc7f73b4def8168e6cda0436aa1c7f88f7f9c0c5f977b030cdffe9ac",
+      "studio-runner/test/run/confinement.test.ts": "a95f56905ecb26eeeb9b30224005a0dd2cb952f7d2a7df47001c2daf18d145d7",
+      "studio-runner/test/run/observation.test.ts": "f466e43b6d6263ee3a26d2612ff18e7d89580e69775e30313f7a0ed5444a692c",
+      "studio-runner/test/run/observedAccount.test.ts": "b0c5981ab79a2a1e26914dbc634ce16d5e8d938143adb4eefee393fc89b56c59",
+      "studio-runner/test/run/observedReplayProtocol.test.ts": "d87091d065352dd04c04effefe0ec8d8599f7ad04278a87a1d6c840f1733999e",
+      "studio-runner/test/runtime-versions.test.ts": "068e72f57f2f8c7090137935df5b25dedfda313d7ce7b14f4f8c14023a82c5f1",
+      "studio-runner/test/server/observedReplayAdmission.test.ts": "66a8d34bd6d7004d1e1d1f9923d9b7c0fa712f5c37bdbb75128b65d43ecf67c7",
+      "studio-runner/test/server/observedReplayAuthorization.test.ts": "8204b9fde7eed1a2399d52702693316f31c66cd7ec0bd4f938e0b5d521e0ecdb",
+      "studio-runner/test/server/observedReplayRoutes.test.ts": "b0e426fdbb12b137523fee949b04b2a4cc18700da779974f2662e16b9ac4da95",
+      "tools/build-studio-observed-schemas.cjs": "d27b237b6fd0b171374bcc945c6544bf493dac05e3c44be0fe5f71d184faf7fc",
+      "tools/check-studio-observed-contracts.cjs": "a61337be05e0b2f8d78c0dd7469537d4032e1652940604136330853e340b7ec5"
+    },
+    "postValidationOBS006Evidence": {
+      "reviewedRevision": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+      "backend": {
+        "tests": 321,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0
+      },
+      "storySubstantiveSha256": "891d3adb2fd83f67fc030deedad2bcc605ee0ed12ab5ce4efe233a6d34ad6286",
+      "mismatches": []
+    },
+    "protectedArtifactsUnchanged": true,
+    "protectedArtifactCount": 235
+  },
+  "epicContextEnrichment": {
+    "helper": "EpicContextAccumulator imported from .aiox-core/core/orchestration; buildAccumulatedContext(STUDIO-OBSERVED,6)",
+    "readOnlyInput": "Ephemeral context from six actual completed SDC/story files; no session/wave state write",
+    "executorDistribution": {
+      "architect": 1,
+      "dev": 4,
+      "data-engineer": 1
+    },
+    "completedStories": 6
+  },
+  "verification": {
+    "buildsRun": false,
+    "testsRun": false,
+    "browserRuns": false,
+    "providerCalls": false,
+    "externalMessages": false,
+    "credentialsInspectedOrRequested": false,
+    "noSubagents": true,
+    "noCommitPushPrDeployment": true,
+    "rootSdcWaveCliExecuted": false,
+    "onlyStoryDevNotesAndChangeLogChanged": true
+  },
+  "limitations": [
+    "Provider identity/docs unknown; no credentials or local browser storage accessed.",
+    "No live-provider connection, same-session interactive handoff, production image or human pilot evidence fabricated.",
+    "Generic core-config architecture/framework paths and task helper scripts are absent; actual task-specific project sources and direct local repository inspection used.",
+    "Validation-engine/run-validation.js tools named by generic task are absent; task checklist evaluated directly and evidence report persisted.",
+    "No library behavior beyond checked source/doc contracts assumed; no new external lookup needed for this source-readiness assessment.",
+    "USD500 entire-wave ceiling; actual spend unknown."
+  ],
+  "filesChanged": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+    ".ai/STUDIO-OBS-007-po-validation.json"
+  ],
+  "storySha256Before": "8a5ec81f8e92bddb47fae1c8ea57519d82479a3fe17f481fe6fc11cec2f3b5ac",
+  "storySha256After": "bc80f9a039a42f1284af6f5f43246e01271081823df729d289c99a5e230fc98e",
+  "nextAuthorizedPhase": "Root verifies NO-GO; obtain provider identification and prepare local expert design/ownership/test refinements before PO revalidation. No developer handoff on Draft.",
+  "boundedArchitectureWorklist": [
+    {
+      "finding": "TECH-001",
+      "area": "Guided provider authorization and current scope",
+      "paths": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java"
+      ],
+      "questions": [
+        "Resolve/checkCurrent implementation contract and nonsecret capability discovery before start; preserve fresh BFF/Core/CSI checks.",
+        "Real same-session connection identity and authConnection semantics; unavailable/null connection currently refuses."
+      ]
+    },
+    {
+      "finding": "TECH-001",
+      "area": "Ordinary replay capability issue/consume boundary",
+      "paths": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/account/ReplayAccountAccess.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayConfiguration.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java",
+        "studio-runner/src/run/observedAccount.ts",
+        "studio-runner/src/run/childRuntime.ts",
+        "studio-runner/src/run/launcher.ts"
+      ],
+      "questions": [
+        "Scope/expiry/revocation binding, opaque one-attempt handle issue/consume, private provider capabilities and unknown-outcome cleanup.",
+        "Compiled reviewed registry registration and provider transport preserving the existing child environment allowlist; no dynamic loading/platform/Vault credentials in child."
+      ]
+    },
+    {
+      "finding": "TECH-001",
+      "area": "Guided and recorded browser initialization",
+      "paths": [
+        "studio-runner/src/run/browser.ts",
+        "studio-runner/src/run/browserFactory.ts",
+        "studio-runner/src/run/guidedBrowser.ts",
+        "studio-runner/src/run/guidedMain.ts"
+      ],
+      "questions": [
+        "Blank-only guided launch needs reviewed authenticated bootstrap, same-context identity and fresh protected-state evidence; ordinary recorded context already exposes scoped cookie install/enter seam.",
+        "Preserve sandbox/single-page/origin restrictions and OBS006 original initial-context/publication evidence; first guided recording remains OBS008."
+      ]
+    },
+    {
+      "finding": "OWN-001",
+      "area": "Bounded schema/public capability ownership",
+      "paths": [
+        "docs/specs/studio-observed-authoring/contracts/session.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/session-view.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v2/replay-account.schema.json",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+        "studio-runner/src/guided/types.ts"
+      ],
+      "questions": [
+        "Specify concrete capability response/consumer contract rather than assuming enum modes implement discovery/secure connection.",
+        "Determine exact additive schema/version/pin and generated type ownership under existing compatibility rules before code; no invented new route/migration in PO validation."
+      ]
+    },
+    {
+      "finding": "TEST-001",
+      "area": "Existing oracle seams to extend in an approved design",
+      "paths": [
+        "studio-runner/test/run/observedAccount.test.ts",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedHttpSecurityIT.java",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+        "studio-runner/test/fixtures-tier/guided-targets.test.ts"
+      ],
+      "questions": [
+        "Existing tests exercise controlled providers and public fixture/browser seams; they do not supply real approved-provider connectivity.",
+        "Design controlled login/protected-page independent receipts and same-context assertions plus account/CSI/origin/concurrency/pause/expiry/revocation/cancel/privacy negatives; preserve earlier exact evidence."
+      ]
+    }
+  ],
+  "boundedArchitectureWorklistLimits": "Design/refinement only; candidate inspection paths are not implementation ownership grants. EXT-001 remains unresolved; provider-specific contract/transport choices require actual approved provider documentation and independent review."
+}

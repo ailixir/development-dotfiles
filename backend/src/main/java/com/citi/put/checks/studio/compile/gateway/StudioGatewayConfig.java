@@ -1,5 +1,10 @@
 package com.citi.put.checks.studio.compile.gateway;
 
+import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.guided.translation.GenAiGuidedLlmGatewayClient;
+import com.citi.put.checks.studio.guided.translation.GuidedLlmGatewayClient;
+import com.citi.put.checks.studio.guided.translation.GuidedModelResponse;
+import com.citi.put.checks.studio.guided.translation.GuidedResponseParser;
 import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,12 +57,36 @@ public class StudioGatewayConfig {
    */
   @Bean(destroyMethod = "close")
   @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
+  public GenAiGatewayTransport genAiGatewayTransport(StudioGatewayProperties properties)
+      throws IOException {
+    return new GenAiGatewayTransport(properties);
+  }
+
+  @Bean(destroyMethod = "close")
+  @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
   public GenAiLlmGatewayClient vertexLlmGatewayClient(
       StudioGatewayProperties properties,
       GatewayResponseParser parser,
-      GatewayAuditLogger auditLogger)
+      GatewayAuditLogger auditLogger,
+      GenAiGatewayTransport transport)
       throws IOException {
-    return new GenAiLlmGatewayClient(properties, parser, auditLogger);
+    return new GenAiLlmGatewayClient(properties, parser, auditLogger, transport);
+  }
+
+  @Bean
+  @ConditionalOnProperty(prefix = PREFIX, name = "provider", havingValue = "vertex")
+  public GuidedLlmGatewayClient guidedLlmGatewayClient(GenAiGatewayTransport transport) {
+    return new GenAiGuidedLlmGatewayClient(
+        transport, new GuidedResponseParser(new GuidedContracts()));
+  }
+
+  /** Recorded compiler fixtures are not a guided production provider. */
+  @Bean
+  @org.springframework.boot.autoconfigure.condition.ConditionalOnExpression(
+      "'${studio.compile.gateway.provider:disabled}' != 'vertex'")
+  public GuidedLlmGatewayClient disabledGuidedLlmGatewayClient() {
+    return (request, budget) ->
+        new GuidedModelResponse(GuidedModelResponse.Code.DISABLED, null, null, null, null);
   }
 
   @Bean
@@ -113,7 +142,8 @@ public class StudioGatewayConfig {
         && studioEnabled
         && selection.selectedProvider() != StudioGatewaySelectionProperties.Provider.VERTEX) {
       throw new IllegalStateException(
-          "UI_TEST is enabled in a deployed profile but studio.compile.gateway.provider is not vertex");
+          "UI_TEST is enabled in a deployed profile but studio.compile.gateway.provider is not"
+              + " vertex");
     }
     return new Object();
   }

@@ -1,3 +1,4 @@
+import { parseObservedBytes, ObservedRefusal } from '../validator/observedReferencePolicy.js';
 /**
  * The five internal routes (AC-1..AC-5, AC-10, AC-11, architecture §8.4; ADR-002 §29).
  *
@@ -51,7 +52,7 @@ export type BodyRead =
  * The cap is applied to the accumulated length as chunks arrive, so an oversized body is refused
  * during the upload rather than after the process has buffered all of it.
  */
-export function readBoundedBody(request: IncomingMessage, maxBytes: number): Promise<BodyRead> {
+export function readBoundedBody(request: IncomingMessage, maxBytes: number, strictUtf8 = false): Promise<BodyRead> {
   return new Promise<BodyRead>((resolve) => {
     const chunks: Buffer[] = [];
     let size = 0;
@@ -78,7 +79,7 @@ export function readBoundedBody(request: IncomingMessage, maxBytes: number): Pro
       chunks.push(chunk);
     });
     request.on('end', () => {
-      finish({ ok: true, text: Buffer.concat(chunks).toString('utf8') });
+      try { const bytes=Buffer.concat(chunks);finish({ ok: true, text: strictUtf8 ? new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes) : bytes.toString('utf8') }); } catch { finish({ok:false,status:400,code:'INVALID_CONTRACT'}); }
     });
     request.on('error', () => {
       finish({ ok: false, status: 400, code: 'BODY_READ_FAILED' });
@@ -303,6 +304,25 @@ export function createRequestHandler(
       return;
     }
 
+    if(method==='POST'&&(path==='/v2/validate-observed'||path==='/v2/runs')){
+      const observedRequest=async():Promise<void>=>{
+        const limit=path==='/v2/validate-observed'?8388608:4194304;
+        const body=await readBoundedBody(request,limit,true);if(!body.ok){respond(response,body.status,{code:body.code});return;}
+        try{
+          const parsed=parseObservedBytes(Buffer.from(body.text),limit);
+          if(path==='/v2/validate-observed'){
+            if(!coordinator.validateObserved){respond(response,503,{code:'OBSERVED_VALIDATION_DISABLED'});return;}
+            const start=options.now(),verdict=coordinator.validateObserved(parsed);
+            if(options.now()-start>Math.min(15000,options.validateTimeoutMs)){respond(response,503,{code:'VALIDATE_OVER_BUDGET'});return;}
+            respond(response,200,{...verdict});
+          }else{
+            if(!coordinator.submitObserved){respond(response,503,{code:'OBSERVED_REPLAY_DISABLED'});return;}
+            const decision=await coordinator.submitObserved(parsed);respond(response,decision.status,{code:decision.code},decision.retryAfterSeconds?{'retry-after':String(decision.retryAfterSeconds)}:{});
+          }
+        }catch(error){respond(response,400,{code:error instanceof ObservedRefusal?error.code:'INVALID_CONTRACT'});}
+      };
+      void observedRequest().catch(()=>{ respond(response,500,{code:'INTERNAL_ERROR'}); });return;
+    }
     if (method === 'POST' && path === '/v1/validate') {
       void handleValidate(request, response).catch(() => {
         respond(response, 500, { code: 'INTERNAL_ERROR' });

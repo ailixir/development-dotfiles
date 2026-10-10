@@ -16,6 +16,8 @@
  * build arg is recorded as `null`, not as `""` (see `optionalEnv`).
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -111,9 +113,29 @@ export function buildRuntimeVersions({ root, versions, env, nodeVersion }) {
   };
 }
 
+export function envBrowserRoot(env){return env.PLAYWRIGHT_BROWSERS_PATH ?? (process.platform==='darwin'?join(homedir(),'Library','Caches','ms-playwright'):process.platform==='linux'?join(homedir(),'.cache','ms-playwright'):join(homedir(),'AppData','Local','ms-playwright'));}
+
 /** Builds the record and writes it to `<root>/dist/runtime-versions.json`. Returns the path. */
 export function writeRuntimeVersionsFile(input) {
   const runtimeVersions = buildRuntimeVersions(input);
+  const fixtureRoot=join(input.root,'fixtures','observed-reference');
+  const schemasPath=join(input.root,'dist','validator','observedSchemas.json');
+  if(existsSync(schemasPath)&&existsSync(fixtureRoot)){
+    const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
+    const hash=v=>createHash('sha256').update(canonical(v)).digest('hex');
+    const references=Object.fromEntries(readdirSync(fixtureRoot).filter(n=>n.endsWith('.json')).sort().map(n=>[n,JSON.parse(readFileSync(join(fixtureRoot,n),'utf8'))]));
+    const choicePath=join(input.root,'..','docs','specs','studio-observed-authoring','contracts','v2','publication-fixtures.json');
+    if(existsSync(choicePath)){
+      const choice=JSON.parse(readFileSync(choicePath,'utf8')).observedChoice;
+      if(!choice||choice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Observed choice reference evidence is missing or invalid.');
+      references['accepted-observed-choice.json']=choice;
+    }
+    writeFileSync(join(input.root,'dist','observed-reference.json'),JSON.stringify(references)+'\n');
+    runtimeVersions.observedSchemaBundleHash=hash(JSON.parse(readFileSync(schemasPath,'utf8')));
+    runtimeVersions.observedReferenceBundleHash=hash(references);
+    const localBrowsers=envBrowserRoot(input.env);
+    runtimeVersions.observedChromiumBuild=readChromiumBuild(localBrowsers);
+  }
   const target = join(input.root, 'dist', 'runtime-versions.json');
   writeFileSync(target, `${JSON.stringify(runtimeVersions, null, 2)}\n`, 'utf8');
   return target;

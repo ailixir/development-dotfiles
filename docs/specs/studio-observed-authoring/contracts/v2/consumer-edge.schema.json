@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v2/consumer-edge.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "bindingId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "producerAdmissionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "consumerAdmissionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "coordinate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "stepId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ordinal": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        }
+      },
+      "required": [
+        "stepId",
+        "ordinal"
+      ]
+    },
+    "argumentSlot": {
+      "enum": [
+        "fill.value",
+        "selectOption.value",
+        "assert.expected"
+      ]
+    },
+    "destinationOrigin": {
+      "type": "string"
+    },
+    "transferPolicy": {
+      "const": "sameOrigin"
+    }
+  },
+  "required": [
+    "bindingId",
+    "producerAdmissionId",
+    "consumerAdmissionId",
+    "coordinate",
+    "argumentSlot",
+    "destinationOrigin",
+    "transferPolicy"
+  ]
+}

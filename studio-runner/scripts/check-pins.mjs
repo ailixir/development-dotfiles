@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { createHash } from 'node:crypto';
 /**
  * Pin consistency check (AC-1, ADR-001 §4.2, architecture §4.3).
  *
@@ -40,7 +41,7 @@
  * Exit code 0 when every asserted copy agrees, 1 otherwise. A failure message names the
  * disagreeing copies with their values.
  */
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -325,6 +326,28 @@ export function checkPins(root, options = {}) {
     );
   }
 
+  const observedSchemas=join(root,'dist','validator','observedSchemas.json');
+  if(existsSync(observedSchemas)){
+    try{
+      const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
+      const hash=v=>createHash('sha256').update(canonical(v)).digest('hex');
+      const read=p=>JSON.parse(readFileSync(p,'utf8'));
+      const sourceSchemas=read(join(root,'src','validator','observedSchemas.json'));
+      const packaged=read(observedSchemas),references=read(join(root,'dist','observed-reference.json'));
+      const refsRoot=join(root,'fixtures','observed-reference');
+      const sourceReferences=Object.fromEntries(readdirSync(refsRoot).filter(n=>n.endsWith('.json')).sort().map(n=>[n,read(join(refsRoot,n))]));
+      const choicePath=join(root,'..','docs','specs','studio-observed-authoring','contracts','v2','publication-fixtures.json');
+      if(existsSync(choicePath)){
+        const choice=read(choicePath).observedChoice;
+        if(!choice||choice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Missing observed choice reference.');
+        sourceReferences['accepted-observed-choice.json']=choice;
+      }
+      if(hash(packaged)!==hash(sourceSchemas)||pins.runtime?.observedSchemaBundleHash!==hash(packaged))failures.push('Observed packaged schema bundle is stale.');
+      if(hash(references)!==hash(sourceReferences)||pins.runtime?.observedReferenceBundleHash!==hash(references))failures.push('Observed packaged reference bundle is stale.');
+      const profile=packaged['replay-profile'];
+      if(profile?.properties?.playwright?.const!==pins.declared)failures.push('Observed profile Playwright pin differs from actual package.');
+    }catch{failures.push('Observed packaged support files are missing or invalid.');}
+  }
   return { ok: failures.length === 0, failures, notAsserted, pins };
 }
 

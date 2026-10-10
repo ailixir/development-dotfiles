@@ -10,10 +10,13 @@ import com.citi.put.checks.studio.dto.ExecutionStatus;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.citi.put.checks.studio.entity.UITestExecution;
+import com.citi.put.checks.studio.entity.UITestRevision;
+import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.internal.dto.ProgressAck;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -53,6 +56,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
  */
 @Service
 public class ProgressReportService {
+
+  private static final GuidedContracts OBSERVED_CONTRACTS = new GuidedContracts();
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ProgressReportService.class);
 
@@ -138,6 +143,24 @@ public class ProgressReportService {
                         InternalCallbackCodes.EXECUTION_UNKNOWN,
                         "No execution with this id is accepting reports"));
 
+    boolean cancelled = statements.isCancelRequested(pathExecutionId);
+    boolean observedPreReady =
+        execution.getObservedRevisionBinding() != null
+            && execution.getBrowserStartedAt() == null
+            && !cancelled
+            && !(RunnerReport.STARTED.equals(report.kind())
+                && report.browserStartedAt() != null
+                && ExecutionStatus.PENDING.equals(execution.getStatus()));
+    if (observedPreReady) {
+      validateObservedAdmission(execution, report);
+      var revision = entityManager.find(UITestRevision.class, execution.getRevisionId());
+      if (revision == null) {
+        throw observedIdentityRefusal();
+      }
+      var source = OBSERVED_CONTRACTS.parse(revision.getSource());
+      RunnerReportProjection.requireObservedPreReadyFailure(
+          report, source.isArray() ? source.size() : 0);
+    }
     RunnerReportProjection.Projected projected =
         RunnerReportProjection.project(
             report,
@@ -147,10 +170,13 @@ public class ProgressReportService {
             // Write-once and never cleared, so reading it ahead of the statement cannot be
             // contradicted by it; and a runner can only have been told to cancel after the request
             // committed (ADR-002 §29).
-            statements.isCancelRequested(pathExecutionId));
+            cancelled);
 
     long sequence = report.runnerSequence();
-    int applied = applyByKind(report, projected, sequence);
+    int applied =
+        observedPreReady
+            ? applyObservedPreReady(report, projected, execution)
+            : applyByKind(report, projected, sequence);
 
     if (applied == 1) {
       entityManager.clear();
@@ -258,6 +284,126 @@ public class ProgressReportService {
         projected.manifestKey());
   }
 
+  private int applyObservedPreReady(
+      RunnerReport report, RunnerReportProjection.Projected projected, UITestExecution execution) {
+    return statements.applyObservedPreReadyFailure(
+        report.executionId(),
+        report.attemptId(),
+        report.admissionId(),
+        report.runnerInstanceId(),
+        report.runnerSequence(),
+        projected.status(),
+        projected.errorCode(),
+        projected.endedAt(),
+        projected.durationMs(),
+        writeJson(projected.stepResults()),
+        writeJson(withDiagnostic(projected)),
+        projected.logsTruncated(),
+        writeJson(projected.runtime()),
+        projected.videoKey(),
+        projected.videoStatus(),
+        projected.videoError(),
+        projected.videoPartial(),
+        projected.videoExpiresAt(),
+        projected.manifestKey(),
+        execution.getObservedRevisionBinding(),
+        execution.getObservedAdmissionReceipt());
+  }
+
+  private static InternalCallbackException observedIdentityRefusal() {
+    return InternalCallbackException.conflict(
+        InternalCallbackCodes.ADMISSION_OWNED, "Observed admission identity mismatch");
+  }
+
+  private void validateObservedAdmission(UITestExecution execution, RunnerReport report) {
+    var contracts = OBSERVED_CONTRACTS;
+    JsonNode binding;
+    JsonNode receipt;
+    try {
+      binding = contracts.parse(execution.getObservedRevisionBinding());
+      receipt = contracts.parse(execution.getObservedAdmissionReceipt());
+      contracts.validate("v2/replay-job#/definitions/ExecutionBinding", binding);
+      contracts.validate("v2/replay-job#/definitions/AdmissionReceipt", receipt);
+    } catch (RuntimeException invalid) {
+      throw observedIdentityRefusal();
+    }
+    var request = receipt.path("request");
+    var grant = binding.path("replayGrant");
+    var account = binding.path("accountAuthorization");
+    for (String field :
+        List.of(
+            "executionId",
+            "attemptId",
+            "revisionId",
+            "revisionDigest",
+            "principalId",
+            "csiId",
+            "scopeHash",
+            "currentPolicyHash")) {
+      if (!grant.path(field).equals(binding.path(field))) {
+        throw observedIdentityRefusal();
+      }
+    }
+    for (String field :
+        List.of("executionId", "attemptId", "revisionDigest", "scope", "scopeHash")) {
+      if (!account.path(field).equals(binding.path(field))) {
+        throw observedIdentityRefusal();
+      }
+    }
+    for (String field : List.of("principalId", "csiId", "environment")) {
+      if (!binding.path("scope").path(field).equals(binding.path(field))) {
+        throw observedIdentityRefusal();
+      }
+    }
+    if (!grant.path("accountGrantId").equals(account.path("grantId"))
+        || !grant
+            .path("profileHash")
+            .asText()
+            .equals(GuidedContracts.hash(binding.path("requiredProfile")))
+        || !grant
+            .path("buildHash")
+            .asText()
+            .equals(GuidedContracts.hash(binding.path("requiredBuild")))
+        || !binding
+            .path("scopeHash")
+            .asText()
+            .equals(GuidedContracts.hash(binding.path("scope")))) {
+      throw observedIdentityRefusal();
+    }
+
+    for (String field :
+        List.of(
+            "executionId",
+            "startedAt",
+            "attemptId",
+            "revisionId",
+            "revisionDigest",
+            "artifactHash",
+            "configurationHash",
+            "learnedPlanHash",
+            "referencePolicyHash",
+            "publicationEvidenceHash",
+            "scopeHash",
+            "currentPolicyHash")) {
+      if (!request.path(field).equals(binding.path(field))) {
+        throw observedIdentityRefusal();
+      }
+    }
+    if (!request.path("profile").equals(binding.path("requiredProfile"))
+        || !request.path("build").equals(binding.path("requiredBuild"))
+        || !request.path("grantId").equals(binding.path("replayGrant").path("grantId"))
+        || !request
+            .path("accountGrantId")
+            .equals(binding.path("accountAuthorization").path("grantId"))
+        || !request.path("admissionId").equals(receipt.path("admissionId"))
+        || !binding.path("executionId").asText().equals(report.executionId().toString())
+        || !binding.path("attemptId").asText().equals(report.attemptId().toString())
+        || !request.path("admissionId").asText().equals(report.admissionId().toString())
+        || !request.path("runnerInstanceId").asText().equals(report.runnerInstanceId())) {
+      throw observedIdentityRefusal();
+    }
+  }
+
   /**
    * A later {@code FINAL} that only moves the evidence disposition (AC-25).
    *
@@ -323,6 +469,10 @@ public class ProgressReportService {
               + bounds.maxLogEntriesOrDefault());
     }
     for (com.citi.put.checks.studio.internal.dto.RunnerLogEntry entry : logs) {
+      if (entry == null) {
+        throw InternalCallbackException.badRequest(
+            InternalCallbackCodes.INVALID_REPORT, "Invalid log entry");
+      }
       if (entry.message() != null
           && entry.message().length() > bounds.maxLogEntryCharsOrDefault()) {
         throw InternalCallbackException.tooLarge(

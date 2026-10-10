@@ -1,0 +1,357 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Independent narrow security/QA design re-review R2; no implementation or lifecycle approval",
+  "reviewer": "/root/obs005_peer",
+  "recordedAt": "2026-10-09T07:43:49.709353+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "summary": "PUB-R1-001 and the other cross-cutting R2 corrections are design-resolved. After the runtime peer report arrived, direct inspection of observationSanitizer confirmed one remaining shared blocker: the TrustedPolicy projection must preserve the existing 32-grant, unique-grant-ID and absent/present applicationPolicy loader contract. No additional architecture restart or later-story scope is required.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "516ced4f8084e955d904e103580a7b5d63fc53757c973b8effaeede9af1ab5c3",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "1ab026994489107a01befe7d20bdea778e040da2da7d5fc910f3aeadbd5bc6c4",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "d03bda578b22fa9991a52bd1b31ccf244a16ddf0aadd48196b7389ddc35939de",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "87123a86eda1b1a7933004fb65c167c543850f2021ec42c711acd7f6e4386173",
+    ".ai/STUDIO-OBS-006-design-resolution-r2.json": "9fe48609ec225f93a8fb0d638d316109f0d92db3897a868dd8cc351c69fb5c4d",
+    ".ai/STUDIO-OBS-006-qa-design-review.json": "20ede22259ea1175527334383d35a84b55184d23113fbd4bf05bfca0a1645390",
+    ".ai/STUDIO-OBS-006-qa-design-review-r1.json": "a429113585fa83d01b65f2d86b659ecc95f21d62c70af12f9b588c3edacc4b15",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java": "9c9af5c53742944c99664f996f1d056e8da326e7d1a09b154c33700c94777d4b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "576b4fc572dcb568860a4e981e1007c0df015304952bd5383812fc0dc027d930",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "7788e2401ecbd5511c576d30ca7ccd4e1a9fb55bfe65a97296bcf1caf072058b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "519aeb135304be4fd8be604b16c75dd679deac8e7c8a7e17724981b8de3621a5",
+    "backend/src/main/java/com/citi/put/checks/studio/compile/CompileInputs.java": "5744ffdda6e8ef0ca7695f2e90c8095c8f9f8916ebb4a64e66d22e3c8bb3dd4b",
+    "backend/src/main/java/com/citi/put/checks/config/StudioInternalSecurityConfig.java": "7a5e836b567cc46ebd8ec48f495dc5b5d3c5a2332268e59e031941d36b03ae67",
+    "backend/src/main/java/com/citi/put/checks/security/ServiceIdentityAuthenticationFilter.java": "f83ddb5c5a7d6540879616a1498e02a8890aa25551b2d0c4889baeb9ee43aca5",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java": "37035ac9534e667c7abca0828cdda8c76b024ea7e4a112ba7407902e2da6ace7",
+    "studio-runner/src/run/observationTypes.ts": "a1bb68ad620612ac3eb456599bfb45af8f4c00ad9d00cc67125bd2035e2572af",
+    "studio-runner/src/run/observationCollector.ts": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985",
+    "studio-runner/src/run/protocol.ts": "f9a9229ed01d7dbc970a76486490132ace680ce8290758335b7928f740d6e1da",
+    "studio-runner/src/run/childRuntime.ts": "498b242ed2aebd3da92514fd96bd340de391fbb193c97250523ab8fcd788498b",
+    "studio-runner/src/compat/runtime-versions.ts": "77bcc59f5a214745713504061b05fa7708edfea3e8d073b1bb1e6cbdedd83413",
+    "studio-runner/src/run/observationSanitizer.ts": "389b94dae82bdefe6519cb7c7ae3f23382430d2de31043220374f954d7a39d8c",
+    ".ai/STUDIO-OBS-006-runtime-design-review-r2.json": "54aed9c9077715a57cf273d719b4a7827c5ba0ab60e7fa30732c130e9bd5e1da"
+  },
+  "frozenHashesMatch": true,
+  "priorReviewRecordsUnchanged": true,
+  "ownership": {
+    "literalPaths": 154,
+    "uniquePaths": 154,
+    "matchesResolutionMap": true,
+    "coordinatorMechanicalReplanAndPoStillRequired": true
+  },
+  "blockers": [
+    {
+      "id": "R2-POLICY-001",
+      "severity": "medium",
+      "classification": "Concrete frozen-design/source-contract mismatch, consolidated with the runtime peer finding",
+      "source_refs": [
+        "studio-runner/src/run/observationSanitizer.ts:23",
+        "studio-runner/src/run/observationSanitizer.ts:25",
+        "studio-runner/src/run/observationSanitizer.ts:28",
+        "studio-runner/src/run/observationSanitizer.ts:39",
+        "studio-runner/src/run/observationTypes.ts"
+      ],
+      "design_refs": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md:C1",
+        "docs/specs/studio-observed-authoring/publication-contracts.md:C8 TrustedPolicy",
+        "docs/specs/studio-observed-authoring/publication-contracts.md:C12 Effective trusted policy"
+      ],
+      "finding": "Frozen R2 allows up to128 read grants, rule-ID reuse across distinct selectors and a required applicationPolicy object with boolean structural flag. Actual unchanged observationOptions accepts at most32 grants with globally unique IDs within the grant list; a present applicationPolicy must enable structural discovery. Field-only configurations instead omit applicationPolicy. The proposed projection can reject valid field-only policies or tempt a permission-widening default/loader change.",
+      "minimal_correction": [
+        "Use applicationPolicy:null or the closed present object with allowStructuralDiscovery:true and readGrants bounded0..32. Null projects to omission of ObservationConfig.applicationPolicy, never a false-flag object or forwarded null.",
+        "Require policyRuleId uniqueness across the readGrants list independent of selectors, but preserve repeated IDs across otherwise valid field overrides where existing source permits them. Override testId remains unique.",
+        "Retain independent field-only rules and existing accessibleName/classification/eligibility validation. Align C1/C8/C12 without widening observationSanitizer/collector behavior."
+      ],
+      "required_oracles": [
+        "Valid field-only config survives null-to-omitted projection; present false policy refuses and absence adds no discovery/read grant.",
+        "Valid application/region grant works without mandatory per-control mapping;33 grants and duplicate grant IDs with distinct selectors refuse.",
+        "Repeated field-override policy IDs preserve existing behavior; duplicate override testId refuses.",
+        "currentPolicyHash covers exact absent/present and complete effective grant/type/override semantics."
+      ],
+      "peer_record": ".ai/STUDIO-OBS-006-runtime-design-review-r2.json"
+    }
+  ],
+  "findingInventory": [
+    {
+      "id": "PUB-001",
+      "status": "DESIGN_RESOLVED_R1_PRESERVED"
+    },
+    {
+      "id": "PUB-002",
+      "status": "DESIGN_RESOLVED_R1_PRESERVED"
+    },
+    {
+      "id": "PUB-003",
+      "status": "DESIGN_RESOLVED_R1_PRESERVED"
+    },
+    {
+      "id": "PUB-004",
+      "status": "DESIGN_RESOLVED_R1_PRESERVED"
+    },
+    {
+      "id": "PUB-R1-001",
+      "status": "DESIGN_RESOLVED_R2",
+      "reason": "AcceptedTranslationPlan preserves trusted obligations[].obligationId and needs[].bindingId and the unchanged persisted translationHash; raw source-model schema cannot mint these IDs."
+    },
+    {
+      "id": "R2-POLICY-001",
+      "status": "NEEDS_CHANGES_NARROW_LOADER_MAPPING",
+      "origin": "Runtime peer report independently confirmed against actual loader before finalizing this review."
+    }
+  ],
+  "crossCuttingAssessment": [
+    {
+      "area": "PUB-R1-001: actual allocated plan",
+      "status": "DESIGN_RESOLVED",
+      "sections": [
+        "C4",
+        "D3",
+        "C12"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:46",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:169",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:133",
+        "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json"
+      ],
+      "assessment": "AllocatedNeed now includes the server-issued bindingId alongside needId/producerStepId/consumers, and AcceptedTranslationPlan retains obligationId. This matches actual005 allocation/persistence. The full stored plan hash is preserved; the raw model schema remains unchanged and cannot mint IDs. Required bidirectional allocation/read/consumer joins reject missing, swapped, duplicate or forged IDs."
+    },
+    {
+      "area": "Original blank-page provenance",
+      "status": "DESIGN_COHERENT",
+      "sections": [
+        "D2",
+        "C12"
+      ],
+      "source_refs": [
+        "docs/specs/studio-observed-authoring/contracts/v2/action.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/v2/execution-evidence.schema.json",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1434"
+      ],
+      "assessment": "The original nonnull page target/document/generation0 remains in the exact action/proposal hash. Only observation FK, origin and derived locator use the genuine initialBlank null branch. The SQL iff plus required-key predicate and original bootstrap identity reject invented documents or observed actions missing observations."
+    },
+    {
+      "area": "Complete configuration and effective policy transport",
+      "status": "PARTIAL_POLICY_LOADER_CORRECTION_REQUIRED",
+      "sections": [
+        "C7",
+        "C8",
+        "C12"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/studio/compile/CompileInputs.java:104",
+        "studio-runner/src/run/observationTypes.ts",
+        "studio-runner/src/run/observationCollector.ts"
+      ],
+      "assessment": "ObservedJob now carries the full immutable configuration with configurationHash joined through binding/admission/launch/execute. Viewport is distinct from recording geometry; browser/environment/waitStrategy/runtime limits have no hidden defaults. TrustedPolicy now carries actual application/region grants, structural discovery, type allowlists and optional overrides, preserving current collector semantics without converting artifact locators into grants or requiring per-control mappings. The precise loader count/ID/absence conditions remain R2-POLICY-001; no change to current collector semantics is approved."
+    },
+    {
+      "area": "Stable validation deadline under ownership renewal",
+      "status": "DESIGN_COHERENT",
+      "sections": [
+        "D3",
+        "D4",
+        "D6",
+        "C4",
+        "C12"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:570"
+      ],
+      "assessment": "snapshotHash binds immutable captured validationDeadline and owner identity/fence, not the mutable lease expiry. Existing same-owner renewal only changes liveness; it does not change evidence identity, spend another claim, or extend/revive the original validation/grant deadline. The concrete real-renewal oracle resolves the earlier retained liveness concern."
+    },
+    {
+      "area": "IPC status, stop, clock and recording truth",
+      "status": "DESIGN_COHERENT",
+      "sections": [
+        "C6",
+        "C8",
+        "C12"
+      ],
+      "source_refs": [
+        "studio-runner/src/run/protocol.ts:152",
+        "studio-runner/src/run/protocol.ts:169",
+        "studio-runner/src/run/childRuntime.ts:154",
+        "studio-runner/src/run/childRuntime.ts:364"
+      ],
+      "assessment": "PASS/FAIL/SKIPPED and nullable unexecuted timings now align with existing reporting. Unknown recording bytes stay null. The common closed Stop applies during account/launch/apply/run/drain. Recording/run-clock origin is established before account apply and merely echoed at Ready, so delayed setup cannot reset time or shift video evidence. Account AbortSignal and bounded cleanup/kill remain explicit."
+    },
+    {
+      "area": "Honest ordinary admission service identity",
+      "status": "DESIGN_COHERENT",
+      "sections": [
+        "C7",
+        "C12"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/config/StudioInternalSecurityConfig.java",
+        "backend/src/main/java/com/citi/put/checks/security/ServiceIdentityAuthenticationFilter.java:44",
+        "backend/src/main/java/com/citi/put/checks/studio/internal/AdmissionCasService.java:69"
+      ],
+      "assessment": "The observed route is correctly assigned to existing /internal/** static Bearer-token/ROLE_STUDIO_RUNNER_CALLBACK protection, not guided-only certificate/JWT authentication. Protected production TLS/routing and the shared-service trust limit are explicit. RunnerInstanceId is a trusted-service CAS identity, not certificate evidence. Real filter-chain negative/positive tests retain separate persisted replay-grant/tuple checks; no permissive user-authority checker is introduced."
+    },
+    {
+      "area": "Packaged execution profile/build versus learning history",
+      "status": "DESIGN_COHERENT",
+      "sections": [
+        "C2",
+        "C5",
+        "C7",
+        "C8",
+        "C9",
+        "C12"
+      ],
+      "source_refs": [
+        "studio-runner/src/compat/runtime-versions.ts",
+        "studio-runner/src/versions.ts"
+      ],
+      "assessment": "BuildIdentity explicitly binds packaged schemas/reference bundle, image association and Chromium build through a trusted release catalog and current execution/validation handshakes. A compatible new build is selected and pinned for a new execution without rewriting the immutable artifact. Historical model/provider/prompt/API facts remain audit provenance, nullable when not recorded, and cannot force unnecessary model relearning."
+    }
+  ],
+  "mandatoryImplementationOracles": [
+    {
+      "id": "PUB-C1",
+      "status": "RETAINED_REQUIRED_IMPLEMENTATION_EVIDENCE",
+      "coverage": "D2/D3/C4/C12 now resolve original facts, blank target and enriched allocated-plan shape.",
+      "oracles": [
+        "Use the actual005 implicit-reference flow to FINALIZING and accept its full persisted translationHash including binding IDs through independent Java/Node validation.",
+        "Original multipage/per-admission facts survive current-observation overwrite/restart; schema-valid wrong operation/guard/reference/edge/binding mutations fail against unchanged original basis despite recomputed local hashes.",
+        "Preserve the original acknowledged bootstrap snapshot, exact source-step order, full successful obligations/assertions and no missing/extra exercised work."
+      ]
+    },
+    {
+      "id": "PUB-C2",
+      "status": "RETAINED_REQUIRED_IMPLEMENTATION_EVIDENCE",
+      "coverage": "D1/D4/D5/D6/D8 and stable-deadline R2 clarification.",
+      "oracles": [
+        "Real PostgreSQL scoped/null-safe/immutable/reciprocal deferred constraints, V19/V33 install orders, epoch/ABA/newer-head and older compile-result fencing, all transaction rollback points and one-winner concurrency.",
+        "Three validator sends maximum across keys/restarts; same-owner renewal during a real pending validation retains one claim and stable snapshot inside the original deadline. Changed owner/fence/source or expiry still refuses; no renewal or Core response extends authority.",
+        "Expected conflict commits without overwriting a concurrent receipt/cancel; unexpected SQL faults remain retryable and never create orphan readiness."
+      ]
+    },
+    {
+      "id": "PUB-C3",
+      "status": "RETAINED_REQUIRED_IMPLEMENTATION_EVIDENCE",
+      "coverage": "C6-C8/C11/C12, D7/D8; no alternative replay pipeline.",
+      "oracles": [
+        "Actual joined publisher/pure validator/ordinary recorded child: one learning submit, zero finalize navigation/read/mutation, two distinct fresh-value receipts with identical hashes and both gateway counters zero.",
+        "Exact configuration differs from recording geometry and is preserved; configuration/profile/build/policy mutation refuses before browser.",
+        "Region/application grants work without testId mappings; moved source, duplicate anchors, narrower deny/type change and sensitive descendants refuse.",
+        "Child values remain local/source-free with fixed diagnostics; real native versus isolated fill/select guards, cancellation, unknown outcomes, delayed account apply/video clock, SKIPPED remainder/null timings, unknown recording bytes and Stop are exercised."
+      ]
+    },
+    {
+      "id": "PUB-C4",
+      "status": "RETAINED_REQUIRED_IMPLEMENTATION_EVIDENCE",
+      "coverage": "C9/C12 and main flags/scheduling sections.",
+      "oracles": [
+        "Actual bean/route matrix for all four publication/replay flags; existing005 starts, historical receipt reads with flags off, old sessions without a base and compatible legacy runs remain correct.",
+        "Existing scheduler activation is never retargeted; actual processor refuses activation mismatch and explicit observed schedules lack unattended authority.",
+        "Benign model/provider/prompt/API changes keep compatible saved replay runnable; incompatible execution/build or explicitly revoked catalog refuses without fallback/recompile/model calls."
+      ]
+    },
+    {
+      "id": "PUB-C5",
+      "status": "RETAINED_REQUIRED_IMPLEMENTATION_EVIDENCE",
+      "coverage": "C10-C12, D8 and all seven story AC tasks/File List.",
+      "oracles": [
+        "Use real production Core/EvidenceRepository/Builder/Publisher/Readiness/Dispatcher/AdmissionCas/child entrypoint; only account connectivity may be controlled.",
+        "No hash-echo validator, fabricated compile/manual confirmation/replay record or later replay video as first-run proof; existing ordinary RUN/same-principal auto-accept remains unchanged.",
+        "Exact tested source/build/worker/profile and honest unavailable/live evidence; actual static service-token filter-chain tests rather than mocked controller identity or invented mTLS proof."
+      ]
+    },
+    {
+      "id": "PUB-C6",
+      "status": "RETAINED_REQUIRED_IMPLEMENTATION_EVIDENCE",
+      "coverage": "D6/C10 unchanged and D8 clarification.",
+      "oracles": [
+        "Receipt routing precedes active-session/account/canExecute guards. Original principal retaining current Core canRead after expiry/head edits reads immutable proof without validation, publication or effects.",
+        "Cached old owner or changed principal cannot override fresh Core denial/unavailability; UUID/digest, historical publication and current readiness remain separate; no cookie persistence or unattended refresh."
+      ]
+    },
+    {
+      "id": "PUB-C7",
+      "status": "RETAINED_REQUIRED_IMPLEMENTATION_EVIDENCE",
+      "coverage": "C6/C7/C12 unchanged bounded user grant with accurate service boundary.",
+      "oracles": [
+        "Fresh explicit-replay grants are execution/attempt/revision/scope/profile/build/account bound, at most 30 seconds until admission; queue/lock/retry cannot extend them.",
+        "Test the stated bounded Core-only revocation lag honestly; local cancellation/policy/account revocation and expired grant prevent new admission.",
+        "One-time account consume/prepare/apply/dispose on the same recorded context, sensitive handles absent from durable/text channels, lost setup ACK never retried, no account/Core/validator I/O under DB locks."
+      ]
+    }
+  ],
+  "acToRequiredEvidence": [
+    {
+      "ac": "AC-1",
+      "design_status": "CONCRETE",
+      "production_seam": "D2/D3/C4: original evidence and exact allocated plan",
+      "required_evidence": "Actual persisted implicit-reference plan, complete source-order successful joins and multipage restart evidence; no model regeneration.",
+      "executed_in_this_review": false
+    },
+    {
+      "ac": "AC-2",
+      "design_status": "CONCRETE",
+      "production_seam": "C3-C5/C9/C12: deterministic lowering and independent equivalence",
+      "required_evidence": "Independent canonical bytes/hashes and typed operation/guard/graph/provenance mutations; no stripped binding IDs or self-evidencing guards.",
+      "executed_in_this_review": false
+    },
+    {
+      "ac": "AC-3",
+      "design_status": "CONCRETE",
+      "production_seam": "D1/D4-D7 plus C5-C7: fresh authority, claims and atomic publication",
+      "required_evidence": "Core/expiry/claim/head/epoch/source/fence/renewal/cancel/rollback races and strict origin/receipt SQL; no callbacks or service token alone mint readiness.",
+      "executed_in_this_review": false
+    },
+    {
+      "ac": "AC-4",
+      "design_status": "CONCRETE",
+      "production_seam": "C10 plus D6/D8: result3, historical receipt and schedules",
+      "required_evidence": "One original submit, zero finalization effects, receipt-backed UUID/digest truth, current-readiness distinction and unchanged schedule activation; no fabricated first-run video.",
+      "executed_in_this_review": false
+    },
+    {
+      "ac": "AC-5",
+      "design_status": "CONCRETE_SUBJECT_TO_R2-POLICY-001",
+      "production_seam": "C6-C8/C12: real ordinary replay/child/account/policy",
+      "required_evidence": "Two fresh private values with identical hashes, both gateways silent, exact configuration/region/native guards, source-free IPC and cancellation/unknown-outcome closure.",
+      "executed_in_this_review": false
+    },
+    {
+      "ac": "AC-6",
+      "design_status": "CONCRETE_SUBJECT_TO_R2-POLICY-001",
+      "production_seam": "C2/C9/C10/C12: execution profile/build, historical learning provenance and flags",
+      "required_evidence": "Actual packaged support/catalog and all four flags; v1/result2 compatibility, benign model/API updates without relearn, incompatible build/algorithm refusal.",
+      "executed_in_this_review": false
+    },
+    {
+      "ac": "AC-7",
+      "design_status": "CONCRETE_SUBJECT_TO_R2-POLICY-001",
+      "production_seam": "Main9/C11/C12/D8: production joined test and mutation oracles",
+      "required_evidence": "Real PostgreSQL/Core/Node validation/guided worker/normal admitted recorded Chromium pipeline; only account provider controlled; exact evidence and current regressions.",
+      "executed_in_this_review": false
+    }
+  ],
+  "preservedDecisions": [
+    "Separate uncached current Core receipt reads work after original session/worker/grant expiry without making new publication authority.",
+    "Current explicit replay has the documented maximum 30-second admission window and bounded Core revocation lag, no cookie persistence/unattended refresh/provisional fallback.",
+    "Result3/session-view3 preserve result2, expose actual UUID plus digest and separate historical publication from current readiness.",
+    "Learning/model/provider/API pins are immutable audit provenance, not accidental execution requirements; compatible replay never calls a model to revalidate them.",
+    "Only 007 account connectivity,008 automatic client/first-run recording,009 live benchmark and010 pilot remain their accepted later boundaries."
+  ],
+  "scopeLimits": {
+    "writtenFile": ".ai/STUDIO-OBS-006-qa-design-review-r2.json",
+    "productTestSchemaStoryGateEdits": false,
+    "buildOrRuntimeTests": false,
+    "cliWaveChanges": false,
+    "subagents": false,
+    "commitOrPush": false,
+    "storyRemains": "Draft",
+    "implementationEvidenceClaimed": false,
+    "wholeWaveCeilingUsd": 500,
+    "spendTelemetry": "UNKNOWN",
+    "newUserDecisionRequired": false
+  },
+  "peerEvidenceReconciliation": {
+    "at": "2026-10-09T07:45:16.976876+00:00",
+    "explanation": "The initial in-turn draft assessment was not delivered as a final verdict. A new peer finding was received before completion, checked against actual source, and incorporated here. Prior initial/R1 records remain untouched.",
+    "additionalBlockersBeyondRuntimePeer": []
+  }
+}

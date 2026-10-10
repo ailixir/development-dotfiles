@@ -195,6 +195,28 @@ resilience4j:
 # (Story 10.7, architecture §8.5). Every value here is a §8.5 STARTING value tuned against staging
 # measurements (§10), not a commitment, and every bound AC-38 inventories has its name here.
 studio:
+  guided-authoring:
+    # Distinct receivers require distinct textual JWT audiences; no credential is stored in session data.
+    controller-token-file: ${STUDIO_GUIDED_RUNNER_CONTROLLER_TOKEN_FILE:}
+    translation:
+      controller-token-file: ${STUDIO_GUIDED_CONTROLLER_TOKEN_FILE:${studio.guided-authoring.controller-token-file:}}
+  guided:
+    publication:
+      enabled: ${STUDIO_OBSERVED_PUBLICATION_ENABLED:false}
+      max-validation-attempts: 3
+      validation-timeout-ms: 15000
+      authorization-ttl-ms: 5000
+      max-validation-bytes: 8388608
+  observed-replay:
+    enabled: ${STUDIO_OBSERVED_REPLAY_ENABLED:false}
+    authorization-ttl-ms: 30000
+    max-artifact-bytes: 1048576
+    max-job-bytes: 4194304
+    max-execute-frame-bytes: 2097152
+    catalog-json: '${STUDIO_OBSERVED_CATALOG_JSON:[]}'
+    policies-json: '${STUDIO_OBSERVED_POLICIES_JSON:[]}'
+    recording-width: ${STUDIO_OBSERVED_RECORDING_WIDTH:1280}
+    recording-height: ${STUDIO_OBSERVED_RECORDING_HEIGHT:720}
   authoring:
     v2-enabled: ${STUDIO_AUTHORING_V2_ENABLED:false}
   secrets:

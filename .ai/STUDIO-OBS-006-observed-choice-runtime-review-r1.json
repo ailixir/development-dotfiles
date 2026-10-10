@@ -1,0 +1,292 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Narrow independent observed-choice runtime design R1 re-review; not implementation permission or whole-story QA",
+  "reviewer": "sdc_bridge_arch",
+  "recordedAt": "2026-10-09T13:35:04.518251+00:00",
+  "verdict": "PASS",
+  "summary": "Both original runtime design findings are resolved by the exact cardinality and separate unchanged byte-limit corrections. The bounded diff changes no proof architecture, executable compatibility, privacy policy or production source. All prior implementation conditions and real observed-choice oracles remain mandatory.",
+  "frozenInputs": [
+    {
+      "path": "docs/specs/studio-observed-authoring/observed-choice-publication-design.md",
+      "expected": "2121de85179799ba76aa6420255dcdd13d618ac25a29f029f5a9f3cce21581b0",
+      "actual": "2121de85179799ba76aa6420255dcdd13d618ac25a29f029f5a9f3cce21581b0",
+      "matches": true
+    },
+    {
+      "path": ".ai/STUDIO-OBS-006-observed-choice-design-resolution-r1.json",
+      "expected": "fd95c9a31b34edd5743e7d6037b52011c70cde7c9d8d9f1920ad6ad131b229c5",
+      "actual": "fd95c9a31b34edd5743e7d6037b52011c70cde7c9d8d9f1920ad6ad131b229c5",
+      "matches": true
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "expected": "50c6462b01057f287f1d5b40d9f23da71725e7e0efeb4861b9f4554fb2663150",
+      "actual": "50c6462b01057f287f1d5b40d9f23da71725e7e0efeb4861b9f4554fb2663150",
+      "matches": true
+    }
+  ],
+  "preservedInputs": [
+    {
+      "path": ".ai/STUDIO-OBS-006-observed-choice-publication-design.json",
+      "expected": "8636942886c3a489623b063aac2b2afb72d4f05b0af3b456dc7af02c5426e1b2",
+      "actual": "8636942886c3a489623b063aac2b2afb72d4f05b0af3b456dc7af02c5426e1b2",
+      "matches": true
+    },
+    {
+      "path": ".ai/STUDIO-OBS-006-observed-choice-data-review.json",
+      "expected": "4c38e2a2d9f027d81e6eda4b05e73720057bce9bb1325928a86f21e30a600232",
+      "actual": "4c38e2a2d9f027d81e6eda4b05e73720057bce9bb1325928a86f21e30a600232",
+      "matches": true
+    },
+    {
+      "path": ".ai/STUDIO-OBS-006-observed-choice-runtime-review.json",
+      "expected": "b1daeb518475aa67f6861cf8ba7bf692ff5ee96369c6521dd2918c052e471e13",
+      "actual": "b1daeb518475aa67f6861cf8ba7bf692ff5ee96369c6521dd2918c052e471e13",
+      "matches": true
+    }
+  ],
+  "initialDesign": {
+    "path": ".aiox/sdc/STUDIO-OBS-006/observed-choice-design-initial/observed-choice-publication-design.md",
+    "sha256": "1b174a901769ef524deb446cb96d031249fb8f7c22f18bdb6a3adba24a2b6c87",
+    "matchesInitialFreeze": true
+  },
+  "priorReview": {
+    "path": ".ai/STUDIO-OBS-006-observed-choice-runtime-review.json",
+    "sha256": "b1daeb518475aa67f6861cf8ba7bf692ff5ee96369c6521dd2918c052e471e13",
+    "preserved": true
+  },
+  "resolutionMapping": [
+    {
+      "id": "OBS-CHOICE-RUNTIME-001",
+      "disposition": "RESOLVED",
+      "location": "docs/specs/studio-observed-authoring/observed-choice-publication-design.md:90",
+      "decision": "ValidationBasis remains <=6,291,456 canonical UTF-8 bytes; complete ValidationRequest remains <=8,388,608 bytes. Existing per-field and aggregate caps remain independent; a smaller request cannot excuse an oversized basis.",
+      "sourceJoins": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java:16",
+        "studio-runner/src/validator/observedReferencePolicy.ts:6",
+        "docs/specs/studio-observed-authoring/publication-contracts.md:17"
+      ],
+      "requiredOracle": "docs/specs/studio-observed-authoring/observed-choice-publication-design.md:94 explicitly requires independent exact/over bounds, multibyte UTF-8, composed witnesses and rejection of over6MiB basis within sub8MiB request. This is a retained implementation requirement, not executed proof."
+    },
+    {
+      "id": "OBS-CHOICE-RUNTIME-002",
+      "disposition": "RESOLVED",
+      "locations": [
+        "docs/specs/studio-observed-authoring/observed-choice-publication-design.md:72",
+        "docs/specs/studio-observed-authoring/observed-choice-publication-design.md:84",
+        "docs/specs/studio-observed-authoring/observed-choice-publication-design.md:94"
+      ],
+      "decision": "Both ModelObservedQuestion alternatives and ordered witness meanings now require2..10, preserving the actual NEXT_ACTION.CLARIFICATION cardinality and equal complete server mappings. Generic/source public contracts remain unchanged.",
+      "sourceJoins": [
+        "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json:1499"
+      ],
+      "requiredOracle": "Begin with a valid two-choice original proof, remove the unselected alternative coherently and recompute local/outer hashes. Both Java and Node must still reject singleton cardinality. Original zero/one/eleven and mapping mutation oracles remain required."
+    }
+  ],
+  "changeAudit": {
+    "documentDiff": "Only two cardinality bounds, separate basis/request ceiling wording and one explicit coherent negative/boundary-oracle paragraph changed.",
+    "unifiedDiff": "--- .aiox/sdc/STUDIO-OBS-006/observed-choice-design-initial/observed-choice-publication-design.md\n+++ docs/specs/studio-observed-authoring/observed-choice-publication-design.md\n@@ -69,7 +69,7 @@\n ```text\n ObservedQuestionMeaning = C{obligationId:UUID,nodeId:ID,bindingId:ID|null,locator:Locator2}\n ModelObservedQuestion = C{reason:existing question reason enum,\n- choices:A<C{choiceId:ID,safeLabel:string[1..256],meaning:ObservedQuestionMeaning}>[1..10]}\n+ choices:A<C{choiceId:ID,safeLabel:string[1..256],meaning:ObservedQuestionMeaning}>[2..10]}\n ObservedQuestionContext = C{sessionId:ID,scopeHash:H,sourceRevision:Rev,\n  configurationRevision:Rev,clarificationId:ID,question:Clarification2,\n  questionCapture:QuestionCapture1}\n@@ -81,15 +81,17 @@\n  responseStatus:CLARIFICATION,modelQuestion:ModelObservedQuestion}\n QuestionPlanEvidence = C{revision:Rev,planHash:H,plan:AcceptedTranslationPlan}\n ObservedChoiceWitness1 = C{version:1,receipt:ObservedChoiceReceipt1,\n- context:ObservedQuestionContext,meanings:A<C{choiceId:ID,meaning:ObservedQuestionMeaning}>[1..10],\n+ context:ObservedQuestionContext,meanings:A<C{choiceId:ID,meaning:ObservedQuestionMeaning}>[2..10],\n  acceptedChoiceId:ID,attempt:QuestionAttemptEvidence,questionPlan:QuestionPlanEvidence}\n ```\n \n These are value-free source/choice/audit projections; no full model prompt, resolved configuration, credential, runtime business value or account handle. Project only those explicit attempt fields from actual immutable identity/safe_result. Full request/projectionHash cannot be independently re-derived from absent historical prompt bytes; retain it as opaque original audit identity, not proof of user authorization. Node validates this local closed question-data type without importing the entire model/provider schema family. Provider choice IDs/labels stay untrusted audit data and never become action arguments, output diagnostics or replay selectors.\n \n-Each witness\u2264262144 canonical UTF-8 bytes; max200 witnesses, at most one per admitted obligation/preparation. Existing8MiB aggregate validation-request/basis bounds remain, so not every combination of individual maxima is promised. Original question observations join the existing observations pool, deduplicated by exact hash/body; Java emits exactly the union needed by successful preparations and validated question captures. Node's used-observations equality must count both independently verified uses and still reject unrelated extras. No duplicate placement bypasses existing400 observation/count/byte accounting.\n+Each witness\u2264262144 canonical UTF-8 bytes; max200 witnesses, at most one per admitted obligation/preparation. The unchanged ValidationBasis ceiling is6,291,456 canonical UTF-8 bytes; the unchanged complete validation request ceiling is8,388,608 bytes. All existing lowerer/validator aggregate and per-field caps continue to apply independently, so not every combination of individual maxima is promised and the request ceiling never raises the basis ceiling. Original question observations join the existing observations pool, deduplicated by exact hash/body; Java emits exactly the union needed by successful preparations and validated question captures. Node's used-observations equality must count both independently verified uses and still reject unrelated extras. No duplicate placement bypasses existing400 observation/count/byte accounting.\n \n Independent Java and Node validators must each:\n+\n+- Preserve the original observed CLARIFICATION cardinality of2..10 in the model question and its equal ordered server choices/meanings. Starting with a valid two-choice witness, coherently remove the unselected alternative and recompute every local and outer hash: both validators must still refuse the singleton. Exercise exact/over basis and request ceilings independently, including multibyte UTF-8 and many individually valid witnesses; a basis over6,291,456 bytes refuses even within a request below8,388,608 bytes.\n \n - Verify every witness hash/reference against its question context, immutable mapping, prep receipt and original question observation. Require observed phase, nonnull original question document/node IDs, exact source/config/scope/coordinate and capture/attempt owner/context/evidence correlation. Require H(modelQuestion)=capture.modelQuestionHash and exact ordered meanings equality between provider response alternatives and server mappings, ignoring provider IDs only for the server-ID mapping comparison. Check server choices and meaning IDs are complete/unique and selected choice/node/binding metadata agree with the receipt answer.\n - Verify H(questionPlan.plan)=questionPlan.planHash=capture.planHash; capture/attempt/questionPlan revision agree. Resolve the original obligation in that actual immutable historical plan and require it byte-equal to the same server-issued obligation in the final accepted plan and action association. This supports unrelated later refinements **only** when the admitted meaning is unchanged; no current-plan substitution for the old plan. All original source-reference/need/binding constraints remain enforced against the final plan and executed graph.\n",
+    "productionSourceSnapshot": [
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+        "priorSha256": "7e3119500ae77eb8d5cf6f81828b2361b60e65437191924a8a07579f0af7f315",
+        "currentSha256": "7e3119500ae77eb8d5cf6f81828b2361b60e65437191924a8a07579f0af7f315",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+        "priorSha256": "5cb65fbf02e80d72c53b1cbdaacc57149ab20e9c6c527f531bd717f0e5ca6753",
+        "currentSha256": "5cb65fbf02e80d72c53b1cbdaacc57149ab20e9c6c527f531bd717f0e5ca6753",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+        "priorSha256": "c001b39a64a818637e7c272e238486492cc681f5e5c3ca151a34530a60e60ebb",
+        "currentSha256": "c001b39a64a818637e7c272e238486492cc681f5e5c3ca151a34530a60e60ebb",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+        "priorSha256": "a6ec6f6b5ce65bed3f5a13c1e8a4e465e25b4b57ddc5c6c1b1a117ee0f235d3b",
+        "currentSha256": "a6ec6f6b5ce65bed3f5a13c1e8a4e465e25b4b57ddc5c6c1b1a117ee0f235d3b",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+        "priorSha256": "7708c9fea3477ff4d2603d939255fbb32906971634b66dcf5d38fc18a47f711d",
+        "currentSha256": "7708c9fea3477ff4d2603d939255fbb32906971634b66dcf5d38fc18a47f711d",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanBuilder.java",
+        "priorSha256": "47c1f97dfd2a15785f0fddad4769f7647ab93090c68fa8ce2059925efafc450f",
+        "currentSha256": "47c1f97dfd2a15785f0fddad4769f7647ab93090c68fa8ce2059925efafc450f",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+        "priorSha256": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+        "currentSha256": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+        "priorSha256": "1ca47811bb8624003aaf6171e62223d4a65615ad9fe88e7f9a024e46223d92ad",
+        "currentSha256": "1ca47811bb8624003aaf6171e62223d4a65615ad9fe88e7f9a024e46223d92ad",
+        "unchanged": true
+      },
+      {
+        "path": "studio-runner/src/validator/observedReplay.ts",
+        "priorSha256": "b512c6cf7c626af179ee36ef1037802497914321f0d3b1d20594fc505ee967f1",
+        "currentSha256": "b512c6cf7c626af179ee36ef1037802497914321f0d3b1d20594fc505ee967f1",
+        "unchanged": true
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/contracts/v2/replay-validation.schema.json",
+        "priorSha256": "46bafdfff5f2c3330f42979b5cc2017e26c6edc3542fd34c7e67a08b801627ed",
+        "currentSha256": "46bafdfff5f2c3330f42979b5cc2017e26c6edc3542fd34c7e67a08b801627ed",
+        "unchanged": true
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/contracts/v2/replay-profile.schema.json",
+        "priorSha256": "9abfdf6fe26bf3a1047c27fd2eaa9f31f70e3ddded23281e6a2f35d7d7508fff",
+        "currentSha256": "9abfdf6fe26bf3a1047c27fd2eaa9f31f70e3ddded23281e6a2f35d7d7508fff",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+        "priorSha256": "e0d97069d72f5aceb3f8b5ad2cd79ae644f4411edc9794ed0af3dda7b042c593",
+        "currentSha256": "e0d97069d72f5aceb3f8b5ad2cd79ae644f4411edc9794ed0af3dda7b042c593",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java",
+        "priorSha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+        "currentSha256": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+        "unchanged": true
+      },
+      {
+        "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationConfiguration.java",
+        "priorSha256": "2d76607e4b98ac7554ebef7ba32815efa6b8cf0f438985512bec4cfcac9590bf",
+        "currentSha256": "2d76607e4b98ac7554ebef7ba32815efa6b8cf0f438985512bec4cfcac9590bf",
+        "unchanged": true
+      },
+      {
+        "path": "studio-runner/src/validator/observedReferencePolicy.ts",
+        "priorSha256": "a77ba19d8f0bb097211539f108d4155c6d0de2811c9fa28dfbea50a4af07452b",
+        "currentSha256": "a77ba19d8f0bb097211539f108d4155c6d0de2811c9fa28dfbea50a4af07452b",
+        "unchanged": true
+      },
+      {
+        "path": "studio-runner/src/executor/observedOperations.ts",
+        "priorSha256": "dcecb66c7636bee6bb5b16e3d01bd65dec5d11d0c7a39bfa7c66712390c46cbf",
+        "currentSha256": "dcecb66c7636bee6bb5b16e3d01bd65dec5d11d0c7a39bfa7c66712390c46cbf",
+        "unchanged": true
+      },
+      {
+        "path": "tools/build-studio-observed-schemas.cjs",
+        "priorSha256": "88254570416fab8921868dcd5b0f50fab08ebd659ed116bd44dda868c42d065e",
+        "currentSha256": "88254570416fab8921868dcd5b0f50fab08ebd659ed116bd44dda868c42d065e",
+        "unchanged": true
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json",
+        "priorSha256": "f409823c0e2817bf11c85adb91b5303548e2ad43c87378a8e3c7d281c68fe54f",
+        "currentSha256": "f409823c0e2817bf11c85adb91b5303548e2ad43c87378a8e3c7d281c68fe54f",
+        "unchanged": true
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/contracts/v2/clarification.schema.json",
+        "priorSha256": "b22d2b247a506ab945524193522efbc79d13a6079160fbb44435fe0ddeb22214",
+        "currentSha256": "b22d2b247a506ab945524193522efbc79d13a6079160fbb44435fe0ddeb22214",
+        "unchanged": true
+      },
+      {
+        "path": "docs/specs/studio-observed-authoring/publication-contracts.md",
+        "priorSha256": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+        "currentSha256": "b9698be8fe19f9cec3463549ee80a6a33e3e3f51529a2547fd5bbe4fdc865fa2",
+        "unchanged": true
+      }
+    ],
+    "unexplainedArchitectureCompatibilityChange": false,
+    "ownership": {
+      "proposedLiteralPaths": 174,
+      "uniqueProposedPaths": 174,
+      "activePartitionPaths": 170,
+      "proposedNotActive": [
+        ".ai/STUDIO-OBS-006-observed-choice-design-resolution-r1.json",
+        ".ai/STUDIO-OBS-006-observed-choice-publication-design.json",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+        "docs/specs/studio-observed-authoring/observed-choice-publication-design.md"
+      ],
+      "r1OnlyAddition": ".ai/STUDIO-OBS-006-observed-choice-design-resolution-r1.json",
+      "missingPriorRequiredPaths": [],
+      "activation": "Pending root; this review does not activate ownership or authorize source/build work."
+    }
+  },
+  "retainedArchitectureDecisions": [
+    {
+      "id": "ORIGINAL_QUESTION_CAPTURE",
+      "decision": "Satisfied by prospective capture, not reconstruction.",
+      "source": "GuidedTranslationService.question currently drops attemptIdentity; context.create stores no plan/owner association. Proposed internal capture carries actual reserved identity/projection facts and joins the original immutable plan. The original acknowledged observation is copied atomically before AWAITING_CLARIFICATION; V33 current-progress/hash guard is reusable. Missing older evidence refuses."
+    },
+    {
+      "id": "ACCEPTANCE_PROVENANCE",
+      "decision": "Satisfied by immutable preparation-time witness, with honest historical limits.",
+      "source": "clarify writes accepted_choice and mutable resolvedClarifications including resolvedAt. Receipt snapshots both under existing session/source transaction before effect and lives in an immutable V33 preparation row. No invented historical actor/acceptedAt/request body. Publication reader must match current accepted row plus immutable context/receipt and successful admission."
+    },
+    {
+      "id": "INDEPENDENT_EFFECTIVE_OBLIGATION",
+      "decision": "Satisfied by independently deriving only the selected target intent and exact locator.",
+      "source": "Java currently validates raw obligation; Node currently compares raw targetIntent. New branches keep raw plan/association meaning byte-equal, derive a local copy, require exact full locator equality, and retain all operation/predicate/input/need/binding/read/origin joins. Original question node and fresh prepared node are independently resolved; node IDs/documents need not survive refresh."
+    },
+    {
+      "id": "DUPLICATES_AND_COMPLETENESS",
+      "decision": "Satisfied by refusing multiple accepted questions even with equal locators and by actual-row completeness.",
+      "source": "Learning effectiveObligation currently iterates resolvedClarifications; deterministic rejection removes accidental order dependence. Java must find every accepted observed row and demand one successful immutable preparation witness. Node verifies supplied evidence but cannot discover omitted DB rows; design explicitly states that trust boundary."
+    },
+    {
+      "id": "QUESTION_PLAN_AND_OBSERVATION_CLOSURE",
+      "decision": "Satisfied by the actual historical QuestionPlanEvidence and used-observation union.",
+      "source": "Original obligation must remain equal in historical and final immutable plans. Existing Node usedObservations equality covers only preparations; amendment expressly adds validated question references and still rejects unrelated observations. Existing400 count/1MiB pool remains authoritative."
+    },
+    {
+      "id": "OPTIONAL_INTERNAL_COMPATIBILITY",
+      "decision": "Satisfied: new closed optional proof, omitted entirely for no/source-only choices; unchanged executable Profile and public/model/IPC bodies.",
+      "source": "Artifact Profile currently pins validationBasis1 and validator observed-1. The amendment changes evidence understanding without changing execution semantics. Exact new schemaBundleHash/build catalog fences old pure validators. Old already-published compatible artifacts remain executable through supported catalogs; missing old choice proof refuses new publication."
+    }
+  ],
+  "retainedMandatoryImplementationConditions": [
+    "Question capture must join the exact persisted CALLING request/attempt, locked original accepted plan, observedDocument execution evidence, actual reserved projection contextRevision/inputs hash and current materialization. After transaction commit the same attempt must be APPLIED/NEXT_ACTION/CLARIFICATION with the original safe_result. Do not search for a matching response after the fact.",
+    "Local question-data schema must preserve the actual NEXT_ACTION question reason enum (AMBIGUOUS_TARGET, AMBIGUOUS_BINDING, INSUFFICIENT_EVIDENCE), exact locator variants, Unicode/ID bounds and ordered meaning correspondence. Server IDs are separately generated; provider IDs/labels remain audit-only.",
+    "Treat original owner lease timestamp and resolvedAt as preserved historical data. Same worker/fence/context/source/config joins are required; ordinary acknowledged same-owner lease renewal does not require historical leaseExpiresAt to equal a later current lease or remain live at publication.",
+    "No accepted observed row may be dropped merely because the final target text matches the raw intent. Backend completeness must reject missing capture/receipt/action association for same-target and alternate-target choices. Node exact-locator comparison covers locator kind/role/name/value/exact, not just text.",
+    "After refresh require the later actual generation and independently verify the old and fresh observations. Never replay old node identity. Require original captured question observation and prepared execution origins/policy/scope to meet their corresponding exact joins; no wrong-origin or unapproved-policy fallback.",
+    "Keep original raw obligation and source/allocated plan untouched; referenceIndex/needId/bindingId/operation/predicate constraints remain exact. Selected meaning.bindingId is display/mapping provenance only, never an alternative producer, consumer edge, input value or read grant.",
+    "V33 receipt NULL is permitted only as absence of observed-choice provenance; accepted observed rows cannot be backfilled into prior preparations. Add strict closed SQL checks with IS TRUE and session/preparation identities; existing immutable-row trigger must protect the new column.",
+    "Apply witness262144-byte/200-count, receipt16384-byte, context64KiB/10 mappings, observation32768-byte/400-count/1MiB and corrected6MiB/8MiB composed bounds before expensive validation/transport. Preserved ISO instant bytes are not normalized to fabricate old hashes.",
+    "Build tooling must generate optional observedChoice property and exact local proof definitions into packaged schemas and TS types. Regenerate package schema hash/reference catalog as needed, negotiate exact build, preserve zero/source-only basis/artifact canonical bytes (deployment build identities may legitimately change).",
+    "No source/model/privacy/IPC/executable grammar change; no browser/model/account call in finalization or proof validation. No production account/live benchmark/pilot requirement is introduced."
+  ],
+  "retainedRequiredOracles": [
+    "Independently hand-authored original-evidence positive fixture: actual accepted observed alternative differs from raw targetIntent, fresh node/generation differs after refresh, both Java and Node derive identical artifact and hashes. Validate positive baseline before mutations.",
+    "Hash-resealed mutations: absent/unaccepted/wrong question/choice; wrong original attempt/request/status/kind/model question; wrong historical plan/revision/hash/obligation; source/config/scope/worker/fence/context mismatch; missing/stale old observation; swapped old/fresh node/locator; same text but different locator kind/role; changed predicate/argument/read recipe/binding graph; unused/duplicate/superseded witnesses.",
+    "Atomic capture/acceptance tests and SQL missing/extra/null-key/cap/immutability tests; capture or source/owner drift rolls back question, observation, context and attempt application together. No network/model I/O inside those locks.",
+    "Prove zero/source-only canonical basis/artifact hashes unchanged; optional omission differs from explicit null and invalid extra fields. Existing historical receipts immutable; old validator/new witness and unsupported schema/catalog tuples refuse before browser. Compatible saved replay survives benign learning-default changes.",
+    "Cross-language canonical vectors with non-ASCII/combining/astral strings, null bindingId, original timestamp precision, optional omission, plan revision decimal strings near integer boundaries, and JSONB reorder/whitespace. No normalization or fabricated prompt/actor metadata.",
+    "Genuine observed-phase alternate question through actual public answer API, human/model delay greater than browser timeout, refresh, original action evidence, actual pure publication and two identical-artifact fresh private-value normal recorded replays. Independently assert chosen versus unchosen fields, one submission per explicit run, zero finalization actions, zero binding-read retries, and zero calls to both gateways during replay. Source-phase timing and async-result-only cases remain separate evidence."
+  ],
+  "remainingBlockers": [],
+  "boundaries": {
+    "writtenOnly": ".ai/STUDIO-OBS-006-observed-choice-runtime-review-r1.json",
+    "sourceSchemaFixtureStoryDistChanged": false,
+    "testsBuildsBrowserSqlRun": false,
+    "nodeGradleConsumersStarted": false,
+    "lifecycleCliChanges": false,
+    "subagents": false,
+    "commits": false,
+    "wholeStoryQaVerdict": false,
+    "sharedBudgetUsd": 500,
+    "actualSpend": "unknown"
+  }
+}

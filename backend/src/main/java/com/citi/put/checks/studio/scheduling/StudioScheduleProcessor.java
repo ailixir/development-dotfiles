@@ -262,6 +262,16 @@ public class StudioScheduleProcessor {
     if (!verdict.revisionId().equals(uuid(schedule, "activated_revision_id"))) {
       return refuse(testId, occurrenceId, "ACTIVATION_REVISION_MISMATCH");
     }
+    Integer artifactFamily =
+        repository
+            .jdbc()
+            .queryForObject(
+                "SELECT artifact_schema_version FROM ui_test_revisions WHERE id=?",
+                Integer.class,
+                verdict.revisionId());
+    if (Integer.valueOf(2).equals(artifactFamily)) {
+      return refuse(testId, occurrenceId, "OBSERVED_SCHEDULE_AUTH_REQUIRED");
+    }
     if (repository.active(testId)) {
       finish(occurrenceId, "SKIPPED", "OVERLAP");
       advance(testId, rule, resolver.now());

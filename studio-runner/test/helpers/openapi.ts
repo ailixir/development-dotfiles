@@ -1,3 +1,7 @@
+import {readFileSync} from 'node:fs';
+import {fileURLToPath} from 'node:url';
+import packagedObservedSchemas from '../../src/validator/observedSchemas.json' with {type:'json'};
+import {parseWireJson} from '../../src/guided/json.js';
 /**
  * A YAML reader and a JSON-Schema conformance checker, for AC-1.
  *
@@ -55,6 +59,7 @@ export function parseYaml(text: string): YamlValue {
   }
   // `maxAliasCount` bounds alias expansion; an unbounded one is a denial-of-service on the parse.
   const value: unknown = document.toJS({ maxAliasCount: 100 });
+  registerContext(value as YamlValue,value as YamlValue);
   return value as YamlValue;
 }
 
@@ -70,23 +75,45 @@ export function parseYaml(text: string): YamlValue {
  * Exported for that walk. It stays the *same* function the conformance checker below calls, so
  * the walk proves the resolver the checker actually uses, not a copy of it.
  */
+const referenceContexts=new WeakMap<object,YamlValue>();
+const documentIds=new WeakMap<object,number>();let nextDocumentId=0;
+const observedFiles=new Set([...Object.keys(packagedObservedSchemas).map(name=>name+'.schema.json'),'publication-fixtures.json']);
+const observedBase='https://checks.citi.example/contracts/observed/v2/';
+const observedDirectory=new URL('../../../docs/specs/studio-observed-authoring/contracts/v2/',import.meta.url);
+const externalDocuments=new Map<string,YamlValue>();
+function registerContext(node:YamlValue,document:YamlValue,seen=new WeakSet(),depth=0):void {
+  if(typeof node!=='object'||node===null||seen.has(node))return;
+  if(depth>64)throw new Error('Reference document depth exceeds64');seen.add(node);referenceContexts.set(node,document);
+  for(const child of Object.values(node))registerContext(child,document,seen,depth+1);
+}
+function loadObservedDocument(file:string):YamlValue {
+  if(!observedFiles.has(file)||file.includes('/')||file.includes('\\')||file.includes('%'))throw new Error('Observed reference file is not allowlisted');
+  const cached=externalDocuments.get(file);if(cached!==undefined)return cached;
+  const bytes=readFileSync(fileURLToPath(new URL(file,observedDirectory)));if(bytes.length>8388608)throw new Error('Observed reference file exceeds bound');
+  const document=parseWireJson(bytes) as YamlValue;
+  if(file.endsWith('.schema.json')&&(!isMapping(document)||document.$id!==observedBase+file))throw new Error('Observed canonical schema identity mismatch');
+  registerContext(document,document);externalDocuments.set(file,document);return document;
+}
 export function resolveRef(document: YamlValue, node: YamlValue): YamlValue {
-  let current = node;
-  const seen = new Set<string>();
-  while (isMapping(current) && typeof current.$ref === 'string') {
-    const pointer = current.$ref;
-    if (!pointer.startsWith('#/')) throw new Error(`Only local $ref is supported: ${pointer}`);
-    if (seen.has(pointer)) throw new Error(`Circular $ref: ${pointer}`);
-    seen.add(pointer);
-    let target: YamlValue = document;
-    for (const rawSegment of pointer.slice(2).split('/')) {
-      const segment = rawSegment.replace(/~1/gu, '/').replace(/~0/gu, '~');
-      if (!isMapping(target)) throw new Error(`$ref does not resolve: ${pointer}`);
-      const next = target[segment];
-      if (next === undefined) throw new Error(`$ref does not resolve: ${pointer}`);
-      target = next;
+  let current=node;const seen=new Set<string>();
+  for(let count=0;isMapping(current)&&typeof current.$ref==='string';count++){
+    if(count>=64)throw new Error('Reference chain exceeds64');
+    const pointer=current.$ref;let root=referenceContexts.get(current)??document,fragment=pointer;
+    if(!pointer.startsWith('#/')){
+      const prefix=pointer.startsWith('../studio-observed-authoring/contracts/v2/')?'../studio-observed-authoring/contracts/v2/':pointer.startsWith(observedBase)?observedBase:null;
+      if(prefix===null)throw new Error(`Only local $ref is supported: ${pointer}`);
+      const rest=pointer.slice(prefix.length),hash=rest.indexOf('#'),file=hash<0?rest:rest.slice(0,hash);fragment=hash<0?'':rest.slice(hash);root=loadObservedDocument(file);
     }
-    current = target;
+    if(typeof root!=='object'||root===null)throw new Error(`$ref does not resolve: ${pointer}`);
+    if(!documentIds.has(root))documentIds.set(root,++nextDocumentId);
+    const identity=String(documentIds.get(root))+':'+fragment;if(seen.has(identity))throw new Error(`Circular $ref: ${pointer}`);seen.add(identity);
+    let target:YamlValue=root;
+    if(fragment){if(!fragment.startsWith('#/'))throw new Error('Unsupported reference fragment');for(const raw of decodeURIComponent(fragment.slice(2)).split('/')){
+      const segment=raw.replace(/~1/gu,'/').replace(/~0/gu,'~');if(['.','..','__proto__','prototype','constructor'].includes(segment))throw new Error('Unsafe reference segment');
+      if(Array.isArray(target)){if(!/^(0|[1-9][0-9]*)$/u.test(segment))throw new Error(`$ref does not resolve: ${pointer}`);const next:YamlValue|undefined=target[Number(segment)];if(next===undefined)throw new Error(`$ref does not resolve: ${pointer}`);target=next;}
+      else{if(!isMapping(target)||!Object.hasOwn(target,segment))throw new Error(`$ref does not resolve: ${pointer}`);const next:YamlValue|undefined=target[segment];if(next===undefined)throw new Error(`$ref does not resolve: ${pointer}`);target=next;}
+    }}
+    current=target;
   }
   return current;
 }
@@ -119,7 +146,9 @@ export function validateAgainstSchema(
   schema: YamlValue,
   document: YamlValue,
   path = '$',
+  depth = 0,
 ): string[] {
+  if(depth>64)return [`${path}: schema recursion exceeds64`];
   const resolved = resolveRef(document, schema);
   if (!isMapping(resolved)) return [`${path}: schema is not an object`];
   const violations: string[] = [];
@@ -156,7 +185,7 @@ export function validateAgainstSchema(
       const propertySchema = properties[name];
       if (propertySchema !== undefined) {
         violations.push(
-          ...validateAgainstSchema(entry, propertySchema, document, `${path}.${name}`),
+          ...validateAgainstSchema(entry, propertySchema, document, `${path}.${name}`, depth+1),
         );
         continue;
       }
@@ -164,7 +193,7 @@ export function validateAgainstSchema(
       if (additional === false) {
         violations.push(`${path}.${name}: property is not permitted by the contract`);
       } else if (isMapping(additional)) {
-        violations.push(...validateAgainstSchema(entry, additional, document, `${path}.${name}`));
+        violations.push(...validateAgainstSchema(entry, additional, document, `${path}.${name}`, depth+1));
       }
     }
   }
@@ -172,19 +201,19 @@ export function validateAgainstSchema(
   if (Array.isArray(value) && resolved.items !== undefined && resolved.items !== null) {
     for (const [index, entry] of value.entries()) {
       violations.push(
-        ...validateAgainstSchema(entry, resolved.items, document, `${path}[${String(index)}]`),
+        ...validateAgainstSchema(entry, resolved.items, document, `${path}[${String(index)}]`, depth+1),
       );
     }
   }
 
   for (const entry of asList(resolved.allOf)) {
-    violations.push(...validateAgainstSchema(value, entry, document, path));
+    violations.push(...validateAgainstSchema(value, entry, document, path, depth+1));
   }
   for (const keyword of ['anyOf', 'oneOf'] as const) {
     const branches = asList(resolved[keyword]);
     if (branches.length === 0) continue;
     const passing = branches.filter(
-      (branch) => validateAgainstSchema(value, branch, document, path).length === 0,
+      (branch) => validateAgainstSchema(value, branch, document, path, depth+1).length === 0,
     );
     if (passing.length === 0) violations.push(`${path}: matches no ${keyword} branch`);
     if (keyword === 'oneOf' && passing.length > 1) {

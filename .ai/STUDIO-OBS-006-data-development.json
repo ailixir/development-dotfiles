@@ -1,0 +1,112 @@
+{
+  "story": "STUDIO-OBS-006",
+  "partition": "DATA",
+  "status": "IMPLEMENTED_AND_OWNED_TESTS_PASS_SOURCE_FROZEN_FOR_LEAD_INTEGRATION",
+  "lifecycle": "No story/status/QA/PO change; independent final QA remains required.",
+  "files": [
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationBaseRepository.java",
+      "sha256": "0f8f5070cb4f09c4c11c6b68476eb1a64d7f553beeca049ba1798dfbbd743040"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationRepository.java",
+      "sha256": "b766892f8fa73ee9efe841f47e96b70ed17ffbfa2b32d2362cac265bd9ebfe86"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql",
+      "sha256": "cfb14657f15b8104be603bc359f283331fb1d2ea9604ab72e7f7f9161c710cbf"
+    },
+    {
+      "path": "backend/db/cutover/V19__studio_inference_candidate_identity.sql",
+      "sha256": "8ae0c62865a356461d02a7e3623f730ee607b475b0364768f32fe99402178204"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationMigrationTest.java",
+      "sha256": "4f201944b6a34dd56673ae971c8c9bb1b5547ff72ca5140b00c5ab8a6f3d27ed"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceRepository.java",
+      "sha256": "6b8cb674b638d61dc172cb1449851734aa506a7b79f56e8dbcaa015c58280393"
+    },
+    {
+      "path": "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationEvidenceTest.java",
+      "sha256": "efb3d9f525ed08f1dfbb56712ff96ee43b3d1f6ea8522ce6032bd0e340a5aa5e"
+    }
+  ],
+  "tests": [
+    {
+      "class": "GuidedPublicationMigrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "halfRevisionAndMissingObservationCannotCommit()",
+        "claimIsSingleSendRenewalStableAndSessionBudgetCannotReset()",
+        "realLegacyChromeUpgradeAndMillisecondNormalization()",
+        "bothCutoverOrdersPreserveLegacyRows()",
+        "directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards()",
+        "validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry()",
+        "upgradeBaseEpochAndImmutableHistory()"
+      ],
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest.xml",
+      "report_sha256": "407c9627c12421cdebec6e2eba3f7ac9c03e15c54f071f2000f29fd2464379ad"
+    },
+    {
+      "class": "GuidedPublicationEvidenceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "captureRollbackAndMissingTargetOrMismatchedObservationRefuse()",
+        "directSqlObservationCapsAndNestedUnknownFieldsRefuse()",
+        "originalBlankAndPageEvidenceSurviveOverwriteWithSafeInputs()"
+      ],
+      "report": "backend/build/test-results/test/TEST-com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceTest.xml",
+      "report_sha256": "b3ab5d90ba05cca3d5eb0b1a3f6a976c6994a61a76eb14f04755e49a0cd11b6f"
+    }
+  ],
+  "total_tests": 10,
+  "commands": [
+    {
+      "command": "Owned five Java files only: cached google-java-format1.22.0 under /Users/brunobuger/.jdks/jdk-21.0.10+7/Contents/Home/bin/java",
+      "result": "PASS; no global formatter used"
+    },
+    {
+      "cwd": "backend",
+      "command": "./gradlew test --tests '*GuidedPublicationMigrationTest' --tests '*GuidedPublicationEvidenceTest' --console=plain",
+      "result": "PASS; final run BUILD SUCCESSFUL in41s,10tests, compileJava and compileTestJava PASS",
+      "exec_session": 33505
+    }
+  ],
+  "lane": "Released to root immediately after final process exit0. No active build/test process remains.",
+  "implemented": [
+    "V33 additive pre-effect base/epoch, immutable bounded original observations/preparations/admission associations and independent value-free evidence reads.",
+    "Exact validator claim/deadline/state/key authority and at-most-three session claims, one-send CAS, canonical SQL hash parity and immutable validated evidence.",
+    "Guided/ordinary revision origin branches, scoped reciprocal deferred receipt proof, exact original Run principal and atomic revision/receipt/head/session adoption with older compile request invalidation; matching historical receipt read is authority-neutral for lead current authentication.",
+    "Both originalV19\u2192V33 and V33\u2192updatedV19 paths preserve ordinary request barrier and historical rows; partial capability checks included.",
+    "D7 closed typed observed binding/account/grant/scope/profile/build hashes and exact partition-column/revision/current-dispatch-ledger joins; insert-only binding and single-assignment admission receipt.",
+    "LegacyStudioAdapter.normalizeBrowser reused before configuration hash; actual preV14chrome row migration regression. New base/publication JSON and matching SQL timestamps use shared millisecond/time helpers; original embedded v2 evidence unchanged."
+  ],
+  "initial_failures_resolved": [
+    "Initial Flyway failure from adjacent nested dollar-quote delimiters; corrected ownedV33/stagedV19 quoting.",
+    "D7 valid-binding test exposed ambiguous JSON subtraction precedence; parenthesized scope extraction.",
+    "Lead-requested missing currentPolicyHash/requiredBuild and nested direct-SQL validation completed before final test run."
+  ],
+  "coverage_scope": [
+    "Actual postgres:15-alpine containers with Flyway migrations, not H2 or mock SQL.",
+    "Repository relational publication-cycle fixture is synthetic controlled data; proves constraints, atomic commit/rollback and idempotent stored receipt, not independent Node semantic equivalence or live browser execution.",
+    "Original observation/preparation examples are imported closedv2 synthetic contract fixtures, not claimed current-site observation. Tests preserve original blank page target and retained multipage evidence after current progress overwrite.",
+    "Existing execution-ledger row controls valid one-time receipt; negative missing/null/extra/wrongtyped binding/grant/build/policy and precision mismatch writes are refused. Future partition trigger inheritance tested.",
+    "400-observation cap and nested unknown-node metadata refusal tested; full joined source/actualapplication receipt/freshCore/Node validator/realrecorded replay/race oracles remain lead integration work."
+  ],
+  "integration_notes": [
+    "Only frozen public repository APIs implemented; helper records/accessors owned by lead remain untouched.",
+    "Lead must own actual uncached Core/account authority, flags/pins/current policy, independently rebuilt full C4 basis/equivalence, and invoke commit inside same session/source transaction. Data stores do not create a second worker fence/action ledger/model counter.",
+    "Evidence.bootstrap returns raw marker/progress.translationBootstrap, receipt/progress.translationBootstrapEvidence and initialEvidence/fromoriginalblankpreparation per lead amendment.",
+    "D7 requires exact millisecond execution.started_at and JSON startedAt, matching normalized storage; actual admission ledger must be ADMITTED with same attempt/admission/runner/start/run deadlines and no cancellation before first receipt update.",
+    "Original model responses and runtime/resolved values are not exported in Evidence materialization projection; private source hashes are verified before stripping values."
+  ],
+  "no_unapproved_actions": "No commits/push, subagents, lifecycle/CLI/wave edits, schema/path expansion or external services. V30-V32 unchanged. No live-provider/account/pilot claims."
+}

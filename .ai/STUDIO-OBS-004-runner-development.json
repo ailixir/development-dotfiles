@@ -1,0 +1,326 @@
+{
+  "story": "STUDIO-OBS-004",
+  "role": "delegated runner implementation",
+  "status": "runner-development-complete-awaiting-independent-qa",
+  "updatedAt": "2026-10-08T15:43:24.095818+00:00",
+  "ownership": "studio-runner only; no backend/contracts/story lifecycle/CLI mutation; no commit or push",
+  "implemented": [
+    "Observed-v2 closed schema/tuple/identity validation and packaged schema drift gate",
+    "Runnable isolated guided HTTPS worker with strict RS256 issuer/audience/role/subject/time/modulus validation and real mTLS peer pinning",
+    "Bounded context/prepare/dispatch/stop, idempotency-key digest conflicts and no dispatch replay",
+    "Actual isolated about:blank bootstrap with null origin and admitted first navigation",
+    "Retained isolated DOM identities with prepare operation/type/classification checks and final pinned reads/fills",
+    "Native CDP mouse/keyboard input with focus/hit/geometry checks, no replacement locator lookup and conservative uncertainty",
+    "Data-free permanent exclusive journal markers and fsynced per-context/fence/admission records; missing/corrupt journal fails closed",
+    "Write-once local exact values, same-origin/order/slot consumer edges, cumulative append-only metadata, count/UTF-8/aggregate bounds",
+    "Outcome acknowledgment before next observation; definite target refusal versus unknown native-send outcome",
+    "Autonomous lease/deadline/cancel teardown and data-free diagnostics; browser shutdown precedes collector disposal",
+    "Private input/capture sanitizer inventory retained across navigation; 67-input real fixture masks later echoes",
+    "Positive trusted application/semantic-region read grants shared by collection, prepare and invoke; ordinary output/status/control reads without testIds or per-control rules; hard sensitive exclusions and private text inventory",
+    "Terminal cleanup drops authored input copies, captured-value Map, private masking arrays, retained browser/launch references, and refuses late withhold; real close completion precedes capacity release and success acknowledgement",
+    "Partial browser launch has a cleanup capability; close failure remains unacknowledged with capacity reserved and data-free error",
+    "Authenticated /assign registry with durable assignment marker; actual worker posts its own typed mTLS/service-JWT claim before any context/browser; immutable scoped202 grant validation",
+    "Serial automatic renewals around10 seconds with fresh keys and a timeout within the previously ACKED lease; active during pre-context, busy execution and clarification",
+    "Dedicated acknowledged lease updates preserve local dataflow/materialization while busy; context timestamps cannot extend authority or regress newer ACKs; preparation proof expiry is safely capped",
+    "Pre-context assignment stop/lifecycle omits fence header, creates a durable tombstone even before assign, rejects late grants/context/restart, and shares capacity through confirmed browser teardown",
+    "Repeated /assign responds with current OWNED only while acknowledged/live; stopped/expired retries refuse409; STOPPED200 is exclusive to assignment /stop",
+    "Post-focus fill rechecks retained identity, original native type, focus, editability/sensitivity and correspondence before writing; inert class/style changes allowed only with unchanged structural/style/uniqueness checks",
+    "Readonly/disabled nonsecret hasValue assertions use readable eligibility and keep password/hidden/sensitive exclusions",
+    "Bounded retained-node automatic reveal inside consumed native action with revalidation and conservative post-scroll uncertainty",
+    "Authenticated fenced /observe with frozen callback correlation, current-generation idempotency, observation reservation before collection, remaining byte cap, preparation invalidation and durable callback acknowledgement before evidence adoption"
+  ],
+  "pending": [
+    "Backend exact final snapshot evidence reconciliation",
+    "Independent QA and root develop-phase verification"
+  ],
+  "verification": [
+    {
+      "command": "npm run type-check --prefix studio-runner",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run lint --prefix studio-runner",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run build --prefix studio-runner",
+      "result": "PASS"
+    },
+    {
+      "command": "npm test --prefix studio-runner",
+      "result": "PASS on native implementation before later schema title cleanup; latest rerun caught common-schema annotation drift, now resynced",
+      "testsPassed": 1243,
+      "testsSkipped": 29,
+      "testFilesPassed": 64,
+      "testFilesSkipped": 1,
+      "coverage": {
+        "runLines": 85.29,
+        "runBranches": 80.9,
+        "thresholdsLowered": false,
+        "guidedIncludedInGlobalCoverage": true
+      }
+    },
+    {
+      "command": "npm test --prefix studio-runner -- test/guided test/run/observation.test.ts --coverage.enabled=false",
+      "result": "PASS after latest schema resync and deterministic lease timer fix",
+      "testsPassed": 29
+    },
+    {
+      "command": "npm run test:fixtures --prefix studio-runner",
+      "result": "PASS before native implementation additions; preserves full existing replay/recording/cancellation suite",
+      "testsPassed": 239,
+      "testsSkipped": 10,
+      "testFilesPassed": 18
+    },
+    {
+      "command": "npm run test:fixtures --prefix studio-runner -- test/fixtures-tier/guided-targets.test.ts test/fixtures-tier/guided-dataflow.test.ts test/fixtures-tier/guided-wire.test.ts test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "result": "PASS on native implementation",
+      "testsPassed": 90
+    },
+    {
+      "command": "npm run test:fixtures --prefix studio-runner -- test/fixtures-tier/guided-dataflow.test.ts test/fixtures-tier/guided-wire.test.ts test/fixtures-tier/guided-targets.test.ts",
+      "result": "PASS including 67 immutable inputs",
+      "testsPassed": 19
+    },
+    {
+      "command": "npm test --prefix studio-runner",
+      "result": "PASS with positive region grant implementation",
+      "testFilesPassed": 64,
+      "testFilesSkipped": 1,
+      "testsPassed": 1246,
+      "testsSkipped": 29,
+      "coverage": {
+        "runLines": 86.3,
+        "runBranches": 82.52,
+        "thresholdsLowered": false
+      }
+    },
+    {
+      "command": "npm run test:fixtures --prefix studio-runner -- test/fixtures-tier/guided-dataflow.test.ts test/fixtures-tier/guided-targets.test.ts test/fixtures-tier/guided-wire.test.ts test/fixtures-tier/observed-authoring-snapshot.test.ts",
+      "result": "PASS with region grant implementation",
+      "testsPassed": 95
+    },
+    {
+      "command": "npm test --prefix studio-runner -- test/guided/runtime.test.ts test/run/observation.test.ts --coverage.enabled=false",
+      "result": "PASS with teardown/failure/late-call cleanup",
+      "testsPassed": 20
+    },
+    {
+      "command": "npm run test:fixtures --prefix studio-runner -- test/fixtures-tier/guided-targets.test.ts test/fixtures-tier/guided-wire.test.ts test/fixtures-tier/guided-dataflow.test.ts",
+      "result": "PASS with teardown/failure/late-call cleanup",
+      "testsPassed": 25
+    }
+  ],
+  "faultEvidence": [
+    "Concurrent independent journal instances excluded by permanent exclusive creation marker",
+    "Duplicate/simultaneous dispatch causes one browser invocation",
+    "Missing live journal cannot recreate or authorize another effect",
+    "Corrupt/restarted journal/context cannot resume a session",
+    "Lost outcome callback acknowledgement preserves definite success without retransmission",
+    "Cancellation before consumption, after consumption/before invocation, and after application effect",
+    "Lease expiry closes autonomously",
+    "Pre-invocation target mismatch returns FAILED/TARGET_CHANGED; native input/focus failure returns UNKNOWN_OUTCOME",
+    "Runtime values cannot be materialized into another live context",
+    "Actual private options array inspected only via test spy: populated before disposal, empty afterward, late withhold rejected without repopulation",
+    "Failed close clears private references but produces no lifecycle success/stop acknowledgement and keeps capacity reserved",
+    "Cancellation during a pending launch does not create a live context; partial initialization failure is closed before releasing capacity",
+    "One outstanding renewal, no effect retry, scoped same-fence grant only; failure/stale/terminal or late response cannot resurrect assignment/context",
+    "Positive pre-context stop before /assign writes a durable marker and never calls claim or starts browser",
+    "Same assignment after confirmed stop returns409 on /assign; /stop returns scoped STOPPED receipt without fake fence header",
+    "Private journal action record explicitly binds sessionId/contextId/ownerFence/admissionId and rejects incomplete writes before effects",
+    "Actual post-focus handlers changing type/password/hidden, readonly/disabled, replacing the field or stealing focus cause UNKNOWN_OUTCOME with no incorrect write; benign focus styling succeeds"
+  ],
+  "browserReceipts": [
+    "No navigation request before bootstrap/admission, exactly one admitted destination request",
+    "Exact whitespace and Unicode business read reused after same-origin document navigation and received by application POST",
+    "Prior captured value and immutable input echo absent from subsequent structural observation",
+    "Real mTLS client certificate and service JWT required; wrong audience/fence and missing client certificate rejected",
+    "Native CSS hover; trusted click; Tab focus; Enter submit/default prevention; Arrow cursor movement; Escape modal dismissal; check/uncheck/no-op",
+    "Hidden locator twin, identical replacement, password/hidden/type transition, origin/document race, focus theft, mouseover replacement, blank/oversize/Unicode/UTF-8 refusals",
+    "Configured-once semantic region grants and rules:[] capture ordinary output/status text and control values without any testId/per-control mapping, then apply exact values to a labelled consumer",
+    "No-grant/outside-region/duplicate-anchor/structuralOnly override/sensitive descendant/password/type or region replacement/equal-specificity overlaps deny capture",
+    "Actual33-second HTTPS/mTLS ownership renewal before browser creation, with refreshed live OWNED receipt and same fence",
+    "Readonly/disabled nonsecret value assertion succeeds; password/hidden transitions refuse"
+  ],
+  "codeRabbit": {
+    "available": false,
+    "checks": [
+      "command -v coderabbit",
+      "/Users/brunobuger/.local/bin/coderabbit executable lookup"
+    ],
+    "verdict": "NOT RUN; independent review required"
+  },
+  "limits": [
+    "No model/provider calls or source-to-model privacy policy",
+    "Production account setup and learned-plan publication remain later fail-closed ports",
+    "Native Chromium public input has no atomic retained-node precondition; immediate checks/no re-resolution/no retries are implemented, not impossible adversarial atomicity",
+    "Runner-only controlled contexts do not claim backend source allocation or PostgreSQL proof"
+  ],
+  "files": [
+    ".ai/STUDIO-OBS-004-runner-development.json",
+    "docs/qa/evidence/STUDIO-OBS-004-viewport-probe-initial-failure.json",
+    "docs/qa/evidence/STUDIO-OBS-004-viewport-probe.json",
+    "studio-runner/README.md",
+    "studio-runner/package.json",
+    "studio-runner/src/guided/contracts.ts",
+    "studio-runner/src/guided/journal.ts",
+    "studio-runner/src/guided/ownership.ts",
+    "studio-runner/src/guided/runtime.ts",
+    "studio-runner/src/guided/schemas.json",
+    "studio-runner/src/guided/transport.ts",
+    "studio-runner/src/guided/types.ts",
+    "studio-runner/src/run/browser.ts",
+    "studio-runner/src/run/guidedBrowser.ts",
+    "studio-runner/src/run/guidedMain.ts",
+    "studio-runner/src/run/nativeInput.ts",
+    "studio-runner/src/run/observationCollector.ts",
+    "studio-runner/src/run/observationSanitizer.ts",
+    "studio-runner/src/run/observationTypes.ts",
+    "studio-runner/test/fixtures-tier/guided-dataflow.test.ts",
+    "studio-runner/test/fixtures-tier/guided-targets.test.ts",
+    "studio-runner/test/fixtures-tier/guided-wire.test.ts",
+    "studio-runner/test/fixtures/guided-tls/README.md",
+    "studio-runner/test/fixtures/guided-tls/cert.fixture",
+    "studio-runner/test/fixtures/guided-tls/key.fixture",
+    "studio-runner/test/guided/browser.test.ts",
+    "studio-runner/test/guided/ownership.test.ts",
+    "studio-runner/test/guided/runtime.test.ts",
+    "studio-runner/test/guided/transport.test.ts",
+    "studio-runner/test/helpers/guided.ts",
+    "studio-runner/test/helpers/guidedTls.ts",
+    "studio-runner/test/run/observation.test.ts",
+    "studio-runner/vitest.config.ts"
+  ],
+  "finalVerification": [
+    {
+      "command": "npm run type-check --prefix studio-runner",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run lint --prefix studio-runner",
+      "result": "PASS"
+    },
+    {
+      "command": "npm run build --prefix studio-runner",
+      "result": "PASS"
+    },
+    {
+      "command": "npm test --prefix studio-runner",
+      "result": "PASS",
+      "testsPassed": 1260,
+      "testsSkipped": 29,
+      "testFilesPassed": 65,
+      "testFilesSkipped": 1,
+      "log": "/tmp/guided-refresh-unit-final.log",
+      "coverage": {
+        "runLines": 85.38,
+        "runBranches": 82.02,
+        "guidedLines": 84.57,
+        "guidedBranches": 86.19,
+        "allExistingThresholdsPreserved": true
+      }
+    },
+    {
+      "command": "npm run test:fixtures --prefix studio-runner",
+      "result": "PASS",
+      "testsPassed": 260,
+      "testsSkipped": 10,
+      "testFilesPassed": 18,
+      "durationSeconds": 204.14,
+      "log": "/tmp/guided-refresh-fixtures-final.log",
+      "includes": "All current guided native/grant/refresh/dataflow/wire cases plus originalOBS002 and complete legacy one-shot replay, recording, cancel, deadline, login, reference and assertion fixtures"
+    }
+  ],
+  "verificationNotes": [
+    "The earlier full real fixture suite239 passed/10 skipped is historical legacy-regression evidence; final current focused real-browser proofs are listed separately rather than falsely claiming the earlier full run covered later actor changes.",
+    "A late static package gate matched an async callback as an async IIFE; the callback was named without weakening the confinement gate, then the full final unit gate passed.",
+    "Lease/JWT timing tests now use controlled clocks so real filesystem/parallel scheduling delays do not invalidate their intended assertions.",
+    "Real worker ownership is proven over HTTPS in the runner fixture; actual PostgreSQL/Spring assignment persistence and application receipts are separately owned by the backend joined suite.",
+    "Private TLS fixture material is deliberately public test-only data and never read by production entrypoints.",
+    "Final current full real fixture suite passed260 tests with10 existing skips. Fixture setup re-emitted dist; aggregate remains66609a69cd2ca878bfab851c7b9a83535a4828c4792e17c426ed110eaf8919eb. Earlier historical runs remain above with their original scope."
+  ],
+  "distSnapshot": {
+    "files": 230,
+    "sha256": "66609a69cd2ca878bfab851c7b9a83535a4828c4792e17c426ed110eaf8919eb",
+    "algorithm": "sha256(sorted(relative path + NUL + per-file sha256 + LF))",
+    "productionEditsFrozenForBackendSnapshot": true
+  },
+  "viewportRemediation": {
+    "status": "PASS",
+    "originalFailureArchive": "docs/qa/evidence/STUDIO-OBS-004-viewport-probe-initial-failure.json",
+    "unchangedProbe": "docs/qa/evidence/STUDIO-OBS-004-viewport-probe.mjs",
+    "probeScriptSha256": "69276c7f993a53671f2eddd6de12d91032e97e9d0931ddbba7baa4496c00ef20",
+    "currentResult": "docs/qa/evidence/STUDIO-OBS-004-viewport-probe.json",
+    "implementation": "One bounded public retained-object DOM.scrollIntoViewIfNeeded inside consumed action, two-frame identity/document/origin/type/policy/stable geometry revalidation, then native input. No locator reacquisition, repeated scroll, or effect retry. Scroll invocation starts uncertainty. Satisfied check/uncheck stays no-op without reveal.",
+    "proof": "Visible and2200px-offscreen probe both produce exactly one trusted mousedown(buttons1) and trusted click. Nested scrolling, offscreen click/hover/check/press and scroll-handler replacement cases pass; replacement receives zero click.",
+    "gates": [
+      {
+        "command": "npm run type-check --prefix studio-runner",
+        "result": "PASS"
+      },
+      {
+        "command": "npm run lint --prefix studio-runner",
+        "result": "PASS"
+      },
+      {
+        "command": "npm run build --prefix studio-runner",
+        "result": "PASS"
+      },
+      {
+        "command": "npm test --prefix studio-runner",
+        "result": "PASS",
+        "testsPassed": 1255,
+        "testsSkipped": 29,
+        "testFilesPassed": 65,
+        "testFilesSkipped": 1,
+        "runCoverageLines": 85.4,
+        "runCoverageBranches": 82.02,
+        "thresholdsLowered": false
+      },
+      {
+        "command": "npm run test:fixtures --prefix studio-runner -- test/fixtures-tier/guided-targets.test.ts test/fixtures-tier/guided-dataflow.test.ts test/fixtures-tier/observed-authoring-snapshot.test.ts",
+        "result": "PASS",
+        "testsPassed": 105
+      },
+      {
+        "command": "node docs/qa/evidence/STUDIO-OBS-004-viewport-probe.mjs",
+        "result": "PASS; unchanged independent root-authored probe, executed by runner specialist"
+      }
+    ],
+    "distSnapshot": {
+      "files": 230,
+      "sha256": "c6cfd3eb8c90322e49b5d15d4ab09599c467066070532b4d7026c1a66fc274e0",
+      "algorithm": "sha256(sorted(relative path + NUL + per-file sha256 + LF))"
+    }
+  },
+  "refreshVerification": {
+    "focusedRuntimeTransport": {
+      "testsPassed": 23,
+      "result": "PASS"
+    },
+    "actualBrowserWireDataflow": {
+      "testsPassed": 4,
+      "result": "PASS",
+      "proof": [
+        "Concurrent authenticated same-key refresh collects once and reports exact frozen oref callback key",
+        "Changed digest conflicts; superseded and stopped cached observations refuse",
+        "Exact captured value survives refresh and subsequent document navigation for all three read-policy variants",
+        "Actual worker acquisition/renewal over33 seconds and admitted Chromium flow remain valid"
+      ]
+    },
+    "faults": [
+      "Initial blank/stale generation refuses",
+      "Pre-ACK evidence cannot be used; competing request refuses BUSY",
+      "Cancellation before late callback acknowledgement cannot revive context",
+      "Count reserved before collect; cumulative remaining byte capacity handed to collector",
+      "Lost callback acknowledgement stops without changing previously committed action success"
+    ],
+    "backendReportedCandidate": {
+      "testsPassed": 80,
+      "result": "PASS reported by backend owner",
+      "distSha256": "796f4498c46f2be4288223c592a7e06762f3efe7b343413072b2d567471cb821",
+      "scope": "32 real joined plus48 guided regressions; includes6 refreshed control scenarios; awaiting exact final snapshot reconciliation"
+    },
+    "finalFixtureSuite": "PASS260 tests across18 files;10 existing skips"
+  }
+}

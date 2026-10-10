@@ -1,0 +1,35 @@
+{
+  "kind": "readiness-architecture-review",
+  "stories": [
+    "STUDIO-OBS-004",
+    "STUDIO-OBS-005"
+  ],
+  "status": "design-recorded-004-po-revalidation-input-policy-open",
+  "architect": "/root/sdc_bridge_arch",
+  "independentReviewer": "/root/sdc_bridge_peer",
+  "implementationVerdict": null,
+  "consensus": [
+    "Amend004 and005; serialize004 then005 rather than add a bridge story.",
+    "Represent genuine original about:blank with null origin and first-authored-navigation-only authority; never fabricate an approved origin.",
+    "Version the bridge and changed evidence/hash semantics; preserve historical v1 and legacy replay.",
+    "Only successful transaction winner receives non-replayable internal send authority; count=1/DISPATCHING and duplicate idempotency responses are never permits.",
+    "Send immutable stored proposal and ledger; authenticated prepare binds a private pinned target, rechecked immediately before browser dispatch.",
+    "Durable local consumption precedes the browser call; ambiguous gaps stop without retransmission.",
+    "Separate pending need, successful value-free producer evidence, and concrete consumer edges admitted at actual ordinals; runtime values stay local.",
+    "Authenticated stop/lifecycle joins backend revocation and local lease/deadline expiry; backend cancel alone cannot guarantee no already-consumed browser effect.",
+    "Preserve durable clarification semantic mapping but require fresh node correspondence.",
+    "Join real PostgreSQL, authenticated transport and Chromium receipts, including duplicate/lost-ack/target-replacement/stop tests."
+  ],
+  "openDecision": {
+    "id": "INPUT-POLICY",
+    "question": "May nonsecret literal text deliberately authored in the English checklist be sent to the translation model?",
+    "recommended": "Allow authored nonsecret text; exact revision-bound source spans produce trusted inputs; never expand secrets/saved variables or send page captures.",
+    "alternative": "Exclude all input bytes, requiring trusted structured/redacted source or clarification before gateway dispatch.",
+    "authorization": "User asked via asynchronous question; answer pending. No dependent privacy weakening authorized.",
+    "limits": "Exact spans prove source provenance, not nonsecrecy or English semantic correctness.",
+    "blocks": "OBS-005 model payload construction; common004 transport independently revalidated"
+  },
+  "filesChangedByIndependentReviewer": [],
+  "historicalQaPreserved": true,
+  "design": "docs/specs/studio-observed-authoring/bridge-design.md"
+}

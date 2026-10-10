@@ -1,0 +1,220 @@
+{
+  "storyId": "STUDIO-OBS-005",
+  "mode": "interactive",
+  "reviewer": "@po",
+  "at": "2026-10-08T05:22:58.587542+00:00",
+  "taskSource": ".aiox-core/development/tasks/validate-next-story.md",
+  "verdict": "NO-GO",
+  "validation_result": false,
+  "implementationReadinessScore": 5,
+  "confidence": "High",
+  "scope": "Pre-implementation readiness review only; no implementation, Done transition, CLI progress changes, provider run or new QA gate.",
+  "statusTransition": {
+    "from": "Draft",
+    "to": "Draft",
+    "version": "0.1.1"
+  },
+  "authorization": "Coordinator delegated PO review within user-approved end-to-end SDC wave and shared USD 500 ceiling. Material architectural ambiguity returned to coordinator; no repeat user permission requested.",
+  "criticalIssues": [
+    {
+      "id": "BOOT-001",
+      "acs": [
+        "AC-1",
+        "AC-3",
+        "AC-4"
+      ],
+      "finding": "No specified transition supports the first authored navigation from a fresh isolated browser. Browser creation performs no application navigation; collector rejects a null/unapproved origin; normal admission requires a previously committed observation and PROPOSING state. Assuming an already-open fixture hides the join failure.",
+      "evidence": [
+        "studio-runner/src/run/browser.ts:83",
+        "studio-runner/src/run/browser.ts:105",
+        "studio-runner/src/run/observationCollector.ts:163",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:374",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:429",
+        "docs/specs/studio-observed-authoring/contracts/action.schema.json"
+      ],
+      "requiredFix": "Designate architect to specify bootstrap state/admission/evidence and first authored navigation behavior, then coordinate any reserved-contract amendment with OBS-004/005. Prove blank-session to actual destination with one recorded action, no fabricated origin or repeated user navigation."
+    },
+    {
+      "id": "JOIN-001",
+      "acs": [
+        "AC-1",
+        "AC-3",
+        "AC-4",
+        "AC-5"
+      ],
+      "finding": "The story can currently be satisfied as a standalone translator without joining durable backend state to the runner. OBS-003 is an actual implementation dependency but absent from the header; no concrete owner/files are assigned for declared plans/proposals/dependency-admissions/context routes, cumulative pending/evidenced metadata, receiver direction or action/choice handoff.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/README.md",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:253",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:611",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:714",
+        "docs/specs/studio-observed-authoring/openapi.yaml:552",
+        "docs/specs/studio-observed-authoring/openapi.yaml:1083"
+      ],
+      "requiredFix": "Specify OBS-005 backend orchestration against existing reserveModel/settleModel/admit/completeStep/clarificationSelection seams and OBS-004 worker receivers, with exact authentication audience/roles, durable identity, fence and idempotency behavior. Allocate source/context/binding storage and shared integration tests/files. Coordinator updates dependency and ownership/wave plan; PO does not mutate CLI state."
+    },
+    {
+      "id": "INPUT-001",
+      "acs": [
+        "AC-1",
+        "AC-2",
+        "AC-4"
+      ],
+      "finding": "Frozen contracts require a trusted immutable authored-input table and planning context, but Snapshot exposes scope/sourceSteps/authConnection only. No story task names the resolver/allocation mapping from plain English/saved configuration to input IDs or safe planner metadata. Sending the full source verbatim also needs reconciliation with the no-resolved-input-byte requirement.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionAccess.java:17",
+        "docs/specs/studio-observed-authoring/contracts/planning-context.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/authored-inputs.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/runner-context.schema.json",
+        "docs/specs/studio-observed-authoring/contracts/README.md"
+      ],
+      "requiredFix": "Assign trusted immutable source/configuration resolution, exact literal/destination mapping and hash materialization; specify ambiguity handling and safe ID/type/source-step metadata available to the model. Do not restore regex translation, copy model/page samples into authored literals, or leak resolved input/account values through source/context/repair requests."
+    }
+  ],
+  "templateComplianceIssues": [
+    {
+      "severity": "advisory",
+      "finding": "Required main sections and distinct executor/dev, quality_gate/architect, sdc_reviewer/qa exist. Tabular Status and top-level File List match wave convention. Future Dev Agent Record is truthfully unstarted. No unresolved template tokens."
+    }
+  ],
+  "shouldFixIssues": [
+    {
+      "id": "CHOICE-001",
+      "finding": "OBS-003 now persists selected clarification safely; OBS-005 must consume that actual seam and retain question semantic mapping across re-observation/restart. Current-node identities expire and cannot simply be reused.",
+      "action": "Add specific revalidation/mapping and duplicate/restart scenario to tasks/tests; never replace a chosen field with another plausible field."
+    },
+    {
+      "id": "TEST-001",
+      "finding": "Gateway-spy and corpus tests are listed but no owned joined browser/backend/model seam case or provider harness files appear in File List.",
+      "action": "Add owned concrete fixture/harness paths and commands during coordinated story correction. Ensure malformed output, cumulative budget/repair, changed scope, pending producer, stale target, selected clarification, missing source and independent action/assertion outcomes are covered."
+    },
+    {
+      "id": "CR-001",
+      "finding": "CodeRabbit configuration uses full QA review, 3 iterations and 30-minute timeout; draft omits the timeout and separate executor light-mode detail.",
+      "action": "Record effective configured reviewer/executor behavior when implementation begins; unavailability may use configured independent-review fallback, not a claimed CodeRabbit PASS."
+    }
+  ],
+  "niceToHaveImprovements": [
+    "Retain high complexity; optional numerical sizing can be added after join ownership is explicit."
+  ],
+  "checks": [
+    {
+      "area": "Template/executor",
+      "result": "PASS",
+      "evidence": "Required story sections and valid distinct dev/architect assignments."
+    },
+    {
+      "area": "File structure",
+      "result": "PARTIAL",
+      "evidence": "Existing gateway file exists; new translation package paths are plausible but omit orchestration/input/contract-test ownership."
+    },
+    {
+      "area": "Frontend",
+      "result": "NOT_APPLICABLE",
+      "evidence": "OBS-008 owns public UI; safe clarification transport remains a backend responsibility."
+    },
+    {
+      "area": "AC coverage",
+      "result": "PARTIAL",
+      "evidence": "All six ACs map to tasks and approved plan; dependencies/first-navigation/materialization prevent joined implementability."
+    },
+    {
+      "area": "Testing",
+      "result": "PARTIAL",
+      "evidence": "Strong intended wire/schema/adversarial checks; explicit real joined seam acceptance needed."
+    },
+    {
+      "area": "Security",
+      "result": "PARTIAL",
+      "evidence": "Privacy/capability/current-evidence requirements explicit, but source/input redaction and authenticated receiver ownership need decisions."
+    },
+    {
+      "area": "Dependencies/sequence",
+      "result": "FAIL",
+      "evidence": "OBS-003 exists and is required but omitted; OBS-004/005 boundary remains unresolved; first navigation lacks contract."
+    },
+    {
+      "area": "CodeRabbit",
+      "result": "PASS_WITH_ADVISORY",
+      "evidence": "Enabled integration and independent QA fallback documented; no tool execution claimed in readiness review."
+    },
+    {
+      "area": "Anti-hallucination",
+      "result": "PASS",
+      "evidence": "Actual collector/service/routes inspected; declared contracts separated from implemented endpoints and later account/publication ports."
+    },
+    {
+      "area": "Implementation readiness",
+      "result": "FAIL",
+      "evidence": "Critical architectural/ownership decisions cannot be invented as mechanical PO fixes."
+    }
+  ],
+  "acTraceability": [
+    {
+      "ac": "AC-1",
+      "source": "Consensus sections 4-5; planning-context/dependency-proposal/pending-bindings contracts",
+      "readiness": "BLOCKED",
+      "neededEvidence": "Full immutable checklist with safe input identities, server allocation of stable pending handles, cumulative replanning and first-step bootstrap."
+    },
+    {
+      "ac": "AC-2",
+      "source": "Consensus section 5; OBS-002 trusted collector; GenAiLlmGatewayClient",
+      "readiness": "PARTIAL",
+      "neededEvidence": "Actual provider-serialized byte assertions spanning source/context/observation/repair, no resolved canaries; reuse isolated observation output."
+    },
+    {
+      "ac": "AC-3",
+      "source": "Consensus sections 5-7; proposal-result/action contracts; reserveModel/settleModel",
+      "readiness": "BLOCKED",
+      "neededEvidence": "Closed typed union, shared durable reservation for initial planning/repair/action proposals, no dispatch before validation, correct handling of clarification/completion/unsupported."
+    },
+    {
+      "ac": "AC-4",
+      "source": "Consensus section 6; GuidedSessionAccess.authorizeAction; current collector.matches; scope/operation contracts",
+      "readiness": "BLOCKED",
+      "neededEvidence": "Trusted scope/source/coordinate/input/binding checks plus real DOM unique correspondence from OBS-004, no model-confidence authorization or semantic-proof claim."
+    },
+    {
+      "ac": "AC-5",
+      "source": "Consensus sections 4-5; pending-binding semantics; clarificationSelection",
+      "readiness": "PARTIAL",
+      "neededEvidence": "Resolve producers before leaving source; cumulative allocations and evidenced edges; user selection survives restart and revalidates; late missing sources produce no hidden navigation."
+    },
+    {
+      "ac": "AC-6",
+      "source": "Consensus section 11; legacy no-LLM replay boundary",
+      "readiness": "PARTIAL",
+      "neededEvidence": "Frozen adversarial corpus and provider evaluation harness with independently checked target/value/action/assertion and honest provider availability; no normal replay gateway access."
+    }
+  ],
+  "antiHallucinationFindings": {
+    "configurationFallback": "Configured framework documentation is stale/absent; used actual AGENTS/ARCH/Studio architecture and frozen observed sources.",
+    "epicContext": "EpicContextAccumulator.buildAccumulatedContext(STUDIO-OBSERVED,4) invoked with verified completed OBS-001/002/003 metadata.",
+    "historicalLabels": "Plan/review-record awaiting user approval and ADR awaiting QA are historical; current user authorization and Done/PASS dependencies supersede those labels.",
+    "acceptedLaterPorts": [
+      "OBS-007 production account connection stays unavailable/fail-closed until implemented. Controlled real browser/account seams may be supplied for this story tests.",
+      "OBS-006 exact-plan publication stays fail-closed.",
+      "OBS-009 real held-out benchmark and OBS-010 human pilot are not claimed by OBS-005 harness implementation."
+    ],
+    "dependencyQA": "OBS-001/002/003 latest independent gates are PASS. Their gates explicitly exclude the joined model/browser/account/publication flow."
+  },
+  "evidence": [
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "result": "124 fixture cases, 109 OpenAPI request/response examples, all schemas compiled, canonical hash vector verified.",
+      "scope": "Schema verification only, not first-navigation or integration proof."
+    }
+  ],
+  "mechanicalChanges": [
+    "Added verified implementation/contract references and concrete readiness remediation without changing AC scope.",
+    "Recorded NO-GO and semver Change Log; preserved Draft and all paired-story/CLI files."
+  ],
+  "changedFiles": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md",
+    ".ai/STUDIO-OBS-005-validation.json"
+  ],
+  "storySha256After": "bd6dd1f93086a348ca4ee7cd40e451f218d456308f2da5985418108ffb5c1270",
+  "handoff": "Coordinator/designated architect resolves BOOT-001/JOIN-001/INPUT-001 and coordinates OBS-004/005 ownership; revalidate this Draft before developer dispatch. Root exclusively owns CLI phase verification."
+}

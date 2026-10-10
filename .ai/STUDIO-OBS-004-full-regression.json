@@ -1,0 +1,26 @@
+{
+  "storyId": "STUDIO-OBS-004",
+  "command": "./gradlew check --console=plain",
+  "overall": "FAIL: final in-flight edits required spotless formatting; no test failure",
+  "sourceScope": "Compiled snapshot at start of broad check; final scoped source changes are verified separately, not claimed covered by this older snapshot.",
+  "lanes": {
+    "test": {
+      "suites": 277,
+      "tests": 1634,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 18
+    },
+    "crossReplicaTest": {
+      "suites": 1,
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  },
+  "log": "/tmp/studio-obs004-backend-check.log",
+  "coverageArchive": "/tmp/studio-obs004-full-regression.exec",
+  "recordedAt": "2026-10-08T07:09:03.355021+00:00",
+  "qaVerdict": null
+}

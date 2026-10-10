@@ -1,0 +1,177 @@
+{
+  "story": "STUDIO-OBS-004",
+  "reviewer": "Quinn (@qa /root/sdc_obs004_qa; independent from implementers)",
+  "reviewed_revision": "sha256:be37fefaad1d9873be7e3cece8c23bb5f1dd541b9a84ac643f1b97554bced84f",
+  "updated": "2026-10-08T15:57:54.426Z",
+  "verdict": "FAIL",
+  "source_manifest": "docs/qa/evidence/STUDIO-OBS-004-qa-source-manifest.json",
+  "issues": [
+    {
+      "id": "SEC-001",
+      "severity": "high",
+      "priority": "P0",
+      "finding": "Previously inventoried password bytes escape in the next document observation. Independent Chromium probe first observes a password field, then navigates to a page whose button echoes that value: firstContains=false, secondContains=true. The exported name/locator can enter the backend observation and future model context.",
+      "suggested_action": "Retain a bounded session-private masking inventory across observations and document replacement, including known sensitive/input/source bytes and normalized aliases; clear it only at confirmed teardown. Add process/callback canary tests for uncaptured password and ordinary input echoes on subsequent documents and after removal in the same document. No raw inventory may become public IPC, callback, diagnostic or manifest data.",
+      "suggested_owner": "dev",
+      "refs": [
+        "studio-runner/src/run/observationCollector.ts:231",
+        "studio-runner/src/run/browser.ts:195",
+        "docs/qa/evidence/STUDIO-OBS-004-independent-edge-probe.json"
+      ]
+    },
+    {
+      "id": "REL-001",
+      "severity": "high",
+      "priority": "P1",
+      "finding": "Native check/uncheck reports success without verifying the requested checked state. A checkbox onclick preventDefault leaves checked=false after check; uncheck on a checked radio leaves checked=true. Both invoke calls return successfully, so GuidedRuntime emits SUCCEEDED/OK even though the typed operation did not complete.",
+      "suggested_action": "Check the actual postcondition on the retained original element after the single native attempt, without re-resolving or retrying. Reject inherently unsupported native uncheck targets before effects. After an effect has begun, preserve honest failure/uncertainty if state or identity cannot be confirmed. Add independent receipt/state tests for prevented toggles, radio targets, handlers that revert state, no-op and no second attempt.",
+      "suggested_owner": "dev",
+      "refs": [
+        "studio-runner/src/run/nativeInput.ts:28",
+        "studio-runner/src/run/browser.ts:327",
+        "studio-runner/src/run/observationCollector.ts:521",
+        "studio-runner/src/guided/runtime.ts:212",
+        "docs/qa/evidence/STUDIO-OBS-004-independent-edge-probe.json"
+      ]
+    },
+    {
+      "id": "SEC-002",
+      "severity": "medium",
+      "priority": "P2",
+      "finding": "Wire/auth parsing is not consistently closed. Real mTLS runner /assign accepts duplicate schemaVersion keys and reaches the claim port. GuidedContracts.parse accepts a second trailing JSON object. The Java JWT verifier accepts an unknown signed claim that the Node verifier rejects.",
+      "suggested_action": "Use duplicate-key rejecting, trailing-data rejecting and fatal UTF-8 JSON parsing on each applicable wire boundary, and agree/enforce the same closed JWT claim set and integer policy in Java/Node. Add malformed raw-byte transport tests rather than only validating already-parsed objects.",
+      "suggested_owner": "dev",
+      "refs": [
+        "studio-runner/src/guided/transport.ts:49",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java:32",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalSecurity.java:185",
+        "docs/qa/evidence/STUDIO-OBS-004-independent-wire-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-independent-parity-probe.log"
+      ]
+    },
+    {
+      "id": "REL-002",
+      "severity": "medium",
+      "priority": "P2",
+      "finding": "Custom runner date-time validation differs from the frozen schema validators: 2026-10-08T24:00:00Z is accepted by runner assignment validation but rejected by Java and Ajv. Runner also rejects the leap-second form accepted by the Ajv contract oracle. The custom resolver silently substitutes an empty schema for an unresolved definition and does not detect unsupported validation keywords.",
+      "suggested_action": "Establish tested Java/Node parity for the currently enforced wire schemas, including date-time edge cases. Validate the schema subset at load time and reject unresolved references/pointers or unsupported validation keywords. No OBS-006 learned-plan runtime support is demanded by this finding.",
+      "suggested_owner": "dev",
+      "refs": [
+        "studio-runner/src/guided/contracts.ts:17",
+        "studio-runner/src/guided/contracts.ts:32",
+        "docs/qa/evidence/STUDIO-OBS-004-schema-parity-probe.json",
+        "docs/qa/evidence/STUDIO-OBS-004-independent-parity-probe.log"
+      ]
+    }
+  ],
+  "checks": [
+    {
+      "command": "./gradlew test --tests '*GuidedBridgeIntegrationTest' --tests '*GuidedSessionIT' --tests '*GuidedSecurityTest' --tests '*GuidedHttpSecurityIT' --tests '*GuidedSourceReferenceValidatorTest' --rerun-tasks --console=plain",
+      "result": "PASS: 80 tests, including 32 real joined PostgreSQL/Spring HTTPS/mTLS/JWT/runner-process/Chromium tests",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-qa-backend.log"
+    },
+    {
+      "command": "npm run type-check && npm run lint && npm test (studio-runner)",
+      "result": "PASS: 1260 tests; 29 existing skips; 65 test files passed, one skipped",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-qa-runner-unit.log"
+    },
+    {
+      "command": "npm run test:fixtures (studio-runner)",
+      "result": "PASS: 260 tests; 10 existing skips; 18 test files passed, including original observation and legacy one-shot regression fixtures",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-qa-fixtures.log"
+    },
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "result": "PASS: original124 cases/109 examples; v2 193 cases/49 examples/26 schemas/6 canonical vectors",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-qa-contracts.log"
+    },
+    {
+      "command": "./gradlew spotlessCheck checkstyleMain checkstyleTest spotbugsMain antiRegressionCheck rdsParityLint testcontainersAlignmentCheck --console=plain",
+      "result": "PASS: existing gates; 30 migrations and eight aligned Testcontainers modules",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-qa-static.log"
+    },
+    {
+      "command": "node docs/qa/evidence/STUDIO-OBS-004-viewport-probe.mjs",
+      "result": "PASS unchanged root script SHA256 69276c7f993a53671f2eddd6de12d91032e97e9d0931ddbba7baa4496c00ef20: visible and below-fold each have one trusted down and one trusted click receipt"
+    },
+    {
+      "command": "node docs/qa/evidence/STUDIO-OBS-004-independent-edge-probe.mjs",
+      "result": "Three independent adversarial cases reproduce SEC-001 and REL-001"
+    },
+    {
+      "command": "node docs/qa/evidence/STUDIO-OBS-004-independent-wire-probe.mjs",
+      "result": "Real TLS+JWT duplicate schemaVersion reaches ownership claim once; no browser launched"
+    },
+    {
+      "command": "./gradlew test --tests '*GuidedIndependentQaProbeTest' -I /tmp/studio-obs004-qa-probe.init.gradle --console=plain",
+      "result": "Two temporary independent Java probes PASS, establishing the defective acceptance and Java rejection described above, not product correctness",
+      "log": "docs/qa/evidence/STUDIO-OBS-004-independent-parity-probe.log"
+    }
+  ],
+  "joined_evidence": {
+    "runtime_snapshot": "docs/qa/evidence/STUDIO-OBS-004-qa-tested-worker.json",
+    "all_230_snapshot_files_identical_to_current_dist": true,
+    "authority": "Current stored proposal, committed WonConsumption outside ambient transaction and generic replay cache; same/different key races, commit failure and lost winner tested. Journal exclusive owner marker/fsync prevents process restart replay.",
+    "materialization": "Classified source/configuration references allocated by actual validator, frozen under authoritative source checks; cumulative allocation append, immutable producer receipt and actual consumer edges; producer/outcome rollback is atomic. Runtime captures stay worker-local in successful fixtures.",
+    "ownership": "Actual node executable claims itself. Assignment intent precedes claim; full grant validation precedes launch. Actual autonomous renewal beyond30s during trusted pause, while busy and before context; stale/failed acknowledgements and restart refuse authority.",
+    "refresh": "Real nonfinal completeStep -> durable refresh intent -> owning-worker collection/correlated202 callback -> second source-step fill with retained value and unchanged action counts. Same-key joins, changed digest, lost final HTTP response recovery, superseding observation, active admission, pause, budget and cancel covered.",
+    "clarification": "Actual v2 answer then refresh uses explicitly controlled trusted question fixture; historical choice preserved and old target refused. Cross-version answer rejected. Production v2 question schema/generation remain OBS-005.",
+    "native": "Existing real tests verify Enter/Tab/Escape/Arrow keys, hover/trusted click, check/uncheck ordinary checkbox/no-op, select/fill/read/assert, nested/below-fold reveal, replacement/focus theft/overlays and uncertainty. Independent prevented-toggle/radio probes invalidate universal typed-operation success claims.",
+    "privacy": "Successful source/capture and authored-input fixtures scrub later-page echoes and keep producer receipts data-free. They do not cover uncaptured prior-page sensitive inventory: independently reproduced leak blocks AC-6.",
+    "scope_limits": "Strict configured ceilings/lowered limits, same-origin reuse, source/consumer ordering, per-value/count/aggregate UTF8 limits, scoped authentication and cancellation guards exercised. Native focus/coordinate input retains acknowledged non-atomic race limit; no universal exactly-once business-effect claim."
+  },
+  "trace": [
+    {
+      "ac": 1,
+      "status": "CONCERNS",
+      "given_when_then": "Given valid assignment, worker credentials and frozen tuple, when claim/context/renew run over mTLS, then actual owner establishes and retains a bounded isolated worker; mismatched scopes/tuples refuse. SEC-002/REL-002 expose validation parity gaps."
+    },
+    {
+      "ac": 2,
+      "status": "FAIL",
+      "given_when_then": "Given retained current DOM identity, prepared operations refuse replacements and stale generations; real refresh continues between source steps. Given a prevented checkbox click or checked radio uncheck, however, invocation incorrectly succeeds with wrong final state (REL-001)."
+    },
+    {
+      "ac": 3,
+      "status": "PASS_WITH_PRIVACY_DEPENDENCY",
+      "given_when_then": "Given positively classified visible text/control source, admitted read captures exact whitespace bytes and an opaque handle; hidden/sensitive/stale/wrong-policy and blank/oversize reads refuse. The separate export privacy guarantee fails under SEC-001."
+    },
+    {
+      "ac": 4,
+      "status": "PASS",
+      "given_when_then": "Given local producer success, only earlier same-origin authorized slots consume exact retained bytes; missing/replanned-away allocation, limits and cancellation refuse; sessions do not share values."
+    },
+    {
+      "ac": 5,
+      "status": "PASS",
+      "given_when_then": "Given simultaneous/repeated dispatch or consume/send/ack failure, one committed winner and fsynced local consumption permit at most one attempt; unknown outcomes do not retry; cancel/expiry revoke and require confirmed browser cleanup."
+    },
+    {
+      "ac": 6,
+      "status": "FAIL",
+      "given_when_then": "Given a password privately inventoried on one page, when the next page echoes it as a button caption, then sanitized observation exports those bytes (SEC-001). Existing data-free receipts/process launch tests remain passing but insufficient."
+    },
+    {
+      "ac": 7,
+      "status": "FAIL",
+      "given_when_then": "Broad real Chromium and joined fault corpus passes, but independent privacy and false-success probes show missing adversarial coverage and broken behavior."
+    }
+  ],
+  "coderabbit": {
+    "available": false,
+    "wsl": false,
+    "configuredBinaryExists": false,
+    "fallback": "Configured graceful_degradation.skip_if_not_installed. Fresh independent QA source review, real reruns and adversarial probes used; no CodeRabbit PASS claimed."
+  },
+  "historical_integrity": {
+    "checked": 29,
+    "mismatches": [],
+    "evidence": "docs/qa/evidence/STUDIO-OBS-004-qa-historical-integrity.json"
+  },
+  "limits": [
+    "No implementation fixes, commits, push, CLI/wave mutations or agent spawning performed.",
+    "No model/service/account/pilot/publication success inferred. INPUT-POLICY-01 remains pending for OBS-005.",
+    "Full unfiltered backend suite and coverage gate were not independently rerun; targeted backend and static gates were. Developer retained broad-run coverage remains separate historical evidence.",
+    "Temporary Java probes were added through a /tmp source-set init script only; they are not production repository tests. Evidence preserves their source."
+  ]
+}

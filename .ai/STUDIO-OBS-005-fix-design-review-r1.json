@@ -1,0 +1,208 @@
+{
+  "storyId": "STUDIO-OBS-005",
+  "reviewType": "Independent read-only remediation design consultation; not implementation review or final QA gate",
+  "reviewer": "/root/sdc_bridge_arch",
+  "at": "2026-10-09T03:44:59.156343+00:00",
+  "verdict": "APPROVE",
+  "approvalScope": "Approve the R1 architecture for implementation with the mandatory conditions below. The original independent FAIL remains authoritative until the separate QA reviewer re-runs the implemented fixes. This record does not certify current code fixed or authorize broader scope.",
+  "summary": "The closed disputed-use meaning and durable bootstrap stages fit existing immutable JSON/progress storage and existing authenticated worker/context seams. No V32 migration or runner change is intrinsically required. Approval depends on enforcing exact use, one-time READY semantics and committed accounting refusal, rather than treating a stored plan, an included reference or HTTP success as execution authority.",
+  "mandatoryConditions": [
+    {
+      "id": "SEC-R1-1",
+      "area": "Closed meaning and future-source coordinate",
+      "condition": "Use a closed {need:{stepId,occurrence,operationKind,argumentSlot},reference}. Require every alternative to have the exact same need. Resolve step membership from the frozen source, bound occurrence by the frozen statement limit, restrict operationKind to operations with a source-input slot and require argumentSlot to equal the trusted operation-to-slot mapping. Validate each reference against the immutable source/configuration and that same step/slot. A later step/occurrence can be a semantic question before materialization; it does not move stepIndex, fabricate observed evidence or allocate an obligation/input/admission. No English regex parser is needed or justified.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java:21",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:820",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1170"
+      ]
+    },
+    {
+      "id": "SEC-R1-2",
+      "area": "Immutable chosen use",
+      "condition": "At initial plan admission, replan and every action admission, enforce every accepted source selection against exactly one obligation at its stepId+occurrence: same operation/slot, non-null referenceIndex, null runtime needId, and exact canonical chosen reference at that index. Including the selected reference unused, using another alternative, moving it to another occurrence or substituting a binding is invalid. Preserve the server obligation ID and exact reference-to-materialized-input provenance after admission. Key second-question/redefinition checks by the disputed coordinate within immutable session/source, not the complete need object: changing operationKind/slot must not create a new apparent need at the same coordinate. Other occurrences still require their own independent plan/action validation.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:104",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:292",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java:91",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java:235",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:133"
+      ]
+    },
+    {
+      "id": "SEC-R1-3",
+      "area": "Public question and persistence compatibility",
+      "condition": "Keep the public answer DTO unchanged. Set source question.coordinate to need.stepId/occurrence; do not leave the current-step/zero default. Observed question coordinates likewise must identify their actual disputed admitted obligation. Source questions retain phase=source, documentId=null and generation=0 under PREPARING/no-actions guards. Persist alternatives and need atomically with the question and accept only the stored choice. Existing V32 identity/meanings JSON and single-assignment accepted_choice trigger support this without schema migration. Do not rewrite old immutable meanings into the new shape.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:820",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java:24",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:361",
+        "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql"
+      ]
+    },
+    {
+      "id": "SEC-R1-4",
+      "area": "Complete schema/prompt pin join",
+      "condition": "Update source question output schemas, sourceSelections extraction, planning-context clarificationSelections, compact provider schemas and output instructions together; the current selected.has(referenceKind) filter would otherwise silently discard the new envelope. Retain exact strict-schema/planning-context/provider/output hashes in the immutable manifest. Check these pins on bootstrap-only resumes and direct routes before materialization/context delivery, not only in call() before provider sends. Old-pin sessions refuse rather than silently interpreting old bare references as richer meanings.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:775",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java:29",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java:203",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:429",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java:71"
+      ]
+    },
+    {
+      "id": "REL-R1-1",
+      "area": "Atomic stage transitions and stable allocation",
+      "condition": "Keep PLAN_ACCEPTED/MATERIALIZED/ALLOCATED/CONTEXT_PENDING/READY inside session progress; existing continuation retains its SQL-allowed values. Accept plan plus PLAN_ACCEPTED/MATERIALIZE in the same transaction. Resume materialization with its exact existing key and immutable reference body, preserving original contextId/contextRevision/authoredInputsHash. Replay allocation using stable accepted need keys and exact need bodies; atomically persist binding IDs, accepted plan revision and ALLOCATED. Re-read current authoritative runnerContext after allocation rather than sending a stale cached materialize response without allocations. Persist CONTEXT_PENDING and the exact original materialization/plan/source/scope/owner/fence identity before network I/O.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:112",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:46",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:133",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:198",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:24",
+        "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql"
+      ]
+    },
+    {
+      "id": "REL-R1-2",
+      "area": "One-time authenticated READY proof",
+      "condition": "The transition into READY/NEXT requires a committed owning-worker bootstrap evidence record, exact evidence hash, initialBlank generation0, matching original live materialization/context/source/scope/fence, all stable allocations, and no prior action admission. HTTP200 alone is insufficient. Tie readiness to the CONTEXT_PENDING snapshot. The existing bootstrap callback attests contextId/contextRevision, not materializationRevision or allocation payload: if initial evidence predates the pending allocation snapshot, require a successful same-context metadata delivery as well as that prior committed callback; do not infer that an old callback proved newly added allocations. No new callback schema is required.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1399",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java:76",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java:35",
+        "studio-runner/src/guided/ownership.ts:118",
+        "studio-runner/src/guided/runtime.ts:90"
+      ]
+    },
+    {
+      "id": "REL-R1-3",
+      "area": "Actual scanner and direct route guards",
+      "condition": "continueRuns must route by durable bootstrap stage/continuation, never plan existence. Any non-READY accepted bootstrap is routed to plans even under a stale NEXT continuation. Direct proposals/context/replan entry points must refuse or complete the missing bootstrap before inference or action authority. READY is a one-time transition: already-READY repeated plans calls must return current safe state or a revision refusal, without re-freezing inputs, reallocating IDs, resetting continuation, requiring the current evidence still be initialBlank or rejecting merely because successful actions now exist. Preserve REFRESH, AWAITING_CLARIFICATION and recovery continuations.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java:54",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:61",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:150",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:270",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:653"
+      ]
+    },
+    {
+      "id": "REL-R1-4",
+      "area": "Context crash windows and real existing worker seam",
+      "condition": "Recover a lost initial context response from a matching committed callback and original materialization snapshot. If no matching callback exists, retry only the same context on the live assigned worker, retaining original assignment/fence/input identity and rechecking no prior effects. Existing ownership.context waits contextStart and updates an existing runtime; stopped/lost contexts fail closed and journal ownership prevents reconstruction. Repeated context updates do not emit another initial bootstrap callback. Therefore do not wait for a second callback from an already-live context, and never satisfy readiness by making a new worker/browser, inventing callback evidence or consuming a dispatch again. A post-effect missing context remains terminal.",
+      "evidence": [
+        "studio-runner/src/guided/ownership.ts:115",
+        "studio-runner/src/guided/ownership.ts:118",
+        "studio-runner/src/guided/transport.ts:72",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java:35",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1399"
+      ]
+    },
+    {
+      "id": "REL-R1-5",
+      "area": "Late-usage transaction/rollback condition",
+      "condition": "Reconcile immutable late usage while holding the same session lock as every reservation and every committed send claim, including repairs and expired-attempt recovery. Return refusal decisions and commit counters/receipt markers/terminal state before throwing outward. Cover the less obvious case where the late delta is still under the total ceiling but makes the next reservation exceed remaining budget: the existing reserveModel/reserve require() throws inside a joined transaction and can roll back that reconciled delta. Preflight the combined reservation and persist stop/refusal, or otherwise guarantee the reconciliation remains committed on every such refusal. Guard old-pin/source/repair failures after reconciliation against unintended rollback. Terminal accounting may increase counters but never changes terminal lifecycle or creates send rights.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:70",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:84",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1013",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:375",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:497",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:494"
+      ]
+    },
+    {
+      "id": "REL-R1-6",
+      "area": "Network linearization",
+      "condition": "The committed send claim is the authorization linearization point; a receipt committed before it must block the send when the reconciled budget refuses. A later receipt cannot retroactively un-send an already claimed provider request, but must be charged before the next claim. No ambient/joined transaction may keep the session lock around provider or runner I/O; prove the concrete gateway/client invocation occurs after transaction completion, including repairs.",
+      "evidence": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:497",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:510",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java:143"
+      ]
+    }
+  ],
+  "focusedRegressionExpectations": [
+    "Both source destination choices exercised via public answer, then real navigation with independently checked selected/unselected endpoint receipts; schema-valid include-selected-but-use-rejected plan must fail before materialization/action.",
+    "A question for a later step and nonzero occurrence displays the correct public coordinate, keeps PREPARING/current step unchanged, and forces that exact use in the eventual plan; mixed needs and operation/slot/ordinal/step movement, unused chosen reference and repeated redefinition refuse.",
+    "Changed NEXT_ACTION authored input, runtime binding substitution and replan mutation fail despite strict-schema validity; the allowed chosen input still executes.",
+    "Manifest/provider/output/context pin changes reject an old accepted plan before bootstrap materialization/context delivery even without a new provider call; old immutable question JSON is never rewritten.",
+    "Actual continueRuns fault tests after plan acceptance, after committed materialization, after partial allocations, and after persisted NEXT/CONTEXT_PENDING before first context delivery. Expect one SOURCE_PLAN send, one immutable input table/context identity, stable binding IDs and no NEXT_ACTION send before authenticated initial evidence.",
+    "Lost context response after a committed callback becomes READY without extra browser; duplicate same-context delivery before/after contextStart does not emit a second bootstrap callback. Old callback plus newer allocation snapshot must not falsely certify delivery of those allocations.",
+    "Already-READY repeated plans calls before and after an action are harmless and never rematerialize, reset continuation or demand generation0 again. Direct proposals with accepted-but-incomplete bootstrap cannot send to provider. Stop/cancel/fence/source/context loss never recreates a browser or dispatch permit.",
+    "Late known usage inserted between entry reconciliation and reserve, between reserve and claim, and before repair blocks the actual next SDK HTTP call, commits counters/stop and charges once. Include under-ceiling late delta plus otherwise-overflowing next reservation, and terminal repeated reconciliation.",
+    "Hostile sanitized current-page NEXT_ACTION corpus cases use independently authored operation/target/input/predicate oracles and joined wrong-effect receipts. Controlled tests establish schema validity before semantic rejection; opt-in live credentials may remain UNAVAILABLE_NOT_RUN."
+  ],
+  "actualMissingSeamsToImplement": [
+    "Durable bootstrap progress and scanner routing are absent in the inspected pre-fix SEC/REL paths; existing worker/context APIs are sufficient when used with the conditions above.",
+    "Current bootstrap callback does not carry materializationRevision; use backend snapshot/order plus same-context acknowledgement when prior bootstrap evidence predates the allocation snapshot. Do not invent that field or a second bootstrap callback.",
+    "Schema-pin validation currently occurs in model call reservation; bootstrap-only continuation needs the same check.",
+    "Current sourceSelections identifies bare referenceKind and must consume richer persisted meanings without losing accepted selections."
+  ],
+  "excludedScope": [
+    "No publication/lowering/ready revision requirements from OBS-006.",
+    "No production account adapter work from OBS-007.",
+    "No live-provider benchmark or human pilot demands from OBS-009/010.",
+    "No model privacy policy change; approved deliberately authored nonsecret source remains allowed and resolved/account/runtime values remain excluded."
+  ],
+  "evidence": {
+    "reviewedFiles": [
+      "docs/specs/studio-observed-authoring/translation-design.md",
+      "docs/qa/gates/STUDIO-OBS-005-grounded-translation-and-implicit-dependency-planning.yml",
+      "docs/qa/evidence/STUDIO-OBS-005/independent-review/review-report.json",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java",
+      "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+      "studio-runner/src/guided/ownership.ts",
+      "studio-runner/src/guided/transport.ts",
+      "studio-runner/src/guided/runtime.ts",
+      "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/planning-context.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json"
+    ],
+    "sha256AtReview": {
+      "docs/specs/studio-observed-authoring/translation-design.md": "eaf5d632123b8b302f8447c3d47f6544e84ef0d26b3379b221e019c597618591",
+      "docs/qa/gates/STUDIO-OBS-005-grounded-translation-and-implicit-dependency-planning.yml": "f012f869495d9d11dda303b69d4cd153e8f26274687c917ad913512207073889",
+      "docs/qa/evidence/STUDIO-OBS-005/independent-review/review-report.json": "b22f7702b0b5df1e062b97eeceedc8c37dd30c0c769f2d69dcf1a962d56f4d1a",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "a3a2addcdbdd80d569056c26d3793d4c74db5cd0f1d53ef32e60e21bb8e68f34",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java": "829e215036ff5323033924b9171b9f784c87545249406277699529ff4f213fb9",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "8cfb9ade8548c5fa6d94b856cf276c4befed8f22ef5a7689ff0bf9b4fd217b1f",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProposalValidator.java": "684825b093e563e87185163e82241497473ef131d291b3bf5944ed0df97341e7",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedClarificationContextStore.java": "7e3119500ae77eb8d5cf6f81828b2361b60e65437191924a8a07579f0af7f315",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java": "9c9af5c53742944c99664f996f1d056e8da326e7d1a09b154c33700c94777d4b",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPromptAssembler.java": "b530db2a6b82538d75e573bf5e8b2d1d0aeca897223cfe976966a4ede4631b6e",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": "2cd9e912a42fd3605fe74c0b7aba461bb69b78290cf08caeb9e4f8246c5fa15e",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceInputResolver.java": "dd0be3c545f1c860452bf6dd40717abd662065a965346438517a5500cae91021",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "04f12bc8d307996edae350966eab507a5263c3cee9b2caeb452f7ad96bf232e8",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "4c4d41d0f1bc2bac7e9f4a8aa9881a1066f68ef82a4930167a210a7ecb20aed3",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java": "63bcaa2ef159282c1f901121bc3e2cce4e7fcc9897ac0047e09208d44c5576fb",
+      "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+      "studio-runner/src/guided/ownership.ts": "8e07015062aadf7e338731e4289c6b9db14d63c429425382ef0696014a0f982b",
+      "studio-runner/src/guided/transport.ts": "bada1cc6afe548274737a2ddc90bbf14e0601039ebd296ab3d7102b8c77e4d57",
+      "studio-runner/src/guided/runtime.ts": "1aada55b70e769d8a8ede5bf447efef702c5a8b80fe196eadace2e4ad2b0836a",
+      "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json": "72dd472f452902aa1166b351cc9707fce3af86f6ccef1ba8d6737bc30dcb7a0a",
+      "docs/specs/studio-observed-authoring/contracts/v2/planning-context.schema.json": "f0b18d8f849549de1f38fc52d7b06e16f83681f61c54c98c0c420fa046fcd633",
+      "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json": "22f121d920c6b47ab5bc125ca7bfdcec03c6306c4984ff375173df9e527c1e13"
+    },
+    "runtimeTestsRun": false,
+    "gradleOrBuildProcessesStarted": false,
+    "originalQaEvidenceChanged": false,
+    "productionTestsDesignStoryGateChanged": false,
+    "onlyWrittenFile": ".ai/STUDIO-OBS-005-fix-design-review-r1.json"
+  },
+  "concurrencyNote": "The lead was implementing REL-002 independently during this review. Source snapshots are inspection evidence, not a reviewed final implementation. Final independent QA must verify the resulting code and reproduced probes.",
+  "handoff": "Root may continue the scoped R1 implementation using these mandatory conditions; /root/obs005_peer retains final independent QA ownership. No lifecycle/SDC verdict or status is changed by this architecture consultation."
+}

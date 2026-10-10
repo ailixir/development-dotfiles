@@ -1,0 +1,176 @@
+{
+  "story": "STUDIO-OBS-007",
+  "storyPath": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+  "task": "validate-next-story (SDC Phase 2) — R4, post-rescope",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T02:38:03Z",
+  "verdict": "GO",
+  "readinessScore": 9,
+  "scoreScale": 10,
+  "previousScores": [4, 6],
+  "confidence": "High for readiness; Medium for execution risk (XL, 18 ACs, ~90 paths)",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogRow": "| 2026-10-09 | 0.2.1 | Validated GO (9/10) — Status: Draft → Ready ... | @po |",
+  "storySha256": {
+    "before": "b93644877f8203f0acf4c28c25603881af5ac1f83d575a6c38a147071d4f36f0",
+    "after": "d762e79a2af541f4d97aa5171267ddd46bd5f2f665fa4a268a2ec606260e1aa2"
+  },
+  "scoreRationale": "The rewritten story traces every security condition 1–9 (R1-tightened) and every design §10 invariant placed in OBS-007 to a falsifiable AC with a named oracle; 28 cited code anchors were read on this tree and match (line drift only); V34 is free; OBS-006 is Done with a verified closure record; File List ownership is disjoint from OBS-008…011 except on the declared linear order. One point withheld for precision: finalize-route attribution is wrong (inherited from design §3), I-C11/C-12 has no standalone AC, and the C-5 oracle does not explicitly span Vault/HTTP error sub-runs. None of these weakens an AC or requires @sm rework; they are recorded as GO conditions.",
+  "bindingDecisionsRespected": {
+    "loginViaAuthorSecretSteps": true,
+    "noAccountProviderHandoffOrUi": true,
+    "ext001Dropped": true,
+    "complianceRightMomentNeverLogged": true,
+    "notRelitigated": true
+  },
+  "historicalValidations": [
+    {"path": ".ai/STUDIO-OBS-007-po-validation.json", "verdict": "NO-GO 4/10", "status": "historical — EXT-001 blocker superseded by design §0", "modified": false},
+    {"path": ".ai/STUDIO-OBS-007-po-local-remediation.json", "verdict": "NO-GO 6/10", "status": "historical — EXT-001 blocker superseded by design §0", "modified": false}
+  ],
+  "canonicalSources": [
+    "docs/specs/studio-observed-authoring/secret-login-design.md (R2 2026-10-09; §0, §1, §2, §3, §4.2, §4.3, §4.4, §4.6 I-A1…I-C11, §5, §6, §7 SEC-1…10/C-1…C-20, §8, §9, §10)",
+    "docs/specs/studio-observed-authoring/secret-login-security-review.md (PASS-WITH-CONDITIONS; conditions 1–9; R1 delta check R1-1/R1-2/R1-3)",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md (CLN-18, CLN-32…38, G2, G3, G4, G9)",
+    "docs/epics/UI-STUDIO-GA-PLAN.md §6–7",
+    "docs/stories/STUDIO-OBSERVED/README.md (index), wave-plan.json (batch 4; edges 006→007→008)"
+  ],
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "result": "PASS", "evidence": "'Login steps with secret references in guided runs' — matches design §0 and README index row 15"},
+    {"n": 2, "item": "Complete description", "result": "PASS", "evidence": "Story statement + binding decision paragraph + Dev Notes 'What the code does today' (design §1) + target flow (design §2)"},
+    {"n": 3, "item": "Testable acceptance criteria", "result": "PASS", "evidence": "18 ACs, each cites the design §7 oracle(s) it is proven by; canary-based oracles can fail. Not Given/When/Then but oracle-bound. Nit: C-12 (I-C11 backend) has no standalone AC (carried by T2 + AC-18 enumeration)"},
+    {"n": 4, "item": "Well-defined scope (IN/OUT)", "result": "PASS", "evidence": "'Out of scope here' enumerates OBS-008/009/010/011 placements per design §10 and a never-in-wave list"},
+    {"n": 5, "item": "Dependencies mapped", "result": "PASS", "evidence": "OBS-006 Done (story :6; closure .ai/STUDIO-OBS-006-close.json key f068570d…); V34 free (no V34__* under db/migration or db/cutover); @data-engineer named for V34 DDL; @architect T0 ruling on x-conflict-codes; G-1/G-2/G-3 and C-2/C-3 stated as OBS-009/010 release gates, not implementation blockers; FakeStudioVaultProvider exists for AC-13/AC-14 oracles"},
+    {"n": 6, "item": "Complexity estimate", "result": "PASS", "evidence": "XL with explicit split analysis (layer split not compile-clean; path split double-edits nine shared files) and a mechanical fallback"},
+    {"n": 7, "item": "Business value", "result": "PASS", "evidence": "Login-protected pages testable without any account provider; no credential shown, stored outside Vault, or logged"},
+    {"n": 8, "item": "Risks documented", "result": "PASS", "evidence": "Residuals (JVM/JS strings, Chromium transient files, same-origin exfiltration, one-poll revocation window), §5 false-positive limits, multi-password-page limit, V30–V33 immutable, no data rewrite, dev v2 revisions become RUNTIME_INCOMPATIBLE"},
+    {"n": 9, "item": "Criteria of Done", "result": "PASS", "evidence": "T4 executes every oracle on real components; T5 evidence with quoted pins/choices; T6 independent @qa sets Done; 'never mark unavailable as passed'"},
+    {"n": 10, "item": "Alignment with PRD/Epic", "result": "PASS", "evidence": "GA plan §7 AC 1–8 all mapped; deviations (GA AC-2 'runner resolves', AC-5 'vars.secret') explicitly resolved in favour of design R2; consensus plan §8.1/§9 withdrawals noted"}
+  ],
+  "executorAssignment": {"executor": "dev", "quality_gate": "architect", "sdc_reviewer": "qa", "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "security-scan"], "executorNotEqualGate": true, "typeConsistency": "Code/Features → @dev / @architect", "result": "PASS"},
+  "coderabbitIntegration": {"enabledInConfig": true, "sectionPresent": true, "subsections": ["Story Type Analysis", "Specialized Agents", "Quality Gates", "Self-Healing and Focus Areas"], "layoutMatchesPrecedent": "STUDIO-OBS-006 (same four headings)", "primaryAgentDev": true, "securityStoryArchitectGate": true, "result": "PASS"},
+  "templateCompleteness": {"sectionsPresent": ["Status (table)", "executor block", "Story", "Acceptance Criteria", "Tasks / Subtasks", "Dev Notes", "Testing", "CodeRabbit Integration", "File List", "Dev Agent Record", "QA Results", "Change Log"], "unfilledPlaceholders": 0, "result": "PASS"},
+  "securityConditionsTrace": [
+    {"condition": 1, "finding": "F-1 + R1-1/R1-2/R1-3", "acs": ["AC-5", "AC-4"], "oracles": ["SEC-6", "C-1", "C-18", "C-19", "C-20"], "fixtureRoutes": ["/two-passwords", "/no-password", "/trap", "/spa-swap", "cross-origin form action", "open shadow root"], "falsifiable": true, "status": "PRESENT"},
+    {"condition": 2, "finding": "F-2 + worker-side sweep", "acs": ["AC-13"], "oracles": ["C-4 mid-run"], "bound": "≤ 2 s plus one in-flight step, never zero", "status": "PRESENT"},
+    {"condition": 3, "finding": "F-3", "acs": ["AC-11"], "oracles": ["C-3 incl. negative launch test"], "status": "PRESENT"},
+    {"condition": 4, "finding": "F-4", "acs": ["AC-9"], "oracles": ["C-5 incl. streaming-parser and ofByteArray test seams"], "status": "PRESENT"},
+    {"condition": 5, "finding": "F-5 (R1 rewording)", "acs": ["AC-12"], "oracles": ["C-13"], "status": "PRESENT"},
+    {"condition": 6, "finding": "F-6", "acs": ["AC-8"], "oracles": ["C-14"], "status": "PRESENT"},
+    {"condition": 7, "finding": "F-7", "acs": ["AC-6"], "oracles": ["C-15"], "status": "PRESENT"},
+    {"condition": 8, "finding": "F-8", "acs": ["AC-2"], "oracles": ["C-16"], "status": "PRESENT"},
+    {"condition": 9, "finding": "F-10 + all §7 oracles", "acs": ["AC-18", "AC-10", "AC-6"], "oracles": ["C-6 raw-error variant", "C-17 capacity/isolation", "SEC-1…10", "§5", "rotation/revocation/isolation", "end-to-end", "C-1…C-7", "C-11…C-20"], "status": "PRESENT"}
+  ],
+  "invariantsPlacedHereTrace": {
+    "I-A1": "AC-4 (C-1); AC-5(c)(d)",
+    "I-A2": "AC-6 (C-2, C-3, C-17); AC-9 read/write residuals",
+    "I-A3": "AC-13 (C-4); AC-6 digest without secret (C-15)",
+    "I-B4": "AC-9 (C-5)",
+    "I-B5": "AC-10 (C-6); AC-8 (C-14)",
+    "I-B6 backend": "AC-12 (C-7 backend half)",
+    "I-C10": "AC-14 (C-11)",
+    "I-C11 backend": "T2 + AC-18 enumeration of C-12 — no standalone AC (condition C2)",
+    "SEC-8": "AC-3", "SEC-9": "AC-14", "SEC-10": "AC-15", "§5": "AC-17", "ARCH-6/7": "AC-16", "Removal/V34": "AC-15"
+  },
+  "rightMomentNeverLoggedCoverage": {
+    "stepBinding": "AC-4", "passwordControlPinning": "AC-5", "originAndFormAction": "AC-4(d)/AC-5", "authorizationRecheckAtRelease": "AC-6/AC-13", "revocationWithinOnePoll": "AC-13", "wipeOnEveryExitPath": "AC-6 (SEC-3; C-2 run.values_wiped)",
+    "sinks": {
+      "backendLogsTRACE": "AC-9", "problemJsonSseMetricsIdempotency": "AC-9", "vaultHttpClientErrors": "AC-9 TRACE capture; explicit error sub-run not named — condition C3",
+      "runnerStdoutStderrJournalCallbacks": "AC-10", "playwrightRawBeforeRedaction": "AC-10", "browserProfileScratchTmpdir": "AC-11", "db": "AC-14 audit scan + SEC-3 rows (DB-wide scan C-10 is OBS-009)", "manifest": "AC-6 SEC-3 / AC-10 C-6", "gatewayBytes": "AC-3 SEC-1", "auditTable": "AC-14"
+    }
+  },
+  "antiHallucination": {
+    "untraceableStatements": 0,
+    "anchorsVerifiedOnTree": [
+      "GuidedSessionService.java:318-322 AUTH_CONNECTION_REQUIRED (story cites 319-323)",
+      "StudioSecretsService.java:60 MAX_VALUE_LENGTH = 8192",
+      "StrictInternalBodyReader.java:29 FAIL_ON_UNKNOWN_PROPERTIES",
+      "docs/specs/studio/openapi.yaml:256 x-conflict-codes incl. AUTH_CONNECTION_REQUIRED",
+      "studio-runner/src/guided/runtime.ts:144 sourceStepId === coordinate.stepId (authoredLiteral only)",
+      "observationCollector.ts:395-396 !safe → withheldRegions++",
+      "browser.ts:90 launchPersistentContext; :98 args: []; :180-193 observedAccountContext installCookies/enter; :304-322 acquire guard; :345/351 TARGET_CHANGED",
+      "guided/transport.ts:72 hash(body) over whole body",
+      "ExecutionControlService.java:31 cancel_requested_at only",
+      "application.yml:253 run-deadline 600s; :259 total-runtime 120s; :297 control-poll-interval 2s",
+      "versions.ts:43-47 observed tuple (artifact 2, referencePolicy 3, executor observed-2, validator observed-1, protocol 2)",
+      "V33__studio_observed_publication.sql:300 profile tuple with accountAbi:1; :6-15 ck_studio_schedule_occurrences_code incl. OBSERVED_SCHEDULE_AUTH_REQUIRED",
+      "GuidedProposalValidator.java:323-339 obligation → sourceReferences → authoredInputs join, authoredLiteral only",
+      "GuidedDispatchService.java:80-94 dispatch after consume()",
+      "StudioDispatcher.java:321-322 references.resolve + recordDispatchPolicy; :359 AUTHORIZATION_REVOKED close; :452 ambiguous never resent",
+      "HashicorpStudioVaultProvider.java:350 readTree; :360 toCharArray",
+      "HttpRunnerDispatchClient.java:114-115 ofString(writeValueAsString)",
+      "GuidedRunnerClient.java:88-89 ofString(GuidedContracts.canonical(body))",
+      "RunJob.java:61 record; :72 Map<String,String> resolvedSecrets; no toString",
+      "guided/ownership.ts:25 AWAITING_AUTH in ACTIVE; :101 capacity ?? 1",
+      "validator/observedReplay.ts:134 accountRef demand; :261 input.stepId === ob.stepId (authoredLiteral)",
+      "playwrightAdapter.ts:504 requireSecretOrigin; :813 describeLastReading(observed,…)",
+      "observationSanitizer.ts:19 knownSecrets ≤ 64, length bound",
+      "GuidedSourceClassifier.java:191 accepts kind secretRef; used.add at :127/:143",
+      "StudioSecretsController.java:36 GET /tests/{id}/secrets; :42 POST — no read-value, no PUT",
+      "ObservedReplayConfiguration.java:15, GuidedPublicationConfiguration.java:25, GuidedPublicationController.java:19 @Profile(\"!worker\"); ExecutionReadinessService.java:125 installObservedVerifier",
+      "guided/session/README.md:97-98 account-provider sentence",
+      "Deletion targets exist: guided/account/ReplayAccountAccess.java, run/observedAccount.ts, test/run/observedAccount.test.ts; validator/references.ts exists; run/references.ts absent; FakeStudioVaultProvider.java exists"
+    ],
+    "knownInaccuracies": [
+      {"id": "KI-1", "where": "AC-1 (and design §3)", "issue": "POST /{id}/finalize is served by GuidedPublicationController:28 (@Profile(\"!worker\")), not GuidedSessionController. The seven-route public set to document in openapi-v3.yaml is still correct.", "acWeakened": false, "disposition": "Reconcile wording at T0; no @sm rework"},
+      {"id": "KI-2", "where": "AC-1 'contracts/v3/ is created by copy-and-edit'", "issue": "contracts/v3/ already holds result.schema.json, session-view.schema.json, publication-fixtures.json (pre-rescope; result.schema.json:34 still lists AWAITING_AUTH per CLN-38). File List already says these are extended, not replaced.", "acWeakened": false, "disposition": "Known; T1 extends the three and copies the remaining 44 v2 files"},
+      {"id": "KI-3", "where": "Dev Notes lanes table, Lane R 'Runs' column", "issue": "'parallel with R' should read 'parallel with B'", "acWeakened": false, "disposition": "Typo; @dev may fix in Dev Notes"}
+    ]
+  },
+  "fileListOwnership": {
+    "obs008": "No overlap: OBS-007 excludes frontend/src/**; OBS-008 is frontend-only plus playwright config and axe-results",
+    "obs009": "Sequential overlap only (007 → 008 → 009): server/application.ts, HttpRunnerDispatchClient.java, ObservedReplayAuthorization.java, ObservedReplayRuntimeConfiguration.java, ExecutionReadinessService.java, application.yml",
+    "obs010": "Sequential overlap only: docs/runbooks/studio-guided-authoring.md (007: one-line correction; 010: rewrite)",
+    "obs011": "Sequential overlap only (011 last): GuidedSourceInputResolver, RunnerOutcomeCodes, VaultStudioReferenceResolver, GuidedSessionService, GuidedContracts, application.yml, versions.ts, write-runtime-versions.mjs, GuidedSessionIT, GuidedHttpSecurityIT, GuidedBridgeIntegrationTest, contracts/README.md, build.gradle.kts, tools/*.cjs, regenerated bundles, confinement.test.ts, StudioContractTest",
+    "wavePlan": "linear OBS-007 → 008 → 009 → 010 → 011; no concurrent edits",
+    "v34": "free — no V34__* in backend/src/main/resources/db/migration or backend/db/cutover; @data-engineer named",
+    "result": "PASS"
+  },
+  "dependencies": {
+    "obs006": {"status": "Done", "closureRecord": ".ai/STUDIO-OBS-006-close.json", "closureKey": "STUDIO-OBS-006:digest:working-tree-sha256:f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab", "verified": true},
+    "hiddenExternalBlockers": "none — Vault prod policy C-2/C-3 and gates G-1/G-2/G-3 are stated in Dev Notes as OBS-009/OBS-010 release gates not closed by this story; FakeStudioVaultProvider covers the AC-13/AC-14 oracles locally",
+    "result": "PASS"
+  },
+  "sizing": {
+    "declared": "XL, one story, three file-disjoint lanes C → (B ‖ R)",
+    "verdict": "ACCEPT one story with phase gates",
+    "reasons": [
+      "Layer split (contracts+backend / runner) is not compile-clean: regenerated v3 types drop AccountHandle/accountAbi that the runner account lifecycle imports (inventory CLN-32/34); A cannot be green without B's removals and the backend would send BridgeDispatch.secret the runner cannot consume",
+      "Path split (legacy hardening / guided secretRef) double-edits nine shared files in strict sequence, splits V34 into V34+V35 and reviews the password-only rule twice, against design §10 'same rule, two adapters; one review'",
+      "Precedent: OBS-006 (148 paths, 20 tasks) validated 9/10 and passed QA in one review",
+      "Every AC names its oracle row, so QA traceability scales row-by-row rather than by prose volume"
+    ],
+    "residualRisk": "Review fatigue over 18 dense ACs; mitigated by conditions C1/C2",
+    "fallbackIfConditionsFail": "Path split as documented in Dev Notes 'Sizing decision' (A = AC-2, AC-7 legacy half, AC-8, AC-9, AC-11 legacy half, AC-12, AC-13, AC-14 legacy rows, AC-17 legacy half; B = the rest; V34 audit + V35 guided schema)"
+  },
+  "userDecisionsPending": {
+    "blocksReady": false,
+    "mode": "conditional GO — defaults applied as design §8 states ('Default if silent: adopt')",
+    "Q1": {"question": "Legacy password-only rule without opt-out", "defaultApplied": "adopt (Vault is none in every value set today, GA plan C-3)", "acsIfChanged": ["AC-7 legacy half", "AC-17 unchanged", "AC-18 SEC-6 legacy opt-out variant"], "decideBy": "before T3 legacy SECRET_TARGET_NOT_MASKED work lands"},
+    "Q3": {"question": "Retention window for studio_secret_use_audit", "defaultApplied": "existing retention pruner window", "acsIfChanged": ["AC-14 retention clause", "OBS-010 runbook row"], "decideBy": "before V34 DDL review (T0/T2)"}
+  },
+  "conditionsOnGo": [
+    {"id": "C1", "owner": "coordinator/@dev", "text": "T1 (Lane C) lands as one compile-green batch and is verified before T2/T3 dispatch; T2 and T3 receive a per-lane peer review before T4"},
+    {"id": "C2", "owner": "@qa", "text": "Trace every AC to its named oracle row, including C-12 (I-C11 backend) under AC-18 and the implemented C-17 branch under AC-6"},
+    {"id": "C3", "owner": "@dev/@qa", "text": "The C-5 TRACE capture spans the C-4 Vault-outage and definite-refusal sub-runs so Vault/HTTP client error text is inside the scan"},
+    {"id": "C4", "owner": "user → @po", "text": "Q1/Q3 stand at design §8 defaults; if decided otherwise before T3 lands, only AC-7 legacy half / AC-18 SEC-6 legacy variant / AC-14 retention clause change and @po revalidates that delta"},
+    {"id": "C5", "owner": "coordinator", "text": "docs/stories/STUDIO-OBSERVED/README.md:25 'Current execution' still names the provider prerequisite and NO-GO 6/10; refresh via *stories-index (outside this validation's write scope)"}
+  ],
+  "requiredFixesForSm": [],
+  "codeIntelligence": {"advisory": true, "blocking": false, "isCodeIntelAvailable": false, "note": "Step 8.1: .aiox-core/core/code-intel isCodeIntelAvailable() returned false on this tree; validateNoDuplicates not invoked; step skipped per task (graceful fallback)."},
+  "epicContextAccumulator": {"invoked": false, "substitute": "Manual cross-reference of docs/stories/STUDIO-OBSERVED/README.md (rescope paragraph :21, index row :15), wave-plan.json (batch 4; edges 006→007→008), OBS-006 story and closure record, OBS-008…011 File Lists"},
+  "filesChanged": [
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md (Status Draft → Ready; Dev Notes '### PO validation — 2026-10-09 (R4, post-rescope)'; Change Log row 0.2.1)",
+    ".ai/STUDIO-OBS-007-po-validation-r4.json"
+  ],
+  "notChanged": ["ACs, scope, title, Tasks, File List, QA Results", "OBS-008…011 story files", "historical .ai/STUDIO-OBS-007-po-*.json files", "any code, spec, design or migration"],
+  "scope": {"codeChanged": false, "gitWrites": false, "buildsOrTestsRun": false, "subagents": false},
+  "limitations": [
+    "Validation is a read-only document/code cross-check; no oracle was executed and no design claim about runtime behaviour was reproduced",
+    "Line numbers in the story and design drift against this working tree (uncommitted changes present); anchors were matched by content, not exact line",
+    "The finalize-route attribution error is inherited from design §3 R2; the design file was not edited (not in write scope)"
+  ],
+  "handoff": {"next_agent": "@dev", "next_command": "*develop STUDIO-OBS-007", "gateBeforeDispatch": "T0 reconciliation (x-conflict-codes ruling, lane ownership, V34 recheck) then T1 compile-green batch (condition C1)"}
+}

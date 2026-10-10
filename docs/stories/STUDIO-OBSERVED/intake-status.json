@@ -1,0 +1,52 @@
+{
+  "at": "2026-10-08T04:41:04.839129+00:00",
+  "workflow": "full-sdc per story; wave-execute CLI planning",
+  "waveId": "STUDIO-OBSERVED",
+  "stories": 10,
+  "batches": 8,
+  "phase": "develop",
+  "firstStory": "STUDIO-OBS-001",
+  "dispatchStarted": true,
+  "implementationStarted": true,
+  "preflight": {
+    "exitCode": 0,
+    "storyStatus": "Ready",
+    "scan": "safe"
+  },
+  "pendingUserInput": null,
+  "sourceSkill": "/Users/brunobuger/.agents/skills/full-sdc/SKILL.md",
+  "budgetCeilingUsd": 500,
+  "status": "batch-2-review-and-remediation",
+  "proposedRepair": "sdc-preflight-repair.patch",
+  "repairApplied": true,
+  "cli": "node tools/aiox-local.cjs",
+  "poVerdict": "GO 8/10",
+  "developmentVerified": true,
+  "contractChecks": {
+    "fixtures": 91,
+    "apiExamples": 109,
+    "schemas": 20
+  },
+  "qaVerdict": "OBS-001 PASS after corrections",
+  "qaFindings": [
+    "TEST-001",
+    "TEST-002",
+    "TEST-003"
+  ],
+  "independentQaBaseline": {
+    "passed": 25,
+    "failed": 5
+  },
+  "completedStories": [
+    "STUDIO-OBS-001",
+    "STUDIO-OBS-003"
+  ],
+  "activeStories": {
+    "STUDIO-OBS-002": "apply_qa_fixes plus positive usability regression corrections"
+  },
+  "currentContractChecks": {
+    "fixtures": 124,
+    "apiExamples": 109,
+    "schemas": 20
+  }
+}

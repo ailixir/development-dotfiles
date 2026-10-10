@@ -1,0 +1,456 @@
+{
+  "storyId": "STUDIO-OBS-004",
+  "phase": "development-support",
+  "status": "completed-development-slice",
+  "scope": "Contract conformance/OpenAPI plus reviewed assignment/renew and explicit observation refresh amendments only; not QA or browser/transport evidence.",
+  "ownedFiles": [
+    "tools/check-studio-observed-contracts.cjs",
+    "docs/specs/studio-observed-authoring/openapi-v2.yaml",
+    "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/learned-plan.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/binding.schema.json",
+    ".ai/STUDIO-OBS-004-contract-development.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment-receipt.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment-stop.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment-lifecycle.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/bridge.schema.json",
+    "docs/specs/studio-observed-authoring/contracts/v2/README.md",
+    "docs/specs/studio-observed-authoring/contracts/v2/observation-refresh.schema.json"
+  ],
+  "historicalSha256Before": {
+    "docs/specs/studio-observed-authoring/contracts/session.schema.json": "983e3adf45c1fbf9336166092d8048be7a5f84709ac2261faa47fb9cdaa1fb6c",
+    "docs/specs/studio-observed-authoring/contracts/limits.schema.json": "70405b35a78eff845d31c63413f64700b196325e0e72be9ba199912a20abc4aa",
+    "docs/specs/studio-observed-authoring/contracts/error.schema.json": "fc41286bca80b55ca951d10e881e4cf1334fd2ad9d7829767fda8aa9cbc88381",
+    "docs/specs/studio-observed-authoring/contracts/learned-plan.schema.json": "10767692b8187c81301517825c56947697c6aaac52d0b5b6c5fa3756998a0d43",
+    "docs/specs/studio-observed-authoring/contracts/session-view.schema.json": "a9ae9effae38fdc95fcb54369af5f08a6aa4df094ac469874162dc42d538bb48",
+    "docs/specs/studio-observed-authoring/contracts/authored-inputs.schema.json": "2e03f48526a23325c31ac1ceb666bda95efe52628a55acbfbccbd01d72267da0",
+    "docs/specs/studio-observed-authoring/contracts/common.schema.json": "a8d8d005f045a66669f282ac0a8f245b84be37e4cbfbc3a96643d597f662f660",
+    "docs/specs/studio-observed-authoring/contracts/README.md": "63744db3288987d251bf6def163bf5f8867eedd6568ed4f8fd356269c110ffbf",
+    "docs/specs/studio-observed-authoring/contracts/dependency-proposal.schema.json": "a4237535b6bc2fe86f8d9b60e51b901465f9cf580e7887e6fff7499ab21035d4",
+    "docs/specs/studio-observed-authoring/contracts/observation.schema.json": "95a53053d719dcfc884745aac8c27abe45e405b6d509f70bf0eb96382d3c5de4",
+    "docs/specs/studio-observed-authoring/contracts/pending-bindings.schema.json": "210d179d21f25a3194989618c9f976e637d05464de02ae802f38c7bde9dfa331",
+    "docs/specs/studio-observed-authoring/contracts/runner-context.schema.json": "ea4869f43f5f6c9246c7c110390a20cfd84841135944c8b9374b4078e7f34eec",
+    "docs/specs/studio-observed-authoring/contracts/planning-context.schema.json": "0dc0a89af05c68187b2adb1e7f7488ff3880634647ca3ada30ffa8d6994c4144",
+    "docs/specs/studio-observed-authoring/contracts/proposal-result.schema.json": "325e6d6a30b0bd9124b5da3763b5ca835dc5b4b286ba2f2da7e61a1979579ef3",
+    "docs/specs/studio-observed-authoring/contracts/clarification.schema.json": "4fa9203f04bc7051bf5f8babb85f69d538ea56540bfea21af6bbc675f7f77c20",
+    "docs/specs/studio-observed-authoring/contracts/fixtures.json": "a0d7e8770d5fd7e098264688045dde137df13fa6120d746db71cf939c4439b28",
+    "docs/specs/studio-observed-authoring/contracts/commands.schema.json": "6cd0b4171b1f54ff76258d995c342cc5e485f63172bfdeed3f36e6b6eef7aaff",
+    "docs/specs/studio-observed-authoring/contracts/result.schema.json": "de52045b184098afafe82335ce94231fc05b797b592bbcbfd608c2221b0fb3bd",
+    "docs/specs/studio-observed-authoring/contracts/action.schema.json": "afdab0fee11c77dcbd5b341d3c749a33c497dbd5467f6293bd0aac2ab09daab7",
+    "docs/specs/studio-observed-authoring/contracts/binding.schema.json": "044e82d87e067ef4249af6a478baffb2cfd20031b6c78063561fcbface7783f9",
+    "docs/specs/studio-observed-authoring/contracts/revision.schema.json": "fd21b1adb65c15d8d8c7f0809ac9f0be7c71f8de47b677f840c266bbdaf1a0f7",
+    "docs/specs/studio-observed-authoring/contracts/ledger.schema.json": "f3e20720805a8c699fb343330edc70960758347ce46ff74eb78948403f71f988",
+    "docs/specs/studio-observed-authoring/openapi.yaml": "ba0c8e2a04a72b365cea74813d614fb9a6a63f9c53346bc00f7aa676ca50eaa1",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md": "59f1eb6ea9a053a552ca94a742d6ed618f9cfe00b2c6dcb7a46da645bad4e26f",
+    "docs/qa/gates/STUDIO-OBS-001-contracts-and-first-run-lifecycle.yml": "0a48a5d4080a4281100bae37bc127ef36805e6a59a3fb10ffdc44d3b1980ffc4",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md": "437a0680384f66b2619d244c83039c5031e5606834e1f01fe775b02c9464222f",
+    "docs/qa/gates/STUDIO-OBS-002-trusted-page-observation-and-sanitization.yml": "2e4b4ae665a8834ed6c9ed261c6219818804a40fdce513b76636f120dbe7e2d1",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md": "f02499ad4a1515150689c511f3ec2fb9ee9c5a8467cbfd37e329f03a99de7b65",
+    "docs/qa/gates/STUDIO-OBS-003-durable-guided-session-and-action-ledger.yml": "9b38a3ec113a31d932717b45180f9a9c3871ea1e6fba0cc27bd2491971bd7323"
+  },
+  "commands": [
+    {
+      "command": "node --check tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "result": "Syntax valid."
+    },
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "result": {
+        "v2Cases": 193,
+        "v2PositiveCases": 47,
+        "v2NegativeCases": 146,
+        "v2OpenApiExamples": 49,
+        "v2Schemas": 26,
+        "allDefinitionsCompiled": true,
+        "canonicalVectors": 6,
+        "observationRefreshCorrelationGoldenVector": "oref-85463e3f7f14e85755f2e0acc7ed3f3aed7fc619744d5545ea85eb54af14fd3e",
+        "v1Cases": 124,
+        "v1OpenApiExamples": 109,
+        "historicalFilesByteIdentical": 29,
+        "existingBridgeBodySchemasUnchanged": true
+      }
+    },
+    {
+      "command": "Python SHA-256 comparison of all snapshotted historical files and owned-file whitespace validation",
+      "exitCode": 0,
+      "result": "29 historical files byte-identical; no trailing whitespace in owned artifacts."
+    }
+  ],
+  "decisions": [
+    "No source-to-model projection or privacy branch chosen.",
+    "Only new final binding.schema.json support file is reserved; existing v2 schemas remain backend-lead owned.",
+    "Reviewed assignment lifecycle amendment owns only four new assignment schemas, minimal bridge stop/lifecycle union changes, README assignment section, fixtures/OpenAPI/checker and evidence; other common schemas remain lead-owned."
+  ],
+  "completedAt": "2026-10-08T15:19:46.542536+00:00",
+  "historicalSha256After": {
+    "docs/specs/studio-observed-authoring/contracts/session.schema.json": "983e3adf45c1fbf9336166092d8048be7a5f84709ac2261faa47fb9cdaa1fb6c",
+    "docs/specs/studio-observed-authoring/contracts/limits.schema.json": "70405b35a78eff845d31c63413f64700b196325e0e72be9ba199912a20abc4aa",
+    "docs/specs/studio-observed-authoring/contracts/error.schema.json": "fc41286bca80b55ca951d10e881e4cf1334fd2ad9d7829767fda8aa9cbc88381",
+    "docs/specs/studio-observed-authoring/contracts/learned-plan.schema.json": "10767692b8187c81301517825c56947697c6aaac52d0b5b6c5fa3756998a0d43",
+    "docs/specs/studio-observed-authoring/contracts/session-view.schema.json": "a9ae9effae38fdc95fcb54369af5f08a6aa4df094ac469874162dc42d538bb48",
+    "docs/specs/studio-observed-authoring/contracts/authored-inputs.schema.json": "2e03f48526a23325c31ac1ceb666bda95efe52628a55acbfbccbd01d72267da0",
+    "docs/specs/studio-observed-authoring/contracts/common.schema.json": "a8d8d005f045a66669f282ac0a8f245b84be37e4cbfbc3a96643d597f662f660",
+    "docs/specs/studio-observed-authoring/contracts/README.md": "63744db3288987d251bf6def163bf5f8867eedd6568ed4f8fd356269c110ffbf",
+    "docs/specs/studio-observed-authoring/contracts/dependency-proposal.schema.json": "a4237535b6bc2fe86f8d9b60e51b901465f9cf580e7887e6fff7499ab21035d4",
+    "docs/specs/studio-observed-authoring/contracts/observation.schema.json": "95a53053d719dcfc884745aac8c27abe45e405b6d509f70bf0eb96382d3c5de4",
+    "docs/specs/studio-observed-authoring/contracts/pending-bindings.schema.json": "210d179d21f25a3194989618c9f976e637d05464de02ae802f38c7bde9dfa331",
+    "docs/specs/studio-observed-authoring/contracts/runner-context.schema.json": "ea4869f43f5f6c9246c7c110390a20cfd84841135944c8b9374b4078e7f34eec",
+    "docs/specs/studio-observed-authoring/contracts/planning-context.schema.json": "0dc0a89af05c68187b2adb1e7f7488ff3880634647ca3ada30ffa8d6994c4144",
+    "docs/specs/studio-observed-authoring/contracts/proposal-result.schema.json": "325e6d6a30b0bd9124b5da3763b5ca835dc5b4b286ba2f2da7e61a1979579ef3",
+    "docs/specs/studio-observed-authoring/contracts/clarification.schema.json": "4fa9203f04bc7051bf5f8babb85f69d538ea56540bfea21af6bbc675f7f77c20",
+    "docs/specs/studio-observed-authoring/contracts/fixtures.json": "a0d7e8770d5fd7e098264688045dde137df13fa6120d746db71cf939c4439b28",
+    "docs/specs/studio-observed-authoring/contracts/commands.schema.json": "6cd0b4171b1f54ff76258d995c342cc5e485f63172bfdeed3f36e6b6eef7aaff",
+    "docs/specs/studio-observed-authoring/contracts/result.schema.json": "de52045b184098afafe82335ce94231fc05b797b592bbcbfd608c2221b0fb3bd",
+    "docs/specs/studio-observed-authoring/contracts/action.schema.json": "afdab0fee11c77dcbd5b341d3c749a33c497dbd5467f6293bd0aac2ab09daab7",
+    "docs/specs/studio-observed-authoring/contracts/binding.schema.json": "044e82d87e067ef4249af6a478baffb2cfd20031b6c78063561fcbface7783f9",
+    "docs/specs/studio-observed-authoring/contracts/revision.schema.json": "fd21b1adb65c15d8d8c7f0809ac9f0be7c71f8de47b677f840c266bbdaf1a0f7",
+    "docs/specs/studio-observed-authoring/contracts/ledger.schema.json": "f3e20720805a8c699fb343330edc70960758347ce46ff74eb78948403f71f988",
+    "docs/specs/studio-observed-authoring/openapi.yaml": "ba0c8e2a04a72b365cea74813d614fb9a6a63f9c53346bc00f7aa676ca50eaa1",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md": "59f1eb6ea9a053a552ca94a742d6ed618f9cfe00b2c6dcb7a46da645bad4e26f",
+    "docs/qa/gates/STUDIO-OBS-001-contracts-and-first-run-lifecycle.yml": "0a48a5d4080a4281100bae37bc127ef36805e6a59a3fb10ffdc44d3b1980ffc4",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-002.story.md": "437a0680384f66b2619d244c83039c5031e5606834e1f01fe775b02c9464222f",
+    "docs/qa/gates/STUDIO-OBS-002-trusted-page-observation-and-sanitization.yml": "2e4b4ae665a8834ed6c9ed261c6219818804a40fdce513b76636f120dbe7e2d1",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md": "f02499ad4a1515150689c511f3ec2fb9ee9c5a8467cbfd37e329f03a99de7b65",
+    "docs/qa/gates/STUDIO-OBS-003-durable-guided-session-and-action-ledger.yml": "9b38a3ec113a31d932717b45180f9a9c3871ea1e6fba0cc27bd2491971bd7323"
+  },
+  "historicalByteIdentity": {
+    "checked": 29,
+    "changed": 0
+  },
+  "ownedSha256": {
+    "tools/check-studio-observed-contracts.cjs": "bc7e9fa0179fd9a4ec3e8ada6e09eba9144aac651522521b985f481049d8063b",
+    "docs/specs/studio-observed-authoring/openapi-v2.yaml": "cdb9b55102fdc5181eedb981db6bf4c9aa7d0d19092e221dcd20b8e218dde0f0",
+    "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json": "4c18212ff1bd2accbd51055133b4dcaff8f160e4f4de7e7ddef234ef0901e6d0",
+    "docs/specs/studio-observed-authoring/contracts/v2/learned-plan.schema.json": "b327b3115166366f20fc679e94cbc4dfbf0de4e9d420240697d5ea6e9c41504d",
+    "docs/specs/studio-observed-authoring/contracts/v2/binding.schema.json": "f09f15972acda3280f240e707fd57388cfb6d537cb6bc4ae4c2cb729099dc64e",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment.schema.json": "68a71381d864ffeff3c8deb095bec7210cb97472e5e2176f949b74feb46adced",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment-receipt.schema.json": "0d4968dd4f8a868e428dce09ca056fbac257f0cc5d87a2683f45cf13dd9652a1",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment-stop.schema.json": "689f2b26bc96c5e97f2a322c7e1a4dbd3ab4479c24db685a0edeecec48fe984d",
+    "docs/specs/studio-observed-authoring/contracts/v2/assignment-lifecycle.schema.json": "b8d090d3f30b97818f3b8531d73fb1aaf889546964b795c15976da1a36aedb5a",
+    "docs/specs/studio-observed-authoring/contracts/v2/bridge.schema.json": "882cd55c381e75d0c2d2b8b0d07066a7c069e5a25dc2fcb4c5669810d63dd1f3",
+    "docs/specs/studio-observed-authoring/contracts/v2/README.md": "f8111c3a136b3e69270d6aa3c51548a00f5530862103f882073f278d4c41ba39",
+    "docs/specs/studio-observed-authoring/contracts/v2/observation-refresh.schema.json": "584adf56c057d1c0b369bbed8e0694f0cd7bcbd916675e0c27bfe3bb70c2b71d"
+  },
+  "coverage": [
+    "Strict Ajv schema IDs, references and all definitions; exact full compatibility tuple.",
+    "True null initialBlank evidence and first-source/ordinal-zero navigation semantics; observed-start alternative.",
+    "Tagged evidence, request, operation, input, scope and full learned-plan hash identities; fixed non-ASCII vectors.",
+    "Trusted classified immutable source spans/configuration references, UTF-16 boundaries and exact Unicode/whitespace provenance. No semantic extraction or model projection.",
+    "Cumulative pending allocation -> successful producer/local availability -> actual consumer admission/slot/coordinate edges; immutable owner/context/input/admission metadata.",
+    "All actual v2 bridge receiver routes with confirmed audience/role/mTLS requirements and runner200/backend202 response shapes; current data-free receiver error formats."
+  ],
+  "limitations": [
+    "This is development conformance evidence, not an independent QA verdict.",
+    "Schema/cross-record fixtures do not prove live DOM identity, transport authentication, native browser semantics, account connection, winner-only runtime execution or crash recovery; actual joined tests belong to backend/runner owners.",
+    "No model-facing source projection or INPUT-POLICY-01 choice; no publication/lowering/artifact/replay readiness implementation.",
+    "Plan array position, concrete first source step, hashes and graph/order constraints are enforced by the cross-record oracle in addition to JSON shape; schema validation alone is insufficient.",
+    "Runner auth/error implementation was in progress during this slice; OpenAPI encodes confirmed success directions/status/shapes and current bounded runner error format."
+  ],
+  "resolvedDevelopmentFindings": [
+    {
+      "finding": "Initial fixture harness canonicalized private source maps keyed by opaque IDs, which are not canonical wire documents.",
+      "resolution": "Validate fixture strings for well-formed Unicode independently; hash only canonical wire/source-reference/table/plan records. Final checker passes."
+    }
+  ],
+  "consultation": {
+    "scope": "Read-only native browser operation guidance requested by coordinator; no runner/backend edits.",
+    "sources": [
+      "https://playwright.dev/docs/api/class-elementhandle",
+      "https://raw.githubusercontent.com/ChromeDevTools/devtools-protocol/master/pdl/domains/Input.pdl"
+    ],
+    "conclusion": "Retain target in isolated collector, revalidate live type/origin/actionability/focus/hit target, use public native keyboard/mouse or CDP Input with bounded cancellation and conservative post-input uncertainty. Public APIs do not atomically bind native focus/coordinate dispatch to isolated retained-node identity; this limitation must not be claimed solved by schema fixtures."
+  },
+  "storyMutations": false,
+  "cliMutations": false,
+  "commits": false,
+  "qaVerdictAssigned": false,
+  "assignmentAmendment": {
+    "status": "completed-contract-amendment",
+    "ownedFiles": [
+      "docs/specs/studio-observed-authoring/contracts/v2/assignment.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/assignment-receipt.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/assignment-stop.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/assignment-lifecycle.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/bridge.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/README.md",
+      "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json",
+      "docs/specs/studio-observed-authoring/openapi-v2.yaml",
+      "tools/check-studio-observed-contracts.cjs",
+      ".ai/STUDIO-OBS-004-contract-development.json"
+    ],
+    "preservedContextVariants": {
+      "stop": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schemaVersion": {
+            "const": 2
+          },
+          "sessionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "workerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "ownerFence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "scopeHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contextId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "contextRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "sourceRevision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "configurationRevision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "versions": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/versions.schema.json"
+          },
+          "reason": {
+            "enum": [
+              "CANCELLED",
+              "EXPIRED",
+              "UNKNOWN_OUTCOME",
+              "LEASE_LOST",
+              "CONTEXT_LOST"
+            ]
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "sessionId",
+          "workerId",
+          "ownerFence",
+          "scopeHash",
+          "contextId",
+          "contextRevision",
+          "sourceRevision",
+          "configurationRevision",
+          "versions",
+          "reason"
+        ]
+      },
+      "lifecycle": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schemaVersion": {
+            "const": 2
+          },
+          "sessionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "workerId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "ownerFence": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "scopeHash": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "contextId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "contextRevision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "sourceRevision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "configurationRevision": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "versions": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/versions.schema.json"
+          },
+          "reason": {
+            "enum": [
+              "CANCELLED",
+              "EXPIRED",
+              "UNKNOWN_OUTCOME",
+              "LEASE_LOST",
+              "CONTEXT_LOST"
+            ]
+          }
+        },
+        "required": [
+          "schemaVersion",
+          "sessionId",
+          "workerId",
+          "ownerFence",
+          "scopeHash",
+          "contextId",
+          "contextRevision",
+          "sourceRevision",
+          "configurationRevision",
+          "versions",
+          "reason"
+        ]
+      }
+    },
+    "scope": "Actual worker assignment/claim/renew control contract only; no model privacy branch or browser/publication proof.",
+    "completedAt": "2026-10-08T12:22:30.699429+00:00",
+    "baseline": {
+      "v2Cases": 96,
+      "v2OpenApiExamples": 37,
+      "v2Schemas": 21,
+      "canonicalVectors": 4,
+      "v1Cases": 124,
+      "v1OpenApiExamples": 109
+    },
+    "verification": {
+      "v2Cases": 150,
+      "v2PositiveCases": 42,
+      "v2NegativeCases": 108,
+      "v2OpenApiExamples": 45,
+      "v2Schemas": 25,
+      "allDefinitionsCompiled": true,
+      "canonicalVectors": 5,
+      "v1Cases": 124,
+      "v1OpenApiExamples": 109,
+      "historicalFilesByteIdentical": 29,
+      "contextStopLifecycleBranchesUnchanged": true
+    },
+    "commands": [
+      {
+        "command": "node --check tools/check-studio-observed-contracts.cjs",
+        "exitCode": 0
+      },
+      {
+        "command": "node tools/check-studio-observed-contracts.cjs",
+        "exitCode": 0
+      },
+      {
+        "command": "Python historical SHA-256, preserved context union branch and owned-file whitespace checks",
+        "exitCode": 0
+      }
+    ],
+    "coverage": [
+      "Closed assignment intent and scoped receipt, acquisition fence increment and hard deadline.",
+      "Existing context stop/lifecycle variants preserved alongside assignment-scoped no-context variants.",
+      "Actual-worker claim request and full typed grant identity; backend role cannot substitute for worker identity.",
+      "Synthetic serial renewal traces with fresh keys during ACTING and AWAITING_CLARIFICATION.",
+      "No context before ownership, no context-timestamp lease extension/regression, stop-before-context and ignored late grants.",
+      "Failed renewal and terminal202 response stop; post-expiry response does not revive local authority."
+    ],
+    "limitations": [
+      "Conformance fixtures do not prove actual worker claim/renew network calls, scheduling, concurrency, fsync or capacity reservations; backend/runner owners must exercise these through joined tests.",
+      "No browser/native operation, model privacy choice, account connection, publication or replay-readiness proof.",
+      "No own QA verdict, story/status/CLI edits or commits."
+    ]
+  },
+  "refreshAmendment": {
+    "status": "completed-contract-amendment",
+    "completedAt": "2026-10-08T15:19:46.542536+00:00",
+    "ownedFiles": [
+      "docs/specs/studio-observed-authoring/contracts/v2/observation-refresh.schema.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json",
+      "docs/specs/studio-observed-authoring/contracts/v2/README.md",
+      "docs/specs/studio-observed-authoring/openapi-v2.yaml",
+      "tools/check-studio-observed-contracts.cjs",
+      ".ai/STUDIO-OBS-004-contract-development.json"
+    ],
+    "baseline": {
+      "v2Cases": 150,
+      "v2OpenApiExamples": 45,
+      "v2Schemas": 25,
+      "canonicalVectors": 5
+    },
+    "verification": {
+      "v2Cases": 193,
+      "v2PositiveCases": 47,
+      "v2NegativeCases": 146,
+      "v2OpenApiExamples": 49,
+      "v2Schemas": 26,
+      "allDefinitionsCompiled": true,
+      "canonicalVectors": 6,
+      "observationRefreshCorrelationGoldenVector": "oref-85463e3f7f14e85755f2e0acc7ed3f3aed7fc619744d5545ea85eb54af14fd3e",
+      "v1Cases": 124,
+      "v1OpenApiExamples": 109,
+      "historicalFilesByteIdentical": 29,
+      "existingBridgeBodySchemasUnchanged": true
+    },
+    "commands": [
+      {
+        "command": "node --check tools/check-studio-observed-contracts.cjs",
+        "exitCode": 0
+      },
+      {
+        "command": "node tools/check-studio-observed-contracts.cjs",
+        "exitCode": 0
+      },
+      {
+        "command": "Python historical SHA-256, existing bridge schema identity and owned-file whitespace checks",
+        "exitCode": 0
+      }
+    ],
+    "coverage": [
+      "Closed current-context refresh request with expectedGeneration and exact existing observation callback/response shapes.",
+      "Golden oref- correlation vector using complete bridge identity, refresh HTTP key and canonical full request digest.",
+      "Backend OBSERVING intent before RPC, idle worker, acknowledged lease and no admitted/dispatching action.",
+      "Fresh committed callback before response, exact returned/current observation hash and generation.",
+      "Observation count reservation and byte accounting without new action, ordinal reset, lost binding handles or retained obsolete preparations.",
+      "Identical duplicate retrieves one current collection; changed digest, superseding generation/admission and stop/terminal state reject cached authority.",
+      "Lost controller response can recover exact matching committed observation without new collection."
+    ],
+    "limitations": [
+      "Synthetic conformance does not prove actual callback transport, worker collection or source-step completion. Backend/runner owners provide joined runtime evidence. Positive public v2 clarification/resume remains OBS-005; unresolved-pause refusal and v1 regression remain required OBS-004 checks.",
+      "Existing bridge schema SHA-256 remained unchanged; no observation request/response body changes.",
+      "No arbitrary-English StepVerifier/question production, model privacy choice, business-action replay, publication, browser/native-input guarantee or independent QA verdict."
+    ],
+    "clarificationScopeCorrection": {
+      "confirmedBy": "root",
+      "at": "2026-10-08T15:21:23.230608+00:00",
+      "required004Evidence": "Real nonfinal completeStep -> worker refresh -> actual next-source-step action retaining prior local binding; unresolved-pause refusal and preserved v1 clarification regression.",
+      "deferred005": "Positive public v2 clarification/resume and supported public DTO; no v1 request used as v2 evidence.",
+      "changes": "README evidence paragraph only; no schema/body/backend/runner/story/CLI changes."
+    }
+  },
+  "rootClarificationCorrection": {
+    "reason": "Verified commands.schema.json#/definitions/clarify exists in v2; missing schema is v2/clarification for question creation. Supersedes earlier clarificationScopeCorrection wording, whose history is retained.",
+    "required004": "Actual v2 answer-to-refresh using clearly labelled trusted question setup, unresolved pause refusal, cross-version rejection and preserved v1 regression.",
+    "deferred005": "Production v2 question creation schema and semantic question generation.",
+    "rootDocumentationEdit": "contracts/v2/README.md corrected after contract specialist handoff; no wire changes."
+  }
+}

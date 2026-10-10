@@ -96,3 +96,7 @@ logs/
 .claude/settings.local.json
 .aiox/install-log.txt
 .aiox/
+
+# QA evidence binaries (coverage archives, run videos) stay on disk, out of git history
+docs/qa/evidence/**/*.tar.gz
+docs/qa/evidence/**/*.webm

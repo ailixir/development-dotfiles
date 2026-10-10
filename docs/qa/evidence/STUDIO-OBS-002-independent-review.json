@@ -1,0 +1,614 @@
+{
+  "generatedAt": "2026-10-08T03:46:34.616Z",
+  "results": [
+    {
+      "id": "sensitive-ancestor-aria-label",
+      "pass": false,
+      "leaked": true,
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 3
+      },
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "text",
+          "depth": 2,
+          "documentId": "8d4615ad-613f-4a23-b02c-d50ab4b53521",
+          "elementType": "input",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "PRIVATE_REGION_CANARY",
+              "role": "textbox"
+            },
+            {
+              "exact": true,
+              "kind": "label",
+              "value": "PRIVATE_REGION_CANARY"
+            }
+          ],
+          "name": "PRIVATE_REGION_CANARY",
+          "nodeId": "node-1-6",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "textbox",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "password-label-aliased",
+      "pass": false,
+      "leaked": true,
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 3
+      },
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "4cf62e14-4e97-4c20-8fc8-f634c1483cda",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "PRIVATE_LABEL_CANARY",
+              "role": "button"
+            }
+          ],
+          "name": "PRIVATE_LABEL_CANARY",
+          "nodeId": "node-1-6",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "normalized-input-echo",
+      "pass": false,
+      "leaked": true,
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 2
+      },
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "3271fecb-ffea-4bcc-9824-970332641a51",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "CUSTOMER CANARY",
+              "role": "button"
+            }
+          ],
+          "name": "CUSTOMER CANARY",
+          "nodeId": "node-1-5",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "sensitive-ancestor-native-label",
+      "pass": false,
+      "leaked": true,
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 3
+      },
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "text",
+          "depth": 2,
+          "documentId": "d5b0c099-955c-4cf6-95a5-bd878a7ee93b",
+          "elementType": "input",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "REGION_LABEL_CANARY",
+              "role": "textbox"
+            },
+            {
+              "exact": true,
+              "kind": "label",
+              "value": "REGION_LABEL_CANARY"
+            }
+          ],
+          "name": "REGION_LABEL_CANARY",
+          "nodeId": "node-1-6",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "textbox",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "default-submit-duplicate",
+      "pass": false,
+      "playwrightCount": 2,
+      "collectorMatches": true,
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "24a2d0bc-2793-49bf-8bb7-0049405c5c4b",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Submit",
+              "role": "button"
+            }
+          ],
+          "name": "Submit",
+          "nodeId": "node-1-4",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ],
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 2
+      }
+    },
+    {
+      "id": "title-button-duplicate",
+      "pass": false,
+      "playwrightCount": 2,
+      "collectorMatches": true,
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "68a4834d-73c0-4689-ad3f-a586ea89c94c",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Continue",
+              "role": "button"
+            }
+          ],
+          "name": "Continue",
+          "nodeId": "node-1-4",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ],
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 2
+      }
+    },
+    {
+      "id": "title-button-wrong-name",
+      "pass": true,
+      "playwrightCount": 1,
+      "collectorMatches": true,
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "52a1e86b-4b7d-46a6-a0ac-e002031a7183",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Other",
+              "role": "button"
+            }
+          ],
+          "name": "Other",
+          "nodeId": "node-1-4",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ],
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 1
+      }
+    },
+    {
+      "id": "duplicate-aria-references",
+      "pass": false,
+      "playwrightCount": 0,
+      "collectorMatches": true,
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "c44de2fe-1c58-43f7-b27e-e017b3c16583",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Continue Continue",
+              "role": "button"
+            }
+          ],
+          "name": "Continue Continue",
+          "nodeId": "node-1-5",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ],
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 2
+      }
+    },
+    {
+      "id": "svg-title-duplicate",
+      "pass": true,
+      "playwrightCount": 2,
+      "collectorMatches": false,
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "060071d3-0363-4172-b6cd-7d18b334192e",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Continue",
+              "role": "button"
+            }
+          ],
+          "name": "Continue",
+          "nodeId": "node-1-4",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ],
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 3
+      }
+    },
+    {
+      "id": "shadow-button-duplicate",
+      "pass": false,
+      "playwrightCount": 2,
+      "collectorMatches": true,
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "c070b4fb-0264-4280-81bd-bf2fe8c9ff90",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Continue",
+              "role": "button"
+            }
+          ],
+          "name": "Continue",
+          "nodeId": "node-1-4",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ],
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "unsupportedSurface",
+        "truncated": false,
+        "withheldRegions": 2
+      }
+    },
+    {
+      "id": "aria-hidden-ancestor-label",
+      "pass": false,
+      "leaked": true,
+      "coverage": {
+        "complete": false,
+        "mode": "semantic",
+        "reason": "sensitivity",
+        "truncated": false,
+        "withheldRegions": 3
+      },
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "text",
+          "depth": 2,
+          "documentId": "be7c4fd8-7485-4fc0-8206-5a98e88c41b6",
+          "elementType": "input",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "HIDDEN_REGION_CANARY",
+              "role": "textbox"
+            },
+            {
+              "exact": true,
+              "kind": "label",
+              "value": "HIDDEN_REGION_CANARY"
+            }
+          ],
+          "name": "HIDDEN_REGION_CANARY",
+          "nodeId": "node-1-6",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "textbox",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "label-noninput-duplicate",
+      "pass": false,
+      "playwrightCount": 2,
+      "collectorMatches": true,
+      "nodes": [
+        {
+          "actionable": false,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "0e7df673-de04-4e1e-9700-84155f517b4b",
+          "elementType": "other",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [],
+          "name": "Reference",
+          "nodeId": "node-1-4",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "generic",
+          "visible": true
+        },
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "text",
+          "depth": 2,
+          "documentId": "0e7df673-de04-4e1e-9700-84155f517b4b",
+          "elementType": "input",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [
+            "node-1-4"
+          ],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Reference",
+              "role": "textbox"
+            },
+            {
+              "exact": true,
+              "kind": "label",
+              "value": "Reference"
+            }
+          ],
+          "name": "Reference",
+          "nodeId": "node-1-5",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "textbox",
+          "visible": true
+        },
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "none",
+          "depth": 2,
+          "documentId": "0e7df673-de04-4e1e-9700-84155f517b4b",
+          "elementType": "button",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "role",
+              "name": "Reference",
+              "role": "button"
+            }
+          ],
+          "name": "Reference",
+          "nodeId": "node-1-6",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "button",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "placeholder-whitespace-duplicate",
+      "pass": true,
+      "playwrightCount": 1,
+      "collectorMatches": true,
+      "nodes": [
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "text",
+          "depth": 2,
+          "documentId": "c4a6f1b4-972f-4b1e-a5fa-52a9a3416838",
+          "elementType": "input",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "placeholder",
+              "value": "Reference"
+            }
+          ],
+          "name": "Reference",
+          "nodeId": "node-1-4",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "textbox",
+          "visible": true
+        },
+        {
+          "actionable": true,
+          "classification": "structuralOnly",
+          "controlType": "text",
+          "depth": 2,
+          "documentId": "c4a6f1b4-972f-4b1e-a5fa-52a9a3416838",
+          "elementType": "input",
+          "formId": null,
+          "generation": 1,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "exact": true,
+              "kind": "placeholder",
+              "value": " Reference "
+            }
+          ],
+          "name": " Reference ",
+          "nodeId": "node-1-5",
+          "parentNodeId": null,
+          "policyRuleId": "app-policy-v1",
+          "regionId": null,
+          "role": "textbox",
+          "visible": true
+        }
+      ]
+    },
+    {
+      "id": "disposed-session-refuses",
+      "pass": true
+    }
+  ]
+}

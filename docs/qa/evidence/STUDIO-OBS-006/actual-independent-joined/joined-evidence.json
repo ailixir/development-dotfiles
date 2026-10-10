@@ -1,0 +1,46 @@
+{
+  "controlledProviderCalls" : 6,
+  "initialSubmits" : 1,
+  "finalizationSubmits" : 0,
+  "ordinaryReplays" : 2,
+  "artifactHash" : "1f08dc395db655f2d1c13e16cc3ef2bdde4ed89cf8c368191d8e6784a73d51f7",
+  "productionImage" : "NOT_ASSERTED_CONTROLLED_LOCAL_CATALOG",
+  "catalog" : {
+    "profile" : {
+      "catalog" : "observed-replay-1",
+      "playwright" : "1.63.0",
+      "browserEngine" : "chromium",
+      "contract" : 2,
+      "learnedPlan" : 2,
+      "observation" : 2,
+      "guidedPolicy" : 2,
+      "referencePolicy" : 3,
+      "lowering" : 1,
+      "artifact" : 2,
+      "language" : "observed-2",
+      "executor" : "observed-2",
+      "publicationEvidence" : 1,
+      "validationBasis" : 1,
+      "validator" : "observed-1",
+      "protocol" : 2,
+      "replayAuthorization" : 1,
+      "accountAbi" : 1
+    },
+    "build" : {
+      "profileHash" : "1df4fdc02c516665bee18e2f6b8f7461c476d4772285b093874ec562ea2572cd",
+      "schemaBundleHash" : "f01fec3de4bc1123d927b1379b050becb5203cafccad1e92ff8abccfd458c275",
+      "referenceBundleHash" : "3a540a063d553503508b3624a3fac8de067ed47a17f9a810695480c4434395d3",
+      "chromiumBuild" : "1243",
+      "executableImageDigest" : "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    }
+  },
+  "learningKinds" : [ "SOURCE_PLAN", "NEXT_ACTION", "NEXT_ACTION", "NEXT_ACTION", "NEXT_ACTION", "NEXT_ACTION" ],
+  "counters" : {
+    "actions" : 5,
+    "observations" : 7,
+    "modelProposals" : 6,
+    "modelInputTokens" : 84020,
+    "modelOutputTokens" : 24576,
+    "sanitizedEvidenceBytes" : 20108
+  }
+}

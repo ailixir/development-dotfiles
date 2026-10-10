@@ -1,0 +1,133 @@
+schema: 1
+story: STUDIO-OBS-004
+story_title: Runner guided control and execution-local dataflow
+gate: PASS
+status_reason: All four initial findings are independently verified resolved,
+  including original unchanged Chromium and wire reproductions. Current joined
+  execution, privacy, parsing, schema parity and legacy regression gates pass
+  within the approved OBS-004 scope.
+reviewer: Quinn (@qa /root/sdc_obs004_qa; independent from implementers)
+reviewed_revision: sha256:765212d573673085c38959683862aca11cda58b7f1998c51885a10975455661d
+updated: 2026-10-08T16:50:14.290Z
+top_issues: []
+waiver:
+  active: false
+review_iteration: 1
+prior_gate:
+  path: docs/qa/evidence/STUDIO-OBS-004-initial-gate-fail.yml
+  verdict: FAIL
+  sha256: 100965b13f1b66fc3be0761acc6a4b7299d2e3f65be71809f0f55b040860cb96
+resolved_findings:
+  - id: SEC-001
+    status: RESOLVED
+    verification: Unchanged initial Chromium script now reports firstContains=false
+      and secondContains=false. Additional independent real browser probe
+      confirms uncaptured password/input/approved-business values remain masked
+      after same-document removal and navigation; fresh session remains
+      isolated; count/byte overflow poisons further collection and disposed
+      state rejects late withhold. Real37-case Spring/worker/Chromium suite
+      confirms actual backend observation/command persistence excludes
+      uncaptured password/input echoes; process stdout/stderr excludes all
+      canaries.
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-004-r1-independent-edge-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-r1-backend.log
+  - id: REL-001
+    status: RESOLVED
+    verification: Original prevented-check returns UNKNOWN_OUTCOME; radio-uncheck
+      returns TARGET_CHANGED before native effects. Independent
+      reverted/replaced checkbox cases each record one effect attempt and
+      uncertainty. Real joined ledger test commits UNKNOWN_OUTCOME after
+      prevented toggle and refuses dispatch retry; radio refuses preparation
+      with zero toggle attempts. Existing positive/no-op/native/reveal
+      regressions pass.
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-004-r1-independent-edge-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-r1-backend.log
+      - docs/qa/evidence/STUDIO-OBS-004-r1-fixtures.log
+  - id: SEC-002
+    status: RESOLVED
+    verification: Original real-mTLS duplicate-key request now returns SCHEMA with
+      zero claims. Raw request suites use actual Java and Node HTTPS endpoints
+      for duplicate and escaped/nested keys, fatal UTF8, trailing tokens,
+      exponent/fraction/negativezero integers; zero persisted
+      commands/navigation. Java and Node JWT suites reject extra claims and
+      noncanonical/negative nbf. Real Java runner-response boundary rejects
+      malformed responses. Additional independent real-mTLS Node callback
+      response probe passes all20 raw vectors; it is a controlled parser
+      fixture, not semantic backend evidence.
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-004-r1-independent-wire-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-r1-response-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-r1-backend.log
+      - docs/qa/evidence/STUDIO-OBS-004-r1-unit.log
+  - id: REL-002
+    status: RESOLVED
+    verification: Actual Java/Node assignment validators and strict Ajv agree with26
+      shared date vectors under the explicitly approved v2 UTC profile.
+      Independent timestamp cases include hour24, leap second, offset, final
+      newline, ninefractiondigits and century leap rules. Unsupported schema
+      keyword, missing/external refs, pointer to nonschema data and cycle all
+      fail. Java missing definition refuses. Source review confirms ordinary
+      NetworkNT draft7 format remains active; no permissive override or
+      normalization. No006 learned-plan runtime validation claim.
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-004-r1-independent-probe.json
+      - docs/qa/evidence/STUDIO-OBS-004-r1-backend.log
+      - docs/qa/evidence/STUDIO-OBS-004-r1-unit.log
+      - docs/qa/evidence/STUDIO-OBS-004-r1-contracts.log
+evidence:
+  review: docs/qa/evidence/STUDIO-OBS-004-r1-independent-review.json
+  source_manifest: docs/qa/evidence/STUDIO-OBS-004-r1-source-manifest.json
+  tested_worker: docs/qa/evidence/STUDIO-OBS-004-r1-tested-worker.json
+  backend_tests: 92
+  joined_tests: 37
+  runner_unit_passed: 1269
+  runner_unit_skipped: 29
+  runner_fixture_passed: 273
+  runner_fixture_skipped: 10
+  trace:
+    ac_covered:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+    ac_gaps: []
+nfr_validation:
+  security:
+    status: PASS
+    notes: Lifetime masking and strict raw wire/auth parsing independently verified.
+  reliability:
+    status: PASS
+    notes: Native postconditions, durable no-repeat, refresh/lease/cancel fault
+      paths and schema parity verified.
+  performance:
+    status: PASS
+    notes: Existing strict bounds and bounded retained-target reveal verified; no
+      benchmark claim.
+  maintainability:
+    status: PASS
+    notes: Custom loaded schema subset now audits unsupported semantics and refs;
+      shared parity corpus is exercised by actual validators.
+coderabbit:
+  available: false
+  wsl: false
+  configuredBinaryExists: false
+  fallback: Configured graceful_degradation; fresh independent reviewer source
+    examination, exact reruns and adversarial probes. No CodeRabbit PASS.
+scope_limits:
+  - PASS covers approved004common mechanism with controlled account/semantic
+    fixture ports only.
+  - INPUT-POLICY-01 remains pending for005source-to-model construction; no model
+    calls, production question generation or005semantic completion proved.
+  - 006publication/lowering and007production account connection remain
+    fail-closed later ports.
+  - Native focus/coordinate input is not universally atomic; guarantee is
+    immediate checks, oneattempt and honest uncertainty.
+  - No implementation fixes, commits/push, agents orCLI/wave-state mutations
+    byQA.

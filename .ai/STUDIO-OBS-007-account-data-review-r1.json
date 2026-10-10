@@ -1,0 +1,290 @@
+{
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Dara / independent database-state-machine reviewer / obs006_ddl_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "reviewType": "NARROW_ACCOUNT_CURRENT_AUTHORITY_R1_DESIGN",
+  "at": "2026-10-09T18:25:50.973486+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "verdictScope": "Local durable authority storage/state-machine design only. Not implementation QA, migration approval, lifecycle or whole-story gate.",
+  "summary": "R1 supplies the missing post-model live-caller protocol, concrete two-table intent and acyclic007 client split. Four locally actionable data-design gaps remain: source/session lock inversion, exact durable binding/epoch/marker enforcement, deadline precision/final lock-wait checks, and bounded retention of replay-protection tombstones. Provider integration remains unavailable and unproved.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r1.json": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "c13a0739f43899cd215ca5765836f7be59f8cffd416838f7a8b214ce5fb0c66b",
+    ".ai/STUDIO-OBS-007-po-validation.json": "48c0dfd523c1b78676e150ee8fc87fb9290fae07c29e65fac86603e39a655e12",
+    ".ai/STUDIO-OBS-007-account-design-review.json": "24a4061216420d75ac7f0aa3f189245794099733fbb1a595650c61d05f14fdf4",
+    ".ai/STUDIO-OBS-007-account-design.json": "01f27650177bb672c8081cff3c6d4f3d9846d54a2b6232d91f772b760e656d6c"
+  },
+  "frozenHashVerification": {
+    "designExpected": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2",
+    "resolutionExpected": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376",
+    "matches": true,
+    "inputFingerprintsCompared": 216,
+    "authorizedStoryBaselineOverlay": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "beforeSha256": "a114e501060be5ef91e4d8f78a5e377c0e43b602fae9788a3f120876a13ac84f",
+        "r1BaselineSha256": "c13a0739f43899cd215ca5765836f7be59f8cffd416838f7a8b214ce5fb0c66b",
+        "reason": "Authorized coordinator story reservation/replan before R1; not mutated by architect."
+      }
+    ],
+    "mismatches": []
+  },
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "faa959d41421b33339c5b168c247a31ae03afb0373596070187b8265d23c1be9",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedProductionSessionAccess.java": "2e8888cb69628831475a32698d9b7093bef99ba0326e7e46300b468d3e9709a5",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java": "8d87928ce342c600189d77baae2c604947e9a086608fdb182e06b2827d1800f5",
+    "backend/src/main/java/com/citi/put/checks/studio/StudioRepository.java": "7ff3123adad8cd1fb10e27c92d874adb124a2fdb5839d6d627a2d70749bd7a3d",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "f4e7f477dd878633cd61d9a66a1fb7199e6c0829357e316f0c4878036a457684",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "c001b39a64a818637e7c272e238486492cc681f5e5c3ca151a34530a60e60ebb",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedPlanningController.java": "a54596c9c59947c685a5420f4d7eef79615af9491928aa7e4de5e3514b2fc4ec",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedDispatchService.java": "4c4d41d0f1bc2bac7e9f4a8aa9881a1066f68ef82a4930167a210a7ecb20aed3",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java": "0b58cd9de58d51591282c6ee2078847cf82d1551b8db3667a2d96ccba708e990",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedMaterializationService.java": "63bcaa2ef159282c1f901121bc3e2cce4e7fcc9897ac0047e09208d44c5576fb",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/GuidedPlanPublisher.java": "cef0198a96089050632bb44b504951bd0e80513a1517caca7631371eb27319be",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayAuthorization.java": "8c129bd8c3a97c3f26c5cd967e57bcee18d5eab2cb7c4af439c975faef0a1331",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+    "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql": "859c27578e24ad4eeaad0c5a16cb42ee11ac82b94d04ab0fa11644ba4c36502a",
+    "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql": "909e8d68b1012aa2b88ae2567e93a811c233fa61c8ade6b822d4c3fb585bf85c",
+    "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7",
+    "backend/src/main/resources/db/migration/V33__studio_observed_publication.sql": "1119fe64db48d1eeb90fb3798cdd51eea1cd9da63bc0fd13d162af5309d6e50d",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "c13a0739f43899cd215ca5765836f7be59f8cffd416838f7a8b214ce5fb0c66b",
+    ".ai/STUDIO-OBS-007-po-validation.json": "48c0dfd523c1b78676e150ee8fc87fb9290fae07c29e65fac86603e39a655e12",
+    ".ai/STUDIO-OBS-007-account-design-review.json": "24a4061216420d75ac7f0aa3f189245794099733fbb1a595650c61d05f14fdf4",
+    ".ai/STUDIO-OBS-007-account-design.json": "01f27650177bb672c8081cff3c6d4f3d9846d54a2b6232d91f772b760e656d6c",
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r1.json": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376",
+    ".codex/skills/aiox-data-engineer/SKILL.md": "c97b81fc2599852b32cf391957ed084df24241814050f962724c35f78448bba4",
+    ".aiox-core/development/agents/data-engineer.md": "4b921018c23721c6f71a5d23b6495d254f260cd85406db5915f034a90d17c845",
+    ".aiox-core/product/checklists/database-design-checklist.md": "6d3cf038f0320db0e6daf9dba61e4c29269ed73c793df5618e155ebd07b6c200",
+    ".aiox-core/product/data/migration-safety-guide.md": "42200ca180d4586447304dfc7f8035ccd09860b6ac34c72b63d284e57c94d2db",
+    ".aiox-core/development/tasks/db-verify-order.md": "478a1f94e0e4d9da5488ce5df41538308454a64e534d587d5d8361dbd9cff701"
+  },
+  "findingResolutionAssessment": {
+    "AUTH-007-01": "Substantially specified locally: after APPLIED/read-only prep, liveFreshCaller uncachedCore/provider preflight, unique durable permit and single-winner atomic intent, no scanner mint, worker final-invocation control, historical accounting. DATA-007-01..04 still prevent localdata-designPASS.",
+    "SEQ-007-02": "Local design split resolves reverse dependency:007 owns minimalreal Run/automaticauthority centralclient;008 owns fullUX/finalize/firstguidedrecording. Rootstill must reserveexactpaths/amendtasks/FileList beforeimplementation."
+  },
+  "findings": [
+    {
+      "id": "DATA-007-01",
+      "severity": "HIGH",
+      "blocking": true,
+      "category": "Global lock order",
+      "designReferences": [
+        "account-provider-readiness-design.md:193",
+        "account-provider-readiness-design.md:199"
+      ],
+      "sourceReferences": [
+        "GuidedSessionService.java:75-80",
+        "GuidedSessionService.java:1756-1762",
+        "GuidedProductionSessionAccess.java:70-74",
+        "GuidedSourceSnapshotRepository.java:28-32",
+        "StudioRepository.java:57-59",
+        "GuidedPlanPublisher.java:187-194",
+        "GuidedPlanPublisher.java:258-270"
+      ],
+      "finding": "R1 orders current test/source before session but existing reachable translation/admission/consume and publication paths lock the guided session first, then ui_tests. Refactoring only the new consume operation leaves a real source->session versus session->source wait cycle. The text explicitly delegates reconciliation without selecting the corrected order.",
+      "correction": "Choose one source-backed order for every operation touching an existing guided session, including mint/consume/accounting/reaper/publication and scanner. The narrow compatible choice is session->current ui_tests source/config->translation/obligation->command->permit->exact preparation/action and any local epoch record at one consistently named position. Discover immutable routing IDs without acquiring a command lock first. Candidate scanning must not hold command/permit row locks before entering session-first consumption. Document the fresh-start exception (no existing session row to contend on) and audit namespace advisory locks and FK/trigger acquisitions. Any different global order requires an explicit complete source/ownership replan, not a local reverse-order transaction.",
+      "plannedNegativeTests": [
+        "Real PostgreSQL barriers: hold session in an existing translation transaction while a consume/mint wants current source, and hold source on the opposing path; corrected ordering must complete/refuse without a source/session deadlock cycle.",
+        "Race candidate scanner with consume/cancel/publication and duplicate same-command callers; scanner selection grants no ownership/send rights and cannot invert command/session order.",
+        "After each queued lock resumes, expire the relevant lease/permit/preparation and confirm zero new admission/dispatch intent."
+      ],
+      "implementationChoiceLocal": true
+    },
+    {
+      "id": "DATA-007-02",
+      "severity": "HIGH",
+      "blocking": true,
+      "category": "Durable binding and enforceable SQL mechanism",
+      "designReferences": [
+        "account-provider-readiness-design.md:117-121",
+        "account-provider-readiness-design.md:163",
+        "account-provider-readiness-design.md:177",
+        "account-provider-readiness-design.md:189-195",
+        "account-provider-readiness-design.md:232",
+        "account-provider-readiness-design.md:339-341"
+      ],
+      "sourceReferences": [
+        "V30__studio_guided_sessions.sql:55-77",
+        "V31__studio_guided_bridge.sql:32-67",
+        "V32__studio_guided_translation.sql:18-35",
+        "V32__studio_guided_translation.sql:37-66",
+        "V32__studio_guided_translation.sql:74-94",
+        "V32__studio_guided_translation.sql:115-135",
+        "GuidedPreparationStore.java:43-76",
+        "GuidedSessionRepository.java:47-72"
+      ],
+      "finding": "The selected commands column list is identity JSON plus metadata, but later claims composite plan/obligation/preparation FKs without selecting scalar/generated projection columns. PostgreSQL FKs do not enforce links embedded only in JSON. Current account/policy revocation epochs have no selected durable authoritative record/update owner; immutable snapshots in commands/permits cannot themselves prove the current epoch. The proposed immutable required-authority progress marker is outside the existing V30 identity guard, which protects document fields but leaves progress mutable.",
+      "correction": "Specify the actual typed nullable discriminator columns or generated projections used for (session_id,plan_revision), (session_id,obligation_id), (session_id,preparation_id), (session_id,model_attempt_id), (session_id,context_id,owner_fence) and eventual scoped admission FK; choose each FK/NO ACTION or RESTRICT behavior and row/JSON equality CHECK with IS TRUE. SETUP must bind its real materialization/assignment and separate bootstrap descriptor, with no fake action/preparation/model FK; state whether its accepted plan remains bound and which action-only fields are null. Persist a monotone local account/policy revocation record or explicitly selected session-progress fields under the common lock, with an authenticated update owner, stale-event rejection and epoch/CAS rules; provider-side current epoch semantics remain EXT-001. Add an additive V34 insert/update guard for the required-authority marker and make it present in the initial INSERT for newly gated sessions, never retrofitted/deleted/replaced on old rows. Choose the unconditional publication guard/hook and owner that rechecks every gated action consumed/accounted association; currently publication owners are listed chiefly under conditional handoff D4. Refactored admission must select the exact command-bound preparation ID/hash, not the current latest matching-proof query. Keep actual APPLIED/request/plan/obligation/account joins explicit application/trigger checks, never credit shape/FK as fresh Core/provider entitlement.",
+      "plannedNegativeTests": [
+        "Start from valid purpose-specific rows; direct SQL missing/extra/null/wrong-type, cross-session and mismatched plan/attempt/obligation/preparation/context/admission projections refuse. Wrong actual APPLIED status/request/plan meaning refuses in the application join even with locally recomputed hashes.",
+        "Direct SQL or service update/delete/backfill of required-authority marker refuses; ordinary historical session with no marker stays unchanged; removing the marker cannot enable old admit/consume/dispatch paths.",
+        "Mint at epoch E, commit durable revocation/policy epoch E+1, restart, then consume at E: zero admission/intent/effect. Old/delayed revocation notifications cannot regress epoch; returning permissions never revives the old command/permit.",
+        "Add a newer same-proposal preparation after a command is frozen: consume either uses the exact original unexpired preparation or refuses, never silently picks the newer row.",
+        "Attempt publication with one gated SUCCEEDED action lacking exact immutable consumed/accounted authority association; refuse while preserving old ungated publication/history/replay."
+      ],
+      "implementationChoiceLocal": true
+    },
+    {
+      "id": "DATA-007-03",
+      "severity": "HIGH",
+      "blocking": true,
+      "category": "Deadline precision and final checks after locks",
+      "designReferences": [
+        "account-provider-readiness-design.md:154",
+        "account-provider-readiness-design.md:175-181",
+        "account-provider-readiness-design.md:191-199",
+        "account-provider-readiness-design.md:207-211",
+        "account-provider-readiness-design.md:386"
+      ],
+      "sourceReferences": [
+        "PublicationContracts.java:23-34",
+        "GuidedSessionService.java:1758-1762",
+        "GuidedSessionService.java:1788-1797",
+        "GuidedPreparationStore.java:43-55",
+        "GuidedTranslationStore.java:120-122",
+        "ObservedReplayAuthorization.java:128-135"
+      ],
+      "finding": "R1 names clock_timestamp and finite permits but does not choose exact protocol/database precision or require the decisive DB-time sample after all potentially waiting locks/FK work. Existing guided wire timestamps permit nanoseconds while PostgreSQL timestamptz has a different precision; existing service owner/active checks can occur before a later source lock wait. An initial transaction-time or stale pre-lock sample is insufficient for the new no-expired-admission invariant. The worker authenticated-clock policy also has no selected conservative skew bound/configuration behavior.",
+      "correction": "Choose one exact representation for newly minted authority times and checkedAt/grace boundaries, e.g. the already implemented UTC millisecond PublicationContracts convention with downward-only deadline flooring. Preserve old evidence timestamp bytes. Re-read fresh DB clock_timestamp only after acquiring every lock that can wait; perform the full minimum Core/account freshness, pending, permit, preparation, provider, owner lease and hard session expiry predicate at the final CAS. Any additional waiting operation requires another fresh decisive check before exposing the ephemeral winner. Specify strict equality-at-expiry refusal and immutable issued/consumed/expiry row-to-JSON equality. Select conservative worker skew/offset policy, configured bound and default refusal when clock assumptions are unavailable; receipt translation must never add rights, and monotonic plus absolute checks survive wall-clock rollback.",
+      "plannedNegativeTests": [
+        "Hold session/source/command/permit/preparation or referenced-row lock across expiry; release and require no admission/command-consumption/send discriminator. Repeat for a slow outside-lock Core/provider check whose freshness window elapses before mint.",
+        "Exact expiry, one supported tick before/after, input nanoseconds and PG round-trip: no rounding-up extension or cross-language disagreement. Same-owner lease renewal leaves original permit expiry byte-identical.",
+        "Inject bounded positive/negative clock skew and backward wall-clock movement after receipt acceptance; zero first invocation after expiry and no later primitive in an already begun compound action."
+      ],
+      "implementationChoiceLocal": true
+    },
+    {
+      "id": "DATA-007-04",
+      "severity": "HIGH",
+      "blocking": true,
+      "category": "Bounded durable retention and replay protection",
+      "designReferences": [
+        "account-provider-readiness-design.md:189-191",
+        "account-provider-readiness-design.md:217-228",
+        "account-provider-readiness-design.md:275-282",
+        "account-provider-readiness-design.md:343",
+        "account-provider-readiness-design.md:388-390"
+      ],
+      "sourceReferences": [
+        "V30__studio_guided_sessions.sql:37-44",
+        "GuidedSessionRepository.java:93-102",
+        "V32__studio_guided_translation.sql:125-135",
+        "GuidedSessionService.java:1171-1183",
+        "GuidedSessionService.java:1199-1209"
+      ],
+      "finding": "R1 bounds wire objects and capability cleanup but gives no command/permit/accounting row or aggregate count/byte limits, no bound on distinct public idempotency keys written through the existing ledger, and no metadata/tombstone retention/deletion eligibility. Live-command uniqueness plus one permit per command does not bound duplicate-key status rows or protect a removed terminal uniqueness record from re-creation. Provider cleanup is distinct from durable replay protection.",
+      "correction": "Select numeric per-session command/setup/permit/accounting and idempotency limits tied to existing finite action/obligation limits; guarantee a single SETUP attempt per frozen context even after terminal state, not merely one live command. Bound status/accounting JSON and persisted historical callback counts; repeated different-key requests should return existing status without unlimited ledger insertion or use a specified bounded dedup policy. Declare retention and deletion guards: never remove live/uncertain records or original consumed/expired/revoked uniqueness tombstones while the parent session/obligation/context can be reused/recovered, callbacks can legally arrive, or publication/history requires the association. A narrow safe initial policy is retain value-free authority tombstones with immutable parent history, reclaim only private resources promptly, and reject retired/unknown IDs rather than reconstruct/mint. If later GC is chosen, define the replay/callback/clock horizon, nonreuse guarantee, FK/publication implications and batch limits; do not equate five-second expiry with safe deletion.",
+      "plannedNegativeTests": [
+        "Flood one command with distinct Idempotency-Key values and repeated/late outcomes; stored row/byte counts remain within selected limits, one permit and deadline unchanged, zero additional effects.",
+        "After command completion/expiry/revocation, try new bootstrapAttemptId/key for the same context and new command/permit for the same obligation; no remint or second setup.",
+        "Attempt early tombstone deletion/retirement while callback/publication/worker recovery is possible; deletion refuses, and restart/scanner/duplicate request cannot recreate send authority.",
+        "Cleanup failure retains safe metadata and quarantined resource status; bounded retention worker never reports unacknowledged remote cleanup as success."
+      ],
+      "implementationChoiceLocal": true
+    }
+  ],
+  "nonblockingNotes": [
+    {
+      "id": "DATA-007-N1",
+      "severity": "MEDIUM",
+      "blocking": false,
+      "topic": "Terminal outcome pair matrix must be explicit during refinement",
+      "references": [
+        "account-provider-readiness-design.md:189-191",
+        "account-provider-readiness-design.md:211-226",
+        "V30__studio_guided_sessions.sql:33-35",
+        "V30__studio_guided_sessions.sql:78-91"
+      ],
+      "note": "Name the exact command/permit/action/session result for conclusive failure and authenticated NOT_INVOKED after consume. CONSUMED->EXPIRED is not in the listed command transitions, while the table says expire/stop. Prefer explicit accounting-complete failure or another selected monotone terminal mapping, preserving dispatchCount1 as consumed intent and wrapper NOT_INVOKED as zero browser effects; do not reset the counter or revive terminal rows. One-write historical accounting can be attached to an already UNKNOWN command without upgrading the command/action state. COMPLETED must mean accounted, not automatically successful publication."
+    }
+  ],
+  "acceptedDesignBoundaries": [
+    "Core/provider calls stay outside SQL locks; account adapters inside existing transactions must validate prepared results/localepochs, never fetch remotely.",
+    "One permit per prepared command, immutable identity/deadlines, jointly committed existing admission/dispatchCount1 and authority consumption with ephemeral live winner only; duplicate/restart yields no send payload. Existing consume disallows ambient transaction, so shared locked primitives must be extracted instead of nesting separately committing public methods.",
+    "Actual plan/model/preparation/evidence/owner/context/account/source comparisons are required; JSON shape/FK alone does not establish current external entitlement or original model/plan semantics.",
+    "Separate SETUP registration/no-browser acknowledgment and authored ACTION, no fake DOM/admission facts; initialBlank/first learned action and old ungated sessions remain preserved.",
+    "New accounting-only owning-worker callback after permit expiry is correct direction: record original correlated facts without live effect authorization, and never revive terminal/unknown/new-fence state, read availability or publication. Existing outcomeV2/internal live-owner guard cannot simply be reused as the late-accounting handler.",
+    "Freshness/lease renewal does not renew hard permit/session/provider/preparation authority. Lost ACK/crash before unproved send remain UNKNOWN/no retry; effect delivery may occur after an authorized initiation and no remote rollback is claimed.",
+    "V34 is proposed and unused; forward-only addition of metadata plus continuation constraint extension and gatedmarker guard can preserve V30-V33 files and ordinary saved replay. Rollback is disabling/draining new modes while keeping historical tombstones/pins; no destructive down migration is required by this repository.",
+    "EXT-001/provider identity/transport/non-navigating mechanism/current remote revocation/handoff capability remain unknown; no available port or controlled fixture is credited as production connectivity."
+  ],
+  "checklistApplication": {
+    "source": ".aiox-core/product/checklists/database-design-checklist.md",
+    "scope": "Static proposed design review, no executable migration exists. Generic framework Supabase/RLS/down-migration expectations are adapted to this JDBC monorepo and forward-only migration policy.",
+    "items": [
+      {
+        "area": "Domain model",
+        "status": "PARTIAL",
+        "comment": "Authorization metadata separated from execution ledger; exact durable binding mechanism incomplete(DATA02)."
+      },
+      {
+        "area": "Tables and keys",
+        "status": "PARTIAL",
+        "comment": "UUID PK/unique command/permit chosen; typed FK projections and setup final key uniqueness requiredefinition. Generic updated_at/softdelete notforced onto immutablefacts."
+      },
+      {
+        "area": "Relationships and constraints",
+        "status": "PARTIAL",
+        "comment": "Actual composite parents exist; proposed purpose-specific FK columns, nullsafeCHECK/marker/epoch guards unresolved."
+      },
+      {
+        "area": "Indexes/access patterns",
+        "status": "PARTIAL",
+        "comment": "Pending/live andunique lookups identified; candidate selection lock behavior and expiry/retention indexes needconcreteDDLre-review."
+      },
+      {
+        "area": "Normalization",
+        "status": "PARTIAL",
+        "comment": "Closed immutable identity+scalar projections justified for audit; state/currentepoch/retentionselectedmechanismneeded."
+      },
+      {
+        "area": "Security",
+        "status": "PARTIAL",
+        "comment": "Valuefree metadata/scoped backendaccess; DBmarker/currentepoch enforcement incomplete. No direct-browser DB/RLS access introduced."
+      },
+      {
+        "area": "Performance/retention",
+        "status": "NOT_DONE",
+        "comment": "Numeric row/byte/idempotency bounds and tombstone/GC lifecycle absent(DATA04); no measured performanceclaim."
+      },
+      {
+        "area": "Documentation",
+        "status": "PARTIAL",
+        "comment": "Source-backed protocol/owners/oracles detailed, but local corrected lock/storage/clock/retention decisions mustbe recorded."
+      }
+    ],
+    "readyForImplementationConfirmation": false
+  },
+  "mandatoryFutureOraclesNotRun": [
+    "Atomic rollback injected after admission insertion, obligation/preparation attachment, dispatchCount change, command consume, permit consume and idempotency status insert leaves every participating row unchanged and no ephemeral sender/network effect.",
+    "Different-key/two-tab/public signal/two scanner races produce exactly one persisted permit, one original action admission/consumption and at most one worker invocation; cached statuses never carry send authority.",
+    "After consume crash-before-send or lost ACK, restart/recovery never redispatches; actual worker completion journal before delayed callback accounts once.",
+    "Late exact-correlation outcome after permitexpiry can settle only a still-current nonterminal action; after hardexpiry/accountrevocation/fence/source drift/UNKNOWN it only appends bounded historical accounting and cannot create availability/readiness.",
+    "Valid purpose-specific baseline before every directSQL/schema/application coherent mutation; all bounds/identity/clock/retention negative tests in findings are requirements, not executed evidence.",
+    "Migrate authentic preV34 historical sessions and both ordinary/observed compatible histories; no retroactive marker/proof, no old-row checksum rewrite, gated oldroutes/mixedschema/unsupportedbuild refuse before effects."
+  ],
+  "readinessPreserved": {
+    "storyStatus": "Draft",
+    "poVerdict": "NO-GO",
+    "poScore": "4/10",
+    "EXT-001": "UNRESOLVED; approved provider/API/transport/configuration/handoff availability unavailable/unapproved",
+    "implementationAuthorizedByReview": false,
+    "overallStoryGateIssued": false
+  },
+  "workPerformed": {
+    "writtenOnly": ".ai/STUDIO-OBS-007-account-data-review-r1.json",
+    "sourceInspection": true,
+    "216FingerprintComparison": true,
+    "testsBuildsDatabaseCommandsBrowserProviderExternalCalls": false,
+    "productSchemaMigrationTestsStoryLifecycleGateEdits": false,
+    "subagentsRootCliCommitsPush": false
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  }
+}

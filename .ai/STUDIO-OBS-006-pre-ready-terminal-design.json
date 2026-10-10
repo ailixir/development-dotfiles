@@ -1,0 +1,31 @@
+{
+  "story": "STUDIO-OBS-006",
+  "kind": "Narrow pre-Ready terminal design, not implementation approval or QA verdict",
+  "at": "2026-10-09T12:07:22.351845+00:00",
+  "evidence": ".aiox/sdc/STUDIO-OBS-006/joined-attempts/pre-ready-final-rejection/",
+  "scope": "Observed-only terminal ERROR; no STARTED/PASS/dispatch/model/schema/migration/cancellation broadening",
+  "frozenDocuments": {
+    "docs/specs/studio-observed-authoring/pre-ready-terminal-design.md": "18126e4107972f3bf4532c1f2b5c815e374cd6999e33f249fa58cd1f17f8b880",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "e3cb5ecbac7ab92f642757f8b0c5dab86e6f5c63b70c6bedd262d67e32dd06d8"
+  },
+  "sourceSnapshot": {
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java": "45eed4c1bf110dcdc934e8b813469ac7e4c2beceacc5897bdb1958c992a00ed0",
+    "backend/src/main/java/com/citi/put/checks/studio/dispatch/StudioDispatchLedgerStatements.java": "e6eb4024b19216c21cae9059da0981ad967831c88a0fa2970dcb6512bf905cf1",
+    "backend/src/main/java/com/citi/put/checks/studio/internal/RunnerReportProjection.java": "d464d3db86b5037154b79a974f93e3e497c2618de433853d8f1d90f6df0f1e0e",
+    "studio-runner/src/server/runCoordinator.ts": "616bb068ea4267c062cf63d868ead2e882fe38c824ca83d2686a82a4f2f6029e",
+    "studio-runner/src/run/childRuntime.ts": "fc99aa7c485f6f41b0ded3b031fcf142a1fa19212246c1a265fc79c25e2b532a",
+    "studio-runner/src/run/observedAccount.ts": "28379ecd4383ccd81e94685c0eb931bd931a2a28ff29fed796cd707491cc400f",
+    "studio-runner/src/run/recording.ts": "0a3f3f29feda2d4f2611a1070bd7f03b253a51b26314985925e9725ac531b3bb"
+  },
+  "newProductOwnershipNeeded": [
+    "backend/src/main/java/com/citi/put/checks/studio/internal/ProgressReportService.java"
+  ],
+  "implementation": "NOT STARTED for this seam; delayed Java work is separately authorized",
+  "reviewQuestions": [
+    "Raw predicate before projection and exact RUN_ERROR/closed reason pair",
+    "Atomic partitioned execution/binding/receipt/owner/sequence SQL and unchanged ordinary/cancellation paths",
+    "No-write owner/sequence idempotence and existing evidence settlement without invented recording origin"
+  ],
+  "budgetCeilingUsd": 500,
+  "spendTelemetry": "UNKNOWN"
+}

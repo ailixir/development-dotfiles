@@ -1,0 +1,230 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "Independent read-only security/QA design re-review R1; not a lifecycle or implementation QA verdict",
+  "reviewer": "/root/obs005_peer",
+  "recordedAt": "2026-10-09T07:14:52.185603+00:00",
+  "verdict": "NEEDS_CHANGES",
+  "summary": "All four original PUB-001..004 security/QA gaps are addressed by concrete D/C production contracts. One actual persisted-plan shape mismatch remains: C4 omits server-issued needs[].bindingId while requiring the exact V32 accepted-plan hash. Correct that narrow contract before PO; the rest of the revised security architecture is acceptable subject to the retained implementation/test conditions.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "cf031d028efafcf8fa8765c868d303c28704b5e1237a10cca6cee82592788820",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "10dbc05aeaa5812d2faf11c1db22501e8ba02f60081c4473266f396a6ff478ab",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "c044f2dae8522a7b69b33d6c4c8a0318d78ae53ff16fbae1076321048bdad9bf",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "6aaa3942e5719619f8d9d87bd847a81146c8695765a55ba5c5ef1997b875db14",
+    ".ai/STUDIO-OBS-006-design-resolution-r1.json": "ef34aec2cf27c8671fca0421be54076e0c30de5b6652e93ef0f621b272b6303c",
+    ".ai/STUDIO-OBS-006-qa-design-review.json": "20ede22259ea1175527334383d35a84b55184d23113fbd4bf05bfca0a1645390",
+    ".ai/STUDIO-OBS-006-data-design-review.json": "23481702cf7009e650722b80b83811863be82b172dc62e089209df41a0be43c3",
+    ".ai/STUDIO-OBS-006-runtime-design-review.json": "5351f3b870c9672026f94062b826156dafa4e262679c40a23b6c964ac075cf80",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java": "9c9af5c53742944c99664f996f1d056e8da326e7d1a09b154c33700c94777d4b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java": "576b4fc572dcb568860a4e981e1007c0df015304952bd5383812fc0dc027d930",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java": "7788e2401ecbd5511c576d30ca7ccd4e1a9fb55bfe65a97296bcf1caf072058b",
+    "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json": "81dc761e0a180e4e0f314727510cc57384ba5159e9819b7fc7a366c339b440f7"
+  },
+  "frozenHashesMatch": true,
+  "initialReviewRecordsUnchanged": true,
+  "ownership": {
+    "literalPaths": 152,
+    "uniquePaths": 152,
+    "rootMechanicalReplanRequired": true,
+    "newContractCorrectionNeedsNoMandatoryNewProductFile": "Separate accepted-plan type can be hosted in already reserved publication contracts/basis validators; raw model schema remains frozen."
+  },
+  "originalFindingDisposition": [
+    {
+      "id": "PUB-001",
+      "status": "DESIGN_ADDRESSED",
+      "sections": [
+        "D2",
+        "D3",
+        "C4",
+        "C11"
+      ],
+      "assessment": "Concrete EvidenceRepository capture occurs in storePreparation while the original sanitized observation is current and in the same transaction; admission facts join atomically to the selected proof/obligation. Immutable bounded tables, missing-history refusal, multipage/restart tests and a basis independent of lowerer output resolve the original retention/equivalence gap. PUB-R1-001 is the remaining accepted-plan serialization correction."
+    },
+    {
+      "id": "PUB-002",
+      "status": "DESIGN_ADDRESSED",
+      "sections": [
+        "D6",
+        "C10"
+      ],
+      "assessment": "Separate ReceiptReadGrant/READ_PUBLISHED_RECEIPT uses actual uncached Core, same original/caller principal and current canRead, independent of expired worker/session/publication grant/current source/head. Stored request identity prevents mismatch; current readiness is separated from immutable historical publication. This resolves the original authority/deadline contradiction."
+    },
+    {
+      "id": "PUB-003",
+      "status": "DESIGN_ADDRESSED",
+      "sections": [
+        "C6",
+        "C7",
+        "D7"
+      ],
+      "assessment": "Concrete006 ObservedReplayAuthorization issues a noncredential execution/preallocated-attempt/revision/scope/profile/policy/account-bound grant after fresh Core canExecute; expiry is at most 30 seconds until admission. Acceptance/dispatch/admission compare immutable binding and expiry/current local revocation, with no cached/provisional/background substitute or unattended cookie refresh. The stated possible30-second Core revocation lag is honest bounded authority, not an instantaneous-revocation claim. Observed schedules fail closed; only account connectivity remains007."
+    },
+    {
+      "id": "PUB-004",
+      "status": "DESIGN_ADDRESSED",
+      "sections": [
+        "C10",
+        "D1",
+        "D5",
+        "D6"
+      ],
+      "assessment": "New result3/session-view3 selected by immutable publication base expose UUID revisionId plus revisionDigest from the real receipt/projector and separate currentReadiness. Original result2 hash-shaped readyRevisionId remains unchanged.008 automatic finalize/poll/reconnect and first-run recording boundary is explicit; no fake video/timings/ordinary replay row is introduced."
+    }
+  ],
+  "blockers": [
+    {
+      "id": "PUB-R1-001",
+      "severity": "high",
+      "priority": "P1",
+      "area": "C4 actual accepted translation-plan shape",
+      "finding": "C4 defines AcceptedTranslationPlan as the closed v2/source-selection schema with the sole extension obligations[].obligationId. Actual OBS-005 plans additionally contain needs[].bindingId: GuidedDependencyPlanner.allocate writes the server-issued bridge binding ID into every need, and bootstrap persists that enriched plan as the accepted V32 head. The referenced source-selection need object is closed and has no bindingId. Therefore the proposed exact basis type rejects every real implicit-reference plan, or forces stripping an original field and breaking the promised H(actual persisted translationPlan)=translationHash join.",
+      "design_refs": [
+        "docs/specs/studio-observed-authoring/publication-contracts.md:C4 AcceptedTranslationPlan",
+        "docs/specs/studio-observed-authoring/publication-data-contract.md:D3 original V32 plan/basis joins"
+      ],
+      "source_refs": [
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:46",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedDependencyPlanner.java:58",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:169",
+        "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java:133",
+        "docs/specs/studio-observed-authoring/contracts/v2/source-selection.schema.json#/properties/needs/items"
+      ],
+      "required_correction": "Define the exact accepted-need shape with the server-issued bindingId in addition to needId/producerStepId/consumers. For final publication require its exact one-to-one correspondence to the authoritative allocation for the same need and the original read/consumer graph. Preserve the full persisted accepted-plan bytes/canonical hash; do not remove bindingId to fit the source-model schema or allow model-issued allocation authority. Keep the raw model source-selection schema unchanged. Update C4 and its fixtures/required evidence; existing reserved publication contract implementation files can host the separate accepted-plan type.",
+      "required_oracles": [
+        "Use the actual closed005 implicit-reference flow to FINALIZING, read the production persisted V32 plan with needs[].bindingId, and accept it unchanged into ValidationBasis; Node must reproduce its stored translationHash.",
+        "Keep the malicious plan schema-valid but replace needs[].bindingId with another existing allocation, mismatch need/producer/consumer association, or recompute its local translationHash. Independent basis/allocation/admission joins refuse publication.",
+        "Missing bindingId for an allocated required need refuses; a no-needs plan remains valid. Raw model SOURCE_PLAN responses still cannot allocate binding IDs."
+      ],
+      "scope": "A concrete design/production-shape inconsistency, not a demand to implement006 before PO or to reopen005."
+    }
+  ],
+  "mandatoryConditions": [
+    {
+      "id": "PUB-C1",
+      "status": "RETAINED_WITH_PUB-R1-001",
+      "condition": "Original evidence capture and independent derivation must use exact immutable V32/bridge records including accepted need binding IDs. Validate the original metadata ACK against its original snapshot; do not compare it to later materialization revisions or treat stale unassociated preparations as live authority.",
+      "oracles": [
+        "Multipage and same-step observations overwritten before finalization still produce exact retained guards after restart.",
+        "Mutate schema-valid target/operation/read/guard/input/edge facts and recompute artifact-local hashes: original basis binding must still reject them."
+      ]
+    },
+    {
+      "id": "PUB-C2",
+      "status": "DESIGN_ADDRESSED_IMPLEMENTATION_REQUIRED",
+      "condition": "Implement D1/D4/D5/D6 parent locks, epoch/ABA guards, session-wide three charged validation claims, reciprocal deferred origin/receipt FKs, both V19 capability orders, source/authoring/head/fence/deadline rechecks and compile_request_id clearing. Final success is atomic; expected conflict is a fresh guarded transition that cannot overwrite a winning receipt/cancel.",
+      "oracles": [
+        "Real PostgreSQL direct-SQL missing/null/cross-scope/immutability tests, every rollback point, old/new compile races and two-session one-winner publication.",
+        "During validation, allow a normal same-owner lease renewal to be distinguished from owner/fence loss; explicitly bind the captured authority deadline versus current live lease. Renewal must not silently extend a committed claim or cause otherwise valid finalization to burn all claims solely through volatile snapshot hashing.",
+        "Across keys/restarts, at most three actual validator sends; stale result/claim/lease/snapshot cannot be applied; validated unchanged proof reuses without another call."
+      ]
+    },
+    {
+      "id": "PUB-C3",
+      "status": "DESIGN_ADDRESSED_IMPLEMENTATION_REQUIRED",
+      "condition": "Run actual normal recorded-child replay with exact job/admission/profile/IPC joins, trusted policy and scoped account SPI. Values originate in the fresh child-local map; no historical node/admission rights, source/code/artifact, captured value or account handle enters inappropriate diagnostics or persistence. Preserve actual fixed isolated fill/select semantics and native pointer/key guards.",
+      "oracles": [
+        "One learning submit; zero finalize navigation/read/mutation and both gateways zero; two later distinct unpredictable values reach independent application receipts with identical plan/artifact/policy hashes.",
+        "Delayed/lost account consume/apply, origin/type/policy/target replacement, duplicate/hidden locator, wrong graph/slot/attempt/handle, cancellation and context loss refuse without repeating setup/effects; video remains a separate authorized real replay channel."
+      ]
+    },
+    {
+      "id": "PUB-C4",
+      "status": "DESIGN_ADDRESSED_IMPLEMENTATION_REQUIRED",
+      "condition": "Use actual bean/route matrix for independent publication/replay flags, durable result-contract selection and explicit observed schedule refusal. Preserve old activation and legacy runtime paths. Execution Profile excludes model/provider/prompt/API pins; those remain immutable audit provenance, not current replay requirements.",
+      "oracles": [
+        "All four flag combinations including historical receipt reads while both flags are off, existing005 starts without a base, queued artifact2 refusal when replay is disabled and no legacy/model fallback.",
+        "Actual scheduler after publication retains activation/revision/enablement and refuses mismatch; observed attempts cannot obtain a provisional grant.",
+        "Benign historical prompt/provider/API changes do not cause re-learning or gateway calls for an otherwise compatible saved replay; actual execution/profile revocation or incompatible image refuses."
+      ]
+    },
+    {
+      "id": "PUB-C5",
+      "status": "DESIGN_ADDRESSED_IMPLEMENTATION_REQUIRED",
+      "condition": "Production Core/source/publisher/validator/readiness/dispatcher/admission/child wiring must be exercised; only account connectivity is controlled. Preserve all original evidence and ordinary RUN/same-principal auto-accept; no hash-echo validator, fabricated confirmed revision or simulated first-run recording satisfies QA.",
+      "oracles": [
+        "Raw SDK/model counters demonstrate no calls during finalization and both replays; typed unsafe mutations falsify independent expected operations/guards/edges.",
+        "Store exact source/build/worker/pins, distinguish controlled versus live evidence and unavailable services, retain old result2 compatibility and no new 007/008/009/010 implementation requirement."
+      ]
+    },
+    {
+      "id": "PUB-C6",
+      "status": "RECEIPT_ACCESS_ORACLE",
+      "condition": "The concrete result3/receipt controller must enter the separate receipt-read path before existing active-session/account/canExecute guards can veto historical access. Fresh Core canRead and original principal remain mandatory.",
+      "oracles": [
+        "After expiry and head/source edits, an original principal who retains canRead but loses canExecute reads the historical receipt without validator/browser/new publication; current readiness is false when appropriate.",
+        "A stale cached owner identity cannot override current Core denial/changed principal; unavailable Core or absent cookie refuses without persistence/logging of credentials."
+      ]
+    },
+    {
+      "id": "PUB-C7",
+      "status": "BOUNDED_REPLAY_GRANT_ORACLE",
+      "condition": "Keep the explicitly documented 30-second admission window and no unattended extension. The account ABI is a fixed trusted registry with sensitive ephemeral handles and at-most-once consumed/prepared/applied/disposed state. No account/Core/validator I/O holds DB locks.",
+      "oracles": [
+        "Revocation before mint refuses; a later Core-only revocation is tested against the documented bounded lag, not misrepresented as instantaneous. Queue/lock/transport delay cannot renew grant expiry.",
+        "Local cancel, policy/catalog replacement and account isCurrent/consume rejection prevent a new admission; wrong execution/attempt/revision/scope grant/handle swaps refuse. After admission existing fixed run deadlines/cancellation remain authoritative."
+      ]
+    }
+  ],
+  "acToRequiredEvidence": [
+    {
+      "ac": "AC-1",
+      "assessment": "NEEDS_PUB-R1-001_CORRECTION",
+      "production_seams": "Session storePreparation/admit -> EvidenceRepository -> immutable D2/D3 basis -> GuidedPlanBuilder",
+      "required_evidence": "Actual persisted plans including trusted needs[].bindingId, original multipage facts and complete source-order successful obligation/assertion/producer/consumer joins; restart and missing/extra facts refuse."
+    },
+    {
+      "ac": "AC-2",
+      "assessment": "NEEDS_PUB-R1-001_CORRECTION",
+      "production_seams": "ObservedArtifactLowerer + independent Node observedReplay/observedReferencePolicy + C4 hash chain",
+      "required_evidence": "Independent canonical bytes/JSONB roundtrip and semantic operation/guard/recipe/graph derivation; unchanged stored translationHash with binding IDs; schema-valid substitutions cannot pass by recomputing caller hashes."
+    },
+    {
+      "ac": "AC-3",
+      "assessment": "CONCRETE_DESIGN_WITH_RETAINED_CONDITIONS",
+      "production_seams": "Public BFF/Core authorization, fenced validation claims, V33 reciprocal receipt/origin constraints and atomic publisher CAS",
+      "required_evidence": "Fresh authorization after validation, session-wide three sends, all transaction rollback points, head/ABA/old-new compiler/fence/lease/cancel races, original source/config/scope and granted deadline checks."
+    },
+    {
+      "ac": "AC-4",
+      "assessment": "CONCRETE_DESIGN_WITH_RETAINED_CONDITIONS",
+      "production_seams": "Receipt-backed result3/session-view3 projector, separate receipt-read authorization and scheduler guards",
+      "required_evidence": "One original submit and no finalize actions; expiry-independent fresh receipt read; UUID/digest and historical/current readiness correctness; unchanged schedule activation and no fake first-run video/replay record."
+    },
+    {
+      "ac": "AC-5",
+      "assessment": "CONCRETE_DESIGN_WITH_RETAINED_CONDITIONS",
+      "production_seams": "ObservedReplayAuthorization -> immutable acceptance binding -> existing dispatcher/admission -> recorded child/observed adapter/account SPI",
+      "required_evidence": "Two fresh-value replays with exact same artifact and both gateways silent; honest 30-second current grant policy; privacy/IPC/profile/target/read/origin/unknown-outcome/cancellation and at-most-once account lifecycle tests."
+    },
+    {
+      "ac": "AC-6",
+      "assessment": "CONCRETE_DESIGN_WITH_RETAINED_CONDITIONS",
+      "production_seams": "Execution-only Profile, separate LearningProvenance, family-specific parsers/pins, v3 result producer, independent feature flags and owned runbook",
+      "required_evidence": "152-path ownership reconciliation, old result2/v1 behavior, all flag states, old/unsupported image refusal, benign model/API pin changes remaining replay-compatible, no automatic schedule/model fallback."
+    },
+    {
+      "ac": "AC-7",
+      "assessment": "REQUIRES_CORRECTED_C4_THEN_IMPLEMENTATION_EVIDENCE",
+      "production_seams": "Actual production PostgreSQL/Core/Node validation/guided worker/normal admission/recorded-child joined fixture",
+      "required_evidence": "Only account connectivity controlled; independent one-submit/zero-finalization/two-fresh-value receipts, exact hashes, source/head races and mutation oracles; current backend/runner/legacy regressions with honest skips."
+    }
+  ],
+  "acceptedPolicies": [
+    "Fresh receipt-read authority is independent of expired publication/session/worker grants and current head/source equality.",
+    "Original learning Run establishes adoption provenance only; later explicit replays receive their own current scoped grant.",
+    "The maximum 30-second Core revocation lag until new admission is explicitly bounded and honest, with local cancellation/policy/account revocation and no unattended refresh/provisional fallback.",
+    "Historical model/provider/prompt/result pins remain immutable audit provenance; execution Profile and explicit catalog revocation govern saved replay compatibility.",
+    "Separate result3/session-view3 keep result2 intact and truthfully expose UUID plus digest and historical/current readiness.",
+    "007 account connectivity,008 automatic client/first-run recording,009 benchmark and010 pilot remain accepted later scope. No user policy decision is pending."
+  ],
+  "constraints": {
+    "writtenFile": ".ai/STUDIO-OBS-006-qa-design-review-r1.json",
+    "productChanges": false,
+    "testExecution": false,
+    "designStoryLifecycleCliChanges": false,
+    "subagentsSpawned": false,
+    "commitsOrPush": false,
+    "wholeWaveCeilingUsd": 500,
+    "spendTelemetry": "UNKNOWN",
+    "noArbitraryEnglishOrLiveProviderClaim": true
+  }
+}

@@ -1,0 +1,102 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewKind": "NARROW_OBSERVED_CHOICE_DATA_DESIGN_R1_REVIEW",
+  "verdict": "PASS",
+  "at": "2026-10-09T13:34:28.393247+00:00",
+  "scope": "Design correction only; no implementation permission, product QA or lifecycle verdict.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/observed-choice-publication-design.md": "2121de85179799ba76aa6420255dcdd13d618ac25a29f029f5a9f3cce21581b0",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "50c6462b01057f287f1d5b40d9f23da71725e7e0efeb4861b9f4554fb2663150",
+    ".ai/STUDIO-OBS-006-observed-choice-design-resolution-r1.json": "fd95c9a31b34edd5743e7d6037b52011c70cde7c9d8d9f1920ad6ad131b229c5",
+    ".ai/STUDIO-OBS-006-observed-choice-data-review.json": "4c38e2a2d9f027d81e6eda4b05e73720057bce9bb1325928a86f21e30a600232",
+    ".ai/STUDIO-OBS-006-observed-choice-publication-design.json": "8636942886c3a489623b063aac2b2afb72d4f05b0af3b456dc7af02c5426e1b2"
+  },
+  "sourceHashes": {
+    "backend/src/main/java/com/citi/put/checks/studio/guided/publication/PublicationContracts.java": "f8be4d6f13f0e8265daf32ed16f4964083cee69985a51b38a93679c7a5096ebc",
+    "studio-runner/src/validator/observedReferencePolicy.ts": "a77ba19d8f0bb097211539f108d4155c6d0de2811c9fa28dfbea50a4af07452b",
+    "docs/specs/studio-observed-authoring/contracts/v2/guided-model-response.schema.json": "f409823c0e2817bf11c85adb91b5303548e2ad43c87378a8e3c7d281c68fe54f"
+  },
+  "hashVerification": "All frozen R1 and preserved-input hashes match. Original document diff contains only the cardinality correction, distinct aggregate ceilings and their explicit negative/boundary oracles.",
+  "resolutionMapping": [
+    {
+      "id": "CHOICE-DATA-01",
+      "status": "RESOLVED",
+      "evidence": "Design section4 now sets both ModelObservedQuestion alternatives and equal ordered witness meanings to2..10 and expressly requires equal server-choice cardinality.",
+      "source": "guided-model-response.schema.json observed CLARIFICATION minItems2/maxItems10",
+      "requiredOracle": "Valid two-choice baseline passes. Coherently remove unselected alternative from provider question/context/mappings and recompute all hashes; Java and Node still reject singleton."
+    },
+    {
+      "id": "OBS-CHOICE-RUNTIME-001",
+      "status": "CONFIRMED_RESOLVED_FROM_DATA_PERSPECTIVE",
+      "evidence": "Section4 now distinguishes6291456 canonicalUTF8 ValidationBasis from8388608 complete validation request, matching PublicationContracts constants and OBSERVED_LIMITS.",
+      "requiredOracle": "Exact and over bounds checked independently, including multibyteUTF8 and many individually valid witnesses. Basis over6291456 refuses even when entire request below8388608. Per-witness262144/count200 and observation400/1MiB caps remain independent."
+    }
+  ],
+  "findings": [],
+  "carriedForwardConditions": {
+    "notWaived": true,
+    "databaseGuaranteesAndDDL": {
+      "existing": [
+        "V32 session-scoped primary key and translation-state FK; context identity/meanings immutable; accepted_choice nullable single assignment, directSQL membership check; no plan/model-attempt FK or historical actor/acceptedAt.",
+        "V32 terminal model attempt identity/safe_result immutable and plans immutable; source/model associations in JSON still need explicit application joins.",
+        "V33 observation capture locks session, checks current progress body/canonical hash and400/1MiB aggregate caps; preparations/admissions retain scoped relational joins and immutable rows."
+      ],
+      "newDDLConditions": [
+        "Add nullable observed_choice_receipt only to unshipped V33 publication preparations; ordinary/old NULL rows remain valid and unmodified.",
+        "CHECK must use observed_choice_receipt IS NULL OR (complete closed typed receipt AND complete closed typed answer AND exact row session/preparation match AND bounds) IS TRUE. JSON null must not pass as SQL NULL; missing keys, wrong scalar types, extras and null required nested fields refuse. bindingId is the only declared nullable answer field.",
+        "Use canonical UTF8 receipt limit16384 with the existing canonical function; verify nested IDs/hashes/coordinate/generation/revisions and original ISO instant without rewriting timestamp bytes.",
+        "Existing whole-row deny-update/delete trigger must cover receipt; attempts to fill a previously NULL receipt after preparation must fail. No new nullable loophole permits application publication because accepted-row completeness requires the original witness."
+      ],
+      "applicationOnlyConditions": [
+        "Same-session originalCALLING attempt/current immutableplan/current materialization/current observation joins are validated before question create; terminalAPPLIED response and historical plan are independently validated when reading. No JSON FK is claimed.",
+        "Existing authenticated clarify source/generation/expiry checks and accepted_choice are authority; mutable resolvedAt alone never supplies authority or chronology.",
+        "Under session/source lock, preparation captures exactly one accepted observed decision, exact context/mappings/answer and proposal locator before admission. Exporter checks all actual accepted observed rows for complete successful witnessed associations.",
+        "Node cannot discover an omitted same-target database decision; that completeness oracle belongs real Java/DB exporter, not a fabricated standalone basis claim."
+      ]
+    },
+    "originalEvidenceAndIndependentOracles": [
+      "Atomic rollback at question context creation, original observation capture and APPLIED model settlement; no orphan retained question/capture or caller-selected attempt.",
+      "DirectSQL receipt extra/missing/null/type/count/byte/scope mutations; originalNULL rows accepted; nonnull receipt update/delete/backfill refused; source V30\u201332 unchanged.",
+      "Valid two-choice original question, accepted alternate locator, later fresh preparation generation/node and immutable action association. Raw target differing from selected target is expected human resolution, not a rejection by invented English grammar.",
+      "Wrong source/config/scope/worker/fence/context/attempt/status/kind/plan/hash/obligation/choice/old node/fresh locator/prep/action refuses with unchanged valid baseline first.",
+      "Duplicate meanings/choiceIds/accepted observed questions, unaccepted/missing capture, missing historical observation, missing preparation receipt, and same-target witness omission fail closed. No implicit latest-wins.",
+      "Historical immutable question plan matching unchanged final obligation succeeds; actual altered obligation/read/input/binding/operation/predicate cannot be rewritten by meaning metadata.",
+      "Every witness hash and exact ordered provider-meaning/server-mapping correspondence independently verified; observation pool exactly union of successful preparation and selected question evidence, no extras.",
+      "Real controlled public observed-phase answer after delay beyond browser timeout, preserved through refresh and actual pure publication; two recorded fresh-value model-free ordinary replays with independent chosen/unchosen destination assertions and one submit per explicit run. No source-question replacement or fake callback."
+    ],
+    "compatibilityAndPrivacy": [
+      "Optional internal PreparationFact.observedChoice omitted entirely for zero/source-only paths; preserve their canonical bytes and existing executable Profile. No public/model/IPC DTO expansion.",
+      "Old accepted observed choice without prospective capture or immutable preparation witness refuses even if target matches raw plan; no migration backfill.",
+      "Coordinate regenerated schema bundle/build catalog and required transport handshake; old decoder must not ignore witness; saved compatible artifacts/replay and historical receipt reading remain supported.",
+      "Positive bounded witness projection excludes full prompts, resolved config/secret/runtime values/account handles; projectionHash is opaque historical identity. Provider labels/IDs remain audit-only, never selectors/arguments or diagnostics.",
+      "Witness262144bytes, max200, basis6291456/request8388608, observation400/1MiB caps all remain independently enforced."
+    ],
+    "specificRequiredProof": [
+      "Prospective immutable questionCapture ties actual originalCALLING attempt/current immutable plan/current materialization and original acknowledged question observation before refresh; terminalAPPLIED question association independently verified at publication.",
+      "Nullable immutable preparation-time acceptance witness requires exact accepted_choice/context/meanings/answer and original successful admission/preparation association; no fabricated acceptedAt/actor/prompt bytes or historical backfill.",
+      "Both Java and Node independently derive only selected targetIntent/selectedLocator while retaining raw obligation/operation/input/read/binding/scope; old/fresh nodes independently resolved.",
+      "All accepted observed rows require complete witnessed successful action associations, including same-target choices; duplicate accepted decisions refuse; historical question plan must retain exact unchanged obligation.",
+      "Real public observed-choice alternate target after model/human delay beyond browser timeout, preserved through refresh and pure finalization, then two fresh model-free recorded replays with chosen/unchosen independent assertions remains mandatory."
+    ]
+  },
+  "ownershipAssessment": {
+    "proposedPaths": 174,
+    "activePaths": 170,
+    "change": "One documented resolution record added; no unexplained product/schema/architecture ownership expansion. New choice implementation paths remain unactivated.",
+    "preservedAPIs": "Existing three-argument create(session,question,meanings) semantics must be preserved despite original design two-argument wording; add internal capture overload only.",
+    "priorReviewPreserved": true
+  },
+  "workPerformed": {
+    "writtenOnly": ".ai/STUDIO-OBS-006-observed-choice-data-review-r1.json",
+    "sourceEdits": false,
+    "schemaEdits": false,
+    "buildsOrTests": false,
+    "databaseMutation": false,
+    "nodeConsumers": false,
+    "subagents": false
+  },
+  "budget": {
+    "waveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  }
+}

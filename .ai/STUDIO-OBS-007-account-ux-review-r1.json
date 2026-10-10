@@ -1,0 +1,423 @@
+{
+  "story": "STUDIO-OBS-007",
+  "reviewer": "Uma — independent UX/production-client boundary reviewer",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "recordedAt": "2026-10-09T18:27:26.055387+00:00",
+  "reviewType": "BOUNDED_LOCAL_ACCOUNT_UX_R1_DESIGN",
+  "verdict": "NEEDS_CHANGES",
+  "scope": "Frozen local design only. No product implementation, actual user-flow acceptance, provider conformance, SDC QA verdict, readiness or lifecycle change.",
+  "summary": "R1 identifies the real production Run entry and a satisfactory proposed007→008 split, removes the test-only-driver escape and keeps provider capability/publication/media claims bounded. Two remaining locally designable decisions prevent a complete production restart/completion path: consume/recover the existing remount-time autorun intent, and distinguish command completion from authoritative session/result state. Both corrections belong to the already proposed007 minimal client; neither needs a real provider selection or008 full UI implementation.",
+  "reviewedFrozenHashes": {
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r1.json": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376"
+  },
+  "reviewedSourceHashes": {
+    "AGENTS.md": "a3e2fe4c0bebc01d91b0fa0b062c49d031e203ab2a522ee9b04d9f06df797198",
+    ".codex/skills/aiox-ux-design-expert/SKILL.md": "2aab08e49e4afc4bb789fac255f4c451099138a0b81b70464259b35a29e19e4c",
+    ".aiox-core/development/agents/ux-design-expert.md": "b6a552405cf1a1eab76e307a505e8b431bffa30ab9681a16169b1427373b8a99",
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r1.json": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376",
+    "docs/specs/studio-observed-authoring/consensus-plan.md": "8f97af78155a57ee32127f4e2433a94f5e134d47896655743df65292cb12f44b",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "c13a0739f43899cd215ca5765836f7be59f8cffd416838f7a8b214ce5fb0c66b",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md": "42b4dbe36ca52975ec7f7871255205248c3727e0483fdf32f5a5c5ef50ebfffe",
+    ".ai/STUDIO-OBS-007-po-validation.json": "48c0dfd523c1b78676e150ee8fc87fb9290fae07c29e65fac86603e39a655e12",
+    ".ai/STUDIO-OBS-007-account-design-review.json": "24a4061216420d75ac7f0aa3f189245794099733fbb1a595650c61d05f14fdf4",
+    "frontend/src/components/studio/run/RunControl.tsx": "30a9a8a22983ebbb5e27047cb38e30908660dd416cf721638519184fef7fbd81",
+    "frontend/src/components/studio/run/useRunGate.ts": "34759dbfa3a63b35144499e5188d8f0b1b42b7ddecf50b577b48874388aa570f",
+    "frontend/src/components/studio/run/runEnablement.ts": "9c539f35dfceff997e8627ab9736191b09f6eb577d5341dcf6030c273af55918",
+    "frontend/src/services/api/apiClient.ts": "06659b78e595366a257801faa585cb02a7c974c18f3d23405a72fb66fb339c68",
+    "frontend/src/services/api/studioApi.ts": "53fac77740bb640c796d744255c315a34c1229791261e3ceaeef1b819871e720",
+    "frontend/src/utils/constants/appConfig.ts": "ce2574cad55f9515042910063ceb0a1ac0af5da3fed6dd5ac46b47c1cbed530a",
+    "frontend/src/types/studio/studioTypes.ts": "22882c6d23c2fd5ae755d88570971ee35de7ea2ed2668cd244df96ca9cb2ff50",
+    "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx": "51c9b0457505d1705533402328bae2e414f26b33257ed21ff8a2b9746e5a1f8e",
+    "frontend/src/services/mocks/studio/handlers.ts": "2be063afef6c9d27ebfe9c04e5bda0d8b1b48db105c890cca237c4bcc2db4859",
+    "frontend/src/components/studio/run/runGate.test.tsx": "76b30d751cdfd4e01ba320095a9e57c94705577a4ffacc5e139b221b6254eaa7",
+    "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx": "887234eb0123a88b974892c786828f18b4e69d57dcc09b7b9924675b4a5a0cf2",
+    "frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx": "f6ca22a03f44c1cf65b020e9e219443107658b8e1d7c14da3224b7dd2ff42ac3",
+    "frontend/src/pages/ChecksStudioPage/studioRunTransport.node.test.tsx": "97650640f27937c709a890a46ac8f034f451fece1bf59e7720bca3ee23de4f5c",
+    "backend/src/main/java/com/citi/put/checks/config/IdempotencyFilter.java": "e49f84fa13c3734a15a1a40424c9067645c8a4603db86a71eb5f7fd491340216",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java": "c559709955d6803ba634e5b1c51e9653a43ec7bd7c5b81a2bfaf077a141cb4a2",
+    "docs/specs/studio-observed-authoring/contracts/v2/commands.schema.json": "264a070c58118a188c1c008a163d5e3b3f0ff7bdb7c9332325b5da6e03e65794",
+    "docs/specs/studio-observed-authoring/contracts/v2/session-view.schema.json": "5a428f20d562ba5a9e5e611803a728404c4142fb2a6e1527140e46966aac20d6",
+    "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json": "1fd9967ac84fe8b38a232ec61929e3a2e5f759ac245dd58453b9c4d95c4654ac",
+    "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json": "667337ab123d511b8f64672b8b7a9113faa5c2bff2c3202ae73b1217313d518c"
+  },
+  "frozenInputVerification": {
+    "filesCompared": 216,
+    "mismatches": [],
+    "authorizedRootStoryReservationBaselineApplied": true,
+    "all216InputsUnchanged": true
+  },
+  "findings": [
+    {
+      "id": "UX-007-R1-01",
+      "severity": "high",
+      "kind": "Local production-client restart/intent gap",
+      "acs": [
+        "AC-1",
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "providerFactsNeededForLocalCorrection": false,
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 preserve autorun/run-again, production controller no new Run on reconnect/restart",
+          "line": 324
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§9.1 AUTH-P0-5 and real production-page oracle",
+          "line": 388
+        },
+        {
+          "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+          "symbolOrSection": "mount-time autorun query reads and increments runRequest",
+          "line": 365
+        },
+        {
+          "path": "frontend/src/components/studio/run/RunControl.tsx",
+          "symbolOrSection": "servedRunRequest is per-mounted control",
+          "line": 176
+        },
+        {
+          "path": "frontend/src/components/studio/run/useRunGate.ts",
+          "symbolOrSection": "per-instance activation latch and fresh activation key",
+          "line": 205
+        },
+        {
+          "path": "frontend/src/services/api/apiClient.ts",
+          "symbolOrSection": "401 can invoke platform login/remount",
+          "line": 81
+        }
+      ],
+      "finding": "R1 correctly assigns a real controller to the production Run path but does not define how the existing autorun intent is consumed or how a guided activation is recognized after page/component restart. Current page reads autorun=1 on every mount; RunControl servedRunRequest and hook inFlight/acceptedLatch are only in memory. A reload, reconnect/remount or platform401 login return to that URL can therefore request a fresh guided start/key/session. The commandId map and server duplicate-per-command CAS do not prevent a new session/Run identity. Merely saying no auto-new Run and preserving every existing autorun route does not resolve this source-backed conflict.",
+      "impact": "A single original Run/deep link can become another guided execution after restart, independently of lost-ACK deduplication within the first session. It also leaves the minimal007 reconnect call path dependent on implementer guesses or later008 work.",
+      "requiredAction": "Define one concrete guided-only intent consumption/recovery mechanism in the same reserved page/RunControl/useRunGate/client paths before the first asynchronous start. State what nonsecret activation/session locator is retained, or how the Run intent is consumed; on lost start/advance response and remount, use read-only authoritative recovery for the known session or show bounded unknown/stopped state without creating a session. Do not restore unknown send rights or introduce a second confirmation. Preserve legacy autorun/run-again semantics in their separate branch; normal deliberate subsequent Run remains available only after the prior guided activation is safely accounted/terminal. This can be designed locally without provider facts or adding008 full reconnect presentation.",
+      "requiredOracles": [
+        "Render actual ChecksStudioPage at an autorun URL, allow one guided session/command, remount/reload the same URL and assert no second start/advance/effect. Repeat after completed run and after lost start/advance ACK.",
+        "Drive central-client401/login callback and remount with cached page intent; regain authority and verify read-only recovery or bounded unknown state, never automatic new guided Run.",
+        "React StrictMode/repeated runRequest/rerender/test switch/unmount issue at most one activation and cancel; a later deliberate Run uses a genuinely new activation, and existing legacy autorun regression still passes."
+      ]
+    },
+    {
+      "id": "UX-007-R1-02",
+      "severity": "high",
+      "kind": "Local command-vs-session completion/read-only status gap",
+      "acs": [
+        "AC-2",
+        "AC-4",
+        "AC-5",
+        "AC-6"
+      ],
+      "providerFactsNeededForLocalCorrection": false,
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§4.2 PendingCommand1/CommandStatus1 describe one SETUP or ACTION",
+          "line": 171
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 minimal typed transport method list",
+          "line": 328
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 minimal client polls pending/command status",
+          "line": 330
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 completed-awaiting-publication and Stop/editor lock",
+          "line": 333
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionController.java",
+          "symbolOrSection": "GET/{id} and GET/{id}/result already expose authoritative lifecycle/publication projection",
+          "line": 45
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3/session-view.schema.json",
+          "symbolOrSection": "separate session and result projection",
+          "line": 1
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/contracts/v3/result.schema.json",
+          "symbolOrSection": "outcome/publication/currentReadiness/evidence projection",
+          "line": 1
+        },
+        {
+          "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+          "symbolOrSection": "ordinary beginRun owns execution subscription/terminal editor release",
+          "line": 440
+        }
+      ],
+      "finding": "The proposed minimal transport/client lists capability/start/pending-command/advance/command-status/cancel, but no typed session/result read or unambiguous session-terminal projection. CommandStatus1.COMPLETED can mean SETUP completed or one ACTION completed;204 may mean planning/no command. Neither proves all steps/assertions completed, cancellation settled, publication state or evidence availability. Terminal CommandStatus1 wording does not define a distinct session-terminal predicate or explain failure/awaiting-clarification/auth transitions. Account CONNECTED is expressly authentication-only. Yet007 must stop polling/release its activation/editor lock and present completed-awaiting-publication truthfully without sending sessionId to the ordinary execution subscription.",
+      "impact": "An implementer can stop after setup/one action, keep a finished guided session Running until the hard deadline and mislabel it expired, release Stop/editor lock early, or display stale ordinary execution/video as current guided evidence. Deferring that terminal projection to008 recreates a mandatory client dependency despite the otherwise acyclic split.",
+      "requiredAction": "Add the minimal read-only authoritative lifecycle/result consumption to007 using existing GET guided-sessions/{id} and/or/{id}/result and their closed supported DTOs, or specify an equally explicit session-terminal projection in the proposed protocol. Name typed transport/client/page ownership, deadlines/no-store/no-retry/cancellation semantics, and exact state mapping. SETUP/ACTION completion remains command-local; session success plus publicationPENDING means run completed/steps not ready to repeat, not saved readiness/media. Distinguish awaiting auth/clarification from active effects and show a bounded honest pause when full008 presentation is not available. Keep008 full progress/clarification/reconnect presentation, automatic finalize and first-guided recording separate; no hidden finalize/effect is needed for this status read.",
+      "requiredOracles": [
+        "Hold after SETUP COMPLETED and after one ACTION COMPLETED while session still PROPOSING or awaiting the next command; Run/editor latch must remain active and no complete/ready/video claim appears.",
+        "Serve real session SUCCEEDED with result publication PENDING/CONFLICT and unavailable evidence: show completed-not-ready, no extra execution/finalize/gateway call, no playable current guided video or stale ordinary green evidence.",
+        "Delay cancellation ACK/terminal state: keep truthful Stopping; on session CANCELLED/EXPIRED/FAILED/UNKNOWN_OUTCOME settle the correct distinct state once. Reconnect reads restore that same state without another start/advance.",
+        "Changed source/config/account makes capability/readiness stale: current Run halts and historical evidence is clearly historical; sessionId is never used as ordinary executionId."
+      ]
+    }
+  ],
+  "sourceBackedAssessments": [
+    {
+      "boundary": "Actual Run entry and acyclic ownership",
+      "assessment": "Design-level direction is sound: existing page mounts one RunControl; it invokes useRunGate. Proposed server route selection is after save+reread and before legacyprepare at hookline452, with client/typedtransport exported through studioApi. New files are named and real rendered production-page transport/browser oracle is mandatory.007 owns callable capability/authority client;008 owns the subsequent full UX/first-guided-video/finalize layer. None is implemented by this document; root must reconcile FileList/tasks before Ready.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1",
+          "line": 320
+        },
+        {
+          "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+          "symbolOrSection": "RunControl mount",
+          "line": 763
+        },
+        {
+          "path": "frontend/src/components/studio/run/useRunGate.ts",
+          "symbolOrSection": "save/read beforeprepare/execute",
+          "line": 437
+        }
+      ]
+    },
+    {
+      "boundary": "One deliberate Run and automatic scope transport",
+      "assessment": "Server-declared guidedFirst/savedReplay/legacy plus authoritative start descriptor prevents inferring application/account from English or TestDto. Body contains server commandID/hash, not user proposal/selector/value/permissions. Live automaticBFF request after model/preparation can obtain current authority without extra normal-click confirmations. Existing synchronous inFlight latch must span the new guided activation; the existing3-second accepted fallback cannot stand in for a longer active guided session.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§§4.1,8.1",
+          "line": 150
+        },
+        {
+          "path": "frontend/src/components/studio/run/useRunGate.ts",
+          "symbolOrSection": "inFlight and accepted latch",
+          "line": 200
+        }
+      ]
+    },
+    {
+      "boundary": "Legacy/compile/auto-save preservation",
+      "assessment": "Separate branch beforeprepare is the right seam. Keep dirty-save/conflict behavior and compatible ordinary beginRun/subscription; no guided sessionID masquerades as executionID. Existing catch handles COMPILE_REQUIRED/RUNTIME_INCOMPATIBLE by recompiling/re-executing at hooklines469–488; new guided and observed savedReplay branches must return outside that legacy fallback. Source/account/config drift and unsupported build on saved observed replay need safe deliberate recovery, not legacy compile/model repair. Existing legacy branch alone retains its documented retry.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 branch selection",
+          "line": 331
+        },
+        {
+          "path": "frontend/src/components/studio/run/useRunGate.ts",
+          "symbolOrSection": "legacy409 retry",
+          "line": 467
+        },
+        {
+          "path": "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+          "symbolOrSection": "ordinary execution subscription",
+          "line": 449
+        }
+      ]
+    },
+    {
+      "boundary": "Capability/account honesty",
+      "assessment": "Scoped discovery is advisory, no-store and value-free. Availability is conjunction of current authorized account, supported guided mechanism/origins/entry profile and later ordinary replay. Unsupported replay choice cannot enable Run/sign-in;200 unavailable is distinct from503transport failure and401/403 leak no account enumeration. Changing account/environment invalidates old capability and server start locks/rechecks source/config; no mode/handle hidden in accountRef. Same-session handoff and Sign in securely remain conditional on actual provider/view/profile facts, with no point-selection claim.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§3",
+          "line": 83
+        },
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 descriptor",
+          "line": 332
+        }
+      ]
+    },
+    {
+      "boundary": "Central API/MSW and retry",
+      "assessment": "Reuse same Axios singleton,withCredentials and per-call baseURL rewrite preserves configured host/prefix. Reject ambiguous base rather than mutate global config or concatenate v1/v3. __doNotRetry on GET and no automatic POSTretry support ambiguous-send status-only policy. Existing IdempotencyFilter only covers api/v1 and api/v2, notapi/v3, so the proposed authority-scoped key is not presently blocked by its UUID rule; v3 service idempotency must still be tested. Proposed MSW mirrors belong to007 reserved handlers, while existing v1execute/cancel fixtures remain intact.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 typed transport",
+          "line": 328
+        },
+        {
+          "path": "frontend/src/services/api/apiClient.ts",
+          "symbolOrSection": "singletoncredentials/retry/baseURL",
+          "line": 17
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/config/IdempotencyFilter.java",
+          "symbolOrSection": "covered paths excludesv3",
+          "line": 34
+        },
+        {
+          "path": "frontend/src/services/mocks/studio/handlers.ts",
+          "symbolOrSection": "v1execute/cancel authority/idempotency",
+          "line": 495
+        }
+      ]
+    },
+    {
+      "boundary": "Bounded errors and internal material",
+      "assessment": "New guided rendering must map declared safe fixed codes/messageKeys, never reuse raw exception/message or legacy serverMessage slots. Centralclient logs response/error bodies before transport validation and normalizes raw server error fields; server facade must emit only closed value-free projections/data-free errors and wire tests must prove absence of provider diagnostics/handles/cookies. identityHash in public protocol is correlation, never UI prose/authority. No new password field,provider URL,credential lookup or unsupported sign-in view.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§§3,8.1",
+          "line": 97
+        },
+        {
+          "path": "frontend/src/services/api/apiClient.ts",
+          "symbolOrSection": "response/errorlogging/normalization",
+          "line": 60
+        },
+        {
+          "path": "frontend/src/components/studio/run/RunControl.tsx",
+          "symbolOrSection": "legacyserver-message/load-error rendering",
+          "line": 241
+        }
+      ]
+    },
+    {
+      "boundary": "Minimal accessible MUI states",
+      "assessment": "ExistingMUI Button,disabled reason with aria-describedby,spinner labels,role=alert androle=status are reusable. New account choice needs an explicit accessible label,safe configured display names and visible reason for unavailable/expired/loading/error states; keyboard Run/Stop and active editor/account locks must stay reachable. Status text must distinguish preparing/waiting/acting/stopping/unknown; never signal connected or completed from a spinner/redirect/commandlocal state. Full responsive three-panel/clarification/video polish stays008. No rendering/a11y test was run by this review.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 UX boundary",
+          "line": 333
+        },
+        {
+          "path": "frontend/src/components/studio/run/RunControl.tsx",
+          "symbolOrSection": "MUIrun/stopcontrolaria andstatus",
+          "line": 259
+        }
+      ]
+    },
+    {
+      "boundary": "Evidence/publication boundaries",
+      "assessment": "Correctly keeps007 minimal status separate from008 automatic finalize,first-guided capture/upload/timeline and full human-facing reconnect/clarification presentation. A replay or MSW video cannot prove initial guided recording; textual redaction never guarantees video confidentiality. FindingUX007R102 supplies the missing minimum authoritative completion read without expanding that scope.",
+      "refs": [
+        {
+          "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+          "symbolOrSection": "§8.1 D6b/full008",
+          "line": 347
+        },
+        {
+          "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-008.story.md",
+          "symbolOrSection": "AC5/6/7",
+          "line": 25
+        }
+      ]
+    }
+  ],
+  "plannedOwnershipAndCallSites": {
+    "007": "Actual ChecksStudioPage RunControl mount→useRunGate.run synchronous activation/save+reread→studioApi typed capability/selectedroute→studioGuidedAuthorityTransport→guidedAuthorityClient server command/read/automaticadvance; new guidedaccepted/status/cancel callbacks and editor lock. Correct restart intent and terminal-read details before activation.",
+    "ownedProposedClientPaths": [
+      "frontend/src/services/api/studioGuidedAuthorityTransport.ts",
+      "frontend/src/types/studio/guidedAuthorityTypes.ts",
+      "frontend/src/components/studio/run/guidedAuthorityClient.ts",
+      "frontend/src/services/api/studioApi.ts",
+      "frontend/src/utils/constants/appConfig.ts",
+      "frontend/src/components/studio/run/useRunGate.ts",
+      "frontend/src/components/studio/run/RunControl.tsx",
+      "frontend/src/pages/ChecksStudioPage/ChecksStudioPage.tsx",
+      "frontend/src/services/mocks/studio/handlers.ts"
+    ],
+    "008": "Later sequential shared-file ownership for full guided progress/logs/clarification/human-facing reconnect/full publication display,automatic finalize and first-guided recording/upload/retrieval/seeking. No007 readiness dependency on undispatched008 UI. Root reconciles story reservations/AC-specific tasks and overlap."
+  },
+  "mandatoryImplementationConditions": [
+    "Separate guidedFirst/savedReplay/legacy control branches before oldprepare and409recompile retry; preserve dirty auto-save/conflict and legacy once-peractivation key/latch. GuidedFirst has zero legacy compile/execute calls; compatible savedReplay executes once without model preparation and unsupported/stale saved observed replay does not fall into legacy compile.",
+    "Own cancellation from the first guided activation/start request, not only after ordinary execution acceptance: Stop during setup/modelwait,unmount,test/account/config changes abort once and best-effort idempotent session cancel; late start/advance response cannot revive UI or authorize another effect. Unknown delivery gives bounded status recovery/unknown, not a newRun.",
+    "Use selected authoritative account/scope/start descriptor, strict contract parsing/no-store/current capability freshness;401/403clear unauthorized choices,source/config/account drift invalidates result and requires later explicitRun,not silent scope replacement.",
+    "Use fixed safe narrative mapping for new guided errors/statuses; never render raw normalized exception/serverMessage,internalpermission/hash/provider URLs/handles/auth bytes. Test console/wire data where actual producer could emit private material; closed local/mock data alone cannot certify real provider secrecy.",
+    "MUI account choice needs explicit accessible name,keyboard selection and meaningful safe disambiguated labels. Visible disabled reason viaaria-describedby;busy status via live role/status;Stop remains reachable while active/preparing, Stopping truthful until terminal,editor locked until actual session settles,read-only historical evidence cannot masquerade as current video/readiness.",
+    "No same-session Sign in securely/view/elementselection unless actual provider/profile supports and binds it to owning context; unsupported default truthful. First-guided media/publicationcompleteUX remains008; real provider EXT-001 and007 Draft / NO-GO remain unresolved."
+  ],
+  "plannedOracles": [
+    {
+      "id": "UX007-CONTRACT",
+      "owners": [
+        "frontend/src/pages/ChecksStudioPage/studioGuidedAuthorityTransport.node.test.tsx",
+        "frontend/src/services/mocks/studio/handlers.ts"
+      ],
+      "scope": "Typed central API host/prefix/cookies/no-auto-retry/abort/no-store/status code/closed enum/cardinality/expiredcaps tests; MSW versions mirror exact server shapes.",
+      "limit": "Mock/readable UI behavior and real local HTTP transport do not prove production provider availability,identity or revocation."
+    },
+    {
+      "id": "UX007-COMPONENT",
+      "owners": [
+        "frontend/src/components/studio/run/guidedAuthorityClient.test.ts",
+        "frontend/src/components/studio/run/runGate.test.tsx",
+        "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx",
+        "frontend/src/pages/ChecksStudioPage/pageSaveAndStop.test.tsx"
+      ],
+      "scope": "One button/double activation/key continuity,account choice,feature-off legacy/dirty save/conflict/savedReplay,keyboard and accessible names and live bounded states,early Stop/unmount/scope change,lost-ACK status-only,restart intent consumption and whole-session completion state.",
+      "limit": "RTL/MSW cannot certify physical provider context/page/session continuity or actual target effects."
+    },
+    {
+      "id": "UX007-PRODUCTION-PAGE",
+      "owners": [
+        "frontend/src/pages/ChecksStudioPage/studioGuidedAuthorityTransport.node.test.tsx",
+        "backend/src/test/java/com/citi/put/checks/studio/guided/auth/GuidedCurrentAuthorityIT.java",
+        "studio-runner/test/fixtures-tier/guided-authority.test.ts"
+      ],
+      "scope": "Render actual page/RunControl/useRunGate,real central transport and callable controller→controlled realBFF/Core/backend→owning sandboxed Chromium/protected HTTPS fixture. Existing Run once automatically advances prepared command; independent receipt counts exactly one effect; revocation/expiry/Stop prevent later effects;guidedzerolegacy compile/execute;reconnect/remount does not start again and command complete does not impersonate session complete.",
+      "limit": "Joined controlled provider proof is stronger than helper/backenddriver tests,but real selected provider staging conformance remainsEXT-001; no production sign-in/video/live-model/pilot claim."
+    },
+    {
+      "id": "UX007-EVIDENCE-BOUNDARY",
+      "owners": [
+        "frontend/src/pages/ChecksStudioPage/studioGuidedAuthorityTransport.node.test.tsx",
+        "frontend/src/pages/ChecksStudioPage/pageRunGate.test.tsx"
+      ],
+      "scope": "Read real session/result terminal/publication pending/conflict/unknown/unavailable evidence and preserve exact labels,editor/Stop lifecycle,distinctsession-vs-execution identity,no stale green/video misattribution,no automatic finalize/new execution.",
+      "limit": "008owns real first-guided recording and full publication/evidence presentation; mocks/replayvideo are not that evidence."
+    }
+  ],
+  "preservedReadiness": {
+    "story007": "Draft",
+    "story008": "Draft",
+    "poVerdict": "NO-GO",
+    "poScore": "4/10",
+    "EXT-001": "UNRESOLVED approved real provider identity/contract/nonsecretconfig and capabilities",
+    "rootAloneRevalidatesReplans": true,
+    "newUserPermissionFlowRequired": false
+  },
+  "evidenceLimits": {
+    "productImplemented": false,
+    "testsBuildsRenderingBrowserRun": false,
+    "providerExternalCalls": false,
+    "liveModelClaims": false,
+    "firstGuidedVideoClaims": false,
+    "sameSessionHandoffAvailable": false,
+    "fullUserFlowAccepted": false,
+    "implementationAuthorizedByReview": false,
+    "wholeStoryQaVerdict": false,
+    "CodeRabbit": "Not run for this source/design-onlyUX review; no automated or finalgate claim."
+  },
+  "preservation": {
+    "all216BaselineFilesUnchanged": true,
+    "onlyOwnedReportWritten": true,
+    "sourceTestsSchemasRuntimeStoriesFrozenDocsUnchanged": true,
+    "rootCliExecuted": false,
+    "subagentsSpawned": false,
+    "commitsPushDeploy": false,
+    "externalMessagesOrCalls": false
+  },
+  "budget": {
+    "sharedWholeWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  },
+  "nextAction": "Root combines independent security/data/UX findings, refines these local production client decisions and reconciles exact 007/008 reservations/tasks before PO revalidation. Preserve EXT-001 and Draft/NO-GO; no 007/008 implementation starts from this review."
+}

@@ -1,3 +1,4 @@
+import type { BuildIdentity } from '../executor/observedOperations.js';
 /**
  * Reads the `runtime-versions.json` this build emitted (ADR-001 §4.2, architecture §4.6).
  *
@@ -91,3 +92,32 @@ export function currentRuntimeVersions(
 export function resetRuntimeVersionsCache(): void {
   cached = null;
 }
+
+/** A deployment catalog authorizes a build; the job cannot choose or populate this record. */
+export function loadObservedBuild(env: Readonly<Record<string, string | undefined>> = process.env, runtimeFile=DEFAULT_RUNTIME_VERSIONS_FILE, referenceFile=fileURLToPath(new URL('../observed-reference.json', import.meta.url))): BuildIdentity | null {
+    const file = env.STUDIO_RUNNER_OBSERVED_CATALOG_FILE, digest = env.STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST;
+    if (!file && !digest)
+        return null;
+    try {
+        const catalog = JSON.parse(readFileSync(file ?? '', 'utf8')) as Record<string, unknown>;
+        observedDemand(Object.keys(catalog).sort().join(',') === 'build,profile', 'PROFILE_MISMATCH');
+        observedAssertProfile(catalog.profile);
+        const build = observedValidate<BuildIdentity>('replay-profile#/definitions/BuildIdentity', catalog.build);
+        const runtime = JSON.parse(readFileSync(runtimeFile, 'utf8')) as Record<string, unknown>;
+        const refs = JSON.parse(readFileSync(referenceFile, 'utf8')) as unknown;
+        observedDemand(build.profileHash === observedHash(catalog.profile) && build.schemaBundleHash === OBSERVED_SCHEMA_BUNDLE_HASH && build.referenceBundleHash === observedHash(refs) && runtime.observedSchemaBundleHash === build.schemaBundleHash && runtime.observedReferenceBundleHash === build.referenceBundleHash && runtime.observedChromiumBuild === build.chromiumBuild && digest === build.executableImageDigest, 'PROFILE_MISMATCH');
+        // Verify the installed executable belonging to the recorded revision, without starting it.
+        const root = env.PLAYWRIGHT_BROWSERS_PATH;
+        const browsers=JSON.parse(readFileSync(fileURLToPath(new URL('../../node_modules/playwright-core/browsers.json',import.meta.url)),'utf8')) as {browsers:{name:string;revision:string}[]};
+        observedDemand(browsers.browsers.find(b=>b.name==='chromium')?.revision===build.chromiumBuild,'PROFILE_MISMATCH');
+        const executable=process.platform==='darwin'?'chrome-mac-'+process.arch+'/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing':process.platform==='linux'?'chrome-linux64/chrome':process.platform==='win32'?'chrome-win64/chrome.exe':'';
+        observedDemand(root&&executable&&existsSync(join(root,'chromium-'+build.chromiumBuild,'INSTALLATION_COMPLETE'))&&existsSync(join(root,'chromium-'+build.chromiumBuild,executable)), 'PROFILE_MISMATCH');
+        return build;
+    }
+    catch {
+        throw new ObservedRefusal('PROFILE_MISMATCH');
+    }
+}
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { assertProfile as observedAssertProfile, demand as observedDemand, hashObserved as observedHash, OBSERVED_SCHEMA_BUNDLE_HASH, ObservedRefusal, validateObserved as observedValidate } from '../validator/observedReferencePolicy.js';

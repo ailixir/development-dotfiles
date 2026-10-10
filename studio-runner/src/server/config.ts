@@ -27,6 +27,11 @@ export const CONFIG_PREFIX = 'STUDIO_RUNNER_';
 export const PERMITTED_DESTINATIONS = ['callback-api', 'object-store', 'target-page'] as const;
 
 export interface RunnerConfig {
+  readonly observedValidationEnabled: boolean;
+  readonly observedReplayEnabled: boolean;
+  readonly observedCatalogFile: string;
+  readonly observedPolicyFile: string;
+  readonly observedImageDigest: string;
   /** TCP port for the internal server. `0` asks the OS for a free port (tests). */
   readonly port: number;
   /** Bind address; internal ClusterIP only, never a public interface. */
@@ -166,6 +171,11 @@ interface KeySpec {
  * destination?" a single-file question.
  */
 const KEY_SPECS: Readonly<Record<string, KeySpec>> = {
+  OBSERVED_VALIDATION_ENABLED:{field:'observedValidationEnabled',kind:'boolean',required:false,fallback:false},
+  OBSERVED_REPLAY_ENABLED:{field:'observedReplayEnabled',kind:'boolean',required:false,fallback:false},
+  OBSERVED_CATALOG_FILE:{field:'observedCatalogFile',kind:'string',required:false,fallback:''},
+  OBSERVED_POLICY_FILE:{field:'observedPolicyFile',kind:'string',required:false,fallback:''},
+  OBSERVED_IMAGE_DIGEST:{field:'observedImageDigest',kind:'string',required:false,fallback:''},
   PORT: { field: 'port', kind: 'integer', required: false, fallback: 8080, min: 0 },
   HOST: { field: 'host', kind: 'string', required: false, fallback: '0.0.0.0' },
   POOL_SIZE: { field: 'poolSize', kind: 'integer', required: false, fallback: 1, min: 1 },

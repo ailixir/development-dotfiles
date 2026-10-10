@@ -1,0 +1,857 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-09T17:03:46" hostname="Brunos-MacBook-Pro-2.local" time="20.585">
+  <properties/>
+  <testcase name="installedScheduleCodeConstraintKeepsLegacyVocabularyAndAddsOnlyObservedRefusal()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.628"/>
+  <testcase name="observedChoiceCanonicalBytesAndUnicodeIdsUseIndependentBounds()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.596"/>
+  <testcase name="halfRevisionAndMissingObservationCannotCommit()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.478"/>
+  <testcase name="observedChoiceReceiptIsOptionalImmutableAndRollsBackWithPreparation()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.653"/>
+  <testcase name="claimIsSingleSendRenewalStableAndSessionBudgetCannotReset()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.638"/>
+  <testcase name="realLegacyChromeUpgradeAndMillisecondNormalization()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.448"/>
+  <testcase name="bothCutoverOrdersPreserveLegacyRows()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="2.977"/>
+  <testcase name="directSqlClaimsAndNewPartitionsKeepTheirIndependentGuards()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.531"/>
+  <testcase name="validatedRelationalCycleCommitsOnceAndKeepsHistoricalReceiptAfterExpiry()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.803"/>
+  <testcase name="observedChoiceReceiptRejectsMissingExtraNullWrongTypesAndRowIdentity()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="3.292"/>
+  <testcase name="upgradeBaseEpochAndImmutableHistory()" classname="com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest" time="1.54"/>
+  <system-out><![CDATA[13:03:46.131 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:46.150 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: b747caa239ca3b760bc73a3445a80d394b90937d5097a3c9e48ea168c161ce8f
+13:03:46.869 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.738815S
+13:03:46.870 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59480/test?loggerLevel=OFF)
+13:03:46.884 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59480/test (PostgreSQL 15.19)
+13:03:46.891 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:46.892 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:46.896 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:46.907 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:46.910 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:46.963 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:46.970 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:46.976 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:46.981 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:46.987 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:46.993 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:47.024 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:47.031 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:47.038 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:47.040 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:47.043 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:47.045 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:47.052 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:47.058 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:47.065 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:47.072 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:47.082 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:47.100 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:47.100 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:47.105 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:47.105 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:47.107 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:47.113 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:47.119 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:47.124 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:47.131 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:47.153 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:47.162 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:47.170 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:47.177 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:47.184 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:47.192 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:47.200 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:47.240 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:47.245 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:47.253 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:47.260 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:47.274 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:47.295 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:47.318 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.267s)
+13:03:47.356 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59480/test (PostgreSQL 15.19)
+13:03:47.365 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.005s)
+13:03:47.372 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:47.380 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:47.426 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.042s)
+13:03:47.758 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:47.777 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: d5036611b0c835519e5074ea9864dbc844cc240b81577b319fd28dda09e02d5e
+13:03:48.530 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.772124S
+13:03:48.531 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59546/test?loggerLevel=OFF)
+13:03:48.555 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59546/test (PostgreSQL 15.19)
+13:03:48.563 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:48.564 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:48.568 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:48.581 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:48.585 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:48.639 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:48.645 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:48.652 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:48.659 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:48.665 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:48.672 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:48.702 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:48.711 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:48.719 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:48.721 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:48.724 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:48.725 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:48.731 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:48.738 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:48.744 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:48.751 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:48.763 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:48.783 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:48.783 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:48.789 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:48.789 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:48.791 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:48.797 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:48.803 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:48.810 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:48.817 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:48.840 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:48.850 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:48.862 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:48.870 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:48.878 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:48.886 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:48.895 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:48.933 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:48.939 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:48.945 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:48.952 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:48.966 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:48.991 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:49.015 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.278s)
+13:03:49.056 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59546/test (PostgreSQL 15.19)
+13:03:49.065 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.005s)
+13:03:49.073 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:49.079 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:49.124 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.041s)
+13:03:49.353 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:49.372 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: 19cfc679a8c965c7945b7fdb711c481564a59099380fba2fc7a44d57f9edac4f
+13:03:50.101 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.74772S
+13:03:50.101 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59581/test?loggerLevel=OFF)
+13:03:50.117 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59581/test (PostgreSQL 15.19)
+13:03:50.125 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:50.126 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:50.131 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:50.143 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:50.146 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:50.203 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:50.209 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:50.216 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:50.221 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:50.226 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:50.233 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:50.263 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:50.270 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:50.277 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:50.279 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:50.282 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:50.284 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:50.290 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:50.296 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:50.303 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:50.309 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:50.319 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:50.337 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:50.337 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:50.341 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:50.341 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:50.344 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:50.349 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:50.355 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:50.361 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:50.368 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:50.392 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:50.403 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:50.411 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:50.419 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:50.426 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:50.433 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:50.441 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:50.479 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:50.485 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:50.491 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:50.501 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:50.517 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:50.546 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:50.571 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.270s)
+13:03:50.609 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59581/test (PostgreSQL 15.19)
+13:03:50.618 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.005s)
+13:03:50.626 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:50.633 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:50.686 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.049s)
+13:03:50.832 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:50.855 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: 86b5626be3ad3c082b06355b8c6754f9d23a75d5d28ce52cee6efc6048178295
+13:03:51.620 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.788019S
+13:03:51.621 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59603/test?loggerLevel=OFF)
+13:03:51.653 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59603/test (PostgreSQL 15.19)
+13:03:51.678 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:51.679 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.016s)
+13:03:51.692 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:51.708 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:51.713 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:51.775 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:51.781 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:51.788 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:51.793 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:51.800 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:51.806 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:51.844 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:51.852 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:51.859 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:51.862 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:51.864 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:51.866 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:51.872 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:51.879 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:51.886 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:51.892 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:51.902 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:51.921 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:51.921 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:51.926 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:51.926 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:51.928 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:51.934 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:51.940 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:51.946 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:51.953 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:51.975 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:51.984 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:51.992 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:51.999 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:52.006 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:52.013 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:52.021 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:52.060 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:52.065 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:52.071 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:52.078 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:52.091 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:52.114 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:52.136 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.281s)
+13:03:52.173 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59603/test (PostgreSQL 15.19)
+13:03:52.181 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:52.189 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:52.196 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:52.241 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.042s)
+13:03:52.485 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:52.510 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: 506ce0e32809a502f13649168c8e95fddf3956405abe86d5a2bee2249911ae7b
+13:03:53.253 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.76864S
+13:03:53.253 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59643/test?loggerLevel=OFF)
+13:03:53.289 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59643/test (PostgreSQL 15.19)
+13:03:53.301 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:53.302 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.006s)
+13:03:53.309 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:53.323 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:53.328 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:53.380 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:53.386 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:53.392 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:53.397 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:53.402 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:53.408 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:53.437 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:53.443 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:53.450 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:53.452 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:53.454 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:53.456 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:53.462 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:53.469 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:53.475 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:53.481 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:53.491 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:53.507 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:53.507 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:53.512 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:53.512 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:53.514 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:53.519 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:53.526 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:53.532 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:53.539 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:53.561 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:53.570 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:53.579 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:53.586 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:53.593 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:53.600 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:53.608 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:53.647 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:53.653 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:53.658 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:53.667 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:53.680 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:53.702 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:53.728 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.261s)
+13:03:53.766 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59643/test (PostgreSQL 15.19)
+13:03:53.774 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.005s)
+13:03:53.782 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:53.788 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:53.836 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.043s)
+13:03:54.123 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:54.143 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: bef407520a57a6915b454a28359e1b8d838d6a501748c7f343bf8df6601f604d
+13:03:54.875 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.752406S
+13:03:54.875 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59675/test?loggerLevel=OFF)
+13:03:54.895 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59675/test (PostgreSQL 15.19)
+13:03:54.905 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:54.906 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:54.911 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:54.922 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:54.925 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:54.981 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:54.987 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:54.993 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:54.999 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:55.004 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:55.010 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:55.040 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:55.046 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:55.054 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:55.056 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:55.058 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:55.060 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:55.068 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:55.074 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:55.081 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:55.087 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:55.095 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 13 migrations to schema "public", now at version v13 (execution time 00:00.109s)
+13:03:55.126 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59675/test (PostgreSQL 15.19)
+13:03:55.134 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:55.140 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 13
+13:03:55.143 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:55.164 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:55.164 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:55.169 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 1 ui_tests row(s) from chrome to chromium
+13:03:55.169 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:55.172 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:55.178 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:55.184 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:55.191 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:55.199 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:55.225 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:55.235 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:55.242 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:55.250 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:55.256 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:55.263 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:55.272 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:55.311 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:55.316 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:55.322 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:55.331 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:55.344 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:55.365 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:55.394 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:55.435 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 19 migrations to schema "public", now at version v33 (execution time 00:00.196s)
+13:03:55.571 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:55.592 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: c9ecfa0793914fec2091652eb01dd4d5da0ae6748fee4a4517eccae9d18db432
+13:03:56.326 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.755147S
+13:03:56.327 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59696/test?loggerLevel=OFF)
+13:03:56.344 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59696/test (PostgreSQL 15.19)
+13:03:56.352 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:56.353 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:56.358 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:56.370 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:56.374 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:56.429 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:56.435 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:56.442 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:56.447 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:56.452 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:56.458 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:56.487 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:56.493 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:56.501 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:56.503 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:56.506 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:56.508 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:56.514 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:56.521 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:56.527 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:56.534 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:56.544 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:56.561 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:56.561 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:56.567 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:56.567 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:56.569 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:56.575 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:56.581 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:56.587 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:56.594 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:56.616 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:56.625 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:56.633 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:56.640 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:56.647 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:56.654 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:56.664 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:56.704 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:56.710 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:56.716 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:56.725 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:56.741 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:56.770 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:56.801 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.272s)
+13:03:56.854 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59696/test (PostgreSQL 15.19)
+13:03:56.862 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.005s)
+13:03:56.870 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:56.876 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:56.927 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.042s)
+13:03:57.079 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:57.100 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: eb61aaa48caa0739f54045d8114d5598b46b50f01c94bb5970d3bd2825ba122d
+13:03:57.853 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.774861S
+13:03:57.853 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59738/test?loggerLevel=OFF)
+13:03:57.868 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59738/test (PostgreSQL 15.19)
+13:03:57.876 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:57.876 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:57.881 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:57.892 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:57.895 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:57.951 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:57.958 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:57.965 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:57.970 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:57.976 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:57.982 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:58.013 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:58.020 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:58.028 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:58.030 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:58.033 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:58.036 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:58.042 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:58.048 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:58.054 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:58.061 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:58.070 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:58.088 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:58.088 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:58.093 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:58.093 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:58.095 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:58.100 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:58.106 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:58.113 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:58.120 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:58.141 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:58.151 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:58.158 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:58.166 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:58.173 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:58.180 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:58.188 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:58.227 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:58.232 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:58.239 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:58.247 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:58.260 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:58.281 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:58.305 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.268s)
+13:03:58.342 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59738/test (PostgreSQL 15.19)
+13:03:58.350 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:58.357 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:58.365 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:58.411 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.041s)
+13:03:58.549 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:03:58.568 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: 27bddedc1143ed0fdd50dd4c89b1db2e0ea309d83e6ca66619f58848e4b02d27
+13:03:59.271 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.721896S
+13:03:59.271 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59756/test?loggerLevel=OFF)
+13:03:59.287 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59756/test (PostgreSQL 15.19)
+13:03:59.295 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:03:59.295 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:59.300 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:03:59.310 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:03:59.313 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:03:59.363 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:03:59.369 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:03:59.376 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:03:59.381 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:03:59.388 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:03:59.394 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:03:59.424 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:03:59.431 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:03:59.440 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:03:59.442 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:59.444 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:59.447 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:03:59.453 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:03:59.459 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:03:59.466 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:03:59.472 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:03:59.483 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:03:59.500 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:03:59.500 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:03:59.505 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:03:59.505 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:03:59.507 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:03:59.513 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:03:59.519 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:03:59.525 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:03:59.532 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:03:59.554 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:03:59.563 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:03:59.573 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:03:59.581 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:03:59.589 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:03:59.597 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:03:59.610 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:03:59.649 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:03:59.654 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:03:59.660 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:03:59.667 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:03:59.681 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:03:59.706 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:03:59.731 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.265s)
+13:03:59.769 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59756/test (PostgreSQL 15.19)
+13:03:59.778 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:03:59.785 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:03:59.791 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:03:59.837 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.041s)
+13:04:00.080 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:04:00.099 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: ed0464ca8541b0fec3132dd6441f55163e97820516870736862bca7313b89d4d
+13:04:00.809 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.728578S
+13:04:00.809 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59787/test?loggerLevel=OFF)
+13:04:00.827 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59787/test (PostgreSQL 15.19)
+13:04:00.835 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:04:00.836 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:04:00.841 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:04:00.852 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:04:00.855 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:04:00.917 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:04:00.924 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:04:00.932 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:04:00.937 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:04:00.944 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:04:00.950 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:04:00.986 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:04:01.003 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:04:01.011 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:04:01.015 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:01.023 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:01.026 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:01.035 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:04:01.042 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:04:01.051 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:04:01.058 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:04:01.070 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:04:01.090 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:04:01.090 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:04:01.097 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:04:01.097 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:04:01.100 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:04:01.106 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:04:01.112 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:04:01.118 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:04:01.125 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:04:01.149 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:04:01.158 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:04:01.167 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:04:01.176 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:04:01.183 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:04:01.189 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:04:01.198 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:04:01.244 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:04:01.250 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:04:01.257 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:04:01.264 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:04:01.277 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:04:01.300 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:04:01.324 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.308s)
+13:04:01.362 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59787/test (PostgreSQL 15.19)
+13:04:01.370 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.005s)
+13:04:01.377 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:04:01.384 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:04:01.439 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.050s)
+13:04:01.884 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:04:01.904 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: 415d07549b791b868a4f00d798b2333ff4487c090f9431fccbdaf4ef06a5b124
+13:04:02.670 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.78568S
+13:04:02.670 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:59845/test?loggerLevel=OFF)
+13:04:02.693 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59845/test (PostgreSQL 15.19)
+13:04:02.703 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:04:02.704 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.006s)
+13:04:02.710 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:04:02.723 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:04:02.727 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:04:02.781 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:04:02.787 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:04:02.793 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:04:02.797 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:04:02.803 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:04:02.808 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:04:02.838 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:04:02.845 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:04:02.852 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:04:02.854 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:02.856 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:02.858 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:02.864 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:04:02.870 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:04:02.877 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:04:02.883 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:04:02.894 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:04:02.914 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:04:02.915 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:04:02.920 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:04:02.920 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:04:02.922 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:04:02.928 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:04:02.935 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:04:02.946 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:04:02.957 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:04:02.983 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:04:02.994 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:04:03.002 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:04:03.010 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:04:03.018 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:04:03.026 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:04:03.037 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:04:03.082 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:04:03.088 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:04:03.093 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:04:03.100 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:04:03.114 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:04:03.138 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:04:03.163 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.285s)
+13:04:03.202 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:59845/test (PostgreSQL 15.19)
+13:04:03.210 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:04:03.218 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:04:03.224 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:04:03.271 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.042s)
+13:04:05.176 [Test worker] INFO tc.postgres:15-alpine -- Creating container for image: postgres:15-alpine
+13:04:05.200 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine is starting: d9edf0dec941cb5c4bb7e0e39bc55d2765188439d8664e7ed0befd353fbe9da7
+13:04:05.948 [Test worker] INFO tc.postgres:15-alpine -- Container postgres:15-alpine started in PT0.772525S
+13:04:05.948 [Test worker] INFO tc.postgres:15-alpine -- Container is started (JDBC URL: jdbc:postgresql://localhost:60105/test?loggerLevel=OFF)
+13:04:05.970 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:60105/test (PostgreSQL 15.19)
+13:04:05.980 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Schema history table "public"."flyway_schema_history" does not exist yet
+13:04:05.981 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.006s)
+13:04:05.987 [Test worker] INFO org.flywaydb.core.internal.schemahistory.JdbcTableSchemaHistory -- Creating Schema History table "public"."flyway_schema_history" ...
+13:04:06.008 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": << Empty Schema >>
+13:04:06.014 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "1 - init"
+13:04:06.075 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "2 - schedule next execution"
+13:04:06.082 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "3 - check templates seed"
+13:04:06.088 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "4 - secrets encrypted value"
+13:04:06.094 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "5 - story 3 schema additions"
+13:04:06.099 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "6 - report next delivery"
+13:04:06.105 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "7 - partition remaining tables and defaults"
+13:04:06.138 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "8 - failed dispatches and report failures"
+13:04:06.146 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "9 - schedules check type column"
+13:04:06.154 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "10 - uppercase status standardization"
+13:04:06.157 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:06.159 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:06.161 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- +-------------------------+
+| _drop_check_constraints |
++-------------------------+
+|                         |
++-------------------------+
+
+13:04:06.168 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "11 - check acknowledge assign"
+13:04:06.173 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "12 - ui test revisions and compile state"
+13:04:06.180 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V12: quarantined 0 ui_tests row(s) with a missing or unregistered CSI
+13:04:06.186 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "13 - studio dispatch ledger"
+13:04:06.197 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "14 - studio execution history v2"
+13:04:06.215 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: backfilled csi_id on 0 ui_test_executions row(s)
+13:04:06.215 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: 0 ui_test_executions row(s) remain without a CSI and are quarantined from every user-facing query
+13:04:06.221 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: renamed 0 ui_tests row(s) from chrome to chromium
+13:04:06.221 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: converted 0 ui_tests row(s) from a non-chrome legacy engine to chromium; they remain STALE until recompiled and confirmed
+13:04:06.223 [Test worker] INFO org.flywaydb.core.internal.sqlscript.DefaultSqlScriptExecutor -- DB: V14: created 0 partition locator(s) for pre-existing execution history
+13:04:06.228 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "15 - studio dispatch ledger state machine"
+13:04:06.235 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "16 - studio compile started at"
+13:04:06.241 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "17 - studio execution error code check"
+13:04:06.249 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "18 - studio inference capture"
+13:04:06.271 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "20 - studio execution cancel"
+13:04:06.279 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "21 - studio authoring context"
+13:04:06.287 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "22 - studio expected intent"
+13:04:06.294 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "23 - studio intent derivation version"
+13:04:06.301 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "24 - studio reference policy"
+13:04:06.308 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "25 - drop plaintext secrets"
+13:04:06.316 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "26 - studio scheduling"
+13:04:06.355 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "27 - studio revision immutability restore"
+13:04:06.361 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "28 - studio execution scope immutable"
+13:04:06.367 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "29 - studio run confirmation"
+13:04:06.374 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "30 - studio guided sessions"
+13:04:06.387 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "31 - studio guided bridge"
+13:04:06.409 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "32 - studio guided translation"
+13:04:06.431 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 31 migrations to schema "public", now at version v32 (execution time 00:00.275s)
+13:04:06.467 [Test worker] INFO org.flywaydb.core.FlywayExecutor -- Database: jdbc:postgresql://localhost:60105/test (PostgreSQL 15.19)
+13:04:06.475 [Test worker] INFO org.flywaydb.core.internal.command.DbValidate -- Successfully validated 32 migrations (execution time 00:00.004s)
+13:04:06.482 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Current version of schema "public": 32
+13:04:06.489 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Migrating schema "public" to version "33 - studio observed publication"
+13:04:06.533 [Test worker] INFO org.flywaydb.core.internal.command.DbMigrate -- Successfully applied 1 migration to schema "public", now at version v33 (execution time 00:00.040s)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

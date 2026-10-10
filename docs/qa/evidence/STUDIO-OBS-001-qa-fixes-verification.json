@@ -1,0 +1,297 @@
+{
+  "storyId": "STUDIO-OBS-001",
+  "phase": "apply-qa-fixes",
+  "iteration": 1,
+  "status": "InProgress",
+  "qaVerdict": "FAIL preserved; independent re-review pending",
+  "reviewedBaseline": "sha256:2e5b29fcdad6fa122f6e20879ba3fe6924223b0183dd292290e347209abe2bc8",
+  "findingResolutions": [
+    {
+      "id": "TEST-001",
+      "severity": "high",
+      "resolution": "FIXED",
+      "details": "Bidirectional cumulative needs/allocation/executed binding and consumer correspondence; negative unallocated/extra-consumer fixtures plus positive two-binding snapshot."
+    },
+    {
+      "id": "TEST-002",
+      "severity": "high",
+      "resolution": "FIXED",
+      "details": "All observations have monotonic session generation; document changes and mutating actions require advancement. Consistent-reference/hash negatives and valid reuse/advance cases."
+    },
+    {
+      "id": "TEST-003",
+      "severity": "medium",
+      "resolution": "FIXED",
+      "details": "Configured source-step bound applied to actual count; audit covered lowered materialized observation/binding counts, counter underreporting, observation/statement bounds and runtime value byte/count bounds."
+    }
+  ],
+  "checks": [
+    {
+      "command": "node tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "stdout": "PASS: 114 fixture cases; 109 OpenAPI request/response examples; all schemas compiled; canonical hash vector verified.",
+      "stderr": ""
+    },
+    {
+      "command": "node docs/qa/evidence/STUDIO-OBS-001-independent-review.cjs",
+      "exitCode": 0,
+      "stderr": "",
+      "report": {
+        "scope": "Independent static contract QA, not runtime or live browser proof",
+        "command": "node docs/qa/evidence/STUDIO-OBS-001-independent-review.cjs",
+        "total": 30,
+        "passed": 30,
+        "failed": 0,
+        "results": [
+          {
+            "name": "positive-bundle",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "positive-localhost",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "positive-ipv4",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "positive-ipv6",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "positive-httpApplication",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "positive-authoredLiteralBundle",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "proposal-union-actionProposal",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "proposal-union-clarificationProposal",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "proposal-union-stepCompleteProposal",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "proposal-union-unsupportedProposal",
+            "expected": "VALID",
+            "actual": "VALID",
+            "passed": true
+          },
+          {
+            "name": "foreign-session",
+            "expected": "SESSION_SCOPE",
+            "actual": "SESSION_SCOPE",
+            "passed": true
+          },
+          {
+            "name": "stale-owner-fence",
+            "expected": "STALE_FENCE",
+            "actual": "STALE_FENCE",
+            "passed": true
+          },
+          {
+            "name": "stale-materialization-fence",
+            "expected": "STALE_FENCE",
+            "actual": "STALE_FENCE",
+            "passed": true
+          },
+          {
+            "name": "materialized-source-value-substitution",
+            "expected": "AUTHORED_INPUT",
+            "actual": "AUTHORED_INPUT",
+            "passed": true
+          },
+          {
+            "name": "password-read-after-consistent-rehash",
+            "expected": "SENSITIVE_SOURCE",
+            "actual": "SENSITIVE_SOURCE",
+            "passed": true
+          },
+          {
+            "name": "hidden-read-after-consistent-rehash",
+            "expected": "SENSITIVE_SOURCE",
+            "actual": "SENSITIVE_SOURCE",
+            "passed": true
+          },
+          {
+            "name": "cancelled-session",
+            "expected": "PUBLICATION_STATE",
+            "actual": "PUBLICATION_STATE",
+            "passed": true
+          },
+          {
+            "name": "expired-session",
+            "expected": "PUBLICATION_STATE",
+            "actual": "PUBLICATION_STATE",
+            "passed": true
+          },
+          {
+            "name": "unknown-outcome-ledger",
+            "expected": "PUBLICATION_STATE",
+            "actual": "PUBLICATION_STATE",
+            "passed": true
+          },
+          {
+            "name": "failed-required-assertion",
+            "expected": "ASSERTION_FAILED",
+            "actual": "ASSERTION_FAILED",
+            "passed": true
+          },
+          {
+            "name": "executed-plan-hash-substitution",
+            "expected": "PUBLICATION_IDENTITY",
+            "actual": "PUBLICATION_IDENTITY",
+            "passed": true
+          },
+          {
+            "name": "admission-provenance-substitution",
+            "expected": "PUBLICATION_IDENTITY",
+            "actual": "PUBLICATION_IDENTITY",
+            "passed": true
+          },
+          {
+            "name": "new-artifact-old-revision",
+            "expected": "PUBLICATION_IDENTITY",
+            "actual": "PUBLICATION_IDENTITY",
+            "passed": true
+          },
+          {
+            "name": "mixed-proposal-outcome",
+            "expected": "SCHEMA",
+            "actual": "SCHEMA",
+            "passed": true
+          },
+          {
+            "name": "empty-step-complete",
+            "expected": "SCHEMA",
+            "actual": "SCHEMA",
+            "passed": true
+          },
+          {
+            "name": "unallocated-executed-binding",
+            "expected": "REJECT",
+            "actual": "DEPENDENCY_PLAN",
+            "passed": true
+          },
+          {
+            "name": "executed-consumer-outside-admitted-needs",
+            "expected": "REJECT",
+            "actual": "DEPENDENCY_PLAN",
+            "passed": true
+          },
+          {
+            "name": "generation-regresses-after-read",
+            "expected": "REJECT",
+            "actual": "NODE_GENERATION",
+            "passed": true
+          },
+          {
+            "name": "document-replaced-without-new-generation",
+            "expected": "REJECT",
+            "actual": "NODE_GENERATION",
+            "passed": true
+          },
+          {
+            "name": "configured-source-step-limit-exceeded",
+            "expected": "REJECT",
+            "actual": "BUDGET",
+            "passed": true
+          }
+        ]
+      }
+    },
+    {
+      "command": "node --check tools/check-studio-observed-contracts.cjs",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "command": "Whitespace scan of all remediation files, including untracked files",
+      "exitCode": 0
+    }
+  ],
+  "summary": {
+    "sharedCases": 114,
+    "openapiExamples": 109,
+    "schemas": 20,
+    "independentCases": 30,
+    "independentPassed": 30,
+    "falseAccepts": 0
+  },
+  "files": [
+    {
+      "path": "tools/check-studio-observed-contracts.cjs",
+      "sha256": "3dbc8c3ea12166f66080495641c84c9f0e854e03405b355b8bed8b0ef869f70a"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/fixtures.json",
+      "sha256": "d3d0d8d80894a6f167336efce912faabebd24e62ce72e998752d9bbd5787fdd2"
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/contracts/README.md",
+      "sha256": "f352d8ecbf128617b5bc844f8c730043926c09738f3bde9c5067077fe3de32b6"
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-001.story.md",
+      "sha256": "5168436778f1f9636efde8bfdd9a943ee930c4e0e0a6432bc7ee77a8779ff640"
+    }
+  ],
+  "protectedQaArtifactsUnmodified": [
+    {
+      "path": "docs/qa/gates/STUDIO-OBS-001-contracts-and-first-run-lifecycle.yml",
+      "sha256": "10090867b054f446c4fb0ccde276c0a3e3112e177c7a116ba6804dc07a7fe29d"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-001-independent-review.cjs",
+      "sha256": "fcfa7ee3262d50e258a83e38bbafed7006fa219d85252eb5d8a8f79f9c3a4b50"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-001-independent-review.json",
+      "sha256": "669e148b030e61cd1a4a138589b68a49d8e20040fa59371b0dd9d084b3eb624c"
+    },
+    {
+      "path": "docs/qa/evidence/STUDIO-OBS-001-reviewed-revision.json",
+      "sha256": "ea97980ac712aa7ce61c1428d9d02de0710ce038923ac48046af0e8ef671904e"
+    }
+  ],
+  "limitations": [
+    "No live/runtime/product proof added",
+    "Model token totals require authoritative gateway/runtime accounting",
+    "Application lint/typecheck/build not applicable; root test script is placeholder; focused full contract suite and CJS syntax check executed",
+    "Original QA FAIL and review artifacts preserved; root phase verification and independent re-review required",
+    "CodeRabbit previously established unavailable; no automated review PASS claimed"
+  ]
+}

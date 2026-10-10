@@ -1,0 +1,105 @@
+{
+  "storyId": "STUDIO-OBS-006",
+  "reviewType": "Targeted independent verification of the frozen R2-POLICY-001 documentation correction only",
+  "reviewer": "/root/sdc_bridge_arch",
+  "at": "2026-10-09T07:49:05.296401+00:00",
+  "verdict": "PASS",
+  "scope": "Design/source-contract verification only. Prior resolved R2 conclusions are preserved; no broad design re-review or implementation QA/readiness verdict is performed.",
+  "findingDisposition": {
+    "id": "R2-POLICY-001",
+    "status": "RESOLVED_AT_DESIGN_LEVEL",
+    "remainingBlockers": []
+  },
+  "reviewedDocumentHashes": {
+    "docs/specs/studio-observed-authoring/publication-design.md": "516ced4f8084e955d904e103580a7b5d63fc53757c973b8effaeede9af1ab5c3",
+    "docs/specs/studio-observed-authoring/publication-data-contract.md": "1ab026994489107a01befe7d20bdea778e040da2da7d5fc910f3aeadbd5bc6c4",
+    "docs/specs/studio-observed-authoring/publication-contracts.md": "75aed332d39e2ff67e0b8d0056a651c9906995b8c0020dffa1f30abf090f3e7f",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md": "6b8237daf96cf2e98d629087a72500d0a84eda844272ee54cd37b3da86b613a8"
+  },
+  "resolutionRecord": {
+    "path": ".ai/STUDIO-OBS-006-design-resolution-policy.json",
+    "sha256": "fc2fba793a3bedbcafe48d3219503b82d85694d6d8c60d7c53329ba9a09650c9"
+  },
+  "unchangedPriorReviewAndResolutionHashes": {
+    ".ai/STUDIO-OBS-006-runtime-design-review.json": "5351f3b870c9672026f94062b826156dafa4e262679c40a23b6c964ac075cf80",
+    ".ai/STUDIO-OBS-006-qa-design-review.json": "20ede22259ea1175527334383d35a84b55184d23113fbd4bf05bfca0a1645390",
+    ".ai/STUDIO-OBS-006-qa-design-review-r2.json": "6ff73492df659f0e03b33d5a08faf624d132bb5dc716f761eada115da774dd3f",
+    ".ai/STUDIO-OBS-006-data-design-review-r1.json": "b5aa0887aab66bc923bd9233d02c74f2164b6f784bbd7edf594d8f386a9e75dd",
+    ".ai/STUDIO-OBS-006-runtime-design-review-r2.json": "54aed9c9077715a57cf273d719b4a7827c5ba0ab60e7fa30732c130e9bd5e1da",
+    ".ai/STUDIO-OBS-006-data-design-review-r2.json": "ce8913038de1eeb1f50336309fedbf8acd01b21d9cca0c4fbd6d0b1f3efb2863",
+    ".ai/STUDIO-OBS-006-runtime-design-review-r1.json": "5eddfd75103b10d912896e497af222ad2a365ab89447d8916d74b5b378e076b1",
+    ".ai/STUDIO-OBS-006-data-design-review.json": "23481702cf7009e650722b80b83811863be82b172dc62e089209df41a0be43c3",
+    ".ai/STUDIO-OBS-006-qa-design-review-r1.json": "a429113585fa83d01b65f2d86b659ecc95f21d62c70af12f9b588c3edacc4b15",
+    ".ai/STUDIO-OBS-006-design-resolution-r1.json": "ef34aec2cf27c8671fca0421be54076e0c30de5b6652e93ef0f621b272b6303c",
+    ".ai/STUDIO-OBS-006-design-resolution-r2.json": "9fe48609ec225f93a8fb0d638d316109f0d92db3897a868dd8cc351c69fb5c4d"
+  },
+  "inspectedRuntimeSourceHashes": {
+    "studio-runner/src/run/observationSanitizer.ts": "389b94dae82bdefe6519cb7c7ae3f23382430d2de31043220374f954d7a39d8c",
+    "studio-runner/src/run/observationTypes.ts": "a1bb68ad620612ac3eb456599bfb45af8f4c00ad9d00cc67125bd2035e2572af",
+    "studio-runner/src/run/observationCollector.ts": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985"
+  },
+  "checks": [
+    {
+      "name": "Nullable application policy maps to true absence",
+      "result": "PASS",
+      "evidence": "C8 allows null or the closed true-flag object. C12 explicitly maps null by omitting ObservationConfig.applicationPolicy, never forwarding null or synthesizing a false object. This matches the optional property in observationTypes and the observationSanitizer presence guard."
+    },
+    {
+      "name": "Present application policy and grants match unchanged loader",
+      "result": "PASS",
+      "evidence": "Present object requires allowStructuralDiscovery:true and readGrants[0..32]. C1 and C12 repeat the32-grant cap, require a read capability/type set and globally unique policyRuleId within the complete grant list, independent of selector differences. observationSanitizer.ts23-35 enforces these conditions."
+    },
+    {
+      "name": "Field-only and optional override behavior preserved",
+      "result": "PASS",
+      "evidence": "rules remains independent. C12 permits shared policyRuleId across otherwise valid FieldOverrides while requiring unique testId, matching accessibleName/name and allowing omitted accessibleName only for permittedBusinessData. No new cross-override global policyRuleId restriction. Existing collector override precedence/structuralOnly denial/sensitive-source checks remain unchanged."
+    },
+    {
+      "name": "Region grants remain optional author-independent configuration",
+      "result": "PASS",
+      "evidence": "The correction does not require per-control mappings, widen read permission or modify collector priority/conflict/eligibility semantics. Application/region grant behavior remains the already-reviewed R2 behavior."
+    },
+    {
+      "name": "Current policy hash retains full effective semantics",
+      "result": "PASS",
+      "evidence": "currentPolicyHash remains H(TrustedPolicy), covering the exact null-versus-present true representation, full region/type lists, overrides, origins and identities. Existing canonical ordering/type ordering stays unchanged; no learned locator becomes read authority."
+    },
+    {
+      "name": "Minimal amendment scope",
+      "result": "PASS",
+      "evidence": "Read-only in-memory reversal of only the C1 count text, C8 nullable/true/32 type and C12 policy paragraph reproduces the exact R2 contracts hash d03bda578b22fa9991a52bd1b31ccf244a16ddf0aadd48196b7389ddc35939de. Removing only the new resolution path and0.1.4 change-log row reproduces R2 story hash87123a86eda1b1a7933004fb65c167c543850f2021ec42c711acd7f6e4386173. Main design/data and all11 prior review/resolution records are byte-identical to their recorded hashes."
+    },
+    {
+      "name": "Actual loader unchanged and ownership exact",
+      "result": "PASS",
+      "evidence": "Loader SHA matches the frozen correction record; inspected types/collector retain their existing behavior. Proposed ownership is the154 R2 paths in the same order plus only .ai/STUDIO-OBS-006-design-resolution-policy.json (155 unique paths). Story remains Draft and QA Results remain not reviewed."
+    }
+  ],
+  "ownership": {
+    "count": 155,
+    "unique": 155,
+    "baseR2Count": 154,
+    "onlyAddedPath": ".ai/STUDIO-OBS-006-design-resolution-policy.json",
+    "exactPriorOrderPreserved": true,
+    "orderedPathsSha256": "8dcf037b0b0c3b6a364defb8dc52aa7af317a0fabcaa54f64ae2c59dc0a16a61"
+  },
+  "retainedImplementationOracles": [
+    "Actual observed-account/policy projection of a valid field-only policy: null becomes omitted property; no synthesized structural/read permission; existing valid overrides still work.",
+    "Actual no-testId/no-per-control source/consumer replay with a single application/region grant and independent fresh-value receipt.",
+    "Reject present false application policy,33 grants and duplicate grant IDs even across distinct nonconflicting selectors.",
+    "Allow repeated policyRuleId across valid field overrides, while duplicate testId or invalid accessibleName/classification refuse under existing validation.",
+    "Hash/mapping mutations for null/present, origin, region, type allowlist and override produce changed effective policy identity or refusal; a stale digest cannot authorize them."
+  ],
+  "preservedBoundaries": {
+    "implementationApproval": false,
+    "productEdits": false,
+    "runtimeTestsOrBuilds": false,
+    "browserExecution": false,
+    "storyStatusOrQaGateChanges": false,
+    "cliWaveChanges": false,
+    "subagents": false,
+    "commits": false,
+    "onlyWrittenFile": ".ai/STUDIO-OBS-006-runtime-design-review-policy.json"
+  },
+  "handoff": "The final runtime design blocker is closed by the frozen minimal correction. Root may use this targeted PASS together with prior resolved reviews for ownership reconciliation and PO readiness. Actual implementation, source/Java/Node/runtime oracles and independent QA remain future gates."
+}

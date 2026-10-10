@@ -25,6 +25,7 @@ export interface HttpRequest {
   /** Already serialized. The client sends these bytes and no others. */
   readonly body: string;
   readonly timeoutMs: number;
+  readonly maxResponseBytes?: number;
 }
 
 export type HttpOutcome =
@@ -49,7 +50,7 @@ export function createFetchHttpClient(): HttpClient {
     async send(request: HttpRequest): Promise<HttpOutcome> {
       const controller = new AbortController();
       const timer = setTimeout(() => {
-        controller.abort();
+        controller.abort('TIMEOUT');
       }, request.timeoutMs);
       try {
         const response = await fetch(request.url, {
@@ -60,12 +61,23 @@ export function createFetchHttpClient(): HttpClient {
           redirect: 'manual',
           signal: controller.signal,
         });
-        const body = await response.text();
+        let body:string;
+        if(request.maxResponseBytes===undefined)body=await response.text();
+        else{
+          const max=request.maxResponseBytes;
+          if(!Number.isSafeInteger(max)||max<0)throw new Error('RESPONSE_BOUND_INVALID');
+          const reader=response.body?.getReader();const chunks:Uint8Array[]=[];let size=0;
+          try{
+            if(reader)for(;;){const next=await reader.read();if(next.done)break;size+=next.value.byteLength;if(size>max){await reader.cancel().catch(()=>undefined);throw new Error('RESPONSE_TOO_LARGE');}chunks.push(next.value);}
+            const bytes=new Uint8Array(size);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.byteLength;}
+            body=new TextDecoder('utf-8',{fatal:true,ignoreBOM:true}).decode(bytes);
+          }catch{controller.abort();throw new Error('RESPONSE_REFUSED');}finally{reader?.releaseLock();}
+        }
         return { kind: 'response', status: response.status, body };
       } catch (error) {
         // The only thing that aborts this controller is the timer above, so an aborted signal
         // means the deadline passed rather than that the peer refused.
-        if (controller.signal.aborted) return { kind: 'timeout' };
+        if (controller.signal.reason === 'TIMEOUT') return { kind: 'timeout' };
         return {
           kind: 'transport',
           reason: error instanceof Error ? error.name : 'unknown',

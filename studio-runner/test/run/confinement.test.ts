@@ -259,7 +259,7 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // Re-anchored by 10.49 (ADR-002 §35/§13): `compileTest`/`confirmCompile` text, `deprecated` removed.
   const BASE_SHA256 = 'ca98f80c590553dc2b453deb110bdec0309ce773eb010ae4eea85e99a6b5fa57';
 
-  it('leaves docs/specs/studio/openapi.yaml byte-unchanged by this story’s diff', () => {
+  it('preserves exact legacy OpenAPI bytes outside the three reviewed observed routes', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
     // whole of the work runner-side. Under §12 a field on a closed runner body is Class B —
     // architect first — so the absence of a diff here *is* the acceptance, not an omission.
@@ -267,7 +267,15 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     // If this goes red because a *later* story legitimately amended the contract, the fix is to
     // re-anchor the constant in that story's PR, deliberately. It must never be re-anchored in a
     // PR whose subject is something else.
-    const actual = createHash('sha256').update(readFileSync(contract)).digest('hex');
+    // OBS-006 adds exactly three independent-family routes. Preserve the original legacy bytes.
+    const observedRoutes=new Set(['/v2/validate-observed','/v2/runs','/internal/studio/executions/{id}/observed-admission']);
+    let observed=false;const legacy:string[]=[];const seen=new Map<string,number>();
+    for(const line of readFileSync(contract,'utf8').split('\n')){
+      if(/^ {2}\/|^[^ ]/u.test(line)){const route=/^ {2}(\/[^:]+):$/u.exec(line)?.[1];observed=route!==undefined&&observedRoutes.has(route);if(observed&&route!==undefined)seen.set(route,(seen.get(route)??0)+1);}
+      if(!observed)legacy.push(line);
+    }
+    expect([...seen.entries()].sort()).toEqual([...observedRoutes].sort().map(route=>[route,1]));
+    const actual = createHash('sha256').update(legacy.join('\n')).digest('hex');
     expect(actual, 'this story may not edit the contract (ADR-002 §12, Class B)').toBe(BASE_SHA256);
   });
 

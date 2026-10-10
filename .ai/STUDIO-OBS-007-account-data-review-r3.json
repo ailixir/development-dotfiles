@@ -1,0 +1,169 @@
+{
+  "story": "STUDIO-OBS-007",
+  "reviewType": "NARROW_DATABASE_STATE_MACHINE_R3_DESIGN",
+  "reviewer": "Dara / obs006_ddl_61_high / independent data reviewer",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "at": "2026-10-09T19:52:23.980246+00:00",
+  "verdict": "PASS",
+  "verdictScope": "Bounded local design of the selected R3 compact ownership cache and source-compatible NOT_INVOKED accounting. No implementation, migration, provider, PO readiness or whole-story approval.",
+  "summary": "Both remaining local R2 findings are resolved in the frozen R3 design. The bounded compact cache covers every mutable Session field and reconstructs exact original replies from verified immutable parent facts; proposed seals close the two existing immutability gaps. Independent static sizing agrees with the selected quotas and preserves the full old Session transport allowance. FAILED/POLICY_DENIED and FAILED/TIMEOUT match the unchanged verifier; active settlement saves the failure before stop, while already-terminal paths remain historical-only. No further blocking local data correction found.",
+  "reviewedHashes": {
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md": "21abbfbb518332c9130985d3f8fb0d36f1ab7685c7006f8f3e4f30aa0724f924",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r3.json": "fafa107b46e82b39a1f33de68a319c29ca801491b73a52360ece2c258044a160",
+    ".ai/STUDIO-OBS-007-account-data-review-r2.json": "4954830d678956622ff427450826a46475bf37aa74269ec887bd3f5764959dd7",
+    ".ai/STUDIO-OBS-007-account-design-review-r2.json": "9c51e985f157968a693e99b8ab3f9c3f04e9e1549458f3c99e0f83e8941a4ed4",
+    ".ai/STUDIO-OBS-007-account-ux-review-r2.json": "d9d4afc6d58af947532934ce6e1b930d2b56ecdf9ec3df0306ec35e4504cfdd4",
+    "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md": "3f32212c6b080241316fdf51e1a368731663bf82206069fc7a69be7a3c400362",
+    ".ai/STUDIO-OBS-007-po-validation.json": "48c0dfd523c1b78676e150ee8fc87fb9290fae07c29e65fac86603e39a655e12"
+  },
+  "frozenVerification": {
+    "expectedDesign": "21abbfbb518332c9130985d3f8fb0d36f1ab7685c7006f8f3e4f30aa0724f924",
+    "expectedResolution": "fafa107b46e82b39a1f33de68a319c29ca801491b73a52360ece2c258044a160",
+    "pairMatches": true,
+    "protectedInputsCompared": 244,
+    "mismatches": [],
+    "authorizedStoryOverlay": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "beforeSha256": "61518ec9553f3515bd7d8b95d3705cba0244f5bf36e9629a37f3454b2d26af59",
+        "r3BaselineSha256": "3f32212c6b080241316fdf51e1a368731663bf82206069fc7a69be7a3c400362",
+        "reason": "Authorized root0.1.5 reservation beforeR3; not an architect story edit."
+      }
+    ],
+    "priorDataR2Unchanged": true
+  },
+  "existingInventoryReferences": [
+    ".ai/STUDIO-OBS-007-account-design.json#/inputFingerprintsSha256",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r1.json#/preservation",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r2.json#/preservation",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r3.json#/preservation"
+  ],
+  "focusedSourceHashes": {
+    "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql": "859c27578e24ad4eeaad0c5a16cb42ee11ac82b94d04ab0fa11644ba4c36502a",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java": "faa959d41421b33339c5b168c247a31ae03afb0373596070187b8265d23c1be9",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java": "c3ce6a43af36602d50d0d34d14ab1d06baa65eaa6282fec9a5abfc76ec00124b",
+    "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedContracts.java": "85435a3aa11d291147e3ccca3afc6f955c146ef0264dd8608a9122d47ed1b5db",
+    "studio-runner/src/guided/ownership.ts": "8e07015062aadf7e338731e4289c6b9db14d63c429425382ef0696014a0f982b",
+    "studio-runner/src/guided/transport.ts": "bada1cc6afe548274737a2ddc90bbf14e0601039ebd296ab3d7102b8c77e4d57",
+    "studio-runner/src/guided/json.ts": "113713fd50d5eab8a49b0740e68ae6b12d55d150c459f4c135f317e78de7b39d",
+    "docs/specs/studio-observed-authoring/contracts/v2/session.schema.json": "ed39a56cb60cb8d70960967cb1fc5f18494130a85e263960e146ed8f5a96f16e",
+    "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json": "4c18212ff1bd2accbd51055133b4dcaff8f160e4f4de7e7ddef234ef0901e6d0"
+  },
+  "findingDispositions": [
+    {
+      "id": "DATA-007-R2-01",
+      "status": "RESOLVED_LOCAL_DESIGN",
+      "references": [
+        "account-provider-readiness-design.md:430-454",
+        "V30__studio_guided_sessions.sql:55-74",
+        "GuidedSessionService.java:start/claim",
+        "contracts/v2/session.schema.json:required/owner/counters/sourceSteps/authConnection",
+        "studio-runner/src/guided/transport.ts:controllerRequest"
+      ],
+      "assessment": "The exact closed cache snapshots state, owner(worker/fence/exact original lease) and all six counters plus complete bounded header/dbTime/number/hash fields. Twelve named parent fields plus these three mutable fields exactly cover the existing fifteen-field Session. Existing V30 guards protect the parent fields except schemaVersion/authConnection; the selected one-way V34 ownership_facts_sealed guard makes those two immutable before the first new-protocol cached reply, without retroactively creating grants or editing old document bytes. Actual service source initializes authConnection at start and has no later writer removed by this seal. ParentFactsHash and full original replyHash verify reconstructed exact field values/array order/time text, with no current state/counter/lease/dbTime substitution. Retained exact duplicate is checked against current authenticated worker/assignment/fence/mode/source/eligible parent and its own original expiry; older replaced counters refuse. Backend restart only rebuilds a still-live retained acknowledgment, while recovered worker journal cannot relaunch. Lease/cache/seal/counter writes are atomic and bounded. A separate ownership-only1MiB+4096 response cap preserves the whole supported Session instead of fitting it into6144 progress."
+    },
+    {
+      "id": "REL-007-R2-01",
+      "status": "RESOLVED_LOCAL_DESIGN",
+      "references": [
+        "account-provider-readiness-design.md:526-548",
+        "GuidedActionLedger.java:verifyReport",
+        "GuidedSessionService.java:outcomeV2/stop",
+        "V30__studio_guided_sessions.sql:78-91"
+      ],
+      "assessment": "The selected FAILED/TIMEOUT and FAILED/POLICY_DENIED tuples with dispatchCount1/assertionPassednull are accepted by the actual existing verifier; detailed timeout/withdrawal/cancellation cause remains in the authenticated wrapper and selected EXPIRED/CANCELLED session state. The new gated handler explicitly reuses validation/locked primitives instead of blindly calling outcomeV2, which would select session FAILED. Saving conclusive FAILED before stop makes the existing stop loop leave it unchanged. If stop/UNKNOWN/epoch/fence/source or a terminal action already won, one bounded historical receipt cannot rewrite the terminal tuple, add availability/bootstrap/current observation, or enable publication. SETUP has no action row and can claim NOT_INVOKED only before provider or browser invocation starts; begun/uncertain work remains UNKNOWN/quarantined."
+    }
+  ],
+  "findings": [],
+  "independentStaticAnalysis": {
+    "classification": "Read-only canonical JSON serialization and algebra only; no validator, SQL, runtime or implementation test executed.",
+    "source": "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json#/documents/session",
+    "construction": "Replace only sourceSteps with100 unique36-character UUIDs/requiresAssertionfalse and maxSourceSteps100; outer assignmentUUID36, renewalNumber602, UTC-ms dbTime24characters. Hash/size through independently defined sorted compact UTF8 JSON serialization.",
+    "baseFixtureSessionBytes": 1854,
+    "session100UuidStepsBytes": 9317,
+    "chosenFullGrantBytes": 9736,
+    "sampleCompactCacheBytes": 912,
+    "maximumSelectedCacheBytes": 4019,
+    "maximumConstruction": "Two ID fields assignmentId/owner.workerId each256 U+0001 scalars escaped as6bytes; longest existing state AWAITING_CLARIFICATION, fence/six counters2147483647, original UTC lease30characters, all fixed hashes64hex, number602, exact fixed keys.",
+    "controlReservationBytes": 2048,
+    "combinedMaximumBytes": 6067,
+    "cacheQuota": 6144,
+    "combinedQuota": 8192,
+    "maximumOuterHeaderWithNullSessionBytes": 1923,
+    "headerAllowance": 4096,
+    "existingSessionAllowance": 1048576,
+    "ownershipOnlyReplyCap": 1052672,
+    "fullMaximumByHeaderAlgebra": 1050495,
+    "exactRequiredFieldCoverage": true,
+    "canonicalExampleReconstructionEqual": true,
+    "exampleOriginalReplyDigestEqual": true,
+    "explicitNullVersusAbsentParentFieldHashDistinct": true,
+    "limits": "Synthetic serialization does not prove a valid complete100-step workflow, provider support, actual transport response size, real database trigger or runtime implementation. The2048 controls reservation is an enforced separate closed projection, not unrelated translation progress or a full arbitrary status body."
+  },
+  "carriedForwardLocalMechanisms": {
+    "unchangedSections": {
+      "12.2": {
+        "matchesR2": true,
+        "sha256": "0c44fec2f464a0904dfabffdbd82392216dbd153bee473d46e0d6bf01205571e"
+      },
+      "12.3": {
+        "matchesR2": true,
+        "sha256": "82f1eccf017d5fab12d92fff6f29325381455a37afa1ec252b51e4357625b293"
+      },
+      "12.4": {
+        "matchesR2": true,
+        "sha256": "d7930e4594f66949f1ff654791929dc000921a1218f287ea7a6105defc18725d"
+      },
+      "12.6": {
+        "matchesR2": true,
+        "sha256": "10b657675af0973a6d61b3bd8aeb8d2f8977bf32755adfca48e25346fb51e187"
+      },
+      "12.7": {
+        "matchesR2": true,
+        "sha256": "f1975b4fa3e76e8fcb15519ef0c37fa4ac0da08f30dce807fe312fc2c4fb3c9a"
+      },
+      "12.8": {
+        "matchesR2": true,
+        "sha256": "921b68f351126a75f04cdbe1fbedc8a96f7847dc6fbb8fb07c54bb3b11bfaf36"
+      }
+    },
+    "lockOrder": "Session\u2192ui_tests\u2192local epoch/assignment/materialization\u2192translation/plan/model/obligation\u2192command\u2192permit\u2192exact preparation/action; scanner unlocked candidates and bounded waits/raw finalDBclock remain selected.",
+    "binding": "Typed purpose FKs/JSON equality, actual APPLIED and preparation joins, monotone epoch owner, immutable activation marker, exact proof selection and unconditional publication linkage remain selected; no FK/hash is credited as current external entitlement.",
+    "time": "New exactUTCms/downward future bounds, after-wait rawDB comparisons, conservative bounded clock/default-disabled and adjacent final invocation checks remain selected.",
+    "retention": "M\u2264200/C\u2264201/all-state singleSETUP, one permit/accounting record, bounded duplicate-key/control storage, no automatic tombstone/parent deletion, truthful cleanup quarantine remain selected.",
+    "UXCarryForward": "12.6 and12.7 are byte-identical to the UX-reviewedR2. This report carries that unchanged scope only; it does not invent a whole-R3 UX approval."
+  },
+  "mandatoryFutureOraclesNotRun": [
+    "Supported100-source-step and maximum bounded-ID/source/scope/accountConnection Session passes the real new ownership claim/renewal transport; actual stored cache\u22646144/controls\u22642048/combined\u22648192 and whole response\u22641052672, without truncation or lowering old limits.",
+    "After retained n, mutate only current state/counters and advance workflow; exact duplicate n/body still returns original complete snapshot/dbTime/digest and original lease. After n+1 replaces n, old n refuses; expired original n never borrows a newer lease.",
+    "Direct SQL/service seal/schemaVersion/authConnection/parentFactsHash/replyHash/counter/mode/fence/nullable-or-missing mutations refuse; explicit null is preserved as data, absent required field is not normalized to null. Restart/lost ACK refuses lost runtime or expired/terminal parent, never second browser/downgrade/new key rights.",
+    "Rollback at seal/lease/cache/counter or quota failure leaves previous grant slot and lease unchanged. New ownership-mode branch alone gets the larger response cap; other transport routes/parser depth/string/duplicate/UTF8 rules remain unchanged.",
+    "Actual consumed ACTION then pre-first-invocation timeout/withdrawal callback reaches unchanged verifyReport with FAILED/TIMEOUT or FAILED/POLICY_DENIED; zero native/renderer effects, dispatchCount1 unchanged, atomic accounted failure and correct EXPIRED/CANCELLED session. FAILED/CANCELLED remains rejected.",
+    "Stop/reaper/revocation/lost-ACK/new-fence/source race before callback preserves original terminalUNKNOWN/ACK_LOST or other terminal tuple; exact late receipt is one historical record, contradictory second receipt refuses, no availability/bootstrap/readiness/publication.",
+    "SETUP NOT_INVOKED proves zero provider/browser invocations and no action/preparation/blank evidence; begun or uncertain provider work cannot be relabeled NOT_INVOKED. Existing successful actual blank setup and old legacy report predicates remain unaffected.",
+    "Previously selected lock/FK/epoch/marker/time/idempotency/tombstone and genuine controlled provider/production-client oracles remain mandatory for eventual implementation; static design PASS does not mark any oracle executed."
+  ],
+  "readinessPreserved": {
+    "storyStatus": "Draft",
+    "poVerdict": "NO-GO",
+    "score": "4/10",
+    "EXT-001": "UNRESOLVED; approved provider identity/docs/config/transport and conditional handoff facts remain unavailable/unapproved.",
+    "implementationApproved": false,
+    "databaseMigrationApproved": false,
+    "wholeStoryGateIssued": false,
+    "lifecycleChanged": false
+  },
+  "workPerformed": {
+    "writtenOnly": ".ai/STUDIO-OBS-007-account-data-review-r3.json",
+    "sourceReadsHashesAndStaticByteAnalysis": true,
+    "testsValidatorsBuildsSQLDatabaseBrowserProviderExternalCalls": false,
+    "productSchemaSQLUIStoryTestLifecycleGateEdits": false,
+    "subagentsRootCliCommitsPush": false,
+    "priorReportsEdited": false
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualSpend": "UNKNOWN"
+  }
+}

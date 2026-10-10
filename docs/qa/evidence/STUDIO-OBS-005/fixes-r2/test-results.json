@@ -1,0 +1,1162 @@
+{
+  "recordedAt": "2026-10-09T05:13:49.219842+00:00",
+  "command": "./backend/gradlew -p backend test --tests '*Guided*' --tests '*GenAiLlmGatewayClientTest' --tests '*CredentialBudgetTest' --tests '*StudioGatewayConfigTest' --tests '*NoRuntimeLlmTest' --tests '*DeReadyCarryForwardTest' --no-daemon --console=plain",
+  "exitCode": 0,
+  "summary": {
+    "tests": 232,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 1
+  },
+  "suites": [
+    {
+      "name": "com.citi.put.checks.studio.compile.NoRuntimeLlmTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "55e4d5141e95e9fcd741409741da019113955ecd8c2c2bcc2eae246919543b5a",
+      "cases": [
+        {
+          "name": "injectedDirectAndTransitiveProviderEdgesFailTheOracle()",
+          "status": "PASS"
+        },
+        {
+          "name": "noClassOutsideTheCompilePackageReferencesTheGateway()",
+          "status": "PASS"
+        },
+        {
+          "name": "guidedAllowanceIsExactAndBothProviderPathsRemainUnreachableFromOrdinaryExecution()",
+          "status": "PASS"
+        },
+        {
+          "name": "theScanIsNotVacuous()",
+          "status": "PASS"
+        },
+        {
+          "name": "theReadinessPackageCannotReachTheGatewayEither()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.compile.gateway.CredentialBudgetTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "7f43e2e6c1cc7dfbe3593e7ed7337124105c1aeb726bdd63feafd64a0a4db95d",
+      "cases": [
+        {
+          "name": "unknownCredentialProvidersFailClosedBeforeAnUnboundedRefreshCanRun()",
+          "status": "PASS"
+        },
+        {
+          "name": "explicitCancellationClosesCredentialSocketBeforeItsLongDeadline()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] mode=adc-user",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] mode=service-account",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.compile.gateway.GenAiLlmGatewayClientTest",
+      "tests": 24,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "935f84ee8c32cef214d8d4e6d132271d9e8bc6620df3e7cd46ce3785dd8b0af8",
+      "cases": [
+        {
+          "name": "activeCallUsesRemainingDeadlineAndDoesNotRetryTimeout()",
+          "status": "PASS"
+        },
+        {
+          "name": "recordsPresentVendorUsageAcrossTheSharedRequest()",
+          "status": "PASS"
+        },
+        {
+          "name": "thinkingConfigSwitchOffOmitsTheFieldAndRecordsProviderDefault()",
+          "status": "PASS"
+        },
+        {
+          "name": "retriesAreBoundedWithoutSdkAmplification()",
+          "status": "PASS"
+        },
+        {
+          "name": "systemInstructionSwitchOffSendsTheIdenticalStaticBytesFirstInContents()",
+          "status": "PASS"
+        },
+        {
+          "name": "compilationSettingsCarryTheThinkingLevel()",
+          "status": "PASS"
+        },
+        {
+          "name": "oversizedOutputIsDiscarded()",
+          "status": "PASS"
+        },
+        {
+          "name": "twoDifferentTestsSendByteIdenticalSystemInstructions()",
+          "status": "PASS"
+        },
+        {
+          "name": "retryCountIsReportedAndBounded()",
+          "status": "PASS"
+        },
+        {
+          "name": "sendsSchemaTokensAndCapturesUnavailableUsageTruthfully()",
+          "status": "PASS"
+        },
+        {
+          "name": "staticPrefixTravelsAsSystemInstructionAndPerRequestLinesFollowIt()",
+          "status": "PASS"
+        },
+        {
+          "name": "thinkingLevelIsSentExplicitlyAndNeverWithABudget()",
+          "status": "PASS"
+        },
+        {
+          "name": "noSamplingParametersAreSentOnTheWire()",
+          "status": "PASS"
+        },
+        {
+          "name": "theWireSchemaIsThePerStatusAnyOf()",
+          "status": "PASS"
+        },
+        {
+          "name": "transportSocketTimeoutsDeriveFromRequestTimeout()",
+          "status": "PASS"
+        },
+        {
+          "name": "compilationSettingsRecordProviderSchemaVersionTwo()",
+          "status": "PASS"
+        },
+        {
+          "name": "saturatedConcurrencyFailsFastWithoutTransport()",
+          "status": "PASS"
+        },
+        {
+          "name": "retryAfterZeroCannotAddUnaccountedHttpRetriesToCompile()",
+          "status": "PASS"
+        },
+        {
+          "name": "oversizedInputIsRejectedBeforeAnyNetworkCall()",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsTruncationEvenWhenTextContainsValidEnvelope()",
+          "status": "PASS"
+        },
+        {
+          "name": "responseWithoutCandidatesIsAParseFailureThatLeaksNoSource()",
+          "status": "PASS"
+        },
+        {
+          "name": "cancellationStopsActualTransportAndRecoversSingleCapacity()",
+          "status": "PASS"
+        },
+        {
+          "name": "responseSlowerThanOkHttpDefaultReadTimeoutSucceeds()",
+          "status": "PASS"
+        },
+        {
+          "name": "expiredBudgetNeverStartsTransport()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.compile.gateway.StudioGatewayConfigTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "17234b33d6f4a4514cfa79b6b1bf3adc99189579ad78021695231d19053836dd",
+      "cases": [
+        {
+          "name": "vertexWithoutConfigurationFailsStartup()",
+          "status": "PASS"
+        },
+        {
+          "name": "unknownProviderFailsConfigurationValidation()",
+          "status": "PASS"
+        },
+        {
+          "name": "anExplicitDisabledProviderSelectsTheDisabledClient()",
+          "status": "PASS"
+        },
+        {
+          "name": "aMissingServiceAccountKeyFileIsReportedByPath()",
+          "status": "PASS"
+        },
+        {
+          "name": "theLocalProfileAloneStillSelectsTheDisabledClient()",
+          "status": "PASS"
+        },
+        {
+          "name": "anAbsentArtifactSchemaFailsStartup()",
+          "status": "PASS"
+        },
+        {
+          "name": "deployedStudioRefusesToAdvertiseTranslationWithoutVertex()",
+          "status": "PASS"
+        },
+        {
+          "name": "theDefaultIsTheDisabledClient()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidatorTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "213946b3cb0a070867b3d393e03f9de0538e106990317191071130839461d052",
+      "cases": [
+        {
+          "name": "configurationIsScopedAndMayContainIntentionalEmptyAuthoredText()",
+          "status": "PASS"
+        },
+        {
+          "name": "destinationsRequireApprovedRealOriginAndNoCredentials()",
+          "status": "PASS"
+        },
+        {
+          "name": "slicesExactUnicodeWhitespaceWithinClassifiedRegionWithoutSemanticMapping()",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsRevisionBoundsSurrogateSplitsAndUnclassifiedRegions()",
+          "status": "PASS"
+        },
+        {
+          "name": "sharedV2NodeAndJavaCanonicalVectorsAndReferenceSchemasAgree()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest",
+      "tests": 37,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "66e9be8f0277fd176ce014eb86e46b87012ee5c44f8092471afc9cb6c53128a6",
+      "cases": [
+        {
+          "name": "uncapturedPasswordAndInputEchoesStayPrivateAcrossActualDocumentNavigation()",
+          "status": "PASS"
+        },
+        {
+          "name": "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue()",
+          "status": "PASS"
+        },
+        {
+          "name": "actualApplicationReplacementAfterPrepareNeverActsOnReplacement()",
+          "status": "PASS"
+        },
+        {
+          "name": "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation()",
+          "status": "PASS"
+        },
+        {
+          "name": "callbackAcceptsValidUnicodeSessionLargerThan64KiB()",
+          "status": "PASS"
+        },
+        {
+          "name": "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased()",
+          "status": "PASS"
+        },
+        {
+          "name": "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple()",
+          "status": "PASS"
+        },
+        {
+          "name": "freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer()",
+          "status": "PASS"
+        },
+        {
+          "name": "belowFoldClickUsesNativeRevealAndOneReceipt()",
+          "status": "PASS"
+        },
+        {
+          "name": "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay()",
+          "status": "PASS"
+        },
+        {
+          "name": "httpSuccessWithoutCommittedCompletionCallbackIsUnknownAndNeverRetried()",
+          "status": "PASS"
+        },
+        {
+          "name": "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot()",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission()",
+          "status": "PASS"
+        },
+        {
+          "name": "supportedV2AnswerResumesTrustedQuestionFixtureThenRefreshPreservesHistoricalSelection()",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyClarificationAnswerCannotResumeObservedV2Session()",
+          "status": "PASS"
+        },
+        {
+          "name": "configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules()",
+          "status": "PASS"
+        },
+        {
+          "name": "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim()",
+          "status": "PASS"
+        },
+        {
+          "name": "committedObservationRecoversLostHttpResponseWithoutAnotherCollection()",
+          "status": "PASS"
+        },
+        {
+          "name": "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction()",
+          "status": "PASS"
+        },
+        {
+          "name": "failedRenewalStopsWithoutUsingUnacknowledgedLeaseOrReclaiming()",
+          "status": "PASS"
+        },
+        {
+          "name": "lateRenewalResponseAfterStopCannotReviveContextOrOwnership()",
+          "status": "PASS"
+        },
+        {
+          "name": "actualAuthenticatedRawBytesRejectAmbiguityAndUnknownSignedClaims()",
+          "status": "PASS"
+        },
+        {
+          "name": "preventedNativeToggleNeverCommitsSuccessOrRetries()",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration()",
+          "status": "PASS"
+        },
+        {
+          "name": "nativeRadioUncheckIsRefusedBeforeAnyBrowserAttempt()",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentSameAndNewKeysHaveOneRealDispatch()",
+          "status": "PASS"
+        },
+        {
+          "name": "restartedWorkerCannotReclaimExistingAssignmentOrReplayBrowserEffects()",
+          "status": "PASS"
+        },
+        {
+          "name": "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption()",
+          "status": "PASS"
+        },
+        {
+          "name": "actualRunnerResponseBoundaryRejectsMalformedUtf8DuplicatesTrailingAndTimestampProfiles()",
+          "status": "PASS"
+        },
+        {
+          "name": "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly()",
+          "status": "PASS"
+        },
+        {
+          "name": "renewalWhileBrowserDispatchIsBusyDoesNotResetOrRepeatTheAction()",
+          "status": "PASS"
+        },
+        {
+          "name": "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()",
+          "status": "PASS"
+        },
+        {
+          "name": "cancellationBeforeConsumptionRevokesAndMissingStopAckNeverConfirmsTeardown()",
+          "status": "PASS"
+        },
+        {
+          "name": "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch()",
+          "status": "PASS"
+        },
+        {
+          "name": "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition()",
+          "status": "PASS"
+        },
+        {
+          "name": "cancellationBeforeAndAfterConsumePreventsFutureWorkAndPreservesUncertainty()",
+          "status": "PASS"
+        },
+        {
+          "name": "nestedRollbackAndLostWinnerNeverManufactureSendAuthority()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "53e9508badc08ff101312f78acbea8485938e3d089e869b51f1403743bbe9e15",
+      "cases": [
+        {
+          "name": "pendingResultAndAbsentClarificationFollowFrozenHttpStatus()",
+          "status": "PASS"
+        },
+        {
+          "name": "legacyCallbackAndOpenApiRoutesRemainOnTheirExistingChains()",
+          "status": "PASS"
+        },
+        {
+          "name": "rawMalformedBodiesNeverReachEitherGuidedControllerOrChangeBffPolicy()",
+          "status": "PASS"
+        },
+        {
+          "name": "authenticatedWorkerArrivesWithItsVerifiedSubjectAndNonUuidKey()",
+          "status": "PASS"
+        },
+        {
+          "name": "internalGuidedChainRunsBeforeLegacyAndRejectsBffOrStaticToken()",
+          "status": "PASS"
+        },
+        {
+          "name": "publicV3UsesBffAndBypassesLegacyUuidIdempotency()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.session.GuidedPlanningIntegrationTest",
+      "tests": 40,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "dd256fbaa3e524953661d3a51724b29dc88a9597b5f01b1bcaf66928dabc06db",
+      "cases": [
+        {
+          "name": "optionalChargedVerificationCannotOverrideMissingExecution()",
+          "status": "PASS"
+        },
+        {
+          "name": "thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit()",
+          "status": "PASS"
+        },
+        {
+          "name": "reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] timing=before, loseResponse=false",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] timing=after, loseResponse=false",
+          "status": "PASS"
+        },
+        {
+          "name": "[3] timing=before, loseResponse=true",
+          "status": "PASS"
+        },
+        {
+          "name": "[4] timing=after, loseResponse=true",
+          "status": "PASS"
+        },
+        {
+          "name": "contextMetadataRetryLimitStopsWithoutAnotherBrowserOrModelCall()",
+          "status": "PASS"
+        },
+        {
+          "name": "sourceChangeDuringProviderCallCannotRestampAndLateUsageRetainsReservation()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] chosenIndex=0",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] chosenIndex=1",
+          "status": "PASS"
+        },
+        {
+          "name": "typedUnsupportedOutcomeStopsWithoutInventingAnAction()",
+          "status": "PASS"
+        },
+        {
+          "name": "bootstrapOnlyResumeChecksPinsAndDirectProposalsRecoverBeforeInference()",
+          "status": "PASS"
+        },
+        {
+          "name": "malformedProviderReplyRepairsThroughDurableChargedAttemptsWithoutEcho()",
+          "status": "PASS"
+        },
+        {
+          "name": "acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] choice=0",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] choice=1",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] mutation=operation",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] mutation=target",
+          "status": "PASS"
+        },
+        {
+          "name": "[3] mutation=value",
+          "status": "PASS"
+        },
+        {
+          "name": "[4] mutation=assertion",
+          "status": "PASS"
+        },
+        {
+          "name": "chosenSourceCannotBeAppendedUnusedWhileTheRejectedDestinationIsUsed()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] boundary=entry",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] boundary=reservation",
+          "status": "PASS"
+        },
+        {
+          "name": "[3] boundary=repair",
+          "status": "PASS"
+        },
+        {
+          "name": "terminalCancellationAcceptsLateAccountingWithoutRevivingAuthority()",
+          "status": "PASS"
+        },
+        {
+          "name": "pinRefusalAfterLockedLateAccountingPreservesTheDeltaAndStop()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] afterEffect=false",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] afterEffect=true",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] capacity=input",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] capacity=output",
+          "status": "PASS"
+        },
+        {
+          "name": "[3] capacity=proposals",
+          "status": "PASS"
+        },
+        {
+          "name": "futureNonzeroSourceQuestionCannotBeRedefinedByChangingItsOperation()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] point=plan",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] point=materialized",
+          "status": "PASS"
+        },
+        {
+          "name": "[3] point=allocation",
+          "status": "PASS"
+        },
+        {
+          "name": "[4] point=next",
+          "status": "PASS"
+        },
+        {
+          "name": "[5] point=lost-context-response",
+          "status": "PASS"
+        },
+        {
+          "name": "[6] point=prior-bootstrap",
+          "status": "PASS"
+        },
+        {
+          "name": "lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.session.GuidedSecurityTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "eabc9f9219836ebbba713c7dc40f849ef8aba9a0577c79c70e081a0b2fceb97f",
+      "cases": [
+        {
+          "name": "bffAndLegacyServiceTokensNeverBecomeGuidedIdentity()",
+          "status": "PASS"
+        },
+        {
+          "name": "wrongAudienceIssuerSubjectSignatureAndRoleFail()",
+          "status": "PASS"
+        },
+        {
+          "name": "signedMalformedUtf8CannotBecomeReplacementCharacterIdentity()",
+          "status": "PASS"
+        },
+        {
+          "name": "timeTypesExpiryFutureAndLifetimeFail()",
+          "status": "PASS"
+        },
+        {
+          "name": "malformedAndOversizedTokensAreRejectedBeforeBodyRead()",
+          "status": "PASS"
+        },
+        {
+          "name": "closedClaimsAndCanonicalNonnegativeNbfMatchRunner()",
+          "status": "PASS"
+        },
+        {
+          "name": "mtlsCannotBeReplacedBySecureOrForwardedHeaders()",
+          "status": "PASS"
+        },
+        {
+          "name": "approvedKebabCaseConfigurationLowersTheFrozenCeilings()",
+          "status": "PASS"
+        },
+        {
+          "name": "validAudienceBoundWorkerAndControllerRemainDistinct()",
+          "status": "PASS"
+        },
+        {
+          "name": "algorithmSubstitutionDuplicateKeysAndTrailingJsonFail()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.session.GuidedSessionIT",
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "8078930ee628404af661bcc210e4ac0c419d3a38413f2329b4f88f247ffa797f",
+      "cases": [
+        {
+          "name": "accessIsolationRechecksPrincipalCsiAccountAndScope()",
+          "status": "PASS"
+        },
+        {
+          "name": "canonicalUnicodeParityAndClosedSchema()",
+          "status": "PASS"
+        },
+        {
+          "name": "clarificationSelectionAndPauseChangeRollBackTogether()",
+          "status": "PASS"
+        },
+        {
+          "name": "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown()",
+          "status": "PASS"
+        },
+        {
+          "name": "gatewayOverrunIsDurablyChargedAndStopsFurtherWork()",
+          "status": "PASS"
+        },
+        {
+          "name": "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()",
+          "status": "PASS"
+        },
+        {
+          "name": "expiryCannotBeExtendedAndTrustedReaperRevokes()",
+          "status": "PASS"
+        },
+        {
+          "name": "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()",
+          "status": "PASS"
+        },
+        {
+          "name": "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch()",
+          "status": "PASS"
+        },
+        {
+          "name": "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent()",
+          "status": "PASS"
+        },
+        {
+          "name": "conflictingAdmissionAndUniqueCoordinatesFail()",
+          "status": "PASS"
+        },
+        {
+          "name": "observationBudgetAndGenerationAreSharedAcrossActions()",
+          "status": "PASS"
+        },
+        {
+          "name": "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery()",
+          "status": "PASS"
+        },
+        {
+          "name": "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed()",
+          "status": "PASS"
+        },
+        {
+          "name": "migrationPreservesExistingDataAndFreshInstallWorks()",
+          "status": "PASS"
+        },
+        {
+          "name": "workerSubjectFenceAndLeaseAreIndependent()",
+          "status": "PASS"
+        },
+        {
+          "name": "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge()",
+          "status": "PASS"
+        },
+        {
+          "name": "entireSessionBudgetsAreReservedAndMissingUsageIsConservative()",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentConflictingStartsHaveOneWinner()",
+          "status": "PASS"
+        },
+        {
+          "name": "noStateCanPublishWithoutExactVerifier()",
+          "status": "PASS"
+        },
+        {
+          "name": "successfulLedgerStillCannotPublishWithoutExactPlanVerifier()",
+          "status": "PASS"
+        },
+        {
+          "name": "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence()",
+          "status": "PASS"
+        },
+        {
+          "name": "lostAckNeverRetriesAndDelayedCallbackCannotRevive()",
+          "status": "PASS"
+        },
+        {
+          "name": "evidenceReferencesAreScopedAndDoNotClaimReplay()",
+          "status": "PASS"
+        },
+        {
+          "name": "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()",
+          "status": "PASS"
+        },
+        {
+          "name": "liveOwnerRenewalPreservesAdmittedAndDispatchedActions()",
+          "status": "PASS"
+        },
+        {
+          "name": "actionBudgetAndFalseAssertionReportsFailClosed()",
+          "status": "PASS"
+        },
+        {
+          "name": "concurrentIdenticalStartsAndChangedDigestAreDurable()",
+          "status": "PASS"
+        },
+        {
+          "name": "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()",
+          "status": "PASS"
+        },
+        {
+          "name": "takeoverCannotReopenFinalizingAfterExecutedEffects()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.session.GuidedWireContractTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "e051868078fa071f92558fd0128edc5b2d8ebf67f4cea3ef013b1816dde88231",
+      "cases": [
+        {
+          "name": "textualPersistenceParserAlsoRejectsDuplicatesAndTrailingObjects()",
+          "status": "PASS"
+        },
+        {
+          "name": "rawByteVectorsRejectAmbiguityBeforeParsingCanDiscardIt()",
+          "status": "PASS"
+        },
+        {
+          "name": "absentSchemaDefinitionNeverBecomesAnEmptyPermissiveSchema()",
+          "status": "PASS"
+        },
+        {
+          "name": "frozenDateTimeOracleMatchesOnEnforcedAssignmentSchema()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedDisabledWiringTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "dfe3f3e6452a81064b7e5c8767ff71937df1a1f869036b22645828904dae937b",
+      "cases": [
+        {
+          "name": "disabledConfigurationHasNoCoordinatorOrImplicitGuidedExecution()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedGatewayPrivacyTest",
+      "tests": 22,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "8998f61c8b9665947482bfc6693ae301fc0c1f050d102d3d9645fb6889e3b1cb",
+      "cases": [
+        {
+          "name": "legacyCompileAndGuidedUseOneCapacityPool()",
+          "status": "PASS"
+        },
+        {
+          "name": "boundedRealCredentialRefreshCancelsBeforeModelAndRecovers()",
+          "status": "PASS"
+        },
+        {
+          "name": "cancellationStopsSocketThenReleasesSharedCapacity()",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsPrivateAndRawFieldsBeforeTheyCanBecomeProviderRequests()",
+          "status": "PASS"
+        },
+        {
+          "name": "reportsThoughtAndToolTokensWithoutDoubleCountingCachedPromptOrReadingThoughtText()",
+          "status": "PASS"
+        },
+        {
+          "name": "remainingDeadlineStopsOneAttemptAndExpiredBudgetDoesNotSend()",
+          "status": "PASS"
+        },
+        {
+          "name": "configuredInstructionFallbackKeepsStaticContractAndSafeProjectionOnWire()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] kind=SOURCE_PLAN",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] kind=NEXT_ACTION",
+          "status": "PASS"
+        },
+        {
+          "name": "[3] kind=VERIFY_STEP",
+          "status": "PASS"
+        },
+        {
+          "name": "negativeOverflowAndInconsistentUsageCannotBecomeSuccessfulKnownCounts()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] status=401",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] status=429",
+          "status": "PASS"
+        },
+        {
+          "name": "[3] status=500",
+          "status": "PASS"
+        },
+        {
+          "name": "[4] status=503",
+          "status": "PASS"
+        },
+        {
+          "name": "disabledProviderDoesNotPretendToReturnFixturePlan()",
+          "status": "PASS"
+        },
+        {
+          "name": "malformedResponseProducesClosedCodeAndNoRawRepairText()",
+          "status": "PASS"
+        },
+        {
+          "name": "rejectsFinishFailureEvenWhenTextIsValid()",
+          "status": "PASS"
+        },
+        {
+          "name": "missingPrimaryUsageStaysUnknownInsteadOfBecomingZero()",
+          "status": "PASS"
+        },
+        {
+          "name": "[1] giantEnvelope=false",
+          "status": "PASS"
+        },
+        {
+          "name": "[2] giantEnvelope=true",
+          "status": "PASS"
+        },
+        {
+          "name": "requestLimitIncludesActualSdkSchemaEnvelopeBeforeNetwork()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedProductionWiringTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "e2f73f53f0eca23bd97717322827d0fa14c7475ca84084f87f5375d55155e093",
+      "cases": [
+        {
+          "name": "enabledConfigurationInstallsConcreteSourceVerifierProviderAndCoordinator()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedProviderEvaluationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 1,
+      "xmlSha256": "c7ecced21224d32ec9f2fc9f68fb8f8c00ea6f0d61cb2ce05715b6fd2ae2a2bd",
+      "cases": [
+        {
+          "name": "approvedProviderEvaluationIsReportedUnavailableWithoutExplicitConfiguration(TestReporter)",
+          "status": "SKIP"
+        },
+        {
+          "name": "hostileCurrentEvidenceCorpusOraclesRejectEverySchemaValidUnsafeSubstitution()",
+          "status": "PASS"
+        },
+        {
+          "name": "independentOracleRejectsPermittedButWrongActionAndOmittedDataflow()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedSourceClassifierTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "0b8fea0a5eccbb2667dba19e4c1446657857355c5cbf09f4ff53a6a6c34dd6ae",
+      "cases": [
+        {
+          "name": "knownCredentialShapesAndUnapprovedSourcePoliciesRefuseBeforePromptConstruction()",
+          "status": "PASS"
+        },
+        {
+          "name": "referencedValuesMustBeAuthoritativeStringsWhileIntentionalEmptyAndUnusedNullArePreserved()",
+          "status": "PASS"
+        },
+        {
+          "name": "declaredTokensCannotBecomeLiteralRegionsAndUnknownReferencesRefuse()",
+          "status": "PASS"
+        },
+        {
+          "name": "authoredSourceIsPermittedWhileSavedValuesHaveOnlyPrivateMaterialization()",
+          "status": "PASS"
+        },
+        {
+          "name": "canonicalWhitespaceAndVaultIdMatchingRemainOpaqueWithNameFallbackAndConflictChecks()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedSourceInputResolverTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "14e218b33cb72eb5a3b88ce6f7fe93f1fb4f3283c31e3b9793749f95a10aadfe",
+      "cases": [
+        {
+          "name": "intentionalEmptySavedTextMaterializesWithoutInventingNullText()",
+          "status": "PASS"
+        },
+        {
+          "name": "exactUnicodeSpansAreSlicedByTheClosedBridgeAndTokensRemainIneligible()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedStepVerifierTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "8cd8c993e750497fa8338c829053a8623bd8325c8692f38e219710df72cb9613",
+      "cases": [
+        {
+          "name": "missingSubmitUnknownOutcomeWrongDigestAndFalseAssertionCannotComplete()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedTranslationConcurrencyTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "676ba04333ca872250ea4d9f8e0b76dcd07a06101ae2ecabec1f3b999d3f6483",
+      "cases": [
+        {
+          "name": "independentConnectionsSerializeAttemptAndSingleSendWinner()",
+          "status": "PASS"
+        },
+        {
+          "name": "oldAttemptCannotSendOrApplyAfterLeaseGenerationOrPlanChange()",
+          "status": "PASS"
+        },
+        {
+          "name": "obligationReservationRecoversIdentityAndCannotChangeProposalOrDropMeaning()",
+          "status": "PASS"
+        },
+        {
+          "name": "sessionThenSourceLockProducesCoherentSnapshotsWhileAnotherSessionAndEditorRun()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedTranslationMigrationTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "490d4225bf43d6ba0333d4f2c22a2bf4cda6ee253ec9dfe6a6b89364ba9f6da9",
+      "cases": [
+        {
+          "name": "freshDatabaseInstallsAllMigrationsWithNoSyntheticTranslationRows()",
+          "status": "PASS"
+        },
+        {
+          "name": "rollbackJoinsAttemptAndReservationAndQuestionAnswerMeaning()",
+          "status": "PASS"
+        },
+        {
+          "name": "obligationLinksCommitWithLedgerAndRejectCrossSessionOrWrongMeaning()",
+          "status": "PASS"
+        },
+        {
+          "name": "upgradePreservesRowsAndImmutableScopedConstraints()",
+          "status": "PASS"
+        },
+        {
+          "name": "attemptsAreSingleSendTerminalAndLateUsageDoesNotRevive()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.guided.translation.GuidedTranslationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "15d8953b413b84d0f765a435d04c3067f0cf4cf9359e212f177214b4c7a64d3c",
+      "cases": [
+        {
+          "name": "cancellationAndAbsoluteDeadlineNeverRenewAProviderCall()",
+          "status": "PASS"
+        },
+        {
+          "name": "replanningCannotRenameRemoveOrAppendRepeatedEffectsButInitialDistinctOccurrencesRemainValid()",
+          "status": "PASS"
+        },
+        {
+          "name": "sourceChoiceConstrainsItsExactOccurrenceSlotOperationAndReferenceUse()",
+          "status": "PASS"
+        },
+        {
+          "name": "wrongAuthoredInputAndReversedAssertionAreRejectedIndependentlyOfModelConfidence()",
+          "status": "PASS"
+        },
+        {
+          "name": "compactSelectionCannotRestampStaleSourcePlanFenceObservationOrMaterialization()",
+          "status": "PASS"
+        },
+        {
+          "name": "strictProviderBoundaryRefusesDuplicateTrailingProseAndIdentitySubstitution()",
+          "status": "PASS"
+        },
+        {
+          "name": "providerSchemaIsSelfContainedSupportedAndBothIdentitiesArePinned()",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "name": "com.citi.put.checks.studio.readiness.DeReadyCarryForwardTest",
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "xmlSha256": "93874d243c709d9871a7829a5b2fb2e09f455b5bb76726bd6debd205cab55651",
+      "cases": [
+        {
+          "name": "ordinaryAcceptanceReadinessAndRealHttpDispatchCallNeitherProvider()",
+          "status": "PASS"
+        },
+        {
+          "name": "aStaleDraftAfterAFailedOptionalRecompileIsStillRunnable()",
+          "status": "PASS"
+        },
+        {
+          "name": "injectedProviderCallsFalsifyTheZeroCallOracle()",
+          "status": "PASS"
+        },
+        {
+          "name": "noGatewayCallHappensAcrossReadinessInAnyOfTheDeReadyStates()",
+          "status": "PASS"
+        },
+        {
+          "name": "falsificationTheThreeCasesGoRedWhenThePredicateReadsCompileStatus()",
+          "status": "PASS"
+        },
+        {
+          "name": "theRuntimePinIsRealConfigurationAndNotASwitch()",
+          "status": "PASS"
+        },
+        {
+          "name": "aDraftWithARecompileInFlightIsStillRunnable()",
+          "status": "PASS"
+        },
+        {
+          "name": "aDraftLeftNeedsRevisionByAFailedValidationIsStillRunnable()",
+          "status": "PASS"
+        }
+      ]
+    }
+  ],
+  "scope": "Complete affected guided/integration/security/gateway/replay group, including40 actual joined cases. Not an unfiltered full-backend rerun."
+}

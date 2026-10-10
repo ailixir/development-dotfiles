@@ -1,0 +1,107 @@
+{
+  "story": "STUDIO-OBS-006",
+  "role": "data-engineer",
+  "status": "RECONNAISSANCE_ONLY_NOT_DESIGN_APPROVAL",
+  "date": "2026-10-09",
+  "migration": {
+    "next_available": "V33",
+    "verified": "Classpath migration files currently end at V32; recheck immediately before writing. Staged backend/db/cutover/V19 is a separate deployment capability, not ordinary Flyway history."
+  },
+  "verified_notes": [
+    "Coordinator reconnaissance correctly identifies v2 finalization as deliberately refused, existing ordinary Run automatic confirmation, policy/runtime incompatibility and the lack of guided replay implementation.",
+    "Additional critical deployment constraint: manually staged V19 rejects every new revision without compile_request_id. Guided publication cannot work there without an explicit reviewed trigger amendment; never invent a compile request.",
+    "No existing guided source manifest/session field captures candidate/confirmed/compile head before browser effects. Source/configuration equality alone misses a newer publication for unchanged source."
+  ],
+  "evidence": [
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java:282",
+      "finding": "publishAcceptedCandidate is ordinary compile adoption: persisted RUN-trigger/principal, current request/revisions/deadline and persisted reference policy; atomically inserts/confirms and links READY. It is not a generic guided publisher."
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/compile/CompileStateService.java:932",
+      "finding": "Captured ordinary revision INSERT SELECT reads immutable ui_test_compile_requests and links compile_request_id. Guided publication must use its own recorded Run/session authority."
+    },
+    {
+      "source": "backend/src/main/resources/db/migration/V29__studio_run_confirmation.sql",
+      "finding": "confirmation_source VARCHAR(10) permits only RUN/MANUAL. Deny-by-default revision trigger permits only first confirmed_by/confirmed_at/confirmation_source mutation. New immutable columns are automatically protected."
+    },
+    {
+      "source": "backend/src/main/resources/db/migration/V21__studio_authoring_context.sql:29",
+      "finding": "BEFORE INSERT trigger overwrites revision authoring and authoring_revision_inputs from current ui_tests. Publisher must hold current test lock and verify exact captured identity; cannot trust caller-supplied authoring. Authoring JSON forbids source=observed; learned evidence belongs in a separate plan/provenance record."
+    },
+    {
+      "source": "backend/src/main/resources/db/migration/V24__studio_reference_policy.sql:17",
+      "finding": "Classpath identity index includes test/source/config/artifact and expected_intent/reference_policy/derivation text, but not learned-plan hash or original authorization. Do not accidentally reuse an ordinary or another-session revision."
+    },
+    {
+      "source": "backend/db/cutover/V19__studio_inference_candidate_identity.sql:35",
+      "finding": "Optional staged cutover drops old identity index and installs studio_inference_require_request rejecting null compile_request_id. Migration and tests must cover both deployed schema capabilities."
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:298",
+      "finding": "Original Run authorization is server-issued authorizationId/kind=scopedRun/authorizedAt/principalId/scopeHash, frozen by V30. Use original principal for guided adoption, never backend-controller principal."
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:797",
+      "finding": "v2 ledger operationHash is canonical coordinate+executionEvidence.origin+durable locator+operation. Persisted proposal, preparation, materialization and obligation admission provide joins to recompute it."
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1757",
+      "finding": "Authenticated owning-worker outcome validates immutable ledger and fence, assertion result, dispatch state, and successful read evidence before recording. Model plan alone is not exercised evidence."
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java:1003",
+      "finding": "finalizeSession refuses v2; legacy branch checks completed ledger but ends with RUNTIME_INCOMPATIBLE. finalization_identity is only a supplied-request digest, not immutable publication result or exercised-plan proof."
+    },
+    {
+      "source": "backend/src/main/resources/db/migration/V30__studio_guided_sessions.sql",
+      "finding": "Terminal session state cannot change; session scope/sourceSteps/runAuthorization immutable, action proposals/terminal outcomes protected. Keep ledger/evidence on publication conflict."
+    },
+    {
+      "source": "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql",
+      "finding": "Materialization/private authored inputs, preparation-to-admission, allocation, producer and consumer-edge tables already provide scoped FK-backed evidence. Preserve them, do not duplicate outcomes."
+    },
+    {
+      "source": "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+      "finding": "Immutable source manifests/accepted plans and one-obligation-to-one-admission associations provide interpretation provenance. Mutable accepted head must be snapshotted and compared around external validation."
+    },
+    {
+      "source": "backend/src/main/java/com/citi/put/checks/studio/readiness/ExecutionReadinessService.java:181",
+      "finding": "Existing readiness invokes ordinary IntentRevisionVerifier, source/artifact recomputation and one supported artifact version/exact pins. Guided derivation must explicitly verify frozen learned plan+Run/admission provenance rather than bypass old check."
+    }
+  ],
+  "minimal_design": {
+    "publication_head": "Add ui_tests.publication_epoch BIGINT NOT NULL DEFAULT 0 with monotone enforcement. Increment under the test row lock when compile_request_id, candidate or confirmed head changes, including ordinary compile start/confirmation/publication and guided publication. Compare this frozen epoch in guided final CAS. A database BEFORE UPDATE trigger can cover all existing writers without adding session locks to them; immutable source/config revisions remain separate guards. Existing rows get epoch0 without claiming historical event counts.",
+    "base_before_effects": "Insert one immutable guided publication-base row during start/source initialization under existing source lock, before assignment/context or any browser effect. Store session/test/CSI scoped FK, original source/configuration and authoring identity hashes, publication_epoch, null-safe captured compile/candidate/confirmed IDs, original Run authorization hash and runtime/policy pins. Missing bases on already-running historical sessions mean cannot adopt; never snapshot a fresh base at finalization. Concurrent sessions can share a base but at most one wins after head advances.",
+    "revision_origin": "Add an immutable guided-origin link on ui_test_revisions and explicit learned-plan hash identity. Prefer confirmation_source=GUIDED_RUN (10 chars, explicit CHECK extension) to distinguish ordinary compile RUN. Require guided-origin and compile_request_id to be mutually exclusive. A scoped composite FK to base (session,test,CSI) prevents cross-test adoption; UNIQUE guided session ensures one revision per learning run. Existing ordinary fields still hold source/artifact/config/references/policy/pins/authoring; no synthetic compile request or ordinary execution record.",
+    "publication_receipt": "One immutable publication record per session containing canonical learned-plan JSON/hash, exact accepted translation revision/hash, lowering/version/hash, produced revision ID, original authorization identity/hash and stable ledger/admission/graph evidence identities. Use same-test/CSI revision FK and unique revision link. Either insert revision plus receipt in one transaction with an appropriate FK order, or use deferred scoped constraints; no nullable claim that can be reused to publish a second artifact.",
+    "identity_and_cutover": "On classpath V24 schema, extend identity/index semantics to distinguish learned-plan/original authorization or guided origin while retaining all ordinary identities. On V19-installed schema, update the require-request trigger to permit exactly a verified guided-origin row OR a real ordinary compile request. Do not silently remove V19 for ordinary writes. Verify capability in migration tests; do not assume catalog matches Flyway files.",
+    "canonical_exercise": "Sort by immutable sourceSteps order then action ordinal, never lexical step UUID order from repository.actions. Join every required obligation to its one actual admission, immutable proposal, preparation/materialization and successful ledger outcome. Recompute proposal/operation/scope/authored-input hashes and require all assertions pass. Join successful read producers and consumer edges with order and slot checks; reject extra/missing/failed/unknown/revoked actions and unresolved obligations. Persist recipes/opaque references and immutable authored-literal provenance, not captured values, DOM nodes, cookies or source examples masquerading as captures.",
+    "independent_replay": "Guided session remains its own learned-execution evidence with publication receipt. Later real normal replay executions reference immutable revision/artifact/runtime and establish replay verification only after their own successful results. Existing execution revision/runtime fields can support this; do not manufacture a PASSED replay row from learning or mutate revision provenance when a later replay succeeds. Schedules/activations are untouched."
+  },
+  "transaction_protocol": [
+    "Build candidate from locked session -> current ui_tests -> translation state/immutable plan -> bridge evidence; copy a canonical snapshot and digest. Release locks before runner validation or other I/O.",
+    "Final short transaction locks session first, ui_tests second, translation/bridge evidence next, revision/publication records last. Recheck current authorization, original scope/source/config/authoring, accepted head/evidence digest, worker fence/live lease, absolute expiry and FINALIZING. No outstanding model/clarification or action work may be accepted between validation and publication.",
+    "An existing successful publication receipt is an idempotent read after current user/CSI authorization; it must not require reviving an expired worker lease. Different finalization identity/content conflicts. A cancelled/expired/unknown/failed session without a receipt never becomes runnable.",
+    "Insert immutable revision+receipt, record first confirmation from original scoped Run, then CAS test source/config/publication_epoch and captured heads; set candidate/confirmed/READY and clear appropriate compile error state without fabricating request identity. Verify affected row count exactly1; any failure rolls back inserted revision/confirmation/receipt.",
+    "Mark session SUCCEEDED and expose published revision only in that same commit. Expected head/source conflicts commit PUBLICATION_CONFLICT with evidence retained, not an exception that rolls back the conflict marker. Validation failure/expiry remains its truthful existing terminal state.",
+    "Preserve source-writer order: ordinary source/compile/confirm paths acquire ui_tests only and never acquire guided-session rows. New guided paths use session->test. No network inside transaction; bound statement/lock waits to remaining session deadline and recheck database clock at final CAS.",
+    "A newer same-source ordinary compile START already invalidates the old guided base, even if compilation later fails. Newer manual confirmation/guided publication and pointer ABA are detected by epoch rather than source/config or pointer equality alone."
+  ],
+  "required_tests": [
+    "Real PostgreSQL fresh V33 and V32 upgrade; separately stage actual V19 capability and prove valid ordinary and guided inserts while forged neither/both-origin inserts fail.",
+    "Direct SQL: immutable learned plan/base/publication receipt/revision origin and first confirmation; missing JSON required keys fail rather than NULL-pass; cross-session/test/CSI links and duplicate session publication refused.",
+    "Two guided sessions same base: both complete browser work, one publishes; loser preserves evidence and creates no revision/head overwrite. Exactly one submit each, zero finalization submissions.",
+    "Race source/config edit, new ordinary compile, same-source manual confirmation, newer guided publication, and pointer ABA after learning starts; old session cannot overwrite any newer head.",
+    "Crash after validation, revision insert, confirmation, CAS and session update: rollback or one durable receipt; retry recovers same revision without extra dispatch.",
+    "Cancel/expiry/fence takeover/current entitlement loss/late callback during validation or lock wait: no publication. Lost response after committed success returns existing receipt without requiring another action or expired send authority.",
+    "Tampered operation/proposal hash, missing producer/consumer edge, wrong obligation coordinate, extra action, changed translation head and failed assertion cannot publish.",
+    "Current authoring trigger copies exactly captured matching authoring under test lock; cannot insert observed page evidence into authoring or mix source/config snapshots.",
+    "Two later explicit replays use fresh unpredictable values with identical immutable artifact/plan hashes; independent receipts and zero gateway calls; recording/step seeking and learned-vs-replay provenance remain distinct."
+  ],
+  "limitations": [
+    "No migration, schema, SQL mutation, build or tests performed by this reconnaissance.",
+    "Runtime lowering details require runner expert review.",
+    "This is early data advice, not approval of the unfinished publication design or lifecycle verdict."
+  ]
+}

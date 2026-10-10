@@ -1,0 +1,161 @@
+{
+  "story": "STUDIO-OBS-009",
+  "task": "validate-next-story",
+  "round": "r2 (first validation of the 2026-10-09 rescoped draft 0.2.0; r1 = pre-rescope intake, superseded)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T02:40:38Z",
+  "validationDate": "2026-10-09",
+  "verdict": "GO",
+  "conditional": true,
+  "readinessScore": 8,
+  "scoreScale": 10,
+  "confidence": "Medium-High — local hardening items High; live-proof items depend on named external prerequisites",
+  "scoreRationale": "Ten testable ACs each name their oracle (design C-8/C-9/C-10/C-17, consensus §11 rows, GA H-1/H-2); deployment hardening placed here by design §10 (ARCH-8, SEC-4/G-1, I-C8/G-2, I-B7, I-C9, ARCH-9/G-3) is complete and honest about external prerequisites; every anchor spot-checked is accurate. Deductions: AC-1…AC-5 are @devops work under a @dev executor (co-execution is stated, dispatch must honor it); AC-3's 'release checklist' target is ambiguous; Done depends on a staging application, model-gateway access and Vault that have owners outside the repo (ED-01 owner TBD, ED-02 ticket to be linked); Q2/Q4 remain user-decidable.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-09 | 0.2.1 | Validated GO (8/10) — Status: Draft → Ready | @po |",
+  "storySha256Before": "35e77731ab5a897c4f0fe96cefdbd9efe97872e9b878dd866d6716cb5422c4d8",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Each AC cites its oracle; thresholds carry denominators; corpus/90% gate recorded as deferred, not claimed"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "'Out of scope here' names OBS-010 pilot/runbook, GA C-2/C-3, OBS-011 retirement, GA §4.A repo/CI"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "OBS-008 Done; backend scheduling/authorization files edited after OBS-007; playwright config created by OBS-008"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size L"},
+    {"n": 7, "item": "Business value", "status": "PASS"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "'Thresholds and honesty rules'; external prerequisites named in T0; gates G-1/G-2/G-3"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "'A failed or unrun gate stays failed or unrun; no speculative Done'; only @qa sets Done"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "design §10 OBS-009 rows; security conditions 10–11; GA §4.D D-2, §4.H H-1/H-2, §6 ARCH-8/9 SEC-4, §7 knock-on"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained."
+  },
+  "executorAssignment": {
+    "executor": "dev",
+    "quality_gate": "architect",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "security-scan"],
+    "status": "PASS_WITH_NOTE",
+    "note": "Valid and distinct. AC-1…AC-5 are Infra/Deploy work whose table executor is @devops; the story states @devops co-executes T1/T2 and the wave README lists 'dev (+ devops)'. Coordinator must dispatch @devops for T1/T2 rather than let @dev own chart/TLS/Vault-policy work alone."
+  },
+  "decisionsPending": {
+    "Q2": {"question": "Scheduled observed runs fill secrets with no live user (ARCH-9) via ConfiguredBackgroundAuthorization parity", "default": "adopt (design §8 Q2; GA plan §6)", "blocksReady": false, "reason": "G-3 holds regardless; AC-5 delta pre-written; if overridden, @sm applies the delta and @po revalidates AC-5 only; OBS-011 AC-5 already conditions emitter removal on this outcome"},
+    "Q4": {"question": "Legacy/replay hop TLS: runner-terminated TLS with client certificates vs platform mTLS mesh", "default": "runner-terminated TLS with client-certificate authentication (reuse guided server's TLS/fingerprint setup)", "blocksReady": false, "reason": "Both are the 'or' inside design I-C8; validate() still rejects http:// outside local/test under either; AC-3 delta pre-written; override must land before T2 starts"}
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "EXT-002", "acs": ["AC-4", "AC-6", "AC-8", "AC-9", "AC-10"], "action": "T0 records every external prerequisite by name and owner: approved staging application + approved origins; provisioned test secret (ED-02 / GA C-3 Vault provider); model gateway access (ED-01/SPK-01, owner TBD per GA D-3); dev Vault for C-10. An absent prerequisite leaves the dependent AC 'unrun, owner X' — never a pass, never a silent skip."},
+    {"id": "GATE-001", "acs": ["AC-3"], "action": "'The release checklist asserts G-1/G-2' must point at OBS-010's release-readiness record (OBS-010 AC-4) and the release-checklist.md run by @devops at handoff; the L2 framework checklist is not editable."},
+    {"id": "EXEC-001", "acs": ["AC-1", "AC-2", "AC-3", "AC-4", "AC-5"], "action": "Dispatch @devops as co-executor for T1/T2 (chart, image, TLS, Vault policy) as the story states."}
+  ],
+  "niceToHaveImprovements": [
+    "Split docs/qa/evidence/studio-observed-authoring/*.json into 'local' and 'deployed-stack' sections so OBS-010 can cite each gate's provenance.",
+    "Name the fixture-server extension points reused from studio-runner/evaluation/fixture-server.mjs in T4 so the prior draft's evaluation/observed-authoring/* paths are visibly extensions, not a parallel harness."
+  ],
+  "goConditions": [
+    "EXT-002 recorded at T0 before any live-proof task.",
+    "GATE-001 interpretation applied (no L2 checklist edit).",
+    "Budget admission against the USD 500 wave ceiling recorded before the first real-provider call; p50/p95, calls, tokens, cost carry denominators (AC-6).",
+    "Only @qa sets Done; Done is not reachable while AC-6(b) or AC-4's Vault policy test is unrun.",
+    "Q2/Q4 defaults stand unless the user overrides before T2/T3; overrides go through @sm delta + @po AC-level revalidation."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "studio-runner/Dockerfile:59 CMD [\"node\", \"dist/main.js\"] (only entrypoint)",
+      "studio-runner/src/run/guidedMain.ts:18 STUDIO_GUIDED_CONFIG_FILE required",
+      "helm-chart/put-checks/templates/: no studio-guided-worker-* template; studio-runner-deployment/networkpolicy/service/scaledobject exist; values.yaml, values-dev/uat/prod.yaml exist",
+      "studio-runner/test/deployment/chart.test.ts:388-398 rendered env ⊆ ACCEPTED_KEYS",
+      "backend .../compile/validator/StudioRunnerProperties.java:59 accepts http:// and https://",
+      "studio-runner/src/server/server.ts:17,33 node:http createServer",
+      "backend .../scheduling/ConfiguredBackgroundAuthorization.java:51-53 grants only under local/test profiles",
+      "OBSERVED_SCHEDULE_AUTH_REQUIRED emitters: StudioScheduleProcessor.java:273, StudioAcceptanceService.java:322; V33:13-15 CHECK keeps the value",
+      "GuidedInternalSecurity.java and studio-runner/src/guided/transport.ts exist (mTLS + RS256 in code; no profile/chart supplies key/issuer/truststore)",
+      "No HeapDumpOnOutOfMemoryError/ulimit/core-dump setting in Dockerfile, build.gradle.kts, application*.yml or helm-chart",
+      "studio-runner/evaluation/{cli,fixture-server,oracle,report,lifecycle}.mjs + example-manifest.json; test/evaluation/{fixture-run,report}.test.ts; tools/corun.sh, tools/corun-report.mjs exist",
+      "application-{api,dev,local,prod,staging,test,worker}.yml + application.yml exist",
+      "StudioBackgroundAuthorization.java, StudioSecretUseAuthorization.java, ConfiguredSecretUseAuthorization.java exist (dev-config source only — GA C-2)",
+      "frontend test:e2e has no Playwright config (OBS-008 creates)"
+    ],
+    "corrections": [
+      "File List names backend/.../guided/publication/ObservedReplayRuntimeConfiguration.java which does not exist today; it is created by OBS-007 AC-16 (007 File List '(new)'), so the edit here is sequenced, not invented."
+    ]
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Deployment/Infrastructure; secondary Security, Integration; complexity high — correct",
+    "agents": "@dev executor / @devops co-executor AC-1…4 / @architect gate / independent @qa",
+    "qualityGates": "Pre-commit, independent SDC QA, pre-deployment review by @devops with G-1/G-2/G-3 asserted",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "secrets management, env config validation, rollback readiness, fail-closed defaults, honest evidence — match deployment/security type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped"},
+  "epicContextEnrichment": {"attempted": true, "result": "empty for STUDIO-OBSERVED; wave README and design §10 used"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS_WITH_NOTE", "findingIds": ["EXEC-001"]},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "Existing paths verified; new templates/tests/evidence files named; one path created upstream by OBS-007"},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A", "details": "Only the Playwright E2E extension (AC-10) touches the frontend"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS", "findingIds": ["EXT-002", "GATE-001"]},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "Deployment tier, profile tests, self-signed-CA IT, Vault policy test with honest skip, evaluation manifests, co-run, full suites, Playwright against deployed stack; QA reproduction list"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "G-1/G-2/G-3 implemented, heap/core-dump, Vault least privilege, wire canaries, manual video gate, mid-run revocation under real polling"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 readiness → T1/T2 devops+dev → T3 schedules → T4 live proof → T5 faults/regressions → T6 record"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS_WITH_ONE_SEQUENCED_PATH"},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "8/10; local items startable after OBS-008 Done; live items gated by named externals"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "GA §6 ARCH-8; design §10", "readiness": "READY", "executor": "@devops+@dev"},
+    {"ac": "AC-2", "testable": true, "source": "GA §6 SEC-4; design I-C8 G-1", "readiness": "READY", "executor": "@devops+@dev"},
+    {"ac": "AC-3", "testable": true, "source": "design I-C8, C-9; GA D-2; Q4 default", "readiness": "READY_CONDITIONAL_Q4", "findingIds": ["GATE-001"]},
+    {"ac": "AC-4", "testable": true, "source": "design I-B7, I-C9, C-8, C-10; security condition 11", "readiness": "READY_EXTERNAL_DEV_VAULT", "findingIds": ["EXT-002"]},
+    {"ac": "AC-5", "testable": true, "source": "design §10 ARCH-9, §8 Q2, I-C8 G-3; security F-9/condition 10", "readiness": "READY_CONDITIONAL_Q2"},
+    {"ac": "AC-6", "testable": true, "source": "consensus §11; GA §7 knock-on", "readiness": "READY_EXTERNAL_STAGING_AND_GATEWAY", "findingIds": ["EXT-002"]},
+    {"ac": "AC-7", "testable": true, "source": "consensus §11 Isolation/Semantic correctness; design §7 isolation", "readiness": "READY"},
+    {"ac": "AC-8", "testable": true, "source": "consensus §11 Data boundary/Prompt injection; design C-17/F-10", "readiness": "READY_EXTERNAL_STAGING"},
+    {"ac": "AC-9", "testable": true, "source": "consensus §11 Recovery/Publication; GA H-1; design I-A3", "readiness": "READY"},
+    {"ac": "AC-10", "testable": true, "source": "consensus §11 UI evidence; GA H-2", "readiness": "READY_AFTER_OBS-008"}
+  ],
+  "dependencyVerification": {
+    "OBS-008": "Validated GO today (Ready); must be Done before this story starts",
+    "OBS-007": "Draft at validation time; backend scheduling/authorization/dispatch files are edited by 007 first",
+    "sharedFiles": ["StudioRunnerProperties.java (007 reads only, 009 edits)", "HttpRunnerDispatchClient.java (007 then 009)", "ObservedReplayAuthorization.java + ObservedReplayRuntimeConfiguration.java (007 creates/edits, 009 background path)", "ExecutionReadinessService.java (007 verification target, 009 edits)", "application*.yml (007 then 009)", "frontend/playwright.config.ts + frontend/e2e/ (008 creates, 009 extends)", "OBSERVED_SCHEDULE_AUTH_REQUIRED emitters (009 lifts, 011 removes)"]
+  },
+  "crossStoryIssues": [
+    "OBS-009 Done — and therefore OBS-010 start and OBS-011 start — is gated by externals with owners outside the repo: ED-01/SPK-01 gateway access (owner TBD, GA D-3), ED-02 Vault/test secret (ticket to be linked), an approved staging application with real login. Surface to the user: name owners now or accept that the guided track idles after OBS-008.",
+    "OBS-011 AC-5 and OBS-009 AC-5 agree on OBSERVED_SCHEDULE_AUTH_REQUIRED (lift here under Q2 default; emitters removed in 011) — consistent."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-009.story.md", "sha256": "35e77731ab5a897c4f0fe96cefdbd9efe97872e9b878dd866d6716cb5422c4d8", "note": "before PO edits"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "f0e40fa531e65be94216cb10ccf0794171e4782cb70d21d7fbea9f61063b234f"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-security-review.md", "sha256": "c5ce3be4543ae51618455b14909caabaf9cc46b9dd7fce0a2ff57516394cde49"},
+    {"path": "docs/epics/UI-STUDIO-GA-PLAN.md", "sha256": "533d258e93ea0bb8496fe6415a549ef190ba1a51c9c7a0c4ad6e53a3ac140eec"},
+    {"path": "docs/specs/studio-observed-authoring/consensus-plan.md", "sha256": "d9e3fc28e6cbc982b3719df676cf059abed124ebab72cf272a19e591f8c64617"},
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md", "sha256": "d762e79a2af541f4d97aa5171267ddd46bd5f2f665fa4a268a2ec606260e1aa2"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "7310713a7b79da816c9878f6911e1a392802005582fa05b4ac2e6477b37aade8"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".aiox-core/product/checklists/po-master-checklist.md", "sha256": "506a3032f461c7ae96c338600208575be4f4823d2fe7c92fe304a4ff07cc5390"},
+    {"path": ".aiox-core/core-config.yaml", "sha256": "7bd8694cded2a845882f29e9c7b11d18ae531ad492a3cefb53a71100eb29bc31"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ],
+  "proposedFileList": [
+    {"path": "studio-runner/Dockerfile", "exists": true},
+    {"path": "helm-chart/put-checks/templates/studio-guided-worker-deployment.yaml", "exists": false, "classification": "new"},
+    {"path": "studio-runner/src/server/server.ts", "exists": true},
+    {"path": "studio-runner/src/server/identity.ts", "exists": true},
+    {"path": "studio-runner/test/deployment/chart.test.ts", "exists": true},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/compile/validator/StudioRunnerProperties.java", "exists": true},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/scheduling/StudioScheduleProcessor.java", "exists": true},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/publication/ObservedReplayRuntimeConfiguration.java", "exists": false, "classification": "created by OBS-007 AC-16"},
+    {"path": "studio-runner/evaluation/observed-authoring/", "exists": false, "classification": "new, extends evaluation/"},
+    {"path": "frontend/e2e/studio-observed-authoring.spec.ts", "exists": false, "classification": "new; config from OBS-008"},
+    {"path": "docs/qa/evidence/studio-observed-authoring/", "exists": false, "classification": "new"}
+  ]
+}

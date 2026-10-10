@@ -1,0 +1,179 @@
+schema: 1
+story: STUDIO-OBS-005
+story_title: Grounded translation and implicit dependency planning
+gate: FAIL
+status_reason: Independent probes reproduce source-choice substitution, failed
+  pre-materialization coordinator recovery and a late-usage race permitting
+  another provider send beyond the fixed budget. Required prompt-injection
+  corpus coverage is also missing.
+reviewer: Quinn (@qa /root/obs005_peer; independent from all OBS-005 implementers)
+reviewed_revision: sha256:a9cf72b6bcf098386248a9a392e5b973a27ae33cb943405cc9c9408967d29d12
+updated: 2026-10-09T03:31:44.225662+00:00
+top_issues:
+  - id: SEC-001
+    severity: high
+    finding: An accepted source clarification is checked only for membership in
+      sourceReferences. The provider can include the chosen destination as an
+      unused reference and bind navigation to the rejected destination; that
+      plan is accepted and materialized.
+    suggested_action: Persist the disputed semantic input/occurrence and slot with
+      each source question. Bind the accepted choice to that exact
+      obligation/reference use during plan admission and action validation;
+      reject unused-choice or alternative-reference substitution. Test both
+      source choices through actual navigation and independent destination
+      receipts, including an adversarial plan containing both references.
+    suggested_owner: dev
+    refs:
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:104
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:858
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-005/independent-review/GuidedIndependentQAProbeTest.java:43
+      - docs/qa/evidence/STUDIO-OBS-005/independent-review/results/TEST-com.citi.put.checks.studio.guided.session.GuidedIndependentQAProbeTest.xml
+  - id: REL-001
+    severity: high
+    finding: The actual coordinator chooses proposals whenever a plan exists,
+      ignoring MATERIALIZE continuation. A restart after source-plan acceptance
+      and before materialization sends another provider request with no runner
+      context, leaving materialization absent. The adjacent
+      NEXT-before-first-pushContext window also has no recovery path by source
+      inspection.
+    suggested_action: Dispatch from durable continuation/bootstrap state rather than
+      plan existence alone. Recover materialization, dependency allocation and
+      acknowledged context/bootstrap stages idempotently before next-action
+      inference. Add actual continueRuns probes after plan acceptance, after
+      materialization, and after NEXT commits but before first context delivery.
+      Do not recreate a lost post-effect browser or resend an action.
+    suggested_owner: dev
+    refs:
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java:79
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:112
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:142
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-005/independent-review/GuidedIndependentQAProbeTest.java:66
+      - docs/qa/evidence/STUDIO-OBS-005/independent-review/results/TEST-com.citi.put.checks.studio.guided.session.GuidedIndependentQAProbeTest.xml
+  - id: REL-002
+    severity: high
+    finding: Late usage reconciliation occurs only at route entry in a separate
+      transaction. A known 200000-input-token receipt committed after that check
+      but before fresh reservation/send is ignored until another route
+      invocation; the next actual SDK HTTP request is sent despite the fixed
+      128000 ceiling. Repairs inside call() also do not rerun reconciliation.
+    suggested_action: Reconcile immutable late usage under the same session lock as
+      each attempt reservation and committed send claim, including
+      repairs/recovery. Commit overage and terminal refusal before allowing
+      another send, charge each receipt once, and retain accounting without
+      reviving terminal sessions. Test receipt arrival between entry
+      reconciliation and reservation/claim.
+    suggested_owner: dev
+    refs:
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:154
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:439
+      - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:490
+    evidence:
+      - docs/qa/evidence/STUDIO-OBS-005/independent-review/GuidedIndependentQAProbeTest.java:87
+      - docs/qa/evidence/STUDIO-OBS-005/independent-review/late-race-results/TEST-com.citi.put.checks.studio.guided.session.GuidedIndependentQAProbeTest.xml
+  - id: TEST-001
+    severity: high
+    finding: AC-6 prompt-injection coverage is absent from the semantic corpus. The
+      approved-provider harness contains four SOURCE_PLAN cases and no hostile
+      observed-page/context instruction case or NEXT_ACTION malicious
+      permitted-action substitution oracle. HTTP error-text and duplicate-JSON
+      tests do not exercise this semantic boundary.
+    suggested_action: Add frozen synthetic prompt-injection and malicious
+      permitted-action/target/value/assertion substitutions to controlled
+      fixtures and the opt-in approved-provider harness. Include sanitized
+      current-page evidence and independent expected outcomes/receipts; prove
+      the oracle rejects the unsafe typed reply. Keep unavailable live execution
+      explicit; no live benchmark, arbitrary-English proof or OBS-009/010 work
+      is required.
+    suggested_owner: dev
+    refs:
+      - backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedProviderEvaluationTest.java:28
+      - backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedProviderEvaluationTest.java:198
+      - docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md:27
+    evidence:
+      - Source inspection of translation tests, planning fixtures and the
+        four-case evaluation corpus
+waiver:
+  active: false
+evidence:
+  report: docs/qa/evidence/STUDIO-OBS-005/independent-review/review-report.json
+  verified_supplied_tests: 200
+  independent_tests: 13
+  independent_passed: 10
+  independent_failures: 3
+  trace:
+    ac_covered:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+    ac_gaps:
+      - 1
+      - 3
+      - 4
+      - 5
+      - 6
+  code_rabbit: UNAVAILABLE; independent fallback executed
+nfr_validation:
+  security:
+    status: FAIL
+    notes: Explicit source selection integrity and AC-6 adversarial coverage
+      incomplete.
+  reliability:
+    status: FAIL
+    notes: Persisted bootstrap continuation and concurrent late-usage/send
+      authorization have reproduced failures.
+  performance:
+    status: PASS
+    notes: Bounded transport/session limits unchanged; controlled counts are not a
+      live-model performance benchmark.
+  maintainability:
+    status: CONCERNS
+    notes: Actual continuation fault tests were absent; bean presence/manual
+      reconstruction did not establish scheduler recovery.
+recommendations:
+  immediate:
+    - action: Persist the disputed semantic input/occurrence and slot with each source
+        question. Bind the accepted choice to that exact obligation/reference
+        use during plan admission and action validation; reject unused-choice or
+        alternative-reference substitution. Test both source choices through
+        actual navigation and independent destination receipts, including an
+        adversarial plan containing both references.
+      refs:
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:104
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:858
+    - action: Dispatch from durable continuation/bootstrap state rather than plan
+        existence alone. Recover materialization, dependency allocation and
+        acknowledged context/bootstrap stages idempotently before next-action
+        inference. Add actual continueRuns probes after plan acceptance, after
+        materialization, and after NEXT commits but before first context
+        delivery. Do not recreate a lost post-effect browser or resend an
+        action.
+      refs:
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationCoordinator.java:79
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:112
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:142
+    - action: Reconcile immutable late usage under the same session lock as each
+        attempt reservation and committed send claim, including
+        repairs/recovery. Commit overage and terminal refusal before allowing
+        another send, charge each receipt once, and retain accounting without
+        reviving terminal sessions. Test receipt arrival between entry
+        reconciliation and reservation/claim.
+      refs:
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:154
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:439
+        - backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java:490
+    - action: Add frozen synthetic prompt-injection and malicious
+        permitted-action/target/value/assertion substitutions to controlled
+        fixtures and the opt-in approved-provider harness. Include sanitized
+        current-page evidence and independent expected outcomes/receipts; prove
+        the oracle rejects the unsafe typed reply. Keep unavailable live
+        execution explicit; no live benchmark, arbitrary-English proof or
+        OBS-009/010 work is required.
+      refs:
+        - backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedProviderEvaluationTest.java:28
+        - backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedProviderEvaluationTest.java:198
+        - docs/stories/STUDIO-OBSERVED/STUDIO-OBS-005.story.md:27

@@ -287,6 +287,215 @@ class AdmissionCasIT {
     assertThat(acceptedAt).isNotNull();
   }
 
+  @Autowired private ProgressReportService reports;
+
+  @Test
+  void legacyAdmissionCannotUseObservedPreReadyFailure() {
+    UUID admission = UUID.randomUUID();
+    admissionService.claim(executionId, request(attemptId, admission, "studio-runner-0"));
+    var before =
+        jdbc.queryForMap(
+            "SELECT status,snapshot_revision,step_results::text FROM ui_test_executions WHERE id=?",
+            executionId);
+    var report =
+        preReady(admission, List.of(skipped(0)), "ERROR", "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
+    assertThatThrownBy(() -> reports.apply(executionId, report))
+        .isInstanceOf(InternalCallbackException.class);
+    assertThat(
+            jdbc.queryForMap(
+                "SELECT status,snapshot_revision,step_results::text FROM ui_test_executions WHERE"
+                    + " id=?",
+                executionId))
+        .isEqualTo(before);
+    assertThat(ledger().get("state")).isEqualTo("ADMITTED");
+    assertThat(((Number) ledger().get("last_runner_sequence")).longValue()).isZero();
+  }
+
+  @Test
+  void observedSqlCannotBorrowAnOrdinaryAdmissionOrAbsentProof() {
+    UUID admission = UUID.randomUUID();
+    admissionService.claim(executionId, request(attemptId, admission, "studio-runner-0"));
+    for (String proof : new String[] {null, "{}"}) {
+      int changed =
+          transactions.execute(
+              status ->
+                  statements.applyObservedPreReadyFailure(
+                      executionId,
+                      attemptId,
+                      admission,
+                      "studio-runner-0",
+                      1,
+                      "ERROR",
+                      "RUN_ERROR",
+                      Instant.now(),
+                      null,
+                      "[]",
+                      "[]",
+                      false,
+                      "{}",
+                      null,
+                      "UNAVAILABLE",
+                      null,
+                      false,
+                      null,
+                      null,
+                      proof,
+                      proof));
+      assertThat(changed).isZero();
+    }
+    assertThat(ledger().get("state")).isEqualTo("ADMITTED");
+  }
+
+  @Test
+  void rawObservedFailureAcceptsOnlyCompleteUntimedSkippedCoordinates() {
+    var baseline =
+        preReady(
+            UUID.randomUUID(),
+            List.of(skipped(0), skipped(1)),
+            "ERROR",
+            "RUN_ERROR",
+            "ACCOUNT_UNAVAILABLE");
+    RunnerReportProjection.requireObservedPreReadyFailure(baseline, 2);
+    List<List<com.citi.put.checks.studio.internal.dto.RunnerStepState>> invalid =
+        new java.util.ArrayList<>();
+    invalid.add(List.of());
+    invalid.add(List.of(skipped(0)));
+    invalid.add(List.of(skipped(0), skipped(0)));
+    invalid.add(List.of(skipped(0), skipped(2)));
+    invalid.add(List.of(skipped(-1), skipped(1)));
+    invalid.add(java.util.Arrays.asList(null, skipped(1)));
+    invalid.add(
+        List.of(
+            skipped(0),
+            new com.citi.put.checks.studio.internal.dto.RunnerStepState(
+                null, "SKIPPED", null, null, null, null)));
+    for (int field = 0; field < 5; field++) {
+      invalid.add(
+          List.of(
+              skipped(0),
+              new com.citi.put.checks.studio.internal.dto.RunnerStepState(
+                  1,
+                  field == 0 ? "PASS" : "SKIPPED",
+                  field == 1 ? 0.0 : null,
+                  field == 2 ? 0.0 : null,
+                  field == 3 ? 0.0 : null,
+                  field == 4 ? "failure" : null)));
+    }
+    for (var steps : invalid) {
+      RunnerReportProjection.requireObservedPreReadyFailure(baseline, 2);
+      var mutation =
+          preReady(baseline.admissionId(), steps, "ERROR", "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
+      assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 2))
+          .isInstanceOf(InternalCallbackException.class);
+    }
+  }
+
+  @Test
+  void rawObservedFailureDoesNotTreatGenericErrorsAsAuthority() {
+    for (String reason :
+        List.of(
+            "INVALID_CONTRACT",
+            "PROFILE_MISMATCH",
+            "POLICY_REFUSED",
+            "AUTHORIZATION_EXPIRED",
+            "ACCOUNT_UNAVAILABLE",
+            "ACCOUNT_UNKNOWN",
+            "TARGET_DRIFT",
+            "TIMEOUT",
+            "CANCELLED",
+            "INTERNAL_ERROR")) {
+      RunnerReportProjection.requireObservedPreReadyFailure(
+          preReady(UUID.randomUUID(), List.of(skipped(0)), "ERROR", "RUN_ERROR", reason), 1);
+    }
+    for (String reason :
+        List.of(
+            "READ_REFUSED",
+            "ASSERTION_FAILED",
+            "REFERENCE_REFUSED",
+            "OUTCOME_UNKNOWN",
+            "account_unavailable",
+            "ACCOUNT_UNAVAILABLE detail",
+            "BROWSER_LAUNCH_FAILED",
+            "START_DEADLINE_EXCEEDED")) {
+      var mutation = preReady(UUID.randomUUID(), List.of(skipped(0)), "ERROR", "RUN_ERROR", reason);
+      assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 1))
+          .isInstanceOf(InternalCallbackException.class);
+    }
+    for (String result : List.of("PASSED", "FAILED")) {
+      var mutation =
+          preReady(
+              UUID.randomUUID(), List.of(skipped(0)), result, "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
+      assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 1))
+          .isInstanceOf(InternalCallbackException.class);
+    }
+    var mutation =
+        preReady(UUID.randomUUID(), List.of(skipped(0)), "ERROR", "CANCELLED", "CANCELLED");
+    assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 1))
+        .isInstanceOf(InternalCallbackException.class);
+  }
+
+  @Test
+  void rawObservedFailureRejectsOriginLogsAndNonfinalKindsEvenWhenReduced() {
+    var baseline =
+        preReady(
+            UUID.randomUUID(), List.of(skipped(0)), "ERROR", "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
+    RunnerReportProjection.requireObservedPreReadyFailure(baseline, 1);
+    for (int variant = 0; variant < 6; variant++) {
+      var mutation =
+          new com.citi.put.checks.studio.internal.dto.RunnerReport(
+              executionId,
+              attemptId,
+              baseline.admissionId(),
+              baseline.runnerInstanceId(),
+              variant == 0 ? "STARTED" : variant == 1 ? "PROGRESS" : "FINAL",
+              1L,
+              Instant.now(),
+              variant == 2 ? Instant.now() : null,
+              variant == 3 ? null : variant == 4 ? List.of() : baseline.steps(),
+              variant == 5
+                  ? List.of(
+                      new com.citi.put.checks.studio.internal.dto.RunnerLogEntry(
+                          0.0, "info", "setup"))
+                  : List.of(),
+              false,
+              Map.of(),
+              baseline.outcome(),
+              null,
+              true);
+      assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 1))
+          .isInstanceOf(InternalCallbackException.class);
+    }
+  }
+
+  private com.citi.put.checks.studio.internal.dto.RunnerReport preReady(
+      UUID admission,
+      List<com.citi.put.checks.studio.internal.dto.RunnerStepState> steps,
+      String result,
+      String code,
+      String reason) {
+    return new com.citi.put.checks.studio.internal.dto.RunnerReport(
+        executionId,
+        attemptId,
+        admission,
+        "studio-runner-0",
+        "FINAL",
+        1L,
+        Instant.now(),
+        null,
+        steps,
+        List.of(),
+        false,
+        Map.of(),
+        new com.citi.put.checks.studio.internal.dto.RunOutcome(result, code, reason),
+        null,
+        true);
+  }
+
+  private static com.citi.put.checks.studio.internal.dto.RunnerStepState skipped(Integer index) {
+    return new com.citi.put.checks.studio.internal.dto.RunnerStepState(
+        index, "SKIPPED", null, null, null, null);
+  }
+
   // ── helpers ──────────────────────────────────────────────────────────────
 
   private AdmissionRequest request(UUID attempt, UUID admission, String runnerInstanceId) {

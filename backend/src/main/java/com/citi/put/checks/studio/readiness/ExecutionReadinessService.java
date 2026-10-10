@@ -89,29 +89,43 @@ public class ExecutionReadinessService implements ExecutionReadiness {
    * and failing the test that reads it.
    */
   public static final String READINESS_QUERY =
-      """
-      SELECT t.deleted_at, t.quarantined_at, t.csi_id, t.steps::text AS draft_source,
-             t.source_revision, t.configuration_revision, t.confirmed_revision_id,
-             r.id AS revision_id, r.test_id AS revision_test_id, r.csi_id AS revision_csi_id,
-             r.confirmed_by, r.confirmed_at,
-             r.source_revision AS revision_source_revision,
-             r.configuration_revision AS revision_configuration_revision,
-             r.source_hash, r.artifact::text AS revision_artifact, r.artifact_hash,
-             r.artifact_schema_version, r.provenance::text AS revision_provenance,
-             r.source::text AS revision_source_document,
-             r.authoring::text AS revision_authoring,
-             r.authoring_revision_inputs::text AS revision_authoring_inputs,
-             r.reference_policy::text AS revision_reference_policy,
-             r.intent_derivation_version
-        FROM ui_tests t
-        LEFT JOIN ui_test_revisions r ON r.id = t.confirmed_revision_id
-       WHERE t.id = ?
-      """;
+      "SELECT t.deleted_at, t.quarantined_at, t.csi_id, t.steps::text AS draft_source,\n"
+          + "       t.source_revision, t.configuration_revision, t.confirmed_revision_id,\n"
+          + "       r.id AS revision_id, r.test_id AS revision_test_id, r.csi_id AS"
+          + " revision_csi_id,\n"
+          + "       r.confirmed_by, r.confirmed_at,\n"
+          + "       r.source_revision AS revision_source_revision,\n"
+          + "       r.configuration_revision AS revision_configuration_revision,\n"
+          + "       r.source_hash, r.artifact::text AS revision_artifact, r.artifact_hash,\n"
+          + "       r.artifact_schema_version, r.publication_kind, r.provenance::text AS"
+          + " revision_provenance,\n"
+          + "       r.source::text AS revision_source_document,\n"
+          + "       r.authoring::text AS revision_authoring,\n"
+          + "       r.authoring_revision_inputs::text AS revision_authoring_inputs,\n"
+          + "       r.reference_policy::text AS revision_reference_policy,\n"
+          + "       r.intent_derivation_version,\n"
+          + "       t.authoring::text AS draft_authoring,\n"
+          + "       jsonb_build_object('browser',CASE t.browser WHEN 'chrome' THEN 'chromium' ELSE"
+          + " t.browser END,\n"
+          + "        "
+          + " 'viewport',jsonb_build_object('width',t.viewport_width,'height',t.viewport_height),\n"
+          + "         'timeoutSeconds',t.timeout_seconds,'waitStrategy',t.wait_strategy,\n"
+          + "         'environment',t.environment)::text AS draft_configuration\n"
+          + "  FROM ui_tests t\n"
+          + "  LEFT JOIN ui_test_revisions r ON r.id = t.confirmed_revision_id\n"
+          + " WHERE t.id = ?\n";
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private final JdbcTemplate jdbc;
   private final RuntimePinProperties pin;
+  private com.citi.put.checks.studio.guided.publication.ObservedRevisionVerifier observed;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  public void installObservedVerifier(
+      com.citi.put.checks.studio.guided.publication.ObservedRevisionVerifier verifier) {
+    this.observed = verifier;
+  }
 
   public ExecutionReadinessService(JdbcTemplate jdbc, RuntimePinProperties pin) {
     this.jdbc = jdbc;
@@ -182,7 +196,11 @@ public class ExecutionReadinessService implements ExecutionReadiness {
     // own immutable authoring under the current derivation version.
     // This is deliberately before every dispatch-side effect: acceptance consults this verdict
     // before creating or claiming a ledger row, resolving values or contacting the runner.
-    if (row.get("revision_authoring") != null
+    boolean observedFamily =
+        asInt(row.get("artifact_schema_version")) == 2
+            && "GUIDED_RUN".equals(row.get("publication_kind"));
+    if (!observedFamily
+        && row.get("revision_authoring") != null
         && !IntentRevisionVerifier.verify(
             string(row.get("revision_source_document")),
             string(row.get("revision_authoring")),
@@ -241,6 +259,41 @@ public class ExecutionReadinessService implements ExecutionReadiness {
           ReadinessVerdict.COMPILE_REQUIRED,
           "The compiled artifact confirmed for this test does not match its recorded hash."
               + " Compile and confirm the current steps before running it.");
+    }
+
+    if (observedFamily) {
+      try {
+        if (observed == null) {
+          return ReadinessVerdict.refused(
+              ReadinessVerdict.RUNTIME_INCOMPATIBLE, "Observed replay is unavailable");
+        }
+        JsonNode verified = observed.verify(confirmedRevisionId);
+        JsonNode currentAuthoring = MAPPER.readTree(String.valueOf(row.get("draft_authoring")));
+        var orderedAuthoring = MAPPER.createArrayNode();
+        for (JsonNode step : currentAuthoring.path("steps")) {
+          int ordinal = orderedAuthoring.size();
+          orderedAuthoring
+              .addObject()
+              .put("stepId", step.path("id").asText())
+              .put("ordinal", ordinal)
+              .put("source", step.path("text").asText());
+        }
+        if (!com.citi.put.checks.studio.guided.session.GuidedContracts.hash(orderedAuthoring)
+                .equals(verified.path("artifact").path("authoringHash").asText())
+            || !com.citi.put.checks.studio.guided.session.GuidedContracts.hash(
+                    MAPPER.readTree(String.valueOf(row.get("draft_configuration"))))
+                .equals(verified.path("artifact").path("configurationHash").asText())) {
+          return ReadinessVerdict.refused(
+              ReadinessVerdict.COMPILE_REQUIRED,
+              "Observed source or configuration changed; deliberately relearn");
+        }
+        return ReadinessVerdict.ready(confirmedRevisionId);
+      } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException
+          | com.fasterxml.jackson.core.JsonProcessingException refusal) {
+        return ReadinessVerdict.refused(
+            ReadinessVerdict.RUNTIME_INCOMPATIBLE,
+            "Observed replay requires supported immutable publication evidence");
+      }
     }
 
     // Term 6 — the artifact envelope version this deployment can execute.

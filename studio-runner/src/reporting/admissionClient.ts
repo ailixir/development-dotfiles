@@ -1,3 +1,5 @@
+import type { AdmissionRequest, AdmissionReceipt } from '../executor/observedOperations.js';
+import {validateObserved,parseObservedBytes,equalObserved,demand,ObservedRefusal} from '../validator/observedReferencePolicy.js';
 /**
  * Admission CAS **client** (AC-7, AC-8, AC-9, architecture §5.1.4, §5.1 closing paragraph).
  *
@@ -193,4 +195,16 @@ export function newAdmissionIdentity(runnerInstanceId: string): AdmissionIdentit
     runnerInstanceId,
     admissionId: randomUUID(),
   };
+}
+
+/** Observed CAS remains one send, with a closed receipt checked before any browser authority. */
+export async function admitObserved(options: AdmissionClientOptions, request: AdmissionRequest): Promise<AdmissionReceipt> {
+    validateObserved('replay-job#/definitions/AdmissionRequest', request, 65536);
+    const response = await options.http.send({ url: admissionUrl(options.baseUrl, request.executionId).replace(/\/admission$/u, '/observed-admission'), method: 'POST', headers: { authorization: `Bearer ${options.identityToken}`, 'content-type': 'application/json' }, body: JSON.stringify(request), timeoutMs: options.timeoutMs, maxResponseBytes: 65536 });
+    if (response.kind !== 'response' || response.status !== 200)
+        throw new ObservedRefusal('AUTHORIZATION_EXPIRED');
+    const receipt = validateObserved<AdmissionReceipt>('replay-job#/definitions/AdmissionReceipt', parseObservedBytes(Buffer.from(response.body), 65536), 65536);
+    demand(receipt.admissionId === request.admissionId && equalObserved(receipt.request, request), 'EVIDENCE_MISMATCH');
+    demand(Date.parse(receipt.admittedAt) <= Date.now() && Date.parse(receipt.startDeadlineAt) > Date.now() && Date.parse(receipt.runDeadlineAt) >= Date.parse(receipt.startDeadlineAt), 'AUTHORIZATION_EXPIRED');
+    return receipt;
 }

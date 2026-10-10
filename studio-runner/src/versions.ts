@@ -38,3 +38,10 @@ export const VALIDATOR_PARSER = {
   name: 'typescript',
   version: '5.9.3',
 } as const;
+
+/** Separate observed family; legacy artifact/language/parser constants above never widen. */
+export const OBSERVED_ARTIFACT_VERSION = 2;
+export const OBSERVED_REFERENCE_POLICY_VERSION = 3;
+export const OBSERVED_EXECUTOR_VERSION = 'observed-2';
+export const OBSERVED_VALIDATOR_VERSION = 'observed-1';
+export const OBSERVED_PROTOCOL_VERSION = 2;

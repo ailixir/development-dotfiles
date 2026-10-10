@@ -1,0 +1,191 @@
+{
+  "story": "STUDIO-OBS-007",
+  "task": "consolidated-security-data-ux-design-resolution-r2",
+  "actor": "Aria / obs007_arch_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "at": "2026-10-09T18:55:21.057240+00:00",
+  "status": "FROZEN_R2_FOR_INDEPENDENT_RE_REVIEW",
+  "storyStatus": "Draft",
+  "poVerdict": "NO-GO",
+  "readinessScore": 4,
+  "lifecycleChanged": false,
+  "implementationApproved": false,
+  "finalGateIssued": false,
+  "gateVerdict": null,
+  "design": {
+    "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+    "normativeAmendment": "12.1–12.8",
+    "r1Sha256": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2",
+    "r2Sha256": "bfb20783c483fc260e61d609c25b6f7530ae96852bb64931232c2cc1fcdfab24"
+  },
+  "resolution": {
+    "path": ".ai/STUDIO-OBS-007-account-design-resolution-r2.json",
+    "selfHashPolicy": "Frozen JSON SHA-256 supplied in handoff; no recursive hash."
+  },
+  "preservedR1": {
+    "resolutionPath": ".ai/STUDIO-OBS-007-account-design-resolution-r1.json",
+    "sha256": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376",
+    "archive": ".aiox/sdc/STUDIO-OBS-007/design-r1/"
+  },
+  "peerReports": [
+    {
+      "path": ".ai/STUDIO-OBS-007-account-design-review-r1.json",
+      "verdict": "NEEDS_CHANGES",
+      "sha256": "0ceb8fb2c353537c3402c10e814430f34fc0ba746ec01f2b6eac310b067649bb"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-007-account-data-review-r1.json",
+      "verdict": "NEEDS_CHANGES",
+      "sha256": "f64e4a8607017b41d262f7407d3ef3b376ea249cb82c5470de77fe7a4fcfd78e"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-007-account-ux-review-r1.json",
+      "verdict": "NEEDS_CHANGES",
+      "sha256": "f348d3b24c127c17ac6ff8e9cb9de7ef03bb890c44f59fd2783a14c376fd6bc1"
+    }
+  ],
+  "findingDisposition": [
+    {
+      "id": "AUTH-007-R1-01",
+      "section": "12.1",
+      "decision": "Authenticated mode-bearing OwnershipGrant1 before accepting context; immutable initial scalar/marker guards; old gated claim rejects, explicit genuine legacy path and no renewal/restart downgrade.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "REL-007-R1-02",
+      "section": "12.2",
+      "decision": "Keep existing session→ui_tests/source order and selected remaining locks; no early scanner command locks or broad inverse refactor.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "DATA-007-01",
+      "section": "12.2",
+      "decision": "Explicit epoch/assignment/materialization/translation/command/permit/exact-preparation/action order, fresh-start/advisory/FK/trigger exceptions, bounded waits and decisive post-wait DB check.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "DATA-007-02",
+      "section": "12.3",
+      "decision": "Typed purpose FK projections/NO ACTION/JSON equality IS TRUE; exact preparation; durable monotone epoch/authenticated owner; initial marker guard and unconditional007 publication proof.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "DATA-007-03",
+      "section": "12.4",
+      "decision": "New exact UTC milliseconds/downward deadlines/raw decisive DB time; conservative DB-sampled freshness and authenticated bounded clock probe/100ms skew/101ms margin/default refusal.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "DATA-007-04",
+      "section": "12.5",
+      "decision": "Actual limits≤201 commands; bounded4MiB metadata/keys/accounting/claims/start intents; one SETUP across terminal states; retain tombstones/parent history and prohibit remint/delete.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "DATA-007-N1",
+      "section": "12.5",
+      "decision": "Exact terminal outcome-pair matrix: accounted failure≠success, NOT_INVOKED retains dispatchCount1, UNKNOWN/late accounting never upgrades readiness.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "UX-007-R1-01",
+      "section": "12.6",
+      "decision": "Guided-only persisted nonsecret one-shot locator/autorun consumption; bounded existing-ledger start intent and actual start key/digest; fresh read-only recovery after uncertainty/remount/login; legacy branch preserved.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    },
+    {
+      "id": "UX-007-R1-02",
+      "section": "12.7",
+      "decision": "Actual typed v3 session/result reads, gated fresh status authorization, command-vs-session/Stop/terminal/publication/evidence separation and minimal accessible states.",
+      "disposition": "LOCAL_DESIGN_MECHANISM_SELECTED_AWAITING_INDEPENDENT_RE_REVIEW",
+      "negativeOracles": "Named in the cited section and12.8; planned, not executed."
+    }
+  ],
+  "scopePreserved": [
+    "Provider/bootstrap/privacy/conditional handoff and learned/replay/version/admission/recording invariants.",
+    "Acyclic007→008:007 minimal actual production authority/status/recovery client;008 full UX/recording/clarification/finalize.",
+    "All new SQL/schema/source/UI/test paths including V34 are proposed ownership, not implemented or approved."
+  ],
+  "exactOwnershipReference": "Design12.8 and8.1: session/assignment/preparation/translation/current-authority, unconditional publication, ownership/runtime/clock/schema, actual page/RunControl/useRunGate/central transport and data/security/real-page tests.",
+  "locallyDeferredMechanismChoices": [],
+  "remainingReviews": [
+    "Independent security/data/UX re-review of the selected R2 mechanisms and planned negative oracles.",
+    "Root exact reservation/File List/task reconciliation and PO revalidation before Ready."
+  ],
+  "externalFactsStillPending": {
+    "EXT001": "Approved provider identity/contract/configuration remains unknown; silence/elapsed time is no answer/approval.",
+    "conditional": "Actual provider transport/identity/current revocation/one-use/cleanup/non-navigating entry and real handoff/view/profile parity remain conditional.",
+    "gateway": "Live gateway configuration/accuracy/cost belongs to later009; alone not007 blocker.",
+    "evidence": "No real provider/browser/gateway/pilot result fabricated."
+  },
+  "preservation": {
+    "inventoryReference": ".ai/STUDIO-OBS-007-account-design-resolution-r1.json#/preservation, reconstructed with its initial architecture inventory.",
+    "authorizedPreR2Adjustments": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "beforeSha256": "c13a0739f43899cd215ca5765836f7be59f8cffd416838f7a8b214ce5fb0c66b",
+        "r2BaselineSha256": "61518ec9553f3515bd7d8b95d3705cba0244f5bf36e9629a37f3454b2d26af59",
+        "reason": "Authorized root0.1.4 reservation beforeR2; architect did not edit story."
+      }
+    ],
+    "additionalR2InputsSha256": {
+      ".ai/STUDIO-OBS-007-account-data-review-r1.json": "f64e4a8607017b41d262f7407d3ef3b376ea249cb82c5470de77fe7a4fcfd78e",
+      ".ai/STUDIO-OBS-007-account-design-resolution-r1.json": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376",
+      ".ai/STUDIO-OBS-007-account-design-review-r1.json": "0ceb8fb2c353537c3402c10e814430f34fc0ba746ec01f2b6eac310b067649bb",
+      ".ai/STUDIO-OBS-007-account-ux-review-r1.json": "f348d3b24c127c17ac6ff8e9cb9de7ef03bb890c44f59fd2783a14c376fd6bc1",
+      ".aiox/sdc/STUDIO-OBS-007/design-r1/STUDIO-OBS-007-account-data-review-r1.json": "f64e4a8607017b41d262f7407d3ef3b376ea249cb82c5470de77fe7a4fcfd78e",
+      ".aiox/sdc/STUDIO-OBS-007/design-r1/STUDIO-OBS-007-account-design-resolution-r1.json": "e4fc2a86a6ac0facee6e8aafd15ada00955294697580b98672e9025a82720376",
+      ".aiox/sdc/STUDIO-OBS-007/design-r1/STUDIO-OBS-007-account-design-review-r1.json": "0ceb8fb2c353537c3402c10e814430f34fc0ba746ec01f2b6eac310b067649bb",
+      ".aiox/sdc/STUDIO-OBS-007/design-r1/STUDIO-OBS-007-account-ux-review-r1.json": "f348d3b24c127c17ac6ff8e9cb9de7ef03bb890c44f59fd2783a14c376fd6bc1",
+      ".aiox/sdc/STUDIO-OBS-007/design-r1/account-provider-readiness-design.md": "800bec2e80bda3f933c2b60342e2e30f9138ca57a7ef3492e5023b84182ffdd2",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/bridge/GuidedPreparationStore.java": "0b58cd9de58d51591282c6ee2078847cf82d1551b8db3667a2d96ccba708e990",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionRepository.java": "6daf6c29c2121e41f383ccd2e555cee55fed75374900f2a6f0fc45196567b01d",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedSourceSnapshotRepository.java": "8d87928ce342c600189d77baae2c604947e9a086608fdb182e06b2827d1800f5",
+      "frontend/src/services/api/studioAuthoringTransport.ts": "1b72681a10af99e8abffabdc6df5664a67d19eb369ce881fca61b9eefb90e9d0"
+    },
+    "protectedInputsCompared": 229,
+    "changedProtectedPaths": [],
+    "allProtectedInputsUnchanged": true,
+    "reviewed006Revision": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+    "sourceMismatches": [],
+    "runtimeMismatches": [],
+    "initialAndR1RecordsReviewsArchivesUnchanged": true,
+    "productSchemaSQLUITestRuntimeStoryUnchanged": true
+  },
+  "verification": {
+    "sourceReadsAndHashComparison": true,
+    "documentationOnly": true,
+    "builds": false,
+    "tests": false,
+    "browserRuns": false,
+    "providerCalls": false,
+    "gatewayCalls": false,
+    "externalCallsMessages": false,
+    "internalProgressOnly": true,
+    "rootCli": false,
+    "subagents": false,
+    "productEdits": false,
+    "previousReportEdits": false,
+    "credentialsOrLocalBrowserStorageInspected": false,
+    "commitPushDeploy": false
+  },
+  "authorization": "Existing approved wave/fixes continues only after readiness/prerequisite gates; no new permission flow.",
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualBilling": "UNKNOWN"
+  },
+  "filesChanged": [
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r2.json"
+  ],
+  "nextHandoff": "Frozen R2 to root/security/data/UX peers; peers/PO own final design/readiness decision.007 remainsDraft/NO-GO."
+}

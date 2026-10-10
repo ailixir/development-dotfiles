@@ -1,0 +1,96 @@
+# Security review record — secret-reference login in guided runs
+
+Reviewer: Quinn (@qa, security-scan remit). Date: 2026-10-09. Subject: `secret-login-design.md` (Aria, 2026-10-09). Method: read-only verification of every load-bearing `path:line` claim against the working tree (116 uncommitted files treated as current); no code executed. "VERIFIED" = read in code; "INFERRED" = reasoned from code, not reproduced.
+
+## Verdict
+
+**PASS-WITH-CONDITIONS.** The design does not reopen the binding decision (no provider, no handoff, no cookie import; `installCookies` is deleted). Its dispatch-ordering, logging-sink and lifetime claims are accurate where they describe existing code. Two findings must be fixed in the design before stories are drafted (F-1, F-2); the rest become acceptance criteria.
+
+## Claims verified against code
+
+| Design claim | Evidence | Status |
+|---|---|---|
+| Resolution happens inside the dispatch pass immediately before `send`; revocation closes `AUTHORIZATION_REVOKED` with no send; Vault outage releases the claim; retryable refusal returns to QUEUED with a fresh attempt; ambiguous is never resent | `StudioDispatcher.java:319-367,440-453` | VERIFIED |
+| Guided dispatch frame built after `consume()` commits; nothing journals it | `GuidedDispatchService.java:80-100`; `GuidedActionLedger.java:26-44` stores proposal/digest only; `journal.ts:33-48` writes hashes only | VERIFIED |
+| Guided backend package has zero logger calls | grep `LoggerFactory|LOGGER\.` under `studio/guided`: none | VERIFIED |
+| `StudioRunnerProperties.validate()` accepts `http://` | `StudioRunnerProperties.java:59-60` | VERIFIED |
+| Idempotency cache holds responses only; no response carries a value | `IdempotencyFilter.java:173-180`; `StudioSecretDto` | VERIFIED |
+| Vault provider logs reference names only | `HashicorpStudioVaultProvider.java:103-107` | VERIFIED |
+| Logback INFO, no tracing dependency | `logback-spring.xml:39-43`; `build.gradle.kts` grep: none | VERIFIED |
+| No dispatch body/payload column in any migration or ledger statement | grep over `db/migration`, `StudioDispatchLedgerStatements` | VERIFIED |
+| Parent wipes values on every exit path; child env is an allowlist; `NODE_OPTIONS` guarded; SIGKILL of tree | `runCoordinator.ts:342-359,945-950`; `launcher.ts:208,264-265,315` | VERIFIED |
+| Executor redactor built from `knownValues()` incl. secrets | `executor.ts:93`; `childRuntime.ts:237-245` | VERIFIED |
+| Guided runtime binds input to declaring step and slot | `guided/runtime.ts:144` (authoredLiteral only today) | VERIFIED |
+| Legacy secret accepted only as `fill()` value; origin pinned to element handle | `validator/references.ts:101-110`; `playwrightAdapter.ts:504-540` | VERIFIED |
+| No `tracing.start`/`recordHar`/`on('console')`/`screenshot` in runner | grep over `studio-runner/src` | VERIFIED (but see F-6) |
+| Frontend: debug log redacts body; rejected error strips `config.data`; input is `type=password autoComplete=new-password` | `apiClient.ts:43-46,112-121`; `SecretInput.tsx:168-169` | VERIFIED |
+| Revocation signalling to a running runner | `ExecutionControlService.java:11,31` carries only `cancel_requested_at` | VERIFIED — see F-2 |
+
+## Findings
+
+| ID | Severity | Design § | Issue | Required change | Evidence |
+|---|---|---|---|---|---|
+| **F-1** | **HIGH (must fix)** | §2, §4.2, §5, §3 "observation pin unchanged" | The trusted collector never exports a password control as an observation node: `type=password` ⇒ `hard` ⇒ `!eligibleSource` ⇒ `blocked` ⇒ `!safe` ⇒ withheld; any node whose name/placeholder/testid matches `/password|…/` is also hardened. Consequences: (a) the model cannot propose `fill.value=secretRef` on a `controlType:'password'` node because no such node exists; (b) §5's signature S cannot read `controlType==='password'` from `Observation.nodes`; (c) if the fix were to export password nodes, the `observation` pin and the sanitizer's threat model change. | Do **not** loosen the sanitizer for the model. The model emits `fill(secretRef)` with a target intent that names no node (new target kind, e.g. `{kind:'passwordControl', formId?}`); **trusted runner code** resolves the unique visible `input[type=password]` in the current top-level document at fill time (0 or >1 ⇒ `POLICY_DENIED`/clarification); the collector exports only a structural count (`coverage.passwordControls: n`, no name, no value) for §5 and for the validator's right-moment rule. Restate §4.2 as "trusted resolution at fill time", bump the `observation` pin for the new coverage field, and update §7 SEC-6/C-1 oracles accordingly. | `observationCollector.ts:62,98,103,301,391` |
+| **F-2** | **HIGH (must fix wording; control is a condition)** | §4.6 I-A3 "no window" | Once released, a value is usable until the run ends. Legacy/replay children hold all declared secrets from `execute` until exit (≤ `STUDIO_TOTAL_RUNTIME`, default 120 s; run-deadline 600 s). A `mayUse` revocation or Vault destroy mid-run stops nothing: the runner's 2 s control poll carries only cancellation. | Rewrite I-A3 as "no stale frame is ever *sent*; a released value remains usable for at most `totalRuntimeMs`". Add `revoked` to `ExecutionControl` (and the guided `context`/`stop` path) so the dispatcher's revocation recheck cancels a live run before its next fill; audit a `REVOKED_MID_RUN` row. | `ExecutionControlService.java:31`; `application.yml:259`; `runCoordinator.ts:342-359` |
+| F-3 | MEDIUM | §4 "Runner memory", I-C9 "scratch never receives values" | Browser profile is an unlisted disk sink. Legacy/replay use `launchPersistentContext` with the profile in scratch; guided uses `chromium.launch` with a temp user-data dir under `TMPDIR`. Chromium's password manager, autofill and form history write to `Login Data`/`Web Data`/`Preferences`; nothing disables them (grep for `password_manager|credentials_enable|Preferences`: none). Scratch is wiped afterwards, but the claim "no scratch file" is not true during the run. | Write a `Preferences` file into the profile dir before launch disabling password saving, autofill and session restore (not via `args`, which the sandbox gate forbids). Extend oracle C-3 to canary-scan the profile/scratch tree and the guided TMPDIR user-data dir **before** `runScratch.clear()`/browser close. State the residual (Chromium internals may still write transient files). | `browser.ts:90-110,466`; `scratchLayout.ts:4` |
+| F-4 | MEDIUM (honesty) | I-A2, I-B4 residuals | Read-side JVM `String` residual is omitted: the Vault response is parsed into a Jackson tree and the value is a `String` before `toCharArray()`. Whole-body Strings are also created on both secret-bearing writers (`writeValueAsString` → `BodyPublishers.ofString`; `GuidedContracts.canonical(body)`). `SecretValue` removes only the `toString()` regression class. | State both residuals in I-A2/I-B4. Condition: parse the Vault read with a streaming `JsonParser` (`getTextCharacters`) and publish bodies as zeroable `byte[]` (`ofByteArray`), erased after send; `SecretValue` serializer writes via `JsonGenerator.writeString(char[],…)`. | `HashicorpStudioVaultProvider.java:350-360`; `HttpRunnerDispatchClient.java:113-116`; `GuidedRunnerClient.java:87-89` |
+| F-5 | LOW | §3 `bridge#dispatch`, I-B5 bounds | Create bound is 8192 UTF-16 units; `BridgeDispatch.secret.value` ≤ 4096 and `knownSecrets` ≤ 4096 (`INVALID_CONTRACT` otherwise). A 4097–8192-char secret is fillable in legacy and refused in guided. | Align bounds (recommend lowering create to 4096) and state it in §3 and the runbook. | `StudioSecretsService.java:60`; `observationSanitizer.ts:19` |
+| F-6 | LOW | I-B5 sink inventory | `locator.inputValue()` exists (`expectValue`) and the last read value is embedded in the assertion failure message. A `hasValue` assertion on a password control echoes a page-supplied value (the redactor scrubs only the known secret). | Refuse `hasValue`/`inputValue` on `type=password` controls (both paths) with a named refusal; exclude `observed` from the message for password controls. | `playwrightAdapter.ts:1024-1041,811-814` |
+| F-7 | LOW | I-A3 "idempotency digest excludes `secret`" | True only for the backend `requestDigest`; the runner's replay map digests the **whole** dispatch body. | Runner strips `secret` before hashing or compares the backend-supplied digest. | `guided/transport.ts:72` |
+| F-8 | LOW | §4.1 / I-C10 | `secretUse` in the runner result changes the frozen internal `RunnerReport` contract (closed schema, `FAIL_ON_UNKNOWN_PROPERTIES`). | Record the contract bump in `openapi.yaml` per ADR-002 §3.1 and add it to the OBS-007 File List. | `StrictInternalBodyReader.java:29` |
+| F-9 | INFO (gate) | §8 Q2, ARCH-9 | Scheduled secret fills inherit legacy background authorization, which has **no production source** (denies outside `local`/`test`). Not a reopening of §0, but G-1/G-2 do not cover it. | Add gate **G-3**: no scheduled run that references a secret in any shared environment until a production `StudioBackgroundAuthorization` and `StudioSecretUseAuthorization` source exists (GA item C-2). | `ConfiguredBackgroundAuthorization.java:9,51-55` |
+| F-10 | INFO (oracles) | §7 | Oracles are falsifiable (canaries can fail) except: video "masked dots only" is human inspection; guided worker isolation assumes `capacity` = 1 (in-process browsers share one heap). | Add: assert configured guided `capacity === 1` or a two-session cross-value isolation test; record video inspection as a manual OBS-009 gate; add the C-6 variant that captures Playwright's **raw** error text before redaction so the "redactor is the control" claim is measured, not assumed. | `ownership.ts:101`; `browser.ts:464-466` |
+
+Residuals the design states correctly and that remain acceptable for a bank review once F-4 is added: JVM/JS string copies, child-memory residency for the run, heap/core dumps as an operational control, Vault KV version history.
+
+## Conditions for @sm (acceptance criteria to carry)
+
+OBS-007
+1. `secretRef` fill targets are resolved by trusted runner code to the unique visible `input[type=password]` in the top-level document at fill time; the model never receives a password node; ambiguity or absence is `POLICY_DENIED`; `observation` pin bumped for `coverage.passwordControls` (F-1).
+2. `ExecutionControl` (and guided `stop`) carries `revoked`; a live run is cancelled within one control poll after revocation; audit row `REVOKED_MID_RUN`; I-A3 wording updated (F-2).
+3. Profile `Preferences` disable password manager/autofill/session restore for both launch modes; canary scan of scratch/profile and TMPDIR user-data **before** clear/close returns zero hits (F-3).
+4. Vault read via streaming parser to `char[]`; dispatch bodies published as `byte[]` and zeroed after send; `SecretValue.toString()`/`RunJob.toString()` print no value; residuals documented in evidence file (F-4).
+5. One value bound (4096) enforced at create, bridge and sanitizer; `allowedOrigins` bounds unchanged (F-5).
+6. `hasValue`/`inputValue` refused on `type=password` controls in legacy and observed executors; assertion messages never embed a password-control reading (F-6).
+7. Runner replay digest excludes `secret`; test proves a byte-identical body differing only in `secret` yields the same digest (F-7).
+8. `RunnerReport.secretUse` contract bump recorded in `openapi.yaml` and contract test (F-8).
+9. All design §7 oracles implemented as listed, plus: Playwright raw-error capture variant of C-6; guided `capacity` assertion (F-10).
+
+OBS-009 / OBS-010
+10. Gates G-1, G-2 and new **G-3** (no scheduled secret-referencing run before production background and secret-use authorization sources exist) in release readiness and runbook (F-9).
+11. Heap-dump/core-dump disabled in chart values with lint; Vault least-privilege policy test (design I-B7, I-C9).
+
+## Binding-decision check
+
+No provider, handoff, account UI or cookie import is introduced; §4.5 deletes `installCookies`. F-1's trusted resolution keeps login author-owned via `<secret ID>`. Decision not reopened.
+
+## R1 delta check — 2026-10-09
+
+Scope: `secret-login-design.md` revision R1. Each finding re-read against the design text and, where R1 cites new code, against the working tree.
+
+| Finding | R1 status | Basis |
+|---|---|---|
+| F-1 | **Closed** (new conditions below) | §2/§3/§4.2: node-free `{kind:passwordControl, documentId, generation}` target, trusted resolution at `prepare` and at fill, `coverage.passwordControls` (observation pin 2→3), validator requires `=== 1`, 0 or >1 ⇒ `PASSWORD_TARGET_ABSENT/AMBIGUOUS`. Design's new code cite confirmed: `!safe` nodes are not emitted (`observationCollector.ts:395-396`). |
+| F-2 | **Closed** | I-A3 rewritten with the bounded post-release window; worker revocation sweep, `ExecutionControl.revoked`, ack-carried flag, guided `stop{REVOKED}`, audit `REVOKED_MID_RUN`; residual (one poll + one step) stated. Reuse path verified: one `requestStop` for all signals (`runCoordinator.ts:457-462`), ack flag parser (`reportClient.ts:76-88`). |
+| F-3 | **Closed** (pref names INFERRED, not verifiable in-repo) | §4 "Browser profile" row: both modes persistent context in scratch with pre-written `Preferences`, launcher refuses without it, canary scan before clear; residual stated. |
+| F-4 | **Closed** | I-A2 names read-side Jackson `String` and both write-side body Strings; streaming parse to `char[]` and `byte[]` bodies required; TLS/HttpClient buffers stated as residual. |
+| F-5 | **Closed** | §3 `bridge#dispatch`: single 4096 bound, `MAX_VALUE_LENGTH` lowered at create, `SECRET_TOO_LONG` at dispatch, never truncated. |
+| F-6 | **Closed** | I-B5: `PASSWORD_CONTROL_READ_REFUSED` in both executors; `observed` omitted from failure text for password controls; observed `controlValue` already excludes `password` (`observationSanitizer.ts:36`, verified). |
+| F-7 | **Closed** | I-A3: runner replay map strips `secret` before hashing. |
+| F-8 | **Closed** | §3 internal `openapi.yaml` row: `RunnerReport.secretUse` and `ExecutionControl.revoked` as a closed-schema bump with digest re-anchor. |
+| F-9 | **Closed** | Gate G-3 in I-C8, OBS-010 release readiness, §8 Q2 "holds regardless". |
+| F-10 | **Closed** | C-17 capacity assertion or isolation oracle; C-6 raw-error capture; video masking recorded as manual OBS-009 gate. |
+
+### New findings on the `passwordControl` rule
+
+| ID | Severity | Design § | Issue | Required change | Evidence |
+|---|---|---|---|---|---|
+| R1-1 | MEDIUM | §4.2, I-A1(c) | Element-identity continuity between `prepare` and the fill is not stated. `generation` advances only per observation and `navigation` only on `framenavigated`; a same-document DOM mutation (SPA swap of the login form for another single-password form, or an injected form replacing the original) leaves both unchanged, so "re-resolve the unique password input at fill time" can legally resolve a *different* element than the one validated at `prepare`. The existing node path avoids this by retaining the element in the isolated world and checking `observedNavigation === navigation`, `documentId`, `generation` (`browser.ts:304-320,374`). | Resolution must run inside the collector's isolated world under the same `acquire`-style guard (cited `documentId`, `generation`, unchanged `navigation`); the element pinned at `prepare` is retained and the fill requires that **the same element** is still attached, still `type=password`, still the unique visible candidate, and that `location.origin` read **in that world** is in `allowedOrigins ∩ approvedOrigins` (not `page.url()`); any deviation ⇒ `TARGET_CHANGED`, nothing typed. Post-fill, re-check `navigation` unchanged. | `observationCollector.ts:35-41` (revision), `browser.ts:252-253,306,322,374` |
+| R1-2 | MEDIUM | §4.3, I-A1(d) | Same-origin steering by page content. The model cannot `navigate` to arbitrary URLs (authored destinations only, `runtime.ts:144-146`) but can be induced by page text to **click** a same-origin link to an attacker-authored page (user-generated content, stored XSS) presenting a single password field; at the author's login step the secret is typed there. Origin binding is the trust boundary and the design does not say so. | (a) §4.3 and the OBS-010 provisioning runbook must state that an `allowedOrigins` entry asserts the **whole origin's content is trusted** (no UGC); (b) cheap structural control: refuse the fill when the pinned input's owning `form.action` (resolved URL) has an origin outside `allowedOrigins`, or when the input has no owning form and the document origin differs from the observed login document's origin — refusal `PASSWORD_FORM_ACTION_NOT_ALLOWED`; (c) residual stated: same-origin script exfiltration of a typed value is not controllable by the runner. | `browser.ts:119-123` (route allowlist is origin-granular), `runtime.ts:144-146` |
+| R1-3 | LOW | §3 `coverage.passwordControls`, §4.2 | Count and resolution must be one function. The collector's "visible" is computed style plus non-zero box (not viewport) and its traversal includes open shadow roots (`observationCollector.ts:134-137,418-431`); a `querySelectorAll('input[type=password]')` resolver would not pierce shadow roots and could count/resolve differently (count 1, resolve 0 ⇒ safe refusal; count 1 in light DOM plus one in shadow ⇒ count 1 but two fillable fields exist). | Define "visible, enabled password input" once, in the isolated-world collector, and use that same function for `coverage.passwordControls`, the `prepare` resolution and the fill-time check; document that off-screen but rendered decoys count (⇒ ambiguous ⇒ refuse) and that frames and closed shadow roots are excluded (⇒ absent ⇒ refuse). | `observationCollector.ts:134-137,418-431` |
+
+Multi-password-page limit: **safe by default** — 0 or >1 candidates refuse with nothing typed; off-screen decoys count as visible and therefore cause refusal rather than mis-targeting; the limit is honestly stated and legacy keeps author-named targets.
+
+### Verdict after R1
+
+Unchanged: **PASS-WITH-CONDITIONS**, no must-fix outstanding. Conditions for @sm are unchanged except: **Condition 1 is tightened** to include R1-1 (isolated-world resolution, retained element identity, in-world origin read, `TARGET_CHANGED` on deviation), R1-2 (form-action/origin refusal and the trusted-origin provisioning statement) and R1-3 (single visibility/candidate function); **Condition 5** reads "create bound lowered to 4096; longer stored entries refused at dispatch with `SECRET_TOO_LONG`, never truncated"; **Condition 2** adds the worker-side revocation sweep at control-poll cadence as R1 specifies. New oracles to carry: SPA form-swap between `prepare` and dispatch ⇒ `TARGET_CHANGED`, nothing typed; same-origin page with a password form whose `action` points cross-origin ⇒ `PASSWORD_FORM_ACTION_NOT_ALLOWED`; password input inside an open shadow root counted and resolved identically.

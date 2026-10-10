@@ -1,0 +1,39 @@
+{
+  "status": "early implementation notes, not QA verdict",
+  "checksForIndependentQa": [
+    "Explicit /observe after actual nonfinal completeStep must cross source-step boundaries with retained private binding, owner-authenticated callback ACK before evidence use, durable intent/current observation verification, callback-key correlation parity, duplicate joining before stale-generation comparison, no recollection on lost final response, busy/pause/terminal/budget refusal, no action-count or receipt inflation. Existing v2 answer-to-refresh is tested using explicitly controlled question setup. Missing v2 clarification question schema/production semantics remain005. Verify cross-version rejection; never claim production question generation from fixture setup.",
+    "Independently reproduced offscreen click failure must be fixed: unchanged root viewport probe, plus nested-scroll and scroll-handler replacement/no-op tests; verify bounded scrolling under consumed action without locator replacement or unsafe retries.",
+    "Actual-worker ownership lifecycle: backend controller must never impersonate worker; /assign intent precedes node /claim, no browser before grant+context, renew beyond30s and while busy/paused, stale/failed ack stops, context timestamps never extend lease, pre-context stop/lifecycle and restart tombstones. Positive joined driver must not call claim on behalf of actual worker.",
+    "Teardown clears secondary private masking inventories and all retained browser/input references, not only main value Map; late withhold rejected; failed close cannot claim stop success or release capacity.",
+    "After any dispatch response, still-DISPATCHING consumed admission becomes unknown if owner callback missing; committed success unaffected; delayed old acknowledgement must never stop unrelated newer admission.",
+    "Original no-mandatory-per-control scope: test applicationPolicy.readGrants with rules:[] and no data-testid anywhere; shared collection/prepare/invoke resolver, positive explicit origin/region/categories, structural-only veto, overlap/absence/sensitive descendant/type/region replacement negatives. Actual joined backend14-case suite now includes no-mapping receipt; independent QA must confirm.",
+    "Verify runtime source/known-input/capture inventory remains private and scrubs echoes on later documents; exact local consumer strings unchanged.",
+    "Journal must distinguish fresh session creation from missing/corrupt expected state; independent process/instance consumption cannot repeat effects.",
+    "Trusted source classification should authorize safe regions, not require preselected literal/slot mappings; preserve deliberate empty authored config values separately from nonblank capture constraints.",
+    "JWT strict parsing parity: exact header, bounded integer times, no duplicates/trailing bytes, RSA2048+, issuer/audience/role/subject and real cert fingerprint.",
+    "Receiver route/key/digest idempotency must reject changed digest; no duplicate prepare/context creates authority. Backend winner result remains outside generic replay cache and committed outside ambient transactions.",
+    "Backend callbacks return full202 session; runner response bound coordinated to1MiB, require valid response >64KiB fixture. Receivers200, bounded401/409 error body per protocol.",
+    "Cumulative pending allocation prospective consumers may append; immutable intent/producer and existing edges must not disappear.",
+    "Runner src/guided/contracts.ts is a custom schema subset. Check shared Node/Java parity for schemas actually enforced, invalid Unicode/date-time, unresolved refs/JSON pointers and unknown validation keywords fail closed. Do not claim learned-plan runtime validation/publication, reserved for006; newly added final schemas include contains and nested/local JSON pointer refs not originally supported by runner helper.",
+    "Actual joined test must use real PostgreSQL, actual Spring service/security over verified TLS, actual runner executable and independent application receipts; no mock-only authority proof.",
+    "Current user INPUT-POLICY-01 answer remains pending; no outbound model source projection or005 development authorized on either assumed branch."
+  ],
+  "viewportProbe": {
+    "script": "docs/qa/evidence/STUDIO-OBS-004-viewport-probe.mjs",
+    "scriptSha256": "69276c7f993a53671f2eddd6de12d91032e97e9d0931ddbba7baa4496c00ef20",
+    "report": "docs/qa/evidence/STUDIO-OBS-004-viewport-probe.json",
+    "initialFinding": "unchanged below-fold target prepares but fails TARGET_CHANGED; visible control succeeds",
+    "currentResult": "Unchanged root probe now passes visible and below-fold; runner1255 units/105 browser and actual joined viewport case pass. Refresh changes still in progress; these are not final004 QA evidence."
+  },
+  "independentSnapshotComparison": {
+    "testedSnapshot": "/var/folders/69/txvg5ksj635bk5xr530hcrx00000gn/T/guided-bridge-1282848098793471008/worker-dist",
+    "current": "studio-runner/dist",
+    "filesEach": 230,
+    "onlyDifference": {
+      "path": "guided/types.d.ts",
+      "testedSha256": "8edeb4d1e534e7205eae0d4e65371f405fd2e2a1fb5b9a1ba8d6482e272bcb4b",
+      "currentSha256": "836729a3ee86d080f282ca9341688bb4f0af6b73d427ef65ab98031aa79991eb"
+    },
+    "result": "Root independently compared every file byte hash. All229 other files including executable JS/maps/schema identical; no runtime rerun for declaration-only difference. Preserve separate aggregate provenance."
+  }
+}

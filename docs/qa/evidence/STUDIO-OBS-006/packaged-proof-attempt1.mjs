@@ -1,0 +1,14 @@
+import { readFileSync } from 'node:fs';
+import assert from 'node:assert/strict';
+import { deriveObservedArtifact, validateObservedRequest } from '../../../../studio-runner/dist/validator/observedReplay.js';
+import { hashObserved, OBSERVED_PROFILE, OBSERVED_SCHEMA_BUNDLE_HASH } from '../../../../studio-runner/dist/validator/observedReferencePolicy.js';
+const fixture = JSON.parse(readFileSync(new URL('../../../../studio-runner/fixtures/observed-reference/fresh-order-reference.json', import.meta.url)));
+const actual = deriveObservedArtifact(fixture.basis);
+assert.deepEqual(actual, {artifact: fixture.artifact, hashes: fixture.hashes});
+const build = {profileHash: hashObserved(OBSERVED_PROFILE),schemaBundleHash: OBSERVED_SCHEMA_BUNDLE_HASH,referenceBundleHash:'a'.repeat(64),executableImageDigest:'b'.repeat(64),chromiumBuild:'qa-controlled-build'};
+const request = {schemaVersion:2,attemptId:'00000000-0000-4000-8000-000000000900',claimId:'00000000-0000-4000-8000-000000000901',snapshotHash:'c'.repeat(64),basisHash:hashObserved(fixture.basis),requiredProfile:OBSERVED_PROFILE,requiredBuild:build,artifact:fixture.artifact,validationBasis:fixture.basis};
+assert.equal(validateObservedRequest(request,build).ok,true);
+const guardMutation=structuredClone(request);guardMutation.artifact.guards[1].target.role='button';assert.equal(validateObservedRequest(guardMutation,build).ok,false);
+const staleBuild=structuredClone(request);staleBuild.requiredBuild.schemaBundleHash='d'.repeat(64);assert.equal(validateObservedRequest(staleBuild,build).ok,false);
+const unrelatedObservation=structuredClone(fixture.basis);unrelatedObservation.observations.push(unrelatedObservation.observations[0]);assert.throws(()=>deriveObservedArtifact(unrelatedObservation));
+console.log(JSON.stringify({result:'PASS',oracles:5,artifactHash:actual.hashes.artifactHash,hashCount:Object.keys(actual.hashes).length,schemaBundleHash:OBSERVED_SCHEMA_BUNDLE_HASH,note:'Fixed manual standalone fixture has an opaque sourceManifestHash; no reconstructed manifest preimage or production image is claimed.'},null,2));

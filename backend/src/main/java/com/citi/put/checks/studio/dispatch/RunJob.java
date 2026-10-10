@@ -74,10 +74,82 @@ public record RunJob(
     String videoKey,
     String manifestKey,
     JsonNode referencePolicy,
-    Map<String, List<String>> secretOrigins) {
+    Map<String, List<String>> secretOrigins,
+    @com.fasterxml.jackson.annotation.JsonIgnore JsonNode observed) {
 
   public RunJob {
     secretOrigins = secretOrigins == null ? Map.of() : Map.copyOf(secretOrigins);
+    observed = observed == null ? null : observed.deepCopy();
+  }
+
+  public RunJob(
+      UUID executionId,
+      UUID attemptId,
+      UUID revisionId,
+      String artifactHash,
+      JsonNode artifact,
+      List<String> source,
+      JsonNode configuration,
+      String csi,
+      ReferenceDeclarations references,
+      Map<String, String> resolvedVars,
+      Map<String, String> resolvedSecrets,
+      JobDeadlines deadlines,
+      String videoKey,
+      String manifestKey,
+      JsonNode referencePolicy,
+      Map<String, List<String>> secretOrigins) {
+    this(
+        executionId,
+        attemptId,
+        revisionId,
+        artifactHash,
+        artifact,
+        source,
+        configuration,
+        csi,
+        references,
+        resolvedVars,
+        resolvedSecrets,
+        deadlines,
+        videoKey,
+        manifestKey,
+        referencePolicy,
+        secretOrigins,
+        null);
+  }
+
+  @Override
+  public JsonNode observed() {
+    return observed == null ? null : observed.deepCopy();
+  }
+
+  public static RunJob observed(JsonNode wire) {
+    JsonNode binding = wire.path("binding");
+    UUID executionId = UUID.fromString(binding.path("executionId").asText());
+    UUID attemptId = UUID.fromString(binding.path("attemptId").asText());
+    UUID testId = UUID.fromString(binding.path("testId").asText());
+    String csi = binding.path("csiId").asText();
+    com.citi.put.checks.studio.guided.session.GuidedSessionException.require(
+        csi.matches("[A-Za-z0-9_-]{1,20}"), "FORBIDDEN_SCOPE", 403);
+    return new RunJob(
+        executionId,
+        attemptId,
+        UUID.fromString(binding.path("revisionId").asText()),
+        binding.path("artifactHash").asText(),
+        wire.path("artifact"),
+        List.of(),
+        wire.path("configuration"),
+        csi,
+        new ReferenceDeclarations(List.of(), List.of()),
+        Map.of(),
+        Map.of(),
+        new JobDeadlines(30000, wire.path("runtime").path("totalRuntimeMs").asLong()),
+        videoKeyFor(csi, testId, executionId, attemptId),
+        manifestKeyFor(csi, testId, executionId, attemptId),
+        wire.path("artifact").path("replayPolicy"),
+        Map.of(),
+        wire);
   }
 
   public RunJob(

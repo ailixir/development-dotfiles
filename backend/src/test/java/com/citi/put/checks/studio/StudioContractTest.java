@@ -139,14 +139,16 @@ class StudioContractTest {
   void internalRoutesStayOffThePublicSurfaceAndNameWhatServesThem() {
     assertThat(serverUrls(contract.get("servers")))
         .as(
-            "the document base is the public one — which is what every internal path item overrides")
+            "the document base is the public one — which is what every internal path item"
+                + " overrides")
         .containsExactly(PUBLIC_BASE);
 
     List<InternalOperation> internal = internalOperations();
     assertThat(internal.stream().map(InternalOperation::key))
         .as(
             "architecture §8.4 tabulates six internal routes and ADR-002 §3.1 declares all six;"
-                + " ADR-002 §29 (Studio v1 WP4) adds the runner's cancel and the control read")
+                + " ADR-002 §29 adds cancel/control; approved OBS006 adds three observed routes")
+        .hasSize(11)
         .containsExactlyInAnyOrder(
             "POST /v1/validate",
             "POST /v1/runs",
@@ -155,7 +157,10 @@ class StudioContractTest {
             "GET /health",
             "GET /ready",
             "POST /internal/studio/executions/{id}/admission",
-            "POST /internal/studio/executions/{id}/progress");
+            "POST /internal/studio/executions/{id}/progress",
+            "POST /v2/validate-observed",
+            "POST /v2/runs",
+            "POST /internal/studio/executions/{id}/observed-admission");
 
     for (InternalOperation operation : internal) {
       String key = operation.key();
@@ -355,13 +360,18 @@ class StudioContractTest {
     expected.put("PATCH /tests/{id}/schedule/enabled", "200,400,401,403,409,503");
     expected.put("DELETE /tests/{id}/schedule", "204,400,401,403,409,503");
     expected.put("POST /schedules/preview", "200,400,401");
+    // Approved OBS006 adds only these three internal operations; the preceding 31 remain exact.
+    expected.put("POST /v2/validate-observed", "200,400,401,403,413,503");
+    expected.put("POST /v2/runs", "202,400,401,403,409,413,429,503");
+    expected.put(
+        "POST /internal/studio/executions/{id}/observed-admission", "200,400,401,403,409,413,422");
 
     Map<String, String> declared = declaredStatusSets();
 
     // The total, asserted separately. Without it, both comparisons below could agree on a set that
     // had silently shrunk to nothing on both sides at once.
-    assertThat(declared).as("the document declares a different number of operations").hasSize(31);
-    assertThat(expected).hasSize(31);
+    assertThat(declared).as("the document declares a different number of operations").hasSize(34);
+    assertThat(expected).hasSize(34);
 
     assertThat(declared.keySet())
         .as("an operation the document declares that this copy does not name")
@@ -376,7 +386,8 @@ class StudioContractTest {
                 + "ruling (ESC-1, ESC-2), and studio-vault-secrets adding GET and POST "
                 + "/tests/{id}/secrets by ADR-002 §32's ruling, and story 10.46's GET /tests and "
                 + "GET /executions gaining 400 for their validated list parameters, and "
-                + "STUDIO-SCHED-001's eight public scheduling operations. Every earlier "
+                + "STUDIO-SCHED-001's eight public scheduling operations and OBS006's three "
+                + "internal observed operations. Every earlier "
                 + "row remains pinned, and a "
                 + "row that moves without a ruling is the drift this copy exists to catch")
         .isEqualTo(expected);

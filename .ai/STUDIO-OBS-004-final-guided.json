@@ -1,0 +1,191 @@
+{
+  "storyId": "STUDIO-OBS-004",
+  "recordedAt": "2026-10-08T15:46:18.814315+00:00",
+  "command": "./gradlew spotlessJavaApply test --tests '*GuidedBridgeIntegrationTest' --tests '*GuidedSessionIT' --tests '*GuidedSecurityTest' --tests '*GuidedHttpSecurityIT' --tests '*GuidedSourceReferenceValidatorTest' check -x crossReplicaTest -I /tmp/studio-obs004-coverage.init.gradle --console=plain",
+  "exitCode": 0,
+  "log": "/tmp/studio-obs004-refresh-final-verified.log",
+  "qaVerdict": null,
+  "status": "current-development-verification-pass",
+  "tests": 80,
+  "suites": {
+    "com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidatorTest": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "configurationIsScopedAndMayContainIntentionalEmptyAuthoredText()",
+        "destinationsRequireApprovedRealOriginAndNoCredentials()",
+        "slicesExactUnicodeWhitespaceWithinClassifiedRegionWithoutSemanticMapping()",
+        "rejectsRevisionBoundsSurrogateSplitsAndUnclassifiedRegions()",
+        "sharedV2NodeAndJavaCanonicalVectorsAndReferenceSchemasAgree()"
+      ]
+    },
+    "com.citi.put.checks.studio.guided.session.GuidedBridgeIntegrationTest": {
+      "tests": 32,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "realWorkerRenewsBeyondInitialLeaseWhilePausedAndPreservesCapturedValue()",
+        "actualApplicationReplacementAfterPrepareNeverActsOnReplacement()",
+        "cancelDuringRefreshRejectsLateCallbackWithoutBrowserMutation()",
+        "callbackAcceptsValidUnicodeSessionLargerThan64KiB()",
+        "currentSourceLockWinsAgainstConcurrentConsumeAndCumulativeAllocationsCannotBeErased()",
+        "actualServiceTransportRejectsWrongAudienceSubjectFenceAndTuple()",
+        "freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer()",
+        "belowFoldClickUsesNativeRevealAndOneReceipt()",
+        "producerReceiptAndOutcomeRollbackTogetherAfterRealReadAndNoReplay()",
+        "httpSuccessWithoutCommittedCompletionCallbackIsUnknownAndNeverRetried()",
+        "assignmentRenewsBeforeContextAndCancellationReleasesItsOnlyCapacitySlot()",
+        "concurrentPreparationsForSameAdmissionKeyUseOneImmutableAdmission()",
+        "supportedV2AnswerResumesTrustedQuestionFixtureThenRefreshPreservesHistoricalSelection()",
+        "legacyClarificationAnswerCannotResumeObservedV2Session()",
+        "configuredRegionReadGrantNeedsNoTestIdsOrPerControlRules()",
+        "invalidAcknowledgedClaimNeverLaunchesAndUnassignedOrWrongWorkersCannotClaim()",
+        "committedObservationRecoversLostHttpResponseWithoutAnotherCollection()",
+        "lateOldAcknowledgementDoesNotDowngradeNewerConsumedAction()",
+        "failedRenewalStopsWithoutUsingUnacknowledgedLeaseOrReclaiming()",
+        "lateRenewalResponseAfterStopCannotReviveContextOrOwnership()",
+        "concurrentRefreshRetriesJoinOneCollectionAndOneCommittedGeneration()",
+        "concurrentSameAndNewKeysHaveOneRealDispatch()",
+        "restartedWorkerCannotReclaimExistingAssignmentOrReplayBrowserEffects()",
+        "actualDeferredCommitFailureSendsNothingAndRollsBackConsumption()",
+        "authorizedConfigurationReferenceIsAllocatedTransportedAndConsumedExactly()",
+        "renewalWhileBrowserDispatchIsBusyDoesNotResetOrRepeatTheAction()",
+        "refreshRefusesActiveAdmissionUnresolvedPauseStaleScopeBudgetAndCancellation()",
+        "cancellationBeforeConsumptionRevokesAndMissingStopAckNeverConfirmsTeardown()",
+        "realBlankReadConsumerHasIndependentReceiptsAndNoSecondDispatch()",
+        "maximumFenceCanBeRenewedBySameOwnerWithoutAnotherAcquisition()",
+        "cancellationBeforeAndAfterConsumePreventsFutureWorkAndPreservesUncertainty()",
+        "nestedRollbackAndLostWinnerNeverManufactureSendAuthority()"
+      ]
+    },
+    "com.citi.put.checks.studio.guided.session.GuidedHttpSecurityIT": {
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "pendingResultAndAbsentClarificationFollowFrozenHttpStatus()",
+        "legacyCallbackAndOpenApiRoutesRemainOnTheirExistingChains()",
+        "authenticatedWorkerArrivesWithItsVerifiedSubjectAndNonUuidKey()",
+        "internalGuidedChainRunsBeforeLegacyAndRejectsBffOrStaticToken()",
+        "publicV3UsesBffAndBypassesLegacyUuidIdempotency()"
+      ]
+    },
+    "com.citi.put.checks.studio.guided.session.GuidedSecurityTest": {
+      "tests": 8,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "bffAndLegacyServiceTokensNeverBecomeGuidedIdentity()",
+        "wrongAudienceIssuerSubjectSignatureAndRoleFail()",
+        "timeTypesExpiryFutureAndLifetimeFail()",
+        "malformedAndOversizedTokensAreRejectedBeforeBodyRead()",
+        "mtlsCannotBeReplacedBySecureOrForwardedHeaders()",
+        "approvedKebabCaseConfigurationLowersTheFrozenCeilings()",
+        "validAudienceBoundWorkerAndControllerRemainDistinct()",
+        "algorithmSubstitutionDuplicateKeysAndTrailingJsonFail()"
+      ]
+    },
+    "com.citi.put.checks.studio.guided.session.GuidedSessionIT": {
+      "tests": 30,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "cases": [
+        "accessIsolationRechecksPrincipalCsiAccountAndScope()",
+        "canonicalUnicodeParityAndClosedSchema()",
+        "clarificationSelectionAndPauseChangeRollBackTogether()",
+        "takeoverAfterEffectsOrLostAcknowledgmentStopsUnknown()",
+        "gatewayOverrunIsDurablyChargedAndStopsFurtherWork()",
+        "renewalAndRecoverableTakeoverPreserveClarificationUntilActualAnswer()",
+        "expiryCannotBeExtendedAndTrustedReaperRevokes()",
+        "clarificationIsBoundToGenerationChoiceAndOriginalDeadline()",
+        "duplicateAdmissionAndConcurrentConsumptionNeverRedispatch()",
+        "outcomeCannotRewriteAdmissionAndIdenticalDeliveryIsIdempotent()",
+        "conflictingAdmissionAndUniqueCoordinatesFail()",
+        "observationBudgetAndGenerationAreSharedAcrossActions()",
+        "protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery()",
+        "sourceChangesRejectInternalTransitionsAndUnavailableAccountsFailClosed()",
+        "migrationPreservesExistingDataAndFreshInstallWorks()",
+        "workerSubjectFenceAndLeaseAreIndependent()",
+        "rollbackBeforeDispatchLeavesNoAdmissionAndNoBudgetCharge()",
+        "entireSessionBudgetsAreReservedAndMissingUsageIsConservative()",
+        "concurrentConflictingStartsHaveOneWinner()",
+        "noStateCanPublishWithoutExactVerifier()",
+        "successfulLedgerStillCannotPublishWithoutExactPlanVerifier()",
+        "cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence()",
+        "lostAckNeverRetriesAndDelayedCallbackCannotRevive()",
+        "evidenceReferencesAreScopedAndDoNotClaimReplay()",
+        "acceptedSelectionSurvivesRestartAndKeepsSafeScopedMapping()",
+        "liveOwnerRenewalPreservesAdmittedAndDispatchedActions()",
+        "actionBudgetAndFalseAssertionReportsFailClosed()",
+        "concurrentIdenticalStartsAndChangedDigestAreDurable()",
+        "selectionHandoffRechecksScopeFenceRevisionDeadlineAndTerminalState()",
+        "takeoverCannotReopenFinalizingAfterExecutedEffects()"
+      ]
+    }
+  },
+  "staticChecks": [
+    "Spotless",
+    "Checkstyle main/test",
+    "SpotBugs main (test analysis skipped by existing configuration)",
+    "antiRegressionCheck",
+    "rdsParityLint:30 migrations",
+    "testcontainersAlignmentCheck:8 modules at1.20.2",
+    "Jacoco existing thresholds unchanged"
+  ],
+  "coverage": {
+    "checks-backend": {
+      "BRANCH": {
+        "covered": 4147,
+        "missed": 1783,
+        "percent": 69.93
+      },
+      "LINE": {
+        "covered": 11925,
+        "missed": 1739,
+        "percent": 87.27
+      }
+    },
+    "com/citi/put/checks/studio/guided/session": {
+      "BRANCH": {
+        "covered": 522,
+        "missed": 248,
+        "percent": 67.79
+      },
+      "LINE": {
+        "covered": 1483,
+        "missed": 90,
+        "percent": 94.28
+      }
+    },
+    "com/citi/put/checks/studio/guided/bridge": {
+      "BRANCH": {
+        "covered": 241,
+        "missed": 119,
+        "percent": 66.94
+      },
+      "LINE": {
+        "covered": 626,
+        "missed": 13,
+        "percent": 97.97
+      }
+    }
+  },
+  "coverageProvenance": {
+    "current": "backend/build/jacoco/test.exec",
+    "retained": [
+      "/tmp/studio-obs004-full-regression.exec",
+      "/tmp/studio-obs004-final-guided.exec",
+      "backend/build/jacoco/crossReplicaTest.exec"
+    ],
+    "note": "Existing thresholds use combined retained broad-regression and current guided execution data. This is not an unfiltered final-source full-suite run."
+  },
+  "testedRunnerAggregateSha256": "796f4498c46f2be4288223c592a7e06762f3efe7b343413072b2d567471cb821",
+  "finalRunnerAggregateSha256": "66609a69cd2ca878bfab851c7b9a83535a4828c4792e17c426ed110eaf8919eb",
+  "buildComparison": ".ai/STUDIO-OBS-004-build-comparison.json"
+}

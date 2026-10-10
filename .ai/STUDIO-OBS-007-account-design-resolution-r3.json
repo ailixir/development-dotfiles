@@ -1,0 +1,170 @@
+{
+  "story": "STUDIO-OBS-007",
+  "task": "narrow-ownership-cache-and-not-invoked-design-resolution-r3",
+  "actor": "Aria / obs007_arch_61_high",
+  "model": "gpt-6.1-sol",
+  "reasoningEffort": "high",
+  "at": "2026-10-09T19:35:09.534633+00:00",
+  "status": "FROZEN_R3_FOR_NARROW_SECURITY_DATA_RE_REVIEW",
+  "storyStatus": "Draft",
+  "poVerdict": "NO-GO",
+  "readinessScore": 4,
+  "lifecycleChanged": false,
+  "implementationApproved": false,
+  "finalGateIssued": false,
+  "gateVerdict": null,
+  "design": {
+    "path": "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+    "r2Sha256": "bfb20783c483fc260e61d609c25b6f7530ae96852bb64931232c2cc1fcdfab24",
+    "r3Sha256": "21abbfbb518332c9130985d3f8fb0d36f1ab7685c7006f8f3e4f30aa0724f924",
+    "changedSections": [
+      "R3 reference note",
+      "12.1 compact exact ownership-reply cache, parent sealing, reconstruction/duplicate/message bounds and related oracles",
+      "12.5 compact metadata reference and conclusive NOT_INVOKED tuple/settlement/setup/late accounting/related oracles"
+    ]
+  },
+  "resolution": {
+    "path": ".ai/STUDIO-OBS-007-account-design-resolution-r3.json",
+    "selfHashPolicy": "Final handoff supplies frozen JSON SHA-256; no recursive self-hash."
+  },
+  "unchangedPeerReports": [
+    {
+      "path": ".ai/STUDIO-OBS-007-account-design-review-r2.json",
+      "sha256": "9c51e985f157968a693e99b8ab3f9c3f04e9e1549458f3c99e0f83e8941a4ed4",
+      "verdict": "NEEDS_CHANGES"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-007-account-data-review-r2.json",
+      "sha256": "4954830d678956622ff427450826a46475bf37aa74269ec887bd3f5764959dd7",
+      "verdict": "NEEDS_CHANGES"
+    },
+    {
+      "path": ".ai/STUDIO-OBS-007-account-ux-review-r2.json",
+      "sha256": "d9d4afc6d58af947532934ce6e1b930d2b56ecdf9ec3df0306ec35e4504cfdd4",
+      "verdict": "PASS"
+    }
+  ],
+  "preservedR2": {
+    "resolution": ".ai/STUDIO-OBS-007-account-design-resolution-r2.json",
+    "sha256": "974139a56f41fea4249bc06f87e5028156400bdad30bef5aaf3e2a8ce46e9a21",
+    "archive": ".aiox/sdc/STUDIO-OBS-007/design-r2/"
+  },
+  "findings": [
+    {
+      "id": "DATA-007-R2-01",
+      "disposition": "SELECTED_COMPACT_DESIGN_CORRECTION_AWAITING_INDEPENDENT_REVIEW",
+      "section": "12.1",
+      "mechanism": "Latest≤6144-byte cache snapshots original mutable state/owner/counters and exact header/dbTime/hashes; verified immutable parent facts including sealed schemaVersion/authConnection reconstruct full canonical original grant. Latest exact duplicate only; expired/terminal/fence/mode/hash drift or older counter refuses. Other controls≤2048; combined8192 retained. Ownership-only reply transport1MiB+4096 preserves full supported Session.",
+      "ownership": "Existing session repository/service/internal controller, proposed V34 cache/seal guard/current-authority schema, backend+runner ownership/transport; no new physical files selected.",
+      "oracles": "Maximum100 steps/IDs/source metadata, exact retained duplicate after state progression, old counter after renewal, original expiry versus current lease, seal/hash/fence/terminal/restart/lost ACK/overflow/rollback and whole transport bounds.",
+      "implemented": false,
+      "testsRun": false
+    },
+    {
+      "id": "REL-007-R2-01",
+      "disposition": "SOURCE_COMPATIBLE_PAIR_SELECTED_AWAITING_INDEPENDENT_REVIEW",
+      "section": "12.5",
+      "mechanism": "NOT_INVOKED timeout→FAILED/TIMEOUT; withdrawn invocation permission→FAILED/POLICY_DENIED, assertionPassed null/dispatchCount1. Exact cancellation/expiry wrapper; active eligible transaction saves failed action before existing stop to EXPIRED/CANCELLED. Stop-already-won terminal UNKNOWN/CANCELLED stays unchanged with one historical receipt. SETUP has no action ledger, no fake bootstrap.",
+      "ownership": "Current-authority accounting repository/service and existing session service locked primitives. GuidedActionLedger read/used unchanged; no verifier/schema widening reserved.",
+      "oracles": "Real consumed-before-first-invocation positive zero-effect tuples, reject FAILED/CANCELLED/wrong wrapper, stop-race terminal immutability, duplicate/conflicting receipt/rollback and publication failure refusal; separate no-action SETUP cases.",
+      "implemented": false,
+      "testsRun": false
+    }
+  ],
+  "staticByteAnalysis": {
+    "classification": "READ_ONLY_CANONICAL_JSON_SERIALIZATION_ANALYSIS_NOT_RUNTIME_SQL_VALIDATOR_OR_TEST_PROOF",
+    "sourceFixture": "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json#/documents/session",
+    "fixtureSha256": "4c18212ff1bd2accbd51055133b4dcaff8f160e4f4de7e7ddef234ef0901e6d0",
+    "supportedExample": "Replace only sourceSteps with100 unique UUID IDs/requiresAssertion false; maxSourceSteps100.",
+    "baseFixtureSessionBytes": 1854,
+    "session100UuidStepsBytes": 9317,
+    "selectedHeaderFullGrantBytes": 9736,
+    "selectedHeaderDifferenceFromReview": "Uses36-character assignment ID and counter602; review's9710 header example differs.",
+    "compactExampleCacheBytes": 912,
+    "worstSelectedCompactFieldsBytes": 4019,
+    "otherControlReservationBytes": 2048,
+    "combinedWorstBytes": 6067,
+    "cacheQuotaBytes": 6144,
+    "combinedQuotaBytes": 8192,
+    "maximumHeaderWithNullSessionBytes": 1923,
+    "headerAllowanceBytes": 4096,
+    "unchangedEffectiveSessionTransportAllowanceBytes": 1048576,
+    "ownershipOnlyResponseCapBytes": 1052672,
+    "canonicalExampleReconstructionEqual": true,
+    "canonicalExampleReplyDigestEqual": true,
+    "worstFields": "256 codepoints at conservative6-byte JSON escaping for assignment/worker IDs; maximal bounded counters/fence, longest enum/lease; all snapshot fields included.",
+    "executionProof": "NONE; static analysis does not establish valid complete100-step workflow or runtime/DB/transport implementation."
+  },
+  "unchangedUX": {
+    "priorVerdict": "PASS",
+    "priorReportSha256": "d9d4afc6d58af947532934ce6e1b930d2b56ecdf9ec3df0306ec35e4504cfdd4",
+    "comparedWith": ".aiox/sdc/STUDIO-OBS-007/design-r2/account-provider-readiness-design.md",
+    "sectionsByteIdentical": true,
+    "section126IncludingHeadingSha256": "10b657675af0973a6d61b3bd8aeb8d2f8977bf32755adfca48e25346fb51e187",
+    "section127IncludingHeadingSha256": "f1975b4fa3e76e8fcb15519ef0c37fa4ac0da08f30dce807fe312fc2c4fb3c9a"
+  },
+  "preservation": {
+    "inventoryReference": ".ai/STUDIO-OBS-007-account-design-resolution-r2.json#/preservation with its prior inventory chain.",
+    "authorizedPreR3BaselineAdjustments": [
+      {
+        "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md",
+        "beforeSha256": "61518ec9553f3515bd7d8b95d3705cba0244f5bf36e9629a37f3454b2d26af59",
+        "r3BaselineSha256": "3f32212c6b080241316fdf51e1a368731663bf82206069fc7a69be7a3c400362",
+        "reason": "Authorized root0.1.5 reservation beforeR3; not an architect story edit."
+      }
+    ],
+    "additionalR3InputsSha256": {
+      ".ai/STUDIO-OBS-007-account-data-review-r2.json": "4954830d678956622ff427450826a46475bf37aa74269ec887bd3f5764959dd7",
+      ".ai/STUDIO-OBS-007-account-design-resolution-r2.json": "974139a56f41fea4249bc06f87e5028156400bdad30bef5aaf3e2a8ce46e9a21",
+      ".ai/STUDIO-OBS-007-account-design-review-r2.json": "9c51e985f157968a693e99b8ab3f9c3f04e9e1549458f3c99e0f83e8941a4ed4",
+      ".ai/STUDIO-OBS-007-account-ux-review-r2.json": "d9d4afc6d58af947532934ce6e1b930d2b56ecdf9ec3df0306ec35e4504cfdd4",
+      ".aiox/sdc/STUDIO-OBS-007/design-r2/STUDIO-OBS-007-account-data-review-r2.json": "4954830d678956622ff427450826a46475bf37aa74269ec887bd3f5764959dd7",
+      ".aiox/sdc/STUDIO-OBS-007/design-r2/STUDIO-OBS-007-account-design-resolution-r2.json": "974139a56f41fea4249bc06f87e5028156400bdad30bef5aaf3e2a8ce46e9a21",
+      ".aiox/sdc/STUDIO-OBS-007/design-r2/STUDIO-OBS-007-account-design-review-r2.json": "9c51e985f157968a693e99b8ab3f9c3f04e9e1549458f3c99e0f83e8941a4ed4",
+      ".aiox/sdc/STUDIO-OBS-007/design-r2/STUDIO-OBS-007-account-ux-review-r2.json": "d9d4afc6d58af947532934ce6e1b930d2b56ecdf9ec3df0306ec35e4504cfdd4",
+      ".aiox/sdc/STUDIO-OBS-007/design-r2/account-provider-readiness-design.md": "bfb20783c483fc260e61d609c25b6f7530ae96852bb64931232c2cc1fcdfab24",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedActionLedger.java": "c3ce6a43af36602d50d0d34d14ab1d06baa65eaa6282fec9a5abfc76ec00124b",
+      "docs/specs/studio-observed-authoring/contracts/limits.schema.json": "70405b35a78eff845d31c63413f64700b196325e0e72be9ba199912a20abc4aa",
+      "docs/specs/studio-observed-authoring/contracts/v2/session.schema.json": "ed39a56cb60cb8d70960967cb1fc5f18494130a85e263960e146ed8f5a96f16e",
+      "docs/specs/studio-observed-authoring/contracts/v2/fixtures.json": "4c18212ff1bd2accbd51055133b4dcaff8f160e4f4de7e7ddef234ef0901e6d0",
+      "studio-runner/src/guided/ownership.ts": "8e07015062aadf7e338731e4289c6b9db14d63c429425382ef0696014a0f982b",
+      "studio-runner/src/guided/journal.ts": "95705022bde07296e5609ea859809484dc6e7d442ae43489c7f49324855e8b83"
+    },
+    "protectedInputsCompared": 244,
+    "changedProtectedPaths": [],
+    "allProtectedInputsUnchanged": true,
+    "actualVerifierSha256": "c3ce6a43af36602d50d0d34d14ab1d06baa65eaa6282fec9a5abfc76ec00124b",
+    "reviewed006Revision": "f068570ddfeeaaa9811ad1b50e29c5ed08ba0afc7d3b99aa23e8f5e78bf020ab",
+    "sourceMismatches": [],
+    "runtimeMismatches": [],
+    "allPreviousRecordsReviewsArchivesAndProductSourcesUnchanged": true
+  },
+  "remaining": "Narrow independent security/data re-review and PO/root readiness gates; EXT-001 approved provider identity/docs/config remains unanswered. Accepted acyclic007→008/provider/bootstrap/privacy/conditional handoff/UX boundaries unchanged.",
+  "verification": {
+    "designOnly": true,
+    "sourceReadsHashesAndStaticSerialization": true,
+    "builds": false,
+    "tests": false,
+    "validatorRuns": false,
+    "sqlOrDatabaseCalls": false,
+    "browserRuns": false,
+    "providerCalls": false,
+    "externalCallsMessages": false,
+    "internalProgressOnly": true,
+    "rootCli": false,
+    "subagents": false,
+    "productSchemaSQLUITestStoryEdits": false,
+    "previousReportEdits": false,
+    "credentialsOrLocalBrowserStorageInspected": false,
+    "commitPushDeploy": false
+  },
+  "budget": {
+    "wholeWaveCeilingUsd": 500,
+    "actualBilling": "UNKNOWN"
+  },
+  "filesChanged": [
+    "docs/specs/studio-observed-authoring/account-provider-readiness-design.md",
+    ".ai/STUDIO-OBS-007-account-design-resolution-r3.json"
+  ],
+  "nextHandoff": "Frozen pair to root/narrow security-data peers; no self-gate, implementation or phase advance."
+}

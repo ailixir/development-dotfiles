@@ -1,0 +1,41 @@
+{
+  "reviewer": "/root/sdc_bridge_data (@data-engineer)",
+  "mode": "read-only",
+  "designStatus": "accepted by coordinator for OBS-004 implementation",
+  "migration": "backend/src/main/resources/db/migration/V31__studio_guided_bridge.sql",
+  "migrationAvailableAtReview": true,
+  "tables": {
+    "materialization": "session PK; session/scope composite FK; immutable source/configuration identities, approved input table and authoredInputsHash; frozen before admission",
+    "preparations": "immutable authenticated proof and full scoped identities; expiry; single-assignment admission with unique association",
+    "pendingAllocations": "session/binding PK and session/need uniqueness; immutable producer intent; cumulative prospective consumers",
+    "producerEvidence": "same-session allocation/admission FKs; one read per binding; immutable recipe/origin/coordinate; value-free availability bound to worker/fence/context",
+    "consumerEdges": "session/consumerAdmission/argumentSlot PK; same-session producer/action FKs; immutable coordinate/destination/policy"
+  },
+  "requirements": [
+    "Reuse V30 session row serialization, command digest deduplication, immutable ledger and terminal protections. Preserve V30; add same-session action/admission uniqueness for composite FKs.",
+    "No ambient transaction at dispatch entry. Dedicated consume transaction must actually commit before returning ephemeral WonConsumption and making one transport send. Nested REQUIRED return is insufficient.",
+    "Never store/replay winning authority in generic command responses; same-key and new-key repeats return AlreadyConsumed. Stored proposal is executable source of truth.",
+    "Persist authenticated preparation after network response, then validate scope/fence/context in a short locked transaction. No network call under DB lock.",
+    "Admission atomically validates current source/account, proof, input hash, binding prerequisites and budgets; attaches proof and concrete consumer edges.",
+    "Read outcome atomically updates ledger, inserts separate producer receipt, increments revision and deduplicates; changed receipt conflicts even when ledger identical.",
+    "No values, value hashes, lengths or samples in producer evidence; captured values remain worker-local.",
+    "Use consistent authoritative source/configuration and session/bridge lock order. Current permissions checked before cached status. Historical status is never live authority.",
+    "Cancellation invalidates unused preparations/context with ledger transitions. Historic producer success never proves live value availability after teardown.",
+    "Use explicit NOT NULL/CHECK relational identity constraints. V30 ledger trigger prohibits receipt append; use separate table. Named INSERT columns required if changing actions columns.",
+    "OBS-004 owns necessary migration-test target/count updates and new actual concurrency tests."
+  ],
+  "tests": [
+    "Same/different-key race: one committed winner/one send",
+    "Nested rollback/commit failure and cache replay: no additional send",
+    "Preparation reuse/digest/context and cross-session FK negatives",
+    "Atomic producer outcome rollback and conflicting duplicate receipt",
+    "Consumer admission race with producer completion",
+    "Concurrent replan: no lost allocation/revision",
+    "Cancel/expire/takeover versus consume/callback: no resurrection",
+    "Actual source/configuration row mutation versus admission/consume locking",
+    "Fresh install and V30-to-V31 migration retain immutable/terminal protections"
+  ],
+  "inputPrivacyBlocksDatabaseDesign": false,
+  "testsRun": false,
+  "filesChangedByReviewer": []
+}

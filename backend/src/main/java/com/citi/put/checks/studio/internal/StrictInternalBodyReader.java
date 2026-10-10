@@ -43,10 +43,9 @@ public class StrictInternalBodyReader {
       }
       return parsed;
     } catch (JsonProcessingException e) {
-      // The message is the parser's own and names the offending field, never a value from it.
+      // Parser diagnostics can quote submitted values. Return neither that text nor its cause.
       throw InternalCallbackException.badRequest(
-          InternalCallbackCodes.INVALID_REPORT,
-          "The body does not conform to the frozen contract: " + e.getOriginalMessage());
+          InternalCallbackCodes.INVALID_REPORT, "The body does not conform to the frozen contract");
     }
   }
 }

@@ -1,0 +1,1023 @@
+{
+  "at": "2026-10-07T21:35:39.538031+00:00",
+  "objectiveComplete": false,
+  "stack": {
+    "frontend": "http://localhost:5173",
+    "backend": "http://localhost:8080",
+    "runner": "http://localhost:8090",
+    "backendHealth": {
+      "status": "UP",
+      "components": {
+        "db": {
+          "status": "UP",
+          "details": {
+            "database": "PostgreSQL",
+            "validationQuery": "isValid()"
+          }
+        },
+        "diskSpace": {
+          "status": "UP",
+          "details": {
+            "total": 494384795648,
+            "free": 139167043584,
+            "threshold": 10485760,
+            "path": "/Users/brunobuger/orca/workspaces/put-checks/ui-studio/backend/.",
+            "exists": true
+          }
+        },
+        "dispatchers": {
+          "status": "UP",
+          "details": {
+            "deadLetteredLast24h": 0,
+            "pendingRetries": 0,
+            "pendingChecks": 0,
+            "pendingReports": 0
+          }
+        },
+        "partitions": {
+          "status": "WARNING",
+          "details": {
+            "execution_results_default_rows": "data landed in default partition \u2014 missing monthly partition (375 rows)",
+            "report_executions_default_rows": "data landed in default partition \u2014 missing monthly partition (5 rows)"
+          }
+        },
+        "ping": {
+          "status": "UP"
+        },
+        "studioScheduling": {
+          "status": "UP",
+          "details": {
+            "producerEnabled": false,
+            "states": {},
+            "eligibleDueCount": 0
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "variables": "PASS: Software testing and Integration testing each passed all four steps; the latter was edited, saved, compiled and executed through the UI.",
+    "navigation": "PASS: title, page text and URL assertions. Original Example Domain heading assertion failed because the live site no longer has that heading.",
+    "runtimeCaptureAndReuse": "UNSUPPORTED_CAPABILITY: compile refused steps 2, 4 and 5. Reproduced through API and UI. Not validated and not replaced with a literal.",
+    "evidenceUI": "PASS: completed step results visible, video readyState 4, duration 1.76s; step 3 selection sought to 0.598s matching its offset.",
+    "scope": "Live Studio checks, not an exhaustive regression suite. No source-code changes."
+  },
+  "tests": [
+    {
+      "id": "f15bacaa-8c42-4416-8b56-7a9eabb69813",
+      "name": "Live variable and multi-step validation",
+      "description": "",
+      "csiId": "178672",
+      "environment": "Development",
+      "steps": [
+        "Go to https://en.wikipedia.org/wiki/Main_Page",
+        "Fill the Search Wikipedia searchbox with \"<var SEARCH_TERM>\" and press Enter",
+        "Verify the page heading is \"Integration testing\"",
+        "Verify the page URL contains \"/wiki/Integration_testing\""
+      ],
+      "variables": [
+        {
+          "name": "SEARCH_TERM",
+          "kind": "plain",
+          "value": "Integration testing",
+          "secretId": null
+        }
+      ],
+      "configuration": {
+        "browser": "chromium",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "timeoutSeconds": 30,
+        "waitStrategy": "networkidle"
+      },
+      "status": "PAUSED",
+      "schedule": null,
+      "createdBy": "bruno.buger@citi.com",
+      "createdAt": "2026-10-07T21:31:49.857094Z",
+      "updatedAt": "2026-10-07T21:34:41.257759Z",
+      "lastRunAt": "2026-10-07T21:34:38.372936Z",
+      "lastRunStatus": "PASSED",
+      "sourceRevision": 3,
+      "configurationRevision": 3,
+      "compileStatus": "READY",
+      "currentCandidateRevisionId": "655647ea-aeac-44b2-b098-2ff67881a26a",
+      "currentCandidateArtifactHash": "ac519160afed1de0a9e5344981cf7ef7a6c21111d2cb3122cf6deb97893f7d87",
+      "currentCandidateArtifact": {
+        "steps": [
+          {
+            "code": "await page.goto('https://en.wikipedia.org/wiki/Main_Page');",
+            "stepIndex": 0,
+            "originalText": "Go to https://en.wikipedia.org/wiki/Main_Page"
+          },
+          {
+            "code": "await page.getByRole('searchbox', { name: 'Search Wikipedia' }).fill(vars.get('SEARCH_TERM'));\nawait page.getByRole('searchbox', { name: 'Search Wikipedia' }).press('Enter');",
+            "stepIndex": 1,
+            "originalText": "Fill the Search Wikipedia searchbox with \"<var SEARCH_TERM>\" and press Enter"
+          },
+          {
+            "code": "await expect(page.getByRole('heading', { name: 'Integration testing' })).toBeVisible();",
+            "stepIndex": 2,
+            "originalText": "Verify the page heading is \"Integration testing\""
+          },
+          {
+            "code": "await expect(page).toHaveURL(/\\/wiki\\/Integration_testing/);",
+            "stepIndex": 3,
+            "originalText": "Verify the page URL contains \"/wiki/Integration_testing\""
+          }
+        ],
+        "version": 1
+      },
+      "confirmedRevisionId": "655647ea-aeac-44b2-b098-2ff67881a26a",
+      "confirmedRevisionArtifactHash": "ac519160afed1de0a9e5344981cf7ef7a6c21111d2cb3122cf6deb97893f7d87",
+      "confirmedRevisionArtifact": {
+        "steps": [
+          {
+            "code": "await page.goto('https://en.wikipedia.org/wiki/Main_Page');",
+            "stepIndex": 0,
+            "originalText": "Go to https://en.wikipedia.org/wiki/Main_Page"
+          },
+          {
+            "code": "await page.getByRole('searchbox', { name: 'Search Wikipedia' }).fill(vars.get('SEARCH_TERM'));\nawait page.getByRole('searchbox', { name: 'Search Wikipedia' }).press('Enter');",
+            "stepIndex": 1,
+            "originalText": "Fill the Search Wikipedia searchbox with \"<var SEARCH_TERM>\" and press Enter"
+          },
+          {
+            "code": "await expect(page.getByRole('heading', { name: 'Integration testing' })).toBeVisible();",
+            "stepIndex": 2,
+            "originalText": "Verify the page heading is \"Integration testing\""
+          },
+          {
+            "code": "await expect(page).toHaveURL(/\\/wiki\\/Integration_testing/);",
+            "stepIndex": 3,
+            "originalText": "Verify the page URL contains \"/wiki/Integration_testing\""
+          }
+        ],
+        "version": 1
+      },
+      "compileError": null,
+      "compileDiagnostics": null
+    },
+    {
+      "id": "4ded80d2-e74f-4d79-9a66-dde283d3f632",
+      "name": "Live navigation and assertion validation",
+      "description": null,
+      "csiId": "178672",
+      "environment": "Development",
+      "steps": [
+        "Go to https://example.com",
+        "Verify the page title is \"Example Domain\"",
+        "Verify the page contains the text \"This domain is for use in documentation examples\"",
+        "Verify the page URL is \"https://example.com/\""
+      ],
+      "variables": [],
+      "configuration": {
+        "browser": "chromium",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "timeoutSeconds": 30,
+        "waitStrategy": "networkidle"
+      },
+      "status": "PAUSED",
+      "schedule": null,
+      "createdBy": "bruno.buger@citi.com",
+      "createdAt": "2026-10-07T21:33:44.579740Z",
+      "updatedAt": "2026-10-07T21:35:13.165823Z",
+      "lastRunAt": "2026-10-07T21:35:10.099798Z",
+      "lastRunStatus": "PASSED",
+      "sourceRevision": 2,
+      "configurationRevision": 1,
+      "compileStatus": "READY",
+      "currentCandidateRevisionId": "7485206a-94a1-4696-b6ac-17bd858e2789",
+      "currentCandidateArtifactHash": "65ed1a6e4068e3e9aa977c8c24ad9170e691929f7646d62d118ef1aed5eefc1a",
+      "currentCandidateArtifact": {
+        "steps": [
+          {
+            "code": "await page.goto('https://example.com');",
+            "stepIndex": 0,
+            "originalText": "Go to https://example.com"
+          },
+          {
+            "code": "await expect(page).toHaveTitle('Example Domain');",
+            "stepIndex": 1,
+            "originalText": "Verify the page title is \"Example Domain\""
+          },
+          {
+            "code": "await expect(page.getByText('This domain is for use in documentation examples')).toBeVisible();",
+            "stepIndex": 2,
+            "originalText": "Verify the page contains the text \"This domain is for use in documentation examples\""
+          },
+          {
+            "code": "await expect(page).toHaveURL('https://example.com/');",
+            "stepIndex": 3,
+            "originalText": "Verify the page URL is \"https://example.com/\""
+          }
+        ],
+        "version": 1
+      },
+      "confirmedRevisionId": "7485206a-94a1-4696-b6ac-17bd858e2789",
+      "confirmedRevisionArtifactHash": "65ed1a6e4068e3e9aa977c8c24ad9170e691929f7646d62d118ef1aed5eefc1a",
+      "confirmedRevisionArtifact": {
+        "steps": [
+          {
+            "code": "await page.goto('https://example.com');",
+            "stepIndex": 0,
+            "originalText": "Go to https://example.com"
+          },
+          {
+            "code": "await expect(page).toHaveTitle('Example Domain');",
+            "stepIndex": 1,
+            "originalText": "Verify the page title is \"Example Domain\""
+          },
+          {
+            "code": "await expect(page.getByText('This domain is for use in documentation examples')).toBeVisible();",
+            "stepIndex": 2,
+            "originalText": "Verify the page contains the text \"This domain is for use in documentation examples\""
+          },
+          {
+            "code": "await expect(page).toHaveURL('https://example.com/');",
+            "stepIndex": 3,
+            "originalText": "Verify the page URL is \"https://example.com/\""
+          }
+        ],
+        "version": 1
+      },
+      "compileError": null,
+      "compileDiagnostics": null
+    },
+    {
+      "id": "da9e3555-a0bc-44e6-848a-de0868af44cd",
+      "name": "Live captured value reuse validation",
+      "description": "Read page data in an earlier step and reuse it in a later search; do not substitute a known literal.",
+      "csiId": "178672",
+      "environment": "Development",
+      "steps": [
+        "Go to https://en.wikipedia.org/wiki/Software_testing",
+        "Read the text of the main level 1 heading and remember it as CAPTURED_HEADING",
+        "Go to https://en.wikipedia.org/wiki/Main_Page",
+        "Fill the Search Wikipedia search field using CAPTURED_HEADING read in step 2, then press Enter",
+        "Verify the main heading matches CAPTURED_HEADING read in step 2"
+      ],
+      "variables": [],
+      "configuration": {
+        "browser": "chromium",
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "timeoutSeconds": 30,
+        "waitStrategy": "networkidle"
+      },
+      "status": "PAUSED",
+      "schedule": null,
+      "createdBy": "bruno.buger@citi.com",
+      "createdAt": "2026-10-07T21:33:01.433806Z",
+      "updatedAt": "2026-10-07T21:35:14.099348Z",
+      "lastRunAt": null,
+      "lastRunStatus": null,
+      "sourceRevision": 1,
+      "configurationRevision": 1,
+      "compileStatus": "NEEDS_REVISION",
+      "currentCandidateRevisionId": null,
+      "currentCandidateArtifactHash": null,
+      "currentCandidateArtifact": null,
+      "confirmedRevisionId": null,
+      "confirmedRevisionArtifactHash": null,
+      "confirmedRevisionArtifact": null,
+      "compileError": null,
+      "compileDiagnostics": {
+        "validatorSchemaVersion": "2.0.0",
+        "artifact": [],
+        "steps": [
+          {
+            "stepIndex": 0,
+            "ok": true,
+            "diagnostics": [],
+            "truncated": false
+          },
+          {
+            "stepIndex": 1,
+            "ok": false,
+            "diagnostics": [
+              {
+                "code": "UNSUPPORTED_CAPABILITY",
+                "stepIndex": 1,
+                "message": "Reading dynamic values into variables or remembering text across steps is not supported.",
+                "node": null,
+                "excerpt": null
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "stepIndex": 2,
+            "ok": true,
+            "diagnostics": [],
+            "truncated": false
+          },
+          {
+            "stepIndex": 3,
+            "ok": false,
+            "diagnostics": [
+              {
+                "code": "UNSUPPORTED_CAPABILITY",
+                "stepIndex": 3,
+                "message": "Using dynamically remembered variables from prior steps is not supported.",
+                "node": null,
+                "excerpt": null
+              }
+            ],
+            "truncated": false
+          },
+          {
+            "stepIndex": 4,
+            "ok": false,
+            "diagnostics": [
+              {
+                "code": "UNSUPPORTED_CAPABILITY",
+                "stepIndex": 4,
+                "message": "Asserting against dynamically remembered variables from prior steps is not supported.",
+                "node": null,
+                "excerpt": null
+              }
+            ],
+            "truncated": false
+          }
+        ],
+        "truncated": false,
+        "truncationReason": null,
+        "attempts": 1,
+        "exhausted": false
+      }
+    }
+  ],
+  "executions": [
+    {
+      "executionId": "e9a183fb-ff63-4551-8028-d26cd2b467d7",
+      "testId": "4ded80d2-e74f-4d79-9a66-dde283d3f632",
+      "testName": "Live navigation and assertion validation",
+      "csiId": "178672",
+      "revisionId": "7485206a-94a1-4696-b6ac-17bd858e2789",
+      "status": "PASSED",
+      "errorCode": null,
+      "acceptedAt": "2026-10-07T21:35:10.099798Z",
+      "startedAt": "2026-10-07T21:35:12.510Z",
+      "endedAt": "2026-10-07T21:35:13.159Z",
+      "durationMs": 649,
+      "stepResults": [
+        {
+          "stepIndex": 0,
+          "originalText": "Go to https://example.com",
+          "status": "PASS",
+          "offsetMs": 2,
+          "durationMs": 164,
+          "message": null
+        },
+        {
+          "stepIndex": 1,
+          "originalText": "Verify the page title is \"Example Domain\"",
+          "status": "PASS",
+          "offsetMs": 167,
+          "durationMs": 9,
+          "message": null
+        },
+        {
+          "stepIndex": 2,
+          "originalText": "Verify the page contains the text \"This domain is for use in documentation examples\"",
+          "status": "PASS",
+          "offsetMs": 176,
+          "durationMs": 19,
+          "message": null
+        },
+        {
+          "stepIndex": 3,
+          "originalText": "Verify the page URL is \"https://example.com/\"",
+          "status": "PASS",
+          "offsetMs": 195,
+          "durationMs": 0,
+          "message": null
+        }
+      ],
+      "logs": [
+        {
+          "at": "2026-10-07T21:35:12.510Z",
+          "level": "INFO",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "at": "2026-10-07T21:35:12.512Z",
+          "level": "INFO",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:35:12.676Z",
+          "level": "INFO",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:35:12.677Z",
+          "level": "INFO",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:35:12.686Z",
+          "level": "INFO",
+          "message": "step 1 PASS",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:35:12.686Z",
+          "level": "INFO",
+          "message": "step 2 started",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:35:12.705Z",
+          "level": "INFO",
+          "message": "step 2 PASS",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:35:12.705Z",
+          "level": "INFO",
+          "message": "step 3 started",
+          "stepIndex": 3
+        },
+        {
+          "at": "2026-10-07T21:35:12.705Z",
+          "level": "INFO",
+          "message": "step 3 PASS",
+          "stepIndex": 3
+        },
+        {
+          "at": null,
+          "level": "INFO",
+          "message": "run PASSED",
+          "stepIndex": null
+        }
+      ],
+      "logsTruncated": false,
+      "video": {
+        "status": "AVAILABLE",
+        "error": null,
+        "expiresAt": "2026-11-06T21:35:13.169820Z",
+        "partial": false
+      },
+      "videoPath": "/api/v1/studio/executions/e9a183fb-ff63-4551-8028-d26cd2b467d7/video",
+      "runtime": {
+        "playwright": "1.63.0",
+        "chromium": null,
+        "validator": "2.0.0",
+        "executor": "2.1.0",
+        "image": null
+      },
+      "revision": 10,
+      "streamComplete": true,
+      "triggerSource": "MANUAL",
+      "scheduleId": null,
+      "scheduleVersion": null,
+      "occurrenceId": null,
+      "scheduledAt": null,
+      "activationId": null,
+      "activatedBy": null,
+      "activatedAt": null
+    },
+    {
+      "executionId": "ad8cdd2c-e450-455d-917b-c9a2d5c4ccd0",
+      "testId": "f15bacaa-8c42-4416-8b56-7a9eabb69813",
+      "testName": "Live variable and multi-step validation",
+      "csiId": "178672",
+      "revisionId": "655647ea-aeac-44b2-b098-2ff67881a26a",
+      "status": "PASSED",
+      "errorCode": null,
+      "acceptedAt": "2026-10-07T21:34:38.372936Z",
+      "startedAt": "2026-10-07T21:34:40.135Z",
+      "endedAt": "2026-10-07T21:34:41.254Z",
+      "durationMs": 1119,
+      "stepResults": [
+        {
+          "stepIndex": 0,
+          "originalText": "Go to https://en.wikipedia.org/wiki/Main_Page",
+          "status": "PASS",
+          "offsetMs": 1,
+          "durationMs": 215,
+          "message": null
+        },
+        {
+          "stepIndex": 1,
+          "originalText": "Fill the Search Wikipedia searchbox with \"<var SEARCH_TERM>\" and press Enter",
+          "status": "PASS",
+          "offsetMs": 216,
+          "durationMs": 228,
+          "message": null
+        },
+        {
+          "stepIndex": 2,
+          "originalText": "Verify the page heading is \"Integration testing\"",
+          "status": "PASS",
+          "offsetMs": 444,
+          "durationMs": 35,
+          "message": null
+        },
+        {
+          "stepIndex": 3,
+          "originalText": "Verify the page URL contains \"/wiki/Integration_testing\"",
+          "status": "PASS",
+          "offsetMs": 480,
+          "durationMs": 0,
+          "message": null
+        }
+      ],
+      "logs": [
+        {
+          "at": "2026-10-07T21:34:40.135Z",
+          "level": "INFO",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "at": "2026-10-07T21:34:40.136Z",
+          "level": "INFO",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:34:40.351Z",
+          "level": "INFO",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:34:40.351Z",
+          "level": "INFO",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:34:40.579Z",
+          "level": "INFO",
+          "message": "step 1 PASS",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:34:40.579Z",
+          "level": "INFO",
+          "message": "step 2 started",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:34:40.614Z",
+          "level": "INFO",
+          "message": "step 2 PASS",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:34:40.615Z",
+          "level": "INFO",
+          "message": "step 3 started",
+          "stepIndex": 3
+        },
+        {
+          "at": "2026-10-07T21:34:40.615Z",
+          "level": "INFO",
+          "message": "step 3 PASS",
+          "stepIndex": 3
+        },
+        {
+          "at": null,
+          "level": "INFO",
+          "message": "run PASSED",
+          "stepIndex": null
+        }
+      ],
+      "logsTruncated": false,
+      "video": {
+        "status": "AVAILABLE",
+        "error": null,
+        "expiresAt": "2026-11-06T21:34:41.260460Z",
+        "partial": false
+      },
+      "videoPath": "/api/v1/studio/executions/ad8cdd2c-e450-455d-917b-c9a2d5c4ccd0/video",
+      "runtime": {
+        "playwright": "1.63.0",
+        "chromium": null,
+        "validator": "2.0.0",
+        "executor": "2.1.0",
+        "image": null
+      },
+      "revision": 10,
+      "streamComplete": true,
+      "triggerSource": "MANUAL",
+      "scheduleId": null,
+      "scheduleVersion": null,
+      "occurrenceId": null,
+      "scheduledAt": null,
+      "activationId": null,
+      "activatedBy": null,
+      "activatedAt": null
+    },
+    {
+      "executionId": "c161dd04-0598-4eda-b462-fe713886d130",
+      "testId": "4ded80d2-e74f-4d79-9a66-dde283d3f632",
+      "testName": "Live navigation and assertion validation",
+      "csiId": "178672",
+      "revisionId": "de8b002f-3b81-47e5-a265-c6cc1e4444d7",
+      "status": "FAILED",
+      "errorCode": null,
+      "acceptedAt": "2026-10-07T21:34:02.731144Z",
+      "startedAt": "2026-10-07T21:34:04.213Z",
+      "endedAt": "2026-10-07T21:34:36.508Z",
+      "durationMs": 32295,
+      "stepResults": [
+        {
+          "stepIndex": 0,
+          "originalText": "Go to https://example.com",
+          "status": "PASS",
+          "offsetMs": 1,
+          "durationMs": 163,
+          "message": null
+        },
+        {
+          "stepIndex": 1,
+          "originalText": "Verify the page heading is \"Example Domain\"",
+          "status": "FAIL",
+          "offsetMs": 164,
+          "durationMs": 30003,
+          "message": "Error: AssertionFailed: expected the locator to be visible within 30000ms (TimeoutError). (page: https://example.com/ \u2014 \"Example Domain\")"
+        },
+        {
+          "stepIndex": 2,
+          "originalText": "Verify the page title is \"Example Domain\"",
+          "status": "SKIPPED",
+          "offsetMs": null,
+          "durationMs": null,
+          "message": null
+        },
+        {
+          "stepIndex": 3,
+          "originalText": "Verify the page contains the text \"This domain is for use in documentation examples\"",
+          "status": "SKIPPED",
+          "offsetMs": null,
+          "durationMs": null,
+          "message": null
+        }
+      ],
+      "logs": [
+        {
+          "at": "2026-10-07T21:34:04.213Z",
+          "level": "INFO",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "at": "2026-10-07T21:34:04.214Z",
+          "level": "INFO",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:34:04.377Z",
+          "level": "INFO",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:34:04.377Z",
+          "level": "INFO",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:34:34.380Z",
+          "level": "ERROR",
+          "message": "step 1 FAIL: Error: AssertionFailed: expected the locator to be visible within 30000ms (TimeoutError). (page: https://example.com/ \u2014 \"Example Domain\")",
+          "stepIndex": 1
+        },
+        {
+          "at": null,
+          "level": "INFO",
+          "message": "step 2 SKIPPED",
+          "stepIndex": 2
+        },
+        {
+          "at": null,
+          "level": "INFO",
+          "message": "step 3 SKIPPED",
+          "stepIndex": 3
+        },
+        {
+          "at": null,
+          "level": "ERROR",
+          "message": "run FAILED: STEP_FAILED",
+          "stepIndex": null
+        },
+        {
+          "at": "2026-10-07T21:34:36.508Z",
+          "level": "INFO",
+          "message": "runnerErrorCode=STEP_FAILED",
+          "stepIndex": null
+        }
+      ],
+      "logsTruncated": false,
+      "video": {
+        "status": "AVAILABLE",
+        "error": null,
+        "expiresAt": "2026-11-06T21:34:36.514193Z",
+        "partial": false
+      },
+      "videoPath": "/api/v1/studio/executions/c161dd04-0598-4eda-b462-fe713886d130/video",
+      "runtime": {
+        "playwright": "1.63.0",
+        "chromium": null,
+        "validator": "2.0.0",
+        "executor": "2.1.0",
+        "image": null
+      },
+      "revision": 8,
+      "streamComplete": true,
+      "triggerSource": "MANUAL",
+      "scheduleId": null,
+      "scheduleVersion": null,
+      "occurrenceId": null,
+      "scheduledAt": null,
+      "activationId": null,
+      "activatedBy": null,
+      "activatedAt": null
+    },
+    {
+      "executionId": "d9a7672b-6390-4a4d-a58f-f438314dc654",
+      "testId": "f15bacaa-8c42-4416-8b56-7a9eabb69813",
+      "testName": "Live variable and multi-step validation",
+      "csiId": "178672",
+      "revisionId": "84636629-1133-4cf2-9b09-6e9ef8baf69b",
+      "status": "PASSED",
+      "errorCode": null,
+      "acceptedAt": "2026-10-07T21:33:27.200576Z",
+      "startedAt": "2026-10-07T21:33:28.297Z",
+      "endedAt": "2026-10-07T21:33:29.455Z",
+      "durationMs": 1158,
+      "stepResults": [
+        {
+          "stepIndex": 0,
+          "originalText": "Go to https://en.wikipedia.org/wiki/Main_Page",
+          "status": "PASS",
+          "offsetMs": 1,
+          "durationMs": 321,
+          "message": null
+        },
+        {
+          "stepIndex": 1,
+          "originalText": "Fill the Search Wikipedia searchbox with \"<var SEARCH_TERM>\" and press Enter",
+          "status": "PASS",
+          "offsetMs": 322,
+          "durationMs": 275,
+          "message": null
+        },
+        {
+          "stepIndex": 2,
+          "originalText": "Verify the page heading is \"Software testing\"",
+          "status": "PASS",
+          "offsetMs": 598,
+          "durationMs": 73,
+          "message": null
+        },
+        {
+          "stepIndex": 3,
+          "originalText": "Verify the page URL contains \"/wiki/Software_testing\"",
+          "status": "PASS",
+          "offsetMs": 671,
+          "durationMs": 0,
+          "message": null
+        }
+      ],
+      "logs": [
+        {
+          "at": "2026-10-07T21:33:28.297Z",
+          "level": "INFO",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "at": "2026-10-07T21:33:28.298Z",
+          "level": "INFO",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:33:28.619Z",
+          "level": "INFO",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:33:28.619Z",
+          "level": "INFO",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:33:28.895Z",
+          "level": "INFO",
+          "message": "step 1 PASS",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:33:28.895Z",
+          "level": "INFO",
+          "message": "step 2 started",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:33:28.968Z",
+          "level": "INFO",
+          "message": "step 2 PASS",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:33:28.968Z",
+          "level": "INFO",
+          "message": "step 3 started",
+          "stepIndex": 3
+        },
+        {
+          "at": "2026-10-07T21:33:28.969Z",
+          "level": "INFO",
+          "message": "step 3 PASS",
+          "stepIndex": 3
+        },
+        {
+          "at": null,
+          "level": "INFO",
+          "message": "run PASSED",
+          "stepIndex": null
+        }
+      ],
+      "logsTruncated": false,
+      "video": {
+        "status": "AVAILABLE",
+        "error": null,
+        "expiresAt": "2026-11-06T21:33:29.461650Z",
+        "partial": false
+      },
+      "videoPath": "/api/v1/studio/executions/d9a7672b-6390-4a4d-a58f-f438314dc654/video",
+      "runtime": {
+        "playwright": "1.63.0",
+        "chromium": null,
+        "validator": "2.0.0",
+        "executor": "2.1.0",
+        "image": null
+      },
+      "revision": 10,
+      "streamComplete": true,
+      "triggerSource": "MANUAL",
+      "scheduleId": null,
+      "scheduleVersion": null,
+      "occurrenceId": null,
+      "scheduledAt": null,
+      "activationId": null,
+      "activatedBy": null,
+      "activatedAt": null
+    },
+    {
+      "executionId": "be4e656e-7c51-457c-93c8-d21e595383cd",
+      "testId": "f15bacaa-8c42-4416-8b56-7a9eabb69813",
+      "testName": "Live variable and multi-step validation",
+      "csiId": "178672",
+      "revisionId": "84636629-1133-4cf2-9b09-6e9ef8baf69b",
+      "status": "PASSED",
+      "errorCode": null,
+      "acceptedAt": "2026-10-07T21:32:47.799691Z",
+      "startedAt": "2026-10-07T21:32:51.235Z",
+      "endedAt": "2026-10-07T21:32:52.352Z",
+      "durationMs": 1117,
+      "stepResults": [
+        {
+          "stepIndex": 0,
+          "originalText": "Go to https://en.wikipedia.org/wiki/Main_Page",
+          "status": "PASS",
+          "offsetMs": 2,
+          "durationMs": 153,
+          "message": null
+        },
+        {
+          "stepIndex": 1,
+          "originalText": "Fill the Search Wikipedia searchbox with \"<var SEARCH_TERM>\" and press Enter",
+          "status": "PASS",
+          "offsetMs": 155,
+          "durationMs": 255,
+          "message": null
+        },
+        {
+          "stepIndex": 2,
+          "originalText": "Verify the page heading is \"Software testing\"",
+          "status": "PASS",
+          "offsetMs": 410,
+          "durationMs": 80,
+          "message": null
+        },
+        {
+          "stepIndex": 3,
+          "originalText": "Verify the page URL contains \"/wiki/Software_testing\"",
+          "status": "PASS",
+          "offsetMs": 489,
+          "durationMs": 0,
+          "message": null
+        }
+      ],
+      "logs": [
+        {
+          "at": "2026-10-07T21:32:51.235Z",
+          "level": "INFO",
+          "message": "browser started",
+          "stepIndex": null
+        },
+        {
+          "at": "2026-10-07T21:32:51.237Z",
+          "level": "INFO",
+          "message": "step 0 started",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:32:51.390Z",
+          "level": "INFO",
+          "message": "step 0 PASS",
+          "stepIndex": 0
+        },
+        {
+          "at": "2026-10-07T21:32:51.390Z",
+          "level": "INFO",
+          "message": "step 1 started",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:32:51.645Z",
+          "level": "INFO",
+          "message": "step 1 PASS",
+          "stepIndex": 1
+        },
+        {
+          "at": "2026-10-07T21:32:51.645Z",
+          "level": "INFO",
+          "message": "step 2 started",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:32:51.724Z",
+          "level": "INFO",
+          "message": "step 2 PASS",
+          "stepIndex": 2
+        },
+        {
+          "at": "2026-10-07T21:32:51.724Z",
+          "level": "INFO",
+          "message": "step 3 started",
+          "stepIndex": 3
+        },
+        {
+          "at": "2026-10-07T21:32:51.725Z",
+          "level": "INFO",
+          "message": "step 3 PASS",
+          "stepIndex": 3
+        },
+        {
+          "at": null,
+          "level": "INFO",
+          "message": "run PASSED",
+          "stepIndex": null
+        }
+      ],
+      "logsTruncated": false,
+      "video": {
+        "status": "AVAILABLE",
+        "error": null,
+        "expiresAt": "2026-11-06T21:32:52.358323Z",
+        "partial": false
+      },
+      "videoPath": "/api/v1/studio/executions/be4e656e-7c51-457c-93c8-d21e595383cd/video",
+      "runtime": {
+        "playwright": "1.63.0",
+        "chromium": null,
+        "validator": "2.0.0",
+        "executor": "2.1.0",
+        "image": null
+      },
+      "revision": 10,
+      "streamComplete": true,
+      "triggerSource": "MANUAL",
+      "scheduleId": null,
+      "scheduleVersion": null,
+      "occurrenceId": null,
+      "scheduledAt": null,
+      "activationId": null,
+      "activatedBy": null,
+      "activatedAt": null
+    }
+  ]
+}

@@ -1,0 +1,1348 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json",
+  "title": "Observed replay replay-validation",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "attemptId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "claimId": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "snapshotHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "basisHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "requiredProfile": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json"
+    },
+    "requiredBuild": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/BuildIdentity"
+    },
+    "artifact": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-artifact.schema.json"
+    },
+    "validationBasis": {
+      "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ValidationBasis"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "attemptId",
+    "claimId",
+    "snapshotHash",
+    "basisHash",
+    "requiredProfile",
+    "requiredBuild",
+    "artifact",
+    "validationBasis"
+  ],
+  "definitions": {
+    "ValidationBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 1
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "testId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "csiId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "sourceRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "configurationRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "sourceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configurationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "authoringHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sourceManifestHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "authoredInputsHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "configuration": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/Configuration"
+        },
+        "learningProvenance": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/LearningProvenance"
+        },
+        "sourceSteps": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "stepId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              },
+              "ordinal": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              },
+              "source": {
+                "type": "string",
+                "maxLength": 4000
+              }
+            },
+            "required": [
+              "stepId",
+              "ordinal",
+              "source"
+            ]
+          }
+        },
+        "scope": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/session.schema.json#/properties/scope"
+        },
+        "runAuthorization": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/session.schema.json#/properties/runAuthorization"
+        },
+        "replayRequirements": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/ReplayRequirements"
+        },
+        "bootstrap": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "contextId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "contextRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "ownerFence": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "materializationRevision": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 2147483647
+            },
+            "inputsHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "allocationHash": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "metadataAcknowledged": {
+              "const": true
+            },
+            "initialEvidence": {
+              "$ref": "https://checks.citi.example/contracts/observed/v2/execution-evidence.schema.json"
+            }
+          },
+          "required": [
+            "contextId",
+            "contextRevision",
+            "ownerFence",
+            "materializationRevision",
+            "inputsHash",
+            "allocationHash",
+            "metadataAcknowledged",
+            "initialEvidence"
+          ]
+        },
+        "translationRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "translationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "translationPlan": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/AcceptedTranslationPlan"
+        },
+        "sourceSelections": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/source-selection.schema.json#/definitions/sourceQuestionMeaning"
+          }
+        },
+        "obligationAssociations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 800,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "obligationId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "coordinate": {
+                "$ref": "https://checks.citi.example/contracts/observed/v2/action.schema.json#/properties/coordinate"
+              },
+              "admissionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "proposalHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              }
+            },
+            "required": [
+              "obligationId",
+              "coordinate",
+              "admissionId",
+              "proposalHash"
+            ]
+          }
+        },
+        "inputs": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/InputIndex"
+          }
+        },
+        "configurationReferences": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ConfigReference"
+          }
+        },
+        "observations": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 400,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "observationHash": {
+                "type": "string",
+                "pattern": "^[a-f0-9]{64}$"
+              },
+              "observation": {
+                "$ref": "https://checks.citi.example/contracts/observed/v2/observation.schema.json"
+              }
+            },
+            "required": [
+              "observationHash",
+              "observation"
+            ]
+          }
+        },
+        "preparations": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/PreparationFact"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "obligationId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "preparationId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "ledger": {
+                "$ref": "https://checks.citi.example/contracts/observed/v2/ledger.schema.json"
+              }
+            },
+            "required": [
+              "obligationId",
+              "preparationId",
+              "ledger"
+            ]
+          }
+        },
+        "allocations": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/allocation.schema.json"
+          }
+        },
+        "producers": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/producer.schema.json"
+          }
+        },
+        "consumerEdges": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/consumer-edge.schema.json"
+          }
+        },
+        "bindings": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 32,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/binding.schema.json"
+          }
+        },
+        "transfers": {
+          "type": "array",
+          "minItems": 0,
+          "maxItems": 200,
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/replay-operation.schema.json#/definitions/Transfer"
+          }
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "testId",
+        "csiId",
+        "sourceRevision",
+        "configurationRevision",
+        "sourceHash",
+        "configurationHash",
+        "authoringHash",
+        "sourceManifestHash",
+        "authoredInputsHash",
+        "configuration",
+        "learningProvenance",
+        "sourceSteps",
+        "scope",
+        "runAuthorization",
+        "replayRequirements",
+        "bootstrap",
+        "translationRevision",
+        "translationHash",
+        "translationPlan",
+        "sourceSelections",
+        "obligationAssociations",
+        "inputs",
+        "configurationReferences",
+        "observations",
+        "preparations",
+        "actions",
+        "allocations",
+        "producers",
+        "consumerEdges",
+        "bindings",
+        "transfers"
+      ]
+    },
+    "ValidationVerdict": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "schemaVersion": {
+          "const": 2
+        },
+        "attemptId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "claimId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "snapshotHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "basisHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "profile": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json"
+        },
+        "build": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-profile.schema.json#/definitions/BuildIdentity"
+        },
+        "ok": {
+          "type": "boolean"
+        },
+        "artifactHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "learnedPlanHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "referencePolicyHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "operationEquivalenceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "admissionProvenanceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publicationEvidenceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "errorCode": {
+          "oneOf": [
+            {
+              "type": "string",
+              "enum": [
+                "INVALID_CONTRACT",
+                "EVIDENCE_MISMATCH",
+                "OPERATION_MISMATCH",
+                "REFERENCE_MISMATCH",
+                "PROFILE_MISMATCH",
+                "LIMIT_EXCEEDED"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "attemptId",
+        "claimId",
+        "snapshotHash",
+        "basisHash",
+        "profile",
+        "build",
+        "ok",
+        "artifactHash",
+        "learnedPlanHash",
+        "referencePolicyHash",
+        "operationEquivalenceHash",
+        "admissionProvenanceHash",
+        "publicationEvidenceHash",
+        "errorCode"
+      ]
+    },
+    "AcceptedTranslationPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sourceReferences": {
+          "type": "array",
+          "items": {
+            "$ref": "https://checks.citi.example/contracts/observed/v2/source-reference.schema.json"
+          },
+          "minItems": 0,
+          "maxItems": 200
+        },
+        "obligations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "stepId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "occurrence": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 7
+              },
+              "operationKind": {
+                "enum": [
+                  "navigate",
+                  "click",
+                  "fill",
+                  "press",
+                  "selectOption",
+                  "check",
+                  "uncheck",
+                  "hover",
+                  "read",
+                  "assert"
+                ]
+              },
+              "targetIntent": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 500
+              },
+              "referenceIndex": {
+                "oneOf": [
+                  {
+                    "type": "integer",
+                    "minimum": 0,
+                    "maximum": 2147483647
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "needId": {
+                "oneOf": [
+                  {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 256
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "predicate": {
+                "oneOf": [
+                  {
+                    "enum": [
+                      "visible",
+                      "containsText",
+                      "hasValue",
+                      "url",
+                      "title"
+                    ]
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "obligationId": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+              }
+            },
+            "required": [
+              "stepId",
+              "occurrence",
+              "operationKind",
+              "targetIntent",
+              "referenceIndex",
+              "needId",
+              "predicate",
+              "obligationId"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 800
+        },
+        "needs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "needId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "producerStepId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "consumers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "stepId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "argumentSlot": {
+                      "enum": [
+                        "fill.value",
+                        "selectOption.value",
+                        "assert.expected"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "stepId",
+                    "argumentSlot"
+                  ]
+                },
+                "minItems": 1,
+                "maxItems": 200
+              },
+              "bindingId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              }
+            },
+            "required": [
+              "needId",
+              "producerStepId",
+              "consumers",
+              "bindingId"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 32
+        }
+      },
+      "required": [
+        "sourceReferences",
+        "obligations",
+        "needs"
+      ]
+    },
+    "InputIndex": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "inputId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "stepId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "destination",
+            "nonsecretText"
+          ]
+        },
+        "intendedSlot": {
+          "type": "string",
+          "enum": [
+            "navigate.destination",
+            "fill.value",
+            "selectOption.value",
+            "assert.expected"
+          ]
+        },
+        "provenance": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/source-reference.schema.json"
+        }
+      },
+      "required": [
+        "inputId",
+        "stepId",
+        "kind",
+        "intendedSlot",
+        "provenance"
+      ]
+    },
+    "ConfigReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "referenceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "referenceName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "stepId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "destination",
+            "nonsecretText"
+          ]
+        },
+        "intendedSlot": {
+          "type": "string",
+          "enum": [
+            "navigate.destination",
+            "fill.value",
+            "selectOption.value",
+            "assert.expected"
+          ]
+        },
+        "inputId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        }
+      },
+      "required": [
+        "referenceId",
+        "referenceName",
+        "stepId",
+        "kind",
+        "intendedSlot",
+        "inputId"
+      ]
+    },
+    "PreparationFact": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "preparationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "proposal": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/action.schema.json"
+        },
+        "proof": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/bridge.schema.json#/definitions/preparation"
+        },
+        "executionEvidence": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/execution-evidence.schema.json"
+        },
+        "observationHash": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "observedChoice": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ObservedChoiceWitness1"
+        }
+      },
+      "required": [
+        "preparationId",
+        "proposal",
+        "proof",
+        "executionEvidence",
+        "observationHash"
+      ]
+    },
+    "QuestionCapture1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "attemptId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "planRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "planHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "obligationId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "workerId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "ownerFence": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "contextId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "contextRevision": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "authoredInputsHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "executionEvidence": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/execution-evidence.schema.json"
+        },
+        "evidenceHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "observationHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "modelQuestionHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "version",
+        "attemptId",
+        "requestId",
+        "attempt",
+        "planRevision",
+        "planHash",
+        "obligationId",
+        "workerId",
+        "ownerFence",
+        "contextId",
+        "contextRevision",
+        "authoredInputsHash",
+        "executionEvidence",
+        "evidenceHash",
+        "observationHash",
+        "modelQuestionHash"
+      ]
+    },
+    "ObservedAnswerSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "clarificationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "coordinate": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "stepId": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            "ordinal": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 7
+            }
+          },
+          "required": [
+            "stepId",
+            "ordinal"
+          ]
+        },
+        "documentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "choiceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "bindingId": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "configurationRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "resolvedAt": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/session.schema.json#/properties/owner/properties/leaseExpiresAt"
+        }
+      },
+      "required": [
+        "sessionId",
+        "scopeHash",
+        "clarificationId",
+        "coordinate",
+        "documentId",
+        "generation",
+        "choiceId",
+        "nodeId",
+        "bindingId",
+        "sourceRevision",
+        "configurationRevision",
+        "resolvedAt"
+      ]
+    },
+    "ObservedChoiceReceipt1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "preparationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "clarificationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "obligationId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "contextIdentityHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "meaningsHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "questionCaptureHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "acceptedChoiceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "answer": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ObservedAnswerSnapshot"
+        }
+      },
+      "required": [
+        "version",
+        "sessionId",
+        "preparationId",
+        "clarificationId",
+        "obligationId",
+        "contextIdentityHash",
+        "meaningsHash",
+        "questionCaptureHash",
+        "acceptedChoiceId",
+        "answer"
+      ]
+    },
+    "ObservedQuestionMeaning": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "obligationId": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+        },
+        "nodeId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "bindingId": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "locator": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/action.schema.json#/properties/target/oneOf/0/properties/locator"
+        }
+      },
+      "required": [
+        "obligationId",
+        "nodeId",
+        "bindingId",
+        "locator"
+      ]
+    },
+    "ModelObservedQuestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "reason": {
+          "type": "string",
+          "enum": [
+            "AMBIGUOUS_TARGET",
+            "AMBIGUOUS_BINDING",
+            "INSUFFICIENT_EVIDENCE"
+          ]
+        },
+        "choices": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "choiceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "safeLabel": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "meaning": {
+                "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ObservedQuestionMeaning"
+              }
+            },
+            "required": [
+              "choiceId",
+              "safeLabel",
+              "meaning"
+            ]
+          }
+        }
+      },
+      "required": [
+        "reason",
+        "choices"
+      ]
+    },
+    "ObservedQuestionContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "sourceRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "configurationRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "clarificationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "question": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/clarification.schema.json"
+        },
+        "questionCapture": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/QuestionCapture1"
+        }
+      },
+      "required": [
+        "sessionId",
+        "scopeHash",
+        "sourceRevision",
+        "configurationRevision",
+        "clarificationId",
+        "question",
+        "questionCapture"
+      ]
+    },
+    "QuestionAttemptEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "attemptId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "attempt": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "kind": {
+          "const": "NEXT_ACTION"
+        },
+        "status": {
+          "const": "APPLIED"
+        },
+        "projectionHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "planRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "scopeHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "scope": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/session.schema.json#/properties/scope"
+        },
+        "owner": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/session.schema.json#/properties/owner"
+        },
+        "documentId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "generation": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "executionEvidence": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/execution-evidence.schema.json"
+        },
+        "responseSchemaVersion": {
+          "const": 2
+        },
+        "responseRequestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "responseKind": {
+          "const": "NEXT_ACTION"
+        },
+        "responseStatus": {
+          "const": "CLARIFICATION"
+        },
+        "modelQuestion": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ModelObservedQuestion"
+        }
+      },
+      "required": [
+        "attemptId",
+        "requestId",
+        "attempt",
+        "kind",
+        "status",
+        "projectionHash",
+        "planRevision",
+        "scopeHash",
+        "scope",
+        "owner",
+        "documentId",
+        "generation",
+        "executionEvidence",
+        "responseSchemaVersion",
+        "responseRequestId",
+        "responseKind",
+        "responseStatus",
+        "modelQuestion"
+      ]
+    },
+    "QuestionPlanEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "revision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "planHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "plan": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/AcceptedTranslationPlan"
+        }
+      },
+      "required": [
+        "revision",
+        "planHash",
+        "plan"
+      ]
+    },
+    "ObservedChoiceWitness1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 1
+        },
+        "receipt": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ObservedChoiceReceipt1"
+        },
+        "context": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ObservedQuestionContext"
+        },
+        "meanings": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 10,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "choiceId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "meaning": {
+                "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/ObservedQuestionMeaning"
+              }
+            },
+            "required": [
+              "choiceId",
+              "meaning"
+            ]
+          }
+        },
+        "acceptedChoiceId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "attempt": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/QuestionAttemptEvidence"
+        },
+        "questionPlan": {
+          "$ref": "https://checks.citi.example/contracts/observed/v2/replay-validation.schema.json#/definitions/QuestionPlanEvidence"
+        }
+      },
+      "required": [
+        "version",
+        "receipt",
+        "context",
+        "meanings",
+        "acceptedChoiceId",
+        "attempt",
+        "questionPlan"
+      ]
+    }
+  }
+}

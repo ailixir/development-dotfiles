@@ -1,0 +1,166 @@
+{
+  "story": "STUDIO-OBS-011",
+  "task": "validate-next-story",
+  "round": "r1 (first validation of draft 0.1.0 created 2026-10-09)",
+  "actor": "Pax (@po)",
+  "model": "claude-fable-5-1",
+  "at": "2026-10-10T02:40:38Z",
+  "validationDate": "2026-10-09",
+  "verdict": "GO",
+  "readinessScore": 9,
+  "scoreScale": 10,
+  "confidence": "High",
+  "scoreRationale": "Ten ACs give a bounded, mechanical done-definition for 'all unused/deprecated code': every inventory row re-verified at HEAD with its command, class A/B removed, class C/K* only under a recorded ruling (else carried forward with owner), ARCH-10 port-first-then-remove with count/name proof, pin/OpenAPI-hash coherence, test-count reconciliation, behaviour preservation by type-check/targeted tests/byte-equality, explicit out-of-scope list and the OBS-010 'Live surface' boundary. Every anchor spot-checked is accurate (v1 mount, v1 versions block, Gradle classpath copy, GuidedContracts v1 resolution, contract tool v1 read, RETIRED guard, test counts, G9 hazards). Deduction: three rulings from three agents gate T1–T3, and the ARCH-10 target wire version is fixed only after reading OBS-007's landing — correct hedging, but two decision points before deletion.",
+  "statusBefore": "Draft",
+  "statusAfter": "Ready",
+  "lifecycleTransitionPerformed": true,
+  "changeLogEntry": "| 2026-10-09 | 0.1.1 | Validated GO (9/10) — Status: Draft → Ready | @po |",
+  "storySha256Before": "b1072650ddd947101e2ec4fc16edb25a3256c701ec2b82e8f1f46da9d82a0b29",
+  "tenPointChecklist": [
+    {"n": 1, "item": "Clear and objective title", "status": "PASS"},
+    {"n": 2, "item": "Complete description", "status": "PASS"},
+    {"n": 3, "item": "Testable acceptance criteria", "status": "PASS", "note": "Per-row grep with command; after = baseline − named drops + named additions; mutation check for relocated guard; git diff --stat byte-equality; contract tool + OpenAPI hash tests"},
+    {"n": 4, "item": "Scope IN/OUT", "status": "PASS", "note": "UI Studio code only (coordinator scope); AC-10 names CLN-30/31, legacy compile path, CLN-13, CLN-25/42 and keep rows as out of scope"},
+    {"n": 5, "item": "Dependencies mapped", "status": "PASS", "note": "OBS-010 (user: end of wave); may start after OBS-009 Done parallel to OBS-010 without touching the Live surface; CLN-37 replaced by 007, not swept; CLN-11 after 008; emitters conditional on 009 Q2"},
+    {"n": 6, "item": "Complexity estimate", "status": "PASS", "note": "Size L; three file-disjoint lanes + ARCH-10 unit after the lanes"},
+    {"n": 7, "item": "Business value", "status": "PASS"},
+    {"n": 8, "item": "Risks documented", "status": "PASS", "note": "G1–G12 guardrails, G9 grep hazards, Flyway immutability, pin re-anchoring, protected paths"},
+    {"n": 9, "item": "Criteria of Done", "status": "PASS", "note": "Every row removed or carried forward with owner; @qa independent grep + count reconciliation; only @qa sets Done"},
+    {"n": 10, "item": "Alignment with PRD/epic", "status": "PASS", "note": "design §3/§6 'Deferred to OBS-011'/§10 ARCH-10 row + order note; GA §3 item 2, §6 ARCH-10; inventory classes and guardrails; 10.51 method"}
+  ],
+  "templateComplianceIssues": {
+    "missingTopLevelSections": [],
+    "unfilledPlaceholders": [],
+    "futureDeveloperOwnedSubsections": ["Agent Model Used", "Debug Log References", "Completion Notes List"],
+    "structure": "Wave convention retained; extra 'Scope (coordinator)' metadata row is helpful, not a deviation."
+  },
+  "executorAssignment": {
+    "executor": "dev",
+    "quality_gate": "architect",
+    "sdc_reviewer": "qa",
+    "quality_gate_tools": ["code-review", "requirements-traceability", "targeted-tests", "dependency-analysis"],
+    "status": "PASS",
+    "note": "Refactor/cleanup → @dev / @architect; distinct; @architect also rules AC-4 contract items, @po rules protected paths/decision table, @qa rules test-only items."
+  },
+  "doneDefinitionAccepted": "All unused/deprecated UI Studio code = every CLN row (01–49 plus new candidates from OBS-007…010) re-verified at HEAD and either removed (A/B), removed under a recorded ruling (C/K*), or carried forward with a named owner and reason; final symbol grep returns nothing (known exceptions listed); counts reconciled; nothing in OBS-010's Live surface touched.",
+  "poPositionsForAC4": {
+    "note": "Advisory at validation; binding only when recorded at T0 with the named co-ruler.",
+    "CLN-27_28": "remove, together with studio-inference-rollout.md:131 (CLN-49); @po appends the dated note amending decisions.md §3 row 6 at T0",
+    "CLN-10": "keep until the first production deploy containing it; sunset = that deploy + 4 weeks; carried forward with owner @devops if no production deploy exists at HEAD",
+    "CLN-12": "document in OpenAPI (live Create-Check caller; removal is a product decision not taken) — needs @architect concurrence for the pin re-anchor",
+    "CLN-04_05_23": "lift protection for the frontend inference files and the STUDIO_AUTHORING_V2 flag (GA §3 item 2 asks to remove/quarantine InferenceStudio; the 2026-10-09 guided decision supersedes the UI half of T-INC row 7); backend V2 engine methods (CLN-24) stay DEFER — needs @architect concurrence; dated note on decisions.md row 7",
+    "10.51_AC-9_protected_paths": "protection stands except comment-only edits (studioTypes.ts:9) and the paths lifted above"
+  },
+  "criticalIssues": [],
+  "shouldFixIssues": [
+    {"id": "RUL-001", "acs": ["AC-4"], "action": "T0 collects all AC-4 rulings (one request each to @architect, @po, @qa) before any Lane A/B/R deletion; absent ruling ⇒ 'Carried forward' row."},
+    {"id": "WIRE-001", "acs": ["AC-5"], "action": "T4 names the live wire version after reading OBS-007's actual landing (v3 public contracts; internal mount version as left by 007) and ports GuidedSessionIT (30), GuidedHttpSecurityIT (6) and the GuidedBridgeIntegrationTest sv1 case with count/name proof before any v1 removal."}
+  ],
+  "niceToHaveImprovements": [
+    "Record the static it( count per review test file in the AC-1 addendum so the 82-vs-88 drift observed today is explained by the fresh baseline, not re-investigated."
+  ],
+  "goConditions": [
+    "RUL-001 and WIRE-001 applied.",
+    "OBSERVED_SCHEDULE_AUTH_REQUIRED emitters (StudioScheduleProcessor.java:273, StudioAcceptanceService.java:322) are removed only if OBS-009 AC-5 lifted schedules (Q2 default); otherwise carried forward.",
+    ".ai/ decision executes archive-first; docs/qa/evidence/** never staged; no git add -A.",
+    "Nothing in OBS-010's dated 'Live surface' list is removed; OBS-010 writes that list before this story's T0."
+  ],
+  "antiHallucinationFindings": {
+    "verifiedAnchors": [
+      "frontend/src/components/studio/review/: 12 production files named for deletion + 11 .test.tsx; keep-siblings CompileElapsed.tsx, formatElapsed.ts, artifactSummary.ts, compileDiagnosticNarratives.ts, compileErrorCodes.ts, compilePollBounds.ts present",
+      "review/diagnostics.test.tsx:256-260 RETIRED guard; run/runGate.test.tsx exists as relocation target",
+      "run/compileWait.test.tsx:245-248 renders CompileReviewPanel in one case",
+      "test/a11y/studioWcagAudit.test.tsx:320-345 surfaces 4/5; pinned keys :99-100",
+      "store/slices/studioSlice.ts:4,22,38 testSteps",
+      "types/studio/legacyTestIr.ts, utils/retireLegacyStudioWorker.ts, components/studio/runs/index.ts, services/mocks/studio/index.ts, services/mocks/studio/REVIEW-SCRIPT.md, evidence/pinnedVideoEvidenceFacts.ts exist",
+      "components/studio/inference/InferenceStudio.test.tsx = 14 it( cases",
+      "backend dto/ExecutionStatus.java:25 CANONICAL, :31 isCanonical; StudioService.java:426 updateAuthoring; application.yml:321 studio.execution.sse.read-interval; GuidedSessionService.java:1213 recordEvidence",
+      "studio-runner/src/versions.ts:43-47 OBSERVED_* constants (:46 'observed-1'); run/launcher.ts:631 TOTAL_TIMEOUT_MESSAGE; test/deferred.test.ts exists",
+      "GuidedInternalController.java:18-19 dual /internal/v1 + /internal/v2 mount; GuidedInternalSecurity.java:56 matcher; GuidedSessionService.java:339-345 v1 versions block",
+      "GuidedSessionIT.java: 30 @Test, 8× schemaVersion 1; GuidedHttpSecurityIT.java: 6 @Test, :44 /internal/v1 URL; guided/bridge/GuidedBridgeIntegrationTest.java exists",
+      "backend/build.gradle.kts:340-343 processResources copies *.schema.json (v1), v2/*, v3/*; GuidedContracts.java:123-131 resolves v1 ('' prefix), v2/, v3/; tools/check-studio-observed-contracts.cjs:985 reads ../openapi.yaml (v1)",
+      "docs/specs/studio-observed-authoring/contracts/ holds v1 schemas + v2/ + v3/ (v3 today: publication-fixtures.json, result.schema.json, session-view.schema.json); openapi.yaml (v1) and openapi-v2.yaml exist",
+      "studio-runner/test/run/confinement.test.ts:260 BASE_SHA256; docs/specs/studio/openapi.yaml:256 x-conflict-codes AUTH_CONNECTION_REQUIRED",
+      "G9 hazards: V33__studio_observed_publication.sql:300 validator observed-1; executor/observedOperations.ts:2; GuidedPublicationRepository.java:238,250",
+      "guided/session/README.md:199 AccountAccess sentence; docs/runbooks/studio-inference-rollout.md:131; compile/README.md:41; STUDIO-INC-001/spec/decisions.md §3 rows 6–7 (lines 126–127); docs/stories/10.51.story.md exists; account-provider-readiness-design.md and studio-context/current-state.md exist"
+    ],
+    "observations": [
+      "Static it( count over the 11 review test files = 82 today vs the inventory's 88 (compileStates 15 vs 20, recompile 3 vs 4); AC-1/AC-8 already treat inventory counts as stale and require fresh baselines — no story change needed."
+    ],
+    "corrections": []
+  },
+  "codeRabbitIntegrationFindings": {
+    "enabled": true,
+    "status": "PLANNING_PARTIAL",
+    "storyType": "Refactor/cleanup; secondary Contract (v1 retirement, pins); complexity medium-high — correct",
+    "agents": "@dev executor / @architect gate + contract rulings / @po protected-path rulings / independent @qa grep + reconciliation",
+    "qualityGates": "Pre-commit, independent SDC QA with per-row mapping and independent grep, @devops handoff",
+    "selfHealing": {"type": "full", "maxIterations": 3, "timeoutMinutes": 30},
+    "focusAreas": "breaking changes/interface stability (ADR-002 classes), pin coherence, protected-path byte-equality, no behaviour change beyond removals, test-count reconciliation — match refactor type",
+    "fallback": "graceful_degradation documented; no PASS invented"
+  },
+  "codeIntelligenceCheck": {"available": false, "result": "skipped"},
+  "epicContextEnrichment": {"attempted": true, "result": "empty for STUDIO-OBSERVED; wave README, design §10 and inventory used"},
+  "taskChecks": [
+    {"taskStep": "1", "check": "Template completeness", "status": "PASS_WITH_MINOR_GAPS"},
+    {"taskStep": "1.1", "check": "Executor assignment", "status": "PASS"},
+    {"taskStep": "2", "check": "File/source structure", "status": "PASS", "details": "Every listed existing path verified; lanes file-disjoint; (del)/(ruling) markers; ARCH-10 unit after lanes"},
+    {"taskStep": "3", "check": "UI/frontend completeness", "status": "N/A", "details": "Removals only; CLN-11 a11y rewrite is test-only"},
+    {"taskStep": "4", "check": "AC coverage/testability", "status": "PASS", "findingIds": ["RUL-001", "WIRE-001"]},
+    {"taskStep": "5", "check": "Testing instructions", "status": "PASS", "details": "Static scans (tsc unused flags, M6/M7 scripts), dynamic suites with baseline filters, contract tool, OpenAPI hash tests, a11y regeneration, mutation check, reconciliation formula"},
+    {"taskStep": "6", "check": "Security considerations", "status": "PASS", "details": "CLN-30/31 explicitly out of scope with owner (ED-02/D-4); Flyway immutability; protected src/main byte-unchanged"},
+    {"taskStep": "7", "check": "Task sequence", "status": "PASS", "details": "T0 rulings+baselines → T1/T2/T3 lanes → T4 ARCH-10 → T5 docs → T6 verify/record"},
+    {"taskStep": "8", "check": "CodeRabbit planning", "status": "PARTIAL"},
+    {"taskStep": "8.1", "check": "Code intelligence duplicates", "status": "N/A"},
+    {"taskStep": "9", "check": "Anti-hallucination", "status": "PASS"},
+    {"taskStep": "10", "check": "Implementation readiness", "status": "GO", "details": "9/10; startable after OBS-009 Done (parallel to OBS-010) or OBS-010 Done per user decision"}
+  ],
+  "acceptanceCriteriaAssessment": [
+    {"ac": "AC-1", "testable": true, "source": "inventory G1; 10.51 method", "readiness": "READY"},
+    {"ac": "AC-2", "testable": true, "source": "inventory class A rows, G7", "readiness": "READY"},
+    {"ac": "AC-3", "testable": true, "source": "inventory class B rows, G2, G4; design §6", "readiness": "READY_AFTER_OBS-007"},
+    {"ac": "AC-4", "testable": true, "source": "inventory class C/K* rows, G6; 10.51 AC-9; decisions.md §3 rows 6–7; GA §3 item 2", "readiness": "READY_WITH_T0_RULINGS", "findingIds": ["RUL-001"]},
+    {"ac": "AC-5", "testable": true, "source": "design §3, §6 'Deferred to OBS-011'; inventory CLN-16/17/38, G9; GA §6 ARCH-10", "readiness": "READY_AFTER_OBS-007_AND_009", "findingIds": ["WIRE-001"]},
+    {"ac": "AC-6", "testable": true, "source": "inventory G3", "readiness": "READY"},
+    {"ac": "AC-7", "testable": true, "source": "inventory G8, G9, M12; 10.51 AC-12", "readiness": "READY"},
+    {"ac": "AC-8", "testable": true, "source": "inventory G5; 10.51 AC-11", "readiness": "READY"},
+    {"ac": "AC-9", "testable": true, "source": "inventory G10, G11; 10.51 AC-13, DOC-001/002", "readiness": "READY"},
+    {"ac": "AC-10", "testable": true, "source": "inventory G12; design §10 order note; coordinator scope", "readiness": "READY_AFTER_OBS-010_LIVE_SURFACE"}
+  ],
+  "dependencyVerification": {
+    "OBS-010": "Validated GO today (Ready); user decision places this story at the end of the wave",
+    "OBS-009": "Validated GO today; design §10 allows a start after OBS-009 Done parallel to OBS-010 if nothing in the Live surface is removed",
+    "OBS-008": "Validated GO today; CLN-11 rewrite and studioSlice/handlers edits are after OBS-008",
+    "OBS-007": "Draft at validation time; class B sweep, ARCH-10 port and pin re-anchors are after OBS-007's landing",
+    "sharedFilesWithEarlierStories": ["docs/specs/studio/openapi.yaml + confinement.test.ts:260 + StudioContractTest op-count (007, 008, then 011 by ruling)", "studioWcagAudit.test.tsx + axe-results.json (008 then 011)", "studioSlice.ts, handlers.ts, studioApi.ts (008 then 011)", "GuidedSessionService.java, GuidedContracts.java, build.gradle.kts, tools/*.cjs, runner generated bundles, versions.ts (007 then 011)", "docs/runbooks/studio-guided-authoring.md (007 → 010 → 011 only if the sentence survived)", "OBSERVED_SCHEDULE_AUTH_REQUIRED emitters (009 lifts, 011 removes)"]
+  },
+  "crossStoryIssues": [
+    "Three sequential re-anchors of docs/specs/studio/openapi.yaml (007 bump, 008 capability route, 011 CLN-12/15/38 by ruling) — each must quote old/new BASE_SHA256 and op-count; never widen the confinement pin.",
+    "If OBS-007 keeps accountRef/accountAbi as constants instead of the v3 tuple (inventory CLN-34 option), AC-3 requires an @architect ruling before touching them — stated in the story."
+  ],
+  "sourceInventory": [
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011.story.md", "sha256": "b1072650ddd947101e2ec4fc16edb25a3256c701ec2b82e8f1f46da9d82a0b29", "note": "before PO edits"},
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-011-cleanup-inventory.md", "sha256": "b2ee4bd6ba470228afaad54f3b268effd756394f17482ea23034095137467cd0"},
+    {"path": "docs/specs/studio-observed-authoring/secret-login-design.md", "sha256": "f0e40fa531e65be94216cb10ccf0794171e4782cb70d21d7fbea9f61063b234f"},
+    {"path": "docs/epics/UI-STUDIO-GA-PLAN.md", "sha256": "533d258e93ea0bb8496fe6415a549ef190ba1a51c9c7a0c4ad6e53a3ac140eec"},
+    {"path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-007.story.md", "sha256": "d762e79a2af541f4d97aa5171267ddd46bd5f2f665fa4a268a2ec606260e1aa2"},
+    {"path": "docs/stories/STUDIO-OBSERVED/README.md", "sha256": "7310713a7b79da816c9878f6911e1a392802005582fa05b4ac2e6477b37aade8"},
+    {"path": ".aiox-core/development/tasks/validate-next-story.md", "sha256": "277faba94cba30ac3773159d641fc2b8a345efd70dcfef6bae15f8a6280128ea"},
+    {"path": ".aiox-core/product/checklists/po-master-checklist.md", "sha256": "506a3032f461c7ae96c338600208575be4f4823d2fe7c92fe304a4ff07cc5390"},
+    {"path": ".aiox-core/core-config.yaml", "sha256": "7bd8694cded2a845882f29e9c7b11d18ae531ad492a3cefb53a71100eb29bc31"},
+    {"path": ".claude/rules/story-lifecycle.md", "sha256": "f5262020e0a3b614104881019550cb0b793907c6694d41e027fc9c1bbe2a2278"}
+  ],
+  "proposedFileList": [
+    {"path": "frontend/src/components/studio/review/CompileReviewPanel.tsx", "exists": true, "classification": "del"},
+    {"path": "frontend/src/components/studio/review/diagnostics.test.tsx", "exists": true, "classification": "del after guard relocation (G7)"},
+    {"path": "frontend/src/types/studio/legacyTestIr.ts", "exists": true, "classification": "del"},
+    {"path": "frontend/src/store/slices/studioSlice.ts", "exists": true},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/dto/ExecutionStatus.java", "exists": true},
+    {"path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedInternalController.java", "exists": true, "classification": "ARCH-10"},
+    {"path": "backend/src/test/java/com/citi/put/checks/studio/guided/session/GuidedSessionIT.java", "exists": true, "classification": "ported"},
+    {"path": "docs/specs/studio-observed-authoring/openapi.yaml", "exists": true, "classification": "v1, del or archived per ruling"},
+    {"path": "studio-runner/src/versions.ts", "exists": true},
+    {"path": "studio-runner/test/run/confinement.test.ts", "exists": true, "classification": "pin re-anchor if openapi.yaml changes"},
+    {"path": "docs/stories/STUDIO-INC-001-incremental-compile/spec/decisions.md", "exists": true, "classification": "append-only dated notes"}
+  ]
+}

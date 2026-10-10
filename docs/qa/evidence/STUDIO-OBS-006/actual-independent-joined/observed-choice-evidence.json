@@ -1,0 +1,76 @@
+{
+  "humanDelayMs" : 1250,
+  "modelDelayMs" : 1250,
+  "sourceStepTimeoutMs" : 1000,
+  "learningSubmits" : 1,
+  "finalizationEffects" : 0,
+  "freshRecordedReplays" : 2,
+  "replayModelCalls" : 0,
+  "bindingReadRetries" : 0,
+  "artifactHash" : "499e90cd4643bba4814234695eb44269d2b0790242b0b9b0742a11c94ca3b217",
+  "originalQuestionCapture" : {
+    "attempt" : 1,
+    "version" : 1,
+    "planHash" : "0a5c90aed7a066ac766a0ff7167902e825604665f4c715dd75ecd0df3823bda6",
+    "workerId" : "worker-1",
+    "attemptId" : "bc21b076-097d-4239-a83e-75a6dc29ebcb",
+    "contextId" : "553fb832-328d-401e-9d69-24bd009cd8cc",
+    "requestId" : "translation-11fb3eafa2e17df66dfe3a6a4ca45db17da3176ed78199410dfd824197a59bcc",
+    "ownerFence" : 1,
+    "evidenceHash" : "6c562d376b801b2349245630cfcf31c27daa933d178edd1db5b27f878649aa90",
+    "obligationId" : "02a7032e-933b-47f5-b08a-eb487f616f3e",
+    "planRevision" : "2",
+    "contextRevision" : 1,
+    "observationHash" : "3b582e70c24a57b56244216b7bd92a317e94915ce260cac591a382cda05b9cfe",
+    "executionEvidence" : {
+      "kind" : "observedDocument",
+      "origin" : "http://127.0.0.1:60805",
+      "contextId" : "553fb832-328d-401e-9d69-24bd009cd8cc",
+      "sessionId" : "7f568beb-3770-4316-8533-189891aac872",
+      "documentId" : "7d5fc0e0-5d1c-4666-8a44-80fc40beea2b",
+      "generation" : 3,
+      "observationHash" : "3b582e70c24a57b56244216b7bd92a317e94915ce260cac591a382cda05b9cfe"
+    },
+    "modelQuestionHash" : "716c01b69907d167ce27bb0f124f8b50e0c4b1ec7d84117883332b86618b960d",
+    "authoredInputsHash" : "badeb086fdba16cd34357b7bc6c12d5b05d181e68ca99f1510cce824bf1e3def"
+  },
+  "preparationReceipt" : {
+    "answer" : {
+      "nodeId" : "node-3-10",
+      "choiceId" : "3bedc6bf-badc-45ad-8524-0e92089ecb92",
+      "bindingId" : null,
+      "scopeHash" : "aac43dfb9415a1fdb93f6819e2e08d9bab43c99d16919db93e36de8846276612",
+      "sessionId" : "7f568beb-3770-4316-8533-189891aac872",
+      "coordinate" : {
+        "stepId" : "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "ordinal" : 0
+      },
+      "documentId" : "7d5fc0e0-5d1c-4666-8a44-80fc40beea2b",
+      "generation" : 3,
+      "resolvedAt" : "2026-10-09T17:05:27.276216Z",
+      "sourceRevision" : "1",
+      "clarificationId" : "bc6a8e79-a663-4f5c-bddf-c148b4446510",
+      "configurationRevision" : "1"
+    },
+    "version" : 1,
+    "sessionId" : "7f568beb-3770-4316-8533-189891aac872",
+    "meaningsHash" : "aa99d6c39887d22903736a2debaac58fb813c1f787bf93aab409edbd0f4256c1",
+    "obligationId" : "02a7032e-933b-47f5-b08a-eb487f616f3e",
+    "preparationId" : "121df1e2-6330-4868-9e53-ee283454a9bb",
+    "clarificationId" : "bc6a8e79-a663-4f5c-bddf-c148b4446510",
+    "acceptedChoiceId" : "3bedc6bf-badc-45ad-8524-0e92089ecb92",
+    "contextIdentityHash" : "6de6e3823d34b3a8053994d00172f9a2375520d86b85ac6d294371fd6e8c1176",
+    "questionCaptureHash" : "56f7e1df88a3ef383a66e632254b543a904c79ea61a369da32ab7c47a8c3ca34"
+  },
+  "chosenAndUnchosenReceipts" : [ {
+    "chosen" : "  fresh-11-22e75054-6e3e-4dfb-b99a-ebcba1aedfc5-é😀  ",
+    "unchosen" : ""
+  }, {
+    "chosen" : "  fresh-12-79787600-79a7-4e82-89f6-ed405268a4b8-é😀  ",
+    "unchosen" : ""
+  }, {
+    "chosen" : "  fresh-13-71be005e-b3d4-4a7a-bb26-f3c2e1b3d3e9-é😀  ",
+    "unchosen" : ""
+  } ],
+  "nativeInvocations" : [ "read", "fill", "click", "assert", "read", "fill", "click", "assert" ]
+}

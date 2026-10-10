@@ -1,0 +1,274 @@
+{
+  "story": "STUDIO-OBS-006",
+  "reviewType": "independent runtime/collector delayed-state design review; not implementation QA",
+  "createdAt": "2026-10-09T11:13:53.580Z",
+  "verdict": "NEEDS_CHANGES",
+  "reviewedHashes": [
+    {
+      "path": "docs/specs/studio-observed-authoring/delayed-state-design.md",
+      "expected": "2c83a7aa1ba08388517b0f1eee03c12362668466c6013cba2db144d3ed7d5c62",
+      "actual": "2c83a7aa1ba08388517b0f1eee03c12362668466c6013cba2db144d3ed7d5c62",
+      "match": true
+    },
+    {
+      "path": "docs/specs/studio-observed-authoring/publication-contracts.md",
+      "expected": "8a2f9f5f9f9570fb82ce5b64c2bf9bcf35af9103816a4094e67d684a89f1acf7",
+      "actual": "8a2f9f5f9f9570fb82ce5b64c2bf9bcf35af9103816a4094e67d684a89f1acf7",
+      "match": true
+    },
+    {
+      "path": "docs/stories/STUDIO-OBSERVED/STUDIO-OBS-006.story.md",
+      "expected": "0fc9f264408daaf49d60ab3d0446928ed9a228310c58ec03c25964adaf8c1786",
+      "actual": "0fc9f264408daaf49d60ab3d0446928ed9a228310c58ec03c25964adaf8c1786",
+      "match": true
+    }
+  ],
+  "ownership": {
+    "literalPaths": 166,
+    "uniquePaths": 166,
+    "requiredAffectedPaths": [
+      "studio-runner/src/run/observedReplayAdapter.ts",
+      "studio-runner/src/executor/observedReplay.ts",
+      "studio-runner/src/run/childRuntime.ts",
+      "studio-runner/src/run/observationTypes.ts",
+      "studio-runner/src/run/observationCollector.ts",
+      "studio-runner/src/run/browser.ts",
+      "studio-runner/test/run/observation.test.ts",
+      "studio-runner/test/observedReplayExecutor.test.ts",
+      "studio-runner/test/run/observedReplayProtocol.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay.test.ts",
+      "studio-runner/test/fixtures-tier/observed-replay-privacy.test.ts",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationTest.java",
+      "backend/src/test/java/com/citi/put/checks/studio/guided/publication/GuidedPublicationReplayIT.java"
+    ],
+    "missing": [],
+    "assessment": "166 literal unique paths; every concrete affected production/test path identified by this review is reserved. No ownership blocker."
+  },
+  "scope": {
+    "writtenFiles": [
+      ".ai/STUDIO-OBS-006-delayed-design-runtime-review.json"
+    ],
+    "sourceOrDistEdits": false,
+    "buildsTestsSqlBrowserRuns": false,
+    "lifecycleChanges": false,
+    "budgetCeilingUsd": 500,
+    "spend": "unknown"
+  },
+  "findings": [
+    {
+      "id": "DELAY-RUNTIME-R1-001",
+      "severity": "high",
+      "blocking": true,
+      "title": "Do not reinterpret browser timeoutSeconds as model-plus-human wall time",
+      "sourceEvidence": [
+        {
+          "path": "docs/specs/studio-observed-authoring/delayed-state-design.md",
+          "section": "4: initialize before first NEXT_ACTION; explicitly charges model/clarification"
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/dto/TestConfiguration.java",
+          "lines": [
+            3,
+            15,
+            17,
+            20
+          ],
+          "fact": "Execution-affecting per-step timeout1..120 seconds, default30."
+        },
+        {
+          "path": "studio-runner/src/run/playwrightAdapter.ts",
+          "lines": [
+            148,
+            483,
+            739
+          ],
+          "fact": "Used as the browser-operation default timeout."
+        },
+        {
+          "path": "studio-runner/src/executor/observedReplay.ts",
+          "lines": [
+            121,
+            129,
+            137
+          ],
+          "fact": "Observed replay starts its source-step clock at actual step execution; there is no LLM/human phase inside it."
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java",
+          "lines": [
+            15,
+            16,
+            26,
+            30
+          ],
+          "fact": "Existing model call budget defaults60 seconds and accepts up to600."
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+          "lines": [
+            764,
+            765,
+            766,
+            769
+          ],
+          "fact": "Actual model deadline is callSeconds bounded by session expiry."
+        },
+        {
+          "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+          "lines": [
+            429,
+            439,
+            588
+          ],
+          "fact": "Clarification uses existing question/session expiry and exact identity, not a30-second browser step clock."
+        }
+      ],
+      "impact": "A valid35-second model call or a human answer after30 seconds can newly fail a default-config session although no browser acquisition budget was spent. A1-second configured browser timeout would make ordinary model-backed authoring effectively unusable. This is a new learning timeout policy, not merely passive waiting or recovery fencing; calling it deliberately bounded does not establish source-backed compatibility.",
+      "requiredCorrection": "Keep model call, human clarification and hard session/lease budgets independent. Recommended minimal correction: use the locked timeoutSeconds as one cumulative passive-readiness allowance per source step, preserved across obligations/replans/clarifications/restarts, and charge only claimed readiness wait/collection windows. Persist remaining/charged duration plus an original per-window deadline bounded by the session expiry; normal model/clarification time outside a pending readiness window consumes its existing separate budgets, not this new allowance. A pending window remains charged across a crash/owner loss/clarification until its durable settlement, so pausing cannot refund unknown time or reset counters. Alternatively retain the existing session deadline plus explicit extra-poll caps without imposing a new configuration-derived global learning clock. In either choice document the exact durable fields, charging/settlement and send-claim check; do not alter replay’s already-approved monotonic source-step deadline.",
+      "oracles": [
+        "With timeoutSeconds1 and a valid model call taking longer than1 second but less than callSeconds, an immediately ready target must not fail solely due to model latency.",
+        "Human clarification longer than browser timeout but within existing question/session expiry resumes exact chosen-reference mapping; it does not reset prior readiness usage/poll counters.",
+        "Two readiness episodes in one compound source step share one cumulative allowance; crash or an unresolved pending refresh cannot obtain a fresh allowance.",
+        "Existing model timeout/session expiry and current owner/source checks still stop as before."
+      ]
+    },
+    {
+      "id": "DELAY-RUNTIME-R1-002",
+      "severity": "medium",
+      "blocking": true,
+      "title": "Clarify private probe freshness reads rather than promising an impossible zero-read freshness check",
+      "sourceEvidence": [
+        {
+          "path": "docs/specs/studio-observed-authoring/delayed-state-design.md",
+          "section": "1: probe performs no second traversal/value read; 2: must check existing freshness inventories"
+        },
+        {
+          "path": "studio-runner/src/run/observationCollector.ts",
+          "lines": [
+            64,
+            72,
+            75,
+            494,
+            501,
+            502
+          ],
+          "fact": "Existing matches freshness checks call snapshotField on retained controls; this rereads field.value/selectedOptions and compares private signatures. DOM property changes need not emit mutation records."
+        },
+        {
+          "path": "studio-runner/src/run/observationCollector.ts",
+          "lines": [
+            89,
+            185,
+            187,
+            198,
+            203
+          ],
+          "fact": "eligibleSource/resolveReadPolicy currently fuse visibility with denial; resolveReadPolicy may inspect businessText and refuses hidden sources."
+        }
+      ],
+      "impact": "Implementers cannot literally reuse all existing freshness checks while also doing no second value read. Omitting field freshness without changing the stated READY/current-inventory guarantee is also not the specified contract. This ambiguity matters precisely for hostile value/property changes between observation and probe.",
+      "requiredCorrection": "State the small concrete rule: the probe performs no second DOM discovery or business capture and no new raw-text/value source read, but may perform the already-approved bounded private field/style-signature freshness checks on the last collection’s retained inventory; those bytes stay private and are not binding captures. Cache readiness/name/type/hard-denial/visibility/policy facts during that existing bounded collection, and evaluate the probe from those records plus the explicit permitted freshness checks. Hidden names/grants that cannot be proved from existing safe facts remain REFUSED. Keep final matches/validateInvocation immediately before one invocation. If instead the architect chooses a strictly metadata-only probe, explicitly make READY provisional with the full field freshness deferred to the existing final matches, and narrow the probe’s current-inventory claim accordingly; choose one behavior before implementation.",
+      "oracles": [
+        "Direct element.value mutation without input/change/attribute mutation cannot result in invocation using a stale private inventory.",
+        "A hidden labelled non-read target with provable structural facts can be VISIBILITY_PENDING; a hidden label/text/grant requiring a new sensitive read remains REFUSED.",
+        "Probe calls never capture a binding, traverse a new subtree, expose hidden metadata or alter public observation bytes."
+      ]
+    }
+  ],
+  "acceptedDesign": {
+    "DELAY_001": "Acquisition loops only before READY/invocation, preserves exact frozen locator/operation/guard, and does not retry capture/assert/submit. This closes the identified replay sampling gap once implemented.",
+    "DELAY_002": "InvocationControl/check/beginInvocation/poison is a viable narrow local seam. Capturing one absolute monotonic source-step deadline and checking after every await resolves late Promise.race continuation risk; no public IPC change is needed.",
+    "DELAY_003": "The conservative four-state classification is implementable through new private cached facts in the existing collector. Complete absence must be established from the bounded exact locator universe, not public nodes or coverage.complete. Unknown/unsupported/truncated/hidden competitor conditions never certify absence. The source does not provide those detailed cached reasons today, so the reserved collector refactor is real work, not an already-existing API.",
+    "DELAY_004": "Using existing REFRESH/NEXT, real correlated /observe and owning-worker committed callbacks is viable. Existing V32 continuation check remains unchanged. Provider500 is not WAIT; model response schema remains unchanged. Timing blocker above must be corrected.",
+    "ownership": "All required collector/runtime/backend/test seams are in the166-path File List. Type-only Guard/ReplayAction imports can describe the local probe without a runtime executor/model dependency in the stringified isolated collector.",
+    "compatibility": "Preserving exported observation shapes, frozen artifact/operation/binding hashes and legacy behavior is coherent. Rebuild actual source/dist/catalog identities after implementation; this review grants no authority to change frozen bytes."
+  },
+  "mandatoryImplementationConditions": [
+    {
+      "id": "D-IMPL-1",
+      "condition": "Cache all reasons needed by ABSENT/VISIBILITY_PENDING during the same bounded collection. A missing safe name is not evidence of non-match. Exclude unrelated hard-denied surfaces only from already available safe structural identity (including main-document scope); unresolved possible matches refuse."
+    },
+    {
+      "id": "D-IMPL-2",
+      "condition": "Do not infer a historic native subtype beyond stored Guard.controlType/elementType. Apply only original frozen facts plus existing operation-specific live compatibility, preserving legitimate actionable=false div click/hover. READY must return one exported node from the request document/generation; replacement or mutation after READY is terminal."
+    },
+    {
+      "id": "D-IMPL-3",
+      "condition": "Reserve count and32768-byte allowance before each collection, settle once to actual export bytes, retain unknown reservations. Enforce32 extra/source step,200 extra/run,400 total and13,107,200 bytes alongside50ms/4096-elements/depth64 and outgoing500/depth8/32768. Learning keeps its stricter existing400/1MiB session ceilings. No retained observation history is added to replay."
+    },
+    {
+      "id": "D-IMPL-4",
+      "condition": "Make the guided nextPollAt formula explicit too: inherit100ms before first additional refresh and250ms thereafter (or another expressly frozen value), rather than leaving guided cadence implicit in scanner frequency. Returning safe202 when not due performs no model/runner I/O or counter increment."
+    },
+    {
+      "id": "D-IMPL-5",
+      "condition": "Existing GuidedTranslationService.refresh currently re-reads current generation and synthesizes refresh-<generation>. Pending recovery must instead reuse the persisted refreshKey and expectedGeneration/exact request, including after callback committed before the second readiness transaction. Use the existing session command/observation-refresh intent record as the full request anchor; do not reconstruct from an advanced current generation. Clear pending only after exact correlated committed evidence; unrelated newer observations never roll progress backward or refund a poll."
+    },
+    {
+      "id": "D-IMPL-6",
+      "condition": "Recover unresolved action/admission/outcome before any readiness poll. With concurrent scanners a single persisted pending reservation wins; another may recover that same idempotent refresh only. Source/config/plan/obligation/worker/fence changes reject stale completion. Preserve committed budget/late-usage settlement before outward refusal."
+    },
+    {
+      "id": "D-IMPL-7",
+      "condition": "Control poisoning must synchronously precede timeout/cancel rejection. Retained work returning after poison cannot enter beginInvocation, withhold/insert a binding or emit PASS. Native dispatch remains non-atomic; once INVOKING is reached, uncertainty never reacquires/repeats the primitive."
+    },
+    {
+      "id": "D-IMPL-8",
+      "condition": "Preserve public observation privacy byte equivalence and model/IPC shape. The new acquisition DTO is process-local only. New helpers inside installObservationCollector must remain closure-free fixed code; no imported runtime helper, arbitrary page program or DOM marker bridge."
+    }
+  ],
+  "requiredOracles006": [
+    "Preserve the original failed asynchronous evidence and synchronous smoke. Add the genuine async-after-real-receipt confirmation with a barrier proving an actual post-submit missing-target collection before response release/render.",
+    "Guided flow: one submit and one independent receipt, no NEXT_ACTION sent for absent Confirmation, later actual owning-worker observation/preparation/admission on the revealed/appended node, unchanged semantic obligations and one SOURCE_PLAN.",
+    "Finalization/retry emits zero browser actions/model calls; two ordinary recorded replays keep identical artifact and recapture distinct fresh values, exactly one independent submit each, zero both LLM gateways.",
+    "Never appears, count/byte cap, compound-step shared budget, cancellation/timeout during each awaited collection/probe/matches/validate/withhold boundary, late returns and post-invocation uncertainty.",
+    "Duplicate including hidden competitor, missing/unresolved names, direct value-property change, sensitive ancestry/descendants/label sources, wrong origin/type/classification/read policy and post-acquisition replacement all refuse without semantic repair.",
+    "Actual PostgreSQL restart before/after refresh intent/callback and concurrent scanner/lease renewal preserve same pending key/count and corrected readiness-time accounting. Model/human-delay regression tests above are mandatory."
+  ],
+  "notRequiredBy006": "No new live model accuracy corpus, production account provider, pilot, or broad latency benchmark; those remain later stories. The controlled asynchronous correctness proof is already006, not deferred009.",
+  "sourceHashes": [
+    {
+      "path": "studio-runner/src/run/observationCollector.ts",
+      "sha256": "2a7c706921ec8850b5e43b6269e6969e86bb3c2ac1dca0661f7aa98443ca3985"
+    },
+    {
+      "path": "studio-runner/src/run/observationTypes.ts",
+      "sha256": "a1bb68ad620612ac3eb456599bfb45af8f4c00ad9d00cc67125bd2035e2572af"
+    },
+    {
+      "path": "studio-runner/src/run/observedReplayAdapter.ts",
+      "sha256": "ff0cb9108809294c75c5a9bd95a1e3eea7700fed350fbc22f8075f5725ea7c75"
+    },
+    {
+      "path": "studio-runner/src/executor/observedReplay.ts",
+      "sha256": "152ce2afc80ff48396c21f6aa4d5532de3390467cea37793e3c0f692bf79a1a5"
+    },
+    {
+      "path": "studio-runner/src/run/childRuntime.ts",
+      "sha256": "fe45c60a175706f6dc25505869efcc5ba437f9f7e41fcc34a16311917faa1963"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationProperties.java",
+      "sha256": "07918c5c4a6cf9c40a4d199930a9e1c44f69dfabdad13710cb656384c0bb76ec"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationService.java",
+      "sha256": "576b4fc572dcb568860a4e981e1007c0df015304952bd5383812fc0dc027d930"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/translation/GuidedTranslationStore.java",
+      "sha256": "7788e2401ecbd5511c576d30ca7ccd4e1a9fb55bfe65a97296bcf1caf072058b"
+    },
+    {
+      "path": "backend/src/main/java/com/citi/put/checks/studio/guided/session/GuidedSessionService.java",
+      "sha256": "1d79d04284a9f999b3fb18d96b2131325342297a01a1b22a6059c6b2f105e0f7"
+    },
+    {
+      "path": "backend/src/main/resources/db/migration/V32__studio_guided_translation.sql",
+      "sha256": "898990b29a4705e0de662a756ba86fad7cfc57cfa1c8775a9a922628781688b7"
+    }
+  ]
+}

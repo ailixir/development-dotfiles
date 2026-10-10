@@ -1,3 +1,4 @@
+import type {InvocationControl} from '../executor/observedReplay.js';
 /**
  * The seam between the child's run logic and the browser library (AC-1, AC-6a, AC-7).
  *
@@ -12,6 +13,9 @@
  * would be a configuration key for it, which AC-6a forbids outright.
  */
 
+import type { ObservationConfig, ObservationSession } from './observationTypes.js';
+import type { Scope } from '../executor/observedOperations.js';
+import type { RecordedContextCapability } from './observedAccount.js';
 import type { PageLike } from './playwrightAdapter.js';
 
 export interface BrowserLaunchRequest {
@@ -22,11 +26,19 @@ export interface BrowserLaunchRequest {
   readonly recording: { readonly width: number; readonly height: number };
   /** The per-run scratch directory. Profile, video and temp output all live under it (AC-22). */
   readonly scratchPath: string;
+  readonly observedScope?: Scope;
 }
 
 export interface BrowserHandle {
   /** The single page of the single context. V1 has exactly one (§5.2). */
   readonly page: PageLike;
+  observedBlankMatches?(): Promise<boolean>;
+  observedInitialContextMatches?(): Promise<boolean>;
+  observedWait?(strategy:'load'|'domcontentloaded'|'networkidle',timeoutMs:number):Promise<void>;
+  observedNavigateBlank?(destination:string, control?:InvocationControl): Promise<void>;
+  observedAccountContext?: RecordedContextCapability;
+  /** Optional on browser-free legacy fakes; implemented by the real trusted browser. */
+  createObservationSession?(config: ObservationConfig): ObservationSession;
   /**
    * Fires when the context opens a page other than {@link page} — a popup or `window.open`.
    *

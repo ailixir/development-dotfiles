@@ -65,35 +65,40 @@ class InferenceMigrationLatestIT {
 
   /** Mirrors the baseline selection in {@code InferenceCaptureStore.persist} at HEAD. */
   private static final String BASELINE_QUERY =
-      """
-      SELECT r.id, e.id AS execution_id
-        FROM ui_test_revisions r
-        LEFT JOIN LATERAL (
-          SELECT x.id, x.started_at FROM ui_test_executions x
-           WHERE x.revision_id = r.id AND x.ui_test_id = r.test_id AND x.csi_id = r.csi_id
-             AND x.status = 'PASSED' AND x.execution_scope = 'FULL'
-             AND x.configuration_snapshot->>'sourceRevision' = r.source_revision::text
-             AND x.configuration_snapshot->>'configurationRevision' = r.configuration_revision::text
-             AND x.configuration_snapshot->>'artifactHash' = r.artifact_hash
-             AND x.configuration_snapshot->>'browser' = r.configuration->>'browser'
-             AND x.configuration_snapshot->>'viewportWidth' = r.configuration->'viewport'->>'width'
-             AND x.configuration_snapshot->>'viewportHeight' = r.configuration->'viewport'->>'height'
-             AND x.configuration_snapshot->>'timeoutSeconds' = r.configuration->>'timeoutSeconds'
-             AND x.configuration_snapshot->>'waitStrategy' = r.configuration->>'waitStrategy'
-             AND x.configuration_snapshot->>'environment' = r.configuration->>'environment'
-             AND x.runtime_versions->>'validator' = r.provenance->>'validatorSchemaVersion'
-             AND x.runtime_versions->>'executor' = r.provenance->>'executorVersion'
-             AND x.runtime_versions->>'playwright' = r.provenance->>'playwrightVersion'
-           ORDER BY x.started_at DESC, x.id DESC LIMIT 1
-        ) e ON TRUE
-       WHERE r.test_id = ? AND r.csi_id = ? AND r.confirmed_at IS NOT NULL
-         AND r.authoring_snapshot IS NOT NULL AND r.compile_request_id IS NOT NULL
-         AND r.compilation_fingerprint = ?
-         AND r."references" = CAST(? AS jsonb)
-         AND (e.id IS NOT NULL OR (r.authoring_snapshot = CAST(? AS jsonb)
-           AND r.source_revision = ? AND r.configuration_revision <> ?))
-       ORDER BY r.created_at DESC, r.id DESC LIMIT 1
-      """;
+      "SELECT r.id, e.id AS execution_id\n"
+          + "  FROM ui_test_revisions r\n"
+          + "  LEFT JOIN LATERAL (\n"
+          + "    SELECT x.id, x.started_at FROM ui_test_executions x\n"
+          + "     WHERE x.revision_id = r.id AND x.ui_test_id = r.test_id AND x.csi_id = r.csi_id\n"
+          + "       AND x.status = 'PASSED' AND x.execution_scope = 'FULL'\n"
+          + "       AND x.configuration_snapshot->>'sourceRevision' = r.source_revision::text\n"
+          + "       AND x.configuration_snapshot->>'configurationRevision' ="
+          + " r.configuration_revision::text\n"
+          + "       AND x.configuration_snapshot->>'artifactHash' = r.artifact_hash\n"
+          + "       AND x.configuration_snapshot->>'browser' = r.configuration->>'browser'\n"
+          + "       AND x.configuration_snapshot->>'viewportWidth' ="
+          + " r.configuration->'viewport'->>'width'\n"
+          + "       AND x.configuration_snapshot->>'viewportHeight' ="
+          + " r.configuration->'viewport'->>'height'\n"
+          + "       AND x.configuration_snapshot->>'timeoutSeconds' ="
+          + " r.configuration->>'timeoutSeconds'\n"
+          + "       AND x.configuration_snapshot->>'waitStrategy' ="
+          + " r.configuration->>'waitStrategy'\n"
+          + "       AND x.configuration_snapshot->>'environment' ="
+          + " r.configuration->>'environment'\n"
+          + "       AND x.runtime_versions->>'validator' ="
+          + " r.provenance->>'validatorSchemaVersion'\n"
+          + "       AND x.runtime_versions->>'executor' = r.provenance->>'executorVersion'\n"
+          + "       AND x.runtime_versions->>'playwright' = r.provenance->>'playwrightVersion'\n"
+          + "     ORDER BY x.started_at DESC, x.id DESC LIMIT 1\n"
+          + "  ) e ON TRUE\n"
+          + " WHERE r.test_id = ? AND r.csi_id = ? AND r.confirmed_at IS NOT NULL\n"
+          + "   AND r.authoring_snapshot IS NOT NULL AND r.compile_request_id IS NOT NULL\n"
+          + "   AND r.compilation_fingerprint = ?\n"
+          + "   AND r.\"references\" = CAST(? AS jsonb)\n"
+          + "   AND (e.id IS NOT NULL OR (r.authoring_snapshot = CAST(? AS jsonb)\n"
+          + "     AND r.source_revision = ? AND r.configuration_revision <> ?))\n"
+          + " ORDER BY r.created_at DESC, r.id DESC LIMIT 1\n";
 
   /**
    * The content-identity publisher statement ({@code CompileStateService.INSERT_REVISION}).
@@ -344,7 +349,7 @@ class InferenceMigrationLatestIT {
   private static String tamperValue(String dataType) {
     return switch (dataType) {
       case "uuid" -> "gen_random_uuid()";
-      case "character varying", "text" -> "'tampered'";
+      case "character", "character varying", "text" -> "'tampered'";
       case "bigint", "integer" -> "999";
       case "jsonb" -> "'{\"tampered\":true}'::jsonb";
       case "timestamp with time zone" -> "NOW()-INTERVAL '1 day'";
@@ -454,9 +459,10 @@ class InferenceMigrationLatestIT {
       assertThat(
               scalar(
                   c,
-                  "SELECT count(*) FROM pg_inherits i WHERE i.inhparent='ui_test_executions'::regclass"
-                      + " AND NOT EXISTS (SELECT 1 FROM pg_trigger t WHERE t.tgrelid=i.inhrelid"
-                      + " AND t.tgname='trg_studio_execution_scope_immutable')"))
+                  "SELECT count(*) FROM pg_inherits i WHERE"
+                      + " i.inhparent='ui_test_executions'::regclass AND NOT EXISTS (SELECT 1 FROM"
+                      + " pg_trigger t WHERE t.tgrelid=i.inhrelid AND"
+                      + " t.tgname='trg_studio_execution_scope_immutable')"))
           .isEqualTo("0");
       UUID existing = UUID.randomUUID();
       s.executeUpdate(
