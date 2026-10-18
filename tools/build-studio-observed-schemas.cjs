@@ -1,122 +1,142 @@
 #!/usr/bin/env node
 'use strict';
-// OBS-006 closed schemas and packaged, browser-free validator types. No network resolution.
+// The closed v3 JSON schemas are the source. This generator never edits those schemas.
 const fs = require('node:fs');
 const path = require('node:path');
-const crypto = require('node:crypto');
 const root = path.resolve(__dirname, '..');
-const dir = path.join(root, 'docs/specs/studio-observed-authoring/contracts/v2');
-const base = 'https://checks.citi.example/contracts/observed/v2/';
-const draft = 'http://json-schema.org/draft-07/schema#';
-const clone = value => structuredClone(value);
-const id = { type:'string', minLength:1, maxLength:256 };
-const uuid = { type:'string', pattern:'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$' };
-const h = { type:'string', pattern:'^[a-f0-9]{64}$' };
-const n = { type:'integer', minimum:0, maximum:2147483647 };
-const time = { type:'string', format:'date-time', pattern:'^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$' };
-const rev = { type:'string', pattern:'^(0|[1-9][0-9]{0,18})$' };
-const origin = { type:'string',format:'uri',maxLength:256,pattern:'^https?://[^/?#]+$' };
-const bool = {type:'boolean'};
-const string = {type:'string'};
-const text = {type:'string',maxLength:4000};
-const elapsed = {type:'number',minimum:0,maximum:2147483647};
-const literal = value => ({const:value});
-const enumeration = (...values) => ({type:'string',enum:values});
-const nullable = value => ({oneOf:[value,{type:'null'}]});
-const array = (items,max,min=0) => ({type:'array',minItems:min,maxItems:max,items});
-const object = (properties, optional=[]) => ({type:'object',additionalProperties:false,properties,required:Object.keys(properties).filter(k=>!optional.includes(k))});
-const ref = (file,fragment='') => ({$ref:base+file+'.schema.json'+fragment});
-const defs = (file,name) => ref(file,'#/definitions/'+name);
-const schema = name => JSON.parse(fs.readFileSync(path.join(dir,name+'.schema.json'),'utf8'));
-const files = {};
-const writeSchema = (name, shape, definitions={}) => { files[name] = {$schema:draft,$id:base+name+'.schema.json',title:'Observed replay '+name,...shape,...Object.keys(definitions).length?{definitions}:{}}; };
-const operation = ref('action','#/properties/operation');
-const coordinate = ref('action','#/properties/coordinate');
-const locator = ref('action','#/properties/target/oneOf/0/properties/locator');
-const initial = ref('learned-plan','#/properties/initialContext');
-const readRecipe = ref('producer','#/properties/recipe');
-const kinds = enumeration('navigate','click','fill','press','check','uncheck','hover','selectOption','read','assert');
-const slot = enumeration('navigate.destination','fill.value','selectOption.value','assert.expected');
-const consumerSlot = enumeration('fill.value','selectOption.value','assert.expected');
-const profile = object({catalog:literal('observed-replay-1'),playwright:literal('1.63.0'),browserEngine:literal('chromium'),contract:literal(2),learnedPlan:literal(2),observation:literal(2),guidedPolicy:literal(2),referencePolicy:literal(3),lowering:literal(1),artifact:literal(2),language:literal('observed-2'),executor:literal('observed-2'),publicationEvidence:literal(1),validationBasis:literal(1),validator:literal('observed-1'),protocol:literal(2),replayAuthorization:literal(1),accountAbi:literal(1)});
-const build = object({profileHash:h,schemaBundleHash:h,referenceBundleHash:h,executableImageDigest:h,chromiumBuild:id});
-const configuration = object({browser:literal('chromium'),viewport:object({width:{...n,minimum:1,maximum:8192},height:{...n,minimum:1,maximum:8192}}),timeoutSeconds:{type:'integer',minimum:1,maximum:120},waitStrategy:enumeration('load','domcontentloaded','networkidle'),environment:id});
-const requirementsProps={csiId:id,environment:id,applicationId:id,accountRef:id,allowedOrigins:{...array(origin,10,1),uniqueItems:true},capabilities:{...array(kinds,10,1),uniqueItems:true},policyId:id,policyVersion:id,entryPolicyId:id,initialContext:initial};
-const requirements=object(requirementsProps);
-const scope=object({principalId:id,...requirementsProps,allowedOrigins:{...array(origin,32,1),uniqueItems:true}});
-writeSchema('replay-profile',profile,{BuildIdentity:build,Configuration:configuration,ReplayRequirements:requirements,Scope:scope,LearningProvenance:object({guidedModelContractHash:h,guidedProviderSchemaHash:h,guidedPromptHash:nullable(h),outputContractHash:h,publicationResultVersion:literal(3),configuredModel:nullable(id),providerReturnedModelVersion:nullable(id)})});
-const inputRecipe=object({inputId:id,stepId:uuid,kind:enumeration('destination','nonsecretText'),intendedSlot:slot,provenance:{oneOf:[object({kind:literal('sourceSpan'),start:n,end:n,sourceHash:h}),object({kind:literal('configuration'),referenceId:id,referenceName:id})]}});
-const guard=object({guardId:id,origin:nullable(origin),target:{oneOf:[object({kind:literal('initialBlank')}),object({kind:literal('page')}),object({kind:literal('element'),locator,role:id,elementType:enumeration('button','input','textarea','select','text','link','other'),controlType:enumeration('none','text','search','email','tel','url','textarea','password','hidden','other'),classification:enumeration('structuralOnly','permittedBusinessData','nonsecretApproved','withheld'),visible:bool,actionable:bool,readRuleId:nullable(id)})]}});
-const transfer=object({bindingId:id,producer:coordinate,consumer:coordinate,slot:consumerSlot,origin});
-const runtimeBinding=object({bindingId:id,producer:coordinate,recipe:readRecipe,origin});
-const action=object({coordinate,guardId:id,operation});
-const step=object({stepIndex:n,stepId:uuid,operations:array(ref('replay-operation'),8,1)});
-writeSchema('replay-operation',action,{InputRecipe:inputRecipe,Guard:guard,Transfer:transfer,RuntimeBinding:runtimeBinding,Step:step});
-const policy=object({schemaVersion:literal(3),learnedPlanHash:h,admissionProvenanceHash:h,publicationEvidenceHash:h,runAuthorizationHash:h,scope:defs('replay-profile','ReplayRequirements'),inputs:array(defs('replay-operation','InputRecipe'),200),bindings:array(ref('binding'),32),transfers:array(defs('replay-operation','Transfer'),200)});
-writeSchema('replay-policy',policy);
-const artifact=object({version:literal(2),kind:literal('observed'),profile:ref('replay-profile'),sourceHash:h,configurationHash:h,authoringHash:h,learnedPlan:ref('learned-plan'),learnedPlanHash:h,inputRecipes:array(defs('replay-operation','InputRecipe'),200),guards:array(defs('replay-operation','Guard'),200,1),replayPolicy:ref('replay-policy'),steps:array(defs('replay-operation','Step'),100,1)});
-writeSchema('replay-artifact',artifact);
-const accepted=clone(schema('source-selection')); delete accepted.$schema;delete accepted.$id;delete accepted.title;delete accepted.definitions;
-accepted.properties.obligations.items.properties.obligationId=uuid;accepted.properties.obligations.items.required.push('obligationId');
-accepted.properties.needs.items.properties.bindingId=id;accepted.properties.needs.items.required.push('bindingId');
-const inputIndex=object({inputId:id,stepId:uuid,kind:enumeration('destination','nonsecretText'),intendedSlot:slot,provenance:ref('source-reference')});
-const cfgRef=object({referenceId:id,referenceName:id,stepId:uuid,kind:enumeration('destination','nonsecretText'),intendedSlot:slot,inputId:id});
-// Original observed-choice evidence is private publication input, never child authority.
-const originalInstant=ref('session','#/properties/owner/properties/leaseExpiresAt');
-const questionCapture=object({version:literal(1),attemptId:id,requestId:id,attempt:{type:'integer',minimum:1,maximum:3},planRevision:rev,planHash:h,obligationId:uuid,workerId:id,ownerFence:n,contextId:id,contextRevision:n,authoredInputsHash:h,executionEvidence:ref('execution-evidence'),evidenceHash:h,observationHash:h,modelQuestionHash:h});
-const answerCoordinate=object({stepId:id,ordinal:{type:'integer',minimum:0,maximum:7}});
-const answerSnapshot=object({sessionId:id,scopeHash:h,clarificationId:id,coordinate:answerCoordinate,documentId:id,generation:n,choiceId:id,nodeId:id,bindingId:nullable(id),sourceRevision:rev,configurationRevision:rev,resolvedAt:originalInstant});
-const choiceReceipt=object({version:literal(1),sessionId:id,preparationId:id,clarificationId:id,obligationId:uuid,contextIdentityHash:h,meaningsHash:h,questionCaptureHash:h,acceptedChoiceId:id,answer:defs('replay-validation','ObservedAnswerSnapshot')});
-const observedMeaning=object({obligationId:uuid,nodeId:id,bindingId:nullable(id),locator});
-const modelQuestion=object({reason:enumeration('AMBIGUOUS_TARGET','AMBIGUOUS_BINDING','INSUFFICIENT_EVIDENCE'),choices:array(object({choiceId:id,safeLabel:id,meaning:defs('replay-validation','ObservedQuestionMeaning')}),10,2)});
-const questionContext=object({sessionId:id,scopeHash:h,sourceRevision:rev,configurationRevision:rev,clarificationId:id,question:ref('clarification'),questionCapture:defs('replay-validation','QuestionCapture1')});
-const questionAttempt=object({attemptId:id,requestId:id,attempt:{type:'integer',minimum:1,maximum:3},kind:literal('NEXT_ACTION'),status:literal('APPLIED'),projectionHash:h,planRevision:rev,scopeHash:h,scope:ref('session','#/properties/scope'),owner:ref('session','#/properties/owner'),documentId:id,generation:n,executionEvidence:ref('execution-evidence'),responseSchemaVersion:literal(2),responseRequestId:id,responseKind:literal('NEXT_ACTION'),responseStatus:literal('CLARIFICATION'),modelQuestion:defs('replay-validation','ModelObservedQuestion')});
-const questionPlan=object({revision:rev,planHash:h,plan:defs('replay-validation','AcceptedTranslationPlan')});
-const choiceWitness=object({version:literal(1),receipt:defs('replay-validation','ObservedChoiceReceipt1'),context:defs('replay-validation','ObservedQuestionContext'),meanings:array(object({choiceId:id,meaning:defs('replay-validation','ObservedQuestionMeaning')}),10,2),acceptedChoiceId:id,attempt:defs('replay-validation','QuestionAttemptEvidence'),questionPlan:defs('replay-validation','QuestionPlanEvidence')});
-const preparationFact=object({preparationId:id,proposal:ref('action'),proof:ref('bridge','#/definitions/preparation'),executionEvidence:ref('execution-evidence'),observationHash:nullable(h),observedChoice:defs('replay-validation','ObservedChoiceWitness1')},['observedChoice']);
-const basis=object({schemaVersion:literal(1),sessionId:id,testId:uuid,csiId:id,sourceRevision:rev,configurationRevision:rev,sourceHash:h,configurationHash:h,authoringHash:h,sourceManifestHash:h,authoredInputsHash:h,configuration:defs('replay-profile','Configuration'),learningProvenance:defs('replay-profile','LearningProvenance'),sourceSteps:array(object({stepId:uuid,ordinal:n,source:text}),100,1),scope:ref('session','#/properties/scope'),runAuthorization:ref('session','#/properties/runAuthorization'),replayRequirements:defs('replay-profile','ReplayRequirements'),bootstrap:object({contextId:id,contextRevision:n,ownerFence:n,materializationRevision:n,inputsHash:h,allocationHash:h,metadataAcknowledged:literal(true),initialEvidence:ref('execution-evidence')}),translationRevision:rev,translationHash:h,translationPlan:defs('replay-validation','AcceptedTranslationPlan'),sourceSelections:array(ref('source-selection','#/definitions/sourceQuestionMeaning'),200),obligationAssociations:array(object({obligationId:id,coordinate,admissionId:id,proposalHash:h}),800,1),inputs:array(defs('replay-validation','InputIndex'),200),configurationReferences:array(defs('replay-validation','ConfigReference'),200),observations:array(object({observationHash:h,observation:ref('observation')}),400),preparations:array(defs('replay-validation','PreparationFact'),200,1),actions:array(object({obligationId:id,preparationId:id,ledger:ref('ledger')}),200,1),allocations:array(ref('allocation'),32),producers:array(ref('producer'),32),consumerEdges:array(ref('consumer-edge'),200),bindings:array(ref('binding'),32),transfers:array(defs('replay-operation','Transfer'),200)});
-const validation=object({schemaVersion:literal(2),attemptId:uuid,claimId:uuid,snapshotHash:h,basisHash:h,requiredProfile:ref('replay-profile'),requiredBuild:defs('replay-profile','BuildIdentity'),artifact:ref('replay-artifact'),validationBasis:defs('replay-validation','ValidationBasis')});
-const verdict=object({schemaVersion:literal(2),attemptId:uuid,claimId:uuid,snapshotHash:h,basisHash:h,profile:ref('replay-profile'),build:defs('replay-profile','BuildIdentity'),ok:bool,artifactHash:h,learnedPlanHash:h,referencePolicyHash:h,operationEquivalenceHash:h,admissionProvenanceHash:h,publicationEvidenceHash:h,errorCode:nullable(enumeration('INVALID_CONTRACT','EVIDENCE_MISMATCH','OPERATION_MISMATCH','REFERENCE_MISMATCH','PROFILE_MISMATCH','LIMIT_EXCEEDED'))});
-writeSchema('replay-validation',validation,{ValidationBasis:basis,ValidationVerdict:verdict,AcceptedTranslationPlan:accepted,InputIndex:inputIndex,ConfigReference:cfgRef,PreparationFact:preparationFact,QuestionCapture1:questionCapture,ObservedAnswerSnapshot:answerSnapshot,ObservedChoiceReceipt1:choiceReceipt,ObservedQuestionMeaning:observedMeaning,ModelObservedQuestion:modelQuestion,ObservedQuestionContext:questionContext,QuestionAttemptEvidence:questionAttempt,QuestionPlanEvidence:questionPlan,ObservedChoiceWitness1:choiceWitness});
-const replayGrant=object({version:literal(1),grantId:uuid,executionId:uuid,attemptId:uuid,revisionId:uuid,revisionDigest:h,principalId:id,csiId:id,scopeHash:h,profileHash:h,buildHash:h,currentPolicyHash:h,accountGrantId:uuid,issuedAt:time,expiresAt:time});
-const accountAuth=object({version:literal(1),grantId:uuid,providerId:id,executionId:uuid,attemptId:uuid,revisionDigest:h,scope:defs('replay-profile','Scope'),scopeHash:h,issuedAt:time,expiresAt:time});
-const accountHandle=object({version:literal(1),authorization:defs('replay-account','AccountAuthorization'),opaqueHandle:{type:'string',minLength:1,maxLength:4096,pattern:'^[A-Za-z0-9_-]+$'}});
-writeSchema('replay-account',accountHandle,{ReplayGrant:replayGrant,AccountAuthorization:accountAuth,ReplayAccountRequest:object({executionId:uuid,attemptId:uuid,revisionDigest:h,scope:defs('replay-profile','Scope'),issuedAt:time,latestExpiry:time})});
-const binding=object({version:literal(1),executionId:uuid,startedAt:time,attemptId:uuid,revisionId:uuid,revisionDigest:h,testId:uuid,csiId:id,principalId:id,environment:id,artifactHash:h,configurationHash:h,learnedPlanHash:h,referencePolicyHash:h,publicationEvidenceHash:h,requiredProfile:ref('replay-profile'),requiredBuild:defs('replay-profile','BuildIdentity'),scope:defs('replay-profile','Scope'),scopeHash:h,currentPolicyHash:h,replayGrant:defs('replay-account','ReplayGrant'),accountAuthorization:defs('replay-account','AccountAuthorization')});
-const recording=object({width:{type:'integer',minimum:1,maximum:8192},height:{type:'integer',minimum:1,maximum:8192}});
-const job=object({schemaVersion:literal(2),kind:literal('observed'),binding:defs('replay-job','ExecutionBinding'),artifact:ref('replay-artifact'),configuration:defs('replay-profile','Configuration'),inputs:array(object({inputId:id,value:{type:'string',maxLength:4096}}),200),accountHandle:ref('replay-account'),runtime:object({stepTimeoutMs:n,totalRuntimeMs:n}),recording});
-const admission=object({schemaVersion:literal(2),kind:literal('observed'),executionId:uuid,startedAt:time,attemptId:uuid,runnerInstanceId:id,admissionId:uuid,revisionId:uuid,revisionDigest:h,artifactHash:h,configurationHash:h,learnedPlanHash:h,referencePolicyHash:h,publicationEvidenceHash:h,scopeHash:h,currentPolicyHash:h,grantId:uuid,accountGrantId:uuid,profile:ref('replay-profile'),build:defs('replay-profile','BuildIdentity')});
-const receipt=object({schemaVersion:literal(2),kind:literal('observed'),admissionId:uuid,request:defs('replay-job','AdmissionRequest'),admittedAt:time,startDeadlineAt:time,runDeadlineAt:time});
-writeSchema('replay-job',job,{ExecutionBinding:binding,AdmissionRequest:admission,AdmissionReceipt:receipt,RecordingConfiguration1:recording});
-const readGrant=object({policyRuleId:id,origin,region:{oneOf:[object({kind:literal('application')}),object({kind:literal('role'),role:enumeration('main','region','form'),name:id,exact:literal(true)})]},visibleText:object({classification:literal('permittedBusinessData')}),controlValue:object({classification:literal('nonsecretApproved'),types:{...array(enumeration('text','search','email','tel','url','textarea'),6,1),uniqueItems:true}})},['visibleText','controlValue']);
-readGrant.anyOf=[{properties:{visibleText:{}},required:['visibleText']},{properties:{controlValue:{}},required:['controlValue']}];
-const field=object({testId:id,name:id,policyRuleId:id,classification:enumeration('structuralOnly','permittedBusinessData','nonsecretApproved'),accessibleName:id},['accessibleName']);
-const trustedPolicy=object({version:literal(1),policyId:id,policyVersion:id,applicationId:id,environment:id,accountRef:id,allowedOrigins:{...array(origin,32,1),uniqueItems:true},entryPolicyId:id,applicationPolicy:nullable(object({policyRuleId:id,allowStructuralDiscovery:literal(true),readGrants:array(defs('replay-ipc','ReadGrant'),32)})),rules:array(defs('replay-ipc','FieldOverride'),128)});
-const baseFrame={protocolVersion:literal(2),mode:literal('observed'),runId:uuid,attemptId:uuid};
-const launch=object({kind:literal('launch'),...baseFrame,admission:defs('replay-job','AdmissionReceipt'),profile:ref('replay-profile'),build:defs('replay-profile','BuildIdentity'),scopeHash:h,configurationHash:h,browser:literal('chromium'),viewport:configuration.properties.viewport,recording,seekOriginCalibrationMs:elapsed,scratchPath:{type:'string',minLength:1,maxLength:1024},totalRuntimeMs:n,accountHandle:ref('replay-account'),policy:defs('replay-ipc','TrustedPolicy')});
-const execute=object({kind:literal('execute'),...baseFrame,profileHash:h,configurationHash:h,waitStrategy:configuration.properties.waitStrategy,stepTimeoutMs:n,steps:array(defs('replay-operation','Step'),100,1),guards:array(defs('replay-operation','Guard'),200,1),bindings:array(defs('replay-operation','RuntimeBinding'),32),transfers:array(defs('replay-operation','Transfer'),200),inputs:array(object({inputId:id,stepId:uuid,kind:enumeration('destination','nonsecretText'),intendedSlot:slot,value:{type:'string',maxLength:4096}}),200)});
-const errors=enumeration('INVALID_CONTRACT','PROFILE_MISMATCH','AUTHORIZATION_EXPIRED','ACCOUNT_UNAVAILABLE','ACCOUNT_UNKNOWN','POLICY_REFUSED','TARGET_DRIFT','READ_REFUSED','REFERENCE_REFUSED','ASSERTION_FAILED','CANCELLED','TIMEOUT','OUTCOME_UNKNOWN','INTERNAL_ERROR');
-const ready=object({kind:literal('ready'),...baseFrame,profileHash:h,build:defs('replay-profile','BuildIdentity'),admissionId:uuid,browserStartedAt:time,startedAtMs:elapsed,calibrationOffsetMs:nullable(elapsed)});
-const start=object({kind:literal('step-started'),...baseFrame,stepIndex:n,stepId:uuid,startedAtMs:elapsed});
-const finish=object({kind:literal('step-finished'),...baseFrame,stepIndex:n,stepId:uuid,status:enumeration('PASS','FAIL','SKIPPED'),startedAtMs:nullable(elapsed),finishedAtMs:nullable(elapsed),durationMs:nullable(elapsed),errorCode:nullable(errors)});
-const result=object({kind:literal('result'),...baseFrame,admissionId:uuid,profileHash:h,build:defs('replay-profile','BuildIdentity'),ok:bool,errorCode:nullable(errors),recording:object({path:nullable({type:'string',maxLength:1024}),bytes:nullable(n),errorCode:nullable(literal('RECORDING_FAILED')),state:enumeration('PENDING','FAILED','UNAVAILABLE'),partial:bool})});
-writeSchema('replay-ipc',{oneOf:['Launch2','Execute2','Ready2','StepStarted2','StepFinished2','Result2','Stop'].map(name=>defs('replay-ipc',name))},{TrustedPolicy:trustedPolicy,ReadGrant:readGrant,FieldOverride:field,Launch2:launch,Execute2:execute,Ready2:ready,StepStarted2:start,StepFinished2:finish,Result2:result,Stop:object({kind:literal('stop')})});
-writeSchema('publication',object({schemaVersion:literal(2),expectedSourceRevision:rev,expectedConfigurationRevision:rev}),{PublicationReceipt:object({schemaVersion:literal(3),sessionId:id,revisionId:uuid,revisionDigest:h,learnedPlanHash:h,artifactHash:h,publicationEvidenceHash:h,publishedAt:time,learnedFromThisRun:literal(true),replayVerified:literal(false)})});
-
-const revisionIdentity=object({version:literal(1),testId:uuid,csiId:id,sourceRevision:rev,configurationRevision:rev,sourceHash:h,configurationHash:h,authoringHash:h,learnedPlanHash:h,artifactHash:h,referencePolicyHash:h,operationEquivalenceHash:h,admissionProvenanceHash:h,publicationEvidenceHash:h,runAuthorizationHash:h,profileHash:h});
-writeSchema('revision',object({schemaVersion:literal(2),id:uuid,revisionDigest:h,identity:defs('revision','RevisionIdentity')}),{RevisionIdentity:revisionIdentity});
-for(const [name,body] of Object.entries(files))fs.writeFileSync(path.join(dir,name+'.schema.json'),JSON.stringify(body,null,2)+'\n');
-// Only transitively referenced schemas enter the runtime bundle; no public-v3 or model resolver.
-const bundled={};
-function add(name){if(bundled[name])return;const s=schema(name);bundled[name]=s;function walk(v){if(!v||typeof v!=='object')return;if(v.$ref){const u=new URL(v.$ref,s.$id);if(!u.href.startsWith(base))throw Error('foreign schema');const other=path.basename(u.pathname).replace('.schema.json','');if(other!==name)add(other);}for(const x of Object.values(v))walk(x);}walk(s)}
-for(const name of Object.keys(files))add(name);
-fs.writeFileSync(path.join(root,'studio-runner/src/validator/observedSchemas.json'),JSON.stringify(bundled,null,2)+'\n');
-const names=new Map();const aliases={action:'GuidedAction',ledger:'GuidedLedger',observation:'ObservedPage',producer:'OriginalProducer','consumer-edge':'OriginalConsumerEdge',allocation:'OriginalAllocation',binding:'HistoricalBinding','learned-plan':'LearnedPlan','source-reference':'SourceReference','execution-evidence':'ExecutionEvidence',session:'GuidedSession','replay-profile':'Profile','replay-operation':'ReplayAction','replay-policy':'Policy3','replay-artifact':'Artifact2','replay-validation':'ValidationRequest','replay-account':'AccountHandle','replay-job':'ObservedJob','replay-ipc':'ObservedFrame',publication:'FinalizeRequest'};
-for(const [file,s] of Object.entries(bundled)){names.set(s.$id,aliases[file]??file.replace(/(^|-)([a-z])/g,(_,a,b)=>b.toUpperCase()));for(const name of Object.keys(s.definitions??{}))names.set(s.$id+'#/definitions/'+name,name==='identity'?'GuidedIdentity':name)}
-const emitted=new Map();
-function lookup(url){const [id,frag]=url.split('#');const s=Object.values(bundled).find(x=>x.$id===id);if(!s)throw Error('unknown ref '+url);return frag?frag.slice(1).split('/').reduce((a,k)=>a[k],s):s;}
-function type(s,baseId){if(s.$ref){const url=new URL(s.$ref,baseId).href;if(names.has(url)){emit(url);return names.get(url)}return type(lookup(url),url.split('#')[0])}if(Object.hasOwn(s,'const'))return JSON.stringify(s.const);if(s.enum)return s.enum.map(x=>JSON.stringify(x)).join(' | ');if(s.oneOf)return s.oneOf.map(x=>'('+type(x,baseId)+')').join(' | ');if(Array.isArray(s.type))return s.type.map(t=>type({...s,type:t},baseId)).join(' | ');if(s.type==='null')return 'null';if(s.type==='string')return 'string';if(s.type==='integer'||s.type==='number')return 'number';if(s.type==='boolean')return 'boolean';if(s.type==='array')return 'readonly ('+type(s.items,baseId)+')[]';if(s.type==='object')return '{ '+Object.entries(s.properties??{}).map(([k,v])=>'readonly '+JSON.stringify(k)+(s.required?.includes(k)?'':'?')+': '+type(v,baseId)+';').join(' ')+' }';return 'unknown'}
-function emit(url){const name=names.get(url);if(emitted.has(name))return;emitted.set(name,'');const shape=lookup(url);emitted.set(name,shape.type==='object'&&!shape.oneOf?'export interface '+name+' '+type(shape,url.split('#')[0]):'export type '+name+' = '+type(shape,url.split('#')[0])+';')}
-for(const file of Object.keys(files)){emit(base+file+'.schema.json');for(const name of Object.keys(files[file].definitions??{}))emit(base+file+'.schema.json#/definitions/'+name)}
-fs.writeFileSync(path.join(root,'studio-runner/src/executor/observedOperations.ts'),'/** Generated from closed observed replay contracts. Never edit by hand. */\n'+[...emitted.values()].filter(Boolean).join('\n')+'\n');
-console.log('Observed replay schema freeze: '+Object.keys(files).length+' new families, '+Object.keys(bundled).length+' transitively packaged schemas.');
+const directory = path.join(root, 'docs/specs/studio-observed-authoring/contracts/v3');
+const base = 'https://checks.citi.example/contracts/observed/v3/';
+const schemas = Object.fromEntries(fs.readdirSync(directory).filter(n => n.endsWith('.schema.json')).sort()
+  .map(file => [file.replace('.schema.json', ''), JSON.parse(fs.readFileSync(path.join(directory, file), 'utf8'))]));
+for (const [name, schema] of Object.entries(schemas)) {
+  if (schema.$id !== base + name + '.schema.json') throw Error('Wrong canonical schema identity: ' + name);
+}
+function closure(roots) {
+  const result = {};
+  function add(name) {
+    if (result[name]) return;
+    const schema = schemas[name];
+    if (!schema) throw Error('Missing schema: ' + name);
+    result[name] = schema;
+    function visit(value) {
+      if (!value || typeof value !== 'object') return;
+      if (value.$ref) {
+        const url = new URL(value.$ref, schema.$id);
+        if (!url.href.startsWith(base)) throw Error('Foreign schema: ' + url.href);
+        add(path.basename(url.pathname).replace('.schema.json', ''));
+      }
+      for (const child of Object.values(value)) visit(child);
+    }
+    visit(schema);
+  }
+  roots.forEach(add);
+  return Object.fromEntries(Object.entries(result).sort(([a], [b]) => a.localeCompare(b)));
+}
+const pascal = name => name.replace(/(^|-)([a-z])/g, (_, prefix, letter) => letter.toUpperCase());
+function generateTypes(bundle, aliases, namedDefinitions) {
+  const names = new Map();
+  for (const [file, schema] of Object.entries(bundle)) {
+    names.set(schema.$id, aliases[file] ?? pascal(file));
+    for (const definition of Object.keys(schema.definitions ?? {})) {
+      names.set(schema.$id + '#/definitions/' + definition,
+        namedDefinitions[file]?.[definition] ?? pascal(definition));
+    }
+  }
+  const emitted = new Map();
+  function resolve(url) {
+    const [id, fragment] = url.split('#');
+    const schema = Object.values(bundle).find(item => item.$id === id);
+    if (!schema) throw Error('Unknown type ref: ' + url);
+    return fragment ? fragment.slice(1).split('/').reduce((value, key) => value[key], schema) : schema;
+  }
+  function type(schema, baseId) {
+    if (schema.$ref) {
+      const url = new URL(schema.$ref, baseId).href;
+      if (names.has(url)) { emit(url); return names.get(url); }
+      return type(resolve(url), url.split('#')[0]);
+    }
+    if (Object.hasOwn(schema, 'const')) return JSON.stringify(schema.const);
+    if (schema.enum) return schema.enum.map(JSON.stringify).join(' | ');
+    if (schema.oneOf) return schema.oneOf.map(branch => '(' + type(branch, baseId) + ')').join(' | ');
+    if (Array.isArray(schema.type)) return schema.type.map(t => type({...schema, type:t}, baseId)).join(' | ');
+    if (schema.type === 'null') return 'null';
+    if (schema.type === 'string' || schema.type === 'boolean') return schema.type;
+    if (schema.type === 'integer' || schema.type === 'number') return 'number';
+    if (schema.type === 'array') return 'readonly (' + type(schema.items, baseId) + ')[]';
+    if (schema.type === 'object') {
+      if (schema.patternProperties) {
+        const valueTypes = [...new Set(Object.values(schema.patternProperties).map(value => type(value, baseId)))];
+        return 'Readonly<Record<string, ' + valueTypes.join(' | ') + '>>';
+      }
+      // A property-less object is a map, not `{}`: closed (additionalProperties:false) admits no key;
+      // a schema-valued additionalProperties types every value; absent/true admits any JSON value.
+      if (Object.keys(schema.properties ?? {}).length === 0) {
+        const additional = schema.additionalProperties;
+        if (additional === false) return 'Readonly<Record<string, never>>';
+        return 'Readonly<Record<string, ' + (additional && typeof additional === 'object'
+          ? type(additional, baseId) : 'unknown') + '>>';
+      }
+      return '{ ' + Object.entries(schema.properties ?? {}).map(([key, value]) =>
+        'readonly ' + JSON.stringify(key) + (schema.required?.includes(key) ? '' : '?') + ': ' + type(value, baseId) + ';').join(' ') + ' }';
+    }
+    return 'unknown';
+  }
+  function emit(url) {
+    const name = names.get(url);
+    if (emitted.has(name)) return;
+    emitted.set(name, '');
+    const schema = resolve(url);
+    const body = type(schema, url.split('#')[0]);
+    emitted.set(name, schema.type === 'object' && !schema.oneOf && body.startsWith('{ ')
+      ? 'export interface ' + name + ' ' + body : 'export type ' + name + ' = ' + body + ';');
+  }
+  for (const schema of Object.values(bundle)) {
+    emit(schema.$id);
+    for (const definition of Object.keys(schema.definitions ?? {})) emit(schema.$id + '#/definitions/' + definition);
+  }
+  return '/** Generated from closed observed v3 contracts by tools/build-studio-observed-schemas.cjs. Never edit by hand. */\n' +
+    [...emitted.values()].filter(Boolean).join('\n') + '\n';
+}
+const guidedRoots = ['session','limits','availability','allocation','authored-inputs','bridge','runner-context','commands',
+  'consumer-edge','action','source-reference','ledger','producer','assignment','assignment-receipt',
+  'assignment-stop','assignment-lifecycle','observation-refresh'];
+const guided = closure(guidedRoots);
+const guidedNames = {bridge:'Bridge', 'consumer-edge':'ConsumerEdge'};
+const guidedDefs = {
+  bridge:Object.fromEntries(Object.keys(schemas.bridge.definitions).map(name => [name,'Bridge'+pascal(name)])),
+  commands:Object.fromEntries(Object.keys(schemas.commands.definitions).map(name => [name,'Commands'+pascal(name)])),
+};
+const observedRoots = ['replay-profile','replay-operation','replay-policy','replay-artifact','replay-validation',
+  'replay-job','replay-ipc','publication','revision'];
+const observed = closure(observedRoots);
+const aliases = {action:'GuidedAction',ledger:'GuidedLedger',observation:'ObservedPage',producer:'OriginalProducer',
+  'consumer-edge':'OriginalConsumerEdge',allocation:'OriginalAllocation',binding:'HistoricalBinding',
+  'learned-plan':'LearnedPlan','source-reference':'SourceReference','execution-evidence':'ExecutionEvidence',
+  session:'GuidedSession','replay-profile':'Profile','replay-operation':'ReplayAction','replay-policy':'Policy4',
+  'replay-artifact':'Artifact3','replay-validation':'ValidationRequest','replay-job':'ObservedJob',
+  'replay-ipc':'ObservedFrame',publication:'FinalizeRequest'};
+const outputs = {
+  'studio-runner/src/guided/schemas.json':JSON.stringify(Object.fromEntries(Object.entries(guided).map(([k,v])=>[k+'.schema.json',v])),null,2)+'\n',
+  'studio-runner/src/guided/types.ts':generateTypes(guided,guidedNames,guidedDefs),
+  'studio-runner/src/validator/observedSchemas.json':JSON.stringify(observed,null,2)+'\n',
+  'studio-runner/src/executor/observedOperations.ts':generateTypes(observed,aliases,{bridge:{identity:'GuidedIdentity'}}),
+};
+const summary = Object.keys(guided).length + ' guided schemas, ' + Object.keys(observed).length +
+  ' replay schemas; four byte-identical outputs';
+/** Throws unless every checked-in output equals a fresh regeneration byte for byte. */
+function check() {
+  for (const [file, content] of Object.entries(outputs)) {
+    if (fs.readFileSync(path.join(root, file), 'utf8') !== content) throw Error('Stale generated output: ' + file);
+  }
+  return summary;
+}
+function generate() {
+  for (const [file, content] of Object.entries(outputs)) fs.writeFileSync(path.join(root, file), content);
+  return summary;
+}
+module.exports = { check, generate, outputs };
+if (require.main === module) {
+  const verified = process.argv.includes('--check');
+  console.log((verified ? 'Verified' : 'Generated') + ' v3: ' + (verified ? check() : generate()) +
+    '. Backend processResources packages the same source schemas.');
+}

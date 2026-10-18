@@ -1,5 +1,7 @@
 # Studio context: architecture assessment
 
+> **Superseded (2026-10-12):** Superseded by [ADR-SC-005](../../architecture/ADR-SC-005-single-path-observed-authoring.md) (single observed path; compile-to-READY removed in STUDIO-OBS-012A).
+
 Assessed 2026-09-18 by @architect against this working tree. This is a static source review, not a live LLM/browser evaluation. Existing uncommitted product changes were inspected and preserved. Proposed changes below are design recommendations for this spec pipeline, not implemented functionality. The user's scope response selected both supplied context and live page inspection; both paths are therefore included in the requested specification.
 
 ## Finding

@@ -1,0 +1,900 @@
+{
+  "description": "ARCH015-03 T1 recording timing order, shared by backend GuidedRecordingTimingsTest and runner test/guided/evidence.test.ts (validation ledger rows 83/84). Order: startMs, kind (prefixReplay, step, clarificationWait, action), ordinal null first, stepId, then admissionId null first; both identifiers in Unicode code point (scalar) order, never UTF-16 code-unit or locale order. readings are runner readings (rounded once to wire); wire is the runner's recordingEvidence.timings; accepted is the backend's merged list with derived step items. utf16CodeUnitOrder records the admission order a UTF-16 comparator would produce when it differs. refused bodies are checked against refusedLedger by the backend only.",
+  "order": [
+    "startMs",
+    "kind",
+    "ordinal",
+    "stepId",
+    "admissionId"
+  ],
+  "kindOrder": [
+    "prefixReplay",
+    "step",
+    "clarificationWait",
+    "action"
+  ],
+  "limits": {
+    "maxSessionSeconds": 600,
+    "maxActions": 200,
+    "maxSourceSteps": 100
+  },
+  "cases": [
+    {
+      "name": "equalMeasuredKeysDistinctAdmissions",
+      "ledgerRow": 83,
+      "note": "Two admitted attempts at one coordinate whose rounded readings tie on (startMs, ordinal, stepId); both are kept, ordered by admissionId, readings unchanged.",
+      "ledger": [
+        {
+          "admissionId": "a-old",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "b-new",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      ],
+      "readings": [
+        {
+          "admissionId": "b-new",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "startMs": 100.4,
+          "endMs": 110.2
+        },
+        {
+          "admissionId": "a-old",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "startMs": 99.6,
+          "endMs": 105
+        }
+      ],
+      "wire": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "b-new",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 110
+        }
+      ],
+      "accepted": [
+        {
+          "kind": "step",
+          "stepId": "step-1",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 100,
+          "endMs": 110
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "b-new",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 110
+        }
+      ],
+      "utf16CodeUnitOrder": null
+    },
+    {
+      "name": "astralAdmissionTieKeepsAbsentPreNativeReadingAbsent",
+      "ledgerRow": 84,
+      "note": "U+FFFD sorts before U+1F600 in code point order but after it in UTF-16 code-unit order. never-started was dispatched but has no measured reading: it stays absent. Both selected ends are null.",
+      "ledger": [
+        {
+          "admissionId": "\ufffd",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "\ud83d\ude00",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "never-started",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      ],
+      "readings": [
+        {
+          "admissionId": "\ud83d\ude00",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        },
+        {
+          "admissionId": "\ufffd",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        }
+      ],
+      "wire": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "\ufffd",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "\ud83d\ude00",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        }
+      ],
+      "accepted": [
+        {
+          "kind": "step",
+          "stepId": "step-1",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 8,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "\ufffd",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "\ud83d\ude00",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        }
+      ],
+      "utf16CodeUnitOrder": [
+        "\ud83d\ude00",
+        "\ufffd"
+      ]
+    },
+    {
+      "name": "astralStepIdOrder",
+      "ledgerRow": 84,
+      "note": "stepId breaks the tie before admissionId, in code point order; derived step items follow the same order.",
+      "ledger": [
+        {
+          "admissionId": "x-2",
+          "stepId": "\ud83d\ude00",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "x-1",
+          "stepId": "\ufffd",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      ],
+      "readings": [
+        {
+          "admissionId": "x-2",
+          "stepId": "\ud83d\ude00",
+          "ordinal": 0,
+          "startMs": 50,
+          "endMs": 60
+        },
+        {
+          "admissionId": "x-1",
+          "stepId": "\ufffd",
+          "ordinal": 0,
+          "startMs": 50,
+          "endMs": 55
+        }
+      ],
+      "wire": [
+        {
+          "kind": "action",
+          "stepId": "\ufffd",
+          "admissionId": "x-1",
+          "ordinal": 0,
+          "startMs": 50,
+          "endMs": 55
+        },
+        {
+          "kind": "action",
+          "stepId": "\ud83d\ude00",
+          "admissionId": "x-2",
+          "ordinal": 0,
+          "startMs": 50,
+          "endMs": 60
+        }
+      ],
+      "accepted": [
+        {
+          "kind": "step",
+          "stepId": "\ufffd",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 50,
+          "endMs": 55
+        },
+        {
+          "kind": "step",
+          "stepId": "\ud83d\ude00",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 50,
+          "endMs": 60
+        },
+        {
+          "kind": "action",
+          "stepId": "\ufffd",
+          "admissionId": "x-1",
+          "ordinal": 0,
+          "startMs": 50,
+          "endMs": 55
+        },
+        {
+          "kind": "action",
+          "stepId": "\ud83d\ude00",
+          "admissionId": "x-2",
+          "ordinal": 0,
+          "startMs": 50,
+          "endMs": 60
+        }
+      ],
+      "utf16CodeUnitOrder": [
+        "x-2",
+        "x-1"
+      ]
+    },
+    {
+      "name": "bmpPrefixAndPrivateUseOrder",
+      "ledgerRow": 84,
+      "note": "Shorter prefix first; BMP below U+D800 agrees in both orders; U+E000..U+FFFF versus astral is where UTF-16 code-unit order diverges.",
+      "ledger": [
+        {
+          "admissionId": "a",
+          "stepId": "s",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "a\ud83d\ude00",
+          "stepId": "s",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "a\ufffd",
+          "stepId": "s",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "\u00e9",
+          "stepId": "s",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "z",
+          "stepId": "s",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "\ue000",
+          "stepId": "s",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      ],
+      "readings": [
+        {
+          "admissionId": "\ue000",
+          "stepId": "s",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "admissionId": "a\ud83d\ude00",
+          "stepId": "s",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "admissionId": "z",
+          "stepId": "s",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "admissionId": "a",
+          "stepId": "s",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "admissionId": "\u00e9",
+          "stepId": "s",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "admissionId": "a\ufffd",
+          "stepId": "s",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        }
+      ],
+      "wire": [
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "a",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "a\ufffd",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "a\ud83d\ude00",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "z",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "\u00e9",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "\ue000",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        }
+      ],
+      "accepted": [
+        {
+          "kind": "step",
+          "stepId": "s",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "a",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "a\ufffd",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "a\ud83d\ude00",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "z",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "\u00e9",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        },
+        {
+          "kind": "action",
+          "stepId": "s",
+          "admissionId": "\ue000",
+          "ordinal": 0,
+          "startMs": 7,
+          "endMs": 9
+        }
+      ],
+      "utf16CodeUnitOrder": [
+        "a",
+        "a\ud83d\ude00",
+        "a\ufffd",
+        "z",
+        "\u00e9",
+        "\ue000"
+      ]
+    },
+    {
+      "name": "endSelectionOverActualReadings",
+      "ledgerRow": 84,
+      "note": "Step start = minimum action start; step end = endMs (or null) of the last action in ORDER, i.e. the greatest start, with admissionId deciding a tie at that start. Never the largest end, never calibrated.",
+      "ledger": [
+        {
+          "admissionId": "a1",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "a2",
+          "stepId": "step-1",
+          "ordinal": 1,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "m-1",
+          "stepId": "step-2",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "m-2",
+          "stepId": "step-2",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "n-1",
+          "stepId": "step-3",
+          "ordinal": 0,
+          "dispatchCount": 1
+        },
+        {
+          "admissionId": "n-2",
+          "stepId": "step-3",
+          "ordinal": 0,
+          "dispatchCount": 1
+        }
+      ],
+      "readings": [
+        {
+          "admissionId": "a2",
+          "stepId": "step-1",
+          "ordinal": 1,
+          "startMs": 20,
+          "endMs": 30
+        },
+        {
+          "admissionId": "a1",
+          "stepId": "step-1",
+          "ordinal": 0,
+          "startMs": 10,
+          "endMs": 5000
+        },
+        {
+          "admissionId": "m-2",
+          "stepId": "step-2",
+          "ordinal": 0,
+          "startMs": 40,
+          "endMs": null
+        },
+        {
+          "admissionId": "m-1",
+          "stepId": "step-2",
+          "ordinal": 0,
+          "startMs": 40,
+          "endMs": 70
+        },
+        {
+          "admissionId": "n-2",
+          "stepId": "step-3",
+          "ordinal": 0,
+          "startMs": 60,
+          "endMs": 65
+        },
+        {
+          "admissionId": "n-1",
+          "stepId": "step-3",
+          "ordinal": 0,
+          "startMs": 60,
+          "endMs": null
+        }
+      ],
+      "wire": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a1",
+          "ordinal": 0,
+          "startMs": 10,
+          "endMs": 5000
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a2",
+          "ordinal": 1,
+          "startMs": 20,
+          "endMs": 30
+        },
+        {
+          "kind": "action",
+          "stepId": "step-2",
+          "admissionId": "m-1",
+          "ordinal": 0,
+          "startMs": 40,
+          "endMs": 70
+        },
+        {
+          "kind": "action",
+          "stepId": "step-2",
+          "admissionId": "m-2",
+          "ordinal": 0,
+          "startMs": 40,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-3",
+          "admissionId": "n-1",
+          "ordinal": 0,
+          "startMs": 60,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-3",
+          "admissionId": "n-2",
+          "ordinal": 0,
+          "startMs": 60,
+          "endMs": 65
+        }
+      ],
+      "accepted": [
+        {
+          "kind": "step",
+          "stepId": "step-1",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 10,
+          "endMs": 30
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a1",
+          "ordinal": 0,
+          "startMs": 10,
+          "endMs": 5000
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a2",
+          "ordinal": 1,
+          "startMs": 20,
+          "endMs": 30
+        },
+        {
+          "kind": "step",
+          "stepId": "step-2",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 40,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-2",
+          "admissionId": "m-1",
+          "ordinal": 0,
+          "startMs": 40,
+          "endMs": 70
+        },
+        {
+          "kind": "action",
+          "stepId": "step-2",
+          "admissionId": "m-2",
+          "ordinal": 0,
+          "startMs": 40,
+          "endMs": null
+        },
+        {
+          "kind": "step",
+          "stepId": "step-3",
+          "admissionId": null,
+          "ordinal": null,
+          "startMs": 60,
+          "endMs": 65
+        },
+        {
+          "kind": "action",
+          "stepId": "step-3",
+          "admissionId": "n-1",
+          "ordinal": 0,
+          "startMs": 60,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-3",
+          "admissionId": "n-2",
+          "ordinal": 0,
+          "startMs": 60,
+          "endMs": 65
+        }
+      ],
+      "utf16CodeUnitOrder": null
+    }
+  ],
+  "refusedLedger": [
+    {
+      "admissionId": "a-old",
+      "stepId": "step-1",
+      "ordinal": 0,
+      "dispatchCount": 1
+    },
+    {
+      "admissionId": "b-new",
+      "stepId": "step-1",
+      "ordinal": 0,
+      "dispatchCount": 1
+    },
+    {
+      "admissionId": "z-zero",
+      "stepId": "step-1",
+      "ordinal": 0,
+      "dispatchCount": 0
+    },
+    {
+      "admissionId": "\ufffd",
+      "stepId": "step-1",
+      "ordinal": 0,
+      "dispatchCount": 1
+    },
+    {
+      "admissionId": "\ud83d\ude00",
+      "stepId": "step-1",
+      "ordinal": 0,
+      "dispatchCount": 1
+    }
+  ],
+  "refused": [
+    {
+      "name": "duplicateAdmissionAtADifferentTime",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 200,
+          "endMs": 210
+        }
+      ]
+    },
+    {
+      "name": "exactDuplicateItem",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        }
+      ]
+    },
+    {
+      "name": "unknownAdmission",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "ghost",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 110
+        }
+      ]
+    },
+    {
+      "name": "undispatchedAdmission",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "z-zero",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 110
+        }
+      ]
+    },
+    {
+      "name": "wrongOrdinal",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "b-new",
+          "ordinal": 1,
+          "startMs": 100,
+          "endMs": 110
+        }
+      ]
+    },
+    {
+      "name": "wrongStepId",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        },
+        {
+          "kind": "action",
+          "stepId": "step-2",
+          "admissionId": "b-new",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 110
+        }
+      ]
+    },
+    {
+      "name": "tieInReverseAdmissionOrder",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "b-new",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 110
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "a-old",
+          "ordinal": 0,
+          "startMs": 100,
+          "endMs": 105
+        }
+      ]
+    },
+    {
+      "name": "astralTieInUtf16CodeUnitOrder",
+      "timings": [
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "\ud83d\ude00",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        },
+        {
+          "kind": "action",
+          "stepId": "step-1",
+          "admissionId": "\ufffd",
+          "ordinal": 0,
+          "startMs": 8,
+          "endMs": null
+        }
+      ]
+    }
+  ]
+}

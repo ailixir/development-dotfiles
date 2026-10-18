@@ -181,6 +181,40 @@ Enforce action and model budgets over the entire session, including repair, clar
 
 The user/product owner decided that authentication in guided runs is **author-written login steps** that reference credentials as `<secret ID>`, exactly as nonsecret values use `<var NAME>` in the legacy compile flow. The "configured approved account reference", "same-session sign-in handoff", "Sign in securely" and "connection requirement" mechanisms above are withdrawn; the `AWAITING_AUTH` state and `AUTH_CONNECTION_REQUIRED` code are removed, and a run that reaches a sign-in page without login steps ends `LOGIN_REQUIRED` with guidance to add them. Secrets resolve by reference at dispatch through the existing Vault path and are filled only into password controls. Canonical design: [secret-login-design.md](secret-login-design.md). Other sections of this plan are unchanged.
 
+### 8.2 Amendment — per-session input bound recalibration (2026-10-13)
+
+**Decision (@architect, DECISION-1 in [architect-rulings-d1-d2.json](../../qa/evidence/STUDIO-OBS-012A/root/architect-rulings-d1-d2.json)); acknowledged by @pm (Morgan) on 2026-10-13 ([pm-ack-d1.json](../../qa/evidence/STUDIO-OBS-012A/root/pm-ack-d1.json)).** The `max-model-input-tokens-total` value in the §8 block above changes from `128000` to **`262144`**. This is both the product default and the upper bound. It covers `GuidedSessionProperties` (the `@DefaultValue` and the `limits` fallback) and `contracts/v3/limits.schema.json` `maxModelInputTokensTotal` (`maximum` = `default` = 262144). Every other §8 bound is unchanged, including `max-model-output-tokens-total: 32000`, the per-call output cap of 4096, the per-request input cap of 65,536 (hard max 131,072), the byte-as-token reservation with its +2048 allowance, and no-refund settlement.
+
+Why: the §8 values were "proposed initial … to verify in the feasibility phase", and the STUDIO-OBS-005 joined fixture is that verification. Before STUDIO-OBS-007, the controlled 3-step clarify-plus-restart flow already reserved 121,589 of 128,000 (95.0%). The secret-login output contract that OBS-007 requires (+701 bytes, plus the v3 response schema) is sent on every request. With it, 7 proposals reserve 112,277, and the 8th cannot fit (projected about 128,320). As a result, `GuidedPlanningIntegrationTest` `[1] chosenIndex=0`, `[2] chosenIndex=1` and `[4] mutation=assertion` stop with `BUDGET_EXCEEDED` ([baseline-residual ledger](../../qa/evidence/STUDIO-OBS-012A/baseline-residual/ledger.json) DECISION-1, runs r0/r10). The ruling rejected changing the accounting, the prompt, the test flow or a test-only ceiling.
+
+Limits of this value:
+- **262,144 is not a measured real-workload capacity.** It is a byte-denominated reservation ceiling, equal to 4 × the per-request input cap of 65,536. It has been checked only against fixture flows, where the joined flow uses about 49%. Real-provider evaluation has not been run.
+- **Recalibration is required from STUDIO-OBS-009 real-model runs (ADR-SC-005 D-C).** That work covers the input total and the output total together. Under production defaults, the output total (32,000 / 4,096 per call) limits a session to 7 proposals (`GuidedDefaultModelReservationIT`), so `max-model-proposals: 100` is not reachable (architect finding F-1). Raising the input ceiling does not change that. The calibration item is recorded in STUDIO-OBS-009 Dev Notes, and that story's ACs are unchanged.
+- **Ownership:** STUDIO-OBS-012A owns this per-session ceiling (Lane C regenerates the schema and re-anchors pins; the baseline-residual @dev lane updates the Java default and test pins). STUDIO-OBS-014 AC-8 adds per-CSI concurrent-session and daily token budgets *in addition to* the per-session budgets. It does not own this ceiling.
+- **Cost:** the worst-case reserved input per session rises by 2.048×. That is a ceiling, not expected spend, and flows that already fit cost the same. The USD 500 wave ceiling is the development/coordinator spend authorization and is unaffected. Aggregate production spend is capped by the STUDIO-OBS-014 AC-8 per-CSI daily token budget, which has to be Done before the OBS-009 pilot under the existing story order.
+
+The `128000` figure in the §8 block is kept as the original proposal and is superseded by this amendment. Other sections of this plan are unchanged.
+
+### 8.3 Amendment — per-session model budget sizing (MODEL-SIZING, 2026-10-18)
+
+**Decision (@architect, STUDIO-OBS-009 MODEL-SIZING ruling, option A-ii, [ruling-draft.md](../../qa/evidence/STUDIO-OBS-009/execution-20261018/model-sizing/ruling-draft.md) §2-§7 and §10); acknowledged by @pm (Morgan) on 2026-10-18 (same file, §9.1).** In the §8 block above, and superseding §8.2 where they differ:
+- `max-model-output-tokens-total` changes from `32000` to a default of **`98304`**, with a schema `maximum` of **`131072`**.
+- `max-model-input-tokens-total` changes from `262144` to a default of **`786432`**, with a schema `maximum` of **`1572864`**.
+
+These cover `GuidedSessionProperties` (the `@DefaultValue`s and the `limits` fallback) and `contracts/v3/limits.schema.json` (`maxModelOutputTokensTotal`, `maxModelInputTokensTotal`). Unlike §8.2, **the maximum is above the default.** Every other bound is unchanged: the per-call output cap of 4096, the per-request input cap of 65,536, `max-model-proposals: 100`, byte-as-token input reservation with the +2048 allowance, reserve-before-send, no-refund settlement, and the STUDIO-OBS-014 AC-8 per-CSI daily budget (640,000 output / 5,242,880 input).
+
+Why: at 32,000 output and 4096 reserved per call, a session holds 7 proposals. The STUDIO-OBS-009 B7 fixture measured 13 for a 10-step base learn with an ideal model, so the AC-7 benchmark would fail by configuration whatever the model's quality. The sizing target is 24 proposals per session (13 measured, × about 1.85 for repairs and clarifications). Output and input move together, because raising output alone would make input the next wall. The ruling rejected a smaller per-call ceiling (truncation risk, since thoughts count as output), chunked learning (a product redesign) and a model change (no effect on the envelope).
+
+Limits of these values:
+- **24 proposals is a planning value from fixture data plus contingency, not a measured capacity.** STUDIO-OBS-009 T4 publishes the real distribution (proposals, repairs, reserved versus reported tokens per call, session wall time), and the ruling's §10 re-rule trigger (T-1..T-6) decides whether these values stand before STUDIO-OBS-010.
+- **The maxima exist so recalibration needs no further contract change.** They are not a licence: running any deployment above the defaults needs a new @architect ruling with @pm acknowledgement, recorded in the AC-7 pinned-version block. No chart key sets these values.
+- **Per-CSI capacity is set by calls, not sessions:** about 156 calls per CSI per day on the output side, and about 160 at a 32 KB input average. That is about 12 ten-step base learns, or 6.5 full-envelope sessions. The `application.yml` comment is corrected to match.
+- **A first learn in one session covers about 20 steps with an ideal model,** and fewer with repairs. STUDIO-OBS-010 discloses this limit with the T4-derived figure. `max-source-steps` is unchanged.
+- **Cost:** the worst-case reservation per session rises about 3×. The expected reservation per learned step is unchanged (per call), and daily spend per CSI stays bounded by the unchanged per-CSI budget.
+- **Deployment:** the session schema epoch and the runner schema bundles change, so the backend and runner images roll out together.
+
+The `32000` and `262144` figures in §8 and §8.2 are kept as history and are superseded by this amendment. Other sections of this plan are unchanged.
+
 ## 9. User-facing states
 
 | State | Experience |

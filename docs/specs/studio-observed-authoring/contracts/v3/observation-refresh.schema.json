@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/observation-refresh.schema.json",
+  "title": "Observed v3 explicit observation refresh",
+  "description": "Controller request for a fresh read-only observation from the current owned context. Existing observation callback remains commit authority. This command cannot navigate, resolve a clarification or execute an authored action.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 3
+    },
+    "sessionId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "workerId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "ownerFence": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "scopeHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "contextId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "contextRevision": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "sourceRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "configurationRevision": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 256
+    },
+    "versions": {
+      "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+    },
+    "expectedGeneration": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483646
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "sessionId",
+    "workerId",
+    "ownerFence",
+    "scopeHash",
+    "contextId",
+    "contextRevision",
+    "sourceRevision",
+    "configurationRevision",
+    "versions",
+    "expectedGeneration"
+  ]
+}

@@ -2,29 +2,6 @@
   "contractVersion": 2,
   "cases": [
     {
-      "name": "legacy-empty-context",
-      "legacy": {
-        "steps": [
-          "  Open Café ☕  ",
-          "Type \"A\\B\"\nnext line"
-        ]
-      },
-      "expected": {
-        "authoringSchemaVersion": 2,
-        "steps": [
-          {
-            "id": "00000000-0000-4000-8000-000000000001",
-            "text": "  Open Café ☕  "
-          },
-          {
-            "id": "00000000-0000-4000-8000-000000000002",
-            "text": "Type \"A\\B\"\nnext line"
-          }
-        ]
-      },
-      "invariants": ["text-byte-for-byte", "stable-id-assigned-once", "empty-context"]
-    },
-    {
       "name": "global-and-step-context",
       "request": {
         "authoringSchemaVersion": 2,

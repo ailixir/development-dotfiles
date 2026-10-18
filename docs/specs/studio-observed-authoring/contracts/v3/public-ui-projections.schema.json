@@ -1,0 +1,545 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://checks.citi.example/contracts/observed/v3/public-ui-projections.schema.json",
+  "title": "Public UI projections (STUDIO-OBS-008 P1-P3)",
+  "definitions": {
+    "StudioCapabilities": {
+      "description": "GET /tests/{id}/capabilities (P1). vaultSecrets is true when a Vault provider is configured, with no Vault call; guidedStart carries the exact start context, or the one refusal code. No provider name, path, token or policy detail.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "vaultSecrets",
+        "guidedStart"
+      ],
+      "properties": {
+        "vaultSecrets": {
+          "type": "boolean"
+        },
+        "guidedStart": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "context"
+              ],
+              "properties": {
+                "available": {
+                  "const": true
+                },
+                "context": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schemaVersion",
+                    "testId",
+                    "sourceRevision",
+                    "configurationRevision",
+                    "environmentId",
+                    "applicationId",
+                    "versions"
+                  ],
+                  "properties": {
+                    "schemaVersion": {
+                      "const": 3
+                    },
+                    "testId": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+                    },
+                    "sourceRevision": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9][0-9]{0,18})$"
+                    },
+                    "configurationRevision": {
+                      "type": "string",
+                      "pattern": "^(0|[1-9][0-9]{0,18})$"
+                    },
+                    "environmentId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "applicationId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "versions": {
+                      "$ref": "https://checks.citi.example/contracts/observed/v3/versions.schema.json"
+                    }
+                  }
+                }
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "available",
+                "code"
+              ],
+              "properties": {
+                "available": {
+                  "const": false
+                },
+                "code": {
+                  "enum": [
+                    "FORBIDDEN_SCOPE",
+                    "RUNTIME_INCOMPATIBLE"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "PublicProgress": {
+      "description": "P2. stepCount is the frozen source step count of the session. activeStep comes only from the durable session progress index, resolved to the stable step id and the authored step sentence of this session; it is null in FINALIZING, in every terminal state and whenever the coordinate is unavailable, and is never clamped or inferred from counters or time. text is the authored source sentence only, never a resolved variable or secret value.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "stepCount",
+        "activeStep"
+      ],
+      "properties": {
+        "stepCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "activeStep": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "stepId",
+                "number",
+                "text"
+              ],
+              "properties": {
+                "stepId": {
+                  "type": "string",
+                  "format": "uuid",
+                  "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+                },
+                "number": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 4000
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "PublicExplanation": {
+      "description": "P3. Read-only account of what this session actually did, from the same session projection (never the current head). safeLabel is the controlled string for the recorded operationKind; referenceIds carry declared ids only, never a value. completed, learnedFromThisRun, reusedFrom and relearnedAfterDrift claim only what the retained facts prove; without proof the actions are empty and no claim is made. It does not imply publication: the publication receipt stays authoritative.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sessionId",
+        "sourceRevision",
+        "configurationRevision",
+        "steps",
+        "referenceFlows"
+      ],
+      "properties": {
+        "sessionId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "sourceRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "configurationRevision": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]{0,18})$"
+        },
+        "steps": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "stepId",
+              "number",
+              "completed",
+              "learnedFromThisRun",
+              "reusedFrom",
+              "relearnedAfterDrift",
+              "actions"
+            ],
+            "properties": {
+              "stepId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+              },
+              "number": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "completed": {
+                "type": "boolean"
+              },
+              "learnedFromThisRun": {
+                "type": "boolean"
+              },
+              "reusedFrom": {
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "revisionId",
+                      "stepId"
+                    ],
+                    "properties": {
+                      "revisionId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+                      },
+                      "stepId": {
+                        "type": "string",
+                        "format": "uuid",
+                        "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+                      }
+                    }
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "relearnedAfterDrift": {
+                "type": "boolean"
+              },
+              "actions": {
+                "type": "array",
+                "maxItems": 9,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "admissionId",
+                    "ordinal",
+                    "attemptOrdinal",
+                    "operationKind",
+                    "safeLabel",
+                    "outcome",
+                    "referenceIds"
+                  ],
+                  "properties": {
+                    "admissionId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "ordinal": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 7
+                    },
+                    "attemptOrdinal": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 1
+                    },
+                    "operationKind": {
+                      "enum": [
+                        "navigate",
+                        "click",
+                        "fill",
+                        "press",
+                        "check",
+                        "uncheck",
+                        "hover",
+                        "selectOption",
+                        "read",
+                        "assert"
+                      ]
+                    },
+                    "safeLabel": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 256
+                    },
+                    "outcome": {
+                      "enum": [
+                        "ADMITTED",
+                        "DISPATCHING",
+                        "SUCCEEDED",
+                        "FAILED",
+                        "UNKNOWN_OUTCOME",
+                        "REVOKED"
+                      ]
+                    },
+                    "referenceIds": {
+                      "type": "array",
+                      "maxItems": 32,
+                      "uniqueItems": true,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 256
+                      }
+                    }
+                  },
+                  "allOf": [
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "navigate"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Open page"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "click"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Click control"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "fill"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Fill field"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "press"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Press key"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "check"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Check control"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "uncheck"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Uncheck control"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "hover"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Move over control"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "selectOption"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Select option"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "read"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Read reference"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "if": {
+                        "properties": {
+                          "operationKind": {
+                            "const": "assert"
+                          }
+                        },
+                        "required": [
+                          "operationKind"
+                        ]
+                      },
+                      "then": {
+                        "properties": {
+                          "safeLabel": {
+                            "const": "Check expected result"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "referenceFlows": {
+          "type": "array",
+          "maxItems": 200,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "bindingId",
+              "producerStepId",
+              "consumerStepId",
+              "argumentSlot"
+            ],
+            "properties": {
+              "bindingId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              "producerStepId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+              },
+              "consumerStepId": {
+                "type": "string",
+                "format": "uuid",
+                "pattern": "^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$"
+              },
+              "argumentSlot": {
+                "enum": [
+                  "fill.value",
+                  "selectOption.value",
+                  "assert.expected"
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

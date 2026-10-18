@@ -18,17 +18,6 @@
       "expectedCategories": ["DUPLICATE_STEP_ID"]
     },
     {
-      "name": "mixed-legacy-v2-steps",
-      "request": {
-        "authoringSchemaVersion": 2,
-        "steps": [
-          "Legacy string",
-          {"id": "00000000-0000-4000-8000-000000000062", "text": "V2 object"}
-        ]
-      },
-      "expectedCategories": ["MIXED_STEP_SHAPES"]
-    },
-    {
       "name": "orphan-evidence-step-id",
       "request": {
         "authoringSchemaVersion": 2,
