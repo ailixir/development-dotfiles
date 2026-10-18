@@ -1,2 +1,4 @@
-- [Studio migrations: test at head](project_studio_migration_head_testing.md) — later CREATE OR REPLACE of write_once dropped V18 guards; verify at Flyway head
-- [Studio schema consolidation](project_studio_schema_consolidation.md) — one authoring path (observed), Option A rewrite vs B forward-only pends @devops shared-DB check
+- [Studio migrations: test at head](project_studio_migration_head_testing.md) — V12–V18 frozen; V19 replaces V14/V15 guards; per-column ITs at Flyway head
+- [Studio schema consolidation](project_studio_schema_consolidation.md) — V12–V18 frozen; head V22; head pins in 3 forms + delta pin (GuidedRuntimeRolePrivilegeIT)
+- [PG regex bound 255](feedback_postgres_regex_bound.md) — {1,256} in CHECK breaks every INSERT; use + with varchar; always add insert-positive IT
+- [Runtime-role grants](project_runtime_role_grants.md) — no V23 for grants; prepared DBA SQL; non-owner delta far wider than the view

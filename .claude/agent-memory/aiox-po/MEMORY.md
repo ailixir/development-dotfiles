@@ -1,5 +1,29 @@
 - [Epic 10 manifest convention](project_epic10_manifest_convention.md) — @po adds manifest entries at validation; `blocks` criterion-backed vs sequencing
-- [STUDIO-OBSERVED wave PO conventions](project_studio_observed_wave_po_conventions.md) — PO section placement, r2/sp report rounds, 2026-10-10 scores, V19/014-015 ownership/UX-panel coordination items
+- [STUDIO-OBSERVED wave PO conventions](project_studio_observed_wave_po_conventions.md) — PO section placement, report rounds, inherited-obligation blocks, 012A placements P1-P7/O-1, close-key digest method
 - [OBS-007 secret-login decisions](project_obs007_secret_login_decisions.md) — binding 2026-10-09 rescope (no provider/handoff/UI); Q1/Q3 at defaults; GO 9/10 Ready
 - [Single-path re-cut validation](project_single_path_recut_validation.md) — 2026-10-10 verdicts 007/012A/012B; 012A one story + Lane M gate; recurring misses (rdsParityLint, observed-contracts build path, 13 review tests)
+- [012B allowlist ruling](project_012b_allowlist_ruling.md) — 2026-10-13 MSW handler-coverage classes A(OBS-008)/B/C; orphaned spec docs deleted by 012B
 - [Epic 10 closure conventions](project_epic10_closure_conventions.md) — no Superseded/Deferred status; notes + status unchanged; Done is @qa's; ADR-SC-005 disposition record
+- [OBS-014 X6 publication copies](project_obs014_x6_publication_copies.md) — 2026-10-13 split ruling (published retained / unpublished pruned via AR-2e); v2 matcher → OBS-014
+- [OBS-014 mounted rules](project_obs014_mounted_rules.md) — 2026-10-13 mounted read-granting `rules` in AC-1 scope; refuse by default; exact rule @architect
+- [AR-2/AR-1 residual placements](project_ar2_residual_placements.md) — 2026-10-13 unpruned stores + two policy sources → @pm follow-ups; 013 AC-4 SSE N/A
+- [v2 check + RS-1](project_v2check_rs1.md) — 2026-10-13 grep oracle scoped to src/main + named test; RS-1 → OBS-009 AC-7 obligation + README F03
+- [OBS-015 T0 follow-ups](project_obs015_t0_followups.md) — 2026-10-13 v1 deleted in 015; AC-2 409 REVISION_CONFLICT+messageCode; V21 @data-engineer; FE v2 → OBS-008
+- [OBS-014 SEC-001 ruling B ack](project_obs014_sec001_ruling_b.md) — 2026-10-14 AC-6 fail-closed clarification; OBS-008 copy obligation; ALLOW oracle open
+- [008-011 feasibility](project_feasibility_008_011.md) — 2026-10-15 local/external per AC; 011 transitively external; proposals A/B unadopted
+- [OBS-014 QA rulings](project_obs014_qa_rulings.md) — 2026-10-14 AC-4 corpus = joined ITs; 3 AC-1 items required (B14); ~21 sessions/CSI/day OK
+- [2026-10-15 user decisions](project_user_decisions_20261015.md) — 015 row85 Option C (positive-tie clause only waived); 011 early start adopted
+- [015 deferrals 2026-10-17](project_015_deferrals_20261017.md) — D5/LIFECYCLE-REASON-01/EDGE/PID-1 into 009 0.3.16; 3 coordination notes (closed by gate follow-ups)
+- [015 gate follow-ups 2026-10-17](project_015_gate_followups_20261017.md) — REL-001 pointer, 15 s rule, KL-015-D5 row, 011 list, F4/R4→008 C-int; code vs kind TIMEOUT
+- [015 admin close 2026-10-17](project_015_close_20261017.md) — drift notes as sibling files (close hashes bound); section-hash method; REQ-002 ED-05 gap in 010
+- [008 scope cut 2026-10-17](project_008_scope_decision_20261017.md) — user removed Out/Nice-to-Have; AC-8 axe in real browser; D5 IN; PLAYBACK-* post-GA
+- [009/010 prep 2026-10-16](project_prep_009_010_20261016.md) — deltas applied (009 0.3.15/010 0.3.8/011 0.2.7); 010 early T2; REL-001 + ED-05 in 015; O-2a docs 10-17
+- [A11y functional-only (ADR-SC-006)](project_a11y_functional_only_adr_sc006.md) — 2026-10-17 no WCAG target; 008 decision 2; F05–F07 backlog; runner aria-* stays
+- [008 carried items placed](project_011_inbound_carried_items.md) — 2026-10-17 C-OBS008-1/2/3/5 → 011 inbound; -4 → 009 lane C9; F08 copy pass + R5 in README
+- [009 T0 outcomes 2026-10-17](project_009_t0_outcomes_20261017.md) — 0.3.20; A2.6 one-pod = AC-1 note (R1 provisional, U20); register U16–U22; D2 = trigger; B2/B3/A16 open
+- [Q9 hint + R1–R4 2026-10-17](project_q9_hint_residuals_20261017.md) — 008 hint trigger BUDGET_EXCEEDED+clause; 009 AE-01 R1–R4; R4 b/c = recommendation; D-5 k = firstLearnStepId
+- [009 W2 placements 2026-10-18](project_009_w2_placements_20261018.md) — C-OBS009-1..4 → 011; F09 alert; KL-009-REVOKE-UNLEARNED; U23 issuer (next free U24)
+- [009 W3 carries 2026-10-18](project_009_w3_carries_20261018.md) — RUN-ORPHAN/SEC-AUDIT 009 residues; MODEL-SIZING ruled+@pm-acked (T4 after §7); 010 AC-4 clar. e; P-1 open
+- [010 T2 status owner + removals 2026-10-18](project_010_t2_status_owner.md) — @po does not move 010 to InProgress (@analyst/@dev); 16 RKG/RKO removals confirmed
+- [011 T0 ratification 2026-10-18](project_011_t0_ratification_20261018.md) — P-1..P-12 + RD-1..4; CLN-57..60; CFC-01 @pm-accepted; P-1 AC-5 row applied; policy owner = user
+- [009 local MET 2026-10-18](project_009_local_met_20261018.md) — trigger MET under C8 waiver (061fc41f); 011 starts satisfied; marks = dated notes; B2/B3 rulings owed by @po

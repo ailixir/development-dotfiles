@@ -2,3 +2,56 @@
 - [gradle check takes ~10.5 min](tooling_gradle_check_duration.md) — run in background, serialize Gradle, count results from test XML
 - [FE suite side effects](tooling_fe_suite_side_effects.md) — full vitest rewrites axe-results.json; flakes under Gradle load; GET retries leak across tests
 - [Deletions and baselines](tooling_deletions_and_baselines.md) — rm not git rm (no staging); check which --tests filter a story baseline used
+- [Runner tiers and coverage](tooling_runner_tiers_coverage.md) — no coverage table on failure; CLI exclude replaces; guidedMain untested in runner; shared dist; flakes
+- [Focused Gradle runs](tooling_gradle_focused_runs.md) — zsh no word-split; copy XML in lock; spotlessIdeHook reformats whole file (never ReplayIT); init scripts
+- [Runner probes and oracle side effects](tooling_runner_probes_and_side_effects.md) — scratch --root probes (can import one fixtures file, no dist rebuild); C-lane regen => SCHEMA_CONFIGURATION; OBS-007 oracle overwrite
+- [ReplayIT/Planning diagnostics](tooling_replayit_diagnostics.md) — Order(1) dep, failed-test state, TRACE/TTL, sleep, reap race, FINAL in result.json, ordinary-ipc-*.jsonl
+- [Shared scratch + gradle lock](project_shared_scratch_and_gradle_lock.md) — parallel 012A lanes share scratchpad/build dir; use per-lane subdir, copy XML via init script
+- [ReplayIT worker preload state](project_replayit_worker_preload_state.md) — long-lived workers carry JS preload counters across cases; read producer sample files, A/B with predecessor
+- [JFR attribution recipe](tooling_jfr_attribution.md) — toolchain JDK 21 path, -D not -P in init scripts, socket-event bracketing, log call-site attribution
+- [Schema epoch overlay](tooling_schema_epoch_overlay.md) — v3 schema edit moves GuidedContracts epochs; overlay-cp recompute; rebuild runner dist for backend ITs
+- [Grant expired = clock skew](tooling_observed_grant_expired_clock_skew.md) — pre-R9: line 82 = JVM/DB skew; post-R9 grants use DB clock, so suspect fixtures
+- [javac pre-check outside lock](tooling_javac_precheck_outside_lock.md) — javac via maincp.txt + cache jars; gjf 1.22 CLI format check while lock is held
+- [Host port + Chromium flakes](project_host_port_and_chromium_flakes.md) — macOS port-0 lands on loopback-specific holders (Horizon 127.0.0.1:49216); Chrome for Testing atfork launch deadlock
+- [Hash parity probe](tooling_hash_parity_probe.md) — Java vs runner canonical hash without Gradle; \u001F vs \u001f divergence; stage S3 cutovers as patches
+- [Story reconciliation attribution](tooling_story_reconciliation_attribution.md) — T0 source-hashes split own vs pre-existing dirty files; XML hides param/DisplayName method names
+- [Contract lane gotchas](tooling_contract_lane_gotchas.md) — guided audit, replay epoch, witness reseal + observed-reference mirror, 14 fixture contexts, stale dist
+- [Postgres regex bound 255](tooling_postgres_regex_bound.md) — {1,256} in a CHECK migrates but fails every INSERT; use + and varchar length
+- [FE suite under host load](tooling_fe_full_suite_under_load.md) — load 20+ times out random FE tests; --maxWorkers=3; redact paths in evidence JSON
+- [Scratch-tree staged unit](tooling_scratch_tree_staged_unit.md) — build coupled S3-type units in an rsync copy under the same lock; ship a patch; @Test grep-count trap; patience diff for insert-only hunks
+- [Evidence ledger append](tooling_evidence_ledger_append.md) — back up untracked ledger.json first; json re-dump rewrites earlier sections' layout
+- [ReplayIT S2 observer single-use](project_replayit_s2_single_use.md) — 2nd beginS2 secret case breaks secret-login teardown (31/40); use plain fixture; test --rerun
+- [Inherited daemon kills Chrome](project_inherited_daemon_chrome_abort.md) — Codex-started daemon 22246: guided Chrome SIGABRT -> bootstrap CONTEXT_PENDING FAILED; use --no-daemon
+- [C5 finalize lease + S2 order](project_replayit_c5_finalize_lease_and_s2_order.md) — Order9 409 = TRACE-slow finalize holds lock past lease; S2_DESCRIPTOR = late prototype re-wrap
+- [Parallel-merge patches](tooling_parallel_merge_patches.md) — patience diff for clean insertions; block-only gjf; validator needs NOT_SUPPORTED tx; register new methods
+- [ReplayIT patch + lint recipe](tooling_replayit_patch_and_lint.md) — histogram diff for p0 patches; checkstyle CLI needs spring-jcl; gjf switch-RHS vs Indentation; /plans=202
+- [macOS zombie ProcessHandle](tooling_macos_zombie_processhandle.md) — zombie isAlive=true, no commandLine; parent() re-queries (TOCTOU); TEMP keeps p4 guard diagnostics
+- [Frozen fixture values](feedback_frozen_fixture_values.md) — never tweak frozen ReplayIT inputs to dodge a refusal; revert, disclose, file as production finding
+- [Incremental lane cascades](project_replayit_incremental_lane_cascades.md) — CSI daily budget + generation guard cascades; open-generation diag; expiry teardown H8; stopSender tap; pgjdbc `??`
+- [macOS unified log for Chrome](tooling_macos_unified_log_chrome_timing.md) — /usr/bin/log show: Chrome spawn/exit/UI-ready marker, kills; zsh `log` builtin trap
+- [REL-001 CONTEXT_LOST diagnosis](project_rel001_context_lost_diagnosis.md) — 2026-10-17 repro: 0/2003 starts failed, H1 unproven; A required, B hardening
+- [REL-001 repro harness gotchas](tooling_rel001_repro_harness_gotchas.md) — mem floor no-op, swap dips, own_dir leak, taskpolicy -p asymmetry, node 23 path
+- [Runner fixtures evidence side effects](tooling_runner_fixtures_evidence_side_effects.md) — fixtures tier writes evidence (redirect-*, 22 rewrites, 63 new); protect_media.py fix; dist re-emit; mutation recipe
+- [Hard-expiry stop-reason race](project_hard_expiry_stop_reason_race.md) — lease==expiry tie decided by Date.now() at timer fire; ~2% LEASE_LOST; not W9/W10; scratch-clone recipe
+- [Profile-safety Default race](tooling_profile_safety_default_recreated.md) — redirected-Default case EEXIST 7-13% cold (Chrome re-creates Default); clone + no-globalSetup loop recipe
+- [008 collector writes to 015 dir](tooling_008_collector_writes_to_015_dir.md) — execute-008 tasked collector exits 2 on green; files land in 015 evidence dir
+- [vitest 1.6 list + e2e harness](tooling_vitest16_list_and_e2e_harness.md) — `vitest list` is watch mode (vacuous); globTestFiles proof; frontend/e2e MSW proxy layout, real-backend flag
+- [008 projector + synthetic sessions](project_obs008_projector_synthetic_sessions.md) — non-UUID/non-decimal seeds need the claim-free fallback; ready6 is in guidedIncrementalTest
+- [D5 real-backend smoke recipe](tooling_d5_real_backend_smoke_recipe.md) — bootRun env + seed OK; POST 403 CORS (Origin 4177) fixed in start-servers.mjs; clean stop
+- [Story append-only consolidation](tooling_story_append_only_consolidation.md) — evidence on new lines, in-order diff check, quote check, atomic mv; File List from manifest diff
+- [Fixtures probe without dist rebuild](tooling_fixtures_probe_no_dist_and_close_bound.md) — scratch config sans globalSetup; Playwright 30 s close bound on frozen Chrome; guided 30 s socket timeout
+- [009 W1 probes + harness](project_obs009_w1_probes_and_harness.md) — R1 and ADJ-1 reproduced; A4 tripwire is 3 sites; assign needs in-process claim; harness red vs pre-fold dist
+- [Runner fold: overlay + real-process smoke](tooling_runner_fold_overlay_and_real_process_smoke.md) — TLS-only listener reds createHarness suites; scratch tree + patch, DER certs, emit-d1 smoke
+- [009 W2 backend lane recipes](tooling_obs009_w2_backend_lane_recipes.md) — ack schema wants decimal revisions; acknowledgeContext needs translation; in-lock multi-file mutation script
+- [Scratch-copy mutations + fixtures](tooling_scratch_copy_mutations_and_fixtures.md) — rsync copy of studio-runner for mutations/evidence-writing fixtures; env-var vitest root; BASELINE variant
+- [D5 vs profile-safety fixture](project_d5_conflicts_with_profile_safety_fixture.md) — ruling D5-1 turns 2 browser-profile-safety tests red; QA/architect decision
+- [OBS-009 lane S schedules](project_obs009_lane_s_schedules.md) — acceptance hunk outside S write set = baton; scratch proof recipe; WebEnvironment.NONE fails; G-3 test shape
+- [Lane I scratch-emit recipe](tooling_obs009_lane_i_scratch_emit_recipe.md) — run folded-runner ITs pre-F-merge via scratch tsc emit + OBS009_RUNNER_DIST; main() wrapper, exit-status race, gjf JDK21
+- [verifyRunnerDist and wildcards](tooling_verify_runner_dist_wildcard.md) — wildcard --tests selects the stale-dist check (0 tests, 8 s); list classes, nested as Outer$Inner
+- [009 EP harness recipes](tooling_obs009_ep_harness_recipes.md) — Node 24 imports TS fixtures; real-Chromium page probe; .d.mts lint trap; B7 evidence source; ledger bound to manifest digest
+- [ReplayIT IPC baseline records](project_replayit_ipc_diagnostic_baseline.md) — constant case-7 performStop-grace kill, r8 3 s stall, incremental 1 ms CONTEXT_LOST are not recurrences
+- [009 W3 joined IT recipes](tooling_obs009_w3_joined_it_recipes.md) — fork-prelude pause seam, runner 4xx has no log, catalog [REAL, FIXTURE], SIGKILL = no video, lock waits
+- [Lane F co-run rig recipes](tooling_obs009_lane_f_corun_recipes.md) — ObservedCoRunIT: fixture traps, preload counters, scripted model, mutation swap, lock-hold scripts
+- [Runner SIGKILL orphans](project_obs009_runner_sigkill_orphans.md) — replay child + browser outlive a runner kill until the step timeout; guided browser dies in 0.3 s
+- [Gate-hold patch prep](tooling_gate_hold_patch_prep.md) — Node epoch replica, generator in sandbox, publication-fixtures bundle pin (108+2), tsc/vitest-shim overlays
+- [Post-G9 batch gotchas](tooling_post_g9_batch_gotchas.md) — --tests FQCN uses package not dir; schema edit stales dist (pins reds); spotlessCheck gate

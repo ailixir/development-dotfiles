@@ -1,0 +1,1 @@
+- [010 Live surface list](project_obs010_live_surface_skeleton.md) — dated 2026-10-18 at G9b (live-surface-20261018, JSON sha e5c58fa5…); P4/P5 met, 010 InProgress; @qa/@pm lines open; re-date after 009 Done

@@ -1,12 +1,20 @@
 ---
 name: studio-schema-consolidation
-description: 2026-10-09 decision pending — UI Studio keeps ONE authoring path (observed/guided, OBS-001..006), no backward compat; schema rewrite (Option A) vs forward-only V34+ (Option B) hinges on whether any shared DB applied V12..V33
+description: Studio re-baselined (012A) into frozen V12–V18; forward-only V19+ (head V22 on 2026-10-17); where every Flyway head pin lives (three grep forms plus a delta pin)
 metadata:
   type: project
 ---
 
-UI Studio is unreleased. The user wants a single authoring path (observed/guided from OBS-001..006) and explicitly no backward compatibility with the compile-to-READY path (V12..V29 compile requests/outcomes, step identities, expected_intent, authoring columns). The choice between rewriting the Studio migrations as a fresh baseline (Option A) or shipping V34+ cleanup migrations (Option B) waits on @devops confirming whether any shared database (staging/prod RDS or shared dev) has applied V12..V33.
+UI Studio keeps one authoring path (observed/guided) with no backward compatibility. The pending Option A/B choice was settled as a re-baseline: 012A rewrote the Studio migrations into V12–V18 on top of untouched core V1–V11. Those files are now frozen (byte-identical, verified by shasum). Forward-only resumed with V19__guided_governance and V20__guided_session_recording, authored as one unit (RK-5 out-of-order risk).
 
-**Why:** pre-GA, no production guided data exists (secret-login-design §1); rewriting is only safe if no shared `flyway_schema_history` already contains V12..V33 (validate-on-migrate is on, baseline-on-migrate off in application.yml).
+**Why:** the product is pre-GA with no production guided data, and validate-on-migrate is on. RK-15: any persistent DB that applied the deleted cutover V19__studio_inference_candidate_identity fails validate and must be recreated.
 
-**How to apply:** do not add V34 compile-path drops until the @devops answer is recorded. Boundary nuance to remember: `ui_tests`/`ui_test_executions` are created by Checks core V1/V7 (not Studio), and V25 drops the core `secrets` table from inside the Studio version range, so a Studio rebase must carry V25 forward and keep V1..V11 byte-identical. Observed path still writes `reference_policy`, `intent_derivation_version`, and sets `ui_tests.compile_status='READY'` on publish — those are shared, not compile-only. See [[studio-migration-head-testing]] for the write_once trigger hazard that any rewrite must preserve.
+**How to apply:** never edit V1–V18. Head is V22 (OBS-008 A1, execution_replay_failure) as of 2026-10-17; next DDL is V23+. Head pins come in three forms, and a grep for `"NN"` misses the integer one:
+- String pins: InferenceMigrationLatestIT (max plus the description list), ErrorCodeConstraintMigrationIT HEAD, GuidedGovernance/Recording/ReplayingPrefix MigrationIT, GuidedPublicationMigrationTest (version list).
+- Integer `isEqualTo(NN)` pins: GuidedSecretLoginMigrationTest (max and `> NN`) and support/LegacyV20ConfirmedBaseFixture.assertPreservedAtHead.
+- Six `.target("NN")` "at head" sites in Guided* ITs. They stay green but stop short of the new migration. Bump them with the head.
+- Gotcha: GuidedBridgeIntegrationTest, GuidedBridgePlannedIT, GuidedDefaultModelReservationIT and GuidedPlanningIntegrationTest live under guided/bridge and guided/translation but declare package `guided.session`. A Gradle `--tests` filter must use that package; a wrong name silently matches nothing.
+
+- Delta pin (added 2026-10-18, OBS-009 DE): guided/secret/GuidedRuntimeRolePrivilegeIT pins every relation/column V19..head creates and the exact runtime grant. Any V23+ that adds a relation, a column on an older table, or changes a function body's table access fails it until its maps, PREPARED_GRANT and docs/qa/evidence/STUDIO-OBS-009/execution-20261018/de/runtime-role-grants-v19-v22.sql move together.
+
+Grep all three forms, and update the delta pin, before a new V and move them together. See [[studio-migration-head-testing]].

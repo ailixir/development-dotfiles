@@ -8,3 +8,35 @@
 - [Single-path decision](single_path_decision.md) — 2026-10-09: observed is the ONLY path; compile removed; V12–V18 re-baseline; incremental re-learn in GA; ADR-SC-005 canonical
 - [V1+ scope decision](v1_plus_scope_decision.md) — 2026-10-07 (SUPERSEDED by single-path 2026-10-09): incremental deferred behind T-INC; S1 O-22, S2 §35+request row, S3 R2D2 probe
 - [Guided login = secret refs](guided_login_secret_ref_decision.md) — 2026-10-09: author-written login with <secret ID>; no provider/handoff; EXT-001 dropped; secret-login-design.md now R3 (single path)
+- [OBS-012A wave1b rulings](obs012a_wave1b_rulings.md) — schedule tests → OBS-009 @Disabled; CSI rebuilt; dispatch recheck HIGH; R6/R7 re-seat, vacuous pass = defer
+- [R8 pre-Ready self-stop](r8_preready_selfstop_ruling.md) — runner wrong: self-stop = RUN_ERROR/'CANCELLED'; reaper = START_TIMEOUT/reconcile; ADJ-1/2 open
+- [R9/R10 clock + control-window](r9_r10_clock_controlwindow_ruling.md) — grants on DB clock (no tolerance, V15 untouched); window miss fail-closed; R8-OBS-1 → OBS-009
+- [OBS-013/014 hidden overlaps](obs013_014_hidden_overlaps.md) — result3 slots REQUIRED (013 hits GuidedSessionService); transport.ts:145; s0-plan-refresh.json
+- [AR-2/AR-3 OBS-014 rulings](ar2_ar3_obs014_rulings.md) — exec vs guided code vocab; V19 prune fn + 2 guard replaces; claimAt is live (only claim() legacy); 8 hidden claim() tests
+- [OBS-012A gate residues](obs012a_gate_residues.md) — APPROVE-W-C; legacy /admission → OBS-014, artifact-1 runtime stamps → OBS-009; dist untracked
+- [AR-1 OBS-013 recording ruling](ar1_obs013_recording_ruling.md) — recordEvidence reuse rejected (terminal refusal); V20 immutable fact; DB-clock SQL expiry; field is `status`
+- [AR-1 C1 deviations](ar1_c1_deviations.md) — D-1 action-timing file ratified; E-1 execution video $ref switch at S2/C2a (B13, F-012B); checker → C lane
+- [Canonical-v1 lowercase + context refusal](canonical_v1_lowercase_ruling.md) — Jackson uppercase hex outlier (9 C0 cps); B14 fixes Java; context 409 IDENTITY_MISMATCH/SCHEMA = terminal, no retry
+- [Mounted rules ruling](ar_mounted_rules_ruling.md) — guided `rules` refused every form, runtime rules:[]; replay untouched; guided read refusal = TARGET_CHANGED
+- [C2b spec rulings](c2b_spec_rulings.md) — N=5 ops 38→43, readGrants required, V19 key-set deltas + PG hash CHECKs, video-null openapi sites
+- [OBS-015 T0 rulings](obs015_t0_rulings.md) — v1 authoring deleted (FE v1-only, unlearnable); lowered k=REVISION_CONFLICT; governed policy for mixed session; V21 state
+- [AC-11 HMAC + refusal codes](ac11_hmac_refusal_codes_ruling.md) — Vault Transit custody, not promoted in 014 (E1-E8 UNCONFIRMED); B14 admission oracles ratified + claimAt Javadoc fix
+- [AR-QA SEC-001/TEST-001](ar_qa_sec001_test001.md) — OBS-013 startup-video trim FIX; oracle A revised 10-14 (content/region, T1 cap, T2 control); AC-6 spec
+- [OBS-015 Claude resume constraints](obs015_claude_resume_constraints.md) — global source freeze per run; in-JVM Core/Vault; gradle lane registration; supervisor DROP; row85 A/B/C
+- [B3abc design01](b3abc_design01.md) — staged offered-basis oracle at stored writer, no prod seam; routes 9/10/13/14 → B1; R-P03 read-in-drift-step
+- [009-011 prep plan](obs009_011_prep_plan.md) — 4 ITs spawn guidedMain (atomic fold), dist shared w/ 008, co-run+benchmark harness dead, A/B recs
+- [REL-001 D4 launch deadline](rel001_d4_launch_deadline_ruling.md) — 12 s start budget (15−3), boundedStartup, code TIMEOUT, argv tree kill; ratified w/ F1 CANCELLED-race + R2 guard; 15 s edge ACCEPT
+- [W11 stop-reason ruling](w11_stop_reason_ruling.md) — tie=EXPIRED at arm; C-1 margin-bound final renewal abort → EXPIRED; backend ctx lifecycle ignores reason (F-1)
+- [ADR-SC-006 a11y scope](adr_sc006_a11y_scope.md) — 2026-10-17: no WCAG target; functional must-haves only; jsdom audit guard-only; FE-A11Y post-GA
+- [OBS-008 W1 confirmations](obs008_w1_confirmations.md) — F4 note OK; A1 empty/misaligned=null; replay cols insertable+updatable=false; R3 needs closing selectors
+- [AR-SEC001 form membership](ar_sec001_form_membership.md) — OBS-014 ruled B: click allow-list (text/textarea/select), Enter press side-effecting; no signal; DENY narrows
+- [OBS-009 T0 rulings](obs009_t0_rulings.md) — 2026-10-17: A2.6 guided ⇒ 1 replica (one worker id/origin); capacity/policy keys withdrawn; LR no tolerance
+- [OBS-008 Q9 literal hint](obs008_q9_authored_literal_trigger.md) — KL-015-Q4 = FAILED BUDGET_EXCEEDED (acquisition gate); hint on TARGET_MISMATCH|BUDGET_EXCEEDED + clause predicate
+- [OBS-009 W1.5 D5 + D1.0](obs009_w15_d5_d10_rulings.md) — 3 s grace after STARTED then hardTeardown; reply after settle; /ready untouched; journal emptyDir
+- [OBS-009 W1.5 R1/ADJ-1/A4](obs009_w15_part2_rulings.md) — R1 GO shared derivation; ADJ-1 (a) outcome-bound applyFinal disjunct, no V23; coordinator TLS, tripwire 0
+- [OBS-008 W5 unreadable + alias](obs008_w5_unreadable_alias_rulings.md) — drop pointer only on fresh UNLEARNED/NEEDS_RELEARN (READY masks LEARNING); alias deleted; start 422 undeclared
+- [OBS-009 pre-F-merge rulings](obs009_fmerge_prerulings.md) — fixture terminate oracle; lost-control-body=A12; connector path filter+API NetPol; tls-connector name blocker
+- [OBS-011 T0 prep](obs011_t0_prep.md) — 2026-10-18: claim 98/checkCommand 22 (AC-4c moot), AC-3 done by 009, runner sandboxes (verifyRunnerDist), REFUSED ruling
+- [OBS-009 pre-G9 rulings](obs009_preg9_rulings.md) — F-A replay orphan carried RUN-ORPHAN-01; pre-Ready secretUse UNKNOWN_OUTCOME accepted, runner NOT_USED later
+- [MODEL-SIZING draft](model_sizing_ruling_draft.md) — 2026-10-18 A-ii: out 98304/in 786432 (maxima higher), 4096/call kept; awaits @pm ack; B8 user
+- [OBS-010 dated list cross-check](obs010_dated_list_crosscheck.md) — 2026-10-18 e5c58fa5 WITH-NOTES; RKO-09 surface; observed live via uat; $id refs dont move hashes

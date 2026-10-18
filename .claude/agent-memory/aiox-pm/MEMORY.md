@@ -1,1 +1,5 @@
 - [Secrets disclaimer policy](project_secrets_disclaimer_policy.md) — PO: name-triggered (any identity token, PO-9) disclaimer, own-risk ack + audit; PRD/BRD conflict open
+- [Guided session budget bounds](project_guided_session_budget_bounds.md) — 2026-10-18 A-ii ACK 98304/786432 (P=24, T4 recal); per-CSI daily kept; U17/U18/U7 user-owed
+- [A11y scope functional-only](project_a11y_scope_functional_only.md) — ADR-SC-006 2026-10-17: no WCAG target; never re-add a11y mandates; FE-A11Y post-GA
+- [Studio follow-up backlog F01-F04](project_studio_followup_backlog.md) — F01-F03 conditional; F04 HMAC/Transit pilot-blocking; E1-E8 nested under ED-02
+- [studioObserved policy owner](project_studio_observed_policy_owner.md) — 2026-10-18: per-env trust policy owner user-owed; pilot blocker; dated list pre-accepted P1-P6

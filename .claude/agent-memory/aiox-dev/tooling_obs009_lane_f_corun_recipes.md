@@ -1,0 +1,20 @@
+---
+name: tooling-obs009-lane-f-corun-recipes
+description: ObservedCoRunIT rig (real folded runner + Spring app + live Chromium): fixture traps, preload counters, scripted model seam, mutation swap, lock-hold scripts
+metadata:
+  type: project
+---
+
+From STUDIO-OBS-009 W3 lane F (2026-10-18). Everything is in `docs/qa/evidence/STUDIO-OBS-009/execution-20261018/f/` (`recipes/`, `reproduce.md`).
+
+- **`ObservedPublicationFixture.publish()` cannot feed a real runner**: ORIGIN is `https://studio-fixture.example.test` and its catalog build is synthetic (`d`x64 digest). The runner's `loadObservedBuild` demands its own build (`OBSERVED_PROFILE`, `runtime-versions.json`, image digest from `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST`). Recipe: derive the catalog with a `node --input-type=module -e` import of `dist/validator/observedReferencePolicy.js` (see ReplayIT `CATALOG`), write the same policy array to a file for `STUDIO_RUNNER_OBSERVED_POLICY_FILE`, copy `learn()/publish()/prepareDeclaredSource()` with a loopback origin. Env to enable replay in the folded runner: `STUDIO_RUNNER_OBSERVED_{VALIDATION,REPLAY}_ENABLED`, `_CATALOG_FILE`, `_POLICY_FILE`, `_IMAGE_DIGEST`, plus `NODE_EXTRA_CA_CERTS` (the replay callback is plain `fetch` over https, no client cert, so Spring needs `server.ssl.client-auth=want`, not `need`).
+- **A step with a URL in its text** is what makes the fixture's navigate exercise reachable; a `/hold` page that never answers gives a deterministic mid-step; `ui_tests.timeout_seconds` (set before publish) is the job's `stepTimeoutMs`.
+- **Public routes put `uid-<email>` in X-User-Id**, and the Run's principal is that id. A secret-use entitlement (`MutableSecretUseAuthorization.grant`) must be granted to it, or the Run is 400 `UNKNOWN_REFERENCE`.
+- **Counting what reaches the runner**: harness `preload(js)` that patches `https.createServer` (count `POST /v2/runs`, `DELETE /v2/runs/<id>`, guided routes by last path segment) and `child_process.fork` (one fork = one replay child), then `syncBuiltinESMExports()`. Write the counters file by temp + `renameSync`; a reader that sees a half file reads zeros.
+- **Guided session without a model**: `@Primary GuidedLlmGatewayClient`. SOURCE_PLAN reply = `{sourceReferences:[sourceSpan destination startUtf16..endUtf16 intendedSlot navigate.destination], obligations:[navigate/page/referenceIndex 0], needs:[]}`; NEXT_ACTION = `{status:ACTION, obligationId, question:null, action:{operation:{kind:navigate,destinationInputId:context.inputs[0].inputId}, target:{kind:page}}}`. Needs `DEFINED_PORT` (the coordinator's `controller-origin` is fixed), the three JWT files (<300 s, refresh per test), `csi-budget.max-concurrent-sessions` raised (default 3), `ObservedPublicationFixture.seedPolicy` for the DB policy.
+- **Nested public class in a package-private test class** (`DatabaseCanaryScanIT$CanaryScan`) is callable by reflection from another package.
+- **Negative control without touching the checkout**: `recipes/mutation.init.gradle.kts` (JavaCompile of one mutated class + `Sync` of main classes with it last + Test.classpath swap, env MUT_SRC/MUT_OUT). Works with the collector (`-I` after the Gradle args). Assert the checkout file hash afterwards.
+- **Lock use**: a shell script run under `with-gradle-lock.py` can hold the lock for several collector runs (static gates, the class, a mutation, named proofs); gate follow-up steps on the results JSON counts, because the collector exits 2 whenever another lane edits source (`sourceStable:false`) even when every test passed.
+- **Reflecting on a cancelled guided session's row**: the teardown confirmation writes `progress.teardownStatus` on its own thread; wait for CONFIRMED and three identical hashes before any byte comparison (it flaked 1 in 13).
+
+**Why:** the rig took four lock cycles to settle. **How to apply:** any future runner-backed IT with the published plan, a secret, or a guided session. Related: [[tooling-obs009-lane-i-scratch-emit-recipe]], [[tooling-verify-runner-dist-wildcard]], [[tooling-javac-precheck-outside-lock]].

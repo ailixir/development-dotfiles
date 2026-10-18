@@ -1,2 +1,10 @@
 - [Vertex model access (epicagentai)](vertex_model_access.md) — 3.8-flash and 3.1-pro-preview callable; 3.5-pro/3.8-pro 404; points to 2026-10-04 UI Studio benchmark data
-- [Verification run budgets](verification_run_budgets.md) — backend studio.* suite >14 min (no 10-min fit); corun.sh ~1 min is the best single integration check; one Gradle at a time
+- [Verification run budgets](verification_run_budgets.md) — backend studio.* suite >14 min (no 10-min fit); corun.sh harness deleted in working tree (2026-10-16); one Gradle at a time
+- [Gate evidence preservation](gate_evidence_preservation.md) — Gradle test re-run wipes run XML that may be the only gate proof; how to name-diff baseline vs final XML
+- [OBS-009 T0 prep facts](project_obs009_t0_prep.md) — prep drafts location, benchmark harness is stale, 13 ported cases not in repo, USD 500 is whole-wave, per-CSI cap = 20 sessions/day
+- [OBS-009 T0 QA 2026-10-17](project_obs009_t0_qa_20261017.md) — A18 class, D2 record spec; manifest tool misses helm-chart; skips 7 or 8; dataflow mode defaults to exact
+- [OBS-015 gate issued + Done](project_obs015_gate_issued.md) — CONCERNS 2026-10-17 at 9d18f555; flipped Done same day (0.1.21); only push/PR left
+- [OBS-008 gate issued + Done](project_obs008_gate.md) — CONCERNS 2026-10-17 at 50692d55; Done 0.3.18; only push left (commit-set caveat)
+- [Story edits can break tests](gotcha_story_first_line.md) — backend reads story line 1; frontend copy table quotes story text; add-only edits
+- [OBS-009 pre-G9 review 2026-10-18](project_obs009_pre_g9_review_20261018.md) — 32000 output cap, ledger revoked_at no trigger, START_FAILED scope, lock path, C4 NOT_MET
+- [OBS-009 C10 + D2 record 2026-10-18](project_obs009_c10_d2_20261018.md) — C10 9/9 red; trigger MET under C8 waiver @ 061fc41f; rows all disclosure; ReplayIT Order(1)+(9)
