@@ -212,3 +212,29 @@ describe('WP7 — disruption and drain', () => {
     expect(podSpec(deployment).terminationGracePeriodSeconds ?? 0).toBeLessThan(150);
   });
 });
+
+
+describe('STUDIO-OBS-009 A2.6 — guided mode and the autoscaler are exclusive', () => {
+  it.each(EACH_SET)('%s: guided mode on renders one replica and no ScaledObject', (_label, valuesFile) => {
+    const outcome = render({ valuesFile, guided: true });
+    expect((runnerDeployment(outcome).spec as { replicas?: number }).replicas).toBe(1);
+    expect(scaledObjects(outcome)).toEqual([]);
+    expect(runnerHpas(outcome)).toEqual([]);
+  });
+
+  it.each(EACH_SET)('%s: guided mode with the autoscaler on fails the render, and the autoscaler alone still renders', (_label, valuesFile) => {
+    const refused = renderOutcome({ valuesFile, guided: true, set: AUTOSCALING_ON });
+    expect(refused.ok, 'a ScaledObject would own the replica count of a pod guided mode needs to be exactly one').toBe(false);
+    expect(refused.error).toContain('autoscaling.enabled: false');
+    // The control: without guided mode the very same autoscaler values render a ScaledObject.
+    expect(scaledObjects(render({ valuesFile, set: AUTOSCALING_ON }))).toHaveLength(1);
+  });
+
+  it('a guided pod does not shrink the replay drain: the grace period is still at least the drain timeout', () => {
+    const deployment = runnerDeployment(render({ guided: true }));
+    const grace = podSpec(deployment).terminationGracePeriodSeconds ?? 0;
+    expect(grace).toBeGreaterThanOrEqual(
+      Math.floor(Number(envValues(soleContainer(deployment))['STUDIO_RUNNER_DRAIN_TIMEOUT_MS']) / 1000),
+    );
+  });
+});

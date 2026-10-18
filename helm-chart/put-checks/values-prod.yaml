@@ -27,7 +27,9 @@ backend:
     targetCPUUtilizationPercentage: 70
 
   env:
-    JAVA_OPTS: "-Xms512m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError"
+    # STUDIO-OBS-009 AC-4 / A6: heap and core dumps off (the two negative flags, no HeapDumpPath);
+    # asserted on every value set by dump-settings.test.ts.
+    JAVA_OPTS: "-Xms512m -Xmx768m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError -XX:-HeapDumpOnOutOfMemoryError -XX:-CreateCoredumpOnCrash"
     CHECKS_CORS_ALLOWED_ORIGINS: "https://checks.citi.com"
     CHECKS_CORE_SERVICE_URL: "http://checks-core.prod.svc.cluster.local:8081"
 
@@ -105,7 +107,9 @@ worker:
       memory: 2Gi
 
   env:
-    JAVA_OPTS: "-Xms768m -Xmx1024m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError"
+    # STUDIO-OBS-009 AC-4 / A6: heap and core dumps off (the two negative flags, no HeapDumpPath);
+    # asserted on every value set by dump-settings.test.ts.
+    JAVA_OPTS: "-Xms768m -Xmx1024m -XX:+UseG1GC -XX:MaxMetaspaceSize=192m -XX:+ExitOnOutOfMemoryError -XX:-HeapDumpOnOutOfMemoryError -XX:-CreateCoredumpOnCrash"
     CHECKS_CORE_SERVICE_URL: "http://checks-core.prod.svc.cluster.local:8081"
 
   envFromSecrets:
@@ -178,6 +182,33 @@ studioRunner:
     sizeLimit: 2Gi
   scratch:
     sizeLimit: 8Gi
+  # STUDIO-OBS-009: the TLS listener's inputs. Secret NAMES are per environment; the fingerprint is
+  # NOT here, deliberately: it is the SHA-256 of this environment's backend client certificate,
+  # which this repository does not know. It is required, has no default, and the render fails
+  # without it (`--set-string studioRunner.tls.controllerCertificateFingerprint256=<AA:BB:...>`).
+  tls:
+    secretName: checks-studio-runner-tls-prod
+  backendTls:
+    secretName: checks-studio-backend-runner-tls-prod
+  # Guided mode is OFF here, as in every shipped values file. Enabling it is a per-environment
+  # decision that also needs `replicaCount: 1` and the token issuer (register U21). When it is on,
+  # the pod runs one replay browser plus one guided browser: these resources and /dev/shm replace
+  # the single-browser ones above. STARTING VALUES, UNMEASURED (GA plan G-4).
+  guided:
+    enabled: false
+    callbackToken:
+      secretName: checks-studio-guided-callback-token-prod
+    backendTokens:
+      secretName: checks-studio-guided-controller-tokens-prod
+    resources:
+      requests:
+        cpu: "2"
+        memory: 4Gi
+      limits:
+        cpu: "4"
+        memory: 8Gi
+    devShm:
+      sizeLimit: 4Gi
   seccompProfile:
     type: RuntimeDefault
   callbackBaseUrl: ""

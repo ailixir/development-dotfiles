@@ -1,3 +1,10 @@
+{{- /* Guided mode is a mode of the runner and needs its pod (A2.6): `guided.enabled` with the runner
+       off must fail here, because nothing else would render and the values would be ignored. The
+       same guard runs first in the runner Deployment for the replica, autoscaler and PID-1 rules. */ -}}
+{{- $_ := include "put-checks.studioRunner.guidedGuard" . }}
+{{- /* Observed replay (G-O1..G-O4) is checked here too, outside `backend.enabled`: `studioObserved`
+       on with `studioRunner.enabled: false` would otherwise render nothing and be ignored. */ -}}
+{{- $_ := include "put-checks.studioObserved.guard" . }}
 {{- if .Values.backend.enabled }}
 {{- include "put-checks.springConfig.validate" (index .Values "backend") }}
 {{- $gatewayProvider := required "studioGateway.provider is required" .Values.studioGateway.provider -}}
@@ -61,9 +68,17 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ .Values.backend.configOverrides | toYaml | sha256sum }}
+        checksum/config: {{ include "put-checks.backend.springProperties" (dict "root" . "role" "api") | sha256sum }}
         {{- with .Values.backend.podAnnotations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.studioAuditSiem.enabled }}
+        # The studio audit stream is on stdout with "stream":"studio-audit"; these mark the pod for
+        # the platform's log forwarder (AC-5). Platform-specific annotations come from values.
+        put.citi.com/studio-audit-stream: "studio-audit"
+        {{- with .Values.studioAuditSiem.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- end }}
       labels:
         {{- include "put-checks.labels" . | nindent 8 }}
@@ -100,6 +115,13 @@ spec:
             - name: http
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
+            {{- if include "put-checks.studioRunner.guidedEnabled" . }}
+            # The guided TLS connector (clientAuth=need), exposed only through the dedicated
+            # `<fullname>-api-guided-tls` Service and admitted from the runner by its NetworkPolicy.
+            - name: guided-tls
+              containerPort: {{ .Values.studioRunner.guided.tlsConnector.port }}
+              protocol: TCP
+            {{- end }}
           env:
             - name: SPRING_CONFIG_ADDITIONAL_LOCATION
               value: "file:/etc/put-checks/config/application.yaml"
@@ -314,6 +336,9 @@ spec:
               mountPath: {{ .Values.studioGateway.credentialsMountPath }}
               readOnly: true
             {{- end }}
+            {{- with (include "put-checks.backend.runnerMounts" .) }}
+            {{- . | nindent 12 }}
+            {{- end }}
           lifecycle:
             preStop:
               exec:
@@ -355,6 +380,9 @@ spec:
               - key: {{ .Values.studioGateway.credentialsKey }}
                 path: {{ .Values.studioGateway.credentialsKey }}
         {{- end }}
+        {{- with (include "put-checks.backend.runnerVolumes" .) }}
+        {{- . | nindent 8 }}
+        {{- end }}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -390,9 +418,16 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ .Values.worker.configOverrides | toYaml | sha256sum }}
+        checksum/config: {{ include "put-checks.backend.springProperties" (dict "root" . "role" "worker") | sha256sum }}
         {{- with .Values.worker.podAnnotations }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
+        {{- if .Values.studioAuditSiem.enabled }}
+        # See the API pod: the same audit stream, the same selector (AC-5).
+        put.citi.com/studio-audit-stream: "studio-audit"
+        {{- with .Values.studioAuditSiem.podAnnotations }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
         {{- end }}
       labels:
         {{- include "put-checks.labels" . | nindent 8 }}
@@ -584,6 +619,9 @@ spec:
               mountPath: {{ .Values.studioVault.tokenMountPath }}
               readOnly: true
             {{- end }}
+            {{- with (include "put-checks.backend.runnerMounts" .) }}
+            {{- . | nindent 12 }}
+            {{- end }}
           lifecycle:
             preStop:
               exec:
@@ -616,6 +654,9 @@ spec:
             items:
               - key: {{ .Values.studioVault.tokenKey }}
                 path: {{ .Values.studioVault.tokenKey }}
+        {{- end }}
+        {{- with (include "put-checks.backend.runnerVolumes" .) }}
+        {{- . | nindent 8 }}
         {{- end }}
       {{- with .Values.worker.nodeSelector }}
       nodeSelector:

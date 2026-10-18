@@ -19,6 +19,12 @@ export interface ImageFacts {
   readonly home: string;
   /** The user the image runs as. */
   readonly user: string;
+  /** Every `Config.Env` NAME the image declares (values are never needed and never returned). */
+  readonly envNames: readonly string[];
+  /** `Config.Cmd` as the image stores it. `null` when the image declares none. */
+  readonly cmd: readonly string[] | null;
+  /** `Config.Entrypoint`. The A6 CMD is asserted together with "no ENTRYPOINT wrapper". */
+  readonly entrypoint: readonly string[] | null;
 }
 
 let cached: ImageFacts | null | undefined;
@@ -75,7 +81,12 @@ export function imageFacts(): ImageFacts {
     ['image', 'inspect', '--format', '{{json .Config}}', RUNNER_IMAGE],
     { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
   );
-  const config = JSON.parse(raw) as { Env?: string[]; User?: string };
+  const config = JSON.parse(raw) as {
+    Env?: string[];
+    User?: string;
+    Cmd?: string[] | null;
+    Entrypoint?: string[] | null;
+  };
   const environment = new Map(
     (config.Env ?? []).map((entry) => {
       const index = entry.indexOf('=');
@@ -93,6 +104,13 @@ export function imageFacts(): ImageFacts {
   if (home === undefined || home === '') {
     throw new Error('the image declares no HOME; the runner Dockerfile sets it and must keep it');
   }
-  cached = { browsersPath, home, user: config.User ?? '' };
+  cached = {
+    browsersPath,
+    home,
+    user: config.User ?? '',
+    envNames: [...environment.keys()],
+    cmd: config.Cmd ?? null,
+    entrypoint: config.Entrypoint ?? null,
+  };
   return cached;
 }

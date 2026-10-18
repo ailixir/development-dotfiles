@@ -14,23 +14,34 @@
  * the runner's, the runner's callback URL against the API Service that render produced — never a
  * comparison against a literal copy of the fact.
  */
-import { describe, expect, it } from 'vitest';
+import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterAll, describe, expect, it } from 'vitest';
+import { parseAllDocuments } from 'yaml';
 
 import { loadConfig } from '../../src/server/config.js';
+import { packageRoot } from '../helpers/corpus.js';
 
 import {
   byKind,
+  CHART_DIR,
   deploymentNamed,
   envNames,
   envValues,
+  mountedSpringProperties,
+  OBSERVED_FIXTURE,
   one,
   podSpec,
   render,
+  renderOutcome,
   runnerDeployment,
   RUNNER_FRAGMENT,
   soleContainer,
   VALUE_SETS,
   valueSetName,
+  writeValuesOverlay,
 } from './helm.js';
 import type { Container, K8sDocument, RenderOutcome } from './helm.js';
 
@@ -233,5 +244,197 @@ describe('Studio v1 gaps — every required backend variable is rendered on its 
     expect(container.readinessProbe?.httpGet?.port).toBe('http');
     expect(envValues(container).MANAGEMENT_SERVER_PORT).toBe(String(http?.containerPort));
     expect(podSpec(deployment).containers).toHaveLength(1);
+  });
+});
+
+
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+// STUDIO-OBS-009 AC-5 — the studio audit stream reaches the platform SIEM sink through values.
+// ══════════════════════════════════════════════════════════════════════════════════════════════
+
+const scratchDirs: string[] = [];
+afterAll(() => {
+  for (const directory of scratchDirs) rmSync(directory, { recursive: true, force: true });
+});
+
+/** The stream and logger the APPLICATION writes, read from the two files that define them. */
+function auditConstants(): { stream: string; logger: string; javaCategory: string } {
+  const backend = join(packageRoot, '..', 'backend', 'src', 'main');
+  const logback = readFileSync(join(backend, 'resources', 'logback-spring.xml'), 'utf8');
+  const stream = /"stream"\s*:\s*"([^"]+)"/u.exec(logback)?.[1];
+  const logger = /<logger name="([^"]*audit\.studio)"/u.exec(logback)?.[1];
+  const java = readFileSync(
+    join(backend, 'java', 'com', 'citi', 'put', 'checks', 'studio', 'guided', 'audit', 'StudioActionAudit.java'),
+    'utf8',
+  );
+  const javaCategory = /CATEGORY\s*=\s*"([^"]+)"/u.exec(java)?.[1];
+  if (stream === undefined || logger === undefined || javaCategory === undefined) {
+    throw new Error('the audit stream, logger or category moved: the SIEM selector can no longer be checked');
+  }
+  return { stream, logger, javaCategory };
+}
+
+const SIEM_ON: Readonly<Record<string, string>> = {
+  'studioAuditSiem.enabled': 'true',
+  'studioAuditSiem.sink.name': 'put-platform-siem-studio',
+};
+
+/** What the routing contract must say, compared against the application's own constants. */
+function siemViolations(outcome: RenderOutcome): string[] {
+  const constants = auditConstants();
+  const violations: string[] = [];
+  const map = byKind(outcome, 'ConfigMap').filter((d) => (d.metadata?.name ?? '').endsWith('-studio-audit-siem'));
+  if (map.length !== 1) return [`expected one siem ConfigMap, found ${String(map.length)}`];
+  const data = map[0]?.data ?? {};
+  if (data['STUDIO_AUDIT_STREAM'] !== constants.stream) violations.push(`stream ${String(data['STUDIO_AUDIT_STREAM'])} != ${constants.stream}`);
+  if (data['STUDIO_AUDIT_LOGGER'] !== constants.logger) violations.push(`logger ${String(data['STUDIO_AUDIT_LOGGER'])} != ${constants.logger}`);
+  if (constants.logger !== constants.javaCategory) violations.push('logback logger and StudioActionAudit.CATEGORY disagree');
+  for (const role of ['-api', '-worker']) {
+    const annotations =
+      (deploymentNamed(outcome, role).spec as { template?: { metadata?: { annotations?: Record<string, string> } } }).template?.metadata
+        ?.annotations ?? {};
+    if (annotations['put.citi.com/studio-audit-stream'] !== constants.stream) {
+      violations.push(`${role} pod does not carry the stream selector`);
+    }
+  }
+  return violations;
+}
+
+describe('AC-5 — the studio audit stream is marked for the SIEM forwarder by values', () => {
+  it.each(EACH)('%s: off by default — no routing contract and no annotation on either pod', (_label, valuesFile) => {
+    const outcome = render({ valuesFile });
+    expect(byKind(outcome, 'ConfigMap').filter((d) => (d.metadata?.name ?? '').endsWith('-studio-audit-siem'))).toEqual([]);
+    for (const role of ['-api', '-worker']) {
+      const annotations =
+        (deploymentNamed(outcome, role).spec as { template?: { metadata?: { annotations?: Record<string, string> } } }).template?.metadata
+          ?.annotations ?? {};
+      expect(Object.keys(annotations).filter((key) => key.startsWith('put.citi.com/studio-audit'))).toEqual([]);
+    }
+  });
+
+  it.each(EACH)('%s: enabled — the selector equals the application’s own stream and logger, on both pods', (_label, valuesFile) => {
+    const outcome = render({ valuesFile, set: SIEM_ON });
+    expect(siemViolations(outcome)).toEqual([]);
+    const data = byKind(outcome, 'ConfigMap').find((d) => (d.metadata?.name ?? '').endsWith('-studio-audit-siem'))?.data;
+    expect(data?.['STUDIO_AUDIT_SINK']).toBe('put-platform-siem-studio');
+  });
+
+  it('passes the platform’s own forwarder annotations through, and only while enabled', () => {
+    const set = { ...SIEM_ON, 'studioAuditSiem.podAnnotations.fluentbit\\.io/parser': 'studio-audit-json' };
+    const annotated = render({ set });
+    for (const role of ['-api', '-worker']) {
+      const annotations =
+        (deploymentNamed(annotated, role).spec as { template?: { metadata?: { annotations?: Record<string, string> } } }).template
+          ?.metadata?.annotations ?? {};
+      expect(annotations['fluentbit.io/parser']).toBe('studio-audit-json');
+    }
+    const off = render({ set: { 'studioAuditSiem.podAnnotations.fluentbit\\.io/parser': 'studio-audit-json' } });
+    const offAnnotations =
+      (deploymentNamed(off, '-api').spec as { template?: { metadata?: { annotations?: Record<string, string> } } }).template?.metadata
+        ?.annotations ?? {};
+    expect(offAnnotations['fluentbit.io/parser']).toBeUndefined();
+  });
+
+  it('refuses to claim routing it did not name: enabled with no sink name fails the render', () => {
+    const outcome = renderOutcome({ set: { 'studioAuditSiem.enabled': 'true' } });
+    expect(outcome.ok).toBe(false);
+    expect(outcome.error).toContain('studioAuditSiem.sink.name');
+    // …and the same set with a name renders, so the failure above is about the name.
+    expect(renderOutcome({ set: SIEM_ON }).ok).toBe(true);
+  });
+
+  it('chart mutation: a renamed stream in the contract turns the comparison red', () => {
+    const scratch = mkdtempSync(join(tmpdir(), 'studio-chart-siem-'));
+    scratchDirs.push(scratch);
+    const chart = join(scratch, 'put-checks');
+    cpSync(CHART_DIR, chart, { recursive: true });
+    const path = join(chart, 'templates', 'configmap.yaml');
+    const text = readFileSync(path, 'utf8');
+    expect(text.split('STUDIO_AUDIT_STREAM: "studio-audit"').length - 1).toBe(1);
+    writeFileSync(path, text.replace('STUDIO_AUDIT_STREAM: "studio-audit"', 'STUDIO_AUDIT_STREAM: "studio-audit-v2"'), 'utf8');
+    const mutated = render({ chartDir: chart, set: SIEM_ON });
+    expect(siemViolations(mutated).join()).toContain('stream studio-audit-v2');
+  });
+
+  it('is rendered on guided sets too, with the same selector', () => {
+    expect(siemViolations(render({ guided: true, set: SIEM_ON }))).toEqual([]);
+  });
+});
+
+/**
+ * STUDIO-OBS-009 OI-06 B5 — the backend's trusted catalog and policies are delivered by the chart.
+ *
+ * `application.yml` defaults `studio.observed-replay.catalog-json` and `policies-json` to `[]`, and
+ * with an empty catalog `ObservedReplayPins.selected()` answers 409 RUNTIME_INCOMPATIBLE, so a
+ * chart-deployed stack could not publish a plan, authorize a replay or run any Studio test. The
+ * chart renders both properties from the SAME `studioObserved` values the runner's files come from,
+ * into the mounted `application.yaml` (never an environment variable). The fixture values are TEST
+ * VALUES.
+ */
+describe('STUDIO-OBS-009 OI-06 B5 — the backend receives the same catalog and policies as the runner', () => {
+  const CATALOG_KEY = 'studio.observed-replay.catalog-json';
+  const POLICIES_KEY = 'studio.observed-replay.policies-json';
+
+  it('uses the property names the backend binds (read out of application.yml, not restated)', () => {
+    const documents = parseAllDocuments(
+      readFileSync(join(packageRoot, '..', 'backend', 'src', 'main', 'resources', 'application.yml'), 'utf8'),
+    ).map((document) => document.toJS() as { studio?: Record<string, Record<string, unknown> | undefined> } | null);
+    const bound = documents.map((document) => document?.studio?.['observed-replay']).find((value) => value !== undefined);
+    expect(bound, 'application.yml no longer binds studio.observed-replay').toBeDefined();
+    const prefix = 'studio.observed-replay.';
+    expect(Object.keys(bound ?? {})).toEqual(
+      expect.arrayContaining([CATALOG_KEY, POLICIES_KEY].map((key) => key.slice(prefix.length))),
+    );
+  });
+
+  it.each(['api', 'worker'] as const)('%s: both properties are delivered as JSON strings, the runner’s entry first', (role) => {
+    const properties = mountedSpringProperties(render({ observed: true }), role);
+    expect(typeof properties[CATALOG_KEY]).toBe('string');
+    expect(typeof properties[POLICIES_KEY]).toBe('string');
+    expect(JSON.parse(String(properties[CATALOG_KEY]))).toEqual([OBSERVED_FIXTURE.catalog]);
+    expect(JSON.parse(String(properties[POLICIES_KEY]))).toEqual(OBSERVED_FIXTURE.policies);
+  });
+
+  it.each(['api', 'worker'] as const)('%s: neither property is delivered through the environment', (role) => {
+    const container = role === 'api' ? api(render({ observed: true })) : worker(render({ observed: true }));
+    expect(envNames(container).filter((name) => /OBSERVED_(CATALOG|POLICIES)_JSON/u.test(name))).toEqual([]);
+  });
+
+  it('puts additionalBackendCatalog after the runner’s entry, and the runner never receives it', () => {
+    const older = {
+      profile: { placeholder: 'TEST-ONLY older profile' },
+      build: { ...OBSERVED_FIXTURE.catalog.build, executableImageDigest: '8'.repeat(64) },
+    };
+    const outcome = render({
+      observed: true,
+      args: ['-f', writeValuesOverlay('observed-additional-catalog.json', { studioObserved: { additionalBackendCatalog: [older] } })],
+    });
+    for (const role of ['api', 'worker'] as const) {
+      const catalog = JSON.parse(String(mountedSpringProperties(outcome, role)[CATALOG_KEY])) as unknown[];
+      expect(catalog, role).toEqual([OBSERVED_FIXTURE.catalog, older]);
+    }
+    const runnerFile = one(
+      byKind(outcome, 'ConfigMap').filter((d) => (d.metadata?.name ?? '').endsWith('-studio-observed-trust')),
+      'observed trust ConfigMap',
+    ).data?.['catalog.json'];
+    expect(JSON.parse(runnerFile ?? 'null')).toEqual(OBSERVED_FIXTURE.catalog);
+  });
+
+  it('delivers neither property while both flags are off, and the pod rolls when the catalog or policies change', () => {
+    const off = render({ set: { 'studioObserved.validationEnabled': 'false', 'studioObserved.replayEnabled': 'false' } });
+    for (const role of ['api', 'worker'] as const) {
+      const properties = mountedSpringProperties(off, role);
+      expect(properties).not.toHaveProperty(CATALOG_KEY);
+      expect(properties).not.toHaveProperty(POLICIES_KEY);
+    }
+    const changed = render({
+      observed: true,
+      args: ['-f', writeValuesOverlay('observed-policies-rolled.json', { studioObserved: { policies: [{ ...OBSERVED_FIXTURE.policies[0], policyVersion: '2' }] } })],
+    });
+    const annotation = (outcome: RenderOutcome, role: string): unknown =>
+      (deploymentNamed(outcome, `-${role}`).spec?.template as { metadata: { annotations: Record<string, unknown> } }).metadata.annotations['checksum/config'];
+    for (const role of ['api', 'worker']) {
+      expect(annotation(changed, role), role).not.toBe(annotation(render({ observed: true }), role));
+    }
   });
 });

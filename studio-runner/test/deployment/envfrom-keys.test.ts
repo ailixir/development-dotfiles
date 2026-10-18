@@ -103,6 +103,12 @@ function springProperties(outcome: RenderOutcome, role: 'api' | 'worker'): Recor
   return parse(yaml ?? '') as Record<string, unknown>;
 }
 
+/** The two properties the chart adds while `studioObserved` is on. Names read from `ObservedReplayProperties`'s prefix. */
+const OBSERVED_REPLAY_PROPERTIES: readonly string[] = [
+  'studio.observed-replay.catalog-json',
+  'studio.observed-replay.policies-json',
+];
+
 interface ChartValues {
   backend: { configOverrides: Record<string, unknown> };
   worker: { configOverrides: Record<string, unknown> };
@@ -122,7 +128,19 @@ describe('AC-18 — envFrom names and lossless Spring configuration delivery', (
       for (const [component, role] of [['backend', 'api'], ['worker', 'worker']] as const) {
         const expected = { ...base[component].configOverrides, ...overlay?.[component]?.configOverrides };
         expect(Object.keys(expected).length).toBeGreaterThan(0);
-        expect(springProperties(outcome, role)).toEqual(expected);
+        const delivered = springProperties(outcome, role);
+        // Every configured key arrives unchanged...
+        expect(delivered).toMatchObject(expected);
+        // ...and the ONLY additions are the chart-owned runner-chain properties (STUDIO-OBS-009:
+        // `studio.runner.tls.*`, and the guided set while guided mode is on) and, while observed
+        // replay is on (values-uat.yaml), the two `studio.observed-replay.*-json` properties
+        // (architect ruling OI-06, B5). Compared against the delivered map itself, so a stray extra
+        // key still reddens this.
+        const extras = Object.keys(delivered).filter((key) => !(key in expected));
+        expect(
+          extras.filter((key) => !key.startsWith('studio.runner.tls.') && !OBSERVED_REPLAY_PROPERTIES.includes(key)),
+        ).toEqual([]);
+        expect(extras.length, 'the runner TLS properties were not delivered').toBeGreaterThan(0);
       }
     });
   }

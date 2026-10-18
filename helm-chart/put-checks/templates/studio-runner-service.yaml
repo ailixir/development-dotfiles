@@ -11,14 +11,43 @@ spec:
   # routes are not exposed publicly, and the MFE never talks to the runner.
   type: {{ .Values.studioRunner.service.type }}
   ports:
-    - name: http
+    - name: https
       # The one key. `STUDIO_RUNNER_PORT` on the pod and `STUDIO_RUNNER_BASE_URL` on the worker
       # are rendered from this same value, which is what closes the 8080/8090 disagreement
       # between `application.yml` and `studio-runner/src/server/config.ts` — by removing the
       # second derivation rather than by editing one of the two defaults into agreement.
       port: {{ .Values.studioRunner.service.port }}
-      targetPort: http
+      # The runner serves TLS only (ruling A3); the port name says so, in step with the container.
+      targetPort: https
       protocol: TCP
   selector:
     {{- include "put-checks.studioRunner.selectorLabels" . | nindent 4 }}
+{{- end }}
+{{- if include "put-checks.studioRunner.guidedEnabled" . }}
+---
+# The API pods' GUIDED TLS CONNECTOR, and nothing else (STUDIO-OBS-009; devops co-sign 3.1).
+#
+# The guided callback chain on the API is `@Profile("!worker")` and requires TLS with
+# `clientAuth=need` at its own connector: "forwarded headers are never proof". So the runner's
+# guided callback cannot go through the ingress or through the API's plain HTTP port. This Service
+# exposes only the connector port, so the general API Service and its port set are untouched and the
+# connector is not reachable through the API's ordinary Service name. The backend certificate must
+# carry SANs for this Service's name (`<fullname>-api-guided-tls`, `.<ns>`, `.<ns>.svc`): it is the
+# host in `STUDIO_RUNNER_GUIDED_CALLBACK_BASE_URL` and in the coordinator's controller-origin.
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "put-checks.studioRunner.guidedTlsServiceName" . }}
+  labels:
+    {{- include "put-checks.labels" . | nindent 4 }}
+    {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - name: guided-tls
+      port: {{ .Values.studioRunner.guided.tlsConnector.servicePort }}
+      targetPort: guided-tls
+      protocol: TCP
+  selector:
+    {{- include "put-checks.api.selectorLabels" . | nindent 4 }}
 {{- end }}

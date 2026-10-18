@@ -27,10 +27,11 @@
  * name.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { parseAllDocuments } from 'yaml';
+import { parse as parseYaml, parseAllDocuments } from 'yaml';
 
 import { packageRoot } from '../helpers/corpus.js';
 
@@ -52,6 +53,117 @@ export const VALUE_SETS: readonly (string | null)[] = [
 export function valueSetName(valuesFile: string | null): string {
   return valuesFile ?? 'values.yaml';
 }
+
+/**
+ * The controller-certificate pin every render in this tier is given, unless a test says otherwise.
+ *
+ * `studioRunner.tls.controllerCertificateFingerprint256` has **no default in any values file and
+ * the render fails without it** (STUDIO-OBS-009 ruling A3 + devops co-sign 3.5): it is the SHA-256
+ * of an environment's backend client certificate, which this repository cannot know. A real
+ * release supplies it with `--set-string`; this harness does the same, with a syntactically valid
+ * fixture value, so the 90 existing criteria keep rendering. The negative cases (`omitPin`) prove
+ * that dropping it still fails the render, so this default cannot hide a missing requirement.
+ */
+export const TEST_PIN: string = Array.from({ length: 32 }, (_unused, index) =>
+  ((index * 7 + 11) % 256).toString(16).toUpperCase().padStart(2, '0'),
+).join(':');
+
+/** Every key the guided overlay sets, for the tests that must not restate the value. */
+export const GUIDED_FIXTURE = {
+  issuer: 'https://guided-issuer.example.test',
+  controllerSubject: 'checks-backend-controller',
+  publicKey: '-----BEGIN PUBLIC KEY-----\nVEVTVC1LRVktTk9ULVJFQUw=\n-----END PUBLIC KEY-----',
+} as const;
+
+const guidedScratch = mkdtempSync(join(tmpdir(), 'studio-chart-guided-'));
+process.once('exit', () => {
+  rmSync(guidedScratch, { recursive: true, force: true });
+});
+
+/**
+ * A values overlay that turns guided mode ON in the one shape A2.6 allows (one replica, no
+ * autoscaler) with the inputs that have no default. Written once per process to a file because the
+ * public key is multi-line, which `--set` cannot carry. The layering is the deployment's own:
+ * `-f values-<env>.yaml -f guided.yaml`, then `--set`.
+ */
+export const GUIDED_OVERLAY_FILE: string = (() => {
+  const file = join(guidedScratch, 'guided-overlay.yaml');
+  writeFileSync(
+    file,
+    [
+      'studioRunner:',
+      '  replicaCount: 1',
+      '  guided:',
+      '    enabled: true',
+      '    token:',
+      `      issuer: ${GUIDED_FIXTURE.issuer}`,
+      `      controllerSubject: ${GUIDED_FIXTURE.controllerSubject}`,
+      `      publicKey: ${JSON.stringify(GUIDED_FIXTURE.publicKey)}`,
+      '',
+    ].join('\n'),
+    'utf8',
+  );
+  return file;
+})();
+
+/**
+ * TEST VALUES ONLY: a syntactically valid, obviously fake catalog entry and trusted policy for the
+ * `studioObserved` block (architect ruling OI-06, B5).
+ *
+ * The chart commits neither: the catalog entry is specific to one runner image (CI generates it from
+ * the pushed image) and the policies are reviewed per-environment configuration, so a real release
+ * supplies both with `-f`, as this harness does. Every hash is a repeated placeholder digit so it
+ * cannot be mistaken for a measurement. The chart checks the SHAPE (key set, 64 lower-case hex), not
+ * that `profileHash` is the hash of `profile`; that equality is the runner's and the backend's.
+ */
+export const OBSERVED_FIXTURE = {
+  catalog: {
+    profile: { placeholder: 'TEST-ONLY replay profile; not a real profile' },
+    build: {
+      profileHash: '1'.repeat(64),
+      schemaBundleHash: '2'.repeat(64),
+      referenceBundleHash: '3'.repeat(64),
+      executableImageDigest: '4'.repeat(64),
+      chromiumBuild: 'TEST-ONLY-chromium-0',
+    },
+  },
+  policies: [
+    {
+      version: 1,
+      policyId: 'test-only-policy',
+      policyVersion: '1',
+      applicationId: 'test-only-application',
+      environment: 'uat',
+      allowedOrigins: ['https://app.example.test'],
+      entryPolicyId: 'test-only-entry',
+      applicationPolicy: null,
+      rules: [],
+    },
+  ],
+} as const;
+
+/**
+ * Writes a values overlay (JSON, which Helm reads as YAML) into the process-scoped scratch directory
+ * and returns its path, for the inputs `--set` cannot express (multi-line, long or nested values).
+ */
+export function writeValuesOverlay(name: string, values: unknown): string {
+  const file = join(guidedScratch, name);
+  writeFileSync(file, JSON.stringify(values), 'utf8');
+  return file;
+}
+
+/**
+ * The fixture catalog and policies as a values overlay, with the flags untouched.
+ *
+ * `values-uat.yaml` turns observed replay ON and commits no catalog or policies on purpose (they come
+ * at deploy time), so a UAT render fails by design without them. This is the deploy-time input every
+ * UAT render in this tier is given, exactly as {@link TEST_PIN} is, so the criteria that are not
+ * about observed replay keep rendering. The negative cases (`observedInputs: false`) prove that
+ * dropping it still fails the render.
+ */
+export const OBSERVED_OVERLAY_FILE: string = writeValuesOverlay('observed-overlay.json', {
+  studioObserved: { catalog: OBSERVED_FIXTURE.catalog, policies: OBSERVED_FIXTURE.policies },
+});
 
 /** Why `helm` cannot be used, or `null` when it can. Never a bare boolean: the reason is the test. */
 export function helmUnavailableReason(): string | null {
@@ -120,6 +232,18 @@ export interface RenderOptions {
   readonly args?: readonly string[];
   /** Defaults to true: nothing renders without it and every criterion here is about the runner. */
   readonly enableRunner?: boolean;
+  /** Layers {@link GUIDED_OVERLAY_FILE} over the value set: guided mode on, one replica. */
+  readonly guided?: boolean;
+  /** Leaves the controller pin unset, to prove the render refuses without it. */
+  readonly omitPin?: boolean;
+  /** Turns observed replay ON (both flags) and supplies {@link OBSERVED_FIXTURE}. */
+  readonly observed?: boolean;
+  /**
+   * Layers {@link OBSERVED_OVERLAY_FILE} (the fixture catalog and policies, flags untouched).
+   * Defaults to true for `values-uat.yaml`, which enables observed replay without committing the
+   * inputs, and for `observed: true`. Pass `false` to prove the render refuses without them.
+   */
+  readonly observedInputs?: boolean;
 }
 
 /**
@@ -134,7 +258,21 @@ export function renderOutcome(options: RenderOptions = {}): RenderOutcome {
   if (options.valuesFile !== undefined && options.valuesFile !== null) {
     args.push('-f', join(chartDir, options.valuesFile));
   }
+  if (options.guided === true) args.push('-f', GUIDED_OVERLAY_FILE);
+  const observedInputs =
+    options.observedInputs ?? (options.observed === true || options.valuesFile === 'values-uat.yaml');
+  if (observedInputs) args.push('-f', OBSERVED_OVERLAY_FILE);
+  if (options.observed === true) {
+    args.push('--set', 'studioObserved.validationEnabled=true', '--set', 'studioObserved.replayEnabled=true');
+  }
   if (options.enableRunner !== false) args.push('--set', 'studioRunner.enabled=true');
+  // Set BEFORE the caller's `--set`s so a test that supplies its own pin (or a bad one) wins. It is
+  // `--set` and not `--set-string` on purpose: Helm applies every `--set-string` AFTER every `--set`
+  // regardless of argument order, so a `--set-string` default would beat the caller's override.
+  // A value of colon-joined hex pairs is a string under `--set` as well.
+  if (options.omitPin !== true) {
+    args.push('--set', `studioRunner.tls.controllerCertificateFingerprint256=${TEST_PIN}`);
+  }
   for (const [key, value] of Object.entries(options.set ?? {})) {
     args.push('--set', `${key}=${value}`);
   }
@@ -239,6 +377,8 @@ export interface PodSpec {
 export interface Container {
   readonly name?: string;
   readonly image?: string;
+  readonly ports?: readonly { readonly name?: string; readonly containerPort?: number }[];
+  readonly terminationMessagePolicy?: string;
   readonly command?: readonly string[];
   readonly args?: readonly string[];
   readonly securityContext?: Record<string, unknown>;
@@ -249,13 +389,15 @@ export interface Container {
     readonly mountPath?: string;
     /** Absent means writable, which is what makes AC-4a part 2's disjointness assertion matter. */
     readonly readOnly?: boolean;
+    /** A Secret mounted through `subPath` never receives updates (devops co-sign 3.3). */
+    readonly subPath?: string;
   }[];
   readonly resources?: {
     readonly limits?: Record<string, string>;
     readonly requests?: Record<string, string>;
   };
-  readonly readinessProbe?: { readonly httpGet?: { readonly path?: string }; readonly exec?: { readonly command?: readonly string[] } };
-  readonly livenessProbe?: { readonly httpGet?: { readonly path?: string }; readonly exec?: { readonly command?: readonly string[] } };
+  readonly readinessProbe?: { readonly httpGet?: { readonly path?: string }; readonly exec?: { readonly command?: readonly string[] }; readonly failureThreshold?: number };
+  readonly livenessProbe?: { readonly httpGet?: { readonly path?: string }; readonly exec?: { readonly command?: readonly string[] }; readonly failureThreshold?: number };
   readonly lifecycle?: Record<string, unknown>;
 }
 
@@ -271,8 +413,17 @@ export interface EnvEntry {
 export interface Volume {
   readonly name?: string;
   readonly emptyDir?: { readonly medium?: string; readonly sizeLimit?: string };
-  readonly secret?: { readonly secretName?: string; readonly items?: readonly { key?: string }[] };
-  readonly configMap?: { readonly name?: string };
+  readonly secret?: {
+    readonly secretName?: string;
+    /** Decimal in the manifest (0440 octal is 288). */
+    readonly defaultMode?: number;
+    readonly items?: readonly { key?: string; path?: string }[];
+  };
+  readonly configMap?: {
+    readonly name?: string;
+    readonly defaultMode?: number;
+    readonly items?: readonly { key?: string; path?: string }[];
+  };
   readonly persistentVolumeClaim?: { readonly claimName?: string };
 }
 
@@ -281,6 +432,23 @@ export function podSpec(deployment: K8sDocument): PodSpec {
   const pod = spec?.template?.spec;
   if (pod === undefined) throw new Error('the Deployment carries no pod spec');
   return pod;
+}
+
+/**
+ * The Spring properties the chart mounts for `role` (the `application.yaml` of the ConfigMap that
+ * the `spring-config` volume names), parsed. Dotted names stay flat keys, as the backend reads them.
+ */
+export function mountedSpringProperties(
+  outcome: RenderOutcome,
+  role: 'api' | 'worker',
+): Record<string, unknown> {
+  const deployment = deploymentNamed(outcome, `-${role}`);
+  const volume = podSpec(deployment).volumes?.find((entry) => entry.name === 'spring-config');
+  const configMap = one(
+    byKind(outcome, 'ConfigMap').filter((entry) => entry.metadata?.name === volume?.configMap?.name),
+    'mounted Spring config',
+  );
+  return parseYaml(configMap.data?.['application.yaml'] ?? '') as Record<string, unknown>;
 }
 
 export function soleContainer(deployment: K8sDocument): Container {

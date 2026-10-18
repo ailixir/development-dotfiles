@@ -48,6 +48,13 @@ spec:
       ports:
         - port: {{ .Values.backend.service.port }}
           protocol: TCP
+        {{- if include "put-checks.studioRunner.guidedEnabled" . }}
+        # The guided callback and claim go to the API pods' TLS connector, a second port on the SAME
+        # destination class (`callback-api`): the replay callback stays plain HTTP on the first.
+        # Rendered only while guided mode is on, so a replay-only deployment opens nothing new.
+        - port: {{ .Values.studioRunner.guided.tlsConnector.port }}
+          protocol: TCP
+        {{- end }}
     # 2. `object-store` — the private evidence store (§6.2). ED-03 supplies the real endpoint; the
     #    port is a values key so the spike's answer lands in one place.
     - ports:
