@@ -3,21 +3,12 @@ package com.citi.put.checks.studio.guided.publication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.citi.put.checks.studio.StudioRepository;
-import com.citi.put.checks.studio.StudioRepositoryCustomImpl;
-import com.citi.put.checks.studio.compile.CandidateRevision;
-import com.citi.put.checks.studio.compile.CompileStateService;
-import com.citi.put.checks.studio.compile.PublishResult;
-import com.citi.put.checks.studio.compile.VersionedIntentDeriver;
-import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executors;
@@ -25,15 +16,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.data.jpa.repository.support.JpaRepositoryFactory;
-import org.springframework.data.repository.core.support.RepositoryComposition.RepositoryFragments;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
-import org.springframework.orm.jpa.SharedEntityManagerCreator;
-import org.springframework.orm.jpa.persistenceunit.PersistenceManagedTypes;
-import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.springframework.transaction.support.TransactionTemplate;
 
 /**
  * Real PostgreSQL writer/lock/fault tests. Original successful learning and validator evidence here
@@ -41,39 +23,6 @@ import org.springframework.transaction.support.TransactionTemplate;
  */
 class GuidedPublicationRaceTest {
   static final GuidedContracts C = new GuidedContracts();
-
-  /** Actual Spring Data repository, production custom fragment and production compile writer. */
-  static final class Compiler implements AutoCloseable {
-    final LocalContainerEntityManagerFactoryBean factory =
-        new LocalContainerEntityManagerFactoryBean();
-    final TransactionTemplate tx;
-    final CompileStateService service;
-
-    Compiler(GuidedPublicationMigrationTest.Database db) {
-      factory.setDataSource(db.jdbc.getDataSource());
-      factory.setManagedTypes(PersistenceManagedTypes.of(UITest.class.getName()));
-      factory.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
-      factory.setJpaPropertyMap(Map.of("hibernate.hbm2ddl.auto", "none"));
-      factory.afterPropertiesSet();
-      var emf = factory.getObject();
-      var manager = new JpaTransactionManager(emf);
-      manager.setDataSource(db.jdbc.getDataSource());
-      tx = new TransactionTemplate(manager);
-      var em = SharedEntityManagerCreator.createSharedEntityManager(emf);
-      var custom = new StudioRepositoryCustomImpl();
-      ReflectionTestUtils.setField(custom, "entityManager", em);
-      StudioRepository drafts =
-          new JpaRepositoryFactory(em)
-              .getRepository(StudioRepository.class, RepositoryFragments.just(custom));
-      service = new CompileStateService(db.jdbc, drafts);
-      ReflectionTestUtils.setField(service, "entityManager", em);
-    }
-
-    @Override
-    public void close() {
-      factory.destroy();
-    }
-  }
 
   static ObjectNode secondSession(GuidedPublicationMigrationTest.Database db, String id) {
     var document = db.session.deepCopy().put("sessionId", id);
@@ -89,6 +38,14 @@ class GuidedPublicationRaceTest {
                   + " studio_guided_source_manifests WHERE session_id='session'",
               id);
           db.jdbc.update("INSERT INTO studio_guided_translation_state(session_id) VALUES (?)", id);
+          // V19: the evidence fixture reads the session's immutable governed policy.
+          db.jdbc.update(
+              "INSERT INTO"
+                  + " studio_guided_session_policies(session_id,policy_id,policy_version,"
+                  + "observation_policy_hash) SELECT ?,policy_id,policy_version,"
+                  + "observation_policy_hash FROM studio_guided_session_policies"
+                  + " WHERE session_id='session'",
+              id);
         });
     return document;
   }
@@ -100,7 +57,6 @@ class GuidedPublicationRaceTest {
             .put("csiId", "CSI")
             .put("environment", "Development")
             .put("applicationId", "app")
-            .put("accountRef", "account")
             .put("policyId", "policy")
             .put("policyVersion", "1")
             .put("entryPolicyId", "entry");
@@ -120,85 +76,37 @@ class GuidedPublicationRaceTest {
       JsonNode session,
       PublicationContracts.Base base) {
     String id = session.path("sessionId").asText();
-    var plan = C.object();
-    plan.putArray("obligations");
-    String translationHash = GuidedContracts.hash(plan);
     db.tx.executeWithoutResult(
         t -> {
-          db.sessions.lock(id);
-          var owner =
-              C.object()
-                  .put("workerId", "worker")
-                  .put("fence", 1)
-                  .put("leaseExpiresAt", PublicationContracts.time(Instant.now().plusSeconds(120)));
-          db.jdbc.update(
-              "UPDATE studio_guided_sessions SET state='FINALIZING',"
-                  + " document=jsonb_set(jsonb_set(document, '{state}','\"FINALIZING\"'),"
-                  + " '{owner}',?::jsonb) WHERE session_id=?",
-              owner.toString(),
-              id);
-          db.jdbc.update(
-              "INSERT INTO"
-                  + " studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash)"
-                  + " VALUES (?,1,0,?::jsonb,?)",
-              id,
-              plan.toString(),
-              translationHash);
-          db.jdbc.update(
-              "UPDATE studio_guided_translation_state SET plan_revision=1 WHERE session_id=?", id);
+          var current = db.sessions.lock(id);
+          current.document().put("state", "OBSERVING");
+          current
+              .document()
+              .putObject("owner")
+              .put("workerId", "worker")
+              .put("fence", 1)
+              .put("leaseExpiresAt", PublicationContracts.time(Instant.now().plusSeconds(120)));
+          db.sessions.save(current);
         });
+    // Complete relational input is synthetic browser evidence, while every immutable row,
+    // history join, candidate hash and actual publication writer remains production code.
     var basis =
-        C.object()
-            .put("testId", db.testId.toString())
-            .put("csiId", "CSI")
-            .put("sourceRevision", "1")
-            .put("configurationRevision", "1");
-    basis
-        .putArray("sourceSteps")
-        .addObject()
-        .put("source", "Open https://orders.example.test/start");
-    var learned = C.object().put("schemaVersion", 2).put("planId", "synthetic-relational-" + id);
-    var policy = C.object().put("schemaVersion", 3);
-    policy.set("scope", base.document().path("replayRequirements"));
-    var profile =
-        C.parse(
-            "{\"catalog\":\"observed-replay-1\", \"playwright\":\"1.63.0\","
-                + " \"browserEngine\":\"chromium\", \"contract\":2, \"learnedPlan\":2,"
-                + " \"observation\":2, \"guidedPolicy\":2, \"referencePolicy\":3, \"lowering\":1,"
-                + " \"artifact\":2, \"language\":\"observed-2\", \"executor\":\"observed-2\","
-                + " \"publicationEvidence\":1, \"validationBasis\":1, \"validator\":\"observed-1\","
-                + " \"protocol\":2, \"replayAuthorization\":1, \"accountAbi\":1}");
-    var build =
-        C.object()
-            .put("profileHash", GuidedContracts.hash(profile))
-            .put("schemaBundleHash", "b".repeat(64))
-            .put("referenceBundleHash", "c".repeat(64))
-            .put("executableImageDigest", "d".repeat(64))
-            .put("chromiumBuild", "relational-only");
-    var artifact = C.object().put("version", 2);
-    artifact.set("learnedPlan", learned);
-    artifact.set("replayPolicy", policy);
-    artifact.set("profile", profile);
-    var hashes = C.object();
-    for (String key :
-        List.of("sourceHash", "configurationHash", "authoringHash", "runAuthorizationHash")) {
-      hashes.set(key, base.document().path(key));
-    }
-    hashes
-        .put("artifactHash", GuidedContracts.hash(artifact))
-        .put("learnedPlanHash", GuidedContracts.hash(learned))
-        .put("referencePolicyHash", GuidedContracts.hash(policy))
-        .put("profileHash", GuidedContracts.hash(profile));
-    for (String key :
-        List.of("operationEquivalenceHash", "admissionProvenanceHash", "publicationEvidenceHash")) {
-      hashes.put(key, "e".repeat(64));
-    }
-    var revisionIdentity = C.object().put("version", 1);
-    for (String key : List.of("testId", "csiId", "sourceRevision", "configurationRevision")) {
-      revisionIdentity.set(key, basis.path(key));
-    }
-    hashes.fields().forEachRemaining(e -> revisionIdentity.set(e.getKey(), e.getValue()));
-    hashes.put("revisionDigest", GuidedContracts.hash(revisionIdentity));
+        com.citi.put.checks.studio.support.GuidedPublicationEvidenceFixture.completeExistingSession(
+            db.jdbc, db.tx, id, base);
+    db.tx.executeWithoutResult(
+        t -> {
+          var current = db.sessions.lock(id);
+          current.document().put("state", "FINALIZING");
+          db.sessions.save(current);
+        });
+    String translationHash = basis.path("translationHash").asText();
+    var profile = GuidedPublicationMigrationTest.currentProfile();
+    var build = GuidedPublicationMigrationTest.observedBuild(profile);
+    var candidate = new ObservedArtifactLowerer(C).lower(basis, profile);
+    var learned = candidate.learnedPlan();
+    var policy = candidate.policy();
+    var artifact = candidate.artifact();
+    var hashes = candidate.hashes();
     var identity = C.object();
     identity.set("base", base.document());
     identity
@@ -235,7 +143,7 @@ class GuidedPublicationRaceTest {
         });
     var verdict =
         C.object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("ok", true)
             .putNull("errorCode")
             .put("attemptId", attempt.attemptId().toString())
@@ -275,7 +183,7 @@ class GuidedPublicationRaceTest {
         "final",
         "d".repeat(64),
         snapshot,
-        new PublicationContracts.Candidate(learned, artifact, policy, hashes),
+        candidate,
         new PublicationContracts.Grant(
             id, "owner@example.test", "CSI", snapshot.hash(), attempt.validationDeadline()));
   }
@@ -297,43 +205,6 @@ class GuidedPublicationRaceTest {
                 Integer.class,
                 id))
         .isZero();
-  }
-
-  static CandidateRevision ordinary(GuidedPublicationMigrationTest.Database db) {
-    var row =
-        db.jdbc.queryForMap(
-            "SELECT steps::text,authoring::text,authoring_revision_inputs::text FROM ui_tests WHERE"
-                + " id=?",
-            db.testId);
-    String source = (String) row.get("steps");
-    var artifact = C.object().put("version", 1);
-    artifact
-        .putArray("steps")
-        .addObject()
-        .put("stepIndex", 0)
-        .put("originalText", C.parse(source).get(0).asText())
-        .put("code", "await page.goto('https://orders.example.test/start');");
-    String referencePolicy =
-        new VersionedIntentDeriver()
-            .derive(
-                "2",
-                source,
-                (String) row.get("authoring"),
-                (String) row.get("authoring_revision_inputs"))
-            .referencePolicy();
-    return new CandidateRevision(
-        1,
-        source,
-        GuidedContracts.hash(C.parse(source)),
-        artifact.toString(),
-        GuidedContracts.hash(artifact),
-        1,
-        "{}",
-        "{\"variables\":[],\"secrets\":[]}",
-        "{\"intentDerivationVersion\":\"2\"}",
-        "owner@example.test",
-        referencePolicy,
-        "2");
   }
 
   @Test
@@ -368,12 +239,14 @@ class GuidedPublicationRaceTest {
                 "SELECT state FROM studio_guided_sessions WHERE session_id=?",
                 String.class,
                 command.sessionId());
-        db.tx.executeWithoutResult(
-            t -> {
-              db.sessions.lock(command.sessionId());
-              db.publications.conflict(
-                  command.sessionId(), command.snapshot().hash(), Instant.now());
-            });
+        boolean moved =
+            db.tx.execute(
+                t -> {
+                  db.sessions.lock(command.sessionId());
+                  return db.publications.conflict(
+                      command.sessionId(), command.snapshot().hash(), Instant.now());
+                });
+        assertThat(moved).as("a late conflict moves nothing, so it requests no teardown").isFalse();
         assertThat(
                 db.jdbc.queryForObject(
                     "SELECT state FROM studio_guided_sessions WHERE session_id=?",
@@ -403,10 +276,32 @@ class GuidedPublicationRaceTest {
       db.tx.executeWithoutResult(
           t -> {
             db.sessions.lock(command.sessionId());
-            db.publications.conflict(command.sessionId(), command.snapshot().hash(), Instant.now());
+            String before = sessionState(db, command.sessionId());
+            boolean moved =
+                db.publications.conflict(
+                    command.sessionId(), command.snapshot().hash(), Instant.now());
+            String after = sessionState(db, command.sessionId());
+            assertThat(moved)
+                .as("true exactly when this call moved FINALIZING to PUBLICATION_CONFLICT")
+                .isEqualTo(before.equals("FINALIZING") && after.equals("PUBLICATION_CONFLICT"));
+            if (moved) {
+              assertThat(
+                      db.jdbc.queryForObject(
+                          "SELECT progress->>'errorCode' FROM studio_guided_sessions"
+                              + " WHERE session_id=?",
+                          String.class,
+                          command.sessionId()))
+                  .as("the post-claim conflict path records the stable error code")
+                  .isEqualTo("PUBLICATION_CONFLICT");
+            }
           });
       return conflict.getMessage();
     }
+  }
+
+  private static String sessionState(GuidedPublicationMigrationTest.Database db, String id) {
+    return db.jdbc.queryForObject(
+        "SELECT state FROM studio_guided_sessions WHERE session_id=?", String.class, id);
   }
 
   static void await(CountDownLatch latch) {
@@ -417,159 +312,6 @@ class GuidedPublicationRaceTest {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new IllegalStateException(e);
-    }
-  }
-
-  @Test
-  void olderRealCompilerIsDiscardedAfterGuidedCommitClearsItsPointer() {
-    try (var db = new GuidedPublicationMigrationTest.Database();
-        var compiler = new Compiler(db)) {
-      var request = compiler.tx.execute(t -> compiler.service.beginCompile(db.testId));
-      var candidate = ordinary(db);
-      var command = prepared(db, db.session, capture(db, db.session));
-      var result = commit(db, command);
-      assertThat(
-              compiler.tx.<PublishResult>execute(
-                  t -> compiler.service.publishCandidate(db.testId, request, candidate)))
-          .isEqualTo(PublishResult.DISCARDED_OUT_OF_ORDER);
-      assertThat(
-              compiler.tx.<PublishResult>execute(
-                  t ->
-                      compiler.service.publishError(
-                          db.testId, request, "{\"code\":\"GATEWAY_FAILURE\"}")))
-          .isEqualTo(PublishResult.DISCARDED_OUT_OF_ORDER);
-      assertThat(
-              db.jdbc
-                  .queryForObject(
-                      "SELECT confirmed_revision_id FROM ui_tests WHERE id=?",
-                      UUID.class,
-                      db.testId)
-                  .toString())
-          .isEqualTo(result.document().path("revisionId").asText());
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT compile_request_id IS NULL FROM ui_tests WHERE id=?",
-                  Boolean.class,
-                  db.testId))
-          .isTrue();
-    }
-  }
-
-  @Test
-  void olderCompilerWinningFirstInvalidatesGuidedBaseWithoutSourceEdit() {
-    try (var db = new GuidedPublicationMigrationTest.Database();
-        var compiler = new Compiler(db)) {
-      var request = compiler.tx.execute(t -> compiler.service.beginCompile(db.testId));
-      var command = prepared(db, db.session, capture(db, db.session));
-      var candidate = ordinary(db);
-      assertThat(
-              compiler.tx.<PublishResult>execute(
-                  t -> compiler.service.publishCandidate(db.testId, request, candidate)))
-          .isEqualTo(PublishResult.PUBLISHED);
-      UUID ordinaryHead =
-          db.jdbc.queryForObject(
-              "SELECT current_candidate_revision_id FROM ui_tests WHERE id=?",
-              UUID.class,
-              db.testId);
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT compile_request_id IS NULL AND publication_kind IS NULL FROM"
-                      + " ui_test_revisions WHERE id=?",
-                  Boolean.class,
-                  ordinaryHead))
-          .isTrue();
-      assertThatThrownBy(() -> commit(db, command))
-          .isInstanceOf(GuidedSessionException.class)
-          .hasMessageContaining("PUBLICATION_CONFLICT");
-      absent(db, "session");
-      db.tx.executeWithoutResult(
-          t -> {
-            db.sessions.lock("session");
-            db.publications.conflict("session", command.snapshot().hash(), Instant.now());
-          });
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT state FROM studio_guided_sessions WHERE session_id='session'",
-                  String.class))
-          .isEqualTo("PUBLICATION_CONFLICT");
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT current_candidate_revision_id FROM ui_tests WHERE id=?",
-                  UUID.class,
-                  db.testId))
-          .isEqualTo(ordinaryHead);
-    }
-  }
-
-  @Test
-  void actualCompileAndSweeperProducePointerAbaButEpochStillFences() {
-    try (var db = new GuidedPublicationMigrationTest.Database();
-        var compiler = new Compiler(db)) {
-      var base = capture(db, db.session);
-      var command = prepared(db, db.session, base);
-      var request = compiler.tx.execute(t -> compiler.service.beginCompile(db.testId));
-      db.jdbc.update(
-          "UPDATE ui_tests SET compile_started_at=clock_timestamp()-interval '1 hour' WHERE id=?",
-          db.testId);
-      assertThat(
-              compiler.tx.<Integer>execute(
-                  t -> compiler.service.sweepAbandoned(Duration.ofSeconds(1), 10)))
-          .isEqualTo(1);
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT compile_request_id IS NULL AND current_candidate_revision_id IS NULL AND"
-                      + " confirmed_revision_id IS NULL FROM ui_tests WHERE id=?",
-                  Boolean.class,
-                  db.testId))
-          .isTrue();
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT publication_epoch FROM ui_tests WHERE id=?", Long.class, db.testId))
-          .isEqualTo(2);
-      assertThatThrownBy(() -> commit(db, command)).hasMessageContaining("PUBLICATION_CONFLICT");
-      assertThat(
-              compiler.tx.<PublishResult>execute(
-                  t -> compiler.service.publishCandidate(db.testId, request, ordinary(db))))
-          .isEqualTo(PublishResult.DISCARDED_OUT_OF_ORDER);
-      absent(db, "session");
-    }
-  }
-
-  @Test
-  void actualManualConfirmationAfterBaseIsANewerHead() {
-    try (var db = new GuidedPublicationMigrationTest.Database();
-        var compiler = new Compiler(db)) {
-      var request = compiler.tx.execute(t -> compiler.service.beginCompile(db.testId));
-      var candidate = ordinary(db);
-      assertThat(
-              compiler.tx.<PublishResult>execute(
-                  t -> compiler.service.publishCandidate(db.testId, request, candidate)))
-          .isEqualTo(PublishResult.PUBLISHED);
-      UUID revision =
-          db.jdbc.queryForObject(
-              "SELECT current_candidate_revision_id FROM ui_tests WHERE id=?",
-              UUID.class,
-              db.testId);
-      var command = prepared(db, db.session, capture(db, db.session));
-      assertThat(
-              compiler.tx.<UUID>execute(
-                  t ->
-                      compiler.service.confirm(
-                          db.testId,
-                          revision,
-                          candidate.artifactHash(),
-                          1,
-                          1,
-                          "owner@example.test")))
-          .isEqualTo(revision);
-      assertThatThrownBy(() -> commit(db, command)).hasMessageContaining("PUBLICATION_CONFLICT");
-      absent(db, "session");
-      assertThat(
-              db.jdbc.queryForObject(
-                  "SELECT confirmation_source FROM ui_test_revisions WHERE id=?",
-                  String.class,
-                  revision))
-          .isEqualTo("MANUAL");
     }
   }
 
@@ -627,11 +369,16 @@ class GuidedPublicationRaceTest {
       assertThatThrownBy(() -> commit(db, command)).isInstanceOf(GuidedSessionException.class);
       absent(db, "session");
       if (change.equals("cancel")) {
-        db.tx.executeWithoutResult(
-            t -> {
-              db.sessions.lock("session");
-              db.publications.conflict("session", command.snapshot().hash(), Instant.now());
-            });
+        boolean moved =
+            db.tx.execute(
+                t -> {
+                  db.sessions.lock("session");
+                  return db.publications.conflict(
+                      "session", command.snapshot().hash(), Instant.now());
+                });
+        assertThat(moved)
+            .as("a cancelled session is not moved, so no teardown is requested")
+            .isFalse();
         assertThat(
                 db.jdbc.queryForObject(
                     "SELECT state FROM studio_guided_sessions WHERE session_id='session'",
@@ -806,8 +553,8 @@ class GuidedPublicationRaceTest {
       absent(db, "session");
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT confirmed_revision_id IS NULL AND current_candidate_revision_id IS NULL"
-                      + " AND publication_epoch=0 FROM ui_tests WHERE id=?",
+                  "SELECT confirmed_revision_id IS NULL AND publication_epoch=0 FROM ui_tests"
+                      + " WHERE id=?",
                   Boolean.class,
                   db.testId))
           .isTrue();

@@ -7,6 +7,20 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
+import com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore;
+import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
+import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
+import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
+import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
+import com.citi.put.checks.studio.guided.publication.GuidedPlanPublisher;
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationAuthorization;
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationBaseRepository;
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository;
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationProperties;
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationRepository;
+import com.citi.put.checks.studio.guided.publication.ObservedReplayPins;
+import com.citi.put.checks.studio.guided.publication.ObservedReplayProperties;
+import com.citi.put.checks.studio.guided.publication.ObservedValidationClient;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -42,11 +56,21 @@ class GuidedSessionIT {
       new PostgreSQLContainer<>("postgres:15-alpine");
   private static JdbcTemplate jdbc;
   private static JsonNode fixtures;
+  private static JsonNode documents;
+
+  /** The fixture session's frozen source steps, as a real start freezes them: UUIDs. */
+  private static final String STEP_1 = "00000000-0000-4000-8000-0000000000a1";
+
+  private static final String STEP_2 = "00000000-0000-4000-8000-0000000000a2";
   private final GuidedContracts contracts = new GuidedContracts();
   private final MutableClock clock = new MutableClock();
   private final TestAccess access = new TestAccess();
   private GuidedSessionRepository repository;
   private GuidedSessionService service;
+  private GuidedMaterializationService materialization;
+  private GuidedAssignmentStore assignments;
+  private final Map<String, ObjectNode> frozenCallbackIdentities =
+      new java.util.concurrent.ConcurrentHashMap<>();
   private final Authentication user = user("user-1", "owner");
   private final Authentication worker =
       new GuidedInternalSecurity.Identity("worker-1", "owning-worker");
@@ -56,21 +80,17 @@ class GuidedSessionIT {
   @BeforeAll
   static void database() throws Exception {
     POSTGRES.start();
-    flyway("29").migrate();
-    var ds =
-        new DriverManagerDataSource(
-            POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
-    jdbc = new JdbcTemplate(ds);
-    jdbc.execute(
-        "CREATE TABLE guided_migration_sentinel(id integer PRIMARY KEY, value text NOT NULL)");
-    jdbc.execute("INSERT INTO guided_migration_sentinel VALUES (1,'legacy')");
-    flyway("30").migrate();
-    flyway("31").migrate();
+    // STUDIO-OBS-012A: contracts/v3 is the only generation. The canonical vector is the v3 one;
+    // the IT's own base documents (already v3-shaped) live with the test.
     fixtures =
         new ObjectMapper()
             .readTree(
                 Files.readString(
-                    Path.of("../docs/specs/studio-observed-authoring/contracts/fixtures.json")));
+                    Path.of("../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")));
+    try (var in =
+        GuidedSessionIT.class.getResourceAsStream("/studio/guided/session-it-documents.json")) {
+      documents = new ObjectMapper().readTree(in).path("documents");
+    }
   }
 
   private static Flyway flyway(String target) {
@@ -88,18 +108,32 @@ class GuidedSessionIT {
 
   @BeforeEach
   void setup() {
+    // Isolated real databases preserve the append-only audit trigger. No privileged trigger
+    // bypass or TRUNCATE CASCADE is used to reset protected production tables.
+    String database = "session_" + UUID.randomUUID().toString().replace("-", "");
+    var admin =
+        new DriverManagerDataSource(
+            POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+    new JdbcTemplate(admin).execute("CREATE DATABASE " + database);
+    var source =
+        new DriverManagerDataSource(
+            POSTGRES.getJdbcUrl().replace(POSTGRES.getDatabaseName(), database),
+            POSTGRES.getUsername(),
+            POSTGRES.getPassword());
+    jdbc = new JdbcTemplate(source);
+    // V13 is the last area before the guided-session migration V14 (STUDIO-OBS-012A re-baseline).
+    Flyway.configure().dataSource(source).target("13").load().migrate();
     jdbc.execute(
-        "TRUNCATE"
-            + " studio_guided_evidence,studio_guided_commands,studio_guided_actions,studio_guided_sessions"
-            + " CASCADE");
+        "CREATE TABLE guided_migration_sentinel(id integer PRIMARY KEY, value text NOT NULL)");
+    jdbc.execute("INSERT INTO guided_migration_sentinel VALUES (1,'legacy')");
+    // STUDIO-OBS-014 S3: the governed policy and per-CSI budget tables are V19; migrate to head.
+    Flyway.configure().dataSource(source).target("22").load().migrate();
     repository =
         new GuidedSessionRepository(
             jdbc,
             new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource())),
             contracts);
-    service =
-        new GuidedSessionService(
-            repository, contracts, access, new GuidedSessionProperties(true, Map.of()), clock);
+    service = newService(new GuidedSessionProperties(true, Map.of()));
   }
 
   @Test
@@ -116,11 +150,10 @@ class GuidedSessionIT {
         Flyway.configure()
             .dataSource(url, POSTGRES.getUsername(), POSTGRES.getPassword())
             .locations("classpath:db/migration")
-            // This foundation test stops at V31; OBS-005 tests current fresh install and V32
-            // upgrade.
-            .target("31")
+            // Fresh install of the whole re-baselined chain: core V1–V11 and Studio V12–V18.
+            .target("18")
             .load();
-    assertThat(fresh.migrate().migrationsExecuted).isEqualTo(30);
+    assertThat(fresh.migrate().migrationsExecuted).isEqualTo(18);
     assertThat(fresh.validateWithResult().validationSuccessful).isTrue();
   }
 
@@ -146,12 +179,10 @@ class GuidedSessionIT {
     assertThat(jdbc.queryForObject("SELECT count(*) FROM studio_guided_sessions", Integer.class))
         .isEqualTo(1);
     ObjectNode changed = start();
-    changed.put("accountRef", "other");
+    changed.put("applicationId", "other");
     assertThatThrownBy(() -> service.start(user, "not-a-uuid", changed))
         .hasMessage("IDEMPOTENCY_CONFLICT");
-    GuidedSessionService restarted =
-        new GuidedSessionService(
-            repository, contracts, access, new GuidedSessionProperties(true, Map.of()), clock);
+    GuidedSessionService restarted = newService(new GuidedSessionProperties(true, Map.of()));
     assertThat(restarted.start(user, "not-a-uuid", start()).path("sessionId"))
         .isEqualTo(results.getFirst().path("sessionId"));
   }
@@ -178,14 +209,14 @@ class GuidedSessionIT {
     service.observe(worker, id, 1, "observe", observation(id, 1));
     var admitted =
         race(
-            () -> service.admit(controller, id, 1, "admit", proposal),
-            () -> service.admit(controller, id, 1, "admit", proposal));
+            () -> admit(controller, id, 1, "admit", proposal),
+            () -> admit(controller, id, 1, "admit", proposal));
     assertThat(admitted.getFirst()).isEqualTo(admitted.getLast());
     JsonNode advance = advance(id, admitted.getFirst());
     var consumed =
         race(
-            () -> service.advance(controller, id, 1, "advance", advance),
-            () -> service.advance(controller, id, 1, "advance-2", advance));
+            () -> consume(controller, id, 1, "advance", advance),
+            () -> consume(controller, id, 1, "advance-2", advance));
     assertThat(consumed).allSatisfy(n -> assertThat(n.path("dispatchCount").asInt()).isEqualTo(1));
     assertThat(repository.actions(id)).hasSize(1);
     assertThat(service.read(user, id, "session").path("counters").path("actions").asInt())
@@ -197,10 +228,10 @@ class GuidedSessionIT {
     String id = observing();
     JsonNode proposal = proposal(id);
     service.observe(worker, id, 1, "observe", observation(id, 1));
-    service.admit(controller, id, 1, "admit", proposal);
+    admit(controller, id, 1, "admit", proposal);
     ObjectNode changed = proposal.deepCopy();
     changed.putObject("operation").put("kind", "hover");
-    assertThatThrownBy(() -> service.admit(controller, id, 1, "admit", changed))
+    assertThatThrownBy(() -> admit(controller, id, 1, "admit", changed))
         .hasMessage("IDEMPOTENCY_CONFLICT");
     ObjectNode row = repository.actions(id).getFirst().deepCopy();
     row.withObject("/admission").put("admissionId", UUID.randomUUID().toString());
@@ -222,13 +253,13 @@ class GuidedSessionIT {
             () ->
                 repository.transaction(
                     () -> {
-                      service.admit(controller, id, 1, "admit", proposal(id));
+                      admit(controller, id, 1, "admit", proposal(id));
                       throw new IllegalStateException("rollback");
                     }))
         .hasMessage("rollback");
     assertThat(repository.actions(id)).isEmpty();
     assertThat(service.read(user, id, "session").path("counters").path("actions").asInt()).isZero();
-    assertThat(service.admit(controller, id, 1, "admit", proposal(id)).path("state").asText())
+    assertThat(admit(controller, id, 1, "admit", proposal(id)).path("state").asText())
         .isEqualTo("ADMITTED");
   }
 
@@ -261,10 +292,14 @@ class GuidedSessionIT {
     assertThatThrownBy(() -> service.observe(worker, id, 1, "observe", observation(id, 1)))
         .hasMessage("STALE_FENCE");
     access.recoverable = true;
-    JsonNode claimed = service.claim(intruder, id, "claim2", claim(id, "worker-other", 1));
-    assertThat(claimed.path("owner").path("fence").asInt()).isEqualTo(2);
-    assertThat(claimed.path("expiresAt"))
-        .isEqualTo(repository.transaction(() -> repository.lock(id).document().path("expiresAt")));
+    assertThatThrownBy(() -> service.claim(intruder, id, "claim2", claim(id, "worker-other", 1)))
+        .hasMessage("FORBIDDEN_SCOPE");
+    assertThatThrownBy(() -> service.claim(worker, id, "expired-owner", claim(id, "worker-1", 1)))
+        .hasMessage("STALE_FENCE");
+    assertThat(
+            repository.transaction(
+                () -> repository.lock(id).document().path("owner").path("fence").asInt()))
+        .isEqualTo(1);
     assertThatThrownBy(() -> service.observe(worker, id, 1, "old", observation(id, 1)))
         .hasMessage("STALE_FENCE");
   }
@@ -274,16 +309,20 @@ class GuidedSessionIT {
     String id = observing();
     JsonNode dispatched = dispatch(id);
     clock.now = clock.now.plusSeconds(31);
-    JsonNode claimed =
-        service.claim(
-            new GuidedInternalSecurity.Identity("worker-other", "owning-worker"),
-            id,
-            "takeover",
-            claim(id, "worker-other", 1));
-    assertThat(claimed.path("state").asText()).isEqualTo("UNKNOWN_OUTCOME");
+    assertThatThrownBy(
+            () ->
+                service.claim(
+                    new GuidedInternalSecurity.Identity("worker-other", "owning-worker"),
+                    id,
+                    "takeover",
+                    claim(id, "worker-other", 1)))
+        .hasMessage("FORBIDDEN_SCOPE");
+    stoppedWorker(id);
+    assertThat(service.read(user, id, "result").path("outcome").asText())
+        .isEqualTo("UNKNOWN_OUTCOME");
     assertThat(repository.actions(id).getFirst().path("state").asText())
         .isEqualTo("UNKNOWN_OUTCOME");
-    assertThatThrownBy(() -> service.outcome(worker, id, 1, "late", outcome(dispatched)))
+    assertThatThrownBy(() -> reportOutcome(worker, id, 1, "late", outcome(dispatched)))
         .hasMessage("STALE_FENCE");
   }
 
@@ -292,26 +331,27 @@ class GuidedSessionIT {
     String id = observing();
     JsonNode dispatched = dispatch(id);
     service.lostAcknowledgment(id);
-    assertThatThrownBy(() -> service.advance(controller, id, 1, "retry", advance(id, dispatched)))
+    assertThatThrownBy(() -> consume(controller, id, 1, "retry", advance(id, dispatched)))
         .hasMessage("UNKNOWN_OUTCOME");
-    assertThatThrownBy(() -> service.outcome(worker, id, 1, "late", outcome(dispatched)))
+    assertThatThrownBy(() -> reportOutcome(worker, id, 1, "late", outcome(dispatched)))
         .hasMessage("UNKNOWN_OUTCOME");
     JsonNode result = service.read(user, id, "result");
     assertThat(result.path("mode").asText()).isEqualTo("guided");
     assertThat(result.path("replayVerified").asBoolean()).isFalse();
-    assertThat(result.path("readyRevisionId").isNull()).isTrue();
+    assertThat(result.path("currentReadiness").path("revisionId").isNull()).isTrue();
+    assertThat(result.path("currentReadiness").path("ready").asBoolean()).isFalse();
   }
 
   @Test
   void cancelRevokesUnconsumedAndRetainsUncertainConsumedEvidence() {
     String id = observing();
     service.observe(worker, id, 1, "observe", observation(id, 1));
-    service.admit(controller, id, 1, "admit", proposal(id));
+    admit(controller, id, 1, "admit", proposal(id));
     service.cancel(user, id, "cancel", cancel());
     assertThat(repository.actions(id).getFirst().path("state").asText()).isEqualTo("REVOKED");
     assertThatThrownBy(
             () ->
-                service.advance(
+                consume(
                     controller, id, 1, "advance", advance(id, repository.actions(id).getFirst())))
         .hasMessage("CANCELLED");
     String next = observing();
@@ -319,7 +359,7 @@ class GuidedSessionIT {
     service.cancel(user, next, "cancel", cancel());
     assertThat(repository.actions(next).getFirst().path("state").asText())
         .isEqualTo("UNKNOWN_OUTCOME");
-    assertThatThrownBy(() -> service.outcome(worker, next, 1, "late", outcome(dispatched)))
+    assertThatThrownBy(() -> reportOutcome(worker, next, 1, "late", outcome(dispatched)))
         .hasMessage("CANCELLED");
   }
 
@@ -347,10 +387,7 @@ class GuidedSessionIT {
   @Test
   void entireSessionBudgetsAreReservedAndMissingUsageIsConservative() {
     service =
-        new GuidedSessionService(
-            repository,
-            contracts,
-            access,
+        newService(
             new GuidedSessionProperties(
                 true,
                 Map.of(
@@ -359,8 +396,7 @@ class GuidedSessionIT {
                     "maxModelOutputTokensTotal",
                     10,
                     "maxModelProposals",
-                    2)),
-            clock);
+                    2)));
     String id = observing();
     service.reserveModel(controller, id, 1, "reserve", 8, 8);
     service.settleModel(controller, id, 1, "settle", "reserve", null, null);
@@ -376,16 +412,10 @@ class GuidedSessionIT {
 
   @Test
   void observationBudgetAndGenerationAreSharedAcrossActions() {
-    service =
-        new GuidedSessionService(
-            repository,
-            contracts,
-            access,
-            new GuidedSessionProperties(true, Map.of("maxObservations", 1)),
-            clock);
+    service = newService(new GuidedSessionProperties(true, Map.of("maxObservations", 1)));
     String id = observing();
     JsonNode dispatched = dispatch(id);
-    service.outcome(worker, id, 1, "result", outcome(dispatched));
+    reportOutcome(worker, id, 1, "result", outcome(dispatched));
     assertThatThrownBy(() -> service.observe(worker, id, 1, "old", observation(id, 1)))
         .hasMessage("STALE_GENERATION");
     assertThatThrownBy(() -> service.observe(worker, id, 1, "over", observation(id, 2)))
@@ -399,12 +429,12 @@ class GuidedSessionIT {
     ObjectNode report = outcome(dispatched);
     ObjectNode changed = report.deepCopy();
     changed.withObject("/ledger").put("operationHash", "0".repeat(64));
-    assertThatThrownBy(() -> service.outcome(worker, id, 1, "tamper", changed))
+    assertThatThrownBy(() -> reportOutcome(worker, id, 1, "tamper", changed))
         .hasMessage("IDEMPOTENCY_CONFLICT");
-    JsonNode result = service.outcome(worker, id, 1, "result", report);
+    JsonNode result = reportOutcome(worker, id, 1, "result", report);
     contracts.validate("session", result);
-    assertThat(service.outcome(worker, id, 1, "result", report)).isEqualTo(result);
-    assertThat(service.outcome(worker, id, 1, "different-delivery", report).path("state").asText())
+    assertThat(reportOutcome(worker, id, 1, "result", report)).isEqualTo(result);
+    assertThat(reportOutcome(worker, id, 1, "different-delivery", report).path("state").asText())
         .isEqualTo("OBSERVING");
   }
 
@@ -412,11 +442,10 @@ class GuidedSessionIT {
   void noStateCanPublishWithoutExactVerifier() {
     String id = observing();
     ObjectNode request = finalizeRequest(id);
-    assertThatThrownBy(() -> service.finalizeSession(controller, id, 1, "finalize", request))
-        .hasMessage("PUBLICATION_CONFLICT");
+    assertThatThrownBy(() -> publish(id, "finalize", request)).hasMessage("PUBLICATION_CONFLICT");
     service.cancel(user, id, "cancel", cancel());
-    assertThatThrownBy(() -> service.finalizeSession(controller, id, 1, "again", request))
-        .hasMessage("CANCELLED");
+    assertThatThrownBy(() -> publish(id, "again", request)).hasMessage("PUBLICATION_CONFLICT");
+    assertThat(service.read(user, id, "result").path("outcome").asText()).isEqualTo("CANCELLED");
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM studio_guided_sessions WHERE finalization_identity IS NOT"
@@ -432,9 +461,12 @@ class GuidedSessionIT {
     assertThatThrownBy(() -> service.observe(worker, id, 1, "observe", observation(id, 1)))
         .hasMessage("REVISION_CONFLICT");
     access.current = true;
-    access.connected = false;
-    assertThatThrownBy(() -> service.start(user, "another", start()))
-        .hasMessage("AUTH_CONNECTION_REQUIRED");
+    access.granted = false;
+    assertThatThrownBy(() -> service.start(user, "another", start())).hasMessage("FORBIDDEN_SCOPE");
+    access.granted = true;
+    ObjectNode obsolete = start().put("accountRef", "account-1");
+    assertThatThrownBy(() -> service.start(user, "obsolete-account", obsolete))
+        .hasMessage("INVALID_CONTRACT");
   }
 
   @Test
@@ -450,7 +482,7 @@ class GuidedSessionIT {
     ObjectNode answer =
         contracts
             .object()
-            .put("schemaVersion", 1)
+            .put("schemaVersion", 3)
             .put("clarificationId", "question-1")
             .put("choiceId", "choice-1")
             .put("generation", 0);
@@ -464,36 +496,34 @@ class GuidedSessionIT {
   @Test
   void successfulLedgerStillCannotPublishWithoutExactPlanVerifier() {
     String id = observing();
-    service.outcome(worker, id, 1, "outcome1", outcome(dispatch(id)));
-    service.completeStep(controller, id, 1, "step1", contracts.object().put("stepId", "step-1"));
+    reportOutcome(worker, id, 1, "outcome1", outcome(dispatch(id)));
+    service.completeStep(controller, id, 1, "step1", contracts.object().put("stepId", STEP_1));
     ObjectNode observation = observation(id, 2);
     service.observe(worker, id, 1, "observation2", observation);
     ObjectNode action = proposal(id);
-    action.put("generation", 2).put("observationHash", GuidedContracts.hash(observation));
+    refreshProposal(action, id, 2);
     action.withObject("/target").put("generation", 2);
-    action.withObject("/coordinate").put("stepId", "step-2");
+    action.withObject("/coordinate").put("stepId", STEP_2);
     action
         .putObject("operation")
         .put("kind", "assert")
         .put("predicate", "visible")
         .putNull("expected");
-    JsonNode admitted = service.admit(controller, id, 1, "admit2", action);
-    JsonNode dispatched = service.advance(controller, id, 1, "advance2", advance(id, admitted));
+    JsonNode admitted = admit(controller, id, 1, "admit2", action);
+    JsonNode dispatched = consume(controller, id, 1, "advance2", advance(id, admitted));
     ObjectNode report = outcome(dispatched);
-    assertThatThrownBy(() -> service.outcome(worker, id, 1, "outcome2", report))
+    assertThatThrownBy(() -> reportOutcome(worker, id, 1, "outcome2", report))
         .hasMessage("INVALID_CONTRACT");
     report.withObject("/ledger").put("assertionPassed", true);
-    service.outcome(worker, id, 1, "outcome2", report);
+    reportOutcome(worker, id, 1, "outcome2", report);
     assertThat(
             service
-                .completeStep(
-                    controller, id, 1, "step2", contracts.object().put("stepId", "step-2"))
+                .completeStep(controller, id, 1, "step2", contracts.object().put("stepId", STEP_2))
                 .path("state")
                 .asText())
         .isEqualTo("FINALIZING");
-    assertThatThrownBy(
-            () -> service.finalizeSession(controller, id, 1, "finalize", finalizeRequest(id)))
-        .hasMessage("RUNTIME_INCOMPATIBLE");
+    assertThatThrownBy(() -> publish(id, "finalize", finalizeRequest(id)))
+        .hasMessage("MISSING_SOURCE");
     assertThat(service.read(user, id, "session").path("state").asText()).isEqualTo("FINALIZING");
     assertThat(
             service
@@ -503,13 +533,16 @@ class GuidedSessionIT {
         .isEqualTo("FINALIZING");
 
     access.current = false;
+    assertThatThrownBy(() -> service.reserveModel(controller, id, 1, "source-conflict", 1, 1))
+        .hasMessage("REVISION_CONFLICT");
+    assertThatThrownBy(() -> publish(id, "source-finalize", finalizeRequest(id)))
+        .hasMessage("MISSING_SOURCE");
     assertThat(
-            service
-                .finalizeSession(controller, id, 1, "source-conflict", finalizeRequest(id))
-                .path("outcome")
-                .asText())
-        .isEqualTo("PUBLICATION_CONFLICT");
-    assertThat(service.read(user, id, "result").path("readyRevisionId").isNull()).isTrue();
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_publications WHERE session_id=?",
+                Integer.class,
+                id))
+        .isZero();
 
     assertThat(
             jdbc.queryForObject(
@@ -521,39 +554,27 @@ class GuidedSessionIT {
 
   @Test
   void actionBudgetAndFalseAssertionReportsFailClosed() {
-    service =
-        new GuidedSessionService(
-            repository,
-            contracts,
-            access,
-            new GuidedSessionProperties(true, Map.of("maxActions", 1)),
-            clock);
+    service = newService(new GuidedSessionProperties(true, Map.of("maxActions", 1)));
     String id = observing();
     JsonNode dispatched = dispatch(id);
     ObjectNode dishonest = outcome(dispatched);
     dishonest.withObject("/ledger").put("assertionPassed", true);
-    assertThatThrownBy(() -> service.outcome(worker, id, 1, "dishonest", dishonest))
+    assertThatThrownBy(() -> reportOutcome(worker, id, 1, "dishonest", dishonest))
         .hasMessage("INVALID_CONTRACT");
-    service.outcome(worker, id, 1, "outcome", outcome(dispatched));
+    reportOutcome(worker, id, 1, "outcome", outcome(dispatched));
     ObjectNode observed = observation(id, 2);
     service.observe(worker, id, 1, "observation2", observed);
     ObjectNode next = proposal(id);
-    next.put("generation", 2).put("observationHash", GuidedContracts.hash(observed));
+    refreshProposal(next, id, 2);
     next.withObject("/target").put("generation", 2);
     next.withObject("/coordinate").put("ordinal", 1);
-    assertThatThrownBy(() -> service.admit(controller, id, 1, "admit2", next))
+    assertThatThrownBy(() -> admit(controller, id, 1, "admit2", next))
         .hasMessage("BUDGET_EXCEEDED");
   }
 
   @Test
   void gatewayOverrunIsDurablyChargedAndStopsFurtherWork() {
-    service =
-        new GuidedSessionService(
-            repository,
-            contracts,
-            access,
-            new GuidedSessionProperties(true, Map.of("maxModelInputTokensTotal", 10)),
-            clock);
+    service = newService(new GuidedSessionProperties(true, Map.of("maxModelInputTokensTotal", 10)));
     String id = observing();
     service.reserveModel(controller, id, 1, "reserve", 8, 8);
     service.settleModel(controller, id, 1, "settle", "reserve", 11, 8);
@@ -562,8 +583,7 @@ class GuidedSessionIT {
     assertThat(result.path("errorCode").asText()).isEqualTo("BUDGET_EXCEEDED");
     assertThat(service.read(user, id, "session").path("counters").path("modelInputTokens").asInt())
         .isEqualTo(11);
-    assertThatThrownBy(
-            () -> service.finalizeSession(controller, id, 1, "finalize", finalizeRequest(id)))
+    assertThatThrownBy(() -> publish(id, "finalize", finalizeRequest(id)))
         .isInstanceOf(GuidedSessionException.class);
   }
 
@@ -580,7 +600,13 @@ class GuidedSessionIT {
         .isInstanceOf(org.springframework.dao.DataIntegrityViolationException.class);
     service.cancel(user, id, "cancel", cancel());
     JsonNode result = service.read(user, id, "result");
-    assertThat(result.path("evidenceRef").asText()).isEqualTo("evidence-store-1");
+    assertThat(result.path("evidence").path("ref").asText()).isEqualTo(id);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT evidence_ref FROM studio_guided_evidence WHERE session_id=?",
+                String.class,
+                id))
+        .isEqualTo("evidence-store-1");
     assertThat(result.path("replayVerified").asBoolean()).isFalse();
   }
 
@@ -594,15 +620,13 @@ class GuidedSessionIT {
     assertThat(stored.path("nodeId").asText()).isEqualTo("node-1");
     assertThat(stored.path("bindingId").isNull()).isTrue();
     assertThat(stored.path("scopeHash").asText()).isEqualTo(scope(id));
-    assertThat(stored.path("sourceRevision").asText()).isEqualTo("source-1");
-    assertThat(stored.path("configurationRevision").asText()).isEqualTo("config-1");
+    assertThat(stored.path("sourceRevision").asText()).isEqualTo("1");
+    assertThat(stored.path("configurationRevision").asText()).isEqualTo("1");
     assertThat(stored.path("coordinate")).isEqualTo(fixture("clarification").path("coordinate"));
     assertThat(stored.path("documentId").asText()).isEqualTo("document-1");
     assertThat(stored.path("generation").asInt()).isEqualTo(1);
     assertThat(stored.toString()).doesNotContain("safeLabel", "Order reference", "value");
-    service =
-        new GuidedSessionService(
-            repository, contracts, access, new GuidedSessionProperties(true, Map.of()), clock);
+    service = newService(new GuidedSessionProperties(true, Map.of()));
     clock.now = clock.now.plusSeconds(1);
     service.clarify(user, id, "answer", answer);
     assertThat(service.clarificationSelection(controller, id, 1, "question-1")).isEqualTo(stored);
@@ -685,26 +709,26 @@ class GuidedSessionIT {
     clock.now = clock.now.plusSeconds(31);
     access.recoverable = true;
     Authentication nextOwner = new GuidedInternalSecurity.Identity("worker-next", "owning-worker");
-    JsonNode acquired = service.claim(nextOwner, id, "takeover", claim(id, "worker-next", 1));
-    assertThat(acquired.path("state").asText()).isEqualTo("AWAITING_CLARIFICATION");
-    assertThat(acquired.path("owner").path("fence").asInt()).isEqualTo(2);
-    assertThatThrownBy(() -> service.observe(nextOwner, id, 2, "bypass2", observation(id, 2)))
-        .hasMessage("STALE_GENERATION");
+    assertThatThrownBy(() -> service.claim(nextOwner, id, "takeover", claim(id, "worker-next", 1)))
+        .hasMessage("FORBIDDEN_SCOPE");
+    assertThat(service.read(user, id, "session").path("state").asText())
+        .isEqualTo("AWAITING_CLARIFICATION");
     service.clarify(user, id, "answer", clarificationAnswer());
-    assertThat(
-            service
-                .clarificationSelection(controller, id, 2, "question-1")
-                .path("choiceId")
-                .asText())
-        .isEqualTo("choice-1");
+    assertThat(service.read(user, id, "session").path("state").asText()).isEqualTo("OBSERVING");
+    assertThatThrownBy(() -> service.clarificationSelection(controller, id, 1, "question-1"))
+        .hasMessage("STALE_FENCE");
     assertThatThrownBy(() -> service.observe(worker, id, 1, "stale-owner", observation(id, 2)))
         .hasMessage("STALE_FENCE");
-    service.observe(nextOwner, id, 2, "fresh", observation(id, 2));
+    assertThatThrownBy(() -> service.observe(nextOwner, id, 1, "replacement", observation(id, 2)))
+        .hasMessage("STALE_FENCE");
   }
 
   @Test
   void protectedAuthAndFinalizingStatesSurviveRenewalAndUndispatchedRecovery() {
-    for (String state : List.of("AWAITING_AUTH", "FINALIZING")) {
+    ObjectNode obsolete = fixture("session").put("state", "AWAITING_AUTH");
+    assertThatThrownBy(() -> contracts.validate("session", obsolete))
+        .hasMessage("INVALID_CONTRACT");
+    for (String state : List.of("FINALIZING")) {
       String id = observing();
       // Downstream auth/finalization transitions are represented here only to exercise maintenance.
       repository.transaction(
@@ -722,33 +746,204 @@ class GuidedSessionIT {
       clock.now = clock.now.plusSeconds(31);
       access.recoverable = true;
       Authentication nextOwner = new GuidedInternalSecurity.Identity("next-owner", "owning-worker");
-      JsonNode acquired = service.claim(nextOwner, id, "recover", claim(id, "next-owner", 1));
-      assertThat(acquired.path("state").asText()).isEqualTo(state);
-      assertThat(acquired.path("owner").path("fence").asInt()).isEqualTo(2);
-      assertThatThrownBy(() -> service.observe(nextOwner, id, 2, "bypass", observation(id, 1)))
-          .hasMessage("STALE_GENERATION");
+      assertThatThrownBy(() -> service.claim(nextOwner, id, "recover", claim(id, "next-owner", 1)))
+          .hasMessage("FORBIDDEN_SCOPE");
+      assertThat(service.read(user, id, "session").path("state").asText()).isEqualTo(state);
+      assertThatThrownBy(() -> service.observe(nextOwner, id, 1, "bypass", observation(id, 1)))
+          .hasMessage("STALE_FENCE");
     }
+  }
+
+  @Test
+  void atomicRenewalPreservesExactProgressAndCommittedCommandSnapshot() {
+    String id = observing();
+    service.observe(worker, id, 1, "before-atomic-renew", observation(id, 1));
+    JsonNode beforeProgress = persistedProgress(id);
+    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
+    clock.now = clock.now.plusSeconds(5);
+    JsonNode renewed = service.claim(worker, id, "atomic-renew", claim(id, "worker-1", 1));
+    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
+    assertThat(renewed.path("owner").path("fence")).isEqualTo(before.path("owner").path("fence"));
+    assertThat(renewed.path("expiresAt")).isEqualTo(before.path("expiresAt"));
+    assertThat(renewed.path("counters")).isEqualTo(before.path("counters"));
+    JsonNode command =
+        contracts.parse(
+            jdbc.queryForObject(
+                "SELECT response::text FROM studio_guided_commands WHERE namespace=? AND route='claim'"
+                    + " AND idempotency_key=?",
+                String.class,
+                id,
+                "atomic-renew"));
+    assertThat(command).isEqualTo(renewed);
+    assertThat(persistedDocument(id)).isEqualTo(renewed);
+    ((ObjectNode) renewed).withObject("/owner").put("workerId", "caller-mutated-copy");
+    assertThat(persistedDocument(id).path("owner").path("workerId").asText()).isEqualTo("worker-1");
+  }
+
+  @Test
+  void atomicRenewalUniqueCommandConflictRollsBackOwnerUpdate() {
+    String id = observing();
+    ObjectNode request = claim(id, "worker-1", 1);
+    service.claim(worker, id, "conflicting-renew", request);
+    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
+    JsonNode beforeProgress = persistedProgress(id);
+    clock.now = clock.now.plusSeconds(5);
+    assertThatThrownBy(
+            () ->
+                repository.transaction(
+                    () -> {
+                      var session = repository.lock(id);
+                      session
+                          .document()
+                          .withObject("/owner")
+                          .put("leaseExpiresAt", clock.now.plusSeconds(30).toString());
+                      repository.saveRenewalAndCommand(
+                          session, "conflicting-renew", GuidedContracts.hash(request));
+                      return null;
+                    }))
+        .isInstanceOf(org.springframework.dao.DuplicateKeyException.class);
+    assertThat(persistedDocument(id)).isEqualTo(before);
+    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands"
+                    + " WHERE namespace=? AND route='claim' AND idempotency_key=?",
+                Integer.class,
+                id,
+                "conflicting-renew"))
+        .isEqualTo(1);
+    assertThat(
+            contracts.parse(
+                jdbc.queryForObject(
+                    "SELECT response::text FROM studio_guided_commands"
+                        + " WHERE namespace=? AND route='claim' AND idempotency_key=?",
+                    String.class,
+                    id,
+                    "conflicting-renew")))
+        .isEqualTo(before);
+  }
+
+  @Test
+  void atomicRenewalExternalCallerRollbackLeavesNoLeaseOrCommandCommit() {
+    String id = observing();
+    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
+    JsonNode beforeProgress = persistedProgress(id);
+    clock.now = clock.now.plusSeconds(5);
+    assertThatThrownBy(
+            () ->
+                repository.transaction(
+                    () -> {
+                      JsonNode renewed =
+                          service.claim(
+                              worker, id, "outer-rollback-renew", claim(id, "worker-1", 1));
+                      assertThat(renewed.path("owner").path("leaseExpiresAt"))
+                          .isNotEqualTo(before.path("owner").path("leaseExpiresAt"));
+                      assertThat(
+                              jdbc.queryForObject(
+                                  "SELECT count(*) FROM studio_guided_commands"
+                                      + " WHERE namespace=? AND route='claim' AND idempotency_key=?",
+                                  Integer.class,
+                                  id,
+                                  "outer-rollback-renew"))
+                          .isEqualTo(1);
+                      throw new IllegalStateException("Controlled outer renewal rollback");
+                    }))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessage("Controlled outer renewal rollback");
+    assertThat(persistedDocument(id)).isEqualTo(before);
+    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands"
+                    + " WHERE namespace=? AND route='claim' AND idempotency_key=?",
+                Integer.class,
+                id,
+                "outer-rollback-renew"))
+        .isZero();
+  }
+
+  @Test
+  void atomicRenewalRejectsInvalidSchemaAndMissingRowWithoutCommand() {
+    String id = observing();
+    JsonNode before = repository.transaction(() -> repository.lock(id).document().deepCopy());
+    JsonNode beforeProgress = persistedProgress(id);
+    assertThatThrownBy(
+            () ->
+                repository.transaction(
+                    () -> {
+                      var session = repository.lock(id);
+                      session.document().put("unexpectedRenewalField", true);
+                      repository.saveRenewalAndCommand(
+                          session,
+                          "invalid-schema-renew",
+                          GuidedContracts.hash(claim(id, "worker-1", 1)));
+                      return null;
+                    }))
+        .hasMessage("INVALID_CONTRACT");
+    assertThat(persistedDocument(id)).isEqualTo(before);
+    assertThat(persistedProgress(id)).isEqualTo(beforeProgress);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands"
+                    + " WHERE namespace=? AND route='claim' AND idempotency_key=?",
+                Integer.class,
+                id,
+                "invalid-schema-renew"))
+        .isZero();
+    String absent = UUID.randomUUID().toString();
+    assertThatThrownBy(
+            () ->
+                repository.transaction(
+                    () -> {
+                      var original = repository.lock(id);
+                      ObjectNode missing = original.document().deepCopy().put("sessionId", absent);
+                      repository.saveRenewalAndCommand(
+                          new GuidedSessionRepository.Session(missing, original.progress()),
+                          "missing-owner-renew",
+                          GuidedContracts.hash(claim(absent, "worker-1", 1)));
+                      return null;
+                    }))
+        .hasMessage("FORBIDDEN_SCOPE");
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands WHERE namespace=?",
+                Integer.class,
+                absent))
+        .isZero();
+    assertThat(persistedDocument(id)).isEqualTo(before);
+  }
+
+  private JsonNode persistedDocument(String id) {
+    return repository.transaction(() -> repository.lock(id).document().deepCopy());
+  }
+
+  private JsonNode persistedProgress(String id) {
+    return contracts.parse(
+        jdbc.queryForObject(
+            "SELECT progress::text FROM studio_guided_sessions WHERE session_id=?",
+            String.class,
+            id));
   }
 
   @Test
   void liveOwnerRenewalPreservesAdmittedAndDispatchedActions() {
     String id = observing();
     service.observe(worker, id, 1, "observe", observation(id, 1));
-    JsonNode admitted = service.admit(controller, id, 1, "admit", proposal(id));
+    JsonNode admitted = admit(controller, id, 1, "admit", proposal(id));
     JsonNode renewed = service.claim(worker, id, "renew", claim(id, "worker-1", 1));
     assertThat(renewed.path("state").asText()).isEqualTo("ACTING");
     assertThat(repository.actions(id).getFirst().path("state").asText()).isEqualTo("ADMITTED");
-    JsonNode dispatched = service.advance(controller, id, 1, "advance", advance(id, admitted));
+    JsonNode dispatched = consume(controller, id, 1, "advance", advance(id, admitted));
     service.claim(worker, id, "renew2", claim(id, "worker-1", 1));
     assertThat(repository.actions(id).getFirst().path("state").asText()).isEqualTo("DISPATCHING");
-    service.outcome(worker, id, 1, "outcome", outcome(dispatched));
+    reportOutcome(worker, id, 1, "outcome", outcome(dispatched));
     assertThat(repository.actions(id).getFirst().path("dispatchCount").asInt()).isEqualTo(1);
   }
 
   @Test
   void takeoverCannotReopenFinalizingAfterExecutedEffects() {
     String id = observing();
-    service.outcome(worker, id, 1, "outcome", outcome(dispatch(id)));
+    reportOutcome(worker, id, 1, "outcome", outcome(dispatch(id)));
     // A completed-work fixture: only ownership maintenance is under test here.
     repository.transaction(
         () -> {
@@ -762,14 +957,551 @@ class GuidedSessionIT {
     clock.now = clock.now.plusSeconds(31);
     access.recoverable = true;
     Authentication nextOwner = new GuidedInternalSecurity.Identity("next-owner", "owning-worker");
-    assertThat(
-            service
-                .claim(nextOwner, id, "takeover", claim(id, "next-owner", 1))
-                .path("state")
-                .asText())
-        .isEqualTo("UNKNOWN_OUTCOME");
+    assertThatThrownBy(() -> service.claim(nextOwner, id, "takeover", claim(id, "next-owner", 1)))
+        .hasMessage("FORBIDDEN_SCOPE");
+    stoppedWorker(id);
+    assertThat(service.read(user, id, "result").path("outcome").asText()).isEqualTo("FAILED");
+    assertThat(repository.actions(id).getFirst().path("state").asText()).isEqualTo("SUCCEEDED");
     assertThatThrownBy(() -> service.observe(nextOwner, id, 2, "bypass", observation(id, 2)))
         .isInstanceOf(GuidedSessionException.class);
+  }
+
+  private void verifyFreshContextQueries(JdbcTemplate observed, String id) {
+    org.mockito.Mockito.verify(observed)
+        .query(
+            org.mockito.ArgumentMatchers.eq(
+                "SELECT * FROM studio_guided_materializations WHERE session_id=?"),
+            org.mockito.ArgumentMatchers.<org.springframework.jdbc.core.RowMapper<ObjectNode>>any(),
+            org.mockito.ArgumentMatchers.eq(id));
+    for (String table :
+        List.of(
+            "studio_guided_allocations",
+            "studio_guided_producers",
+            "studio_guided_consumer_edges")) {
+      org.mockito.Mockito.verify(observed)
+          .queryForList(
+              org.mockito.ArgumentMatchers.eq(
+                  "SELECT document::text FROM "
+                      + table
+                      + " WHERE session_id=? ORDER BY document::text"),
+              org.mockito.ArgumentMatchers.eq(String.class),
+              org.mockito.ArgumentMatchers.eq(id));
+    }
+  }
+
+  @Test
+  void sameCallbackContextSuccessStillReadsAllRowsAndDefaultsStayStrict() {
+    String id = observing();
+    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
+    JdbcTemplate queried = org.mockito.Mockito.spy(jdbc);
+    var selected = new GuidedMaterializationService(queried, checked);
+    repository.transaction(
+        () -> {
+          ObjectNode session = repository.lock(id).document();
+          var proof = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
+          assertThat(proof).isNotNull();
+          org.mockito.Mockito.clearInvocations(queried, checked);
+          ObjectNode fresh = selected.context(session, proof);
+          assertThat(fresh.path("sessionId").asText()).isEqualTo(id);
+          verifyFreshContextQueries(queried, id);
+          org.mockito.Mockito.verify(checked, org.mockito.Mockito.never())
+              .validate(
+                  org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+                  org.mockito.ArgumentMatchers.any());
+          selected.context(session);
+          org.mockito.Mockito.verify(checked)
+              .validate(
+                  org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+                  org.mockito.ArgumentMatchers.any());
+          selected.verify(session, frozenCallbackIdentities.get(id));
+          org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2))
+              .validate(
+                  org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+                  org.mockito.ArgumentMatchers.any());
+          return null;
+        });
+  }
+
+  @Test
+  void completeContextLeaseArraysRepresentationRevisionAndForeignProofFallBack() {
+    String id = observing();
+    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
+    var selected = new GuidedMaterializationService(jdbc, checked);
+    repository.transaction(
+        () -> {
+          ObjectNode session = repository.lock(id).document();
+          var proof = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
+          assertThat(proof).isNotNull();
+          ObjectNode renewed = session.deepCopy();
+          String lease =
+              Instant.parse(session.path("owner").path("leaseExpiresAt").asText())
+                  .plusMillis(1)
+                  .toString();
+          renewed.withObject("/owner").put("leaseExpiresAt", lease);
+          ObjectNode arrays = session.deepCopy();
+          arrays
+              .withObject("/scope")
+              .withArray("approvedOrigins")
+              .add("https://additional.example.test");
+          // Representation-only change of a context-carried object. STUDIO-OBS-012A: versions is
+          // the one-key {contract:3}, so the reorder moves the first limits member instead.
+          ObjectNode reordered = session.deepCopy();
+          ObjectNode limits = (ObjectNode) reordered.path("limits");
+          String first = limits.fieldNames().next();
+          JsonNode moved = limits.remove(first);
+          limits.set(first, moved);
+          for (ObjectNode changed : List.of(renewed, arrays, reordered)) {
+            org.mockito.Mockito.clearInvocations(checked);
+            ObjectNode fresh = selected.context(changed, proof);
+            assertThat(fresh.path("sessionId").asText()).isEqualTo(id);
+            org.mockito.Mockito.verify(checked)
+                .validate(
+                    org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+                    org.mockito.ArgumentMatchers.any());
+          }
+          var foreign =
+              new GuidedMaterializationService(jdbc, checked)
+                  .verifyAndCapture(session, frozenCallbackIdentities.get(id));
+          org.mockito.Mockito.clearInvocations(checked);
+          selected.context(session, foreign);
+          selected.context(session, null);
+          org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2))
+              .validate(
+                  org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+                  org.mockito.ArgumentMatchers.any());
+          int initialRevision = selected.context(session).path("materializationRevision").asInt();
+          selected.bump(id); // Actual monotone materialization revision, guarded in PostgreSQL.
+          org.mockito.Mockito.clearInvocations(checked);
+          assertThat(selected.context(session, proof).path("materializationRevision").asInt())
+              .isEqualTo(initialRevision + 1);
+          org.mockito.Mockito.verify(checked)
+              .validate(
+                  org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+                  org.mockito.ArgumentMatchers.any());
+          return null;
+        });
+  }
+
+  @Test
+  void contextProofCannotSkipFirstIdentityCanonicalOrFreshLiveRefusal() {
+    String id = observing();
+    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
+    var selected = new GuidedMaterializationService(jdbc, checked);
+    repository.transaction(
+        () -> {
+          ObjectNode session = repository.lock(id).document();
+          ObjectNode wrongIdentity =
+              frozenCallbackIdentities.get(id).deepCopy().put("contextRevision", 2);
+          assertThatThrownBy(() -> selected.verifyAndCapture(session, wrongIdentity))
+              .hasMessage("STALE_FENCE");
+          ObjectNode wrongSchema = session.deepCopy();
+          wrongSchema.withObject("/owner").put("leaseExpiresAt", "fixed-invalid-time");
+          assertThatThrownBy(
+                  () -> selected.verifyAndCapture(wrongSchema, frozenCallbackIdentities.get(id)))
+              .hasMessage("INVALID_CONTRACT");
+          var proof = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
+          assertThat(proof).isNotNull();
+          ObjectNode nonfinite = session.deepCopy();
+          nonfinite.withObject("/limits").put("maxObservationBytes", Double.NaN);
+          org.mockito.Mockito.clearInvocations(checked);
+          assertThatThrownBy(() -> selected.context(nonfinite, proof))
+              .hasMessage("INVALID_CONTRACT");
+          org.mockito.Mockito.verify(checked, org.mockito.Mockito.never())
+              .validate(
+                  org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+                  org.mockito.ArgumentMatchers.any());
+          selected.stop(id); // Same actual row becomes nonlive; old proof cannot authorize it.
+          assertThatThrownBy(() -> selected.context(session, proof)).hasMessage("STALE_FENCE");
+          return null;
+        });
+  }
+
+  @Test
+  void observeV2ReusesOnlySecondSchemaAndUnavailableCaptureDefaults() {
+    String id = observing();
+    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
+    var selected = new GuidedMaterializationService(jdbc, checked);
+    var localService =
+        new GuidedSessionService(
+            repository, contracts, access, new GuidedSessionProperties(true, Map.of()), clock);
+    localService.installBridge(
+        selected,
+        new GuidedPreparationStore(jdbc, contracts),
+        new GuidedBindingStore(jdbc, contracts, selected),
+        assignments);
+    JsonNode observed =
+        localService.observeV2(worker, id, 1, "same-context", observationEnvelope(id, 1));
+    assertThat(observed.path("state").asText()).isEqualTo("PROPOSING");
+    org.mockito.Mockito.verify(checked)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("v3/runner-context"),
+            org.mockito.ArgumentMatchers.any());
+    repository.transaction(
+        () -> {
+          ObjectNode session = repository.lock(id).document();
+          ObjectNode customSession = session.deepCopy();
+          ObjectNode customVersions =
+              new ObjectNode(com.fasterxml.jackson.databind.node.JsonNodeFactory.instance) {};
+          customVersions.setAll((ObjectNode) customSession.path("versions"));
+          customSession.set("versions", customVersions);
+          assertThat(selected.verifyAndCapture(customSession, frozenCallbackIdentities.get(id)))
+              .isNull();
+          RuntimeException unavailable = new IllegalStateException("fixed-capture-unavailable");
+          org.mockito.Mockito.doThrow(unavailable)
+              .when(checked)
+              .parse(org.mockito.ArgumentMatchers.contains("\"materializationRevision\":"));
+          var absent = selected.verifyAndCapture(session, frozenCallbackIdentities.get(id));
+          assertThat(absent).isNull();
+          selected.context(session, absent);
+          Error fatal = new AssertionError("fixed-capture-fatal");
+          org.mockito.Mockito.doThrow(fatal)
+              .when(checked)
+              .parse(org.mockito.ArgumentMatchers.contains("\"materializationRevision\":"));
+          assertThatThrownBy(
+                  () -> selected.verifyAndCapture(session, frozenCallbackIdentities.get(id)))
+              .isSameAs(fatal);
+          return null;
+        });
+  }
+
+  private GuidedSessionService observationValidationService(GuidedContracts validationContracts) {
+    var selected =
+        new GuidedSessionService(
+            repository,
+            validationContracts,
+            access,
+            new GuidedSessionProperties(true, Map.of()),
+            clock);
+    selected.installBridge(
+        materialization,
+        new GuidedPreparationStore(jdbc, contracts),
+        new GuidedBindingStore(jdbc, contracts, materialization),
+        assignments);
+    return selected;
+  }
+
+  private ObjectNode observationEnvelope(String id, int generation) {
+    ObjectNode envelope = frozenCallbackIdentities.get(id).deepCopy();
+    envelope.set("observation", observation(id, generation));
+    return envelope;
+  }
+
+  @Test
+  void preparedObservationOwnsTheWholeEnvelopeBeforeCallerMutation() {
+    String id = observing();
+    ObjectNode supplied = observationEnvelope(id, 1);
+    String expectedHash = GuidedContracts.hash(supplied.path("observation"));
+    GuidedContracts controlled = org.mockito.Mockito.spy(new GuidedContracts());
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              assertThat(
+                      org.springframework.transaction.support.TransactionSynchronizationManager
+                          .isActualTransactionActive())
+                  .isFalse();
+              supplied.put("workerId", "foreign-worker");
+              ((ObjectNode) supplied.path("observation")).put("generation", 77);
+              return invocation.callRealMethod();
+            })
+        .when(controlled)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+    var selected = observationValidationService(controlled);
+    JsonNode result = selected.observeV2(worker, id, 1, "owned-observation", supplied);
+    assertThat(result.path("state").asText()).isEqualTo("PROPOSING");
+    repository.transaction(
+        () -> {
+          var stored = repository.lock(id);
+          assertThat(stored.progress().path("generation").asInt()).isEqualTo(1);
+          assertThat(stored.progress().path("observationHash").asText().equals(expectedHash))
+              .isTrue();
+          return null;
+        });
+    org.mockito.Mockito.verify(controlled)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+  }
+
+  @Test
+  void preparedObservationFailureKeepsOwnerMaterializationRefreshAndDuplicatePriority() {
+    String id = observing();
+    String initialState =
+        repository.transaction(() -> repository.lock(id).document().path("state").asText());
+    ObjectNode request = observationEnvelope(id, 1);
+    GuidedContracts controlled = org.mockito.Mockito.spy(new GuidedContracts());
+    org.mockito.Mockito.doThrow(new GuidedSessionException("INVALID_CONTRACT", 422))
+        .when(controlled)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+    var selected = observationValidationService(controlled);
+    access.granted = false;
+    assertThatThrownBy(() -> selected.observeV2(worker, id, 1, "denied-observation", request))
+        .hasMessage("FORBIDDEN_SCOPE");
+    access.granted = true;
+    assertThatThrownBy(() -> selected.observeV2(worker, id, 2, "wrong-owner", request))
+        .hasMessage("STALE_FENCE");
+    ObjectNode wrongContext = request.deepCopy().put("contextRevision", 2);
+    assertThatThrownBy(() -> selected.observeV2(worker, id, 1, "wrong-context", wrongContext))
+        .hasMessage("STALE_FENCE");
+    assertThatThrownBy(() -> selected.observeV2(worker, id, 1, "oref-unmatched", request))
+        .hasMessage("STALE_GENERATION");
+    assertThatThrownBy(() -> selected.observeV2(worker, id, 1, "typed-observation", request))
+        .isInstanceOfSatisfying(
+            GuidedSessionException.class,
+            failure -> {
+              assertThat(failure.getMessage()).isEqualTo("INVALID_CONTRACT");
+              assertThat(failure.status()).isEqualTo(422);
+              assertThat(failure.getCause()).isNull();
+            });
+    String stateAfterFailures =
+        repository.transaction(() -> repository.lock(id).document().path("state").asText());
+    assertThat(stateAfterFailures).isEqualTo(initialState);
+    // Original public/default observe commits the real first observation and command.
+    service.observe(worker, id, 1, "duplicate-observation", observation(id, 1));
+    JsonNode duplicate = selected.observeV2(worker, id, 1, "duplicate-observation", request);
+    assertThat(duplicate.path("state").asText()).isEqualTo("PROPOSING");
+    int duplicateGeneration =
+        repository.transaction(() -> repository.lock(id).progress().path("generation").asInt());
+    assertThat(duplicateGeneration).isEqualTo(1);
+  }
+
+  @Test
+  void unsupportedObservationEnvelopeUsesOriginalLockedValidation() {
+    String id = observing();
+    ObjectNode request =
+        new ObjectNode(com.fasterxml.jackson.databind.node.JsonNodeFactory.instance) {};
+    request.setAll(observationEnvelope(id, 1));
+    GuidedContracts controlled = org.mockito.Mockito.spy(new GuidedContracts());
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              assertThat(
+                      org.springframework.transaction.support.TransactionSynchronizationManager
+                          .isActualTransactionActive())
+                  .isTrue();
+              return invocation.callRealMethod();
+            })
+        .when(controlled)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+    var selected = observationValidationService(controlled);
+    assertThat(
+            selected
+                .observeV2(worker, id, 1, "unsupported-envelope", request)
+                .path("state")
+                .asText())
+        .isEqualTo("PROPOSING");
+    org.mockito.Mockito.verify(controlled)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+  }
+
+  @Test
+  void unavailableObservationPreparationFallsBackAndFatalRemainsEarly() {
+    String id = observing();
+    ObjectNode request = observationEnvelope(id, 1);
+    GuidedContracts controlled = org.mockito.Mockito.spy(new GuidedContracts());
+    RuntimeException unavailable = new IllegalStateException("fixed-preparation-unavailable");
+    org.mockito.Mockito.doThrow(unavailable)
+        .doCallRealMethod()
+        .when(controlled)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+    var selected = observationValidationService(controlled);
+    assertThat(
+            selected
+                .observeV2(worker, id, 1, "fallback-observation", request)
+                .path("state")
+                .asText())
+        .isEqualTo("PROPOSING");
+    org.mockito.Mockito.verify(controlled, org.mockito.Mockito.times(2))
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+    Error fatal = new AssertionError("fixed-preparation-fatal");
+    org.mockito.Mockito.doThrow(fatal)
+        .when(controlled)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("observation"), org.mockito.ArgumentMatchers.any());
+    assertThatThrownBy(() -> selected.observeV2(worker, id, 1, "fatal-observation", request))
+        .isSameAs(fatal);
+    int retainedGeneration =
+        repository.transaction(() -> repository.lock(id).progress().path("generation").asInt());
+    assertThat(retainedGeneration).isEqualTo(1);
+  }
+
+  @Test
+  void outcomeSaveProofPreservesRealRollbackFreshFenceAndIdempotentWrite() {
+    String id = observing();
+    JsonNode dispatched = dispatch(id);
+    ObjectNode envelope = outcome(dispatched);
+    ObjectNode report = (ObjectNode) envelope.path("ledger");
+    GuidedContracts checked = org.mockito.Mockito.spy(new GuidedContracts());
+    var selectedRepository =
+        org.mockito.Mockito.spy(
+            new GuidedSessionRepository(
+                jdbc,
+                new TransactionTemplate(new DataSourceTransactionManager(jdbc.getDataSource())),
+                checked));
+    var prepared = new GuidedActionLedger(checked).prepareReport(report);
+    assertThat(prepared).isNotNull();
+    assertThatThrownBy(
+            () ->
+                selectedRepository.transaction(
+                    () -> {
+                      selectedRepository.lock(id);
+                      selectedRepository.saveAction(report, prepared);
+                      jdbc.queryForObject("SELECT 1 / 0", Integer.class);
+                      return null;
+                    }))
+        .isInstanceOf(org.springframework.dao.DataAccessException.class);
+    assertThat(repository.actions(id).getFirst()).isEqualTo(dispatched);
+
+    var selectedService =
+        new GuidedSessionService(
+            selectedRepository,
+            checked,
+            access,
+            new GuidedSessionProperties(true, Map.of()),
+            clock);
+    selectedService.installBridge(
+        materialization,
+        new GuidedPreparationStore(jdbc, contracts),
+        new GuidedBindingStore(jdbc, contracts, materialization),
+        assignments);
+    assertThatThrownBy(
+            () -> selectedService.outcomeV2(worker, id, 2, "wrong-proof-fence", envelope))
+        .hasMessage("STALE_FENCE");
+    assertThat(repository.actions(id).getFirst()).isEqualTo(dispatched);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='outcomes-v2'",
+                Integer.class,
+                id))
+        .isZero();
+
+    org.mockito.Mockito.clearInvocations(checked, selectedRepository);
+    JsonNode accepted = selectedService.outcomeV2(worker, id, 1, "proof-winner", envelope);
+    assertThat(accepted.path("state").asText()).isEqualTo("OBSERVING");
+    assertThat(repository.actions(id).getFirst()).isEqualTo(report);
+    org.mockito.Mockito.verify(checked)
+        .validate(org.mockito.ArgumentMatchers.eq("ledger"), org.mockito.ArgumentMatchers.any());
+    org.mockito.Mockito.verify(selectedRepository, org.mockito.Mockito.never())
+        .saveAction(org.mockito.ArgumentMatchers.any(ObjectNode.class));
+    assertThat(selectedService.outcomeV2(worker, id, 1, "proof-winner", envelope))
+        .isEqualTo(accepted);
+    assertThat(repository.actions(id).getFirst()).isEqualTo(report);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_commands WHERE namespace=? AND route='outcomes-v2'",
+                Integer.class,
+                id))
+        .isEqualTo(1);
+  }
+
+  private GuidedSessionService newService(GuidedSessionProperties properties) {
+    var result = new GuidedSessionService(repository, contracts, access, properties, clock);
+    // STUDIO-OBS-008 P2/P3: the real presentation projector, as the production composition wires.
+    result.installPresentation(new GuidedPublicPresentationProjector(jdbc, contracts));
+    materialization = new GuidedMaterializationService(jdbc, contracts);
+    assignments = new GuidedAssignmentStore(jdbc, contracts);
+    result.installBridge(
+        materialization,
+        new GuidedPreparationStore(jdbc, contracts),
+        new GuidedBindingStore(jdbc, contracts, materialization),
+        assignments);
+    // STUDIO-OBS-014 S3: every start needs an approved governed policy for its scope. "other" is
+    // governed too so concurrentConflictingStartsHaveOneWinner races two startable requests.
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
+        result,
+        jdbc,
+        "CSI-123",
+        "orders",
+        List.of("fixture", "other"),
+        List.of("https://orders.example.test"),
+        null);
+    // STUDIO-OBS-013/014 S3b: the production recording projection, as GuidedEvidenceConfiguration
+    // installs it; the NONE default's null video is invalid v3/result after C2b by design.
+    result.installEvidence(
+        new com.citi.put.checks.studio.guided.evidence.RecordedGuidedEvidenceProjection(
+            new com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceRepository(jdbc),
+            new com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties(null),
+            false,
+            contracts));
+    return result;
+  }
+
+  private ObjectNode versions() {
+    return (ObjectNode) contracts.parse("{\"contract\":3}");
+  }
+
+  private ObjectNode context(String id) {
+    return repository.transaction(() -> materialization.context(repository.lock(id).document()));
+  }
+
+  private void refreshProposal(ObjectNode proposal, String id, int generation) {
+    ObjectNode observation = observation(id, generation);
+    ObjectNode context = context(id);
+    ObjectNode evidence =
+        contracts
+            .object()
+            .put("kind", "observedDocument")
+            .put("sessionId", id)
+            .put("contextId", context.path("contextId").asText())
+            .put("documentId", "document-1")
+            .put("generation", generation)
+            .put("origin", "https://orders.example.test")
+            .put("observationHash", GuidedContracts.hash(observation));
+    proposal.remove("observationHash");
+    proposal
+        .put("generation", generation)
+        .put("evidenceHash", GuidedContracts.hash(evidence))
+        .put("authoredInputsHash", context.path("authoredInputsHash").asText())
+        .put("contextRevision", 1);
+    proposal.set("executionEvidence", evidence);
+    proposal.withObject("/target").put("generation", generation);
+  }
+
+  // This PostgreSQL service test supplies a trusted runner preparation at the existing
+  // authenticated
+  // transport seam; it does not claim browser/DOM or HTTP transport proof (covered by joined ITs).
+  private JsonNode admit(
+      Authentication actor, String id, long fence, String key, JsonNode proposal) {
+    JsonNode existing = service.existingAdmission(actor, id, fence, key, proposal);
+    if (existing != null) {
+      return existing;
+    }
+    ObjectNode proof = materialization.identity(context(id));
+    proof
+        .put("preparationId", UUID.randomUUID().toString())
+        .put("requestDigest", GuidedContracts.hash(proposal))
+        .put("evidenceHash", proposal.path("evidenceHash").asText())
+        .put("authoredInputsHash", proposal.path("authoredInputsHash").asText())
+        .put("expiresAt", clock.now.plusSeconds(20).toString());
+    service.storePreparation(actor, id, fence, proposal, proof);
+    return service.admit(actor, id, fence, key, proposal);
+  }
+
+  private JsonNode consume(
+      Authentication actor, String id, long fence, String key, JsonNode request) {
+    GuidedSessionService.Consumption result = service.consume(actor, id, fence, key, request);
+    if (result instanceof GuidedSessionService.WonConsumption won) {
+      return won.ledger();
+    }
+    return ((GuidedSessionService.AlreadyConsumed) result).ledger();
+  }
+
+  private JsonNode reportOutcome(
+      Authentication actor, String id, long fence, String key, JsonNode report) {
+    return service.outcomeV2(actor, id, fence, key, report);
+  }
+
+  private void stoppedWorker(String id) {
+    ObjectNode request =
+        contracts
+            .object()
+            .put("schemaVersion", 3)
+            .put("kind", "assignment")
+            .put("reason", "LEASE_LOST");
+    request.set("assignment", assignments.find(id));
+    service.assignmentLifecycle(worker, id, "lost-worker", request);
   }
 
   private String pendingClarification() {
@@ -787,42 +1519,98 @@ class GuidedSessionIT {
   private ObjectNode clarificationAnswer() {
     return contracts
         .object()
-        .put("schemaVersion", 1)
+        .put("schemaVersion", 3)
         .put("clarificationId", "question-1")
         .put("choiceId", "choice-1")
         .put("generation", 1);
   }
 
   private ObjectNode fixture(String name) {
-    return fixtures.path("documents").path(name).deepCopy();
+    ObjectNode value = documents.path(name).deepCopy();
+    value.put("schemaVersion", 3);
+    if (name.equals("observation")) {
+      value.withObject("/coverage").put("passwordControls", 0);
+    }
+    if (name.equals("clarification")) {
+      value.put("phase", "observed");
+    }
+    if (name.equals("session")) {
+      value.withObject("/scope").remove("accountRef");
+      value.remove("authConnection");
+      value.set("versions", versions());
+    }
+    return value;
   }
 
   private ObjectNode start() {
     return contracts
         .object()
-        .put("schemaVersion", 1)
+        .put("schemaVersion", 3)
         .put("testId", "test-1")
-        .put("sourceRevision", "source-1")
-        .put("configurationRevision", "config-1")
+        .put("sourceRevision", "1")
+        .put("configurationRevision", "1")
         .put("environmentId", "fixture")
         .put("applicationId", "orders")
-        .put("accountRef", "account-1");
+        .set("versions", versions());
   }
 
   private ObjectNode claim(String id, String workerId, int fence) {
     return contracts
         .object()
-        .put("schemaVersion", 1)
+        .put("schemaVersion", 3)
         .put("sessionId", id)
         .put("workerId", workerId)
-        .put("expectedFence", fence);
+        .put("expectedFence", fence)
+        .set("versions", versions());
   }
 
   private String observing() {
     String id =
         service.start(user, UUID.randomUUID().toString(), start()).path("sessionId").asText();
-    service.claim(worker, id, "claim", claim(id, "worker-1", 0));
+    ObjectNode intent = service.prepareAssignment(controller, id, "assignment", "worker-1");
+    JsonNode claimed = service.claim(worker, id, "claim", claim(id, "worker-1", 0));
+    ObjectNode receipt =
+        contracts
+            .object()
+            .put("schemaVersion", 3)
+            .put("status", "OWNED")
+            .put("ownerFence", 1)
+            .put("leaseExpiresAt", claimed.path("owner").path("leaseExpiresAt").asText());
+    receipt.set("assignment", intent);
+    service.acknowledgeAssignment(controller, id, receipt);
+    service.materialize(controller, id, 1, "materialize", new ObjectMapper().createArrayNode());
+    frozenCallbackIdentities.put(id, materialization.identity(context(id)));
     return id;
+  }
+
+  /**
+   * STUDIO-OBS-014 AC-1 oracle "approved v2 => context hash changes" (po-qa014-rulings b, item 1;
+   * AC-1 clarification h1): the runner context materialized for a session started after v2's
+   * approval carries the v2 application policy and hash(v2), which differs from the hash the v1
+   * session's context carries. The runner's acceptance of only the bound hash is R14's policyHash
+   * tests.
+   */
+  @Test
+  void theRunnerContextOfASessionStartedAfterV2CarriesV2AndItsHash() {
+    String v1Session = observing();
+    ObjectNode v1Context = context(v1Session);
+    ObjectNode v2 = contracts.object();
+    v2.put("policyRuleId", "governed-v2")
+        .put("allowStructuralDiscovery", true)
+        .putArray("readGrants");
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
+        jdbc, "CSI-123", "orders", "fixture", List.of("https://orders.example.test"), v2, "ALLOW");
+    String v2Session = observing();
+    ObjectNode v2Context = context(v2Session);
+
+    assertThat(v2Context.path("applicationPolicy")).isEqualTo(v2);
+    assertThat(v2Context.path("policyHash").asText()).isEqualTo(GuidedContracts.hash(v2));
+    assertThat(v1Context.path("policyHash").asText())
+        .isEqualTo(GuidedContracts.hash(v1Context.path("applicationPolicy")))
+        .isNotEqualTo(v2Context.path("policyHash").asText());
+    assertThat(context(v1Session).path("policyHash"))
+        .as("the v1 session keeps its frozen v1 policy")
+        .isEqualTo(v1Context.path("policyHash"));
   }
 
   private String scope(String id) {
@@ -840,16 +1628,18 @@ class GuidedSessionIT {
 
   private ObjectNode proposal(String id) {
     ObjectNode p = fixture("action");
-    p.put("sessionId", id)
-        .put("scopeHash", scope(id))
-        .put("observationHash", GuidedContracts.hash(observation(id, 1)));
+    p.put("sessionId", id).put("scopeHash", scope(id));
+    // This suite tests lifecycle, budgets and immutable admission; a click has no runtime-value
+    // producer side effects. Read/binding semantics retain their joined bridge suite coverage.
+    p.putObject("operation").put("kind", "click");
+    refreshProposal(p, id, 1);
     return p;
   }
 
   private ObjectNode advance(String id, JsonNode admission) {
     return contracts
         .object()
-        .put("schemaVersion", 1)
+        .put("schemaVersion", 3)
         .put("sessionId", id)
         .put("ownerFence", 1)
         .put("admissionId", admission.path("admission").path("admissionId").asText())
@@ -858,33 +1648,60 @@ class GuidedSessionIT {
 
   private JsonNode dispatch(String id) {
     service.observe(worker, id, 1, "observe", observation(id, 1));
-    JsonNode a = service.admit(controller, id, 1, "admit", proposal(id));
-    return service.advance(controller, id, 1, "advance", advance(id, a));
+    JsonNode a = admit(controller, id, 1, "admit", proposal(id));
+    return consume(controller, id, 1, "advance", advance(id, a));
   }
 
   private ObjectNode outcome(JsonNode dispatched) {
     ObjectNode report = dispatched.deepCopy();
     report.put("state", "SUCCEEDED").put("outcomeCode", "OK");
-    ObjectNode body = contracts.object().put("schemaVersion", 1);
+    ObjectNode body =
+        frozenCallbackIdentities.get(dispatched.path("sessionId").asText()).deepCopy();
     body.set("ledger", report);
+    body.putNull("availability");
     return body;
   }
 
   private ObjectNode cancel() {
-    return contracts.object().put("schemaVersion", 1).put("reason", "userRequested");
+    return contracts.object().put("schemaVersion", 3).put("reason", "userRequested");
   }
 
   private ObjectNode finalizeRequest(String id) {
+    // Publication is driven by current immutable base evidence, never caller-provided hashes.
     return contracts
         .object()
-        .put("schemaVersion", 1)
-        .put("sessionId", id)
-        .put("ownerFence", 1)
-        .put("expectedSourceRevision", "source-1")
-        .put("expectedConfigurationRevision", "config-1")
-        .put("learnedPlanHash", "0".repeat(64))
-        .put("artifactHash", "0".repeat(64))
-        .put("admissionProvenanceHash", "0".repeat(64));
+        .put("schemaVersion", 3)
+        .put("expectedSourceRevision", "1")
+        .put("expectedConfigurationRevision", "1");
+  }
+
+  private JsonNode publish(String id, String key, JsonNode request) {
+    var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
+    var publisher =
+        new GuidedPlanPublisher(
+            repository,
+            service,
+            new GuidedPublicationBaseRepository(jdbc, contracts),
+            new GuidedPublicationEvidenceRepository(jdbc, contracts),
+            new GuidedPublicationRepository(jdbc, contracts),
+            contracts,
+            org.mockito.Mockito.mock(ObservedReplayPins.class),
+            validator,
+            org.mockito.Mockito.mock(GuidedPublicationAuthorization.class),
+            access,
+            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
+            new ObservedReplayProperties(
+                true, 30000, 1048576, 4194304, 2097152, "[]", "[]", 1280, 720),
+            clock);
+    try {
+      return publisher
+          .finalizeForUser(
+              user, new org.springframework.mock.web.MockHttpServletRequest(), id, key, request)
+          .document();
+    } finally {
+      // No state, successful ledger, caller digest or missing source can invoke validation.
+      org.mockito.Mockito.verifyNoInteractions(validator);
+    }
   }
 
   private JsonNode attempt(Callable<JsonNode> action) throws Exception {
@@ -956,19 +1773,20 @@ class GuidedSessionIT {
       return true;
     }
 
-    private boolean granted = true, current = true, connected = true, recoverable = false;
+    private boolean granted = true, current = true, recoverable = false;
 
     @Override
     public Snapshot resolve(Authentication principal, JsonNode start) {
       ObjectNode session = fixture("session"), scope = (ObjectNode) session.path("scope");
-      for (String field : List.of("environmentId", "applicationId", "accountRef")) {
+      for (String field : List.of("environmentId", "applicationId")) {
         scope.set(field, start.path(field));
       }
-      ObjectNode connection = (ObjectNode) session.path("authConnection");
-      if (!connected) {
-        connection.put("mode", "unavailable").putNull("connectionId");
-      }
-      return new Snapshot(scope, session.path("sourceSteps"), connection);
+      return new Snapshot(scope, session.path("sourceSteps"));
+    }
+
+    @Override
+    public GuidedSourceReferenceValidator.Sources sources(JsonNode session) {
+      return new GuidedSourceReferenceValidator.Sources("1", "1", Map.of(), Map.of());
     }
 
     @Override

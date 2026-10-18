@@ -52,13 +52,9 @@ class ExecutionVideoContractTest {
   private static final Set<String> OPERATIONS_CARRYING_ATTRIBUTION =
       new TreeSet<>(
           List.of(
-              "compileTest",
-              "confirmCompile",
               "streamExecution",
               "getExecutionVideo",
-              "runnerValidateArtifact",
-              "runnerAdmitRun",
-              "claimAdmission",
+              // STUDIO-OBS-014 C2a: claimAdmission is deleted from the document.
               "reportProgress",
               "runnerHealth",
               "runnerReadiness",
@@ -71,7 +67,27 @@ class ExecutionVideoContractTest {
               "removeStudioSchedule",
               "enableStudioSchedule",
               "previewStudioSchedule",
-              "listStudioScheduleOccurrences"));
+              "listStudioScheduleOccurrences",
+              // STUDIO-OBS-012A: the seven guided-session operations move into the one public
+              // document under /api/v1/studio with their OBS-003/005/006 attributions.
+              "startGuidedSession",
+              "readGuidedSession",
+              "readGuidedResult",
+              "readGuidedClarification",
+              "clarifyGuidedSession",
+              "cancelGuidedSession",
+              "finalizeObservedPublication",
+              // STUDIO-OBS-013 (AR-1): the guided learn-run recording route.
+              "getGuidedSessionVideo",
+              // STUDIO-OBS-014 C2b: the five guided-policy operations (x-implemented-by
+              // STUDIO-OBS-014).
+              "lookupGuidedPolicy",
+              "createGuidedPolicy",
+              "readGuidedPolicy",
+              "createGuidedPolicyVersion",
+              "approveGuidedPolicyVersion",
+              // STUDIO-OBS-008 C-int W1 (P1): the per-test capability read.
+              "getStudioTestCapabilities"));
 
   /** {@code $ref} targets, spelled once so a typo cannot make two assertions agree by accident. */
   private static final String SESSION_UNAUTHORIZED = "#/components/responses/SessionUnauthorized";
@@ -100,8 +116,6 @@ class ExecutionVideoContractTest {
               "getTest",
               "updateTest",
               "deleteTest",
-              "compileTest",
-              "confirmCompile",
               "executeTest",
               "listExecutions",
               "getExecution",
@@ -122,7 +136,29 @@ class ExecutionVideoContractTest {
               "removeStudioSchedule",
               "enableStudioSchedule",
               "previewStudioSchedule",
-              "listStudioScheduleOccurrences"));
+              "listStudioScheduleOccurrences",
+              // STUDIO-OBS-012A: validate-variables and the seven guided-session routes are
+              // session-authenticated public operations of the one public document (21 -> 29).
+              "validateTestVariables",
+              "startGuidedSession",
+              "readGuidedSession",
+              "readGuidedResult",
+              "readGuidedClarification",
+              "clarifyGuidedSession",
+              "cancelGuidedSession",
+              "finalizeObservedPublication",
+              // STUDIO-OBS-013 (AR-1): getGuidedSessionVideo is a session-authenticated public
+              // route (29 -> 30).
+              "getGuidedSessionVideo",
+              // STUDIO-OBS-014 C2b: the five guided-policy operations are session-authenticated
+              // public routes; their 401 is SessionUnauthorized (30 -> 35).
+              "lookupGuidedPolicy",
+              "createGuidedPolicy",
+              "readGuidedPolicy",
+              "createGuidedPolicyVersion",
+              "approveGuidedPolicyVersion",
+              // STUDIO-OBS-008 C-int W1 (P1): a session-authenticated public route (35 -> 36).
+              "getStudioTestCapabilities"));
 
   /**
    * The two internal callbacks, whose {@code 401} comes from {@code
@@ -133,20 +169,15 @@ class ExecutionVideoContractTest {
       new TreeSet<>(
           // ADR-002 §29.4 adds the control read, served by the same filter.
           // Approved OBS006 adds observed admission under that unchanged service-token filter.
-          List.of(
-              "claimAdmission",
-              "reportProgress",
-              "readExecutionControl",
-              "admitObservedExecution"));
+          // STUDIO-OBS-014 C2a: claimAdmission is deleted (4 -> 3).
+          List.of("reportProgress", "readExecutionControl", "admitObservedExecution"));
 
   private static final Set<String> RUNNER_OPERATIONS_DECLARING_UNAUTHENTICATED =
       new TreeSet<>(
           List.of(
-              "runnerAdmitRun",
               "runnerCancelRun",
               "runnerHealth",
               "runnerReadiness",
-              "runnerValidateArtifact",
               "validateObservedPublication",
               "runObservedRevision"));
 
@@ -441,13 +472,13 @@ class ExecutionVideoContractTest {
    * ADR-002 §25.4 — every operation's {@code 401} points at the component its <b>own producer</b>
    * writes, partitioned by the document's own {@code internal} tag.
    *
-   * <p><b>The partition is the tag, never the path.</b> Four runner operations are internal on
-   * paths that do not start with {@code /internal/studio/} — {@code runnerValidateArtifact} ({@code
-   * /v1/validate}), {@code runnerAdmitRun} ({@code /v1/runs}), {@code runnerHealth} ({@code
-   * /health}) and {@code runnerReadiness} ({@code /ready}) — so a path-prefix rule would count
-   * sixteen "public" operations and be false against the correct document. {@code info.description}
-   * defines the partition itself: <i>"Routes tagged `internal` are not exposed through public
-   * ingress … each declares … exactly one of `runner` or `api-callback` next to `internal`."</i>
+   * <p><b>The partition is the tag, never the path.</b> Runner operations are internal on paths
+   * that do not start with {@code /internal/studio/} — {@code runObservedRevision} ({@code
+   * /v2/runs}), {@code runnerHealth} ({@code /health}) and {@code runnerReadiness} ({@code /ready})
+   * among them — so a path-prefix rule would count them as "public" operations and be false against
+   * the correct document. {@code info.description} defines the partition itself: <i>"Routes tagged
+   * `internal` are not exposed through public ingress … each declares … exactly one of `runner` or
+   * `api-callback` next to `internal`."</i>
    *
    * <p>Three producers, three components, asserted in both directions:
    *
@@ -506,11 +537,15 @@ class ExecutionVideoContractTest {
     // Each total on its own. A set comparison alone is satisfied by two collections that stopped
     // collecting together, and a correctly-added thirteenth public operation passes every
     // comparison above.
-    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(23);
+    // STUDIO-OBS-013: + getGuidedSessionVideo (29 -> 30). STUDIO-OBS-014 C2b: + five
+    // guided-policy operations (30 -> 35). STUDIO-OBS-008 C-int W1: + getStudioTestCapabilities
+    // (35 -> 36).
+    assertThat(publicRefs).as("the number of public operations declaring a 401 moved").hasSize(36);
     assertThat(callbackRefs)
         .as("the number of internal callbacks declaring a 401 moved")
-        .hasSize(4);
-    assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(7);
+        .hasSize(3);
+    // STUDIO-OBS-012A: artifact-1 POST /v1/validate and POST /v1/runs are gone (7 -> 5).
+    assertThat(runnerRefs).as("the number of runner operations declaring a 401 moved").hasSize(5);
 
     // The pinned second copies, both ways.
     assertThat(publicRefs.keySet())
@@ -675,9 +710,15 @@ class ExecutionVideoContractTest {
             .collect(java.util.stream.Collectors.toSet()));
   }
 
+  /**
+   * getExecutionVideo's response for {@code status}, read through a {@code $ref} when the route
+   * declares one (E-1: C2a moves 404/410/416 to the shared components; every asserted value stays
+   * the same, only the read path changes).
+   */
   private static Object responseOf(String status) {
-    return ContractDocument.at(
-        document.getOperation(ContractDocument.VIDEO_PATH), "responses", status);
+    return document.deref(
+        ContractDocument.at(
+            document.getOperation(ContractDocument.VIDEO_PATH), "responses", status));
   }
 
   @SuppressWarnings("unchecked")
@@ -769,17 +810,33 @@ class ExecutionVideoContractTest {
     try (var dirs = Files.list(stories)) {
       for (Path dir : dirs.filter(Files::isDirectory).toList()) {
         String id = dir.getFileName().toString();
-        Path story = dir.resolve(id + ".story.md");
-        if (Files.isRegularFile(story)
-            && Files.readAllLines(story, StandardCharsets.UTF_8).stream()
-                .findFirst()
-                .filter(line -> line.startsWith("# Story " + id + " "))
-                .isPresent()) {
+        if (declaresStory(dir.resolve(id + ".story.md"), id)) {
           ids.add(id);
+        }
+        // A story group (STUDIO-OBS-012A): docs/stories/{GROUP}/{ID}.story.md headed the same way,
+        // e.g. docs/stories/STUDIO-OBSERVED/STUDIO-OBS-003.story.md.
+        try (var files = Files.list(dir)) {
+          for (Path file : files.filter(Files::isRegularFile).toList()) {
+            String name = file.getFileName().toString();
+            if (name.endsWith(".story.md")) {
+              String grouped = name.substring(0, name.length() - ".story.md".length());
+              if (declaresStory(file, grouped)) {
+                ids.add(grouped);
+              }
+            }
+          }
         }
       }
     }
     return ids;
+  }
+
+  private static boolean declaresStory(Path story, String id) throws IOException {
+    return Files.isRegularFile(story)
+        && Files.readAllLines(story, StandardCharsets.UTF_8).stream()
+            .findFirst()
+            .filter(line -> line.startsWith("# Story " + id + " "))
+            .isPresent();
   }
 
   /** A throwaway copy of the document with one substitution, for the non-vacuity controls. */
@@ -789,5 +846,124 @@ class ExecutionVideoContractTest {
     scratch.toFile().deleteOnExit();
     Files.writeString(scratch, raw.replace(find, replace), StandardCharsets.UTF_8);
     return scratch;
+  }
+
+  // ── STUDIO-OBS-013 (AR-1): the guided learn-run recording route ──────────
+  //
+  // Additions only. Nothing above is weakened: getExecutionVideo's own status set, parameters and
+  // refusal shapes are still asserted exactly as before.
+
+  private static final String GUIDED_VIDEO_PATH = "/guided-sessions/{id}/video";
+
+  @SuppressWarnings("unchecked")
+  private static Map<String, Object> guidedVideo() {
+    Map<String, Object> operation = document.getOperation(GUIDED_VIDEO_PATH);
+    assertThat(operation.get("operationId"))
+        .as("the document declares GET %s (contract lane C1)", GUIDED_VIDEO_PATH)
+        .isEqualTo("getGuidedSessionVideo");
+    return operation;
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void theGuidedVideoRouteDeclaresTheSessionIdAndOnlyTheDownloadFlag() {
+    Map<String, Object> operation = guidedVideo();
+    List<Object> pathParameters =
+        (List<Object>) ContractDocument.at(document.paths(), GUIDED_VIDEO_PATH, "parameters");
+    assertThat(pathParameters).hasSize(1);
+    assertThat(ContractDocument.at(pathParameters.get(0), "$ref"))
+        .as("the same id parameter readGuidedSession declares")
+        .isEqualTo(
+            ContractDocument.at(
+                ((List<Object>)
+                        ContractDocument.at(
+                            document.paths(), "/guided-sessions/{id}", "parameters"))
+                    .get(0),
+                "$ref"));
+    List<Object> parameters = (List<Object>) operation.get("parameters");
+    assertThat(parameters).hasSize(1);
+    assertThat(ContractDocument.at(parameters.get(0), "name")).isEqualTo("download");
+    assertThat(ContractDocument.at(parameters.get(0), "in")).isEqualTo("query");
+    assertThat(ContractDocument.at(parameters.get(0), "schema", "type")).isEqualTo("boolean");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void theGuidedVideoRouteHasTheExecutionVideoStatusSet() {
+    Map<String, Object> responses = (Map<String, Object>) guidedVideo().get("responses");
+    assertThat(responses.keySet().stream().map(String::valueOf).toList())
+        .containsExactlyInAnyOrder("200", "206", "401", "403", "404", "410", "416", "503");
+    assertThat(new TreeSet<>(responses.keySet().stream().map(String::valueOf).toList()))
+        .isEqualTo(declaredStatuses());
+  }
+
+  @Test
+  void theGuidedVideoRefusalsAreSharedComponentsWithTheExecutionRoutesShapes() {
+    Map<String, Object> operation = guidedVideo();
+    for (String[] pair :
+        new String[][] {
+          {"404", "VideoNoEvidence"}, {"410", "VideoExpired"}, {"416", "VideoRangeNotSatisfiable"}
+        }) {
+      assertThat(ContractDocument.at(operation, "responses", pair[0], "$ref"))
+          .as("ADR-002 §24.3: a shared component, not a route-local copy")
+          .isEqualTo("#/components/responses/" + pair[1]);
+      Object component = ContractDocument.at(document.root(), "components", "responses", pair[1]);
+      assertThat(ContractDocument.at(component, "content", "application/json", "schema", "$ref"))
+          .as("%s carries the same body getExecutionVideo's %s does", pair[1], pair[0])
+          .isEqualTo(
+              ContractDocument.at(
+                  responseOf(pair[0]), "content", "application/json", "schema", "$ref"));
+    }
+    Map<String, Object> execution = document.getOperation(ContractDocument.VIDEO_PATH);
+    for (String status : new String[] {"404", "410", "416"}) {
+      Object guidedRef = ContractDocument.at(operation, "responses", status, "$ref");
+      Object executionRef = ContractDocument.at(execution, "responses", status, "$ref");
+      // E-1 (C2a landed): both video routes reference the same shared component (ADR-002 §24.3).
+      assertThat(guidedRef).as("the guided route declares %s by $ref", status).isNotNull();
+      assertThat(executionRef)
+          .as("both video routes use the same shared %s component", status)
+          .isEqualTo(guidedRef);
+      // Read through the reference either way: the same error code in the same example key.
+      Object guided = document.deref(ContractDocument.at(operation, "responses", status));
+      Object executionResponse = responseOf(status);
+      assertThat(ContractDocument.at(guided, "content", "application/json", "examples"))
+          .isInstanceOf(Map.class);
+      @SuppressWarnings("unchecked")
+      Map<String, Object> examples =
+          (Map<String, Object>)
+              ContractDocument.at(guided, "content", "application/json", "examples");
+      for (String example : examples.keySet()) {
+        assertThat(
+                ContractDocument.at(
+                    executionResponse,
+                    "content",
+                    "application/json",
+                    "examples",
+                    example,
+                    "value",
+                    "error"))
+            .as("%s example %s carries the same code on both routes", status, example)
+            .isEqualTo(
+                ContractDocument.at(
+                    guided, "content", "application/json", "examples", example, "value", "error"));
+      }
+    }
+    Object unsatisfiable =
+        ContractDocument.at(document.root(), "components", "responses", "VideoRangeNotSatisfiable");
+    assertThat(ContractDocument.at(unsatisfiable, "headers", "Content-Range", "schema", "type"))
+        .isEqualTo("string");
+    assertThat(ContractDocument.at(operation, "responses", "401", "$ref"))
+        .isEqualTo(SESSION_UNAUTHORIZED);
+    assertThat(ContractDocument.at(operation, "responses", "403"))
+        .as("the 403 is described exactly as readGuidedSession's: it IS that route's decision")
+        .isEqualTo(
+            ContractDocument.at(
+                document.getOperation("/guided-sessions/{id}"), "responses", "403"));
+  }
+
+  @Test
+  void theGuidedVideoRouteNamesTheStoryThatShipsIt() {
+    assertThat(guidedVideo().get("x-implemented-by")).isEqualTo("STUDIO-OBS-013");
+    assertThat(guidedVideo().get("x-not-yet-implemented")).isNull();
   }
 }

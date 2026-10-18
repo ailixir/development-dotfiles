@@ -14,3 +14,11 @@ management:
   endpoint:
     health:
       show-details: never
+
+# STUDIO-OBS-009 AC-2: the guided bridge authenticates only with mutual TLS plus the pinned key and
+# issuer. A deployment that wires a guided hop must also supply the rest of the chain (key, issuer,
+# connector port, token files) and the backend key store / trust store (studio.runner.tls), or the
+# pod does not start (GuidedSessionConfiguration.MtlsChain, StudioRunnerTls.Wiring).
+studio:
+  guided-authoring:
+    mtls-required: true

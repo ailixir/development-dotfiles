@@ -7,9 +7,10 @@ import com.citi.put.checks.csi.CsiRepository;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
-import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
+import com.citi.put.checks.studio.authoring.ConfigurationChangeClassifier;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -18,11 +19,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -45,7 +48,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioIdempotencyIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String OWNER = "idempotency-owner@citi.com";
   private static final String OTHER_PRINCIPAL = "idempotency-other@citi.com";
@@ -61,14 +70,14 @@ class StudioIdempotencyIT {
   @Autowired private ConfigurationChangeClassifier changeClassifier;
   @Autowired private CsiOwnershipEvaluator csiOwnershipEvaluator;
   @Autowired private ExecutionSnapshotMapper snapshotMapper;
-  @Autowired private com.citi.put.checks.studio.compile.CompilePipeline compilePipeline;
-  @Autowired private com.citi.put.checks.studio.compile.CompileStateService compileStateService;
+  @Autowired private com.citi.put.checks.studio.readiness.ExecutionReadinessService readiness;
   @Autowired private com.citi.put.checks.users.UserProvisioningService userProvisioningService;
 
   @Autowired
   private com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements ledgerStatements;
 
-  @Autowired private TransactionTemplate transactions;
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorizer observedReplay;
 
   private UUID testId;
   private UUID otherTestId;
@@ -85,13 +94,19 @@ class StudioIdempotencyIT {
   @Test
   void theSameKeyAndDigestResolvesToTheSameExecutionOnAnIndependentServiceInstance() {
     String key = "exec-key-" + UUID.randomUUID();
-    ExecutionSnapshotDto first = studioService.executeTest(testId, identity(OWNER), key);
+    ExecutionSnapshotDto first =
+        studioService.executeTest(
+            testId, identity(OWNER), key, ObservedPublicationFixture.request(identity(OWNER)));
 
     // A second service object built from the same beans: no shared in-memory state with the one
     // that accepted the original request, which is what a second API replica amounts to here.
+    // Outside any transaction, as a request reaches a replica: the explicit observed Run authority
+    // refuses to be issued inside one (STUDIO-OBS-012A), and the acceptance it then joins is the
+    // shared transactional bean.
     ExecutionSnapshotDto retry =
-        transactions.execute(
-            status -> independentInstance().executeTest(testId, identity(OWNER), key));
+        independentInstance()
+            .executeTest(
+                testId, identity(OWNER), key, ObservedPublicationFixture.request(identity(OWNER)));
 
     assertThat(retry).isNotNull();
     assertThat(retry.executionId()).isEqualTo(first.executionId());
@@ -114,7 +129,9 @@ class StudioIdempotencyIT {
   @Test
   void theDatabaseItselfRefusesASecondRowForTheSameKey() {
     String key = "exec-key-" + UUID.randomUUID();
-    ExecutionSnapshotDto accepted = studioService.executeTest(testId, identity(OWNER), key);
+    ExecutionSnapshotDto accepted =
+        studioService.executeTest(
+            testId, identity(OWNER), key, ObservedPublicationFixture.request(identity(OWNER)));
 
     // This is the guarantee that survives replicas and restarts: no in-memory filter is involved.
     assertThatThrownBy(
@@ -137,9 +154,16 @@ class StudioIdempotencyIT {
   @Test
   void theSameKeyWithADifferentRequestIsAConflict() {
     String key = "exec-key-" + UUID.randomUUID();
-    studioService.executeTest(testId, identity(OWNER), key);
+    studioService.executeTest(
+        testId, identity(OWNER), key, ObservedPublicationFixture.request(identity(OWNER)));
 
-    assertThatThrownBy(() -> studioService.executeTest(otherTestId, identity(OWNER), key))
+    assertThatThrownBy(
+            () ->
+                studioService.executeTest(
+                    otherTestId,
+                    identity(OWNER),
+                    key,
+                    ObservedPublicationFixture.request(identity(OWNER))))
         .isInstanceOf(StudioConflictException.class)
         .hasMessageContaining(key);
     assertThat(
@@ -154,16 +178,27 @@ class StudioIdempotencyIT {
   void theKeyIsScopedToThePrincipalSoTwoUsersNeverShareAnExecution() {
     String key = "shared-key-" + UUID.randomUUID();
 
-    ExecutionSnapshotDto mine = studioService.executeTest(testId, identity(OWNER), key);
-    ExecutionSnapshotDto theirs = studioService.executeTest(testId, identity(OTHER_PRINCIPAL), key);
+    ExecutionSnapshotDto mine =
+        studioService.executeTest(
+            testId, identity(OWNER), key, ObservedPublicationFixture.request(identity(OWNER)));
+    ExecutionSnapshotDto theirs =
+        studioService.executeTest(
+            testId,
+            identity(OTHER_PRINCIPAL),
+            key,
+            ObservedPublicationFixture.request(identity(OTHER_PRINCIPAL)));
 
     assertThat(theirs.executionId()).isNotEqualTo(mine.executionId());
   }
 
   @Test
   void anExecutionWithoutAKeyIsAlwaysANewRun() {
-    ExecutionSnapshotDto first = studioService.executeTest(testId, identity(OWNER), null);
-    ExecutionSnapshotDto second = studioService.executeTest(testId, identity(OWNER), null);
+    ExecutionSnapshotDto first =
+        studioService.executeTest(
+            testId, identity(OWNER), null, ObservedPublicationFixture.request(identity(OWNER)));
+    ExecutionSnapshotDto second =
+        studioService.executeTest(
+            testId, identity(OWNER), null, ObservedPublicationFixture.request(identity(OWNER)));
 
     assertThat(second.executionId()).isNotEqualTo(first.executionId());
     // Postgres treats NULLs as distinct, so unkeyed executions never collide on the unique index.
@@ -186,30 +221,35 @@ class StudioIdempotencyIT {
    * stand-in for that pod: if idempotency resolves here, it resolved from committed rows.
    */
   private StudioService independentInstance() {
-    return new StudioService(
-        studioRepository,
-        executionRepository,
-        revisionRepository,
-        csiRepository,
-        changeClassifier,
-        csiOwnershipEvaluator,
-        snapshotMapper,
-        acceptanceService,
-        compilePipeline,
-        compileStateService,
-        userProvisioningService,
-        ledgerStatements);
+    StudioService instance =
+        new StudioService(
+            studioRepository,
+            executionRepository,
+            revisionRepository,
+            csiRepository,
+            changeClassifier,
+            csiOwnershipEvaluator,
+            snapshotMapper,
+            acceptanceService,
+            readiness,
+            userProvisioningService,
+            ledgerStatements);
+    // What Spring injects into a replica's StudioService: the explicit observed Run authority.
+    org.springframework.test.util.ReflectionTestUtils.setField(
+        instance, "observedReplay", observedReplay);
+    return instance;
   }
 
   private static Authentication identity(String email) {
     return new BffAuthenticationToken(
-        new UserIdentity("uid-" + email, email, email, "Ops", List.of("checks-admin"), List.of()));
+        // Core user id == email (identity contract shape): the observed Run's principal.
+        new UserIdentity(email, email, email, "Ops", List.of("checks-admin"), List.of()));
   }
 
   /**
    * A compiled and confirmed draft. Acceptance runs the readiness gate from story 10.7 onwards, so
-   * a draft with no confirmed revision is refused {@code 409 COMPILE_REQUIRED} rather than executed
-   * — which is the product behaviour, not a test inconvenience.
+   * a draft with no learned revision is refused {@code 409 LEARN_REQUIRED} rather than executed —
+   * which is the product behaviour, not a test inconvenience.
    */
   private UUID seedTest(String name) {
     return new StudioExecutionFixtures(jdbc)

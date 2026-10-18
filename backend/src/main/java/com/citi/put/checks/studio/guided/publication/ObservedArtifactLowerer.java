@@ -27,24 +27,14 @@ public final class ObservedArtifactLowerer {
   }
 
   public PublicationContracts.Candidate lower(JsonNode basis, JsonNode profile) {
+    // One collapsed tuple (STUDIO-OBS-012A): learned-plan versions = {contract: profile.contract};
+    // the build identity is compared separately by ObservedReplayPins.
     ObjectNode versions = contracts.object();
-    for (String key :
-        List.of(
-            "contract",
-            "learnedPlan",
-            "observation",
-            "guidedPolicy",
-            "referencePolicy",
-            "lowering",
-            "artifact",
-            "language",
-            "executor")) {
-      versions.set(key, profile.path(key));
-    }
+    versions.set("contract", profile.path("contract"));
     ObjectNode plan = builder.plan(basis, versions);
     ArrayNode recipes = recipes(basis);
     ObjectNode policy = policies.derive(basis, plan, recipes);
-    ObjectNode artifact = contracts.object().put("version", 2).put("kind", "observed");
+    ObjectNode artifact = contracts.object().put("version", 3).put("kind", "observed");
     artifact.set("profile", profile.deepCopy());
     for (String field : List.of("sourceHash", "configurationHash", "authoringHash")) {
       artifact.set(field, basis.path(field));
@@ -76,31 +66,43 @@ public final class ObservedArtifactLowerer {
       ObjectNode targetGuard = guard.putObject("target");
       if (execution.path("kind").asText().equals("initialBlank")) {
         targetGuard.put("kind", "initialBlank");
-      } else if (target.path("kind").asText().equals("page")) {
-        targetGuard.put("kind", "page");
       } else {
-        JsonNode preparation =
-            GuidedPlanBuilder.unique(
-                basis.path("preparations"), "preparationId", text(fact, "preparationId"));
-        JsonNode observation =
-            GuidedPlanBuilder.unique(
-                    basis.path("observations"),
-                    "observationHash",
-                    text(preparation, "observationHash"))
-                .path("observation");
-        JsonNode node =
-            GuidedPlanBuilder.unique(observation.path("nodes"), "nodeId", text(target, "nodeId"));
-        targetGuard.put("kind", "element");
-        targetGuard.set("locator", target.path("locator").deepCopy());
-        for (String field :
-            List.of(
-                "role", "elementType", "controlType", "classification", "visible", "actionable")) {
-          targetGuard.set(field, node.path(field));
-        }
-        if (proposal.path("operation").path("kind").asText().equals("read")) {
-          targetGuard.set("readRuleId", node.path("policyRuleId"));
+        if (target.path("kind").asText().equals("passwordControl")) {
+          targetGuard.put("kind", "passwordControl");
         } else {
-          targetGuard.putNull("readRuleId");
+          if (target.path("kind").asText().equals("page")) {
+            targetGuard.put("kind", "page");
+          } else {
+            JsonNode preparation =
+                GuidedPlanBuilder.unique(
+                    basis.path("preparations"), "preparationId", text(fact, "preparationId"));
+            JsonNode observation =
+                GuidedPlanBuilder.unique(
+                        basis.path("observations"),
+                        "observationHash",
+                        text(preparation, "observationHash"))
+                    .path("observation");
+            JsonNode node =
+                GuidedPlanBuilder.unique(
+                    observation.path("nodes"), "nodeId", text(target, "nodeId"));
+            targetGuard.put("kind", "element");
+            targetGuard.set("locator", target.path("locator").deepCopy());
+            for (String field :
+                List.of(
+                    "role",
+                    "elementType",
+                    "controlType",
+                    "classification",
+                    "visible",
+                    "actionable")) {
+              targetGuard.set(field, node.path(field));
+            }
+            if (proposal.path("operation").path("kind").asText().equals("read")) {
+              targetGuard.set("readRuleId", node.path("policyRuleId"));
+            } else {
+              targetGuard.putNull("readRuleId");
+            }
+          }
         }
       }
       ObjectNode action = contracts.object().put("guardId", guardId);
@@ -163,6 +165,23 @@ public final class ObservedArtifactLowerer {
     for (JsonNode step : basis.path("sourceSteps")) {
       order.put(text(step, "stepId"), step.path("ordinal").asInt());
     }
+    // Input history remains complete in the basis. Only successful effective operations create
+    // future replay recipes; preparing/materializing a value is not execution authority.
+    var usedInputs = new HashSet<String>();
+    for (JsonNode fact : basis.path("actions")) {
+      if (!fact.path("ledger").path("state").asText().equals("SUCCEEDED")) {
+        continue;
+      }
+      JsonNode operation = GuidedPlanBuilder.proposal(basis, fact).path("operation");
+      if (operation.has("destinationInputId")) {
+        usedInputs.add(text(operation, "destinationInputId"));
+      }
+      for (String field : List.of("value", "expected")) {
+        if (operation.path(field).has("sourceInputId")) {
+          usedInputs.add(text(operation.path(field), "sourceInputId"));
+        }
+      }
+    }
     List<ObjectNode> values = new ArrayList<>();
     var ids = new HashSet<String>();
     var meanings = new HashSet<String>();
@@ -196,6 +215,12 @@ public final class ObservedArtifactLowerer {
                 && provenance.path("sourceRevision").equals(basis.path("sourceRevision")),
             "REFERENCE_MISMATCH",
             422);
+        var secretToken =
+            java.util.regex.Pattern.compile("<secret\\s+[A-Za-z0-9_.-]{1,64}>").matcher(source);
+        while (secretToken.find()) {
+          require(
+              end <= secretToken.start() || start >= secretToken.end(), "REFERENCE_MISMATCH", 422);
+        }
         projected
             .put("kind", "sourceSpan")
             .put("start", start)
@@ -223,8 +248,11 @@ public final class ObservedArtifactLowerer {
       ObjectNode meaning = recipe.deepCopy();
       meaning.remove("inputId");
       require(meanings.add(GuidedContracts.hash(meaning)), "REFERENCE_MISMATCH", 422);
-      values.add(recipe);
+      if (usedInputs.contains(text(input, "inputId"))) {
+        values.add(recipe);
+      }
     }
+    require(ids.containsAll(usedInputs), "REFERENCE_MISMATCH", 422);
     values.sort(
         Comparator.comparingInt((ObjectNode r) -> order.get(text(r, "stepId")))
             .thenComparingInt(

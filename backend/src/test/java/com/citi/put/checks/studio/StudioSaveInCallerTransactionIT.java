@@ -114,8 +114,12 @@ class StudioSaveInCallerTransactionIT {
                           studioRepository.findById(draft).orElseThrow().getSourceRevision());
                       // Another request's save commits on its own connection and transaction.
                       commitElsewhere(save("Winning step", "from the winner"));
-                      studioService.updateTest(
-                          draft, save("Losing step", "from the loser"), owner());
+                      com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(
+                          studioService,
+                          jdbc,
+                          draft,
+                          save("Losing step", "from the loser"),
+                          owner());
                     }));
 
     SoftAssertions softly = new SoftAssertions();
@@ -148,7 +152,8 @@ class StudioSaveInCallerTransactionIT {
           held.setSchedule("{\"written\":\"before the save\"}");
           pendingWhenTheSaveWasCalled.set(entityManager.unwrap(Session.class).isDirty());
 
-          studioService.updateTest(draft, save("Saved step", "from the save"), owner());
+          com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(
+              studioService, jdbc, draft, save("Saved step", "from the save"), owner());
 
           managedAfterSave.set(entityManager.contains(held));
           revisionSeenThroughReference.set(held.getSourceRevision());
@@ -206,7 +211,10 @@ class StudioSaveInCallerTransactionIT {
   private void commitElsewhere(UITestRequest request) {
     try {
       elsewhere
-          .submit(() -> studioService.updateTest(draft, request, owner()))
+          .submit(
+              () ->
+                  com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(
+                      studioService, jdbc, draft, request, owner()))
           .get(30, TimeUnit.SECONDS);
     } catch (Exception e) {
       throw new IllegalStateException("the concurrent save did not commit", e);

@@ -9,6 +9,7 @@ import static com.citi.put.checks.studio.scheduling.StudioScheduleRepository.uui
 import com.citi.put.checks.studio.StudioConflictException;
 import com.citi.put.checks.studio.StudioExecutionProperties;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
+import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
@@ -262,15 +263,14 @@ public class StudioScheduleProcessor {
     if (!verdict.revisionId().equals(uuid(schedule, "activated_revision_id"))) {
       return refuse(testId, occurrenceId, "ACTIVATION_REVISION_MISMATCH");
     }
-    Integer artifactFamily =
-        repository
-            .jdbc()
-            .queryForObject(
-                "SELECT artifact_schema_version FROM ui_test_revisions WHERE id=?",
-                Integer.class,
-                verdict.revisionId());
-    if (Integer.valueOf(2).equals(artifactFamily)) {
-      return refuse(testId, occurrenceId, "OBSERVED_SCHEDULE_AUTH_REQUIRED");
+    // Gate G-3 (design I-C8, security review F-9): a scheduled run of a secret-referencing revision
+    // is refused outside the local/test fixture policy until a production background-authorization
+    // and secret-use source exist (GA C-2). A production StudioBackgroundAuthorization alone does
+    // not lift it. Observed revisions without secrets run under the background grant checked below.
+    if (!authorization.localOnly()
+        && StudioScheduledDispatchAuthorization.declaresSecrets(
+            repository.jdbc(), verdict.revisionId())) {
+      return refuse(testId, occurrenceId, "BACKGROUND_AUTHORIZATION_DENIED");
     }
     if (repository.active(testId)) {
       finish(occurrenceId, "SKIPPED", "OVERLAP");
@@ -310,22 +310,31 @@ public class StudioScheduleProcessor {
             uuid(schedule, "activation_id"),
             slot.scheduledAt(),
             uuid(schedule, "activated_revision_id"));
-    var result =
-        acceptance.acceptScheduled(
-            testId,
-            principal,
-            identity,
-            () -> {
-              if (!properties.isEnabled()) {
-                throw new StudioConflictException(
-                    "DISPATCH_DISABLED", "Scheduling was disabled during admission");
-              }
-              authorization.require(principal, csi, environment);
-              if (!graceDeadline.isAfter(resolver.now())) {
-                throw new StudioConflictException(
-                    "GRACE_EXPIRED", "The nominal occurrence grace expired before acceptance");
-              }
-            });
+    StudioAcceptanceService.ScheduledResult result;
+    try {
+      result =
+          acceptance.acceptScheduled(
+              testId,
+              principal,
+              identity,
+              () -> {
+                if (!properties.isEnabled()) {
+                  throw new StudioConflictException(
+                      "DISPATCH_DISABLED", "Scheduling was disabled during admission");
+                }
+                authorization.require(principal, csi, environment);
+                if (!graceDeadline.isAfter(resolver.now())) {
+                  throw new StudioConflictException(
+                      "GRACE_EXPIRED", "The nominal occurrence grace expired before acceptance");
+                }
+              });
+    } catch (GuidedSessionException ex) {
+      // The observed binding was refused before any row was written (unsupported pin, revision or
+      // scope drift). Fail closed with a stored decision instead of retrying the occurrence on
+      // every pass; the closed code is data-free.
+      LOG.warn("Observed schedule binding refused for test {} ({})", testId, ex.getMessage());
+      return refuse(testId, occurrenceId, "RUNTIME_INCOMPATIBLE");
+    }
     if ("DEFERRED".equals(result.decision())) {
       return defer(
           testId,

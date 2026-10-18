@@ -3,8 +3,8 @@ package com.citi.put.checks.studio.guided.translation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.citi.put.checks.studio.compile.gateway.GenAiGatewayTransport;
-import com.citi.put.checks.studio.compile.gateway.StudioGatewayProperties;
+import com.citi.put.checks.studio.gateway.GenAiGatewayTransport;
+import com.citi.put.checks.studio.gateway.StudioGatewayProperties;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -104,10 +104,9 @@ class GuidedProviderEvaluationTest {
             1,
             131072,
             65536,
-            true,
-            0,
-            new StudioGatewayProperties.TransportRetry(0, Duration.ofMillis(1), 1, 0),
-            "classpath:studio/artifact.schema.json");
+            StudioGatewayProperties.DEFAULT_MAX_OUTPUT_TOKENS,
+            StudioGatewayProperties.ThinkingLevel.LOW,
+            StudioGatewayProperties.ProviderFeatures.ALL);
     var contracts = new GuidedContracts();
     try (var transport = new GenAiGatewayTransport(properties)) {
       var client = new GenAiGuidedLlmGatewayClient(transport, new GuidedResponseParser(contracts));
@@ -289,7 +288,7 @@ class GuidedProviderEvaluationTest {
             .parse(
                 java.nio.file.Files.readString(
                     java.nio.file.Path.of(
-                        "../docs/specs/studio-observed-authoring/contracts/v2/planning-fixtures.json")));
+                        "../docs/specs/studio-observed-authoring/contracts/v3/planning-fixtures.json")));
     assertThat(corpus.path("semanticCorpus").asText()).isEqualTo(CORPUS);
     return corpus.path("semanticCases");
   }

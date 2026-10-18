@@ -1,69 +1,83 @@
 package com.citi.put.checks.studio.dispatch;
 
+import com.citi.put.checks.studio.secrets.SecretValue;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * One conforming {@link RunJob}, built once (story 10.17 AC-2).
+ * One conforming observed {@link RunJob}, built once (story 10.17 AC-2; ADR-SC-005).
  *
  * <p>Two tests need a job to hand the dispatch client and they must not build two, because two
- * fixtures of one closed body is how a producer and its assertions drift apart — which is the class
- * of defect this story exists to close, not to repeat in the test tree.
+ * fixtures of one closed body is how a producer and its assertions drift apart.
  *
- * <p>This builds the <em>input</em> to the producer. It deliberately does <b>not</b> build the
- * body: the body is what {@code HttpRunnerDispatchClient} decides, and the whole point of {@code
- * InternalBodyContractConformanceTest} is to judge that decision against the frozen document rather
- * than against a second copy of it made here.
+ * <p>The wire document is the frozen {@code ObservedJob} example of {@code
+ * contracts/v3/publication-fixtures.json}, read rather than restated, with a fresh execution
+ * identity and the given nonsecret inputs appended. This builds the <em>input</em> to the producer
+ * and deliberately not the body: the body is what {@code HttpRunnerDispatchClient} decides, and
+ * {@code InternalBodyContractConformanceTest} judges that decision against the frozen document.
  */
 final class RunJobFixtures {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final Path FIXTURES =
+      Path.of("..", "docs", "specs", "studio-observed-authoring", "contracts", "v3")
+          .resolve("publication-fixtures.json");
+
+  /** The origin every fixture secret is bound to. */
+  static final String SECRET_ORIGIN = "https://login.app.example";
 
   private RunJobFixtures() {}
 
-  /** A job with both kinds of reference declared and both resolved. */
+  /** A job with one nonsecret input and one resolved secret. */
   static RunJob conformingJob() {
     return conformingJob(Map.of("REGION", "emea"), Map.of("LOGIN_PW", "fixture-password"));
   }
 
-  static RunJob conformingJob(
-      Map<String, String> resolvedVars, Map<String, String> resolvedSecrets) {
-    UUID executionId = UUID.randomUUID();
-    UUID attemptId = UUID.randomUUID();
-    UUID testId = UUID.randomUUID();
-    String csi = "60406";
+  static RunJob conformingJob(Map<String, String> inputs, Map<String, String> resolvedSecrets) {
+    Map<String, List<String>> origins = new LinkedHashMap<>();
+    resolvedSecrets.keySet().forEach(id -> origins.put(id, List.of(SECRET_ORIGIN)));
+    return observedJob(inputs, resolvedSecrets, origins);
+  }
+
+  /** The same job with an explicit per-secret origin map, which may be empty. */
+  static RunJob observedJob(
+      Map<String, String> inputs,
+      Map<String, String> resolvedSecrets,
+      Map<String, List<String>> origins) {
+    ObjectNode wire = example();
+    String executionId = UUID.randomUUID().toString();
+    String attemptId = UUID.randomUUID().toString();
+    ObjectNode binding = (ObjectNode) wire.path("binding");
+    binding.put("executionId", executionId).put("attemptId", attemptId);
+    ((ObjectNode) binding.path("replayGrant"))
+        .put("executionId", executionId)
+        .put("attemptId", attemptId);
+    ArrayNode wireInputs = (ArrayNode) wire.path("inputs");
+    inputs.forEach((id, value) -> wireInputs.addObject().put("inputId", id).put("value", value));
+    Map<String, SecretValue> secrets = new LinkedHashMap<>();
+    resolvedSecrets.forEach((id, value) -> secrets.put(id, new SecretValue(value.toCharArray())));
+    return RunJob.observed(wire, secrets, origins);
+  }
+
+  private static ObjectNode example() {
     try {
-      return new RunJob(
-          executionId,
-          attemptId,
-          UUID.randomUUID(),
-          "sha256:0f9d2c1b",
-          MAPPER.readTree("{\"steps\":[]}"),
-          List.of("Go to the home page"),
-          MAPPER.readTree(
-              "{\"browser\":\"chromium\",\"viewport\":{\"width\":1280,\"height\":720},"
-                  + "\"timeoutSeconds\":30,\"waitStrategy\":\"load\"}"),
-          csi,
-          new ReferenceDeclarations(
-              List.copyOf(resolvedVars.keySet()), List.copyOf(resolvedSecrets.keySet())),
-          resolvedVars,
-          resolvedSecrets,
-          // §8.5's admitted-start value and §5.2's total browser runtime. The total is deliberately
-          // not the configuration's timeoutSeconds x 1000: the two are different budgets.
-          new RunJob.JobDeadlines(30_000L, 120_000L),
-          RunJob.videoKeyFor(csi, testId, executionId, attemptId),
-          RunJob.manifestKeyFor(csi, testId, executionId, attemptId),
-          null,
-          // Every resolved secret bound to one origin, so the conformance test validates a
-          // populated secretOrigins against the frozen schema rather than an empty map.
-          resolvedSecrets.keySet().stream()
-              .collect(
-                  java.util.stream.Collectors.toMap(
-                      id -> id, id -> List.of("https://login.app.example"))));
-    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-      throw new AssertionError("fixture documents are not JSON", e);
+      return (ObjectNode)
+          MAPPER
+              .readTree(Files.readString(FIXTURES))
+              .path("examples")
+              .path("ObservedJob")
+              .path("value")
+              .deepCopy();
+    } catch (IOException e) {
+      throw new AssertionError("the frozen ObservedJob example cannot be read", e);
     }
   }
 }

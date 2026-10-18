@@ -24,7 +24,7 @@ public interface RunnerDispatchClient {
   DispatchOutcome send(RunJob job);
 
   /**
-   * Relays a recorded cancel to the runner: exactly one {@code DELETE /v1/runs/{executionId}}
+   * Relays a recorded cancel to the runner: exactly one {@code DELETE /v2/runs/{executionId}}
    * (Studio v1 WP4, ADR-002 §29). Unlike {@link #send}, a repeat is harmless — the runner answers a
    * second cancel of the same run idempotently — so an unacknowledged relay is retried by the next
    * dispatcher pass rather than left to recovery.

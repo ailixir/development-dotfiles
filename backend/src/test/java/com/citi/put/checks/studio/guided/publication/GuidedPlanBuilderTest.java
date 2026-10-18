@@ -28,10 +28,46 @@ class GuidedPlanBuilderTest {
   static final GuidedContracts C = new GuidedContracts();
 
   static ObjectNode fixture(String name) throws Exception {
-    return (ObjectNode)
-        C.parse(
-            Files.readString(
-                Path.of("../studio-runner/fixtures/observed-reference/" + name + ".json")));
+    ObjectNode corrected =
+        copy(
+            C.parse(
+                Files.readString(
+                    Path.of(
+                        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json"))));
+    ObjectNode original =
+        copy(
+            C.parse(
+                Files.readString(
+                    Path.of("../studio-runner/fixtures/observed-reference/" + name + ".json"))));
+    JsonNode current =
+        name.equals("fresh-order-reference") ? corrected : corrected.path("controlValueReference");
+    // Import independent declared hashes only after proving both complete frozen parents equal.
+    // Each vector keeps its own session, worker, materialization and observation identities.
+    assertThat(original.path("basis")).isEqualTo(current.path("basis"));
+    assertThat(original.path("artifact")).isEqualTo(current.path("artifact"));
+    var hashNames = new java.util.HashSet<String>();
+    original.path("hashes").fieldNames().forEachRemaining(hashNames::add);
+    assertThat(hashNames)
+        .containsExactlyInAnyOrder(
+            "sourceHash",
+            "configurationHash",
+            "authoringHash",
+            "learnedPlanHash",
+            "artifactHash",
+            "referencePolicyHash",
+            "operationEquivalenceHash",
+            "admissionProvenanceHash",
+            "publicationEvidenceHash",
+            "runAuthorizationHash",
+            "profileHash");
+    original.path("hashes").forEach(value -> assertThat(value.asText()).matches("[a-f0-9]{64}"));
+    if (name.equals("fresh-order-reference")) {
+      assertThat(original.at("/hashes/artifactHash"))
+          .isEqualTo(corrected.at("/admissionRequest/artifactHash"));
+      corrected.set("hashes", original.path("hashes").deepCopy());
+      return corrected;
+    }
+    return original;
   }
 
   /** Independent Python proof fixture; this synthetic projection is not browser evidence. */
@@ -40,7 +76,7 @@ class GuidedPlanBuilderTest {
         C.parse(
                 Files.readString(
                     Path.of(
-                        "../docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json")))
+                        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")))
             .path("observedChoice"));
   }
 
@@ -67,7 +103,7 @@ class GuidedPlanBuilderTest {
       n.fields().forEachRemaining(e -> fields.put(e.getKey(), e.getValue()));
       return "{"
           + fields.entrySet().stream()
-              .map(e -> C.object().textNode(e.getKey()).toString() + ":" + canonical(e.getValue()))
+              .map(e -> string(e.getKey()) + ":" + canonical(e.getValue()))
               .collect(java.util.stream.Collectors.joining(","))
           + "}";
     }
@@ -76,7 +112,43 @@ class GuidedPlanBuilderTest {
       n.forEach(v -> values.add(canonical(v)));
       return "[" + String.join(",", values) + "]";
     }
-    return n.toString();
+    return n.isTextual() ? string(n.textValue()) : n.toString();
+  }
+
+  /** The JSON short escape of a code point, or null when it has none. */
+  private static String shortEscape(int cp) {
+    return switch (cp) {
+      case 0x22 -> "\\\"";
+      case 0x5C -> "\\\\";
+      case 0x08 -> "\\b";
+      case 0x09 -> "\\t";
+      case 0x0A -> "\\n";
+      case 0x0C -> "\\f";
+      case 0x0D -> "\\r";
+      default -> null;
+    };
+  }
+
+  /**
+   * Canonical-v1 string bytes, written independently of production code (ar-2-r14-stops.json ruling
+   * 1): JSON.stringify form, controls without a short escape as LOWERCASE {@code \\u00xx}.
+   */
+  static String string(String value) {
+    StringBuilder out = new StringBuilder("\"");
+    value
+        .codePoints()
+        .forEach(
+            cp -> {
+              String shortEscape = shortEscape(cp);
+              if (shortEscape != null) {
+                out.append(shortEscape);
+              } else if (cp < 0x20) {
+                out.append(String.format(java.util.Locale.ROOT, "\\u%04x", cp));
+              } else {
+                out.appendCodePoint(cp);
+              }
+            });
+    return out.append('"').toString();
   }
 
   static String hash(JsonNode n) {
@@ -138,7 +210,12 @@ class GuidedPlanBuilderTest {
       session.set("scope", expected.path("scope").deepCopy());
       session.put("scopeHash", hash(expected.path("scope")));
       session.set("runAuthorization", expected.path("runAuthorization").deepCopy());
-      session.putObject("owner").put("workerId", "worker-1").put("fence", 1);
+      JsonNode materializationIdentity = expected.at("/materializationEvidence/versions/0");
+      assertThat(materializationIdentity.path("workerId").isTextual()).isTrue();
+      assertThat(materializationIdentity.path("workerId").asText()).isNotBlank();
+      String workerId = materializationIdentity.path("workerId").asText();
+      int ownerFence = materializationIdentity.path("ownerFence").asInt();
+      session.putObject("owner").put("workerId", workerId).put("fence", ownerFence);
       var sourceSteps = session.putArray("sourceSteps");
       for (JsonNode step : expected.path("sourceSteps")) {
         sourceSteps.addObject().put("stepId", step.path("stepId").asText());
@@ -158,6 +235,9 @@ class GuidedPlanBuilderTest {
       }
       for (String key :
           List.of(
+              "materializationEvidence",
+              "incrementalEvidence",
+              "snapshotEvidence",
               "translationRevision",
               "translationHash",
               "translationPlan",
@@ -175,12 +255,10 @@ class GuidedPlanBuilderTest {
           List.of("contextId", "contextRevision", "materializationRevision", "ownerFence")) {
         material.set(key, expected.path("bootstrap").path(key));
       }
-      material.put("workerId", "worker-1");
+      material.put("workerId", workerId);
       var inputs = material.putArray("inputs");
-      for (JsonNode inputRow : expected.path("inputs")) {
-        var row = copy(inputRow);
-        row.set("sourceStepId", row.remove("stepId"));
-        inputs.add(row);
+      for (JsonNode inputRow : expected.path("materializationEvidence").path("entries")) {
+        inputs.add(inputRow.path("metadata").deepCopy());
       }
       var actions = raw.putArray("actions");
       var admissionRows = raw.putArray("admissionAssociations");
@@ -216,7 +294,8 @@ class GuidedPlanBuilderTest {
       }
       context.set("authoredInputsHash", expected.path("bootstrap").path("inputsHash"));
       context.set("allocations", expected.path("allocations").deepCopy());
-      var bootIdentity = marker.putObject("identity").put("workerId", "worker-1").put("fence", 1);
+      var bootIdentity =
+          marker.putObject("identity").put("workerId", workerId).put("fence", ownerFence);
       bootIdentity.set("scopeHash", session.path("scopeHash"));
       bootIdentity.set("sourceRevision", expected.path("sourceRevision"));
       bootIdentity.set("configurationRevision", expected.path("configurationRevision"));
@@ -233,8 +312,8 @@ class GuidedPlanBuilderTest {
           C.object()
               .put("contextId", context.path("contextId").asText())
               .put("contextRevision", 1)
-              .put("workerId", "worker-1")
-              .put("ownerFence", 1);
+              .put("workerId", workerId)
+              .put("ownerFence", ownerFence);
       for (String field : List.of("sourceRevision", "configurationRevision")) {
         bootReceipt.set(field, expected.path(field));
       }
@@ -363,6 +442,9 @@ class GuidedPlanBuilderTest {
       ObjectNode basis = expected.deepCopy();
       for (String key :
           List.of(
+              "materializationEvidence",
+              "incrementalEvidence",
+              "snapshotEvidence",
               "translationRevision",
               "translationHash",
               "translationPlan",
@@ -411,6 +493,182 @@ class GuidedPlanBuilderTest {
                 .asText())
         .isEqualTo("page");
     assertThat(result.path("preparations").get(0).path("observationHash").isNull()).isTrue();
+  }
+
+  @ParameterizedTest(name = "complete detached input head refuses {0}")
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"missing-unused-input", "raw-row-order", "same-id-metadata-substitution"})
+  void detachedCurrentInputsMatchCompleteHistoryBeforeEffectiveFiltering(String mutation)
+      throws Exception {
+    JsonNode independent = fixture("fresh-order-reference");
+    var f = new Original(independent.path("basis"));
+    JsonNode rawBefore = f.raw.deepCopy();
+    ObjectNode result = f.build();
+    assertThat(result).as("complete independent parent before %s", mutation).isEqualTo(f.expected);
+    assertThat(f.raw).isEqualTo(rawBefore);
+    ArrayNode rawInputs = array(object(f.raw, "materialization"), "inputs");
+    JsonNode completeInputs = rawInputs.deepCopy(),
+        historyBefore = f.raw.path("materializationEvidence").deepCopy();
+    assertThat(rawInputs).hasSize(3);
+    assertThat(historyBefore.path("entries")).hasSize(3);
+    assertThat(historyBefore.at("/versions/0/inputCount").asInt()).isEqualTo(3);
+    assertThat(rawInputs.get(0).path("inputId").asText()).isEqualTo("input-destination");
+    assertThat(rawInputs.get(1).path("inputId").asText()).isEqualTo("input-label");
+    assertThat(rawInputs.get(2).path("inputId").asText()).isEqualTo("input-config");
+    for (int index = 0; index < 3; index++) {
+      assertThat(rawInputs.get(index))
+          .isEqualTo(historyBefore.path("entries").get(index).path("metadata"));
+    }
+    assertThat(result.path("inputs")).hasSize(2);
+    assertThat(result.path("inputs").get(0).path("inputId").asText())
+        .isEqualTo("input-destination");
+    assertThat(result.path("inputs").get(1).path("inputId").asText()).isEqualTo("input-label");
+    assertThat(new ObservedArtifactLowerer(C).recipes(result))
+        .isEqualTo(independent.path("artifact").path("inputRecipes"));
+    assertThat(independent.path("artifact").path("inputRecipes").toString())
+        .doesNotContain("input-config");
+    switch (mutation) {
+      case "missing-unused-input" -> rawInputs.remove(2);
+      case "raw-row-order" -> {
+        JsonNode first = rawInputs.get(0);
+        rawInputs.set(0, rawInputs.get(1));
+        rawInputs.set(1, first);
+      }
+      case "same-id-metadata-substitution" ->
+          object(rawInputs.get(2), "provenance").put("referenceId", "different-saved-reference");
+      default -> throw new IllegalArgumentException(mutation);
+    }
+    JsonNode invalidRaw = f.raw.deepCopy();
+    assertThat(f.raw.path("materializationEvidence")).isEqualTo(historyBefore);
+    assertThatThrownBy(f::build)
+        .isInstanceOfSatisfying(
+            GuidedSessionException.class,
+            refusal -> {
+              assertThat(refusal.getMessage()).isEqualTo("EVIDENCE_MISMATCH");
+              assertThat(refusal.status()).isEqualTo(422);
+            });
+    assertThat(f.raw).as("refusal does not repair either supplied copy").isEqualTo(invalidRaw);
+    object(f.raw, "materialization").set("inputs", completeInputs.deepCopy());
+    assertThat(f.raw).as("restore the exact original rows and their order").isEqualTo(rawBefore);
+    assertThat(f.build())
+        .as("exact restoration recovers the complete parent")
+        .isEqualTo(f.expected);
+  }
+
+  @Test
+  void appendedHistoricalHeadPreservesOriginalVersionsAndIndependentWholeBasis() throws Exception {
+    JsonNode corpus =
+        C.parse(
+            Files.readString(
+                Path.of(
+                    "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")));
+    JsonNode vector = null;
+    for (JsonNode row : corpus.path("incrementalContracts").path("basisCases")) {
+      if (row.path("name").asText().equals("appendedHistorical")) {
+        vector = row;
+      }
+    }
+    assertThat(vector).isNotNull();
+    JsonNode frozen = vector.path("basis"), frozenBefore = frozen.deepCopy();
+    JsonNode privateInputs = vector.at("/authority/privateInputs"),
+        privateBefore = privateInputs.deepCopy();
+    JsonNode versions = frozen.at("/materializationEvidence/versions");
+    assertThat(versions).hasSize(2);
+    assertThat(versions.get(0).path("inputCount").asInt()).isEqualTo(1);
+    assertThat(versions.get(1).path("inputCount").asInt()).isEqualTo(3);
+    assertThat(versions.get(1).path("birthMaterializationRevision").asInt()).isEqualTo(3);
+    C.validate("v3/authored-inputs", privateInputs);
+    assertThat(privateInputs.path("inputs")).hasSize(3);
+    assertThat(hash(privateInputs)).isEqualTo(versions.get(1).path("authoredInputsHash").asText());
+    ObjectNode originalPrivateVersion = copy(privateInputs);
+    originalPrivateVersion.putArray("inputs").add(privateInputs.path("inputs").get(0).deepCopy());
+    assertThat(hash(originalPrivateVersion))
+        .isEqualTo(versions.get(0).path("authoredInputsHash").asText());
+    assertThat(hash(originalPrivateVersion)).isNotEqualTo(hash(privateInputs));
+    ArrayNode completeMetadata = C.object().putArray("inputs");
+    for (int index = 0; index < 3; index++) {
+      JsonNode privateInput = privateInputs.path("inputs").get(index);
+      ObjectNode metadata = copy(privateInput);
+      metadata.remove("value");
+      JsonNode entry = frozen.at("/materializationEvidence/entries").get(index);
+      assertThat(hash(privateInput)).isEqualTo(entry.path("inputHash").asText());
+      assertThat(metadata).isEqualTo(entry.path("metadata"));
+      assertThat(hash(metadata))
+          .as("public metadata never replaces private document commitment")
+          .isNotEqualTo(entry.path("inputHash").asText());
+      completeMetadata.add(metadata);
+    }
+
+    // Declared synthetic current head: metadata bumped after immutable context2 birth3.
+    // Only this subject adapts the ordinary reconstruction helper; bootstrap/ACK/actions stay old.
+    var f = new Original(frozen);
+    JsonNode bootstrapBefore = f.raw.path("bootstrap").deepCopy(),
+        actionsBefore = f.raw.path("actions").deepCopy();
+    JsonNode preparationsBefore = f.raw.path("preparations").deepCopy();
+    ObjectNode materialization = object(f.raw, "materialization");
+    materialization.put("contextRevision", 2).put("materializationRevision", 4);
+    for (String field : List.of("contextId", "workerId", "ownerFence", "authoredInputsHash")) {
+      materialization.set(field, versions.get(1).path(field));
+    }
+    materialization.set("inputs", completeMetadata);
+    assertThat(materialization.path("contextRevision").asInt()).isEqualTo(2);
+    assertThat(materialization.path("materializationRevision").asInt())
+        .isGreaterThan(versions.get(1).path("birthMaterializationRevision").asInt());
+    assertThat(f.raw.at("/bootstrap/marker/context/contextRevision").asInt()).isEqualTo(1);
+    assertThat(f.raw.at("/bootstrap/marker/context/materializationRevision").asInt()).isEqualTo(1);
+    assertThat(f.raw.at("/bootstrap/marker/context/authoredInputsHash"))
+        .isEqualTo(versions.get(0).path("authoredInputsHash"));
+    for (int index = 0; index < preparationsBefore.size(); index++) {
+      JsonNode preparation = preparationsBefore.get(index);
+      int revision = index < 2 ? 1 : 2;
+      assertThat(preparation.path("materializationRevision").asInt()).isEqualTo(index < 2 ? 2 : 4);
+      assertThat(preparation.at("/proof/contextRevision").asInt()).isEqualTo(revision);
+      assertThat(preparation.at("/proof/authoredInputsHash"))
+          .isEqualTo(versions.get(revision - 1).path("authoredInputsHash"));
+      assertThat(actionsBefore.get(index).path("contextRevision").asInt()).isEqualTo(revision);
+      assertThat(actionsBefore.get(index).path("authoredInputsHash"))
+          .isEqualTo(versions.get(revision - 1).path("authoredInputsHash"));
+    }
+    assertThat(actionsBefore).isEqualTo(vector.at("/authority/ledgers"));
+    assertThat(preparationsBefore).isEqualTo(frozen.path("preparations"));
+
+    ObjectNode expected = copy(frozen), manifest = C.object();
+    ArrayNode sourceRows = manifest.putArray("sourceSteps"),
+        references = manifest.putArray("configurationReferences");
+    for (JsonNode source : frozen.path("sourceSteps")) {
+      sourceRows
+          .addObject()
+          .put("stepId", source.path("stepId").asText())
+          .put("text", source.path("source").asText());
+    }
+    for (JsonNode ref : frozen.path("configurationReferences")) {
+      ObjectNode copy = copy(ref);
+      copy.remove("inputId");
+      references.add(copy);
+    }
+    expected.put("sourceManifestHash", hash(manifest));
+    assertThat(f.raw.path("sourceManifest")).isEqualTo(manifest);
+    assertThat(f.expected)
+        .as("only independently calculated synthetic manifest adjustment")
+        .isEqualTo(expected);
+    JsonNode rawBefore = f.raw.deepCopy();
+    ObjectNode actual = f.build();
+    assertThat(actual).isEqualTo(expected);
+    assertThat(actual.path("materializationEvidence"))
+        .isEqualTo(frozen.path("materializationEvidence"));
+    assertThat(actual.path("bootstrap")).isEqualTo(frozen.path("bootstrap"));
+    assertThat(actual.path("actions")).isEqualTo(frozen.path("actions"));
+    assertThat(actual.path("preparations")).isEqualTo(frozen.path("preparations"));
+    assertThat(actual.path("inputs")).hasSize(2);
+    assertThat(materialization.path("inputs")).hasSize(3);
+    assertThat(new ObservedArtifactLowerer(C).recipes(actual))
+        .isEqualTo(vector.path("expectedArtifact").path("inputRecipes"));
+    assertThat(f.raw.path("bootstrap")).isEqualTo(bootstrapBefore);
+    assertThat(f.raw.path("actions")).isEqualTo(actionsBefore);
+    assertThat(f.raw.path("preparations")).isEqualTo(preparationsBefore);
+    assertThat(f.raw).isEqualTo(rawBefore);
+    assertThat(frozen).isEqualTo(frozenBefore);
+    assertThat(privateInputs).isEqualTo(privateBefore);
   }
 
   @Test

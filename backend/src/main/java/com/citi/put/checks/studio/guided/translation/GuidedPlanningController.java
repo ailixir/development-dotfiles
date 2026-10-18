@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(
     name = "studio.guided-authoring.translation.enabled",
-    havingValue = "true")
+    havingValue = "true",
+    matchIfMissing = true)
 @RequestMapping("/internal/v2/studio/guided-sessions/{id}")
 public final class GuidedPlanningController {
   private final GuidedTranslationService service;
@@ -77,6 +78,6 @@ public final class GuidedPlanningController {
   public ResponseEntity<?> failure(GuidedSessionException exception) {
     return ResponseEntity.status(exception.status())
         .header("Cache-Control", "no-store")
-        .body(java.util.Map.of("schemaVersion", 2, "code", exception.getMessage()));
+        .body(exception.response());
   }
 }

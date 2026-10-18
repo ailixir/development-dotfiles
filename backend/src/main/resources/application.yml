@@ -198,17 +198,71 @@ studio:
   guided-authoring:
     # Distinct receivers require distinct textual JWT audiences; no credential is stored in session data.
     controller-token-file: ${STUDIO_GUIDED_RUNNER_CONTROLLER_TOKEN_FILE:}
+    # The mutual-TLS chain of the guided bridge (STUDIO-OBS-009 AC-2). The API pod checks every call
+    # to /internal/v2/studio/guided-sessions/** against these three together (GuidedInternalSecurity)
+    # and answers 401 when any is missing. The deployed profiles set mtls-required, and a deployment
+    # that wires a guided hop does not start without the rest (GuidedSessionConfiguration.MtlsChain).
+    #   service-public-key  the pinned RSA public key (PEM, SPKI) that verifies the controller JWTs
+    #   service-issuer      the `iss` those JWTs must carry
+    # Rotate by draining sessions, changing key and issuer together and restarting every pod.
+    mtls-required: ${STUDIO_GUIDED_MTLS_REQUIRED:false}
+    service-public-key: ${STUDIO_GUIDED_SERVICE_PUBLIC_KEY:}
+    service-issuer: ${STUDIO_GUIDED_SERVICE_ISSUER:}
+    # The API pod's guided TLS connector: clientAuth=need, trust from studio.runner.tls, serving the
+    # backend's one certificate. 0 = no connector (workers; local; test). The runner's
+    # GUIDED_CALLBACK_BASE_URL and translation.controller-origin name this port.
+    connector:
+      port: ${STUDIO_GUIDED_CONNECTOR_PORT:0}
+    # The origins have no placeholder on purpose. runner-origin switches a bean on by being present
+    # (@ConditionalOnProperty), and an empty but present property would switch it on. Set them as
+    # environment variables STUDIO_GUIDED_AUTHORING_RUNNER_ORIGIN and
+    # STUDIO_GUIDED_AUTHORING_TRANSLATION_CONTROLLER_ORIGIN (https only).
     translation:
       controller-token-file: ${STUDIO_GUIDED_CONTROLLER_TOKEN_FILE:${studio.guided-authoring.controller-token-file:}}
+    # STUDIO-OBS-014 AC-3 (ruling AR-2 b): sanitized observations, model output and the publication
+    # copies of never-published sessions are pruned this long after a terminal session's expiry.
+    # Same default as studio.execution.evidence-retention, so video and observations age out
+    # together. Start-up refuses a window under 24h.
+    retention:
+      observation-window: ${STUDIO_GUIDED_OBSERVATION_RETENTION:30d}
+      pruner-delay-ms: 3600000
+      batch-size: 100
+    # STUDIO-OBS-014 AC-8 (ruling AR-2 c): per-CSI limits on top of the per-session ceilings above.
+    # Daily defaults hold 156 calls at the 4096 per-call reservation, about 12 ten-step base learns or
+    # 6.5 full-envelope sessions (MODEL-SIZING ruling 2026-10-18; OBS-009 T4 recalibrates).
+    csi-budget:
+      max-concurrent-sessions: ${STUDIO_GUIDED_CSI_MAX_CONCURRENT:3}
+      daily-model-input-tokens: ${STUDIO_GUIDED_CSI_DAILY_INPUT_TOKENS:5242880}
+      daily-model-output-tokens: ${STUDIO_GUIDED_CSI_DAILY_OUTPUT_TOKENS:640000}
+    # STUDIO-OBS-014 AC-1/AC-5 (rulings AR-2 f, h): governed observation policy. No approver group
+    # by default, so every approval is refused (fail closed until OBS-010 provisions one).
+    policy:
+      approver-groups: []
+      default-destructive-vocabulary:
+        - delete
+        - remove
+        - erase
+        - destroy
+        - purge
+        - pay
+        - transfer
+        - send money
+        - submit order
+        - place order
+        - confirm payment
+        - cancel subscription
+        - close account
+        - deactivate
+        - revoke
   guided:
     publication:
-      enabled: ${STUDIO_OBSERVED_PUBLICATION_ENABLED:false}
+      enabled: ${STUDIO_OBSERVED_PUBLICATION_ENABLED:true}
       max-validation-attempts: 3
       validation-timeout-ms: 15000
       authorization-ttl-ms: 5000
       max-validation-bytes: 8388608
   observed-replay:
-    enabled: ${STUDIO_OBSERVED_REPLAY_ENABLED:false}
+    enabled: ${STUDIO_OBSERVED_REPLAY_ENABLED:true}
     authorization-ttl-ms: 30000
     max-artifact-bytes: 1048576
     max-job-bytes: 4194304
@@ -217,8 +271,9 @@ studio:
     policies-json: '${STUDIO_OBSERVED_POLICIES_JSON:[]}'
     recording-width: ${STUDIO_OBSERVED_RECORDING_WIDTH:1280}
     recording-height: ${STUDIO_OBSERVED_RECORDING_HEIGHT:720}
+  # Save-time authoring bounds: over-limit drafts are refused 400 before anything is written.
   authoring:
-    v2-enabled: ${STUDIO_AUTHORING_V2_ENABLED:false}
+    max-steps: ${STUDIO_AUTHORING_MAX_STEPS:100}
   secrets:
     vault:
       # Vault KV v2 is the only Studio secret store, and it is off by default (`none`: saving or
@@ -326,116 +381,50 @@ studio:
       max-streams-per-pod: ${STUDIO_SSE_MAX_PER_POD:200}
       max-watched-executions: ${STUDIO_SSE_MAX_WATCHED:200}
       sender-threads: ${STUDIO_SSE_SENDER_THREADS:4}
-  # Studio compile translation. Vertex AI is the only translating provider. Disabled keeps draft
-  # saving available but always reports compilation as unavailable; it never invents an artifact.
-  compile:
-    incremental:
-      enabled: ${STUDIO_INCREMENTAL_ENABLED:false}
-    gateway:
-      provider: ${STUDIO_GATEWAY_PROVIDER:disabled}
-      endpoint: ${STUDIO_GATEWAY_ENDPOINT:}
-      project: ${STUDIO_GATEWAY_PROJECT:}
-      location: ${STUDIO_GATEWAY_LOCATION:}
-      model: ${STUDIO_GATEWAY_MODEL:gemini-3.8-flash}
-      credentials:
-        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
-        service-account-key-file: ${STUDIO_GATEWAY_CREDENTIALS_KEY_FILE:}
-      # VAL-007 interim default (user decision D3, 2026-10-04), pending the latency benchmark. Each
-      # call is still capped by the remaining 240s compile budget; one full attempt fits, repairs
-      # after a long first call are truncated by that shared deadline.
-      request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:150s}
-      max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
-      max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
-      max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
-      max-output-tokens: ${STUDIO_GATEWAY_MAX_OUTPUT_TOKENS:32768}
-      structured-output: ${STUDIO_GATEWAY_STRUCTURED_OUTPUT:true}
-      # VAL-007 (2026-10-04): LOW measured >= MEDIUM >= HIGH on quality and 3-6x faster
-      # (docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/report.md). A fingerprint input: changing
-      # it recompiles every test once. LOW | MEDIUM | HIGH; MINIMAL fails binding.
-      thinking-level: ${STUDIO_GATEWAY_THINKING_LEVEL:LOW}
-      retry:
-        max-retries: 2
-        initial-backoff: 250ms
-        backoff-multiplier: 2.0
-        jitter-factor: 0.5
-      # FIXTURE COPY pending story 10.1a; see the $comment in the schema file.
-      artifact-schema: ${STUDIO_GATEWAY_ARTIFACT_SCHEMA:classpath:studio/artifact.schema.json}
-
-    # Bounded compile work (Story 10.8, AC-17/AC-18/AC-19). Every value below is a starting value
-    # to be tuned against staging measurements (§8.5), and every one has a defined behaviour at the
-    # bound with a test that drives the input past it.
-    pipeline:
-      # Fixed pool, NO queue: attempt concurrency+1 is refused, not parked.
-      concurrency: ${STUDIO_COMPILE_CONCURRENCY:4}
-      # One monotonic deadline covers authentication, inference retries, repairs and validation.
-      # Every call is capped by remaining time; configured retries need not all fit in this bound.
-      # Expiry cancels active transports and prevents publication. Saturation is retryable STALE.
-      attempt-budget: ${STUDIO_COMPILE_ATTEMPT_BUDGET:240s}
-    # The bounded repair loop (§4.3 "a maximum of two repair attempts"). This is a bound the
-    # architecture fixes, not a tuning parameter: at most 3 propose calls and 3 /v1/validate calls
-    # per compile request, and exhaustion is NEEDS_REVISION with the final attempt's diagnostics.
-    # If throughput needs tuning, pipeline.concurrency is the knob.
-    repair:
-      max-attempts: ${STUDIO_COMPILE_REPAIR_MAX_ATTEMPTS:2}
-    # The abandoned-compile sweep (§4.7). A compile in flight when its replica died leaves a row in
-    # COMPILING forever, because the budget and the late-result drop are held in memory. This moves
-    # such a row to exactly what publishError produces — STALE, retryable, candidate cleared — and
-    # additionally clears the request identity, which is what makes a late result from the swept
-    # compile fail the publish guards that already condition on it.
-    #
-    # It buys a truthful authoring display, NOT a recovered capability: readiness never reads
-    # compile_status, so a stranded row blocks nothing and POST /execute is accepted before and
-    # after a sweep.
-    #
-    # Studio v1 WP9 (decision D11): sweep-to-STALE IS the v1 recovery for a compile whose replica
-    # died, so an author learns of it within threshold + one interval. Both were shortened for that
-    # (600s -> 300s, 60s -> 15s). The frontend's COMPILING watch window is derived from these two
-    # defaults and compilePollBounds.test.ts fails if they drift apart.
-    abandonment:
-      enabled: ${STUDIO_COMPILE_ABANDONMENT_ENABLED:true}
-      # Must strictly exceed pipeline.attempt-budget, validated at startup, so a healthy in-flight
-      # compile can never be swept out from under itself.
-      threshold: ${STUDIO_COMPILE_ABANDONMENT_THRESHOLD:300s}
-      # The run stops at the cap and the next scheduled run continues; never an unbounded UPDATE.
-      batch-size: ${STUDIO_COMPILE_ABANDONMENT_BATCH:200}
-      # One key, read by both the schedule annotation and the bound validation — not two
-      # representations of one value (§8.5).
-      interval-ms: ${STUDIO_COMPILE_ABANDONMENT_INTERVAL_MS:15000}
-    # Enforced before beginCompile: over-limit is a 400 and no compile state changes (AC-6).
-    authoring:
-      # Must never be looser than the runner's DEFAULT_BOUNDS.maxSteps, or a draft could be
-      # authorable and structurally uncompilable. RunnerBoundsAlignmentTest enforces that.
-      max-steps: ${STUDIO_COMPILE_MAX_STEPS:100}
-      max-line-chars: ${STUDIO_COMPILE_MAX_LINE_CHARS:1024}
-      max-source-bytes: ${STUDIO_COMPILE_MAX_SOURCE_BYTES:65536}
-    # Applied before publishInvalid; truncation is explicit in the stored structure (AC-15).
-    diagnostics:
-      max-per-step: ${STUDIO_COMPILE_MAX_DIAGNOSTICS_PER_STEP:10}
-      max-message-chars: ${STUDIO_COMPILE_MAX_DIAGNOSTIC_MESSAGE:400}
-      max-excerpt-chars: ${STUDIO_COMPILE_MAX_DIAGNOSTIC_EXCERPT:120}
-      max-total-bytes: ${STUDIO_COMPILE_MAX_DIAGNOSTICS_BYTES:65536}
+  # Guided-authoring model transport. Vertex AI is the only provider; anything else answers
+  # DISABLED and never invents a proposal. Guided authoring owns per-attempt budgets and wire bounds.
+  gateway:
+    provider: ${STUDIO_GATEWAY_PROVIDER:disabled}
+    endpoint: ${STUDIO_GATEWAY_ENDPOINT:}
+    project: ${STUDIO_GATEWAY_PROJECT:}
+    location: ${STUDIO_GATEWAY_LOCATION:}
+    model: ${STUDIO_GATEWAY_MODEL:gemini-3.8-flash}
+    credentials:
+      mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
+      service-account-key-file: ${STUDIO_GATEWAY_CREDENTIALS_KEY_FILE:}
+    request-timeout: ${STUDIO_GATEWAY_REQUEST_TIMEOUT:150s}
+    max-concurrency: ${STUDIO_GATEWAY_MAX_CONCURRENCY:4}
+    max-input-bytes: ${STUDIO_GATEWAY_MAX_INPUT_BYTES:262144}
+    max-output-bytes: ${STUDIO_GATEWAY_MAX_OUTPUT_BYTES:262144}
+    max-output-tokens: ${STUDIO_GATEWAY_MAX_OUTPUT_TOKENS:32768}
+    # VAL-007 (2026-10-04): LOW measured >= MEDIUM >= HIGH on quality and 3-6x faster
+    # (docs/stories/UI-STUDIO-VALIDATION-20261004/benchmark/report.md). LOW | MEDIUM | HIGH;
+    # MINIMAL fails binding.
+    thinking-level: ${STUDIO_GATEWAY_THINKING_LEVEL:LOW}
   # The studio-runner Service. The base URL is deployment configuration and never job- or
-  # user-supplied (§8.4, §8.5). Empty by default: without it the pipeline reports
-  # VALIDATOR_UNAVAILABLE and the draft stays retryable, rather than publishing an unvalidated
-  # candidate. Both runner routes (POST /v1/validate and the worker's POST /v1/runs) read this
-  # one block and present the same bearer; without base-url or service-identity-token the
-  # dispatcher sends nothing and closes the execution DISPATCH_FAILED (DEF-05).
+  # user-supplied (§8.4, §8.5). Both observed runner routes (POST /v2/validate-observed and the
+  # worker's POST/DELETE /v2/runs) read this one block and present the same bearer; without
+  # base-url or service-identity-token the dispatcher sends nothing and closes the execution
+  # DISPATCH_FAILED (DEF-05).
+  #
+  # TLS (STUDIO-OBS-009 AC-3). The runner has no plaintext listener, so outside the local and test
+  # profiles base-url must be https and the four runner-facing clients (dispatch, validation, the
+  # guided bridge and the translation controller hop) all take their TLS from `tls` below, built by
+  # StudioRunnerTls. No javax.net.ssl.* property and no cacerts is read. The key store holds the
+  # backend's one certificate: its client certificate toward the runner and the server certificate
+  # of the guided connector (serverAuth and clientAuth). The trust store holds the issuer of the
+  # runner certificate and of the connector certificate. Passwords are files, never values.
   runner:
     base-url: ${STUDIO_RUNNER_BASE_URL:}
     service-identity-token: ${STUDIO_RUNNER_SERVICE_TOKEN:}
-    validate-timeout: ${STUDIO_RUNNER_VALIDATE_TIMEOUT:10s}
     connect-timeout: ${STUDIO_RUNNER_CONNECT_TIMEOUT:2s}
-  # The exact-match half of the §4.6 compatibility rule. The ranged Playwright/executor terms stay
-  # with the runner's own isCompatible, which revalidates before any browser launch — one rule, one
-  # owner, no drift. executor-version and playwright-version below are RECORDED on revision
-  # provenance and never compared by this backend.
-  runtime:
-    pin:
-      artifact-schema-version: 1
-      validator-schema-version: ${STUDIO_RUNTIME_VALIDATOR_SCHEMA_VERSION:2.0.0}
-      syntax-reference-version: ${STUDIO_RUNTIME_SYNTAX_REFERENCE_VERSION:2.1.0}
-      executor-version: ${STUDIO_RUNTIME_EXECUTOR_VERSION:2.1.0}
-      playwright-version: ${STUDIO_RUNTIME_PLAYWRIGHT_VERSION:1.63.0}
+    tls:
+      key-store: ${STUDIO_RUNNER_TLS_KEY_STORE:}
+      key-store-password-file: ${STUDIO_RUNNER_TLS_KEY_STORE_PASSWORD_FILE:}
+      key-store-type: ${STUDIO_RUNNER_TLS_KEY_STORE_TYPE:PKCS12}
+      trust-store: ${STUDIO_RUNNER_TLS_TRUST_STORE:}
+      trust-store-password-file: ${STUDIO_RUNNER_TLS_TRUST_STORE_PASSWORD_FILE:}
+      trust-store-type: ${STUDIO_RUNNER_TLS_TRUST_STORE_TYPE:PKCS12}
 
 springdoc:
   api-docs:
@@ -454,3 +443,8 @@ logging:
     com.google.genai: WARN
     com.google.api: WARN
     io.grpc: WARN
+    # STUDIO-OBS-015 ruling E: json-schema-validator logs every validated instance and its whole
+    # root document at DEBUG (BaseJsonValidator.debug). SecretMasker does not cover document
+    # values, so DEBUG here is a content sink. It has no INFO output; WARN keeps its schema/pattern
+    # errors (no instance values) and closes the sink under any root level.
+    com.networknt: WARN

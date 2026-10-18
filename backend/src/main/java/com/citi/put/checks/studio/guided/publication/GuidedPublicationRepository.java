@@ -19,11 +19,20 @@ public final class GuidedPublicationRepository {
   private final JdbcTemplate jdbc;
   private final GuidedContracts contracts;
   private final GuidedPublicationBaseRepository bases;
+  private final java.util.function.Supplier<GuidedPublicationEvidenceRepository> evidence;
 
   public GuidedPublicationRepository(JdbcTemplate jdbc, GuidedContracts contracts) {
+    this(jdbc, contracts, () -> new GuidedPublicationEvidenceRepository(jdbc, contracts));
+  }
+
+  GuidedPublicationRepository(
+      JdbcTemplate jdbc,
+      GuidedContracts contracts,
+      java.util.function.Supplier<GuidedPublicationEvidenceRepository> evidence) {
     this.jdbc = jdbc;
     this.contracts = contracts;
     this.bases = new GuidedPublicationBaseRepository(jdbc, contracts);
+    this.evidence = java.util.Objects.requireNonNull(evidence);
   }
 
   public Optional<PublicationContracts.Receipt> receipt(String id) {
@@ -69,19 +78,21 @@ public final class GuidedPublicationRepository {
               || old.status() == PublicationContracts.AttemptStatus.VALIDATING)
           && !old.validationDeadline().isAfter(wall)) {
         updateTerminal(old, PublicationContracts.AttemptStatus.UNKNOWN, null, "EXPIRED", wall);
-      } else if (old.identity().path("snapshotHash").asText().equals(claim.snapshot().hash())
-          && old.identity().path("finalizeDigest").asText().equals(claim.finalizeDigest())
-          && old.validationDeadline().isAfter(wall)
-          && (old.status() == PublicationContracts.AttemptStatus.RESERVED
-              || old.status() == PublicationContracts.AttemptStatus.VALIDATING
-              || old.status() == PublicationContracts.AttemptStatus.VALIDATED)) {
-        return old;
       } else {
-        require(
-            old.status() != PublicationContracts.AttemptStatus.RESERVED
-                && old.status() != PublicationContracts.AttemptStatus.VALIDATING,
-            "IDEMPOTENCY_CONFLICT",
-            409);
+        if (old.identity().path("snapshotHash").asText().equals(claim.snapshot().hash())
+            && old.identity().path("finalizeDigest").asText().equals(claim.finalizeDigest())
+            && old.validationDeadline().isAfter(wall)
+            && (old.status() == PublicationContracts.AttemptStatus.RESERVED
+                || old.status() == PublicationContracts.AttemptStatus.VALIDATING
+                || old.status() == PublicationContracts.AttemptStatus.VALIDATED)) {
+          return old;
+        } else {
+          require(
+              old.status() != PublicationContracts.AttemptStatus.RESERVED
+                  && old.status() != PublicationContracts.AttemptStatus.VALIDATING,
+              "IDEMPOTENCY_CONFLICT",
+              409);
+        }
       }
     }
     require(prior.size() < 3, "BUDGET_EXCEEDED", 429);
@@ -216,38 +227,83 @@ public final class GuidedPublicationRepository {
         403);
     var candidate = commit.candidate();
     verifyCandidate(commit.snapshot(), candidate, a.verdict());
-    JsonNode current = bases.lockCurrent(UUID.fromString(base.path("testId").asText())).document();
+    var currentSource = bases.lockCurrent(UUID.fromString(base.path("testId").asText()));
+    JsonNode current = currentSource.document();
     JsonNode basis = commit.snapshot().basis();
+    // Current commit is the head-schema writer. Re-read its complete stored authority under the
+    // same locks, even when called directly instead of through the publisher's earlier check.
+    var builder = new GuidedPlanBuilder(contracts);
+    var raw = evidence.get().read(commit.sessionId());
+    var pinned = bases.find(commit.sessionId()).orElseThrow();
+    // Ruling E-2: verifyCandidate above already validated this exact snapshot basis in this
+    // transaction. If verifyCandidate ever moves after this line, the witness must become null.
+    JsonNode currentBasis =
+        builder.basisMatching(
+            pinned,
+            currentSource,
+            raw,
+            session(commit.sessionId()),
+            builder.learningProvenance(raw.document().path("sourceManifest")),
+            basis);
+    require(
+        currentBasis.equals(basis)
+            && GuidedContracts.hash(currentBasis).equals(a.identity().path("basisHash").asText()),
+        "PUBLICATION_CONFLICT",
+        409);
     var source = contracts.object().putArray("items");
     for (JsonNode step : basis.path("sourceSteps")) {
       source.add(step.path("source"));
     }
-    ObjectNode references = contracts.object();
+    require(
+        basis
+                .path("snapshotEvidence")
+                .path("current")
+                .path("authoring")
+                .equals(current.path("authoring"))
+            && basis
+                .path("snapshotEvidence")
+                .path("current")
+                .path("authoredDeclarations")
+                .equals(current.path("authoredDeclarations")),
+        "PUBLICATION_CONFLICT",
+        409);
+    jdbc.update(
+        "UPDATE ui_tests SET authoring_revision_inputs=?::jsonb WHERE id=?",
+        current.path("authoringRevisionInputs").toString(),
+        UUID.fromString(base.path("testId").asText()));
+    ObjectNode references = contracts.object().put("authoringIdentityVersion", 1);
+    references.set("authoredDeclarations", current.path("authoredDeclarations"));
     var variables = references.putArray("variables");
-    references.putArray("secrets");
-    var seen = new java.util.TreeSet<String>();
+    var secrets = references.putArray("secrets");
+    var seen =
+        new java.util.TreeSet<String>(
+            com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8);
+    var secretNames =
+        new java.util.TreeSet<String>(
+            com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8);
     for (JsonNode ref : basis.path("configurationReferences")) {
-      seen.add(ref.path("referenceName").asText());
+      if (ref.path("kind").asText().equals("secretRef")) {
+        secretNames.add(ref.path("referenceName").asText());
+      } else {
+        seen.add(ref.path("referenceName").asText());
+      }
     }
     seen.forEach(variables::add);
+    secretNames.forEach(secrets::add);
     ObjectNode provenance = PublicationContracts.copy(candidate.hashes());
     provenance.set("profile", candidate.artifact().path("profile"));
-    provenance
-        .put("guidedSessionId", commit.sessionId())
-        .put("publicationKind", "GUIDED_RUN")
-        .put("intentDerivationVersion", "observed-1");
+    provenance.put("guidedSessionId", commit.sessionId()).put("publicationKind", "GUIDED_RUN");
     provenance.set("runAuthorization", base.path("runAuthorization"));
     jdbc.update(
         "INSERT INTO"
-            + " ui_test_revisions(id,test_id,csi_id,source_revision,configuratio"
-            + "n_revision,source,source_hash,artifact,artifact_hash,artifact_sch"
-            + "ema_version,configuration,\"references\",provenance,created_by,co"
-            + "nfirmed_by,confirmed_at,confirmation_source,reference_policy,inte"
-            + "nt_derivation_version,publication_kind,guided_session_id,learned_"
-            + "plan_hash,revision_digest)"
+            + " ui_test_revisions(id,test_id,csi_id,source_revision,configuration_revision,"
+            + "source,source_hash,artifact,artifact_hash,artifact_schema_version,configuration,"
+            + "\"references\",provenance,created_by,confirmed_by,confirmed_at,confirmation_source,"
+            + "reference_policy,publication_kind,guided_session_id,learned_plan_hash,"
+            + "revision_digest,step_snapshot_hashes,step_reuse_provenance)"
             + " VALUES"
-            + " (?,?,?,?,?,?::jsonb,?,?::jsonb,?,2,?::jsonb,?::jsonb,?::jsonb,?,"
-            + "?,?,'GUIDED_RUN',?::jsonb,'observed-1','GUIDED_RUN',?,?,?)",
+            + " (?,?,?,?,?,?::jsonb,?,?::jsonb,?,3,?::jsonb,?::jsonb,?::jsonb,?,"
+            + "?,?,'GUIDED_RUN',?::jsonb,'GUIDED_RUN',?,?,?,?::jsonb,?::jsonb)",
         commit.revisionId(),
         UUID.fromString(base.path("testId").asText()),
         base.path("csiId").asText(),
@@ -266,7 +322,9 @@ public final class GuidedPublicationRepository {
         candidate.policy().toString(),
         commit.sessionId(),
         candidate.hashes().path("learnedPlanHash").asText(),
-        candidate.hashes().path("revisionDigest").asText());
+        candidate.hashes().path("revisionDigest").asText(),
+        candidate.learnedPlan().path("stepSnapshotHashes").toString(),
+        candidate.learnedPlan().path("reusedFrom").toString());
     JsonNode inserted =
         contracts.parse(
             jdbc.queryForObject(
@@ -310,6 +368,14 @@ public final class GuidedPublicationRepository {
             .put("publishedAt", PublicationContracts.time(wall))
             .put("learnedFromThisRun", true)
             .put("replayVerified", false);
+    ObjectNode entered =
+        new com.citi.put.checks.studio.guided.session.GuidedIncrementalStore(jdbc, contracts)
+            .relearnedFrom(commit.sessionId());
+    if (entered == null) {
+      publicReceipt.putNull("relearnedFrom");
+    } else {
+      publicReceipt.set("relearnedFrom", entered);
+    }
     for (String key :
         List.of("revisionDigest", "learnedPlanHash", "artifactHash", "publicationEvidenceHash")) {
       publicReceipt.set(key, candidate.hashes().path(key));
@@ -333,26 +399,19 @@ public final class GuidedPublicationRepository {
         Timestamp.from(PublicationContracts.millisecond(wall)));
     int changed =
         jdbc.update(
-            "UPDATE ui_tests SET"
-                + " current_candidate_revision_id=?,confirmed_revision_id=?,compile_"
-                + "request_id=NULL,compile_status='READY',compile_started_at=NULL,co"
-                + "mpile_error=NULL,compile_diagnostics=NULL"
+            "UPDATE ui_tests SET confirmed_revision_id=?"
                 + " WHERE id=? AND source_revision=? AND configuration_revision=? AND"
-                + " publication_epoch=? AND compile_request_id IS NOT DISTINCT FROM ?::uuid AND"
-                + " current_candidate_revision_id IS NOT DISTINCT FROM ?::uuid AND"
+                + " publication_epoch=? AND"
                 + " confirmed_revision_id IS NOT DISTINCT FROM ?::uuid AND deleted_at IS NULL AND"
                 + " quarantined_at IS NULL AND clock_timestamp()<? AND EXISTS(SELECT 1 FROM"
                 + " studio_guided_sessions WHERE session_id=? AND state='FINALIZING' AND"
                 + " expires_at>clock_timestamp() AND"
                 + " (document->'owner'->>'leaseExpiresAt')::timestamptz>clock_timestamp())",
             commit.revisionId(),
-            commit.revisionId(),
             UUID.fromString(base.path("testId").asText()),
             Long.parseLong(base.path("sourceRevision").asText()),
             Long.parseLong(base.path("configurationRevision").asText()),
             Long.parseLong(base.path("publicationEpoch").asText()),
-            nullable(base.path("compileRequestId")),
-            nullable(base.path("candidateRevisionId")),
             nullable(base.path("confirmedRevisionId")),
             Timestamp.from(grant.expiresAt()),
             commit.sessionId());
@@ -373,30 +432,46 @@ public final class GuidedPublicationRepository {
     return new PublicationContracts.Receipt(document);
   }
 
-  public void conflict(String id, String expectedSnapshotHash, Instant now) {
+  /**
+   * True iff this call moved FINALIZING to PUBLICATION_CONFLICT; the caller then requests teardown.
+   */
+  public boolean conflict(String id, String expectedSnapshotHash, Instant now) {
     GuidedPublicationBaseRepository.transaction();
     if (receipt(id).isPresent()) {
-      return;
+      return false;
     }
     ObjectNode s = session(id);
     bases.lockCurrent(UUID.fromString(s.path("testId").asText()));
     if (!s.path("state").asText().equals("FINALIZING")) {
-      return;
+      return false;
     }
     require(
         attempts(id).stream()
             .anyMatch(a -> a.identity().path("snapshotHash").asText().equals(expectedSnapshotHash)),
         "IDEMPOTENCY_CONFLICT",
         409);
-    jdbc.update(
-        "UPDATE studio_guided_sessions SET"
-            + " state='PUBLICATION_CONFLICT',document=jsonb_set(document,'{state}','\"PUBLICATION_CONFLICT\"')"
-            + " WHERE session_id=? AND state='FINALIZING'",
-        id);
+    return jdbc.update(
+            "UPDATE studio_guided_sessions SET"
+                + " state='PUBLICATION_CONFLICT',document=jsonb_set(document,'{state}','\"PUBLICATION_CONFLICT\"'),"
+                + "progress=jsonb_set(progress,'{errorCode}','\"PUBLICATION_CONFLICT\"')"
+                + " WHERE session_id=? AND state='FINALIZING'",
+            id)
+        == 1;
   }
 
-  private void verifyCandidate(
+  // Pure writer boundary: compare the supplied candidate, not merely its independently valid basis.
+  void verifyCandidate(
       PublicationContracts.Snapshot snapshot, PublicationContracts.Candidate c, JsonNode verdict) {
+    PublicationContracts.Candidate recomputed =
+        new ObservedArtifactLowerer(contracts)
+            .lower(snapshot.basis(), c.artifact().path("profile"));
+    require(
+        recomputed.learnedPlan().equals(c.learnedPlan())
+            && recomputed.artifact().equals(c.artifact())
+            && recomputed.policy().equals(c.policy())
+            && recomputed.hashes().equals(c.hashes()),
+        "EVIDENCE_MISMATCH",
+        422);
     JsonNode h = c.hashes(), b = snapshot.basis();
     require(
         GuidedContracts.hash(b).equals(snapshot.identity().path("basisHash").asText())
@@ -498,7 +573,8 @@ public final class GuidedPublicationRepository {
                     new com.citi.put.checks.studio.guided.session.GuidedSessionException(
                         "MISSING_SOURCE", 409));
     require(base.document().equals(identity.path("base")), "EVIDENCE_MISMATCH", 422);
-    bases.requireCurrent(base, bases.lockCurrent(UUID.fromString(s.path("testId").asText())));
+    var currentSource = bases.lockCurrent(UUID.fromString(s.path("testId").asText()));
+    bases.requireCurrent(base, currentSource);
     require(
         s.path("owner").path("workerId").equals(identity.path("ownerWorkerId"))
             && s.path("owner").path("fence").equals(identity.path("ownerFence"))
@@ -515,19 +591,28 @@ public final class GuidedPublicationRepository {
             String.class,
             id);
     require(head.equals(identity.path("translationHash").asText()), "PUBLICATION_CONFLICT", 409);
+    var incremental =
+        new com.citi.put.checks.studio.guided.session.GuidedIncrementalStore(jdbc, contracts);
+    int excluded = 0;
+    for (String stored :
+        jdbc.queryForList(
+            "SELECT document::text FROM studio_guided_actions WHERE session_id=?",
+            String.class,
+            id)) {
+      JsonNode ledger = contracts.parse(stored);
+      if (ledger.path("state").asText().equals("SUCCEEDED")
+          && ledger.path("dispatchCount").asInt() == 1) {
+        continue;
+      }
+      require(incremental.excluded(id, ledger) && ++excluded == 1, "PUBLICATION_CONFLICT", 409);
+    }
     require(
         jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND"
-                        + " (document->>'state'<>'SUCCEEDED' OR document->>'dispatchCount'<>'1')",
-                    Integer.class,
-                    id)
-                == 0
-            && jdbc.queryForObject(
-                    "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
-                        + " status IN ('RESERVED','CALLING')",
-                    Integer.class,
-                    id)
-                == 0,
+                "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
+                    + " status IN ('RESERVED','CALLING')",
+                Integer.class,
+                id)
+            == 0,
         "PUBLICATION_CONFLICT",
         409);
   }
@@ -536,7 +621,7 @@ public final class GuidedPublicationRepository {
     return PublicationContracts.copy(
         contracts.parse(
             jdbc.queryForObject(
-                "SELECT document::text FROM studio_guided_sessions WHERE session_id=?",
+                "SELECT document::text FROM studio_guided_sessions WHERE session_id=? FOR UPDATE",
                 String.class,
                 id)));
   }

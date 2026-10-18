@@ -13,9 +13,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.citi.put.checks.config.ChecksExceptionHandler;
-import com.citi.put.checks.studio.compile.AuthoringLimits;
-import com.citi.put.checks.studio.compile.StudioCompileProperties;
-import com.citi.put.checks.studio.dto.AuthoringV2Request;
+import com.citi.put.checks.studio.authoring.AuthoringLimits;
+import com.citi.put.checks.studio.authoring.StudioAuthoringProperties;
 import com.citi.put.checks.studio.dto.StudioAuthoringMapper;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,8 +37,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
  * body, and never reach the service when they do.
  *
  * <p>An empty step list is deliberately <em>accepted</em> at save: the Tests page creates every
- * draft with {@code steps: []} and the editor saves before steps exist. The empty draft is refused
- * at compile instead ({@code CompilePipelineSourceAdmissionTest}).
+ * draft with {@code steps: []} and the editor saves before steps exist.
  *
  * <p>The controller, the real {@link StudioAuthoringMapper} and the real {@link
  * ChecksExceptionHandler} run in a standalone MockMvc so this needs no database. The service is a
@@ -59,47 +57,39 @@ class StudioWriteValidationControllerTest {
   void setUp() {
     service = mock(StudioService.class);
     StudioConflictException reached = new StudioConflictException("REACHED_SERVICE", "reached");
-    when(service.createTest(any(), any())).thenThrow(reached);
-    when(service.updateTest(any(), any(), any())).thenThrow(reached);
     when(service.createAuthoringDraft(any(), any(), any())).thenThrow(reached);
     when(service.updateAuthoringDraft(any(), any(), any(), any())).thenThrow(reached);
     StudioAuthoringMapper authoringMapper =
         new StudioAuthoringMapper(
             mapper,
             Validation.buildDefaultValidatorFactory().getValidator(),
-            new AuthoringLimits(
-                new StudioCompileProperties(
-                    null,
-                    new StudioCompileProperties.Authoring(100, 1024, 65536),
-                    null,
-                    null,
-                    null)));
+            new AuthoringLimits(new StudioAuthoringProperties(100)));
     mvc =
         MockMvcBuilders.standaloneSetup(new StudioController(service, authoringMapper))
             .setControllerAdvice(new ChecksExceptionHandler())
             .build();
   }
 
-  // ── VAL-021: an empty draft is saved (FE create-then-edit), refused only at compile ──
+  // ── VAL-021: an empty draft is saved (FE create-then-edit) ──
 
   @Test
-  void anEmptyLegacyDraftIsAcceptedOnCreateAndUpdate() throws Exception {
-    send(post(BASE), legacy(30)).andExpect(status().isConflict());
-    send(put(BASE + "/" + ID), legacy(30)).andExpect(status().isConflict());
+  void anEmptyCanonicalDraftIsAcceptedOnCreateAndUpdate() throws Exception {
+    send(post(BASE), canonical(30)).andExpect(status().isConflict());
+    send(put(BASE + "/" + ID), canonical(30)).andExpect(status().isConflict());
 
     ArgumentCaptor<UITestRequest> created = ArgumentCaptor.forClass(UITestRequest.class);
-    verify(service).createTest(created.capture(), any());
+    verify(service).createAuthoringDraft(created.capture(), any(), any());
     assertThat(created.getValue().steps()).isEmpty();
-    verify(service).updateTest(eq(ID), any(), any());
+    verify(service).updateAuthoringDraft(eq(ID), any(), any(), any());
   }
 
   // ── VAL-022: blank and whitespace-only steps ──────────────────────────────
 
   @Test
-  void aWhitespaceOnlyStepIsRefusedOnLegacyCreateAndUpdateNamingTheStep() throws Exception {
+  void aWhitespaceOnlyStepIsRefusedOnCanonicalCreateAndUpdateNamingTheStep() throws Exception {
     for (MockHttpServletRequestBuilder route :
         new MockHttpServletRequestBuilder[] {post(BASE), put(BASE + "/" + ID)}) {
-      ObjectNode body = legacy(30);
+      ObjectNode body = canonical(30);
       body.withArray("steps").add("Go home").add("   ");
       send(route, body)
           .andExpect(status().isBadRequest())
@@ -134,14 +124,14 @@ class StudioWriteValidationControllerTest {
   @Test
   void anOutOfRangeTimeoutIsRefusedOnCreateAndUpdate() throws Exception {
     for (int timeout : new int[] {0, 121}) {
-      send(post(BASE), legacyWithStep(timeout))
+      send(post(BASE), canonicalWithStep(timeout))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.error").value("INVALID_CONFIGURATION"))
           .andExpect(
               jsonPath("$.message")
                   .value(
                       "timeoutSeconds is " + timeout + "; it must be between 1 and 120 seconds."));
-      send(put(BASE + "/" + ID), legacyWithStep(timeout))
+      send(put(BASE + "/" + ID), canonicalWithStep(timeout))
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.error").value("INVALID_CONFIGURATION"));
       ObjectNode v2 = v2("Go home");
@@ -155,38 +145,48 @@ class StudioWriteValidationControllerTest {
 
   @Test
   void theTimeoutBoundsAreAcceptedAndStoredAsSubmitted() throws Exception {
-    send(post(BASE), legacyWithStep(1)).andExpect(status().isConflict());
-    send(put(BASE + "/" + ID), legacyWithStep(120)).andExpect(status().isConflict());
+    send(post(BASE), canonicalWithStep(1)).andExpect(status().isConflict());
+    send(put(BASE + "/" + ID), canonicalWithStep(120)).andExpect(status().isConflict());
     ObjectNode v2 = v2("Go home");
     v2.putObject("configuration").put("browser", "chromium").put("timeoutSeconds", 120);
     send(post(BASE), v2).andExpect(status().isConflict());
 
     ArgumentCaptor<UITestRequest> created = ArgumentCaptor.forClass(UITestRequest.class);
-    verify(service).createTest(created.capture(), any());
-    assertThat(created.getValue().configuration().timeoutSeconds()).isEqualTo(1);
+    verify(service, org.mockito.Mockito.times(2))
+        .createAuthoringDraft(created.capture(), any(), any());
+    assertThat(created.getAllValues().stream().map(value -> value.configuration().timeoutSeconds()))
+        .containsExactly(1, 120);
     ArgumentCaptor<UITestRequest> updated = ArgumentCaptor.forClass(UITestRequest.class);
-    verify(service).updateTest(eq(ID), updated.capture(), any());
+    verify(service).updateAuthoringDraft(eq(ID), updated.capture(), any(), any());
     assertThat(updated.getValue().configuration().timeoutSeconds()).isEqualTo(120);
-    ArgumentCaptor<UITestRequest> v2Created = ArgumentCaptor.forClass(UITestRequest.class);
-    verify(service).createAuthoringDraft(v2Created.capture(), any(AuthoringV2Request.class), any());
-    assertThat(v2Created.getValue().configuration().timeoutSeconds()).isEqualTo(120);
   }
 
-  // ── VAL-024: the compile step-count and line-length bounds also apply at save ──
+  // ── VAL-024: the step-count and line-length bounds apply at save ──
 
   @Test
   void aStepOverTheLineCapIsRefusedOnCreateAndUpdateWithTheCompileMessage() throws Exception {
     for (MockHttpServletRequestBuilder route :
         new MockHttpServletRequestBuilder[] {post(BASE), put(BASE + "/" + ID)}) {
-      ObjectNode body = legacy(30);
-      body.withArray("steps").add("Go home").add("x".repeat(1025));
+      ObjectNode body = canonical(30);
+      body.withArray("steps").add("Go home").add("x".repeat(501));
       send(route, body)
           .andExpect(status().isBadRequest())
           .andExpect(jsonPath("$.error").value("SOURCE_LINE_TOO_LONG"))
           .andExpect(
               jsonPath("$.message")
                   .value(
-                      "Step 2 is 1025 characters long; the maximum is 1024. Shorten it or split"
+                      "Step 2 is 501 characters long; the maximum is 500. Shorten it or split"
+                          + " it into two steps."));
+      // The 501-1024 band is the author-facing refusal too, not the generic INVALID_AUTHORING.
+      ObjectNode longer = canonical(30);
+      longer.withArray("steps").add("Go home").add("x".repeat(600));
+      send(route, longer)
+          .andExpect(status().isBadRequest())
+          .andExpect(jsonPath("$.error").value("SOURCE_LINE_TOO_LONG"))
+          .andExpect(
+              jsonPath("$.message")
+                  .value(
+                      "Step 2 is 600 characters long; the maximum is 500. Shorten it or split"
                           + " it into two steps."));
     }
     verifyNoInteractions(service);
@@ -196,7 +196,7 @@ class StudioWriteValidationControllerTest {
   void moreStepsThanTheCapAreRefusedOnCreateAndUpdateWithTheCompileMessage() throws Exception {
     for (MockHttpServletRequestBuilder route :
         new MockHttpServletRequestBuilder[] {post(BASE), put(BASE + "/" + ID)}) {
-      ObjectNode body = legacy(30);
+      ObjectNode body = canonical(30);
       for (int index = 0; index < 101; index++) {
         body.withArray("steps").add("Click button " + index);
       }
@@ -206,17 +206,18 @@ class StudioWriteValidationControllerTest {
           .andExpect(
               jsonPath("$.message")
                   .value(
-                      "This test has 101 steps; the maximum is 100. Split it into smaller tests"
-                          + " before compiling."));
+                      "This test has 101 steps; the maximum is 100. Split it into smaller"
+                          + " tests."));
     }
     verifyNoInteractions(service);
   }
 
   @Test
   void exactlyTheCapsAreAcceptedAtSave() throws Exception {
-    ObjectNode body = legacy(30);
+    // 100 steps at the single AuthoringStep.text bound (500).
+    ObjectNode body = canonical(30);
     for (int index = 0; index < 100; index++) {
-      body.withArray("steps").add("y".repeat(1024));
+      body.withArray("steps").add("y".repeat(500));
     }
     send(post(BASE), body).andExpect(status().isConflict());
     send(put(BASE + "/" + ID), body).andExpect(status().isConflict());
@@ -225,9 +226,10 @@ class StudioWriteValidationControllerTest {
   // ── helpers ──────────────────────────────────────────────────────────────
 
   /** The body the Tests page sends on create (`StudioTestsPage`): no steps yet. */
-  private ObjectNode legacy(int timeoutSeconds) {
+  private ObjectNode canonical(int timeoutSeconds) {
     ObjectNode body = mapper.createObjectNode();
-    body.put("name", "Login smoke")
+    body.put("authoringSchemaVersion", 2)
+        .put("name", "Login smoke")
         .put("csiId", "60406")
         .put("description", "")
         .put("environment", "Development")
@@ -242,8 +244,8 @@ class StudioWriteValidationControllerTest {
     return body;
   }
 
-  private ObjectNode legacyWithStep(int timeoutSeconds) {
-    ObjectNode body = legacy(timeoutSeconds);
+  private ObjectNode canonicalWithStep(int timeoutSeconds) {
+    ObjectNode body = canonical(timeoutSeconds);
     body.withArray("steps").add("Go home");
     return body;
   }
@@ -258,6 +260,16 @@ class StudioWriteValidationControllerTest {
 
   private org.springframework.test.web.servlet.ResultActions send(
       MockHttpServletRequestBuilder route, ObjectNode body) throws Exception {
+    ArrayNode source = mapper.createArrayNode();
+    int index = 0;
+    for (var step : body.path("steps")) {
+      if (step.isTextual()) {
+        source.addObject().put("id", new UUID(0, ++index).toString()).put("text", step.textValue());
+      } else {
+        source.add(step);
+      }
+    }
+    body.set("steps", source);
     return mvc.perform(
         route.contentType(MediaType.APPLICATION_JSON).content(mapper.writeValueAsString(body)));
   }

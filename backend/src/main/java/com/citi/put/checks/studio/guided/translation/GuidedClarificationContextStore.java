@@ -100,7 +100,7 @@ public final class GuidedClarificationContextStore {
   }
 
   private void validateCapture(JsonNode session, JsonNode question, JsonNode capture) {
-    contracts.validate("v2/replay-validation#/definitions/QuestionCapture1", capture);
+    contracts.validate("v3/replay-validation#/definitions/QuestionCapture1", capture);
     require(
         question.path("phase").asText().equals("observed") && question.path("choices").size() >= 2,
         "INVALID_CONTRACT",

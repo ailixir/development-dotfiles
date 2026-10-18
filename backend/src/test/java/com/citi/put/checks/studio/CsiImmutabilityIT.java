@@ -2,12 +2,11 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.citi.put.checks.studio.compile.CandidateRevision;
-import com.citi.put.checks.studio.compile.CompileRequest;
-import com.citi.put.checks.studio.compile.CompileStateService;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -39,7 +38,6 @@ class CsiImmutabilityIT {
   @Autowired TestRestTemplate restTemplate;
   @Autowired ObjectMapper objectMapper;
   @Autowired JdbcTemplate jdbc;
-  @Autowired CompileStateService compileStateService;
 
   private UUID testId;
 
@@ -77,24 +75,9 @@ class CsiImmutabilityIT {
     assertThat(createResponse(null).getStatusCode().value()).isEqualTo(400);
   }
 
+  /** Publishes the draft as an observed revision (ADR-SC-005: the only family). */
   private UUID publishCandidate() {
-    CompileRequest request = compileStateService.beginCompile(testId);
-    compileStateService.publishCandidate(
-        testId,
-        request,
-        new CandidateRevision(
-            request.configurationRevision(),
-            "{\"version\":1,\"steps\":[]}",
-            "source-hash",
-            "{\"version\":1,\"steps\":[]}",
-            "artifact-hash",
-            1,
-            "{\"browser\":\"chromium\"}",
-            "[]",
-            "{\"model\":\"stub-model@1\"}",
-            OWNER));
-    return jdbc.queryForObject(
-        "SELECT current_candidate_revision_id FROM ui_tests WHERE id = ?", UUID.class, testId);
+    return new ObservedPublicationFixture(jdbc).publish(testId, List.of(), List.of());
   }
 
   private ResponseEntity<String> put(String requestBody) {
@@ -106,18 +89,27 @@ class CsiImmutabilityIT {
   }
 
   private String body(String csiId, long sourceRevision, long configurationRevision) {
-    return """
-        {"name":"CSI bound draft","description":"immutable csi",%s
-         "steps":"[\\"Go to the home page %d\\"]","variables":"[]","browser":"chrome",
-         "viewportWidth":1920,"viewportHeight":1080,"timeoutSeconds":30,
-         "waitStrategy":"networkidle","environment":"Production",
-         "sourceRevision":%d,"configurationRevision":%d}
-        """
-        .formatted(
-            csiId == null ? "" : "\"csiId\":\"" + csiId + "\",",
-            sourceRevision,
-            sourceRevision,
-            configurationRevision);
+    var body =
+        objectMapper
+            .createObjectNode()
+            .put("authoringSchemaVersion", 2)
+            .put("name", "CSI bound draft")
+            .put("description", "immutable csi")
+            .put("environment", "Production")
+            .put("sourceRevision", sourceRevision)
+            .put("configurationRevision", configurationRevision);
+    if (csiId != null) {
+      body.put("csiId", csiId);
+    }
+    body.putArray("steps")
+        .addObject()
+        .put("id", "00000000-0000-4000-8000-000000000001")
+        .put("text", "Go to the home page " + sourceRevision);
+    body.putArray("variables");
+    body.set(
+        "configuration",
+        objectMapper.valueToTree(com.citi.put.checks.studio.dto.TestConfiguration.defaults()));
+    return body.toString();
   }
 
   private UUID createTest(String csiId) throws Exception {
@@ -127,14 +119,7 @@ class CsiImmutabilityIT {
   }
 
   private ResponseEntity<String> createResponse(String csiId) {
-    String createBody =
-        """
-        {"name":"CSI bound draft","description":"immutable csi",%s
-         "steps":"[\\"Go to the home page\\"]","variables":"[]","browser":"chrome",
-         "viewportWidth":1920,"viewportHeight":1080,"timeoutSeconds":30,
-         "waitStrategy":"networkidle","environment":"Production"}
-        """
-            .formatted(csiId == null ? "" : "\"csiId\":\"" + csiId + "\",");
+    String createBody = body(csiId, 1, 1).replace("home page 1", "home page");
     return restTemplate.exchange(
         "/api/v1/studio/tests",
         HttpMethod.POST,

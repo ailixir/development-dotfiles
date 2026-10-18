@@ -14,9 +14,7 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
-import com.citi.put.checks.studio.compile.CompilePipeline;
-import com.citi.put.checks.studio.compile.CompileStateService;
-import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
+import com.citi.put.checks.studio.authoring.ConfigurationChangeClassifier;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.entity.UITest;
@@ -68,8 +66,7 @@ class StudioServiceExecuteAuthorizationTest {
         evaluator,
         mock(ExecutionSnapshotMapper.class),
         acceptance,
-        mock(CompilePipeline.class),
-        mock(CompileStateService.class),
+        mock(com.citi.put.checks.studio.readiness.ExecutionReadinessService.class),
         mock(UserProvisioningService.class),
         mock(StudioDispatchLedgerStatements.class));
   }

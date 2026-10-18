@@ -16,7 +16,10 @@ import com.citi.put.checks.studio.dispatch.ReferenceDeclarations;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dispatch.StudioReferenceResolver;
-import com.citi.put.checks.studio.dto.UITestRequest;
+import com.citi.put.checks.studio.dto.AuthoringStep;
+import com.citi.put.checks.studio.dto.AuthoringV2Request;
+import com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorizer;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Clock;
@@ -37,6 +40,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -64,7 +68,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioScheduleApiIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
+
   @Container
   static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
 
@@ -121,6 +132,7 @@ class StudioScheduleApiIT {
   @Autowired StudioSchedulingProperties properties;
   @Autowired StudioService studio;
   @Autowired StudioAcceptanceService acceptance;
+  @Autowired ObservedReplayAuthorizer runAuthority;
   @Autowired StudioDispatchLedgerStatements statements;
   @Autowired DispatchAuthorization dispatchAuthorization;
   @Autowired MutableClock clock;
@@ -148,14 +160,22 @@ class StudioScheduleApiIT {
     fixtures.seedCsi(csi, OWNER);
     List<String> steps = List.of("Go to the home page");
     testId = fixtures.seedTest("Scheduled fixture", csi, OWNER, steps);
-    String configuration = StudioExecutionFixtures.DEFAULT_CONFIGURATION;
-    configuration =
-        configuration.substring(0, configuration.length() - 1) + ",\"environment\":\"Production\"}";
     revisionId =
-        fixtures.confirmRevision(
-            testId, csi, steps, StudioExecutionFixtures.NO_REFERENCES, configuration);
+        fixtures.confirmRevision(testId, csi, steps, StudioExecutionFixtures.NO_REFERENCES);
     owner = StudioExecutionFixtures.identity(OWNER, csi, "owner");
     properties.getLocalGrants().put(csi + "|Production", PRINCIPAL);
+  }
+
+  /**
+   * An explicit manual Run of a learned draft (STUDIO-OBS-012A): fresh Run authority for the owner,
+   * then the same acceptance transaction {@code POST /execute} uses.
+   */
+  private UUID manualRun(UUID test, String key) {
+    String testCsi =
+        jdbc.queryForObject("SELECT csi_id FROM ui_tests WHERE id = ?", String.class, test);
+    var caller = StudioExecutionFixtures.identity(OWNER, testCsi, "owner");
+    var grant = runAuthority.authorize(test, caller, ObservedPublicationFixture.request(caller));
+    return acceptance.acceptObserved(test, OWNER, key, grant);
   }
 
   private StudioScheduleDtos.Schedule create() {
@@ -356,7 +376,8 @@ class StudioScheduleApiIT {
   @Test
   void activeManualWorkSkipsOverlapWithoutChangingManualPermission() {
     var s = enable();
-    studio.executeTest(testId, owner, "manual-before-due");
+    studio.executeTest(
+        testId, owner, "manual-before-due", ObservedPublicationFixture.request(owner));
     due(s);
     assertThat(processor.process(testId)).isEqualTo("OVERLAP");
     assertThat(service.occurrences(testId, 0, 20, owner).data().get(0).executionId()).isNull();
@@ -364,7 +385,7 @@ class StudioScheduleApiIT {
 
   @Test
   void durableUncertaintyRequiresExactAcknowledgmentAndNeverReplaysOldSlot() {
-    UUID manual = acceptance.accept(testId, OWNER, "uncertain-manual");
+    UUID manual = manualRun(testId, "uncertain-manual");
     statements.closeWithError(manual, "DISPATCH_UNKNOWN", clock.instant());
     assertThat(
             jdbc.queryForObject(
@@ -398,27 +419,35 @@ class StudioScheduleApiIT {
         .isEqualTo(1);
   }
 
+  /**
+   * STUDIO-OBS-012A R1 live port of the deleted compile-era {@code
+   * sourceMutationBlocksAndOptionalUnchangedCompileFailureDoesNot}: a source edit blocks an enabled
+   * schedule {@code LEARN_REQUIRED} and keeps the owner's request. STUDIO-OBS-009 AC-6 re-pointed
+   * it to the lifted contract: the control is now an occurrence that is {@code ACCEPTED} under
+   * background authority before the edit, not a refusal. The edit goes through the v2 authoring
+   * save because the v1 {@code updateTest} entry point no longer exists (STUDIO-OBS-015 ruling1).
+   */
   @Test
-  void sourceMutationBlocksAndOptionalUnchangedCompileFailureDoesNot() {
-    var s = enable();
-    jdbc.update("UPDATE ui_tests SET compile_status='STALE' WHERE id=?", testId);
-    due(s);
-    assertThat(processor.process(testId)).isEqualTo("ACCEPTED");
-    var current = studio.findTestById(testId, owner);
-    var update =
-        new UITestRequest(
-            current.name(),
-            current.description(),
-            current.csiId(),
-            current.environment(),
-            List.of("Go somewhere else"),
-            current.variables(),
-            current.configuration(),
-            current.sourceRevision(),
-            current.configurationRevision());
-    studio.updateTest(testId, update, owner, false, false);
+  void sourceMutationBlocksTheScheduleWithLearnRequired() {
+    var schedule = enable();
+    assertThat(service.read(testId, owner).state()).as("control").isEqualTo("ENABLED");
+    due(schedule);
+    assertThat(processor.process(testId)).as("control: the lifted contract").isEqualTo("ACCEPTED");
+    assertThat(service.read(testId, owner).state()).as("control").isEqualTo("ENABLED");
+    var draft = studio.findTestById(testId, owner);
+    var authoring = studio.findAuthoringV2ById(testId, owner);
+    var step = authoring.steps().get(0);
+    studio.saveAuthoring(
+        testId,
+        new AuthoringV2Request(
+            2,
+            authoring.globalContext(),
+            List.of(new AuthoringStep(step.id(), "Go somewhere else", step.context()))),
+        draft.sourceRevision(),
+        draft.configurationRevision(),
+        owner);
     assertThat(service.read(testId, owner).state()).isEqualTo("BLOCKED");
-    assertThat(service.read(testId, owner).blockedCode()).isEqualTo("COMPILE_REQUIRED");
+    assertThat(service.read(testId, owner).blockedCode()).isEqualTo("LEARN_REQUIRED");
     assertThat(service.read(testId, owner).requestedEnabled()).isTrue();
   }
 
@@ -463,7 +492,7 @@ class StudioScheduleApiIT {
     var f = new StudioExecutionFixtures(jdbc);
     UUID other = f.seedRunnableTest("capacity", csi, OWNER, List.of("Go home")).testId();
     for (int i = 0; i < 20; i++) {
-      acceptance.accept(other, OWNER, "quota-" + i);
+      manualRun(other, "quota-" + i);
     }
     assertThat(processor.process(testId)).isEqualTo("PENDING_QUOTA_EXCEEDED");
     var deferred = service.occurrences(testId, 0, 20, owner).data().get(0);
@@ -536,7 +565,7 @@ class StudioScheduleApiIT {
               .seedRunnableTest("quota", csi, OWNER, List.of("Go home"))
               .testId();
       for (int i = 0; i < 20; i++) {
-        acceptance.accept(other, OWNER, "fill-" + other + "-" + i);
+        manualRun(other, "fill-" + other + "-" + i);
       }
       assertThat(processor.process(testId)).isEqualTo("PENDING_QUOTA_EXCEEDED");
       var current = service.read(testId, owner);
@@ -550,28 +579,26 @@ class StudioScheduleApiIT {
         service.remove(testId, current.version(), owner);
       }
       if ("input".equals(mutation)) {
+        // STUDIO-OBS-012A R7b: the input change goes through the v2 authoring save, because the v1
+        // updateTest entry point no longer exists (STUDIO-OBS-015 ruling1).
         var draft = studio.findTestById(testId, owner);
-        studio.updateTest(
+        var authoring = studio.findAuthoringV2ById(testId, owner);
+        var step0 = authoring.steps().get(0);
+        studio.saveAuthoring(
             testId,
-            new UITestRequest(
-                draft.name(),
-                draft.description(),
-                draft.csiId(),
-                draft.environment(),
-                List.of("Changed step"),
-                draft.variables(),
-                draft.configuration(),
-                draft.sourceRevision(),
-                draft.configurationRevision()),
-            owner,
-            false,
-            false);
+            new AuthoringV2Request(
+                2,
+                authoring.globalContext(),
+                List.of(new AuthoringStep(step0.id(), "Changed step", step0.context()))),
+            draft.sourceRevision(),
+            draft.configurationRevision(),
+            owner);
       }
       assertThat(service.occurrences(testId, 0, 20, owner).data().get(0).code())
           .isEqualTo(
               "update".equals(mutation)
                   ? "SCHEDULE_UPDATED"
-                  : "remove".equals(mutation) ? "SCHEDULE_REMOVED" : "COMPILE_REQUIRED");
+                  : "remove".equals(mutation) ? "SCHEDULE_REMOVED" : "LEARN_REQUIRED");
       assertThat(
               jdbc.queryForObject(
                   "SELECT count(*) FROM studio_schedule_occurrences WHERE test_id=? AND"
@@ -586,7 +613,7 @@ class StudioScheduleApiIT {
   void callbackLedgerLockDoesNotBlockOverlapAndUncertaintyAfterResumeBlocksNextTick()
       throws Exception {
     var s = enable();
-    UUID manual = acceptance.accept(testId, OWNER, "late-manual");
+    UUID manual = manualRun(testId, "late-manual");
     due(s);
     var held = new CountDownLatch(1);
     var release = new CountDownLatch(1);
@@ -841,17 +868,18 @@ class StudioScheduleApiIT {
     UUID originalRevision = revisionId;
     Authentication writer = owner;
     var draft = studio.findTestById(target, writer);
+    // STUDIO-OBS-012A R1: the edit races through the v2 authoring save, because the v1 updateTest
+    // entry point no longer exists (STUDIO-OBS-015 ruling1).
+    var authoring = studio.findAuthoringV2ById(target, writer);
     var changed =
-        new UITestRequest(
-            draft.name(),
-            draft.description(),
-            draft.csiId(),
-            draft.environment(),
-            List.of("A new reviewed input is needed"),
-            draft.variables(),
-            draft.configuration(),
-            draft.sourceRevision(),
-            draft.configurationRevision());
+        new AuthoringV2Request(
+            2,
+            authoring.globalContext(),
+            List.of(
+                new AuthoringStep(
+                    authoring.steps().get(0).id(),
+                    "A new reviewed input is needed",
+                    authoring.steps().get(0).context())));
     var execution =
         CompletableFuture.supplyAsync(
             () -> {
@@ -862,25 +890,111 @@ class StudioScheduleApiIT {
         CompletableFuture.runAsync(
             () -> {
               await(start);
-              studio.updateTest(target, changed, writer, false, false);
+              studio.saveAuthoring(
+                  target, changed, draft.sourceRevision(), draft.configurationRevision(), writer);
             });
     start.countDown();
-    execution.get(10, TimeUnit.SECONDS);
+    String decision = execution.get(10, TimeUnit.SECONDS);
     edit.get(10, TimeUnit.SECONDS);
     assertThat(service.read(target, writer).state()).isEqualTo("BLOCKED");
     assertThat(processor.process(target)).isNull();
     var runs =
         jdbc.queryForList(
             "SELECT revision_id FROM ui_test_executions WHERE ui_test_id=?", UUID.class, target);
-    assertThat(runs).allMatch(originalRevision::equals).hasSizeLessThanOrEqualTo(1);
+    assertThat(runs).allMatch(originalRevision::equals);
+    // STUDIO-OBS-009 AC-6 c (R7): a scheduled acceptance can now happen, so the final assertion is
+    // conditioned on what the processor decided. An accepted occurrence leaves exactly one run on
+    // the revision that was activated; anything else leaves none.
+    if ("ACCEPTED".equals(decision)) {
+      assertThat(runs).containsExactly(originalRevision);
+    } else {
+      assertThat(runs).isEmpty();
+    }
+  }
+
+  /**
+   * STUDIO-OBS-009 AC-6 c (R7): the deterministic acceptance-first ordering. The acceptance holds
+   * the test row until its transaction commits; the racing edit is started while it holds it and is
+   * proven to be waiting (an ungranted lock) before the acceptance commits. The edit therefore
+   * serializes strictly after the acceptance, which must have produced exactly one run, on the
+   * revision that was activated, and the edit then blocks the schedule.
+   */
+  @Test
+  void editedWriterQueuedBehindAnAcceptanceKeepsExactlyTheAcceptedRevision() throws Exception {
+    var schedule = enable();
+    due(schedule);
+    UUID target = testId;
+    UUID originalRevision = revisionId;
+    Authentication writer = owner;
+    var draft = studio.findTestById(target, writer);
+    var authoring = studio.findAuthoringV2ById(target, writer);
+    var changed =
+        new AuthoringV2Request(
+            2,
+            authoring.globalContext(),
+            List.of(
+                new AuthoringStep(
+                    authoring.steps().get(0).id(),
+                    "A new reviewed input is needed",
+                    authoring.steps().get(0).context())));
+    var edit = new java.util.concurrent.atomic.AtomicReference<CompletableFuture<Void>>();
+    String decision =
+        transactions.execute(
+            status -> {
+              String accepted = processor.process(target);
+              edit.set(
+                  CompletableFuture.runAsync(
+                      () ->
+                          studio.saveAuthoring(
+                              target,
+                              changed,
+                              draft.sourceRevision(),
+                              draft.configurationRevision(),
+                              writer)));
+              long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+              Boolean waiting = Boolean.FALSE;
+              while (System.nanoTime() < deadline && !Boolean.TRUE.equals(waiting)) {
+                waiting =
+                    jdbc.queryForObject(
+                        "SELECT EXISTS (SELECT 1 FROM pg_locks WHERE NOT granted AND locktype IN"
+                            + " ('transactionid','tuple'))",
+                        Boolean.class);
+                if (!Boolean.TRUE.equals(waiting)) {
+                  try {
+                    Thread.sleep(10);
+                  } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException(ex);
+                  }
+                }
+              }
+              assertThat(waiting).as("the edit is waiting on the acceptance's row lock").isTrue();
+              assertThat(edit.get()).as("the edit has not completed first").isNotDone();
+              return accepted;
+            });
+    edit.get().get(10, TimeUnit.SECONDS);
+    assertThat(decision).isEqualTo("ACCEPTED");
+    assertThat(
+            jdbc.queryForList(
+                "SELECT revision_id FROM ui_test_executions WHERE ui_test_id=?",
+                UUID.class,
+                target))
+        .containsExactly(originalRevision);
+    assertThat(service.occurrences(target, 0, 20, writer).data().get(0).decision())
+        .isEqualTo("ACCEPTED");
+    assertThat(service.read(target, writer).state()).isEqualTo("BLOCKED");
   }
 
   @Test
   void rawReadinessChangesRefuseExplicitlyAndAnotherActivatorDoesNotRewriteAcceptedProvenance() {
     var schedule = enable();
     due(schedule);
-    jdbc.update("UPDATE ui_tests SET source_revision=source_revision+1 WHERE id=?", testId);
-    assertThat(processor.process(testId)).isEqualTo("COMPILE_REQUIRED");
+    // Same real edit as the live port above: a counter-only bump is no longer an edit (OBS-015).
+    jdbc.update(
+        "UPDATE ui_tests SET source_revision=source_revision+1,"
+            + " steps=CAST('[\"Go somewhere else\"]' AS jsonb) WHERE id=?",
+        testId);
+    assertThat(processor.process(testId)).isEqualTo("LEARN_REQUIRED");
     assertThat(service.occurrences(testId, 0, 20, owner).data().get(0).executionId()).isNull();
     fixture();
     schedule = enable();

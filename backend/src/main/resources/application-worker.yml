@@ -34,3 +34,8 @@ management:
   endpoint:
     health:
       show-details: always
+
+# The worker role (STUDIO-OBS-009 AC-5) runs the guided expiry reaper and the translation
+# coordinator (`@Profile("!api | worker")`). It has no internal guided chain and no TLS connector
+# (those are `!worker`); it reaches the API's connector as a client with the backend's one
+# certificate (studio.runner.tls, translation.controller-origin).

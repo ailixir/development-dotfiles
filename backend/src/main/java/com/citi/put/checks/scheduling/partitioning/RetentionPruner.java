@@ -22,7 +22,14 @@ public class RetentionPruner {
   private static final Logger LOG = LoggerFactory.getLogger(RetentionPruner.class);
 
   private static final List<String> MANAGED_TABLES =
-      List.of("execution_results", "ui_test_executions", "report_executions");
+      List.of(
+          "execution_results",
+          "ui_test_executions",
+          "report_executions",
+          "studio_secret_use_audit",
+          "studio_observed_secret_read_entries",
+          "studio_observed_no_send_decisions",
+          "studio_observed_terminal_secret_settlements");
 
   private final JdbcTemplate jdbc;
   private final MeterRegistry meterRegistry;

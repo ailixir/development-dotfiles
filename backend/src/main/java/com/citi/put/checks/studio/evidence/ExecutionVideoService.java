@@ -9,11 +9,6 @@ import com.citi.put.checks.studio.recovery.ResultManifestStore;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -56,20 +51,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExecutionVideoService {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(ExecutionVideoService.class);
-
   /** The one media type this route produces, set on the success path and never on the mapping. */
   public static final String VIDEO_WEBM = "video/webm";
 
   private final StudioService studioService;
   private final StudioDispatchLedgerStatements ledger;
-  private final VideoObjectStore store;
+  private final VideoObjectServer objects;
 
   public ExecutionVideoService(
-      StudioService studioService, StudioDispatchLedgerStatements ledger, VideoObjectStore store) {
+      StudioService studioService,
+      StudioDispatchLedgerStatements ledger,
+      VideoObjectServer objects) {
     this.studioService = studioService;
     this.ledger = ledger;
-    this.store = store;
+    this.objects = objects;
   }
 
   /**
@@ -107,49 +102,10 @@ public class ExecutionVideoService {
     // (3) The key, derived from immutable execution identity.
     String key = ManifestKeys.videoKey(identityOf(snapshot));
 
-    // (4) The size, measured from the object.
-    VideoObjectMetadata object = metadata(key, executionId);
-    long size = object.sizeBytes();
-
-    // (5) The window, resolved against that measured size.
-    ByteRangeRequest range = ByteRangeRequest.parse(rangeHeader, size);
+    // (4) and (5) The measured size and the range, served by the shared key-based server so the
+    // guided learn-run recording (STUDIO-OBS-013) reuses this path rather than forking it.
     String filename = download ? attachmentFilename(snapshot, identityOf(snapshot)) : null;
-
-    if (range.kind() == ByteRangeRequest.Kind.UNSATISFIABLE) {
-      throw ExecutionVideoException.unsatisfiableRange(size);
-    }
-    if (range.satisfiable()) {
-      byte[] bytes = readBytes(key, range.firstByte(), range.lastByte(), executionId);
-      String contentRange = "bytes " + range.firstByte() + "-" + range.lastByte() + "/" + size;
-      return respond(HttpStatus.PARTIAL_CONTENT, bytes, contentRange, filename);
-    }
-    byte[] bytes = size == 0 ? new byte[0] : readBytes(key, 0, size - 1, executionId);
-    return respond(HttpStatus.OK, bytes, null, filename);
-  }
-
-  /**
-   * The one place a response is shaped, so {@code 200} and {@code 206} cannot drift apart.
-   *
-   * <p>{@code Content-Length} is the number of bytes being written and {@code Content-Range}'s
-   * total is the measured object size; both come from the store and neither from a row.
-   */
-  private ResponseEntity<byte[]> respond(
-      HttpStatus status, byte[] bytes, String contentRange, String filename) {
-    ResponseEntity.BodyBuilder response =
-        ResponseEntity.status(status)
-            .contentType(MediaType.parseMediaType(VIDEO_WEBM))
-            .header(HttpHeaders.ACCEPT_RANGES, "bytes")
-            .header(HttpHeaders.CACHE_CONTROL, "private, no-store")
-            .contentLength(bytes.length);
-    if (contentRange != null) {
-      response = response.header(HttpHeaders.CONTENT_RANGE, contentRange);
-    }
-    if (filename != null) {
-      response =
-          response.header(
-              HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
-    }
-    return response.body(bytes);
+    return objects.serve(key, filename, rangeHeader, "execution " + executionId);
   }
 
   private ResultManifestStore.ExecutionIdentity identityOf(ExecutionSnapshotDto snapshot) {
@@ -165,37 +121,6 @@ public class ExecutionVideoService {
         snapshot.testId(),
         snapshot.executionId(),
         UUID.fromString(attemptId.toString()));
-  }
-
-  private VideoObjectMetadata metadata(String key, UUID executionId) {
-    Optional<VideoObjectMetadata> found;
-    try {
-      found = store.metadata(key);
-    } catch (VideoObjectStoreUnavailableException e) {
-      throw unreachable(e, executionId);
-    }
-    // The store answered and the object is not there. That is an absent object, and it is the only
-    // case that may be reported as "no evidence".
-    return found.orElseThrow(ExecutionVideoException::noEvidence);
-  }
-
-  private byte[] readBytes(String key, long firstByte, long lastByte, UUID executionId) {
-    try {
-      return store.read(key, firstByte, lastByte);
-    } catch (VideoObjectStoreUnavailableException e) {
-      throw unreachable(e, executionId);
-    }
-  }
-
-  private ExecutionVideoException unreachable(
-      VideoObjectStoreUnavailableException cause, UUID executionId) {
-    // The cause names the bucket and the endpoint. It is logged and never sent: §6.2 keeps object
-    // keys, buckets and hosts off the wire, and AC-6 asserts it over every status this route has.
-    LOGGER.warn(
-        "Studio evidence store unreachable while serving the recording for execution {}",
-        executionId,
-        cause);
-    return ExecutionVideoException.storeUnavailable();
   }
 
   /**

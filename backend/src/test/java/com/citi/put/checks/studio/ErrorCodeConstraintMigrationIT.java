@@ -24,7 +24,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Story 10.14 AC-16 — V17's CHECK proven against a database that <em>already holds</em> rows.
+ * Story 10.14 AC-16 — the error-code CHECK proven against a database that <em>already holds</em>
+ * rows. Since the STUDIO-OBS-012A re-baseline (ADR-SC-005 D-B) the constraint is defined once, in
+ * {@code V13__executions_ledger.sql}, together with the {@code error_code} column it constrains.
  *
  * <p>This epic has paid for this test shape once already. Story 10.1's V14 would have aborted on
  * any non-empty database — section 6 rewrote {@code ui_tests.browser} while V1's inline constraint
@@ -34,17 +36,20 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * rows"</i>. It was found when QA stood up a container holding one pre-existing row.
  *
  * <p>A constraint proven only against a schema built empty is proven against the one condition that
- * cannot fail. So this test migrates to <b>V16</b>, <b>seeds</b>, and only then migrates to V17 —
- * twice, against two databases in one container, because the constraint has two outcomes and both
- * are decided rather than discovered:
+ * cannot fail. Because V13 creates the column and its CHECK in one migration, no Flyway target can
+ * stop between them; so this test migrates to the <b>head</b>, removes only this CHECK on the
+ * disposable database, <b>seeds</b>, and then applies <b>the migration's own two statements</b> —
+ * read out of V13 by {@link ErrorCodeVocabularyTest#constraintStatements()}, never transcribed — in
+ * one transaction, as Flyway does. It does so twice, against two databases in one container,
+ * because the constraint has two outcomes and both are decided rather than discovered:
  *
  * <ul>
  *   <li><b>clean</b> — rows across {@code ui_test_executions_2026_06} and the <b>DEFAULT</b>
- *       partition, some with {@code error_code IS NULL} and one per declared value: V17 applies,
- *       every partition's constraint ends {@code convalidated}, and a new undeclared write is
- *       refused;
+ *       partition, some with {@code error_code IS NULL} and one per declared value: V13's ADD and
+ *       VALIDATE apply, every partition's constraint ends {@code convalidated}, and a new
+ *       undeclared write is refused;
  *   <li><b>dirty</b> — the same seed plus one row holding a value outside the vocabulary, which is
- *       the only way a ninth value can exist (§15.5: a restored dump or a manual repair): V17
+ *       the only way an undeclared value can exist (§15.5: a restored dump or a manual repair): V13
  *       <b>fails loudly</b>, the message names the offending relation, the operator query in the
  *       migration's own comment finds the row, and the constraint validates once it is repaired.
  * </ul>
@@ -61,17 +66,19 @@ class ErrorCodeConstraintMigrationIT {
   private static final String CONSTRAINT = "ck_ui_test_executions_error_code";
 
   /**
-   * The vocabulary V17 constrains: the API's, less the codes a later migration added.
-   *
-   * <p>Read from {@link ExecutionErrorCode#values()} and narrowed, never transcribed. {@code
-   * CANCELLED} arrived with V20 (Studio v1 WP4), so no row can hold it before V20 applies; seeding
-   * one at V16 would be seeding data V17 rightly refuses. V20's own list is compared with the enum
-   * by {@link ErrorCodeVocabularyTest}.
+   * The head schema version: core V1–V11, the seven Studio area migrations V12–V18, and the
+   * forward-only guided V19 (governance, STUDIO-OBS-014) and V20 (session recording,
+   * STUDIO-OBS-013). Neither V19 nor V20 names this constraint; V13 stays its only definition.
    */
-  private static final java.util.Set<String> V17_VOCABULARY =
-      ExecutionErrorCode.values().stream()
-          .filter(code -> !ExecutionErrorCode.CANCELLED.equals(code))
-          .collect(java.util.stream.Collectors.toUnmodifiableSet());
+  private static final String HEAD = "22";
+
+  /**
+   * The vocabulary V13 constrains: the API's whole enumeration, one set (the re-baseline installs
+   * the final list once, so there is no historical subset to narrow to). Read from {@link
+   * ExecutionErrorCode#values()}, never transcribed; V13's own list is compared with the enum and
+   * the contract by {@link ErrorCodeVocabularyTest}.
+   */
+  private static final java.util.Set<String> VOCABULARY = ExecutionErrorCode.values();
 
   /** Only a restored dump or a manual repair can produce one (§15.5). */
   private static final String OUT_OF_VOCABULARY = "RESTORED_FROM_DUMP";
@@ -97,17 +104,21 @@ class ErrorCodeConstraintMigrationIT {
       statement.execute("CREATE DATABASE checks_error_code_dirty");
     }
 
-    // Stage one: the schema as it stood before this story, on both databases.
-    flywayTo(cleanUrl, "16");
-    flywayTo(dirtyUrl, "16");
+    // Stage one: the whole schema on both databases, then only this CHECK removed so that rows can
+    // exist before it, as they would on any populated deployment of an additive vocabulary change.
+    flywayTo(cleanUrl, HEAD);
+    flywayTo(dirtyUrl, HEAD);
+    execute(cleanUrl, "ALTER TABLE ui_test_executions DROP CONSTRAINT " + CONSTRAINT);
+    execute(dirtyUrl, "ALTER TABLE ui_test_executions DROP CONSTRAINT " + CONSTRAINT);
 
     // Stage two: rows, before the constraint exists. This is the whole point of the test.
     cleanTestId = seed(cleanUrl, false);
     dirtyTestId = seed(dirtyUrl, true);
 
-    // Stage three: the migration under test, on the clean database only. The dirty one is
-    // migrated inside its own test so the failure is the assertion rather than a setup error.
-    flywayTo(cleanUrl, "17");
+    // Stage three: the migration's statements under test, on the clean database only. The dirty
+    // one is migrated inside its own test so the failure is the assertion rather than a setup
+    // error.
+    applyMigrationStatements(cleanUrl);
   }
 
   @AfterAll
@@ -123,7 +134,7 @@ class ErrorCodeConstraintMigrationIT {
       throws SQLException {
     assertThat(
             scalarString(cleanUrl, "SELECT MAX(version::numeric)::text FROM flyway_schema_history"))
-        .isEqualTo("17");
+        .isEqualTo(HEAD);
     assertThat(
             scalarInt(cleanUrl, "SELECT COUNT(*) FROM flyway_schema_history WHERE success = false"))
         .isZero();
@@ -158,7 +169,7 @@ class ErrorCodeConstraintMigrationIT {
   @Test
   @Order(3)
   void refusesAnUndeclaredValueOnANewWriteAndAcceptsEveryDeclaredOne() throws SQLException {
-    for (String code : new TreeSet<>(V17_VOCABULARY)) {
+    for (String code : new TreeSet<>(VOCABULARY)) {
       execute(
           cleanUrl,
           insertExecution(
@@ -193,10 +204,10 @@ class ErrorCodeConstraintMigrationIT {
   @Test
   @Order(4)
   void refusesToValidateAgainstARowHoldingAValueOutsideTheVocabulary() throws SQLException {
-    assertThatThrownBy(() -> flywayTo(dirtyUrl, "17"))
+    assertThatThrownBy(() -> applyMigrationStatements(dirtyUrl))
         .as(
-            "a restored dump holding a ninth value must abort the deploy rather than be published"
-                + " as though the API had assigned it")
+            "a restored dump holding an undeclared value must abort the deploy rather than be"
+                + " published as though the API had assigned it")
         .hasMessageContaining(CONSTRAINT)
         // PostgreSQL 15 names the *relation*, not the row — which is why the migration's comment
         // carries the query that finds the row.
@@ -208,7 +219,7 @@ class ErrorCodeConstraintMigrationIT {
             dirtyUrl,
             "SELECT error_code FROM ui_test_executions WHERE error_code IS NOT NULL"
                 + " AND error_code NOT IN ("
-                + quoted(V17_VOCABULARY)
+                + quoted(VOCABULARY)
                 + ")");
     assertThat(offending).containsExactly(OUT_OF_VOCABULARY);
   }
@@ -216,9 +227,9 @@ class ErrorCodeConstraintMigrationIT {
   @Test
   @Order(5)
   void validatesOnceTheOffendingRowIsRepaired() throws SQLException {
-    // Runs after @Order(4)'s failed migration, which left the constraint NOT VALID. The guard is
-    // belt and braces: if Flyway ever rolls the failed statement back, the constraint is re-added
-    // in the form the migration uses, so this test decides the remedy and not the rollback.
+    // Runs after @Order(4)'s failed migration. Its transaction rolled the NOT VALID add back with
+    // the failed VALIDATE, exactly as Flyway's per-migration transaction does, so the constraint is
+    // re-added in the form the migration uses; this test decides the remedy and not the rollback.
     ensureConstraintPresent(dirtyUrl);
 
     assertThatThrownBy(
@@ -293,7 +304,7 @@ class ErrorCodeConstraintMigrationIT {
 
     // A named partition: nulls plus half the vocabulary.
     execute(url, insertExecution(testId, UUID.randomUUID(), "2026-06-15 10:00:00+00", "NULL"));
-    List<String> codes = new ArrayList<>(new TreeSet<>(V17_VOCABULARY));
+    List<String> codes = new ArrayList<>(new TreeSet<>(VOCABULARY));
     for (int index = 0; index < codes.size(); index++) {
       String partition = index % 2 == 0 ? "2026-06-15 10:00:00+00" : "2027-03-15 10:00:00+00";
       execute(
@@ -334,13 +345,23 @@ class ErrorCodeConstraintMigrationIT {
     if (present > 0) {
       return;
     }
-    execute(
-        url,
-        "ALTER TABLE ui_test_executions ADD CONSTRAINT "
-            + CONSTRAINT
-            + " CHECK (error_code IS NULL OR error_code IN ("
-            + quoted(V17_VOCABULARY)
-            + ")) NOT VALID");
+    execute(url, ErrorCodeVocabularyTest.constraintStatements().get(0));
+  }
+
+  /** V13's ADD ... NOT VALID and VALIDATE, in one transaction as Flyway applies a migration. */
+  private static void applyMigrationStatements(String url) throws SQLException {
+    try (Connection connection = open(url)) {
+      connection.setAutoCommit(false);
+      try (Statement statement = connection.createStatement()) {
+        for (String sql : ErrorCodeVocabularyTest.constraintStatements()) {
+          statement.execute(sql);
+        }
+        connection.commit();
+      } catch (SQLException e) {
+        connection.rollback();
+        throw e;
+      }
+    }
   }
 
   private static String quoted(java.util.Collection<String> values) {

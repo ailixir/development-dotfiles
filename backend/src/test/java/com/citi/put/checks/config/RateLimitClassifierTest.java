@@ -51,6 +51,21 @@ class RateLimitClassifierTest {
         .isEqualTo(BucketClass.READ);
   }
 
+  /** STUDIO-OBS-014 AC-8: the guided session start, as mapped, is EXECUTE; nothing else of it. */
+  @Test
+  void startingAGuidedSessionIsExecuteButItsReadsAndSubRoutesAreNot() {
+    String start =
+        com.citi.put.checks.studio.guided.session.GuidedSessionController.class.getAnnotation(
+                RequestMapping.class)
+            .value()[0];
+    String id = UUID.randomUUID().toString();
+
+    assertThat(classifier.classify(request("POST", start))).isEqualTo(BucketClass.EXECUTE);
+    assertThat(classifier.classify(request("GET", start + "/" + id))).isEqualTo(BucketClass.READ);
+    assertThat(classifier.classify(request("POST", start + "/" + id + "/cancel")))
+        .isEqualTo(BucketClass.WRITE);
+  }
+
   @Test
   void checkExecutionIsStillExecute() {
     assertThat(

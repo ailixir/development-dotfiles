@@ -1,6 +1,7 @@
 package com.citi.put.checks.studio;
 
 import com.citi.put.checks.ChecksApplication;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import org.springframework.boot.WebApplicationType;
@@ -26,6 +27,26 @@ public final class SecondApplicationContext implements AutoCloseable {
   private final ConfigurableApplicationContext context;
 
   public SecondApplicationContext(DataSource sharedWith) {
+    this(sharedWith, false);
+  }
+
+  /**
+   * A second replica that can also accept an observed Run (STUDIO-OBS-012A): it carries the same
+   * trusted observed-replay configuration and fresh-authority double as the first context.
+   */
+  public static SecondApplicationContext observed(DataSource sharedWith) {
+    return new SecondApplicationContext(sharedWith, true);
+  }
+
+  /**
+   * As {@link #observed(DataSource)}, with extra {@code --key=value} arguments for properties the
+   * first context also sets (STUDIO-OBS-014: per-CSI budget limits under test).
+   */
+  public static SecondApplicationContext observed(DataSource sharedWith, String... extra) {
+    return new SecondApplicationContext(sharedWith, true, extra);
+  }
+
+  private SecondApplicationContext(DataSource sharedWith, boolean observed, String... extra) {
     // Touch the first context's datasource so its container is definitely up before the second
     // context asks the Testcontainers driver for the same URL.
     try (java.sql.Connection connection = sharedWith.getConnection()) {
@@ -33,17 +54,15 @@ public final class SecondApplicationContext implements AutoCloseable {
     } catch (SQLException e) {
       throw new IllegalStateException("The first context's database is not reachable", e);
     }
-    this.context =
-        new SpringApplicationBuilder(ChecksApplication.class)
-            .web(WebApplicationType.SERVLET)
-            // Command-line arguments, not SpringApplicationBuilder.properties()/profiles():
-            // those are *default* properties and sit below application.yml, whose
-            // `spring.profiles.active: local` would otherwise stay on and hand this context a
-            // Zonky embedded Postgres of its own. Both symptoms — a second Testcontainers
-            // database and a second embedded one — look identical from the outside: the second
-            // context simply sees an empty schema, and a cross-replica test built on it would
-            // have been comparing two unrelated databases.
-            .run(
+    // Command-line arguments, not SpringApplicationBuilder.properties()/profiles(): those are
+    // *default* properties and sit below application.yml, whose `spring.profiles.active: local`
+    // would otherwise stay on and hand this context a Zonky embedded Postgres of its own. Both
+    // symptoms — a second Testcontainers database and a second embedded one — look identical from
+    // the outside: the second context simply sees an empty schema, and a cross-replica test built
+    // on it would have been comparing two unrelated databases.
+    java.util.List<String> arguments =
+        new java.util.ArrayList<>(
+            java.util.List.of(
                 "--spring.profiles.active=test",
                 "--server.port=0",
                 // No datasource override: application-test.yml's Testcontainers JDBC URL is
@@ -58,7 +77,14 @@ public final class SecondApplicationContext implements AutoCloseable {
                 "--spring.flyway.enabled=false",
                 // Several contexts share one container; a 30-connection default each
                 // is how a suite exhausts max_connections.
-                "--spring.datasource.hikari.maximum-pool-size=5");
+                "--spring.datasource.hikari.maximum-pool-size=5"));
+    SpringApplicationBuilder builder = new SpringApplicationBuilder(ChecksApplication.class);
+    arguments.addAll(java.util.List.of(extra));
+    if (observed) {
+      arguments.addAll(ObservedPublicationFixture.commandLineProperties());
+      builder.sources(ObservedPublicationFixture.FreshAuthority.class);
+    }
+    this.context = builder.web(WebApplicationType.SERVLET).run(arguments.toArray(String[]::new));
   }
 
   public <T> T bean(Class<T> type) {

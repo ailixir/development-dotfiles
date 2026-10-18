@@ -1,29 +1,31 @@
 package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-import com.citi.put.checks.studio.compile.CandidateRevision;
-import com.citi.put.checks.studio.compile.CompileRequest;
-import com.citi.put.checks.studio.compile.CompileStateService;
-import com.citi.put.checks.studio.dto.UITestRequest;
+import com.citi.put.checks.studio.dto.AuthoringStep;
+import com.citi.put.checks.studio.dto.AuthoringV2Request;
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
  * Story 10.4 AC-20 — FOC-01 cross-check: history keeps the revision it actually executed.
  *
- * <p>{@code ui_test_executions.revision_id} is added by story 10.1's V14, which merges after this
- * story (FOC-01). Until then every case here is skipped by the assumption below rather than
- * asserted against a column that does not exist yet; once V14 lands the test activates on its own
- * with no edit required.
+ * <p>STUDIO-OBS-012A (ADR-SC-005 D-A): the only revision family is an observed ({@code GUIDED_RUN})
+ * publication, so each case publishes one through the production writers ({@link
+ * ObservedPublicationFixture}) and records an execution of it that carries the observed revision
+ * binding the V15 execution guard requires.
  *
  * <p>Note the partition key: {@code ui_test_executions} is partitioned by {@code started_at} with
  * primary key {@code (id, started_at)}, so history rows are always addressed by that pair.
@@ -36,14 +38,12 @@ class RevisionRetentionIT {
   private static final String CSI_ID = "60406";
 
   @Autowired StudioService studioService;
-  @Autowired CompileStateService compileStateService;
   @Autowired JdbcTemplate jdbc;
 
   private UUID testId;
 
   @BeforeEach
   void setUp() {
-    assumeTrue(revisionIdColumnExists(), "ui_test_executions.revision_id arrives with 10.1's V14");
     seedUser();
     seedCsi();
     testId = seedTest();
@@ -51,12 +51,13 @@ class RevisionRetentionIT {
 
   @Test
   void anExecutionKeepsItsRevisionAfterTheDraftIsEditedAndRecompiled() {
-    UUID executedRevision = compileAndConfirm("artifact-hash-1", 1L, 1L);
-    Instant startedAt = Instant.now();
+    UUID executedRevision = publish();
+    String executedArtifactHash = artifactHash(executedRevision);
+    Instant startedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     UUID executionId = seedExecution(executedRevision, startedAt);
 
-    studioService.updateTest(testId, updateRequest("[\"Go to the login page\"]"));
-    UUID newRevision = compileAndConfirm("artifact-hash-2", 2L, 1L);
+    editFirstStep("Go to the login page");
+    UUID newRevision = publish();
 
     assertThat(newRevision).isNotEqualTo(executedRevision);
     assertThat(executionRevision(executionId, startedAt)).isEqualTo(executedRevision);
@@ -65,7 +66,7 @@ class RevisionRetentionIT {
                 "SELECT artifact_hash FROM ui_test_revisions WHERE id = ?",
                 String.class,
                 executedRevision))
-        .isEqualTo("artifact-hash-1");
+        .isEqualTo(executedArtifactHash);
     assertThat(
             jdbc.queryForObject(
                 "SELECT confirmed_by FROM ui_test_revisions WHERE id = ?",
@@ -76,8 +77,8 @@ class RevisionRetentionIT {
 
   @Test
   void aSoftDeletedTestStillExposesTheRevisionItsHistoryPointsAt() {
-    UUID executedRevision = compileAndConfirm("artifact-hash-3", 1L, 1L);
-    Instant startedAt = Instant.now();
+    UUID executedRevision = publish();
+    Instant startedAt = Instant.now().truncatedTo(ChronoUnit.MILLIS);
     UUID executionId = seedExecution(executedRevision, startedAt);
 
     studioService.softDeleteTest(testId);
@@ -91,50 +92,66 @@ class RevisionRetentionIT {
 
   // ── helpers ───────────────────────────────────────────────────────────────
 
-  private boolean revisionIdColumnExists() {
-    Integer count =
-        jdbc.queryForObject(
-            "SELECT COUNT(*) FROM information_schema.columns"
-                + " WHERE table_name = 'ui_test_executions' AND column_name = 'revision_id'",
-            Integer.class);
-    return count != null && count > 0;
+  /** Publishes the draft's current steps as an observed revision and confirms it. */
+  private UUID publish() {
+    return new ObservedPublicationFixture(jdbc).publish(testId, List.of(), List.of());
   }
 
-  private UUID compileAndConfirm(
-      String artifactHash, long sourceRevision, long configurationRevision) {
-    CompileRequest request = compileStateService.beginCompile(testId);
-    compileStateService.publishCandidate(
-        testId,
-        request,
-        new CandidateRevision(
-            request.configurationRevision(),
-            "{\"version\":1,\"steps\":[]}",
-            "source-hash-" + artifactHash,
-            "{\"version\":1,\"steps\":[]}",
-            artifactHash,
-            1,
-            "{\"browser\":\"chromium\"}",
-            "[]",
-            "{\"model\":\"stub-model@1\"}",
-            OWNER));
-    UUID revisionId =
-        jdbc.queryForObject(
-            "SELECT current_candidate_revision_id FROM ui_tests WHERE id = ?", UUID.class, testId);
-    return compileStateService.confirm(
-        testId, revisionId, artifactHash, sourceRevision, configurationRevision, OWNER);
+  private String artifactHash(UUID revisionId) {
+    return jdbc.queryForObject(
+        "SELECT artifact_hash FROM ui_test_revisions WHERE id = ?", String.class, revisionId);
   }
 
+  /**
+   * An executed run of {@code revisionId}: its dispatch-ledger locator, then the history row with
+   * the observed revision binding the V15 execution guard requires of a row that names a {@code
+   * GUIDED_RUN} revision ({@code StudioSchedulingSchemaIT} history/ledger shape).
+   *
+   * @param startedAt millisecond precision, the precision the binding records
+   */
   private UUID seedExecution(UUID revisionId, Instant startedAt) {
     UUID executionId = UUID.randomUUID();
     jdbc.update(
+        "INSERT INTO studio_dispatch_ledger (execution_id, execution_accepted_at, test_id, csi_id,"
+            + " principal, state) VALUES (?, ?, ?, ?, ?, 'DONE')",
+        executionId,
+        Timestamp.from(startedAt),
+        testId,
+        CSI_ID,
+        OWNER);
+    jdbc.update(
         "INSERT INTO ui_test_executions (id, ui_test_id, status, started_at, ended_at,"
-            + " duration_ms, revision_id) VALUES (?, ?, 'PASSED', ?, ?, 1000, ?)",
+            + " duration_ms, csi_id, principal, environment, revision_id,"
+            + " observed_revision_binding) VALUES (?, ?, 'PASSED', ?, ?, 1000, ?, ?, 'Production',"
+            + " ?, CAST(? AS jsonb))",
         executionId,
         testId,
         Timestamp.from(startedAt),
         Timestamp.from(startedAt.plusMillis(1000)),
-        revisionId);
+        CSI_ID,
+        OWNER,
+        revisionId,
+        GuidedPublicationMigrationTest.observedBinding(
+                jdbc, revisionId, executionId, startedAt, OWNER)
+            .toString());
     return executionId;
+  }
+
+  /** Edits the first step through the v2 authoring save a learned draft requires. */
+  private void editFirstStep(String text) {
+    Authentication owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
+    var draft = studioService.findTestById(testId, owner);
+    var authoring = studioService.findAuthoringV2ById(testId, owner);
+    var step = authoring.steps().get(0);
+    studioService.saveAuthoring(
+        testId,
+        new AuthoringV2Request(
+            2,
+            authoring.globalContext(),
+            List.of(new AuthoringStep(step.id(), text, step.context()))),
+        draft.sourceRevision(),
+        draft.configurationRevision(),
+        owner);
   }
 
   private UUID executionRevision(UUID executionId, Instant startedAt) {
@@ -143,23 +160,6 @@ class RevisionRetentionIT {
         UUID.class,
         executionId,
         Timestamp.from(startedAt));
-  }
-
-  private UITestRequest updateRequest(String steps) {
-    return new UITestRequest(
-        "Retention draft",
-        "history",
-        CSI_ID,
-        steps,
-        "[]",
-        "chrome",
-        1920,
-        1080,
-        30,
-        "networkidle",
-        "Production",
-        1L,
-        1L);
   }
 
   private UUID seedTest() {

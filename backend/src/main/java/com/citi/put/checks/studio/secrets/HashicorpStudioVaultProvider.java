@@ -96,7 +96,13 @@ public final class HashicorpStudioVaultProvider implements StudioVaultProvider {
           throw new VaultProviderUnavailableException(
               "Vault refused the reference read with status " + response.statusCode());
         }
-        VaultEntry entry = parse(readBody(body, deadline));
+        byte[] bytes = readBody(body, deadline);
+        VaultEntry entry;
+        try {
+          entry = parse(bytes);
+        } finally {
+          Arrays.fill(bytes, (byte) 0);
+        }
         if (kind == ReferenceKind.SECRET && entry.allowedOrigins().isEmpty()) {
           // Names the reference only. Origins are not secret, but the list is not echoed either:
           // the entry's owner can read it, and a log line is not where it should be corrected.
@@ -271,10 +277,20 @@ public final class HashicorpStudioVaultProvider implements StudioVaultProvider {
     return Integer.toString(version.asInt());
   }
 
+  private java.util.function.Consumer<byte[]> responseBytesObserver;
+
+  void observeResponseBytes(java.util.function.Consumer<byte[]> observer) {
+    this.responseBytesObserver = observer;
+  }
+
   private byte[] readBody(InputStream body, long deadline)
       throws IOException, InterruptedException {
     byte[] bytes = readBounded(body, properties.maxResponseBytesOrDefault() + 1, deadline);
+    if (responseBytesObserver != null) {
+      responseBytesObserver.accept(bytes);
+    }
     if (bytes.length > properties.maxResponseBytesOrDefault()) {
+      Arrays.fill(bytes, (byte) 0);
       throw new VaultProviderUnavailableException("Vault returned an oversized response");
     }
     return bytes;
@@ -347,19 +363,64 @@ public final class HashicorpStudioVaultProvider implements StudioVaultProvider {
   }
 
   private VaultEntry parse(byte[] body) throws IOException {
-    JsonNode root = objectMapper.readTree(body);
-    JsonNode value = root.path("data").path("data").path(properties.valueKeyOrDefault());
-    JsonNode version = root.path("data").path("metadata").path("version");
-    if (!value.isValueNode()
-        || value.isNull()
-        || !version.canConvertToInt()
-        || version.asInt() <= 0) {
-      throw new VaultProviderUnavailableException("Vault returned a malformed KV v2 response");
+    char[] value = null;
+    int version = 0;
+    List<String> origins = List.of();
+    var path = new java.util.ArrayDeque<String>();
+    try (var parser = objectMapper.getFactory().createParser(body)) {
+      com.fasterxml.jackson.core.JsonToken token;
+      String field = null;
+      while ((token = parser.nextToken()) != null) {
+        if (token == com.fasterxml.jackson.core.JsonToken.FIELD_NAME) {
+          field = parser.currentName();
+        } else {
+          if (token == com.fasterxml.jackson.core.JsonToken.START_OBJECT
+              || token == com.fasterxml.jackson.core.JsonToken.START_ARRAY) {
+            path.addLast(field == null ? "$" : field);
+            field = null;
+          } else {
+            if (token.isStructEnd()) {
+              path.removeLast();
+              field = null;
+            } else {
+              if (List.copyOf(path).equals(List.of("$", "data", "data"))) {
+                if (properties.valueKeyOrDefault().equals(field)) {
+                  if (token != com.fasterxml.jackson.core.JsonToken.VALUE_STRING || value != null) {
+                    throw new VaultProviderUnavailableException(
+                        "Vault returned a malformed KV v2 response");
+                  }
+                  value =
+                      java.util.Arrays.copyOfRange(
+                          parser.getTextCharacters(),
+                          parser.getTextOffset(),
+                          parser.getTextOffset() + parser.getTextLength());
+                } else {
+                  if (SecretOrigins.VAULT_KEY.equals(field)
+                      && token == com.fasterxml.jackson.core.JsonToken.VALUE_STRING) {
+                    origins = SecretOrigins.parse(parser.getText());
+                  }
+                }
+              } else {
+                if (List.copyOf(path).equals(List.of("$", "data", "metadata"))
+                    && "version".equals(field)
+                    && token == com.fasterxml.jackson.core.JsonToken.VALUE_NUMBER_INT) {
+                  version = parser.getIntValue();
+                }
+              }
+            }
+          }
+        }
+      }
+      if (value == null || version <= 0) {
+        throw new VaultProviderUnavailableException("Vault returned a malformed KV v2 response");
+      }
+      return new VaultEntry(value, Integer.toString(version), origins);
+    } catch (IOException | RuntimeException failure) {
+      if (value != null) {
+        java.util.Arrays.fill(value, '\0');
+      }
+      throw failure;
     }
-    return new VaultEntry(
-        value.asText().toCharArray(),
-        Integer.toString(version.asInt()),
-        allowedOrigins(root.path("data").path("data").path(SecretOrigins.VAULT_KEY)));
   }
 
   /**

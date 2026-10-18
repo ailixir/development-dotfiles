@@ -14,10 +14,8 @@ import java.util.regex.Pattern;
  * Checks a draft's variable references against its declared variables (Studio v1 WP6, plan ADD-7).
  *
  * <p>Source lines reference variables as {@code <var NAME>} and secrets as {@code <secret ID>}
- * (architecture §4.3). The token grammar here is the runner validator's, {@code
- * studio-runner/src/validator/references.ts}, so both sides agree on what a reference is. A {@code
- * secretRef} declaration is matched by its {@code secretId}, falling back to its name, exactly as
- * {@code CompileInputs} declares it to the compiler.
+ * (architecture §4.3). A {@code secretRef} declaration is matched by its {@code secretId}, falling
+ * back to its name.
  *
  * <p>Three findings make a draft invalid:
  *
@@ -88,7 +86,7 @@ public final class VariableReferenceValidator {
         continue;
       }
       if (StudioVariable.KIND_SECRET_REF.equals(variable.kind())) {
-        String id = variable.secretId() == null ? variable.name() : variable.secretId();
+        String id = variable.secretId();
         if (id != null) {
           secretIds.add(id);
         }
@@ -102,7 +100,7 @@ public final class VariableReferenceValidator {
     for (String name : referencedVariables) {
       if (!plainValues.containsKey(name)) {
         undeclared.add("<var " + name + ">");
-      } else if (isBlank(plainValues.get(name)) && !isSupplied(supplied, name)) {
+      } else if (plainValues.get(name) == null && !isSupplied(supplied, name)) {
         unvalued.add(name);
       }
     }

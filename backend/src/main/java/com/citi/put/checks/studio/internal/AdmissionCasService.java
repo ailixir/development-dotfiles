@@ -6,7 +6,6 @@ import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import com.citi.put.checks.studio.internal.dto.AdmissionResponse;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Optional;
@@ -37,7 +36,6 @@ public class AdmissionCasService {
 
   private final StudioDispatchLedgerStatements statements;
   private final StudioExecutionProperties properties;
-  private final Clock clock;
 
   @Autowired(required = false)
   private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
@@ -48,37 +46,31 @@ public class AdmissionCasService {
   @Autowired(required = false)
   private com.citi.put.checks.studio.guided.session.GuidedContracts observedContracts;
 
-  @Autowired
   public AdmissionCasService(
       StudioDispatchLedgerStatements statements, StudioExecutionProperties properties) {
-    this(statements, properties, Clock.systemUTC());
-  }
-
-  AdmissionCasService(
-      StudioDispatchLedgerStatements statements,
-      StudioExecutionProperties properties,
-      Clock clock) {
     this.statements = statements;
     this.properties = properties;
-    this.clock = clock;
   }
 
   /**
-   * Grants, re-acknowledges or refuses an admission.
+   * Grants, re-acknowledges or refuses an admission at {@code now}. Reached only from {@link
+   * #claimObserved}: the legacy unauthenticated-binding entry and its {@code
+   * /internal/studio/executions/{id}/admission} route were deleted in STUDIO-OBS-014 (inherited
+   * obligation P1), because they could take admission ownership of an observed run without the
+   * observed authorization check.
    *
-   * <p>The one refusal that writes: a cancel recorded before the admission arrived (Studio v1 WP4).
-   * The CAS refused it; the refusal then closes the execution {@code ERROR / CANCELLED} and answers
-   * {@code EXECUTION_SETTLED}, which is true by the time the runner reads it. The close is why the
-   * transaction does not roll back on the refusal's exception — every other refusal path writes
-   * nothing, so there is nothing else a commit could keep.
+   * <p>Defence in depth (ar-ac11-and-refusal-codes.json 2.R1): {@code refusal()}'s cancel-close
+   * branch (close {@code ERROR / CANCELLED}, answer {@code EXECUTION_SETTLED}) and its {@code DONE}
+   * &rarr; {@code EXECUTION_SETTLED} branch are <b>not reached through {@link #claimObserved}</b>,
+   * the only caller: under the same {@code FOR UPDATE} row lock, {@code
+   * ObservedReplayAuthorization.check} already refuses a cancelled or settled row with {@code 409
+   * CANCELLED} and writes nothing. A cancelled run that was never admitted is then settled {@code
+   * ERROR / CANCELLED} by {@code RunningReaper} after the cancel margin. The branches stay as cheap
+   * defence, which is also why {@code claimObserved}'s transaction is declared {@code
+   * noRollbackFor} the refusal.
    *
    * @throws InternalCallbackException {@code 409} for every refusal, including an unknown execution
    */
-  @Transactional(noRollbackFor = InternalCallbackException.class)
-  public AdmissionResponse claim(UUID pathExecutionId, AdmissionRequest request) {
-    return claimAt(pathExecutionId, request, clock.instant());
-  }
-
   private AdmissionResponse claimAt(UUID pathExecutionId, AdmissionRequest request, Instant now) {
     validate(pathExecutionId, request);
     Instant startDeadlineAt = now.plus(properties.startDeadlineOrDefault());
@@ -191,7 +183,7 @@ public class AdmissionCasService {
     var receipt =
         observedContracts
             .object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("kind", "observed")
             .put("admissionId", response.admissionId().toString())
             .put(
@@ -206,7 +198,7 @@ public class AdmissionCasService {
                 com.citi.put.checks.studio.guided.publication.PublicationContracts.time(
                     response.runDeadlineAt()));
     receipt.set("request", request);
-    observedContracts.validate("v2/replay-job#/definitions/AdmissionReceipt", receipt);
+    observedContracts.validate("v3/replay-job#/definitions/AdmissionReceipt", receipt);
     int written =
         observedJdbc.update(
             "UPDATE ui_test_executions e SET observed_admission_receipt=?::jsonb FROM"

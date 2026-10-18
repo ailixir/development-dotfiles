@@ -32,6 +32,7 @@ public final class GuidedTranslationService {
   private final GuidedDependencyPlanner dependencies;
   private final GuidedTranslationProperties properties;
   private final Clock clock;
+  private final GuidedPromptAssembler.PreparationCapability preparationCapability;
 
   public GuidedTranslationService(
       GuidedSessionService sessions,
@@ -47,6 +48,38 @@ public final class GuidedTranslationService {
       GuidedDependencyPlanner dependencies,
       GuidedTranslationProperties properties,
       Clock clock) {
+    this(
+        sessions,
+        repository,
+        store,
+        questions,
+        dispatch,
+        gateway,
+        contracts,
+        prompts,
+        inputs,
+        validator,
+        dependencies,
+        properties,
+        clock,
+        null);
+  }
+
+  private GuidedTranslationService(
+      GuidedSessionService sessions,
+      GuidedSessionRepository repository,
+      GuidedTranslationStore store,
+      GuidedClarificationContextStore questions,
+      GuidedDispatchService dispatch,
+      GuidedLlmGatewayClient gateway,
+      GuidedContracts contracts,
+      GuidedPromptAssembler prompts,
+      GuidedSourceInputResolver inputs,
+      GuidedProposalValidator validator,
+      GuidedDependencyPlanner dependencies,
+      GuidedTranslationProperties properties,
+      Clock clock,
+      GuidedPromptAssembler.PreparationCapability capability) {
     this.sessions = sessions;
     this.repository = repository;
     this.store = store;
@@ -60,6 +93,38 @@ public final class GuidedTranslationService {
     this.dependencies = dependencies;
     this.properties = properties;
     this.clock = clock;
+    preparationCapability = capability != null && capability.ownedBy(prompts) ? capability : null;
+  }
+
+  static GuidedTranslationService fromPureAssemblerFactory(
+      GuidedSessionService sessions,
+      GuidedSessionRepository repository,
+      GuidedTranslationStore store,
+      GuidedClarificationContextStore questions,
+      GuidedDispatchService dispatch,
+      GuidedLlmGatewayClient gateway,
+      GuidedContracts contracts,
+      GuidedPromptAssembler prompts,
+      GuidedSourceInputResolver inputs,
+      GuidedProposalValidator validator,
+      GuidedDependencyPlanner dependencies,
+      GuidedTranslationProperties properties,
+      Clock clock) {
+    return new GuidedTranslationService(
+        sessions,
+        repository,
+        store,
+        questions,
+        dispatch,
+        gateway,
+        contracts,
+        prompts,
+        inputs,
+        validator,
+        dependencies,
+        properties,
+        clock,
+        prompts.preparationCapability());
   }
 
   public JsonNode plan(
@@ -69,8 +134,19 @@ public final class GuidedTranslationService {
             .isActualTransactionActive(),
         "RUNTIME_INCOMPATIBLE",
         409);
-    contracts.validate("v2/guided-planning-commands", command);
+    contracts.validate("v3/guided-planning-commands", command);
     require(id.equals(command.path("sessionId").asText()), "INVALID_CONTRACT", 422);
+    // ar-2-r14-stops ruling 2 (tests[1]): a continuation of a session that a definite runner
+    // refusal of its bootstrap context ended returns that terminal session and makes no runner,
+    // model or assignment request. Every other terminal continuation is unchanged.
+    JsonNode refused = refusedBootstrapSession(controller, id);
+    if (refused != null) {
+      return refused;
+    }
+    JsonNode waiting = prefixWaiting(controller, id, fence, command);
+    if (waiting != null) {
+      return waiting;
+    }
     if (fence == 0) {
       JsonNode owned =
           dispatch.assign(controller, id, "translation-assignment", properties.workerId());
@@ -78,6 +154,40 @@ public final class GuidedTranslationService {
     }
     final long owner = fence;
     reconcile(controller, id, owner);
+    boolean prefix =
+        sessions.translationTransaction(
+            controller, id, owner, current -> repository.incremental().pending(id));
+    if (prefix) {
+      sessions.translationTransaction(
+          controller,
+          id,
+          owner,
+          current -> {
+            checkCommand(current, command);
+            if (store.state(id).path("plan").isNull()
+                || store.state(id).path("plan").isMissingNode()) {
+              ObjectNode imported = repository.incremental().prefixPlan(current.document());
+              store.acceptPlan(id, store.state(id).path("planRevision").asLong(), imported);
+              bootstrapStage(current, "PLAN_ACCEPTED", null);
+            }
+            store.continuation(id, "REPLAYING_PREFIX");
+            return null;
+          });
+      bootstrap(controller, id, owner);
+      return advancePrefix(controller, id, owner);
+    }
+    boolean suffixMaterialize =
+        sessions.translationTransaction(
+            controller,
+            id,
+            owner,
+            current ->
+                repository.incremental().hasBase(id)
+                    && bootstrapReady(current)
+                    && store.state(id).path("continuation").asText().equals("MATERIALIZE"));
+    if (suffixMaterialize) {
+      return finishSuffixMaterialization(controller, id, owner);
+    }
     boolean planned =
         sessions.translationTransaction(
             controller,
@@ -165,7 +275,13 @@ public final class GuidedTranslationService {
       phase = "MATERIALIZED";
     }
     if (phase.equals("MATERIALIZED")) {
-      dependencies.allocate(controller, state.path("document"), plan);
+      if (repository.incremental().pending(id)) {
+        for (JsonNode need : plan.path("needs")) {
+          sessions.importPrefixBinding(controller, id, fence, need);
+        }
+      } else {
+        dependencies.allocate(controller, state.path("document"), plan);
+      }
       sessions.translationTransaction(
           controller,
           id,
@@ -173,6 +289,7 @@ public final class GuidedTranslationService {
           current -> {
             checkPins(id);
             checkBootstrapIdentity(current);
+            GuidedAcceptedPlan.validate(contracts, plan);
             ObjectNode head = store.state(id);
             if (!head.path("plan").equals(plan)) {
               store.acceptPlan(id, head.path("planRevision").asLong(), plan);
@@ -204,11 +321,300 @@ public final class GuidedTranslationService {
     require(!delivery.path("exhausted").asBoolean(), "RUNTIME_INCOMPATIBLE", 409);
     // A callback cannot acknowledge allocations. A lost RPC response leaves the same pending
     // context for a bounded idempotent metadata retry on the next continuation.
-    JsonNode acknowledgement = dispatch.pushContext(controller, id, fence);
+    final JsonNode acknowledgement;
+    try {
+      acknowledgement = dispatch.pushContext(controller, id, fence);
+    } catch (RuntimeException failure) {
+      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.definiteContextRefusal(
+          failure)) {
+        // ar-2-r14-stops ruling 2: a definite refusal is terminal on first receipt, in this same
+        // continuation, with no further delivery. Uncertain outcomes keep the bounded retry.
+        refuseBootstrapDelivery(controller, id, fence, delivery);
+        sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");
+      }
+      throw failure;
+    }
     require(
         finishBootstrap(controller, id, fence, delivery, acknowledgement), "STALE_GENERATION", 409);
     return sessions.translationTransaction(
         controller, id, fence, current -> safe(current.document()));
+  }
+
+  /** One prefix coordinate per durable continuation; no gateway capability enters this branch. */
+  private JsonNode advancePrefix(Authentication controller, String id, long fence) {
+    ObjectNode captured =
+        sessions.translationTransaction(
+            controller,
+            id,
+            fence,
+            current -> {
+              if (!repository.incremental().pending(id) || !bootstrapReady(current)) {
+                return contracts.object().set("done", safe(current.document()));
+              }
+              JsonNode confirmation = current.progress().path("sideEffectConfirmation");
+              if (confirmation.path("status").asText().equals("CONFIRMED")
+                  && confirmation.has("prefixRequestDigest")) {
+                JsonNode confirmed =
+                    repository
+                        .incremental()
+                        .confirmationRequest(current.document(), current.progress(), false);
+                if (confirmed
+                    .path("evidenceHash")
+                    .equals(current.progress().path("evidenceHash"))) {
+                  ObjectNode request =
+                      new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(
+                              jdbc(), contracts)
+                          .identity(sessions.runnerContext(controller, id, fence));
+                  request.put("expectedGeneration", current.progress().path("generation").asInt());
+                  ObjectNode refresh =
+                      contracts
+                          .object()
+                          .put(
+                              "refreshKey",
+                              "prefix-confirmation-"
+                                  + confirmation.path("clarificationId").asText());
+                  refresh.set("refresh", request);
+                  return refresh;
+                }
+              }
+              JsonNode next = repository.incremental().nextAction(id);
+              if (next == null) {
+                int boundary = repository.incremental().initialIndex(id);
+                repository
+                    .incremental()
+                    .switchToLearning(current.document(), "BOUNDARY", boundary, 0, null);
+                current.progress().put("stepIndex", boundary);
+                current.document().put("state", "OBSERVING");
+                repository.save(current);
+                return contracts.object().set("done", safe(current.document()));
+              }
+              int index =
+                  com.citi.put.checks.studio.guided.session.GuidedIncrementalStore.stepIndex(
+                      current.document(), next.path("coordinate").path("stepId").asText());
+              current.progress().put("stepIndex", index);
+              repository.save(current);
+              for (ObjectNode action : repository.actions(id)) {
+                if (action.path("coordinate").equals(next.path("coordinate"))) {
+                  ObjectNode existing = contracts.object().set("existing", action);
+                  return existing;
+                }
+              }
+              ObjectNode context = sessions.runnerContext(controller, id, fence);
+              new com.citi.put.checks.studio.guided.publication.GuidedPublicationEvidenceRepository(
+                      jdbc(), contracts)
+                  .capturePrefixObservation(current, context);
+              ObjectNode result = contracts.object().set("action", next);
+              result.set(
+                  "request",
+                  repository
+                      .incremental()
+                      .issue(
+                          current.document(),
+                          context,
+                          next.path("coordinate"),
+                          current.progress().path("evidenceHash")));
+              return result;
+            });
+    if (captured.has("done")) {
+      return captured.path("done");
+    }
+    if (captured.has("refresh")) {
+      dispatch.observe(
+          controller, id, fence, captured.path("refreshKey").asText(), captured.path("refresh"));
+      return repository.transaction(() -> safe(repository.lock(id).document()));
+    }
+    if (captured.has("existing")) {
+      JsonNode action = captured.path("existing");
+      if (action.path("state").asText().equals("DISPATCHING")) {
+        sessions.lostAcknowledgment(id, action.path("admission").path("admissionId").asText());
+      } else if (action.path("state").asText().equals("ADMITTED")) {
+        ObjectNode command =
+            contracts
+                .object()
+                .put("schemaVersion", 3)
+                .put("sessionId", id)
+                .put("admissionId", action.path("admission").path("admissionId").asText())
+                .put("ownerFence", fence)
+                .put("operationHash", action.path("operationHash").asText());
+        dispatch.dispatch(
+            controller,
+            id,
+            fence,
+            "prefix-dispatch-" + action.path("idempotencyKey").asText(),
+            command);
+      }
+      return repository.transaction(() -> safe(repository.lock(id).document()));
+    }
+    // Successful prefix reads persist producer metadata after bootstrap. Apply the current
+    // metadata to the same runtime before a new coordinate can resolve that private value.
+    try {
+      dispatch.pushContext(controller, id, fence);
+    } catch (RuntimeException failure) {
+      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.definiteContextRefusal(
+          failure)) {
+        sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");
+      }
+      throw failure;
+    }
+    sessions.translationTransaction(
+        controller,
+        id,
+        fence,
+        current -> {
+          require(
+              repository.incremental().pending(id)
+                  && bootstrapReady(current)
+                  && current.document().path("state").asText().equals("REPLAYING_PREFIX"),
+              "STALE_GENERATION",
+              409);
+          JsonNode confirmation = current.progress().path("sideEffectConfirmation");
+          if (confirmation.path("status").asText().equals("CONFIRMED")
+              && confirmation.has("prefixRequestDigest")) {
+            JsonNode confirmed =
+                repository
+                    .incremental()
+                    .confirmationRequest(current.document(), current.progress(), false);
+            require(
+                !confirmed.path("evidenceHash").equals(current.progress().path("evidenceHash")),
+                "STALE_GENERATION",
+                409);
+          }
+          JsonNode next = repository.incremental().nextAction(id);
+          JsonNode request = captured.path("request").path("request");
+          require(
+              next != null
+                  && next.equals(captured.path("action"))
+                  && next.path("coordinate").equals(request.path("coordinate")),
+              "STALE_GENERATION",
+              409);
+          for (ObjectNode action : repository.actions(id)) {
+            require(
+                !action.path("coordinate").equals(request.path("coordinate")),
+                "STALE_GENERATION",
+                409);
+          }
+          ObjectNode context = sessions.runnerContext(controller, id, fence);
+          for (String field :
+              List.of(
+                  "schemaVersion",
+                  "sessionId",
+                  "workerId",
+                  "ownerFence",
+                  "scopeHash",
+                  "contextId",
+                  "contextRevision",
+                  "authoredInputsHash",
+                  "sourceRevision",
+                  "configurationRevision")) {
+            require(request.path(field).equals(context.path(field)), "STALE_GENERATION", 409);
+          }
+          String programHash = GuidedContracts.hash(repository.incremental().program(id));
+          require(
+              request.path("prefixProgramHash").asText().equals(programHash)
+                  && context.path("prefixProgramHash").asText().equals(programHash)
+                  && GuidedContracts.hash(context.path("prefixProgram")).equals(programHash)
+                  && request.path("evidenceHash").equals(current.progress().path("evidenceHash"))
+                  && GuidedContracts.hash(request)
+                      .equals(captured.path("request").path("requestDigest").asText()),
+              "STALE_GENERATION",
+              409);
+          return null;
+        });
+    JsonNode response = dispatch.preparePrefix(captured.path("request"));
+    String kind = response.path("kind").asText();
+    // Prepare DRIFT response is never commit authority. Its owning-worker callback has committed
+    // the one receipt/switch, or this request cannot make the controller enter learning.
+    if (kind.equals("DRIFT")) {
+      return sessions.translationTransaction(
+          controller,
+          id,
+          fence,
+          current -> {
+            require(
+                repository.incremental().duplicateReceipt(id, response.path("receipt")),
+                "UNKNOWN_OUTCOME",
+                409);
+            return safe(current.document());
+          });
+    }
+    sessions.translationTransaction(
+        controller,
+        id,
+        fence,
+        current -> {
+          repository.incremental().verifyPrepared(id, captured.path("request"), response);
+          repository
+              .incremental()
+              .settle(
+                  id,
+                  captured.path("request").path("requestDigest").asText(),
+                  kind.equals("WAIT") ? "WAIT" : "PREPARED");
+          return null;
+        });
+    if (kind.equals("WAIT")) {
+      refresh(controller, id, fence);
+      return repository.transaction(() -> safe(repository.lock(id).document()));
+    }
+    JsonNode proposal = response.path("proposal");
+    final ObjectNode association;
+    try {
+      association =
+          sessions.translationTransaction(
+              controller,
+              id,
+              fence,
+              current -> {
+                JsonNode meaning = null;
+                for (JsonNode obligation : store.state(id).path("plan").path("obligations")) {
+                  if (obligation.path("stepId").equals(proposal.path("coordinate").path("stepId"))
+                      && obligation
+                          .path("occurrence")
+                          .equals(proposal.path("coordinate").path("ordinal"))) {
+                    require(meaning == null, "EVIDENCE_MISMATCH", 409);
+                    meaning = obligation;
+                  }
+                }
+                require(meaning != null, "EVIDENCE_MISMATCH", 409);
+                JsonNode question =
+                    guardAction(
+                        controller,
+                        fence,
+                        current,
+                        meaning,
+                        proposal,
+                        null,
+                        captured.path("request").path("requestDigest").asText());
+                if (question != null) {
+                  return contracts.object().put("awaiting", true);
+                }
+                return store.reserveObligation(
+                    current.document(), meaning.path("obligationId").asText(), proposal);
+              });
+    } catch (GuidedSessionException failure) {
+      stopRejected(controller, id, fence, failure);
+      return repository.transaction(() -> safe(repository.lock(id).document()));
+    }
+    if (association.path("awaiting").asBoolean()) {
+      return repository.transaction(() -> safe(repository.lock(id).document()));
+    }
+    sessions.storePreparation(controller, id, fence, proposal, response.path("preparation"));
+    JsonNode admitted =
+        sessions.admit(controller, id, fence, association.path("admissionKey").asText(), proposal);
+    ObjectNode command =
+        contracts
+            .object()
+            .put("schemaVersion", 3)
+            .put("sessionId", id)
+            .put("admissionId", admitted.path("admission").path("admissionId").asText())
+            .put("ownerFence", fence)
+            .put("operationHash", admitted.path("operationHash").asText());
+    dispatch.dispatch(
+        controller,
+        id,
+        fence,
+        "prefix-dispatch-" + association.path("admissionKey").asText(),
+        command);
+    return repository.transaction(() -> safe(repository.lock(id).document()));
   }
 
   private ObjectNode beginBootstrapDelivery(Authentication controller, String id, long fence) {
@@ -245,6 +651,25 @@ public final class GuidedTranslationService {
               .put("contextHash", GuidedContracts.hash(context));
           repository.save(current);
           return delivery;
+        });
+  }
+
+  /** Records on the pending delivery that the runner refused it (internal progress only). */
+  private void refuseBootstrapDelivery(
+      Authentication controller, String id, long fence, JsonNode delivery) {
+    sessions.translationTransaction(
+        controller,
+        id,
+        fence,
+        current -> {
+          for (JsonNode attempt :
+              current.progress().path("translationBootstrap").path("deliveries")) {
+            if (attempt.path("deliveryId").equals(delivery.path("deliveryId"))) {
+              ((ObjectNode) attempt).put("outcome", "REFUSED");
+            }
+          }
+          repository.save(current);
+          return null;
         });
   }
 
@@ -339,7 +764,8 @@ public final class GuidedTranslationService {
                   .put("identityHash", GuidedContracts.hash(delivery.path("identity")));
           require(!proof.path("deliveryId").asText().isBlank(), "INVALID_CONTRACT", 422);
           repository.save(current);
-          store.continuation(id, "NEXT");
+          store.continuation(
+              id, repository.incremental().pending(id) ? "REPLAYING_PREFIX" : "NEXT");
           return true;
         });
   }
@@ -448,7 +874,11 @@ public final class GuidedTranslationService {
             .isActualTransactionActive(),
         "RUNTIME_INCOMPATIBLE",
         409);
-    contracts.validate("v2/guided-planning-commands", command);
+    contracts.validate("v3/guided-planning-commands", command);
+    JsonNode waiting = prefixWaiting(controller, id, fence, command);
+    if (waiting != null) {
+      return waiting;
+    }
     reconcile(controller, id, fence);
     ObjectNode state =
         sessions.translationTransaction(
@@ -515,7 +945,7 @@ public final class GuidedTranslationService {
                       .path("stepId")
                       .asText();
               List<ObjectNode> actions =
-                  repository.actions(id).stream()
+                  repository.effectiveActions(id).stream()
                       .filter(
                           action ->
                               action.path("coordinate").path("stepId").asText().equals(stepId))
@@ -573,6 +1003,11 @@ public final class GuidedTranslationService {
                   effectiveObligation(current, obligation, proposal),
                   proposal,
                   context);
+              JsonNode confirmation =
+                  guardAction(controller, fence, current, obligation, proposal, attemptIdentity);
+              if (confirmation != null) {
+                return confirmation;
+              }
               return store.reserveObligation(current.document(), obligationId, proposal);
             });
     if (result.path("complete").asBoolean()) {
@@ -590,7 +1025,7 @@ public final class GuidedTranslationService {
             .isActualTransactionActive(),
         "RUNTIME_INCOMPATIBLE",
         409);
-    contracts.validate("v2/guided-planning-commands", command);
+    contracts.validate("v3/guided-planning-commands", command);
     return sessions.translationTransaction(
         controller,
         id,
@@ -616,8 +1051,18 @@ public final class GuidedTranslationService {
             .isActualTransactionActive(),
         "RUNTIME_INCOMPATIBLE",
         409);
-    contracts.validate("v2/guided-planning-commands", command);
+    contracts.validate("v3/guided-planning-commands", command);
+    JsonNode waiting = prefixWaiting(controller, id, fence, command);
+    if (waiting != null) {
+      return waiting;
+    }
     reconcile(controller, id, fence);
+    boolean incremental =
+        sessions.translationTransaction(
+            controller, id, fence, current -> repository.incremental().hasBase(id));
+    if (incremental) {
+      return learnSuffix(controller, id, fence, key, command);
+    }
     sessions.translationTransaction(
         controller,
         id,
@@ -647,12 +1092,317 @@ public final class GuidedTranslationService {
           validator.sourceSelections(current.document(), refined, sourceSelections(current));
           dependencies.validate(current.document(), refined);
           dependencies.allocate(controller, current.document(), refined);
+          GuidedAcceptedPlan.validate(contracts, refined);
           store.acceptPlan(id, state.path("planRevision").asLong(), refined);
           return refined;
         });
     return safe(
         sessions.translationTransaction(
             controller, id, fence, current -> current.document().deepCopy()));
+  }
+
+  private JsonNode learnSuffix(
+      Authentication controller, String id, long fence, String key, JsonNode command) {
+    sessions.translationTransaction(
+        controller,
+        id,
+        fence,
+        current -> {
+          checkCommand(current, command);
+          require(
+              !repository.incremental().pending(id) && bootstrapReady(current),
+              "REVISION_CONFLICT",
+              409);
+          return null;
+        });
+    call(
+        controller,
+        id,
+        fence,
+        key,
+        GuidedModelRequest.Kind.SOURCE_PLAN,
+        (current, response, attemptIdentity) -> {
+          if (response.has("question")) {
+            return question(controller, current, response.path("question"), "source");
+          }
+          JsonNode window = repository.incremental().learningWindow(current.document());
+          ObjectNode selected = validator.admitPlan(current.document(), response, window);
+          inputs.validate(
+              current.document(),
+              store.state(id).path("manifest"),
+              selected.path("sourceReferences"));
+          boolean first = repository.incremental().firstSuffixPending(id);
+          ObjectNode merged = mergeSuffix(current, selected, first);
+          validator.sourceSelections(current.document(), merged, sourceSelections(current));
+          dependencies.validate(current.document(), merged);
+          // Cumulative allocation intent is established before any appended input creates a pending
+          // ACK.
+          dependencies.allocate(controller, current.document(), merged);
+          GuidedAcceptedPlan.validate(contracts, merged);
+          long previous = store.state(id).path("planRevision").asLong();
+          store.acceptPlan(id, previous, merged);
+          store.continuation(id, "MATERIALIZE");
+          return merged;
+        });
+    boolean pending =
+        repository.transaction(
+            () -> store.state(id).path("continuation").asText().equals("MATERIALIZE"));
+    return pending
+        ? finishSuffixMaterialization(controller, id, fence)
+        : repository.transaction(() -> safe(repository.lock(id).document()));
+  }
+
+  private JsonNode finishSuffixMaterialization(Authentication controller, String id, long fence) {
+    ObjectNode state =
+        sessions.translationTransaction(controller, id, fence, current -> store.state(id));
+    long revision = state.path("planRevision").asLong();
+    // OBS-015 B2B-01 P1: admissions, allocations and reads bump materialization_revision after the
+    // last push; the runner accepts an append only at runtime+1 (runtime.ts:180).
+    if (sessions.contextDeliveryId(controller, id, fence) == null) {
+      syncContext(controller, id, fence);
+    }
+    sessions.materialize(
+        controller,
+        id,
+        fence,
+        "suffix-materialize-" + revision,
+        state.path("plan").path("sourceReferences"));
+    pushMaterializedContext(controller, id, fence);
+    return sessions.translationTransaction(
+        controller,
+        id,
+        fence,
+        current -> {
+          require(
+              store.state(id).path("planRevision").asLong() == revision, "REVISION_CONFLICT", 409);
+          store.continuation(id, "REFRESH");
+          return safe(current.document());
+        });
+  }
+
+  /** Applies the current same-version head to the runtime; a definite refusal is terminal. */
+  private void syncContext(Authentication controller, String id, long fence) {
+    try {
+      dispatch.pushContext(controller, id, fence);
+    } catch (RuntimeException failure) {
+      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.definiteContextRefusal(
+          failure)) {
+        sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");
+      }
+      throw failure;
+    }
+  }
+
+  /**
+   * OBS-015 B2B-01 P2 (A18-4): a keyed append delivery is resent with the same id only after
+   * transport uncertainty, at most three sends and never at or after its frozen lease. Any closed
+   * runner refusal is final for the delivery and terminal on first receipt. The delivery becomes
+   * ACKNOWLEDGED only from a validated runner ACK ({@link GuidedDispatchService#pushContext}).
+   */
+  private void pushMaterializedContext(Authentication controller, String id, long fence) {
+    String delivery = sessions.contextDeliveryId(controller, id, fence);
+    if (delivery == null) {
+      syncContext(controller, id, fence);
+      return;
+    }
+    boolean send =
+        sessions.translationTransaction(
+            controller,
+            id,
+            fence,
+            current -> {
+              JsonNode recorded = current.progress().path("suffixDelivery");
+              ObjectNode counter =
+                  recorded.isObject() && recorded.path("deliveryId").asText().equals(delivery)
+                      ? (ObjectNode) recorded
+                      : current
+                          .progress()
+                          .putObject("suffixDelivery")
+                          .put("deliveryId", delivery)
+                          .put("sends", 0);
+              Instant lease =
+                  Instant.parse(
+                      sessions
+                          .runnerContext(controller, id, fence)
+                          .path("leaseExpiresAt")
+                          .asText());
+              int sends = counter.path("sends").asInt();
+              if (sends >= 3 || !clock.instant().isBefore(lease)) {
+                return false;
+              }
+              counter.put("sends", sends + 1);
+              repository.save(current);
+              return true;
+            });
+    if (!send) {
+      sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");
+      throw refusedAppend();
+    }
+    try {
+      dispatch.pushContext(controller, id, fence);
+    } catch (RuntimeException failure) {
+      if (com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.closedContextRefusal(
+          failure)) {
+        sessions.translationTransaction(
+            controller,
+            id,
+            fence,
+            current -> {
+              JsonNode recorded = current.progress().path("suffixDelivery");
+              if (recorded.isObject() && recorded.path("deliveryId").asText().equals(delivery)) {
+                ((ObjectNode) recorded).put("outcome", "REFUSED");
+                repository.save(current);
+              }
+              return null;
+            });
+        sessions.failTranslation(controller, id, fence, "RUNTIME_INCOMPATIBLE");
+        throw refusedAppend();
+      }
+      throw failure;
+    }
+  }
+
+  private static GuidedSessionException refusedAppend() {
+    return new GuidedSessionException(
+        "RUNTIME_INCOMPATIBLE",
+        409,
+        com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient.CONTEXT_REFUSED,
+        false,
+        null);
+  }
+
+  private ObjectNode mergeSuffix(
+      GuidedSessionRepository.Session current, ObjectNode selected, boolean first) {
+    String id = current.document().path("sessionId").asText();
+    JsonNode previous = store.state(id).path("plan");
+    ObjectNode result = contracts.object();
+    var references = result.putArray("sourceReferences");
+    previous.path("sourceReferences").forEach(reference -> references.add(reference.deepCopy()));
+    java.util.Map<Integer, Integer> referenceIndexes = new java.util.HashMap<>();
+    for (int at = 0; at < selected.path("sourceReferences").size(); at++) {
+      JsonNode reference = selected.path("sourceReferences").get(at);
+      int index = -1;
+      for (int existing = 0; existing < references.size(); existing++) {
+        if (references.get(existing).equals(reference)) {
+          index = existing;
+        }
+      }
+      if (index < 0) {
+        index = references.size();
+        references.add(reference.deepCopy());
+      }
+      referenceIndexes.put(at, index);
+    }
+    var obligations = result.putArray("obligations");
+    java.util.Set<String> retained = new java.util.HashSet<>();
+    for (ObjectNode action : repository.effectiveActions(id)) {
+      if (action.path("state").asText().equals("SUCCEEDED")) {
+        retained.add(action.path("admission").path("admissionId").asText());
+      }
+    }
+    for (JsonNode old : previous.path("obligations")) {
+      ObjectNode association = store.obligation(id, old.path("obligationId").asText());
+      if (association != null && retained.contains(association.path("admissionId").asText())) {
+        obligations.add(old.deepCopy());
+      }
+    }
+    java.util.Map<String, String> freshNeeds = new java.util.HashMap<>();
+    var needs = result.putArray("needs");
+    java.util.Map<String, ObjectNode> needsById = new java.util.LinkedHashMap<>();
+    java.util.Set<String> produced = new java.util.HashSet<>();
+    for (JsonNode producer : materialized(current).path("producers")) {
+      produced.add(producer.path("bindingId").asText());
+    }
+    for (JsonNode old : previous.path("needs")) {
+      if (!first || produced.contains(old.path("bindingId").asText())) {
+        ObjectNode kept = old.deepCopy();
+        if (first) {
+          var consumers = kept.putArray("consumers");
+          for (JsonNode oldConsumer : old.path("consumers")) {
+            boolean successful = false;
+            for (JsonNode edge : materialized(current).path("consumerEdges")) {
+              successful |=
+                  edge.path("bindingId").equals(old.path("bindingId"))
+                      && edge.path("coordinate").path("stepId").equals(oldConsumer.path("stepId"))
+                      && edge.path("argumentSlot").equals(oldConsumer.path("argumentSlot"))
+                      && retained.contains(edge.path("consumerAdmissionId").asText());
+            }
+            if (successful) {
+              consumers.add(oldConsumer.deepCopy());
+            }
+          }
+        }
+        needsById.put(old.path("needId").asText(), kept);
+      }
+    }
+    for (JsonNode candidate : selected.path("needs")) {
+      ObjectNode need = candidate.deepCopy();
+      need.remove("bindingId");
+      String needId = need.path("needId").asText();
+      ObjectNode old = needsById.get(needId);
+      if (old != null) {
+        require(
+            old.path("producerStepId").equals(need.path("producerStepId")), "BINDING_ORDER", 422);
+        var consumers = (com.fasterxml.jackson.databind.node.ArrayNode) old.path("consumers");
+        for (JsonNode consumer : need.path("consumers")) {
+          boolean exists = false;
+          for (JsonNode previousConsumer : consumers) {
+            exists |= previousConsumer.equals(consumer);
+          }
+          if (!exists) {
+            consumers.add(consumer.deepCopy());
+          }
+        }
+      } else {
+        boolean imported = false;
+        for (JsonNode former : previous.path("needs")) {
+          imported |= former.path("needId").asText().equals(needId);
+        }
+        if (first && imported) {
+          String fresh = UUID.randomUUID().toString();
+          freshNeeds.put(needId, fresh);
+          need.put("needId", fresh);
+          needId = fresh;
+        }
+        needsById.put(needId, need);
+      }
+    }
+    needsById.values().forEach(needs::add);
+    for (JsonNode candidate : selected.path("obligations")) {
+      ObjectNode obligation = candidate.deepCopy();
+      if (!obligation.path("referenceIndex").isNull()) {
+        obligation.put(
+            "referenceIndex", referenceIndexes.get(obligation.path("referenceIndex").asInt()));
+      }
+      String needId = obligation.path("needId").asText();
+      if (freshNeeds.containsKey(needId)) {
+        obligation.put("needId", freshNeeds.get(needId));
+      }
+      if (!first) {
+        for (JsonNode old : previous.path("obligations")) {
+          if (GuidedProposalValidator.sameOccurrence(old, obligation)) {
+            ObjectNode expected = old.deepCopy(), offered = obligation.deepCopy();
+            expected.remove("obligationId");
+            offered.remove("obligationId");
+            require(expected.equals(offered), "IDEMPOTENCY_CONFLICT", 409);
+            obligation.set("obligationId", old.path("obligationId"));
+          }
+        }
+      }
+      obligations.add(obligation);
+    }
+    java.util.List<JsonNode> ordered = new java.util.ArrayList<>();
+    obligations.forEach(ordered::add);
+    ordered.sort(
+        java.util.Comparator.comparingInt(
+                (JsonNode obligation) ->
+                    com.citi.put.checks.studio.guided.session.GuidedIncrementalStore.stepIndex(
+                        current.document(), obligation.path("stepId").asText()))
+            .thenComparingInt(obligation -> obligation.path("occurrence").asInt()));
+    obligations.removeAll();
+    ordered.forEach(obligations::add);
+    GuidedAcceptedPlan.validateBeforeAllocation(contracts, result);
+    return result;
   }
 
   private void checkCommand(GuidedSessionRepository.Session current, JsonNode command) {
@@ -702,6 +1452,29 @@ public final class GuidedTranslationService {
     for (int index = 1; index <= 3; index++) {
       final int attemptNumber = index;
       String translator = UUID.randomUUID().toString();
+      GuidedPromptAssembler.PreparedProjection prepared = null;
+      if (preparationCapability != null) {
+        try {
+          ObjectNode captured =
+              sessions.translationTransaction(
+                  controller,
+                  id,
+                  fence,
+                  current ->
+                      capturePromptInputsLocked(current, kind).positiveContext(kind, repairs));
+          prepared =
+              prompts.preparePure(
+                  preparationCapability,
+                  captured,
+                  key,
+                  attemptNumber,
+                  kind,
+                  properties.maxOutputTokens());
+        } catch (RuntimeException unavailable) {
+          // Preparation is not authority: original actual reservation supplies current refusal.
+        }
+      }
+      final GuidedPromptAssembler.PreparedProjection candidate = prepared;
       Reserved reserved;
       try {
         reserved =
@@ -724,6 +1497,7 @@ public final class GuidedTranslationService {
                       409);
                   JsonNode abandoned = store.state(id).path("activeAttempt");
                   String effectiveKey = key;
+                  boolean nestedSettlement = false;
                   if (!abandoned.isNull()
                       && !abandoned.isMissingNode()
                       && !Instant.parse(abandoned.path("leaseUntil").asText())
@@ -739,32 +1513,48 @@ public final class GuidedTranslationService {
                     store.finishAttempt(
                         id, abandoned.path("attemptId").asText(), "UNKNOWN_CALL", null, null, null);
                     effectiveKey = key + "-recovery-" + UUID.randomUUID();
+                    nestedSettlement = true;
                   }
+                  // Nested settlement updates a different detached wrapper; never borrow it.
+                  var freshInputOwner =
+                      nestedSettlement && preparationCapability != null
+                          ? repository.lock(id)
+                          : current;
                   GuidedModelRequest request =
-                      request(current, effectiveKey, attemptNumber, kind, repairs);
-                  ObjectNode payload =
-                      contracts
-                          .object()
-                          .put("kind", request.kind().name())
-                          .put("requestId", request.requestId())
-                          .put("attempt", request.attempt());
-                  payload.set("context", request.projection().document());
-                  ObjectNode wireBound =
-                      contracts
-                          .object()
-                          .put("contents", payload.toString())
-                          .put("systemInstruction", request.outputContract());
-                  wireBound.set("responseJsonSchema", request.responseSchema());
-                  // Count escaped content plus actual supplied schema; allowance covers SDK field
-                  // wrappers.
-                  int bytes = wireBound.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
+                      request(
+                          freshInputOwner, effectiveKey, attemptNumber, kind, repairs, candidate);
+                  ObjectNode projectionDocument;
+                  Integer preparedBytes = candidate == null ? null : candidate.bytesFor(request);
+                  int bytes;
+                  if (preparedBytes != null) {
+                    projectionDocument = request.projection().document();
+                    bytes = preparedBytes;
+                  } else {
+                    ObjectNode payload =
+                        contracts
+                            .object()
+                            .put("kind", request.kind().name())
+                            .put("requestId", request.requestId())
+                            .put("attempt", request.attempt());
+                    projectionDocument = request.projection().document();
+                    payload.set("context", projectionDocument);
+                    ObjectNode wireBound =
+                        contracts
+                            .object()
+                            .put("contents", payload.toString())
+                            .put("systemInstruction", request.outputContract());
+                    wireBound.set("responseJsonSchema", request.responseSchema());
+                    // Count escaped content plus actual supplied schema; allowance covers SDK field
+                    // wrappers.
+                    bytes = wireBound.toString().getBytes(StandardCharsets.UTF_8).length + 2048;
+                  }
                   if (bytes > properties.maxInputBytes()) {
                     sessions.failTranslation(controller, id, fence, "BUDGET_EXCEEDED");
                     return null;
                   }
                   if (!store.hasAttempt(id, request.requestId(), attemptNumber)
                       && !sessions.modelReservationFitsLocked(
-                          current, bytes, request.maxOutputTokens())) {
+                          freshInputOwner, bytes, request.maxOutputTokens())) {
                     return null;
                   }
                   ObjectNode frozenState = store.state(id);
@@ -777,13 +1567,14 @@ public final class GuidedTranslationService {
                       409);
                   long revision = frozenState.path("planRevision").asLong();
                   Instant deadline = clock.instant().plusSeconds(properties.callSeconds());
-                  Instant hard = Instant.parse(current.document().path("expiresAt").asText());
+                  Instant hard =
+                      Instant.parse(freshInputOwner.document().path("expiresAt").asText());
                   if (deadline.isAfter(hard)) {
                     deadline = hard;
                   }
                   var attempt =
                       store.reserveAttempt(
-                          current.document(),
+                          freshInputOwner.document(),
                           request.requestId(),
                           attemptNumber,
                           kind.name(),
@@ -793,7 +1584,7 @@ public final class GuidedTranslationService {
                                   .setAll(
                                       java.util.Map.of(
                                           "context",
-                                          request.projection().document(),
+                                          projectionDocument,
                                           "schemaPins",
                                           prompts.schemaProvenance()))),
                           revision,
@@ -815,7 +1606,7 @@ public final class GuidedTranslationService {
       } catch (GuidedSessionException failure) {
         // Source/pin/repair refusal may roll back a joined transaction. Preserve any late receipt.
         sessions.reconcileLateModelUsage(controller, id, fence);
-        stopRejected(controller, id, fence, failure.getMessage());
+        stopRejected(controller, id, fence, failure);
         throw failure;
       }
       // Commit numeric overage/terminal stop before refusal. Never throw inside that transaction.
@@ -920,6 +1711,19 @@ public final class GuidedTranslationService {
                     return contracts.object().put("rejected", true);
                   }
                   if (received.proposal().path("status").asText().equals("UNSUPPORTED")) {
+                    if (kind == GuidedModelRequest.Kind.NEXT_ACTION
+                        && java.util.Set.of("MISSING_SOURCE", "INSUFFICIENT_EVIDENCE")
+                            .contains(received.proposal().path("reasonCode").asText())
+                        && sessions.annotateLoginFailure(controller, id, fence)) {
+                      store.finishAttempt(
+                          id,
+                          reserved.attempt().attemptId(),
+                          "APPLIED",
+                          received.proposal(),
+                          received.inputTokens(),
+                          received.outputTokens());
+                      return safe(repository.lock(id).document());
+                    }
                     sessions.failTranslation(
                         controller,
                         id,
@@ -1003,12 +1807,24 @@ public final class GuidedTranslationService {
               });
         }
         if (rejected
+            && kind == GuidedModelRequest.Kind.NEXT_ACTION
+            && java.util.Set.of(
+                    "INVALID_CONTRACT",
+                    "POLICY_DENIED",
+                    "MISSING_SOURCE",
+                    "INSUFFICIENT_EVIDENCE",
+                    "REFERENCE_MISMATCH")
+                .contains(failure.getMessage())
+            && sessions.annotateLoginFailure(controller, id, fence)) {
+          return safe(sessions.secretSession(id));
+        }
+        if (rejected
             && index < 3
             && List.of("INVALID_CONTRACT", "BINDING_ORDER").contains(failure.getMessage())) {
           repairs.add(failure.getMessage());
           continue;
         }
-        stopRejected(controller, id, fence, failure.getMessage());
+        stopRejected(controller, id, fence, failure);
         throw failure;
       }
       if (received.code() != GuidedModelResponse.Code.INVALID_RESPONSE || index == 3) {
@@ -1036,15 +1852,124 @@ public final class GuidedTranslationService {
     }
   }
 
-  private void stopRejected(Authentication controller, String id, long fence, String code) {
-    String terminalCode = code.equals("EVIDENCE_MISMATCH") ? "INVALID_CONTRACT" : code;
+  /**
+   * STUDIO-OBS-014 AC-4/5/6 (AR-2 a, f): the governed action guard on a structurally valid
+   * proposal. A refusal is {@code 422 POLICY_DENIED} with the closed {@link
+   * com.citi.put.checks.studio.guided.policy.GuidedPolicyReason} as its message code, audited at
+   * the decision (AC-10), and goes through the existing rejected-proposal path (login annotation,
+   * then the terminal mapping in {@link #stopRejected}). Under {@code CLARIFY_FIRST} the first
+   * side-effecting action of the session raises one server-made confirmation instead; the returned
+   * node is that question, and nothing is admitted.
+   */
+  private JsonNode guardAction(
+      Authentication controller,
+      long fence,
+      GuidedSessionRepository.Session current,
+      JsonNode obligation,
+      JsonNode proposal,
+      JsonNode attemptIdentity) {
+    return guardAction(controller, fence, current, obligation, proposal, attemptIdentity, null);
+  }
+
+  private JsonNode guardAction(
+      Authentication controller,
+      long fence,
+      GuidedSessionRepository.Session current,
+      JsonNode obligation,
+      JsonNode proposal,
+      JsonNode attemptIdentity,
+      String prefixRequestDigest) {
+    String id = current.document().path("sessionId").asText();
+    JsonNode target = proposal.path("target");
+    String stepId = obligation.path("stepId").asText();
+    JsonNode manifest = store.state(id).path("manifest");
+    String authored = "";
+    for (JsonNode step : manifest.path("sourceSteps")) {
+      if (step.path("stepId").asText().equals(stepId)) {
+        authored = step.path("text").asText();
+      }
+    }
+    var decision =
+        GuidedActionGuard.evaluateProposal(
+            current.progress(), manifest, proposal, store.frozenPolicy(id));
+    if (decision.refused()) {
+      com.citi.put.checks.studio.guided.audit.StudioActionAudit.guidedActionRefused(
+          current.document(),
+          attemptIdentity == null ? null : attemptIdentity.path("attemptId").asText(null),
+          proposal,
+          decision.refusal().name());
+      throw new GuidedSessionException(
+          "POLICY_DENIED", 422, decision.refusal().name(), false, null);
+    }
+    if (!decision.confirmFirst()) {
+      return null;
+    }
+    ObjectNode question =
+        contracts
+            .object()
+            .put("schemaVersion", 3)
+            .put("phase", "observed")
+            .put("clarificationId", UUID.randomUUID().toString())
+            .put("sessionId", id)
+            .put("scopeHash", current.document().path("scopeHash").asText())
+            .put("reason", "SIDE_EFFECT_CONFIRMATION")
+            .put("promptCode", "CONFIRM_ACTION")
+            .put("expiresAt", current.document().path("expiresAt").asText());
+    question
+        .putObject("coordinate")
+        .put("stepId", stepId)
+        .set("ordinal", obligation.path("occurrence"));
+    question.set("documentId", current.progress().path("documentId"));
+    question.put("generation", current.progress().path("generation").asInt());
+    String label = authored.isBlank() ? "Confirm this action" : authored;
+    question
+        .putArray("choices")
+        .addObject()
+        .put("choiceId", UUID.randomUUID().toString())
+        .put(
+            "safeLabel",
+            label.substring(
+                0,
+                label.offsetByCodePoints(
+                    0, Math.min(256, label.codePointCount(0, label.length())))))
+        .put("labelSource", "AUTHORED")
+        .setAll(
+            java.util.Map.of(
+                "nodeId",
+                target.has("nodeId")
+                    ? target.path("nodeId")
+                    : com.fasterxml.jackson.databind.node.NullNode.instance,
+                "bindingId",
+                com.fasterxml.jackson.databind.node.NullNode.instance));
+    contracts.validate("v3/clarification", question);
+    return sessions.sideEffectConfirmation(controller, id, fence, question, prefixRequestDigest);
+  }
+
+  private void stopRejected(
+      Authentication controller, String id, long fence, GuidedSessionException failure) {
+    String code = failure.getMessage();
+    // AR-2 a: a POLICY_DENIED that carries a governed reason ends FAILED with errorCode
+    // POLICY_DENIED. Every other POLICY_DENIED (the password-control refusals) keeps today's
+    // mapping to INVALID_CONTRACT, so OBS-007 behaviour is unchanged.
+    boolean governed =
+        code.equals("POLICY_DENIED")
+            && com.citi.put.checks.studio.guided.policy.GuidedPolicyReason.of(failure.messageCode())
+                != null;
+    String terminalCode =
+        governed
+            ? "POLICY_DENIED"
+            : java.util.Set.of("EVIDENCE_MISMATCH", "POLICY_DENIED", "REFERENCE_MISMATCH")
+                    .contains(code)
+                ? "INVALID_CONTRACT"
+                : code;
     if (!List.of(
             "BUDGET_EXCEEDED",
             "MISSING_SOURCE",
             "INVALID_CONTRACT",
             "RUNTIME_INCOMPATIBLE",
             "REVISION_CONFLICT",
-            "BINDING_ORDER")
+            "BINDING_ORDER",
+            "POLICY_DENIED")
         .contains(terminalCode)) {
       return;
     }
@@ -1061,6 +1986,69 @@ public final class GuidedTranslationService {
       int attempt,
       GuidedModelRequest.Kind kind,
       List<String> repairs) {
+    return request(current, key, attempt, kind, repairs, null);
+  }
+
+  private GuidedModelRequest request(
+      GuidedSessionRepository.Session current,
+      String key,
+      int attempt,
+      GuidedModelRequest.Kind kind,
+      List<String> repairs,
+      GuidedPromptAssembler.PreparedProjection prepared) {
+    return capturePromptInputsLocked(current, kind).complete(key, attempt, kind, repairs, prepared);
+  }
+
+  private final class PromptInputs {
+    private final JsonNode session, progress, state, safeInputs, remaining, selections;
+
+    private PromptInputs(
+        JsonNode session,
+        JsonNode progress,
+        JsonNode state,
+        JsonNode safeInputs,
+        JsonNode remaining,
+        JsonNode selections) {
+      this.session = session;
+      this.progress = progress;
+      this.state = state;
+      this.safeInputs = safeInputs;
+      this.remaining = remaining;
+      this.selections = selections;
+    }
+
+    private ObjectNode positiveContext(GuidedModelRequest.Kind kind, List<String> repairs) {
+      return prompts
+          .buildPositiveContext(
+              kind, session, progress, state, safeInputs, remaining, selections, repairs)
+          .deepCopy();
+    }
+
+    private GuidedModelRequest complete(
+        String key,
+        int attempt,
+        GuidedModelRequest.Kind kind,
+        List<String> repairs,
+        GuidedPromptAssembler.PreparedProjection prepared) {
+      return prompts.completePreparedOrOriginal(
+          preparationCapability,
+          prepared,
+          key,
+          attempt,
+          kind,
+          session,
+          progress,
+          state,
+          safeInputs,
+          remaining,
+          selections,
+          repairs,
+          properties.maxOutputTokens());
+    }
+  }
+
+  private PromptInputs capturePromptInputsLocked(
+      GuidedSessionRepository.Session current, GuidedModelRequest.Kind kind) {
     String id = current.document().path("sessionId").asText();
     JsonNode state = store.state(id);
     var safeInputs = contracts.object().putArray("items");
@@ -1089,7 +2077,7 @@ public final class GuidedTranslationService {
             .get(current.progress().path("stepIndex").asInt())
             .path("stepId")
             .asText();
-    List<ObjectNode> actions = repository.actions(id);
+    List<ObjectNode> actions = repository.effectiveActions(id);
     for (JsonNode obligation : state.path("plan").path("obligations")) {
       if (!obligation.path("stepId").asText().equals(step)) {
         continue;
@@ -1114,19 +2102,12 @@ public final class GuidedTranslationService {
       remaining.removeAll();
       state.path("plan").path("obligations").forEach(remaining::add);
     }
+    if (kind == GuidedModelRequest.Kind.SOURCE_PLAN && repository.incremental().hasBase(id)) {
+      progress.set("learningWindow", repository.incremental().learningWindow(current.document()));
+    }
     progress.put("translationOrdinal", ordinal);
-    return prompts.assemble(
-        key,
-        attempt,
-        kind,
-        current.document(),
-        progress,
-        state,
-        safeInputs,
-        remaining,
-        sourceSelections(current),
-        repairs,
-        properties.maxOutputTokens());
+    return new PromptInputs(
+        current.document(), progress, state, safeInputs, remaining, sourceSelections(current));
   }
 
   private ObjectNode materialized(GuidedSessionRepository.Session current) {
@@ -1218,7 +2199,7 @@ public final class GuidedTranslationService {
     ObjectNode question =
         contracts
             .object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("phase", phase)
             .put("clarificationId", UUID.randomUUID().toString())
             .put("sessionId", current.document().path("sessionId").asText())
@@ -1256,6 +2237,10 @@ public final class GuidedTranslationService {
       JsonNode meaning = choice.path("meaning");
       require(seenMeanings.add(GuidedContracts.hash(meaning)), "INVALID_CONTRACT", 422);
       String label;
+      // STUDIO-OBS-014 AC-7: where the label text came from, so the UI can mark page-derived
+      // labels untrusted. Secret references name their ID only (I-C11), never a value.
+      String labelSource;
+      JsonNode pageNode = null;
       if (phase.equals("source")) {
         validator.sourceMeaning(current.document(), meaning);
         require(meaning.path("need").equals(sourceNeed), "INVALID_CONTRACT", 422);
@@ -1275,7 +2260,11 @@ public final class GuidedTranslationService {
             refs);
         JsonNode manifest =
             store.state(current.document().path("sessionId").asText()).path("manifest");
-        label = "Saved input choice " + (++index);
+        label =
+            meaning.path("kind").asText().equals("secretRef")
+                ? meaning.path("referenceName").asText()
+                : "Saved input choice " + (++index);
+        labelSource = "SAVED_INPUT";
         if (meaning.path("referenceKind").asText().equals("sourceSpan")) {
           for (JsonNode source : manifest.path("sourceSteps")) {
             if (source.path("stepId").equals(meaning.path("stepId"))) {
@@ -1286,6 +2275,7 @@ public final class GuidedTranslationService {
                       .substring(
                           meaning.path("startUtf16").asInt(), meaning.path("endUtf16").asInt());
               label = "Use authored text: " + excerpt.substring(0, Math.min(200, excerpt.length()));
+              labelSource = "AUTHORED";
             }
           }
         }
@@ -1332,24 +2322,38 @@ public final class GuidedTranslationService {
         if (label.isBlank()) {
           label = "Field " + (++index);
         }
+        // Every observed-phase choice names a page node: PAGE, with that node's role and region,
+        // taken from the sanitized observation the worker reported (never raw DOM).
+        labelSource = "PAGE";
+        pageNode = node;
       }
-      choices
-          .addObject()
-          .put("choiceId", choiceId)
-          .put("safeLabel", label)
-          .setAll(
-              java.util.Map.of(
-                  "nodeId",
-                  phase.equals("source")
-                      ? com.fasterxml.jackson.databind.node.NullNode.instance
-                      : meaning.path("nodeId"),
-                  "bindingId",
-                  phase.equals("source")
-                      ? com.fasterxml.jackson.databind.node.NullNode.instance
-                      : meaning.path("bindingId")));
+      ObjectNode emitted =
+          choices
+              .addObject()
+              .put("choiceId", choiceId)
+              .put("safeLabel", label)
+              .put("labelSource", labelSource);
+      if (pageNode != null) {
+        emitted.put("role", pageNode.path("role").asText());
+        emitted.set(
+            "region",
+            pageNode.path("regionId").isTextual()
+                ? pageNode.path("regionId")
+                : com.fasterxml.jackson.databind.node.NullNode.instance);
+      }
+      emitted.setAll(
+          java.util.Map.of(
+              "nodeId",
+              phase.equals("source")
+                  ? com.fasterxml.jackson.databind.node.NullNode.instance
+                  : meaning.path("nodeId"),
+              "bindingId",
+              phase.equals("source")
+                  ? com.fasterxml.jackson.databind.node.NullNode.instance
+                  : meaning.path("bindingId")));
       meanings.addObject().put("choiceId", choiceId).set("meaning", choice.path("meaning"));
     }
-    contracts.validate("v2/clarification", question);
+    contracts.validate("v3/clarification", question);
     JsonNode capture =
         phase.equals("observed")
             ? questionCapture(controller, current, candidate, attemptIdentity)
@@ -1417,7 +2421,7 @@ public final class GuidedTranslationService {
       capture.set(key, context.path(key));
     }
     capture.set("observationHash", evidence.path("observationHash"));
-    contracts.validate("v2/replay-validation#/definitions/QuestionCapture1", capture);
+    contracts.validate("v3/replay-validation#/definitions/QuestionCapture1", capture);
     return capture;
   }
 
@@ -1458,7 +2462,7 @@ public final class GuidedTranslationService {
     ObjectNode request =
         contracts
             .object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("sessionId", id)
             .put("admissionId", admission.path("admission").path("admissionId").asText())
             .put("ownerFence", fence)
@@ -1543,6 +2547,11 @@ public final class GuidedTranslationService {
 
   /** Availability is only a reason to defer inference, never an executable target selection. */
   static boolean acquisitionAvailable(JsonNode progress, JsonNode obligation) {
+    return acquisitionAvailable(progress, obligation, null);
+  }
+
+  static boolean acquisitionAvailable(
+      JsonNode progress, JsonNode obligation, JsonNode acceptedPlan) {
     String operation = obligation.path("operationKind").asText();
     if (operation.equals("navigate")
         || operation.equals("assert")
@@ -1557,6 +2566,11 @@ public final class GuidedTranslationService {
             && !observation.path("coverage").path("reason").asText().equals("unsupportedSurface"),
         "UNSUPPORTED_SURFACE",
         422);
+    if (acceptedSecretFill(acceptedPlan, obligation)) {
+      JsonNode count = observation.path("coverage").path("passwordControls");
+      // This count permits inference only. The live prepare/fill resolver remains authoritative.
+      return count.isIntegralNumber() && count.canConvertToInt() && count.intValue() == 1;
+    }
     String intent = obligation.path("targetIntent").asText();
     JsonNode selected = obligation.path("selectedLocator");
     for (JsonNode node : observation.path("nodes")) {
@@ -1582,12 +2596,45 @@ public final class GuidedTranslationService {
     return false;
   }
 
+  private static boolean acceptedSecretFill(JsonNode plan, JsonNode obligation) {
+    if (plan == null
+        || !plan.isObject()
+        || !obligation.path("operationKind").asText().equals("fill")) {
+      return false;
+    }
+    JsonNode index = obligation.path("referenceIndex"), references = plan.path("sourceReferences");
+    if (!index.isIntegralNumber()
+        || !index.canConvertToInt()
+        || !references.isArray()
+        || index.intValue() < 0
+        || index.intValue() >= references.size()) {
+      return false;
+    }
+    JsonNode reference = references.get(index.intValue());
+    if (!reference.path("referenceKind").asText().equals("configuration")
+        || !reference.path("kind").asText().equals("secretRef")
+        || !reference.path("stepId").equals(obligation.path("stepId"))
+        || !reference.path("intendedSlot").asText().equals("fill.value")) {
+      return false;
+    }
+    for (JsonNode accepted : plan.path("obligations")) {
+      if (accepted.path("operationKind").equals(obligation.path("operationKind"))
+          && accepted.path("stepId").equals(obligation.path("stepId"))
+          && accepted.path("occurrence").equals(obligation.path("occurrence"))
+          && accepted.path("referenceIndex").equals(index)
+          && accepted.path("obligationId").equals(obligation.path("obligationId"))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   private ObjectNode acquisitionRequest(GuidedSessionRepository.Session current) {
     ObjectNode result =
         new com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService(jdbc(), contracts)
             .identity(materialized(current));
     result.set("expectedGeneration", current.progress().path("generation"));
-    contracts.validate("v2/observation-refresh", result);
+    contracts.validate("v3/observation-refresh", result);
     return result;
   }
 
@@ -1604,7 +2651,8 @@ public final class GuidedTranslationService {
                 require(bootstrapReady(current), "RUNTIME_INCOMPATIBLE", 409);
                 JsonNode state = store.state(id),
                     obligation = nextAcquisitionObligation(current, state);
-                boolean available = acquisitionAvailable(current.progress(), obligation);
+                boolean available =
+                    acquisitionAvailable(current.progress(), obligation, state.path("plan"));
                 return store.acquire(
                     current,
                     state,
@@ -1644,7 +2692,7 @@ public final class GuidedTranslationService {
                     obligation,
                     claim,
                     response,
-                    acquisitionAvailable(current.progress(), obligation));
+                    acquisitionAvailable(current.progress(), obligation, state.path("plan")));
               });
       if (settled.disposition() == GuidedTranslationStore.AcquisitionDisposition.REFUSED) {
         sessions.failTranslation(controller, id, fence, settled.errorCode());
@@ -1722,6 +2770,53 @@ public final class GuidedTranslationService {
             controller, id, fence, current -> current.progress().path("generation").asInt());
     identity.put("expectedGeneration", generation);
     dispatch.observe(controller, id, fence, "refresh-" + generation, identity);
+  }
+
+  /**
+   * The safe view of a session that ended FAILED because the runner definitely refused a bootstrap
+   * context delivery (outcome REFUSED, recorded by {@link #refuseBootstrapDelivery}), else null.
+   */
+  private JsonNode prefixWaiting(
+      Authentication controller, String id, long fence, JsonNode command) {
+    com.citi.put.checks.studio.guided.session.GuidedInternalSecurity.requireRole(
+        controller, "backend-controller");
+    return repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          if (!current.document().path("state").asText().equals("AWAITING_CLARIFICATION")
+              || !repository.incremental().pending(id)) {
+            return null;
+          }
+          // Waiting blocks inference but does not turn a stale controller/source/lease into valid
+          // continuation authority. Reuse the same current checks and immutable command pins.
+          return sessions.translationTransaction(
+              controller,
+              id,
+              fence,
+              locked -> {
+                checkCommand(locked, command);
+                return safe(locked.document());
+              });
+        });
+  }
+
+  private JsonNode refusedBootstrapSession(Authentication controller, String id) {
+    com.citi.put.checks.studio.guided.session.GuidedInternalSecurity.requireRole(
+        controller, "backend-controller");
+    return repository.transaction(
+        () -> {
+          var session = repository.lock(id);
+          if (!session.document().path("state").asText().equals("FAILED")) {
+            return null;
+          }
+          for (JsonNode delivery :
+              session.progress().path("translationBootstrap").path("deliveries")) {
+            if (delivery.path("outcome").asText().equals("REFUSED")) {
+              return safe(session.document());
+            }
+          }
+          return null;
+        });
   }
 
   private ObjectNode safe(JsonNode session) {

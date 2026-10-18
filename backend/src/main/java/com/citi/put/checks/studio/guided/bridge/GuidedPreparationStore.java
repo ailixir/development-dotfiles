@@ -20,8 +20,8 @@ public final class GuidedPreparationStore {
     this.contracts = contracts;
   }
 
-  public void store(JsonNode proof, JsonNode proposal, Instant now) {
-    contracts.validate("v2/bridge#/definitions/preparation", proof);
+  public boolean store(JsonNode proof, JsonNode proposal, Instant now) {
+    contracts.validate("v3/bridge#/definitions/preparation", proof);
     require(
         proof.path("requestDigest").asText().equals(GuidedContracts.hash(proposal))
             && proof.path("evidenceHash").equals(proposal.path("evidenceHash"))
@@ -29,6 +29,20 @@ public final class GuidedPreparationStore {
             && Instant.parse(proof.path("expiresAt").asText()).isAfter(now),
         "STALE_GENERATION",
         409);
+    var old =
+        jdbc.queryForList(
+            "SELECT proof::text,request_digest FROM studio_guided_preparations"
+                + " WHERE session_id=? AND preparation_id=?",
+            proof.path("sessionId").asText(),
+            proof.path("preparationId").asText());
+    if (!old.isEmpty()) {
+      require(
+          contracts.parse((String) old.getFirst().get("proof")).equals(proof)
+              && old.getFirst().get("request_digest").equals(GuidedContracts.hash(proposal)),
+          "IDEMPOTENCY_CONFLICT",
+          409);
+      return false;
+    }
     jdbc.update(
         "INSERT INTO studio_guided_preparations(session_id,preparation_id,context_id"
             + ",owner_fence,request_digest,proof,expires_at) VALUES (?,?,?,?,?,?::jsonb,?)",
@@ -39,6 +53,7 @@ public final class GuidedPreparationStore {
         proof.path("requestDigest").asText(),
         proof.toString(),
         Timestamp.from(Instant.parse(proof.path("expiresAt").asText())));
+    return true;
   }
 
   public JsonNode authorize(JsonNode session, JsonNode proposal, JsonNode context, Instant now) {

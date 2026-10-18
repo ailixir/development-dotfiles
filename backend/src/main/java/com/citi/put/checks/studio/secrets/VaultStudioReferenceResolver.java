@@ -43,9 +43,9 @@ import org.springframework.stereotype.Component;
  * CSI can still be refused a secret it names. The principal dimension of the <em>real</em> vault's
  * policy is AC-5b and `ED-02`'s.
  *
- * <p><b>Preflight retains nothing.</b> It must prove a value exists without becoming a place a
- * value lives, so every array it reads is zeroed before the method returns — including on the
- * refusal path, which is the one an exception could otherwise skip.
+ * <p><b>Secret preflight reads names only.</b> Authorization and the scoped name list prove the
+ * declaration exists without reading its value. Legacy variable preflight erases every array it
+ * reads, including on refusal.
  */
 @Component
 public class VaultStudioReferenceResolver implements StudioReferenceResolver {
@@ -85,10 +85,9 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
         // A name grants nothing (§9.2). The refusal names the reference and never the value.
         throw new SecretUseNotAuthorizedException(secretId);
       }
-      erase(
-          vault
-              .read(StudioVaultProvider.ReferenceKind.SECRET, scope, secretId)
-              .orElseThrow(() -> new UnknownReferenceException(secretId)));
+      if (!vault.listSecretNames(scope).contains(secretId)) {
+        throw new UnknownReferenceException(secretId);
+      }
     }
   }
 
@@ -99,6 +98,25 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
       UUID testId,
       String principal,
       ReferenceDeclarations declarations) {
+    return resolve(
+        csiId,
+        environment,
+        testId,
+        principal,
+        declarations,
+        id -> {
+          // Guided/legacy resolution does not record an observed replay read-entry.
+        });
+  }
+
+  @Override
+  public Resolved resolve(
+      String csiId,
+      String environment,
+      UUID testId,
+      String principal,
+      ReferenceDeclarations declarations,
+      ValueReadEntry entryObserver) {
     refuseCrossedNames(declarations, true);
     VaultScope scope = VaultScope.of(csiId, environment, testId);
 
@@ -106,6 +124,9 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
     Map<String, char[]> secrets = new LinkedHashMap<>();
     Map<String, String> versions = new LinkedHashMap<>();
     Map<String, List<String>> origins = new LinkedHashMap<>();
+    Map<String, Decision> decisions = new LinkedHashMap<>();
+    String currentSecret = null;
+    var entered = new java.util.LinkedHashSet<String>();
     try {
       for (String name : declarations.variables()) {
         StudioVaultProvider.VaultEntry entry =
@@ -115,6 +136,7 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
         variables.put(name, entry.value());
       }
       for (String secretId : declarations.secrets()) {
+        currentSecret = secretId;
         if (!StudioVaultProvider.isValidSecretName(secretId)) {
           throw new ReferenceUnavailableException(secretId);
         }
@@ -123,21 +145,78 @@ public class VaultStudioReferenceResolver implements StudioReferenceResolver {
         if (!secretUse.mayUse(principal, csiId, environment, secretId)) {
           throw new SecretUseRevokedException(secretId);
         }
+        entryObserver.beforeRead(secretId);
+        entered.add(secretId);
         StudioVaultProvider.VaultEntry entry =
             vault
                 .read(StudioVaultProvider.ReferenceKind.SECRET, scope, secretId)
                 .orElseThrow(() -> new ReferenceUnavailableException(secretId));
+        if (entry.value() == null
+            || entry.versionIdentifier() == null
+            || entry.versionIdentifier().isBlank()
+            || entry.versionIdentifier().length() > 256) {
+          if (entry.value() != null) {
+            Arrays.fill(entry.value(), '\0');
+          }
+          throw new ReferenceUnavailableException(secretId);
+        }
+        if (entry.value().length == 0) {
+          Arrays.fill(entry.value(), '\0');
+          throw new ReferenceUnavailableException(secretId);
+        }
+        if (entry.value().length > 4096) {
+          Arrays.fill(entry.value(), '\0');
+          throw new SecretTooLongException(secretId);
+        }
         secrets.put(secretId, entry.value());
         versions.put(secretId, entry.versionIdentifier());
         origins.put(secretId, entry.allowedOrigins());
+        decisions.put(secretId, new Decision(DecisionOutcome.RESOLVED, entry.versionIdentifier()));
+        currentSecret = null;
+      }
+      // A revocation during a bounded Vault read is rechecked before any release/frame is built.
+      for (String secretId : declarations.secrets()) {
+        if (!secretUse.mayUse(principal, csiId, environment, secretId)) {
+          decisions.put(secretId, new Decision(DecisionOutcome.REVOKED, versions.get(secretId)));
+          throw new SecretUseRevokedException(secretId);
+        }
       }
     } catch (RuntimeException e) {
+      if (currentSecret != null
+          && (entered.contains(currentSecret)
+              || e instanceof SecretUseRevokedException
+              || e instanceof ReferenceUnavailableException)) {
+        DecisionOutcome outcome =
+            e instanceof VaultProviderUnavailableException
+                ? DecisionOutcome.VAULT_UNAVAILABLE
+                : e instanceof SecretUseRevokedException
+                    ? DecisionOutcome.REVOKED
+                    : DecisionOutcome.UNAVAILABLE;
+        decisions.put(currentSecret, new Decision(outcome, versions.get(currentSecret)));
+      }
+      var positivelyNotEntered = new java.util.LinkedHashSet<>(declarations.secrets());
+      positivelyNotEntered.removeAll(entered);
+      positivelyNotEntered.removeAll(decisions.keySet());
+      StudioReferenceResolver.attachDecisionFacts(e, decisions, positivelyNotEntered);
       // Everything read so far is erased before the exception leaves, on every refusal path.
       variables.values().forEach(value -> Arrays.fill(value, '\0'));
       secrets.values().forEach(value -> Arrays.fill(value, '\0'));
       throw e;
     }
     return new Resolved(variables, secrets, versions, origins);
+  }
+
+  public static final class SecretTooLongException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+
+    public SecretTooLongException(String id) {
+      super("Secret exceeds the value bound: " + id);
+    }
+  }
+
+  /** Names-only authorization recheck; no Vault read or list call. */
+  public boolean mayUse(String principal, String csi, String environment, String secretId) {
+    return secretUse.mayUse(principal, csi, environment, secretId);
   }
 
   /**

@@ -20,6 +20,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -30,6 +31,483 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 /** Independent RUNNER fixture artifact/hash vectors are the expected results, never Java output. */
 class ObservedArtifactLowererTest {
+  @Test
+  void validationCanonicalRetainsPublicNameRefusalAndImmutableInputBytes() throws Exception {
+    var checked = new GuidedContracts();
+    ObjectNode publication =
+        checked
+            .object()
+            .put("schemaVersion", 3)
+            .put("expectedConfigurationRevision", "2")
+            .put("expectedSourceRevision", "1");
+    String before = publication.toString();
+    String expected = GuidedContracts.canonical(publication);
+    checked.validate("publication", publication);
+    assertThat(checked.validateAndCanonical("publication", publication).equals(expected)).isTrue();
+    assertThat(
+            checked
+                .validateAndCanonical("v3/publication", publication)
+                .getBytes(StandardCharsets.UTF_8))
+        .isEqualTo(expected.getBytes(StandardCharsets.UTF_8));
+    assertThat(publication.toString().equals(before)).isTrue();
+    ObjectNode invalid = publication.deepCopy().put("unexpected", true);
+    assertThatThrownBy(() -> checked.validate("publication", invalid))
+        .hasMessage("INVALID_CONTRACT");
+    assertThatThrownBy(() -> checked.validateAndCanonical("publication", invalid))
+        .hasMessage("INVALID_CONTRACT");
+    ObjectNode nonCanonical = publication.deepCopy().put("schemaVersion", 3.5);
+    assertThatThrownBy(() -> checked.validate("publication", nonCanonical))
+        .hasMessage("INVALID_CONTRACT");
+    assertThatThrownBy(() -> checked.validateAndCanonical("publication", nonCanonical))
+        .hasMessage("INVALID_CONTRACT");
+
+    var independent = fixture("fresh-order-reference");
+    ObjectNode request =
+        checked
+            .object()
+            .put("schemaVersion", 3)
+            .put("attemptId", "00000000-0000-4000-8000-000000000001")
+            .put("claimId", "00000000-0000-4000-8000-000000000002")
+            .put("snapshotHash", "a".repeat(64))
+            .put("basisHash", hash(independent.path("basis")));
+    request.set("requiredProfile", independent.path("artifact").path("profile").deepCopy());
+    request.set(
+        "requiredBuild",
+        checked
+            .object()
+            .put("profileHash", hash(request.path("requiredProfile")))
+            .put("schemaBundleHash", "b".repeat(64))
+            .put("referenceBundleHash", "c".repeat(64))
+            .put("executableImageDigest", "d".repeat(64))
+            .put("chromiumBuild", "synthetic-component"));
+    request.set("artifact", independent.path("artifact").deepCopy());
+    request.set("validationBasis", independent.path("basis").deepCopy());
+    ObjectNode retained = request.deepCopy();
+    String representation = request.toString();
+    byte[] originalBytes = GuidedContracts.canonical(request).getBytes(StandardCharsets.UTF_8);
+    byte[] reusedBytes =
+        checked
+            .validateAndCanonical("v3/replay-validation", request)
+            .getBytes(StandardCharsets.UTF_8);
+    assertThat(reusedBytes).isEqualTo(originalBytes);
+    assertThat(request.equals(retained)).isTrue();
+    assertThat(request.toString().equals(representation)).isTrue();
+    var nodes = new java.util.ArrayDeque<JsonNode[]>();
+    nodes.add(new JsonNode[] {retained, request});
+    while (!nodes.isEmpty()) {
+      JsonNode[] pair = nodes.removeFirst();
+      assertThat(pair[0].getClass() == pair[1].getClass()).isTrue();
+      if (pair[0].isObject()) {
+        pair[0]
+            .fields()
+            .forEachRemaining(
+                field -> nodes.add(new JsonNode[] {field.getValue(), pair[1].get(field.getKey())}));
+      } else if (pair[0].isArray()) {
+        for (int i = 0; i < pair[0].size(); i++) {
+          nodes.add(new JsonNode[] {pair[0].get(i), pair[1].get(i)});
+        }
+      }
+    }
+
+    var http = org.mockito.Mockito.mock(java.net.http.HttpClient.class);
+    org.mockito.Mockito.when(http.followRedirects())
+        .thenReturn(java.net.http.HttpClient.Redirect.NEVER);
+    var tokenCalls = new java.util.concurrent.atomic.AtomicInteger();
+    var client =
+        new ObservedValidationClient(
+            java.net.URI.create("http://localhost"),
+            http,
+            () -> {
+              tokenCalls.incrementAndGet();
+              return "controlled-local-token";
+            },
+            checked,
+            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
+    org.mockito.Mockito.clearInvocations(http);
+    var now = Instant.parse("2026-10-12T12:00:00Z");
+    var expired =
+        new PublicationBudget(
+            now.minusMillis(1), java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
+    assertThatThrownBy(() -> client.validate(request, expired)).hasMessage("EXPIRED");
+    assertThat(tokenCalls.get()).isEqualTo(1);
+    assertThatThrownBy(() -> client.validate(request.deepCopy().put("unexpected", true), expired))
+        .hasMessage("INVALID_CONTRACT");
+    assertThat(tokenCalls.get()).isEqualTo(1);
+    var tight =
+        new ObservedValidationClient(
+            java.net.URI.create("http://localhost"),
+            http,
+            () -> {
+              tokenCalls.incrementAndGet();
+              return "controlled-local-token";
+            },
+            checked,
+            new GuidedPublicationProperties(true, 3, 15000, 5000, 1));
+    org.mockito.Mockito.clearInvocations(http);
+    assertThatThrownBy(() -> tight.validate(request, expired)).hasMessage("BUDGET_EXCEEDED");
+    assertThat(tokenCalls.get()).isEqualTo(1);
+    org.mockito.Mockito.verifyNoInteractions(http);
+  }
+
+  @Test
+  void unsupportedNullCanonicalDependencyRetainsOriginalValidationAndBudgetOrder()
+      throws Exception {
+    var checked = org.mockito.Mockito.spy(new GuidedContracts());
+    org.mockito.Mockito.doReturn(null)
+        .when(checked)
+        .validateAndCanonical(
+            org.mockito.ArgumentMatchers.eq("v3/replay-validation"),
+            org.mockito.ArgumentMatchers.any());
+    var http = org.mockito.Mockito.mock(java.net.http.HttpClient.class);
+    org.mockito.Mockito.when(http.followRedirects())
+        .thenReturn(java.net.http.HttpClient.Redirect.NEVER);
+    var client =
+        new ObservedValidationClient(
+            java.net.URI.create("http://localhost"),
+            http,
+            () -> "controlled-local-token",
+            checked,
+            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608));
+    var now = Instant.parse("2026-10-12T12:00:00Z");
+    var expired =
+        new PublicationBudget(
+            now.minusMillis(1), java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
+    org.mockito.Mockito.clearInvocations(http);
+    assertThatThrownBy(() -> client.validate(checked.object(), expired))
+        .hasMessage("INVALID_CONTRACT");
+    // Existing void-path refusal stub must still win over an already-expired budget.
+    org.mockito.Mockito.doThrow(new GuidedSessionException("INVALID_CONTRACT", 422))
+        .when(checked)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("v3/replay-validation"),
+            org.mockito.ArgumentMatchers.any());
+    org.mockito.Mockito.clearInvocations(http);
+    assertThatThrownBy(() -> client.validate(checked.object(), expired))
+        .hasMessage("INVALID_CONTRACT");
+    org.mockito.Mockito.verify(checked, org.mockito.Mockito.times(2))
+        .validate(
+            org.mockito.ArgumentMatchers.eq("v3/replay-validation"),
+            org.mockito.ArgumentMatchers.any());
+    org.mockito.Mockito.verifyNoInteractions(http);
+  }
+
+  @Test
+  void separateOwnedLoweringCopiesRetainCutAndIndependentArtifact() throws Exception {
+    for (String name : List.of("fresh-order-reference", "control-value-reference")) {
+      var independent = fixture(name);
+      ObjectNode retainedBasis = copy(independent.path("basis"));
+      ObjectNode retainedProfile = copy(independent.path("artifact").path("profile"));
+      String basisRepresentation = retainedBasis.toString();
+      String profileRepresentation = retainedProfile.toString();
+      ObjectNode loweringBasis = retainedBasis.deepCopy();
+      ObjectNode loweringProfile = retainedProfile.deepCopy();
+      var candidate = new ObservedArtifactLowerer(C).lower(loweringBasis, loweringProfile);
+      assertThat(retainedBasis.toString().equals(basisRepresentation)).isTrue();
+      assertThat(retainedProfile.toString().equals(profileRepresentation)).isTrue();
+      assertThat(loweringBasis.equals(retainedBasis)).isTrue();
+      assertThat(loweringProfile.equals(retainedProfile)).isTrue();
+      assertThat(candidate.artifact().equals(independent.path("artifact"))).isTrue();
+      loweringBasis.remove("scope");
+      loweringProfile.put("testOnlyAfterLowering", true);
+      assertThat(retainedBasis.toString().equals(basisRepresentation)).isTrue();
+      assertThat(retainedProfile.toString().equals(profileRepresentation)).isTrue();
+      assertThat(candidate.artifact().equals(independent.path("artifact"))).isTrue();
+    }
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {"matched", "build", "representation", "invalid", "runtime", "fatal", "ambient"})
+  void publicPublisherUsesOnlyMatchingDetachedSuccessWithFreshInputs(String mode) throws Exception {
+    // Complete existing Original input, with honest current synthetic schema provenance.
+    var original =
+        new GuidedPlanBuilderTest.Original(fixture("fresh-order-reference").path("basis"));
+    ObjectNode schemaPins =
+        new com.citi.put.checks.studio.guided.translation.GuidedPromptAssembler(C)
+            .schemaProvenance();
+    object(original.raw, "sourceManifest").set("schemaPins", schemaPins);
+    String manifestHash = hash(original.raw.path("sourceManifest"));
+    original.base.put("sourceManifestHash", manifestHash);
+    original.expected.put("sourceManifestHash", manifestHash);
+    original.expected.set(
+        "learningProvenance",
+        new GuidedPlanBuilder(C).learningProvenance(original.raw.path("sourceManifest")));
+    var now = Instant.parse("2026-10-12T12:00:00Z");
+    original.session.put("state", "FINALIZING").put("expiresAt", now.plusSeconds(300).toString());
+    object(original.session, "owner").put("leaseExpiresAt", now.plusSeconds(3).toString());
+    String id = original.session.path("sessionId").asText();
+    ObjectNode profile = copy(fixture("fresh-order-reference").path("artifact").path("profile"));
+    ObjectNode selection = C.object();
+    selection.set("profile", profile);
+    selection.set(
+        "build",
+        C.object()
+            .put("profileHash", hash(profile))
+            .put("schemaBundleHash", "b".repeat(64))
+            .put("referenceBundleHash", "c".repeat(64))
+            .put("executableImageDigest", "d".repeat(64))
+            .put("chromiumBuild", "synthetic-component"));
+    var depth = new java.util.concurrent.atomic.AtomicInteger();
+    var callbacks = new java.util.concurrent.atomic.AtomicInteger();
+    var pinCalls = new java.util.concurrent.atomic.AtomicInteger();
+    var learnedPlanDepths = new java.util.ArrayList<Integer>();
+    var basisDepths = new java.util.ArrayList<Integer>();
+    var pinDepths = new java.util.ArrayList<Integer>();
+    var sourceReadDepths = new java.util.ArrayList<Integer>();
+    var evidenceReadDepths = new java.util.ArrayList<Integer>();
+    var currentGuardDepths = new java.util.ArrayList<Integer>();
+    var lastSessionRead = new java.util.concurrent.atomic.AtomicReference<ObjectNode>();
+    var captured = new java.util.concurrent.atomic.AtomicReference<PublicationContracts.Claim>();
+    var checked = org.mockito.Mockito.spy(new GuidedContracts());
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              learnedPlanDepths.add(depth.get());
+              return invocation.callRealMethod();
+            })
+        .when(checked)
+        .validate(
+            org.mockito.ArgumentMatchers.eq("v3/learned-plan"), org.mockito.ArgumentMatchers.any());
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              basisDepths.add(depth.get());
+              int expectedDepth = callbacks.get() == 2 && !mode.equals("ambient") ? 0 : 1;
+              assertThat(depth.get()).isEqualTo(expectedDepth);
+              return invocation.callRealMethod();
+            })
+        .when(checked)
+        .validate(org.mockito.ArgumentMatchers.eq("v3/ledger"), org.mockito.ArgumentMatchers.any());
+    var sessions =
+        org.mockito.Mockito.mock(
+            com.citi.put.checks.studio.guided.session.GuidedSessionRepository.class);
+    org.mockito.Mockito.when(sessions.transaction(org.mockito.ArgumentMatchers.any()))
+        .thenAnswer(
+            invocation -> {
+              int ordinal = callbacks.incrementAndGet();
+              int actualPrepare = mode.equals("ambient") ? 2 : 3;
+              if (ordinal == actualPrepare) {
+                object(original.session, "owner")
+                    .put("leaseExpiresAt", now.plusSeconds(8).toString());
+                if (mode.equals("invalid")) {
+                  object(object(original.raw, "sourceManifest"), "schemaPins")
+                      .put("strictSchemaHash", "invalid-provenance");
+                }
+              }
+              depth.incrementAndGet();
+              try {
+                Object result = ((java.util.function.Supplier<?>) invocation.getArgument(0)).get();
+                if (ordinal == 2 && !mode.equals("ambient")) {
+                  // A caller retaining the read node cannot change the detached capture.
+                  lastSessionRead.get().put("scopeHash", "changed-after-capture");
+                }
+                return result;
+              } finally {
+                depth.decrementAndGet();
+              }
+            });
+    org.mockito.Mockito.when(sessions.lock(id))
+        .thenAnswer(
+            invocation -> {
+              ObjectNode document = original.session.deepCopy();
+              lastSessionRead.set(document);
+              return new com.citi.put.checks.studio.guided.session.GuidedSessionRepository.Session(
+                  document, C.object());
+            });
+    var bases = org.mockito.Mockito.mock(GuidedPublicationBaseRepository.class);
+    org.mockito.Mockito.when(bases.find(id))
+        .thenAnswer(
+            invocation -> java.util.Optional.of(new PublicationContracts.Base(original.base)));
+    org.mockito.Mockito.when(bases.lockCurrent(org.mockito.ArgumentMatchers.any()))
+        .thenAnswer(
+            invocation -> {
+              sourceReadDepths.add(depth.get());
+              assertThat(depth.get()).isEqualTo(1);
+              return new PublicationContracts.CurrentSource(original.current);
+            });
+    var evidence = org.mockito.Mockito.mock(GuidedPublicationEvidenceRepository.class);
+    org.mockito.Mockito.when(evidence.read(id))
+        .thenAnswer(
+            invocation -> {
+              evidenceReadDepths.add(depth.get());
+              assertThat(depth.get()).isEqualTo(1);
+              return new PublicationContracts.Evidence(original.raw);
+            });
+    var pins = org.mockito.Mockito.mock(ObservedReplayPins.class);
+    var fatal = new AssertionError("fixed-optional-fatal");
+    org.mockito.Mockito.when(pins.selected())
+        .thenAnswer(
+            invocation -> {
+              pinDepths.add(depth.get());
+              int ordinal = pinCalls.incrementAndGet();
+              if (ordinal == 1 && mode.equals("runtime")) {
+                throw new IllegalStateException("fixed-optional-unavailable");
+              }
+              if (ordinal == 1 && mode.equals("fatal")) {
+                throw fatal;
+              }
+              if (ordinal == 2 && mode.equals("build")) {
+                object(selection, "build").put("chromiumBuild", "synthetic-current-build");
+              }
+              if (ordinal == 2 && mode.equals("representation")) {
+                // STUDIO-OBS-012A: the profile is the one-key {contract:3}, so the
+                // representation-only reorder moves the first build member instead.
+                ObjectNode build = object(selection, "build");
+                var first = build.fieldNames().next();
+                var unchangedValue = build.remove(first);
+                build.set(first, unchangedValue);
+              }
+              return selection.deepCopy();
+            });
+    var publications = org.mockito.Mockito.mock(GuidedPublicationRepository.class);
+    org.mockito.Mockito.when(publications.receipt(id)).thenReturn(java.util.Optional.empty());
+    org.mockito.Mockito.when(
+            publications.reserve(
+                org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any()))
+        .thenAnswer(
+            invocation -> {
+              captured.set(invocation.getArgument(0));
+              throw new GuidedSessionException("BUDGET_EXCEEDED", 429);
+            });
+    var access =
+        org.mockito.Mockito.mock(
+            com.citi.put.checks.studio.guided.session.GuidedSessionAccess.class);
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              assertThat(depth.get())
+                  .isZero(); // Logical supplied callback depth, not physical JDBC TX.
+              return null;
+            })
+        .when(access)
+        .checkUser(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              currentGuardDepths.add(depth.get());
+              assertThat(depth.get()).isEqualTo(1);
+              return null;
+            })
+        .when(access)
+        .checkCurrent(org.mockito.ArgumentMatchers.any());
+    var validator = org.mockito.Mockito.mock(ObservedValidationClient.class);
+    var publisher =
+        new GuidedPlanPublisher(
+            sessions,
+            org.mockito.Mockito.mock(
+                com.citi.put.checks.studio.guided.session.GuidedSessionService.class),
+            bases,
+            evidence,
+            publications,
+            checked,
+            pins,
+            validator,
+            org.mockito.Mockito.mock(GuidedPublicationAuthorization.class),
+            access,
+            new GuidedPublicationProperties(true, 3, 15000, 5000, 8388608),
+            new ObservedReplayProperties(
+                true, 30000, 1048576, 4194304, 2097152, "[]", "[]", 1280, 720),
+            java.time.Clock.fixed(now, java.time.ZoneOffset.UTC));
+    ObjectNode body =
+        C.object()
+            .put("schemaVersion", 3)
+            .put("expectedSourceRevision", original.base.path("sourceRevision").asText())
+            .put(
+                "expectedConfigurationRevision",
+                original.base.path("configurationRevision").asText());
+    boolean priorActive =
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .isActualTransactionActive();
+    try {
+      if (mode.equals("ambient")) {
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .setActualTransactionActive(true);
+      }
+      var assertion =
+          assertThatThrownBy(
+              () ->
+                  publisher.finalizeForUser(
+                      org.mockito.Mockito.mock(
+                          org.springframework.security.core.Authentication.class),
+                      new org.springframework.mock.web.MockHttpServletRequest(),
+                      id,
+                      "component-finalize",
+                      body));
+      if (mode.equals("fatal")) {
+        assertion.isSameAs(fatal);
+      } else {
+        assertion.hasMessage(mode.equals("invalid") ? "EVIDENCE_MISMATCH" : "BUDGET_EXCEEDED");
+      }
+    } finally {
+      org.springframework.transaction.support.TransactionSynchronizationManager
+          .setActualTransactionActive(priorActive);
+    }
+    assertThat(depth.get()).isZero();
+    assertThat(basisDepths).isNotEmpty();
+    if (mode.equals("ambient")) {
+      assertThat(basisDepths).containsOnly(1);
+    } else {
+      assertThat(basisDepths.getFirst()).isZero();
+      if (!mode.equals("invalid") && !mode.equals("fatal")) {
+        assertThat(basisDepths).contains(1);
+      }
+    }
+    assertThat(pinDepths)
+        .containsExactlyElementsOf(
+            mode.equals("ambient")
+                ? List.of(1)
+                : mode.equals("invalid") || mode.equals("fatal") ? List.of(0) : List.of(0, 1));
+    int guardedPasses = mode.equals("ambient") || mode.equals("fatal") ? 1 : 2;
+    var guardedDepths = java.util.Collections.nCopies(guardedPasses, 1);
+    assertThat(sourceReadDepths).containsExactlyElementsOf(guardedDepths);
+    assertThat(evidenceReadDepths).containsExactlyElementsOf(guardedDepths);
+    assertThat(currentGuardDepths).containsExactlyElementsOf(guardedDepths);
+    org.mockito.Mockito.verify(bases, org.mockito.Mockito.times(guardedPasses))
+        .requireCurrent(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    org.mockito.Mockito.verifyNoInteractions(validator);
+    org.mockito.Mockito.verify(sessions, org.mockito.Mockito.never())
+        .save(org.mockito.ArgumentMatchers.any());
+    if (mode.equals("invalid") || mode.equals("fatal")) {
+      assertThat(captured.get()).isNull();
+      assertThat(learnedPlanDepths)
+          .containsExactlyElementsOf(mode.equals("invalid") ? List.of(0) : List.of());
+      org.mockito.Mockito.verify(publications, org.mockito.Mockito.never())
+          .reserve(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    } else {
+      assertThat(captured.get()).isNotNull();
+      assertThat(learnedPlanDepths)
+          .containsExactlyElementsOf(
+              mode.equals("matched")
+                  ? List.of(0)
+                  : mode.equals("runtime") || mode.equals("ambient") ? List.of(1) : List.of(0, 1));
+      // Honest freshly reconstructed synthetic input, not the original opaque golden provenance.
+      ObjectNode freshBasis = original.build();
+      var reference = new ObservedArtifactLowerer(C).lower(freshBasis, profile);
+      assertThat(captured.get().snapshot().basis().equals(freshBasis)).isTrue();
+      for (String key :
+          List.of(
+              "learnedPlanHash",
+              "artifactHash",
+              "referencePolicyHash",
+              "operationEquivalenceHash",
+              "publicationEvidenceHash",
+              "profileHash")) {
+        assertThat(
+                captured.get().snapshot().identity().path(key).equals(reference.hashes().path(key)))
+            .isTrue();
+      }
+      assertThat(captured.get().snapshot().identity().path("validationBuildHash").asText())
+          .isEqualTo(hash(selection.path("build")));
+      assertThat(captured.get().snapshot().identity().path("validationDeadline").asText())
+          .isEqualTo(PublicationContracts.time(now.plusSeconds(8)));
+      assertThat(captured.get().snapshot().identity().path("ownerFence"))
+          .isEqualTo(original.session.path("owner").path("fence"));
+      org.mockito.Mockito.verify(publications)
+          .reserve(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+    }
+    if (mode.equals("ambient")) {
+      assertThat(callbacks.get()).isEqualTo(2);
+      assertThat(pinCalls.get()).isEqualTo(1);
+      org.mockito.Mockito.verify(evidence).read(id);
+    }
+  }
+
   @ParameterizedTest
   @ValueSource(strings = {"fresh-order-reference", "control-value-reference"})
   void reproducesIndependentNodeArtifactAndEveryCanonicalHash(String name) throws Exception {
@@ -81,7 +559,7 @@ class ObservedArtifactLowererTest {
         C.parse(
             Files.readString(
                 Path.of(
-                    "../docs/specs/studio-observed-authoring/contracts/v2/publication-canonical-vectors.json")));
+                    "../docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json")));
     for (JsonNode vector : vectors.path("positive")) {
       assertThat(
               HexFormat.of()
@@ -122,7 +600,21 @@ class ObservedArtifactLowererTest {
     var wrongSlot = copy(original);
     object(at(wrongSlot, "inputs", 1), "provenance").put("intendedSlot", "assert.expected");
     assertThatThrownBy(() -> lowerer.recipes(wrongSlot)).isInstanceOf(GuidedSessionException.class);
-    var wrongConfig = copy(original);
+    JsonNode configured =
+        C.parse(
+                Files.readString(
+                    Path.of(
+                        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")))
+            .path("controlValueReferenceUsedConfiguration");
+    assertThat(configured.path("basis").path("configurationReferences")).hasSize(1);
+    assertThat(
+            lowerer
+                .lower(configured.path("basis"), configured.path("artifact").path("profile"))
+                .artifact())
+        .isEqualTo(configured.path("artifact"));
+    assertThat(lowerer.recipes(configured.path("basis")))
+        .isEqualTo(configured.path("artifact").path("inputRecipes"));
+    var wrongConfig = copy(configured.path("basis"));
     at(wrongConfig, "configurationReferences", 0).put("referenceId", "different-saved-reference");
     assertThatThrownBy(() -> lowerer.recipes(wrongConfig))
         .isInstanceOf(GuidedSessionException.class);
@@ -165,6 +657,373 @@ class ObservedArtifactLowererTest {
   }
 
   @Test
+  void correctedCompleteBasisPreimagesKeepExactlyTheOriginalEvidenceEnvelope() throws Exception {
+    JsonNode root =
+        C.parse(
+                Files.readString(
+                    Path.of(
+                        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")))
+            .path("incrementalContracts");
+    for (int index = 0; index < 2; index++) {
+      JsonNode parent = root.path("basisCases").get(index), basis = parent.path("basis");
+      JsonNode before = basis.deepCopy(), expectedArtifact = parent.path("expectedArtifact");
+      JsonNode basisVector = root.path("canonicalVectors").get(index == 0 ? 24 : 27);
+      JsonNode evidenceVector = root.path("canonicalVectors").get(index == 0 ? 25 : 28);
+      assertThat(basisVector.path("name").asText())
+          .isEqualTo(
+              index == 0
+                  ? "complete-extended-validation-basis"
+                  : "complete-incremental-boundary-validation-basis");
+      assertThat(evidenceVector.path("name").asText())
+          .isEqualTo(
+              index == 0
+                  ? "publication-evidence-preimage"
+                  : "incremental-publication-evidence-preimage");
+      assertThat(basis).isEqualTo(basisVector.path("input"));
+      assertThat(canonical(basis)).isEqualTo(basisVector.path("canonical").asText());
+      assertThat(hash(basis)).isEqualTo(basisVector.path("sha256").asText());
+      ObjectNode expectedPreimage =
+          C.object()
+              .put("version", 1)
+              .put("basisHash", hash(basis))
+              .put("runAuthorizationHash", hash(basis.path("runAuthorization")))
+              .put("translationHash", basis.path("translationHash").asText())
+              .put("bootstrapHash", hash(basis.path("bootstrap")))
+              .put("sourceManifestHash", basis.path("sourceManifestHash").asText());
+      assertThat(expectedPreimage).hasSize(6).isEqualTo(evidenceVector.path("input"));
+      assertThat(canonical(expectedPreimage)).isEqualTo(evidenceVector.path("canonical").asText());
+      assertThat(
+              HexFormat.of()
+                  .formatHex(canonical(expectedPreimage).getBytes(StandardCharsets.UTF_8)))
+          .isEqualTo(evidenceVector.path("canonicalUtf8Hex").asText());
+      assertThat(hash(expectedPreimage)).isEqualTo(evidenceVector.path("sha256").asText());
+      JsonNode actual =
+          new ObservedArtifactLowerer(C).lower(basis, expectedArtifact.path("profile")).artifact();
+      assertThat(actual).isEqualTo(expectedArtifact);
+      assertThat(actual.path("replayPolicy").path("publicationEvidenceHash").asText())
+          .isEqualTo(evidenceVector.path("sha256").asText());
+      for (String field :
+          List.of(
+              "version",
+              "basisHash",
+              "runAuthorizationHash",
+              "translationHash",
+              "bootstrapHash",
+              "sourceManifestHash")) {
+        ObjectNode omitted = expectedPreimage.deepCopy();
+        omitted.remove(field);
+        assertThat(hash(omitted))
+            .as("original envelope cannot omit %s", field)
+            .isNotEqualTo(evidenceVector.path("sha256").asText());
+      }
+      ObjectNode wrapper = C.object();
+      wrapper.set("publicationEvidence", expectedPreimage);
+      assertThat(hash(wrapper)).isNotEqualTo(evidenceVector.path("sha256").asText());
+      ObjectNode versionTwo = expectedPreimage.deepCopy().put("version", 2);
+      assertThat(hash(versionTwo)).isNotEqualTo(evidenceVector.path("sha256").asText());
+      assertThat(basis).isEqualTo(before);
+    }
+  }
+
+  @ParameterizedTest(name = "exact tuple array and final plan commitments {0}")
+  @ValueSource(ints = {0, 1, 2})
+  void effectiveAdmissionArrayAndFinalPlanHaveTheirExactIndependentPreimages(int parentIndex)
+      throws Exception {
+    JsonNode root =
+        C.parse(
+                Files.readString(
+                    Path.of(
+                        "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")))
+            .path("incrementalContracts");
+    JsonNode parent = root.path("basisCases").get(parentIndex), basis = parent.path("basis");
+    JsonNode before = basis.deepCopy(), artifact = parent.path("expectedArtifact");
+    JsonNode frozenTuples = root.path("canonicalVectors").get(26);
+    assertThat(frozenTuples.path("name").asText())
+        .isEqualTo("effective-admission-provenance-array");
+    var tuples = C.object().putArray("items");
+    for (JsonNode action : basis.path("actions")) {
+      ObjectNode tuple = tuples.addObject();
+      for (String field : List.of("coordinate", "admission", "operationHash", "scopeHash")) {
+        tuple.set(field, action.path("ledger").path(field).deepCopy());
+      }
+    }
+    assertThat(tuples).isEqualTo(frozenTuples.path("input"));
+    assertThat(canonical(tuples)).isEqualTo(frozenTuples.path("canonical").asText());
+    assertThat(HexFormat.of().formatHex(canonical(tuples).getBytes(StandardCharsets.UTF_8)))
+        .isEqualTo(frozenTuples.path("canonicalUtf8Hex").asText());
+    assertThat(hash(tuples)).isEqualTo(frozenTuples.path("sha256").asText());
+    ObjectNode wrappedTuples = C.object();
+    wrappedTuples.set("admissions", tuples.deepCopy());
+    assertThat(hash(wrappedTuples)).isNotEqualTo(frozenTuples.path("sha256").asText());
+    JsonNode actual =
+        new ObservedArtifactLowerer(C).lower(basis, artifact.path("profile")).artifact();
+    assertThat(actual).isEqualTo(artifact);
+    assertThat(actual.path("replayPolicy").path("admissionProvenanceHash").asText())
+        .isEqualTo(frozenTuples.path("sha256").asText())
+        .isNotEqualTo(hash(wrappedTuples));
+    JsonNode expectedPlan = artifact.path("learnedPlan");
+    assertThat(actual.path("learnedPlan")).isEqualTo(expectedPlan);
+    assertThat(actual.path("learnedPlanHash").asText()).isEqualTo(hash(expectedPlan));
+    assertThat(actual.path("replayPolicy").path("learnedPlanHash").asText())
+        .isEqualTo(hash(expectedPlan));
+    for (String field : List.of("stepSnapshotHashes", "reusedFrom", "incremental")) {
+      assertThat(expectedPlan.has(field)).as("final plan contains %s", field).isTrue();
+      ObjectNode premature = expectedPlan.deepCopy();
+      premature.remove(field);
+      assertThat(hash(premature))
+          .as("final hash must include derived %s", field)
+          .isNotEqualTo(actual.path("learnedPlanHash").asText());
+    }
+    if (parentIndex == 2) {
+      JsonNode excluded = basis.path("incrementalEvidence").path("excludedAttempts");
+      assertThat(excluded).hasSize(1);
+      JsonNode failedLedger = excluded.get(0).path("action").path("ledger");
+      assertThat(failedLedger.path("admission").path("admissionId").asText())
+          .isEqualTo("admission-spent");
+      assertThat(failedLedger.path("state").asText()).isEqualTo("FAILED");
+      assertThat(canonical(tuples)).doesNotContain("admission-spent");
+      var withSpent = tuples.deepCopy();
+      ObjectNode spentTuple = withSpent.addObject();
+      for (String field : List.of("coordinate", "admission", "operationHash", "scopeHash")) {
+        spentTuple.set(field, failedLedger.path(field).deepCopy());
+      }
+      assertThat(hash(withSpent)).isNotEqualTo(frozenTuples.path("sha256").asText());
+      ObjectNode erasedHistory = basis.deepCopy();
+      ((ObjectNode) erasedHistory.path("incrementalEvidence")).putArray("excludedAttempts");
+      assertThat(hash(erasedHistory)).isNotEqualTo(hash(basis));
+      // Erasing history changes the raw commitment; it is not a valid semantic control.
+    }
+    assertThat(basis).isEqualTo(before);
+  }
+
+  @Test
+  void lawfulJoinedSemanticBasisAcceptsExactlySixMiBBeforeOneLegalByteIsRefused() throws Exception {
+    var parent = IncrementalBoundaryFixture.exact();
+    ObjectNode basis = parent.basis(), basisBefore = basis.deepCopy();
+    JsonNode expected = parent.artifact(), expectedBefore = expected.deepCopy();
+    assertThat(PublicationContracts.MAX_BASIS_BYTES).isEqualTo(6_291_456);
+    assertThat(PublicationContracts.MAX_VALIDATION_BYTES).isEqualTo(8_388_608);
+    assertThat(IncrementalBoundaryFixture.bytes(basis)).isEqualTo(6_291_456);
+    assertThat(GuidedContracts.canonical(basis).getBytes(StandardCharsets.UTF_8).length)
+        .isEqualTo(6_291_456);
+    assertThat(parent.baselineBytes() + 100 * parent.intentBytes() + parent.residue())
+        .isEqualTo(6_291_456);
+    assertThat(parent.residue()).isBetween(0, 99);
+    assertBoundaryComponentsAndCompleteJoins(parent);
+    assertThat(IncrementalBoundaryFixture.bytes(expected)).isLessThanOrEqualTo(1_048_576);
+    assertThat(IncrementalBoundaryFixture.bytes(expected.path("replayPolicy")))
+        .isLessThanOrEqualTo(524_288);
+    ObjectNode oversized = IncrementalBoundaryFixture.plusOne(parent),
+        oversizedBefore = oversized.deepCopy();
+    assertThat(IncrementalBoundaryFixture.bytes(oversized)).isEqualTo(6_291_457);
+    // The +1 is legal safeLabel text, with all model/capture/context/receipt hashes resealed.
+    C.validate("v3/replay-validation#/definitions/ValidationBasis", oversized);
+    var checked = org.mockito.Mockito.spy(new GuidedContracts());
+    var lowerer = new ObservedArtifactLowerer(checked);
+    var hashCalls = new java.util.concurrent.atomic.AtomicInteger();
+    try (var hashes =
+        org.mockito.Mockito.mockStatic(
+            GuidedContracts.class,
+            invocation -> {
+              if (invocation.getMethod().getName().equals("hash")) {
+                hashCalls.incrementAndGet();
+              }
+              return invocation.callRealMethod();
+            })) {
+      var accepted = lowerer.lower(basis, expected.path("profile"));
+      assertThat(accepted.artifact()).isEqualTo(expected);
+      assertThat(accepted.hashes()).isEqualTo(parent.hashes());
+      assertThat(hashCalls.get())
+          .as("positive parent observes actual semantic hashing through this hook")
+          .isPositive();
+      org.mockito.Mockito.verify(checked)
+          .validate(
+              org.mockito.ArgumentMatchers.eq("v3/replay-validation#/definitions/ValidationBasis"),
+              org.mockito.ArgumentMatchers.same(basis));
+      hashCalls.set(0);
+      org.mockito.Mockito.clearInvocations(checked);
+      assertThatThrownBy(() -> lowerer.lower(oversized, expected.path("profile")))
+          .isInstanceOfSatisfying(
+              GuidedSessionException.class,
+              refusal -> {
+                assertThat(refusal.getMessage()).isEqualTo("BUDGET_EXCEEDED");
+                assertThat(refusal.status()).isEqualTo(413);
+              });
+      assertThat(hashCalls.get()).as("+1 refused before semantic hashing").isZero();
+      org.mockito.Mockito.verify(checked, org.mockito.Mockito.never())
+          .validate(
+              org.mockito.ArgumentMatchers.anyString(),
+              org.mockito.ArgumentMatchers.any(JsonNode.class));
+    }
+    assertThat(basis).isEqualTo(basisBefore);
+    assertThat(expected).isEqualTo(expectedBefore);
+    assertThat(oversized).isEqualTo(oversizedBefore);
+    // This pure lowerer has no dispatch, JDBC, HTTP, callback, native or model dependency.
+    // Actual raw 8 MiB HTTP exact/+1 is a separate runner route obligation.
+  }
+
+  private static void assertBoundaryComponentsAndCompleteJoins(
+      IncrementalBoundaryFixture.Parent parent) {
+    JsonNode basis = parent.basis();
+    for (String field :
+        List.of("sourceSteps", "actions", "preparations", "obligationAssociations")) {
+      assertThat(basis.path(field)).as(field).hasSize(100);
+    }
+    assertThat(basis.at("/translationPlan/obligations")).hasSize(100);
+    assertThat(basis.path("observations")).hasSize(198);
+    for (String field :
+        List.of("allocations", "producers", "consumerEdges", "bindings", "transfers")) {
+      assertThat(basis.path(field)).as(field).isEmpty();
+    }
+    assertThat(basis.at("/materializationEvidence/versions")).hasSize(1);
+    assertThat(basis.at("/materializationEvidence/entries")).hasSize(1);
+    assertThat(basis.at("/snapshotEvidence/baseProof").isNull()).isTrue();
+    assertThat(basis.at("/snapshotEvidence/pinnedBase").isObject()).isTrue();
+    assertThat(basis.at("/incrementalEvidence/switch/reason").asText()).isEqualTo("EMPTY_PREFIX");
+    assertThat(basis.at("/incrementalEvidence/program/actions")).isEmpty();
+    assertThat(basis.at("/incrementalEvidence/program/sourceStepIds")).isEmpty();
+    assertThat(basis.at("/incrementalEvidence/prefixRequests")).isEmpty();
+    assertThat(basis.at("/incrementalEvidence/excludedAttempts")).isEmpty();
+    C.validate("v3/authored-inputs", parent.privateInputs());
+    assertThat(hash(parent.privateInputs())).isEqualTo(basis.path("authoredInputsHash").asText());
+    JsonNode privateInput = parent.privateInputs().path("inputs").get(0);
+    assertThat(hash(privateInput))
+        .isEqualTo(basis.at("/materializationEvidence/entries/0/inputHash").asText());
+    ObjectNode safeInput = privateInput.deepCopy();
+    safeInput.remove("value");
+    assertThat(safeInput).isEqualTo(basis.at("/materializationEvidence/entries/0/metadata"));
+    var observations = new java.util.LinkedHashMap<String, JsonNode>();
+    int observationBytes = 0, sourceBytes = 0;
+    for (JsonNode row : basis.path("observations")) {
+      int bytes = IncrementalBoundaryFixture.bytes(row.path("observation"));
+      assertThat(bytes).isLessThanOrEqualTo(32_768);
+      observationBytes += bytes;
+      C.validate("v3/observation", row.path("observation"));
+      assertThat(row.path("observation").path("nodes")).hasSize(2);
+      assertThat(row.path("observation").path("observedAt").asText())
+          .isEqualTo("2026-10-08T03:00:05.123456789Z");
+      assertThat(hash(row.path("observation"))).isEqualTo(row.path("observationHash").asText());
+      assertThat(observations.put(row.path("observationHash").asText(), row)).isNull();
+    }
+    assertThat(observationBytes).isLessThanOrEqualTo(1_048_576);
+    for (JsonNode source : basis.path("sourceSteps")) {
+      sourceBytes += source.path("source").asText().getBytes(StandardCharsets.UTF_8).length;
+    }
+    assertThat(sourceBytes).isLessThanOrEqualTo(1_048_576);
+    var preparationIds = new java.util.HashSet<String>();
+    var admissionIds = new java.util.HashSet<String>();
+    var obligationIds = new java.util.HashSet<String>();
+    var stepIds = new java.util.HashSet<String>();
+    var questionIds = new java.util.HashSet<String>();
+    var attemptIds = new java.util.HashSet<String>();
+    var requestIds = new java.util.HashSet<String>();
+    var contextHashes = new java.util.HashSet<String>();
+    var choiceIds = new java.util.HashSet<String>();
+    var providerIds = new java.util.HashSet<String>();
+    var builder = new GuidedPlanBuilder(C);
+    var proposals = new com.citi.put.checks.studio.guided.translation.GuidedProposalValidator(C);
+    JsonNode header = basis.at("/materializationEvidence/versions/0");
+    var materialization =
+        GuidedMaterializationEvidence.versionContext(C, basis.path("materializationEvidence"), 1);
+    for (int index = 0; index < 100; index++) {
+      JsonNode source = basis.path("sourceSteps").get(index),
+          fact = basis.path("actions").get(index),
+          prep = basis.path("preparations").get(index),
+          ledger = fact.path("ledger"),
+          proposal = prep.path("proposal"),
+          obligation = basis.at("/translationPlan/obligations").get(index),
+          association = basis.path("obligationAssociations").get(index);
+      assertThat(stepIds.add(source.path("stepId").asText())).isTrue();
+      assertThat(preparationIds.add(prep.path("preparationId").asText())).isTrue();
+      assertThat(admissionIds.add(ledger.at("/admission/admissionId").asText())).isTrue();
+      assertThat(obligationIds.add(obligation.path("obligationId").asText())).isTrue();
+      assertThat(
+              obligation
+                  .path("targetIntent")
+                  .asText()
+                  .codePointCount(0, obligation.path("targetIntent").asText().length()))
+          .isLessThanOrEqualTo(500);
+      assertThat(ledger.path("state").asText()).isEqualTo("SUCCEEDED");
+      assertThat(ledger.path("dispatchCount").asInt()).isEqualTo(1);
+      assertThat(ledger.path("outcomeCode").asText()).isEqualTo("OK");
+      assertThat(ledger.at("/coordinate/ordinal").asInt()).isZero();
+      assertThat(ledger.at("/coordinate/stepId")).isEqualTo(source.path("stepId"));
+      assertThat(obligation.path("stepId")).isEqualTo(source.path("stepId"));
+      assertThat(fact.path("obligationId")).isEqualTo(obligation.path("obligationId"));
+      assertThat(association.path("obligationId")).isEqualTo(obligation.path("obligationId"));
+      assertThat(association.path("coordinate")).isEqualTo(ledger.path("coordinate"));
+      assertThat(association.path("admissionId")).isEqualTo(ledger.at("/admission/admissionId"));
+      assertThat(association.path("proposalHash").asText()).isEqualTo(hash(proposal));
+      assertThat(fact.path("preparationId")).isEqualTo(prep.path("preparationId"));
+      assertThat(ledger.path("preparationId")).isEqualTo(prep.path("preparationId"));
+      assertThat(proposal.path("coordinate")).isEqualTo(ledger.path("coordinate"));
+      assertThat(proposal.path("executionEvidence")).isEqualTo(ledger.path("executionEvidence"));
+      assertThat(proposal.path("authoredInputsHash")).isEqualTo(header.path("authoredInputsHash"));
+      ObjectNode progress = C.object(), actionContext = C.object();
+      for (String field : List.of("generation", "evidenceHash", "executionEvidence")) {
+        progress.set(field, proposal.path(field));
+      }
+      actionContext.putObject("authoredInputs").set("inputs", materialization.path("inputs"));
+      if (index == 0) {
+        assertThat(prep.has("observedChoice")).isFalse();
+        proposals.action(
+            parent.session(),
+            progress,
+            basis.path("translationPlan"),
+            obligation,
+            proposal,
+            actionContext);
+        continue;
+      }
+      JsonNode witness = prep.path("observedChoice");
+      C.validate("v3/replay-validation#/definitions/ObservedChoiceWitness1", witness);
+      assertThat(IncrementalBoundaryFixture.bytes(witness)).isLessThanOrEqualTo(262_144);
+      assertThat(IncrementalBoundaryFixture.bytes(witness.path("context")))
+          .isLessThanOrEqualTo(65_536);
+      assertThat(IncrementalBoundaryFixture.bytes(witness.path("meanings")))
+          .isLessThanOrEqualTo(65_536);
+      assertThat(IncrementalBoundaryFixture.bytes(witness.path("receipt")))
+          .isLessThanOrEqualTo(16_384);
+      assertThat(witness.at("/questionPlan/plan")).isEqualTo(basis.path("translationPlan"));
+      assertThat(witness.at("/questionPlan/plan/obligations")).hasSize(100);
+      assertThat(questionIds.add(witness.at("/context/clarificationId").asText())).isTrue();
+      assertThat(attemptIds.add(witness.at("/attempt/attemptId").asText())).isTrue();
+      assertThat(requestIds.add(witness.at("/attempt/requestId").asText())).isTrue();
+      assertThat(contextHashes.add(hash(witness.path("context")))).isTrue();
+      for (JsonNode choice : witness.at("/context/question/choices")) {
+        assertThat(choiceIds.add(choice.path("choiceId").asText())).isTrue();
+      }
+      for (JsonNode provider : witness.at("/attempt/modelQuestion/choices")) {
+        assertThat(providerIds.add(provider.path("choiceId").asText())).isTrue();
+      }
+      JsonNode effective =
+          builder.effectiveObservedObligation(
+              parent.session(),
+              basis.path("translationPlan"),
+              materialization,
+              prep,
+              observations,
+              obligation);
+      assertThat(effective.path("selectedLocator")).isEqualTo(proposal.at("/target/locator"));
+      proposals.action(
+          parent.session(),
+          progress,
+          basis.path("translationPlan"),
+          effective,
+          proposal,
+          actionContext);
+      assertThat(prep.at("/executionEvidence/generation").asInt())
+          .isGreaterThan(witness.at("/context/question/generation").asInt());
+    }
+    assertThat(questionIds).hasSize(99);
+    assertThat(attemptIds).hasSize(99);
+    assertThat(requestIds).hasSize(99);
+    assertThat(contextHashes).hasSize(99);
+    assertThat(choiceIds).hasSize(198);
+    assertThat(providerIds).hasSize(198);
+  }
+
+  @Test
   void defensiveCandidateCannotBeChangedThroughCallerJson() throws Exception {
     var fixture = fixture("fresh-order-reference");
     var candidate =
@@ -200,8 +1059,11 @@ class ObservedArtifactLowererTest {
           .as(entry.getKey())
           .isEqualTo(entry.getValue());
     }
+    // Current unchanged independently authored choice vector, not the reconstructed manifest.
+    assertThat(independent.path("hashes").path("artifactHash").asText())
+        .isEqualTo("d846a0ca41fa432dd9ac7e87bf6d7cb36c37d96fc5fd64dee6d0ad1815dbb7b8");
     assertThat(hash(candidate.artifact()))
-        .isEqualTo("b46c947e135be6a3ae51240a1bfcd02febad64314a30b572f8c171419740c447");
+        .isEqualTo(independent.path("hashes").path("artifactHash").asText());
     assertThat(
             candidate
                 .artifact()
@@ -298,7 +1160,7 @@ class ObservedArtifactLowererTest {
             "if(build.schemaBundleHash!==OBSERVED_SCHEMA_BUNDLE_HASH||",
             "build.referenceBundleHash!==hashObserved(references))",
             "throw Error('packaged build records differ');",
-            "const request={schemaVersion:2,attemptId:'00000000-0000-4000-8000-000000000900',",
+            "const request={schemaVersion:3,attemptId:'00000000-0000-4000-8000-000000000900',",
             "claimId:'00000000-0000-4000-8000-000000000901',",
             "snapshotHash:'d'.repeat(64),basisHash:hashObserved(data.basis),",
             "requiredProfile:OBSERVED_PROFILE,requiredBuild:{...build},",

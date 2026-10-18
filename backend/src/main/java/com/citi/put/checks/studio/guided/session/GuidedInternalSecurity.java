@@ -52,8 +52,7 @@ public class GuidedInternalSecurity {
       throws Exception {
     // Construct in-chain only: intentionally not a Filter bean or servlet auto-registration.
     var filter = new IdentityFilter(key, issuer, mtls, Clock.systemUTC());
-    http.securityMatcher(
-            "/internal/v1/studio/guided-sessions/**", "/internal/v2/studio/guided-sessions/**")
+    http.securityMatcher("/internal/v2/studio/guided-sessions/**")
         .csrf(c -> c.disable())
         .cors(c -> c.disable())
         .formLogin(c -> c.disable())
@@ -65,7 +64,7 @@ public class GuidedInternalSecurity {
     return http.build();
   }
 
-  static void requireRole(Authentication auth, String role) {
+  public static void requireRole(Authentication auth, String role) {
     require(auth instanceof Identity && auth.isAuthenticated(), "UNAUTHENTICATED", 401);
     require(((Identity) auth).role.equals(role), "FORBIDDEN_SCOPE", 403);
   }
@@ -119,9 +118,7 @@ public class GuidedInternalSecurity {
         var failure =
             new java.util.HashMap<String, Object>(
                 new GuidedSessionException("UNAUTHENTICATED", 401).response());
-        if (request.getRequestURI().startsWith("/internal/v2/")) {
-          failure.put("schemaVersion", 2);
-        }
+        failure.put("schemaVersion", 3);
         json.writeValue(response.getOutputStream(), failure);
         return;
       }

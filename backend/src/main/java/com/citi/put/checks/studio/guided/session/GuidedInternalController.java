@@ -14,10 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping({
-  "/internal/v1/studio/guided-sessions/{id}",
-  "/internal/v2/studio/guided-sessions/{id}"
-})
+@RequestMapping("/internal/v2/studio/guided-sessions/{id}")
 public class GuidedInternalController {
   private final GuidedSessionService service;
 
@@ -36,9 +33,8 @@ public class GuidedInternalController {
       Authentication caller,
       @PathVariable String id,
       @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
+      @RequestBody JsonNode body) {
+    currentContract(body);
     return service.claim(caller, id, key, body);
   }
 
@@ -49,12 +45,9 @@ public class GuidedInternalController {
       @PathVariable String id,
       @RequestHeader("X-Owner-Fence") long fence,
       @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
-    return body.path("schemaVersion").asInt() == 2
-        ? service.observeV2(caller, id, fence, key, body)
-        : service.observe(caller, id, fence, key, body);
+      @RequestBody JsonNode body) {
+    currentContract(body);
+    return service.observeV2(caller, id, fence, key, body);
   }
 
   @ResponseStatus(HttpStatus.ACCEPTED)
@@ -64,15 +57,11 @@ public class GuidedInternalController {
       @PathVariable String id,
       @RequestHeader("X-Owner-Fence") long fence,
       @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
-    if (body.path("schemaVersion").asInt() == 2) {
-      var bridge = dispatch.getIfAvailable();
-      GuidedSessionException.require(bridge != null, "RUNTIME_INCOMPATIBLE", 409);
-      return bridge.prepareAndAdmit(caller, id, fence, key, body);
-    }
-    return service.admit(caller, id, fence, key, body);
+      @RequestBody JsonNode body) {
+    currentContract(body);
+    var bridge = dispatch.getIfAvailable();
+    GuidedSessionException.require(bridge != null, "RUNTIME_INCOMPATIBLE", 409);
+    return bridge.prepareAndAdmit(caller, id, fence, key, body);
   }
 
   @ResponseStatus(HttpStatus.ACCEPTED)
@@ -82,15 +71,11 @@ public class GuidedInternalController {
       @PathVariable String id,
       @RequestHeader("X-Owner-Fence") long fence,
       @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
-    if (body.path("schemaVersion").asInt() == 2) {
-      var bridge = dispatch.getIfAvailable();
-      GuidedSessionException.require(bridge != null, "RUNTIME_INCOMPATIBLE", 409);
-      return bridge.dispatch(caller, id, fence, key, body);
-    }
-    return service.advance(caller, id, fence, key, body);
+      @RequestBody JsonNode body) {
+    currentContract(body);
+    var bridge = dispatch.getIfAvailable();
+    GuidedSessionException.require(bridge != null, "RUNTIME_INCOMPATIBLE", 409);
+    return bridge.dispatch(caller, id, fence, key, body);
   }
 
   @ResponseStatus(HttpStatus.ACCEPTED)
@@ -100,27 +85,9 @@ public class GuidedInternalController {
       @PathVariable String id,
       @RequestHeader("X-Owner-Fence") long fence,
       @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
-    return body.path("schemaVersion").asInt() == 2
-        ? service.outcomeV2(caller, id, fence, key, body)
-        : service.outcome(caller, id, fence, key, body);
-  }
-
-  @ResponseStatus(HttpStatus.ACCEPTED)
-  @PostMapping("/finalize")
-  public JsonNode finalizeSession(
-      Authentication caller,
-      @PathVariable String id,
-      @RequestHeader("X-Owner-Fence") long fence,
-      @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
-    GuidedSessionException.require(
-        body.path("schemaVersion").asInt() != 2, "RUNTIME_INCOMPATIBLE", 409);
-    return service.finalizeSession(caller, id, fence, key, body);
+      @RequestBody JsonNode body) {
+    currentContract(body);
+    return service.outcomeV2(caller, id, fence, key, body);
   }
 
   @ResponseStatus(HttpStatus.ACCEPTED)
@@ -130,9 +97,8 @@ public class GuidedInternalController {
       @PathVariable String id,
       @RequestHeader("X-Owner-Fence") long fence,
       @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
+      @RequestBody JsonNode body) {
+    currentContract(body);
     return service.bootstrap(caller, id, fence, key, body);
   }
 
@@ -143,9 +109,8 @@ public class GuidedInternalController {
       @PathVariable String id,
       @RequestHeader(value = "X-Owner-Fence", required = false) Long fence,
       @RequestHeader("Idempotency-Key") String key,
-      @RequestBody JsonNode body,
-      jakarta.servlet.http.HttpServletRequest request) {
-    routeVersion(request, body);
+      @RequestBody JsonNode body) {
+    currentContract(body);
     if (body.path("kind").asText().equals("assignment")) {
       GuidedSessionException.require(fence == null, "INVALID_CONTRACT", 422);
       return service.assignmentLifecycle(caller, id, key, body);
@@ -154,10 +119,13 @@ public class GuidedInternalController {
     return service.lifecycle(caller, id, fence, key, body);
   }
 
-  private static void routeVersion(jakarta.servlet.http.HttpServletRequest request, JsonNode body) {
+  /** One internal mount, one contract generation: every bridge body is schemaVersion 3. */
+  private static void currentContract(JsonNode body) {
     GuidedSessionException.require(
-        request.getRequestURI().startsWith("/internal/v2/")
-            == (body.path("schemaVersion").asInt() == 2),
+        (body.path("kind").asText().equals("prefixDrift")
+                ? body.path("receipt").path("schemaVersion").asInt()
+                : body.path("schemaVersion").asInt())
+            == 3,
         "RUNTIME_INCOMPATIBLE",
         409);
   }
@@ -172,9 +140,7 @@ public class GuidedInternalController {
   public ResponseEntity<?> failure(
       GuidedSessionException failure, jakarta.servlet.http.HttpServletRequest request) {
     var response = new java.util.HashMap<String, Object>(failure.response());
-    if (request.getRequestURI().startsWith("/internal/v2/")) {
-      response.put("schemaVersion", 2);
-    }
+    response.put("schemaVersion", 3);
     return ResponseEntity.status(failure.status()).body(response);
   }
 }

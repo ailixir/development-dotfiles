@@ -12,7 +12,6 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import com.citi.put.checks.studio.StudioExecutionProperties;
-import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -112,10 +111,7 @@ class JobBodyLeakTest {
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
             new StudioRunnerProperties(
-                "http://localhost:" + wireMock.port(),
-                "test-runner-token",
-                Duration.ofSeconds(5),
-                Duration.ofSeconds(2)));
+                "http://localhost:" + wireMock.port(), "test-runner-token", Duration.ofSeconds(2)));
   }
 
   @AfterEach
@@ -146,13 +142,13 @@ class JobBodyLeakTest {
 
   @Test
   void theValuesTravelOnTheWireAndAppearInNoLogLineAtAnyLevel() {
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(202)));
 
     DispatchOutcome outcome = client.send(canaryJob());
 
     // Proven present first, on the bytes that actually left the process.
     String sent =
-        wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/runs"))).get(0).getBodyAsString();
+        wireMock.findAll(postRequestedFor(urlPathEqualTo("/v2/runs"))).get(0).getBodyAsString();
     assertThat(sent).contains(SECRET_CANARY).contains(VARIABLE_CANARY);
     assertThat(outcome.kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
 
@@ -175,20 +171,20 @@ class JobBodyLeakTest {
     paths.put("timeout", aResponse().withStatus(202).withFixedDelay(3000));
     paths.put("connection loss", aResponse().withFault(Fault.CONNECTION_RESET_BY_PEER));
     paths.put("5xx", aResponse().withStatus(503));
-    paths.put("3xx", aResponse().withStatus(302).withHeader("Location", "/v1/runs-elsewhere"));
+    paths.put("3xx", aResponse().withStatus(302).withHeader("Location", "/v2/runs-elsewhere"));
     paths.put("terminal refusal", aResponse().withStatus(400));
 
     paths.forEach(
         (label, response) -> {
           wireMock.resetAll();
-          wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(response));
+          wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(response));
 
           DispatchOutcome outcome = client.send(canaryJob());
 
           // It travelled: even on the paths that end badly, the body did leave this process.
           String sent =
               wireMock
-                  .findAll(postRequestedFor(urlPathEqualTo("/v1/runs")))
+                  .findAll(postRequestedFor(urlPathEqualTo("/v2/runs")))
                   .get(0)
                   .getBodyAsString();
           assertThat(sent)

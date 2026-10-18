@@ -1,13 +1,10 @@
 package com.citi.put.checks.studio;
 
-import com.citi.put.checks.studio.dto.CompileAcceptedDto;
-import com.citi.put.checks.studio.dto.ConfirmCompileRequestDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.StudioAuthoringMapper;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.validation.VariableReferenceValidator;
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -30,8 +27,8 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * Public Studio API (Architecture §8.3), frozen in {@code docs/specs/studio/openapi.yaml}.
  *
- * <p>Unversioned requests retain legacy adaptation. Explicit v2 bodies use the strict authoring
- * mapper; neither route accepts executable code.
+ * <p>Create and update requests use the strict v2 authoring mapper; stable step IDs are required
+ * and executable code is refused.
  */
 @RestController
 @Profile("!worker")
@@ -68,92 +65,25 @@ public class StudioController {
 
   @PostMapping("/tests")
   public ResponseEntity<?> createTest(@RequestBody JsonNode body, Authentication auth) {
-    if (body.has("authoringSchemaVersion")) {
-      StudioAuthoringMapper.ParsedWrite write = authoringMapper.read(body, false);
-      StudioService.AuthoringDraft created =
-          studioService.createAuthoringDraft(write.metadata(), write.authoring(), auth);
-      return ResponseEntity.created(URI.create("/api/v1/studio/tests/" + created.test().id()))
-          .body(authoringMapper.response(created));
-    }
-    UITestDto created = studioService.createTest(authoringMapper.legacy(body), auth);
-    return ResponseEntity.created(URI.create("/api/v1/studio/tests/" + created.id())).body(created);
+    StudioAuthoringMapper.ParsedWrite write = authoringMapper.read(body, false);
+    StudioService.AuthoringDraft created =
+        studioService.createAuthoringDraft(write.metadata(), write.authoring(), auth);
+    return ResponseEntity.created(URI.create("/api/v1/studio/tests/" + created.test().id()))
+        .body(authoringMapper.response(created));
   }
 
-  /** Version negotiation is explicit; an ordinary GET retains the frozen v1 projection. */
   @GetMapping("/tests/{id}")
-  public ResponseEntity<?> findTestById(
-      @PathVariable UUID id,
-      @RequestParam(required = false) Integer authoringSchemaVersion,
-      Authentication auth) {
-    if (authoringSchemaVersion != null) {
-      if (authoringSchemaVersion != 2) {
-        throw new StudioValidationException("INVALID_AUTHORING", "Unsupported authoring version");
-      }
-      return ResponseEntity.ok(
-          authoringMapper.response(studioService.readAuthoringDraft(id, auth)));
-    }
-    return ResponseEntity.ok(studioService.findTestById(id, auth));
+  public ResponseEntity<?> findTestById(@PathVariable UUID id, Authentication auth) {
+    return ResponseEntity.ok(authoringMapper.response(studioService.readAuthoringDraft(id, auth)));
   }
 
   @PutMapping("/tests/{id}")
   public ResponseEntity<?> updateTest(
       @PathVariable UUID id, @RequestBody JsonNode body, Authentication auth) {
-    if (body.has("authoringSchemaVersion")) {
-      StudioAuthoringMapper.ParsedWrite write = authoringMapper.read(body, true);
-      return ResponseEntity.ok(
-          authoringMapper.response(
-              studioService.updateAuthoringDraft(id, write.metadata(), write.authoring(), auth)));
-    }
-    return ResponseEntity.ok(studioService.updateTest(id, authoringMapper.legacy(body), auth));
-  }
-
-  /**
-   * Enqueues compilation of the current source (Story 10.8 AC-1; Architecture §8.3).
-   *
-   * <p>{@code 202} says the compile request was <em>recorded</em>, not that a model was reached:
-   * acceptance and execution are separate events, so pool saturation, the gateway bulkhead and the
-   * per-attempt budget all surface asynchronously as {@code compileStatus: STALE} with a {@code
-   * compileError} the authoring UI reads, and never as a status code here.
-   *
-   * <p>The refusals are ordered by ADR-002 §14.4 — {@code 401}/{@code 403}, then {@code 409} for a
-   * soft-deleted or quarantined draft, then {@code 400} for an authoring bound or an inline
-   * credential — and every one of them leaves the draft's compile state exactly where it was.
-   */
-  @PostMapping("/tests/{id}/compile")
-  public ResponseEntity<CompileAcceptedDto> compileTest(
-      @PathVariable UUID id, Authentication auth) {
-    return ResponseEntity.accepted().body(studioService.compileTest(id, auth));
-  }
-
-  /**
-   * Confirms exactly the candidate the author reviewed (Story 10.9 AC-1; Architecture §4.2, §8.3).
-   *
-   * <p>The body is the frozen four-field one and every field is load-bearing: the confirmation is
-   * decided by two conditional statements that name all four, so a stale tab approving a newer
-   * artifact, an edit made underneath a review and a second confirmation of an already-confirmed
-   * revision are all {@code 409 STALE_CANDIDATE} with nothing written.
-   *
-   * <p>The refusals are ordered by ADR-002 §14.4 — {@code 401}/{@code 403} first, so a caller who
-   * may not act on the draft's CSI never learns whether it exists, then {@code 409} for a
-   * soft-deleted or quarantined draft, then the confirmation itself. The one documented exception
-   * is bean validation: {@code @Valid} runs during argument resolution and so a malformed body is
-   * {@code 400} before authorization. That discloses nothing, because it answers identically for an
-   * id that never existed.
-   *
-   * <p>{@code 200} carries the committed draft, re-read after the transaction — not the state the
-   * caller asked for.
-   *
-   * @param id the draft whose candidate is being confirmed
-   * @param request the frozen {@code ConfirmCompileRequest} body
-   * @param auth the caller
-   * @return the confirmed draft
-   */
-  @PostMapping("/tests/{id}/confirm-compile")
-  public ResponseEntity<UITestDto> confirmCompile(
-      @PathVariable UUID id,
-      @Valid @RequestBody ConfirmCompileRequestDto request,
-      Authentication auth) {
-    return ResponseEntity.ok(studioService.confirmCompile(id, request, auth));
+    StudioAuthoringMapper.ParsedWrite write = authoringMapper.read(body, true);
+    return ResponseEntity.ok(
+        authoringMapper.response(
+            studioService.updateAuthoringDraft(id, write.metadata(), write.authoring(), auth)));
   }
 
   /**
@@ -171,6 +101,13 @@ public class StudioController {
    * Accepts an execution (AC-7 – AC-11). Owners and explicitly authorized administrators of the
    * test's CSI may execute (§9.1); every other caller receives the same {@code 403} as for an
    * unknown test id (Story 10.48, ADR-002 O-22).
+   *
+   * <p>STUDIO-OBS-014 AC-9 (AR-3): the {@code Idempotency-Key} header is mandatory on this route.
+   * An absent header is refused here, before any write, with {@code 400 IDEMPOTENCY_KEY_REQUIRED}.
+   * A malformed or blank header never reaches this method: the platform {@code IdempotencyFilter}
+   * refuses it first with {@code 400 INVALID_IDEMPOTENCY_KEY}. The header stays {@code required =
+   * false} on purpose, so the refusal is this route's own code and no global handler changes; the
+   * service keeps accepting a null key for its internal, non-HTTP callers.
    */
   @PostMapping("/tests/{id}/execute")
   public ResponseEntity<Map<String, Object>> executeTest(
@@ -178,6 +115,10 @@ public class StudioController {
       @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
       Authentication auth,
       jakarta.servlet.http.HttpServletRequest request) {
+    if (idempotencyKey == null || idempotencyKey.isBlank()) {
+      throw new StudioValidationException(
+          "IDEMPOTENCY_KEY_REQUIRED", "Idempotency-Key header is required");
+    }
     ExecutionSnapshotDto execution = studioService.executeTest(id, auth, idempotencyKey, request);
     return ResponseEntity.accepted()
         .body(Map.of("executionId", execution.executionId(), "status", execution.status()));

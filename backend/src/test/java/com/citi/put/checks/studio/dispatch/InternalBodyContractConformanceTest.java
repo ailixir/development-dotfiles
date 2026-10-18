@@ -5,10 +5,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
-import com.citi.put.checks.studio.compile.validator.RunnerValidationClient;
-import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
+import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+import com.citi.put.checks.studio.internal.StrictInternalBodyReader;
+import com.citi.put.checks.studio.internal.dto.ExecutionControl;
+import com.citi.put.checks.studio.internal.dto.RunOutcome;
+import com.citi.put.checks.studio.internal.dto.RunnerReport;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -17,26 +22,19 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
-import com.networknt.schema.ValidationMessage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.springframework.http.client.SimpleClientHttpRequestFactory;
-import org.springframework.web.client.RestClient;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -70,17 +68,23 @@ import org.yaml.snakeyaml.Yaml;
  *       silently failed to load would make every producer "conform".
  * </ol>
  *
- * <p>Adding a producer to {@link #internalBodies()} is how this grows. {@code RunJob} was the first
- * member because it was the one that was red; {@code ValidateRequest} is the second, added on QA's
- * LOW-3 — the registry was <em>general in shape and singular in fact</em>, and a loop over one
- * member is a claim about one member however it is written. Both bodies are captured off a real
- * socket from the real client.
+ * <p>Adding a producer to {@link #internalBodies()} is how this grows. Since ADR-SC-005 the one run
+ * body is the observed job of {@code POST /v2/runs}, whose frozen schema the document references as
+ * {@code contracts/v3/replay-job.schema.json}; it is judged by the backend's own validator of that
+ * same file. The artifact-1 {@code RunJob} and the compile-only {@code ValidateRequest} producers
+ * are gone with their routes.
  */
 class InternalBodyContractConformanceTest {
 
   private static final Path CONTRACT = Path.of("..", "docs", "specs", "studio", "openapi.yaml");
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
+
+  /** The backend's validator of the frozen observed contracts, read from the same v3 files. */
+  private static final GuidedContracts CONTRACTS = new GuidedContracts();
+
+  /** The schema {@code POST /v2/runs} declares for its request body. */
+  private static final String OBSERVED_JOB = "v3/replay-job";
 
   private static JsonNode contractRoot;
   private static WireMockServer wireMock;
@@ -118,22 +122,19 @@ class InternalBodyContractConformanceTest {
 
   /** The registry. Every internal body with a producer belongs here. */
   static Stream<InternalBody> internalBodies() {
-    return Stream.of(
-        new InternalBody("RunJob", captureRunJobBody()),
-        new InternalBody("ValidateRequest", captureValidateRequestBody()));
+    return Stream.of(new InternalBody(OBSERVED_JOB, captureRunJobBody()));
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("internalBodies")
   void theSerializedBytesValidateAgainstTheSchemaTheFrozenDocumentDeclares(InternalBody body) {
-    Set<ValidationMessage> problems = schemaFor(body.schemaName()).validate(read(body));
-
-    assertThat(problems)
+    org.assertj.core.api.Assertions.assertThatCode(
+            () -> CONTRACTS.validate(body.schemaName(), read(body)))
         .as(
-            "the bytes %s hands its transport do not conform to the frozen %s schema in %s;"
+            "the bytes %s hands its transport do not conform to the frozen %s schema;"
                 + " the contract is the authority and the producer is what changes",
-            body.schemaName(), body.schemaName(), CONTRACT)
-        .isEmpty();
+            body.schemaName(), body.schemaName())
+        .doesNotThrowAnyException();
   }
 
   /**
@@ -144,21 +145,114 @@ class InternalBodyContractConformanceTest {
    */
   @Test
   void theValidatorWouldNoticeAForbiddenKeyAndAMissingRequiredField() {
-    ObjectNode wrong = MAPPER.createObjectNode();
-    wrong.put("executionId", UUID.randomUUID().toString());
-    wrong.put("callbackBaseUrl", "http://put-checks-api:8080");
+    JsonNode valid = read(new InternalBody(OBSERVED_JOB, captureRunJobBody()));
+    ObjectNode forbidden = valid.deepCopy();
+    forbidden.put("callbackBaseUrl", "http://put-checks-api:8080");
+    ObjectNode missing = valid.deepCopy();
+    missing.remove("secrets");
 
-    Set<String> messages =
-        schemaFor("RunJob").validate(wrong).stream()
-            .map(ValidationMessage::getMessage)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-
-    assertThat(messages)
+    assertThatThrownBy(() -> CONTRACTS.validate(OBSERVED_JOB, forbidden))
         .as("a forbidden key must be reported by the same machinery the producers are judged by")
-        .anyMatch(message -> message.contains("callbackBaseUrl"));
-    assertThat(messages)
+        .isInstanceOf(GuidedSessionException.class);
+    assertThatThrownBy(() -> CONTRACTS.validate(OBSERVED_JOB, missing))
         .as("a missing required field must be reported by the same machinery")
-        .anyMatch(message -> message.contains("resolvedSecrets"));
+        .isInstanceOf(GuidedSessionException.class);
+  }
+
+  @Test
+  void secretUsageAndRevocationParseThroughTheStrictBoundary() throws IOException {
+    StrictInternalBodyReader reader =
+        new StrictInternalBodyReader(new ObjectMapper().findAndRegisterModules());
+    byte[] control =
+        ("{\"executionId\":\"11111111-1111-4111-8111-111111111111\","
+                + "\"cancelRequested\":false,\"revoked\":true}")
+            .getBytes(StandardCharsets.UTF_8);
+    assertThat(schemaFor("ExecutionControl").validate(MAPPER.readTree(control))).isEmpty();
+    assertThat(reader.read(control, ExecutionControl.class).revoked()).isTrue();
+
+    byte[] report =
+        "{\"secretUse\":{\"PASS\":\"USED\",\"UNREACHED\":\"NOT_USED\",\"DENIED\":\"REFUSED\"}}"
+            .getBytes(StandardCharsets.UTF_8);
+    assertThat(reader.read(report, RunnerReport.class).secretUse())
+        .containsExactlyInAnyOrderEntriesOf(
+            Map.of("PASS", "USED", "UNREACHED", "NOT_USED", "DENIED", "REFUSED"));
+    assertThat(reader.read("{}".getBytes(StandardCharsets.UTF_8), RunnerReport.class).secretUse())
+        .isEmpty();
+    assertThat(
+            reader
+                .read("{\"secretUse\":{}}".getBytes(StandardCharsets.UTF_8), RunnerReport.class)
+                .secretUse())
+        .isEmpty();
+    assertThatThrownBy(
+            () ->
+                reader.read(
+                    "{\"secretUse\":null}".getBytes(StandardCharsets.UTF_8), RunnerReport.class))
+        .isInstanceOf(com.citi.put.checks.studio.internal.InternalCallbackException.class);
+    assertThatThrownBy(
+            () ->
+                reader.read(
+                    "{\"secretUse\":{\"PASS\":\"CANARY_VALUE\"}}".getBytes(StandardCharsets.UTF_8),
+                    RunnerReport.class))
+        .isInstanceOf(com.citi.put.checks.studio.internal.InternalCallbackException.class);
+    assertThatThrownBy(
+            () ->
+                reader.read(
+                    "{\"secretUse\":{},\"resolvedSecretValue\":\"CANARY_VALUE\"}"
+                        .getBytes(StandardCharsets.UTF_8),
+                    RunnerReport.class))
+        .isInstanceOf(com.citi.put.checks.studio.internal.InternalCallbackException.class);
+  }
+
+  @Test
+  void loginRequiredIsAFailedOutcomeWithClosedDetail() throws IOException {
+    StrictInternalBodyReader reader =
+        new StrictInternalBodyReader(new ObjectMapper().findAndRegisterModules());
+    byte[] bytes =
+        ("{\"result\":\"FAILED\",\"errorCode\":\"LOGIN_REQUIRED\",\"errorMessage\":null,"
+                + "\"detail\":{\"stepId\":\"protected-step\",\"loginStepsPresent\":true}}")
+            .getBytes(StandardCharsets.UTF_8);
+    JsonNode valid = MAPPER.readTree(bytes);
+    assertThat(schemaFor("RunOutcome").validate(valid)).isEmpty();
+    assertThat(reader.read(bytes, RunOutcome.class).detail().loginStepsPresent()).isTrue();
+
+    String json = new String(bytes, StandardCharsets.UTF_8);
+    assertThat(
+            reader
+                .read(
+                    json.replace("true", "false").getBytes(StandardCharsets.UTF_8),
+                    RunOutcome.class)
+                .detail()
+                .loginStepsPresent())
+        .isFalse();
+    for (String invalid :
+        List.of(
+            json.replace("FAILED", "PASSED"),
+            json.replace("LOGIN_REQUIRED", "STEP_FAILED"),
+            "{\"result\":\"FAILED\",\"errorCode\":\"LOGIN_REQUIRED\",\"errorMessage\":null}",
+            json.replace("true", "null"),
+            json.replace("true", "\"true\""),
+            json.replace("true", "1"),
+            json.replace("\"protected-step\"", "42"),
+            json.replace("\"protected-step\"", "true"),
+            json.replace(",\"loginStepsPresent\":true", ""),
+            json.replace("\"stepId\":\"protected-step\",", ""))) {
+      assertThatThrownBy(
+              () -> reader.read(invalid.getBytes(StandardCharsets.UTF_8), RunOutcome.class))
+          .isInstanceOf(com.citi.put.checks.studio.internal.InternalCallbackException.class);
+    }
+
+    ObjectNode wrong = valid.deepCopy();
+    wrong.put("result", "PASSED");
+    assertThat(schemaFor("RunOutcome").validate(wrong)).isNotEmpty();
+    wrong = valid.deepCopy();
+    wrong.remove("detail");
+    assertThat(schemaFor("RunOutcome").validate(wrong)).isNotEmpty();
+    wrong = valid.deepCopy();
+    ((ObjectNode) wrong.path("detail")).put("value", "CANARY_VALUE");
+    assertThat(schemaFor("RunOutcome").validate(wrong)).isNotEmpty();
+    byte[] forbidden = MAPPER.writeValueAsBytes(wrong);
+    assertThatThrownBy(() -> reader.read(forbidden, RunOutcome.class))
+        .isInstanceOf(com.citi.put.checks.studio.internal.InternalCallbackException.class);
   }
 
   /**
@@ -170,66 +264,17 @@ class InternalBodyContractConformanceTest {
    */
   private static String captureRunJobBody() {
     wireMock.resetAll();
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(202)));
 
     new HttpRunnerDispatchClient(
             new ObjectMapper(),
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofSeconds(5), null, null, null, null, null, null),
             new StudioRunnerProperties(
-                "http://localhost:" + wireMock.port(),
-                "test-runner-token",
-                Duration.ofSeconds(5),
-                Duration.ofSeconds(2)))
+                "http://localhost:" + wireMock.port(), "test-runner-token", Duration.ofSeconds(2)))
         .send(RunJobFixtures.conformingJob());
 
-    var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/runs")));
-    assertThat(requests)
-        .as("no request reached the socket, so there are no producer bytes to judge")
-        .hasSize(1);
-    return requests.get(0).getBodyAsString();
-  }
-
-  /**
-   * Captures the body the compile path's validation client actually puts on the wire (QA LOW-3).
-   *
-   * <p>The same technique as {@link #captureRunJobBody()} and for the same reason: {@code
-   * RunnerValidationClient.requestBody} could be asserted directly, but the bytes are what the
-   * runner's own closed key set judges, and the two can differ.
-   */
-  private static String captureValidateRequestBody() {
-    wireMock.resetAll();
-    wireMock.stubFor(
-        post(urlPathEqualTo("/v1/validate"))
-            .willReturn(
-                aResponse()
-                    .withStatus(200)
-                    .withHeader("Content-Type", "application/json")
-                    .withBody(
-                        "{\"ok\":true,\"diagnostics\":[],\"steps\":[],"
-                            + "\"validatorSchemaVersion\":\"1.0.0\","
-                            + "\"languagePolicyVersion\":\"1.0.0\","
-                            + "\"syntaxReferenceVersion\":\"1.0.0\","
-                            + "\"executorVersion\":\"1.0.0\"}")));
-
-    SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
-    factory.setConnectTimeout(1_000);
-    factory.setReadTimeout(5_000);
-    new RunnerValidationClient(
-            RestClient.builder().requestFactory(factory).build(),
-            new StudioRunnerProperties(
-                "http://localhost:" + wireMock.port(),
-                "conformance-token",
-                Duration.ofSeconds(5),
-                Duration.ofSeconds(1)))
-        .validate(
-            "{\"version\":1,\"steps\":[{\"stepIndex\":0,\"originalText\":\"Go to the home"
-                + " page\",\"code\":\"await page.goto('https://example.com/');\"}]}",
-            List.of("Go to the home page"),
-            List.of("REGION"),
-            List.of("LOGIN_PW"));
-
-    var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/validate")));
+    var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v2/runs")));
     assertThat(requests)
         .as("no request reached the socket, so there are no producer bytes to judge")
         .hasSize(1);

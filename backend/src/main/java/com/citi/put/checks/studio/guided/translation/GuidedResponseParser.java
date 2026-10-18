@@ -16,7 +16,7 @@ public final class GuidedResponseParser {
   public JsonNode parse(GuidedModelRequest request, byte[] response) {
     require(response != null && response.length <= 65536, "INVALID_CONTRACT", 422);
     JsonNode result = contracts.parseWire(response);
-    contracts.validate("v2/guided-model-response", result);
+    contracts.validate("v3/guided-model-response", result);
     require(
         result.path("kind").asText().equals(request.kind().name())
             && result.path("requestId").asText().equals(request.requestId()),

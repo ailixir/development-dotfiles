@@ -69,7 +69,8 @@ public record RunJob(
     String csi,
     ReferenceDeclarations references,
     Map<String, String> resolvedVars,
-    Map<String, String> resolvedSecrets,
+    @com.fasterxml.jackson.annotation.JsonIgnore
+        Map<String, com.citi.put.checks.studio.secrets.SecretValue> resolvedSecrets,
     JobDeadlines deadlines,
     String videoKey,
     String manifestKey,
@@ -93,7 +94,7 @@ public record RunJob(
       String csi,
       ReferenceDeclarations references,
       Map<String, String> resolvedVars,
-      Map<String, String> resolvedSecrets,
+      Map<String, com.citi.put.checks.studio.secrets.SecretValue> resolvedSecrets,
       JobDeadlines deadlines,
       String videoKey,
       String manifestKey,
@@ -120,11 +121,23 @@ public record RunJob(
   }
 
   @Override
+  public String toString() {
+    return "RunJob[executionId=" + executionId + ", attemptId=" + attemptId + ", secrets=<secret>]";
+  }
+
+  @Override
   public JsonNode observed() {
     return observed == null ? null : observed.deepCopy();
   }
 
   public static RunJob observed(JsonNode wire) {
+    return observed(wire, Map.of(), Map.of());
+  }
+
+  public static RunJob observed(
+      JsonNode wire,
+      Map<String, com.citi.put.checks.studio.secrets.SecretValue> secrets,
+      Map<String, List<String>> origins) {
     JsonNode binding = wire.path("binding");
     UUID executionId = UUID.fromString(binding.path("executionId").asText());
     UUID attemptId = UUID.fromString(binding.path("attemptId").asText());
@@ -141,14 +154,14 @@ public record RunJob(
         List.of(),
         wire.path("configuration"),
         csi,
-        new ReferenceDeclarations(List.of(), List.of()),
+        new ReferenceDeclarations(List.of(), List.copyOf(secrets.keySet())),
         Map.of(),
-        Map.of(),
+        secrets,
         new JobDeadlines(30000, wire.path("runtime").path("totalRuntimeMs").asLong()),
         videoKeyFor(csi, testId, executionId, attemptId),
         manifestKeyFor(csi, testId, executionId, attemptId),
         wire.path("artifact").path("replayPolicy"),
-        Map.of(),
+        origins,
         wire);
   }
 
@@ -163,7 +176,7 @@ public record RunJob(
       String csi,
       ReferenceDeclarations references,
       Map<String, String> resolvedVars,
-      Map<String, String> resolvedSecrets,
+      Map<String, com.citi.put.checks.studio.secrets.SecretValue> resolvedSecrets,
       JobDeadlines deadlines,
       String videoKey,
       String manifestKey,
@@ -198,7 +211,7 @@ public record RunJob(
       String csi,
       ReferenceDeclarations references,
       Map<String, String> resolvedVars,
-      Map<String, String> resolvedSecrets,
+      Map<String, com.citi.put.checks.studio.secrets.SecretValue> resolvedSecrets,
       JobDeadlines deadlines,
       String videoKey,
       String manifestKey) {

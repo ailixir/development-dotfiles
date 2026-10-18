@@ -9,9 +9,9 @@ import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.internal.AdmissionCasService;
 import com.citi.put.checks.studio.internal.ProgressReportService;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import com.citi.put.checks.studio.internal.dto.RunnerLogEntry;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.Instant;
@@ -23,9 +23,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -54,7 +57,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     })
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class SseCrossReplicaIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60473";
   private static final String OWNER = "cross-replica-owner@citi.com";
@@ -63,6 +72,10 @@ class SseCrossReplicaIT {
 
   @Autowired private StudioService studioService;
   @Autowired private AdmissionCasService admissionService;
+
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
   @Autowired private ProgressReportService progressService;
   @Autowired private StudioDispatchLedgerStatements statements;
   @Autowired private TransactionTemplate transactions;
@@ -81,14 +94,19 @@ class SseCrossReplicaIT {
     fixtures.seedUser(OWNER);
     fixtures.seedUser(READER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     Authentication owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     UUID testId =
         fixtures
             .seedRunnableTest("Cross-replica draft", CSI_ID, OWNER, List.of("Go to the home page"))
             .testId();
-    executionId = studioService.executeTest(testId, owner, null).executionId();
-    attemptId = UUID.randomUUID();
+    executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
+    // STUDIO-OBS-014 P1: dispatched under the attempt the observed Run authority issued and
+    // admitted through the observed admission, as the runner does (legacy claim() deleted).
+    attemptId = ObservedPublicationFixture.bindingAttempt(observedReplay, executionId);
     UUID attempt = attemptId;
     transactions.executeWithoutResult(
         status -> {
@@ -97,8 +115,8 @@ class SseCrossReplicaIT {
           statements.beginDispatch(executionId, "xr-dispatcher", attempt);
         });
     admissionId = UUID.randomUUID();
-    admissionService.claim(
-        executionId, new AdmissionRequest(executionId, attemptId, RUNNER, admissionId, Map.of()));
+    ObservedPublicationFixture.admitObserved(
+        observedReplay, admissionService, executionId, RUNNER, admissionId);
   }
 
   @Test
@@ -189,6 +207,7 @@ class SseCrossReplicaIT {
         Map.of(),
         null,
         null,
-        null);
+        null,
+        Map.of());
   }
 }

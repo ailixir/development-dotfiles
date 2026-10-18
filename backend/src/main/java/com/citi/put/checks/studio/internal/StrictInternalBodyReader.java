@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component;
 /**
  * Reads an internal callback body from the <b>bytes the API actually received</b> (AC-1, AC-24).
  *
- * <p>The two internal routes take their body as a byte array and parse it here rather than letting
- * Spring bind it, for one reason: the closed schemas of ADR-002 §6.2 have to be enforced, and the
- * platform {@code ObjectMapper} has {@code FAIL_ON_UNKNOWN_PROPERTIES} disabled — Spring Boot's
- * default, and one the public Studio surface depends on, because its legacy request adapters accept
- * shapes the typed contract does not name.
+ * <p>The internal progress route takes its body as a byte array and parses it here rather than
+ * letting Spring bind it, for one reason: the closed schemas of ADR-002 §6.2 have to be enforced,
+ * and the platform {@code ObjectMapper} has {@code FAIL_ON_UNKNOWN_PROPERTIES} disabled — Spring
+ * Boot's default, and one the public Studio surface depends on, because its legacy request adapters
+ * accept shapes the typed contract does not name.
  *
  * <p>Turning that feature on globally would change how every other request in the service is read.
  * A mapper scoped to this boundary turns it on for exactly the bodies the contract declares closed

@@ -6,7 +6,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.citi.put.checks.studio.compile.CompilePipeline;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,13 +14,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,7 +37,6 @@ class StudioAuthoringApiIT {
   @Autowired MockMvc mvc;
   @Autowired ObjectMapper mapper;
   @Autowired JdbcTemplate jdbc;
-  @MockBean CompilePipeline compilePipeline;
 
   @BeforeEach
   void seed() {
@@ -90,7 +89,7 @@ class StudioAuthoringApiIT {
 
   @Test
   void sharedInvalidSourcesAreRejectedBeforePersistence() throws Exception {
-    for (JsonNode fixture : fixtures("context-authoring-invalid.json")) {
+    for (JsonNode fixture : invalidFixtures()) {
       JsonNode response = send(post(BASE), body(fixture.path("request")), 400);
       assertThat(mapper.convertValue(fixture.path("expectedCategories"), String[].class))
           .as(fixture.path("name").asText())
@@ -131,30 +130,33 @@ class StudioAuthoringApiIT {
         .put("value", "also changed");
     JsonNode both = send(put(url), request, 200);
     assertThat(both.path("configurationRevision").asLong()).isEqualTo(3);
-    assertThat(send(get(url), null, 200).path("steps").get(0).asText()).isEqualTo("edited");
+    assertThat(send(get(url), null, 200).path("steps").get(0).path("text").asText())
+        .isEqualTo("edited");
   }
 
   @Test
-  void legacyNegotiationNeverMintsIdsUntilExplicitV2Save() throws Exception {
-    ObjectNode legacy = body(mapper.createObjectNode().set("steps", validLegacy().path("steps")));
-    JsonNode created = send(post(BASE), legacy, 201);
+  void aV1ShapedWriteIsRefusedAndWritesNothing() throws Exception {
+    Integer count = jdbc.queryForObject("SELECT count(*) FROM ui_tests", Integer.class);
+    ObjectNode v1 = body(mapper.createObjectNode().set("steps", validLegacy().path("steps")));
+    assertThat(send(post(BASE), v1, 400).path("error").asText()).isEqualTo("INVALID_AUTHORING");
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM ui_tests", Integer.class))
+        .isEqualTo(count);
+    JsonNode created = send(post(BASE), body(valid("exact-literals")), 201);
     String url = BASE + "/" + created.path("id").asText();
-    assertThat(send(get(url + "?authoringSchemaVersion=2"), null, 409).path("error").asText())
-        .isEqualTo("LEGACY_AUTHORING");
-    assertThat(send(get(url), null, 200).path("steps")).isEqualTo(legacy.path("steps"));
+    UUID id = UUID.fromString(created.path("id").asText());
+    String before =
+        jdbc.queryForObject(
+            "SELECT to_jsonb(t)::text FROM ui_tests t WHERE id=?", String.class, id);
+    tokens(v1, created);
+    assertThat(send(put(url), v1, 400).path("error").asText()).isEqualTo("INVALID_AUTHORING");
     assertThat(
             jdbc.queryForObject(
-                "SELECT authoring IS NULL FROM ui_tests WHERE id=?",
-                Boolean.class,
-                UUID.fromString(created.path("id").asText())))
-        .isTrue();
-    ObjectNode promoted = body(validExpectedLegacy());
-    tokens(promoted, created);
-    JsonNode saved = send(put(url), promoted, 200);
-    assertThat(saved.path("sourceRevision").asLong()).isEqualTo(1);
-    assertThat(saved.path("configurationRevision").asLong()).isEqualTo(2);
-    assertThat(send(get(url + "?authoringSchemaVersion=2"), null, 200).path("steps"))
-        .isEqualTo(saved.path("steps"));
+                "SELECT to_jsonb(t)::text FROM ui_tests t WHERE id=?", String.class, id))
+        .isEqualTo(before);
+    v1.put("viewportWidth", 1000);
+    assertThat(send(post(BASE), v1, 400).path("error").asText()).isEqualTo("UNSUPPORTED_FIELD");
+    assertThat(jdbc.queryForObject("SELECT count(*) FROM ui_tests", Integer.class))
+        .isEqualTo(count + 1);
   }
 
   @Test
@@ -240,11 +242,39 @@ class StudioAuthoringApiIT {
     throw new IllegalArgumentException(name);
   }
 
-  private JsonNode validLegacy() throws Exception {
-    return fixtures("context-authoring-valid.json").get(0).path("legacy");
+  /**
+   * The v1 string-step body that was the shared fixture case {@code legacy-empty-context} (its
+   * {@code legacy} member, verbatim). Single path: it is kept only as a body the API must refuse.
+   */
+  private JsonNode validLegacy() {
+    return mapper
+        .createObjectNode()
+        .set(
+            "steps",
+            mapper
+                .createArrayNode()
+                .add("  Open Caf\u00e9 \u2615  ")
+                .add("Type \"A\\B\"\nnext line"));
   }
 
-  private JsonNode validExpectedLegacy() throws Exception {
-    return fixtures("context-authoring-valid.json").get(0).path("expected");
+  /**
+   * The shared invalid cases plus {@code mixed-legacy-v2-steps}, which was a case of {@code
+   * context-authoring-invalid.json} until the single-path cleanup and is kept inline, verbatim.
+   */
+  private List<JsonNode> invalidFixtures() throws Exception {
+    List<JsonNode> cases = new ArrayList<>();
+    fixtures("context-authoring-invalid.json").forEach(cases::add);
+    ObjectNode mixed = mapper.createObjectNode().put("name", "mixed-legacy-v2-steps");
+    mixed
+        .putObject("request")
+        .put("authoringSchemaVersion", 2)
+        .putArray("steps")
+        .add("Legacy string")
+        .addObject()
+        .put("id", "00000000-0000-4000-8000-000000000062")
+        .put("text", "V2 object");
+    mixed.putArray("expectedCategories").add("MIXED_STEP_SHAPES");
+    cases.add(mixed);
+    return cases;
   }
 }

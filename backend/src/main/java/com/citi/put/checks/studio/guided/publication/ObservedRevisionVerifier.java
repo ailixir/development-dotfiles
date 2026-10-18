@@ -34,14 +34,53 @@ public final class ObservedRevisionVerifier {
     this.properties = properties;
   }
 
+  public void assertResolvedSecretLiterals(
+      JsonNode artifact,
+      com.citi.put.checks.studio.dispatch.StudioReferenceResolver.Resolved resolved) {
+    assertResolvedSecretLiterals(
+        artifact, resolved, new com.fasterxml.jackson.databind.ObjectMapper().createArrayNode());
+  }
+
+  public void assertResolvedSecretLiterals(
+      JsonNode artifact,
+      com.citi.put.checks.studio.dispatch.StudioReferenceResolver.Resolved resolved,
+      JsonNode inputs) {
+    var secrets = resolved.secretValues();
+    for (JsonNode step : artifact.path("steps")) {
+      for (JsonNode action : step.path("operations")) {
+        JsonNode operation = action.path("operation");
+        if (operation.path("kind").asText().equals("fill")) {
+          JsonNode value = operation.path("value");
+          if (value.path("kind").asText().equals("authoredLiteral")) {
+            for (JsonNode input : inputs) {
+              if (input.path("inputId").equals(value.path("sourceInputId"))) {
+                require(
+                    secrets.values().stream()
+                        .noneMatch(secret -> secret.matches(input.path("value").asText())),
+                    "REFERENCE_MISMATCH",
+                    422);
+              }
+            }
+          }
+          if (value.isTextual() || value.path("kind").asText().equals("literal")) {
+            String literal = value.isTextual() ? value.textValue() : value.path("value").asText();
+            require(
+                secrets.values().stream().noneMatch(secret -> secret.matches(literal)),
+                "REFERENCE_MISMATCH",
+                422);
+          }
+        }
+      }
+    }
+  }
+
   public ObjectNode verify(UUID revisionId) {
     require(properties.enabled(), "RUNTIME_INCOMPATIBLE", 409);
     var rows =
         jdbc.queryForList(
             "SELECT"
-                + " id,test_id,csi_id,publication_kind,guided_session_id,compile_req"
-                + "uest_id,confirmed_by,confirmed_at,confirmation_source,artifact_sc"
-                + "hema_version,artifact::text"
+                + " id,test_id,csi_id,publication_kind,guided_session_id,confirmed_by,"
+                + "confirmed_at,confirmation_source,artifact_schema_version,artifact::text"
                 + " AS artifact,configuration::text AS configuration,reference_policy::text AS"
                 + " policy,provenance::text AS"
                 + " provenance,source_revision,configuration_revision,source_hash,ar"
@@ -51,12 +90,12 @@ public final class ObservedRevisionVerifier {
     require(rows.size() == 1, "MISSING_SOURCE", 409);
     var row = rows.getFirst();
     require(
+        ((Number) row.get("artifact_schema_version")).intValue() == 3, "RUNTIME_INCOMPATIBLE", 409);
+    require(
         "GUIDED_RUN".equals(row.get("publication_kind"))
             && "GUIDED_RUN".equals(row.get("confirmation_source"))
-            && row.get("compile_request_id") == null
             && row.get("confirmed_by") != null
-            && row.get("confirmed_at") != null
-            && ((Number) row.get("artifact_schema_version")).intValue() == 2,
+            && row.get("confirmed_at") != null,
         "EVIDENCE_MISMATCH",
         409);
     var receipt =
@@ -76,9 +115,9 @@ public final class ObservedRevisionVerifier {
         policy = contracts.parse((String) row.get("policy")),
         configuration = contracts.parse((String) row.get("configuration")),
         provenance = contracts.parse((String) row.get("provenance"));
-    contracts.validate("v2/replay-artifact", artifact);
-    contracts.validate("v2/replay-policy", policy);
-    contracts.validate("v2/replay-profile#/definitions/Configuration", configuration);
+    contracts.validate("v3/replay-artifact", artifact);
+    contracts.validate("v3/replay-policy", policy);
+    contracts.validate("v3/replay-profile#/definitions/Configuration", configuration);
     pins.supported(artifact.path("profile"), null);
     require(
         GuidedContracts.hash(artifact).equals(row.get("artifact_hash"))
@@ -91,6 +130,101 @@ public final class ObservedRevisionVerifier {
             && artifact.path("learnedPlanHash").asText().equals(row.get("learned_plan_hash")),
         "EVIDENCE_MISMATCH",
         409);
+    JsonNode authoring =
+        contracts.parse(
+            jdbc.queryForObject(
+                "SELECT authoring::text FROM ui_test_revisions WHERE id=?",
+                String.class,
+                revisionId));
+    var metadata =
+        jdbc.queryForMap(
+            "SELECT authoring_revision_inputs::text,\"references\"::text AS reference_identity,"
+                + "step_snapshot_hashes::text,step_reuse_provenance::text FROM ui_test_revisions WHERE id=?",
+            revisionId);
+    require(
+        metadata.get("authoring_revision_inputs") != null
+            && metadata.get("reference_identity") != null
+            && metadata.get("step_snapshot_hashes") != null
+            && metadata.get("step_reuse_provenance") != null,
+        "LEARN_REQUIRED",
+        409);
+    try {
+      var mapper =
+          new com.fasterxml.jackson.databind.ObjectMapper()
+              .findAndRegisterModules()
+              .disable(
+                  com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+              .disable(
+                  com.fasterxml.jackson.databind.DeserializationFeature
+                      .ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+      var frozenAuthoring =
+          mapper.treeToValue(authoring, com.citi.put.checks.studio.dto.AuthoringV2Request.class);
+      var inputs =
+          mapper.readValue(
+              (String) metadata.get("authoring_revision_inputs"),
+              com.citi.put.checks.studio.dto.AuthoringRevisionInputs.class);
+      JsonNode references = contracts.parse((String) metadata.get("reference_identity"));
+      if (references.path("authoringIdentityVersion").asInt() != 1
+          || metadata.get("step_snapshot_hashes") == null
+          || metadata.get("step_reuse_provenance") == null) {
+        throw new GuidedSessionException("LEARN_REQUIRED", 409);
+      }
+      var complete =
+          com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.frozen(
+              frozenAuthoring, inputs, references);
+      JsonNode snapshots =
+          com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.snapshots(
+              frozenAuthoring, complete, configuration, artifact.path("learnedPlan"));
+      require(
+          snapshots.equals(contracts.parse((String) metadata.get("step_snapshot_hashes")))
+              && snapshots.equals(artifact.path("learnedPlan").path("stepSnapshotHashes"))
+              && contracts
+                  .parse((String) metadata.get("step_reuse_provenance"))
+                  .equals(artifact.path("learnedPlan").path("reusedFrom")),
+          "EVIDENCE_MISMATCH",
+          409);
+      var plain =
+          new java.util.TreeSet<String>(
+              com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8);
+      var secrets =
+          new java.util.TreeSet<String>(
+              com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8);
+      for (JsonNode recipe : artifact.path("inputRecipes")) {
+        if (recipe.path("provenance").path("kind").asText().equals("configuration")) {
+          (recipe.path("kind").asText().equals("secretRef") ? secrets : plain)
+              .add(recipe.path("provenance").path("referenceName").asText());
+        }
+      }
+      require(
+          mapper.valueToTree(plain).equals(references.path("variables"))
+              && mapper.valueToTree(secrets).equals(references.path("secrets")),
+          "EVIDENCE_MISMATCH",
+          409);
+    } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
+      throw new GuidedSessionException("EVIDENCE_MISMATCH", 409);
+    } catch (GuidedSessionException failure) {
+      if (failure.messageCode().equals("BASE_IDENTITY_INCOMPLETE")) {
+        throw new GuidedSessionException("LEARN_REQUIRED", 409);
+      }
+      throw failure;
+    }
+    for (JsonNode recipe : artifact.path("inputRecipes")) {
+      JsonNode recipeProvenance = recipe.path("recipeProvenance");
+      if (recipeProvenance.path("kind").asText().equals("sourceSpan")) {
+        String source =
+            text(
+                GuidedPlanBuilder.unique(authoring.path("steps"), "id", text(recipe, "stepId")),
+                "text");
+        int start = recipeProvenance.path("start").asInt(-1),
+            end = recipeProvenance.path("end").asInt(-1);
+        require(start >= 0 && end > start && end <= source.length(), "REFERENCE_MISMATCH", 422);
+        var token =
+            java.util.regex.Pattern.compile("<secret\\s+[A-Za-z0-9_.-]{1,64}>").matcher(source);
+        while (token.find()) {
+          require(end <= token.start() || start >= token.end(), "REFERENCE_MISMATCH", 422);
+        }
+      }
+    }
     ObjectNode equivalence = contracts.object();
     var operations = equivalence.putArray("operations");
     int index = 0;

@@ -70,6 +70,20 @@ public class ProgressReportService {
   private final ObjectMapper objectMapper;
   private final List<ReportCommitHook> commitHooks;
   private final Clock clock;
+  private com.citi.put.checks.studio.secrets.SecretAuditLifecycle secretAudit;
+
+  @Autowired(required = false)
+  public void installSecretAudit(com.citi.put.checks.studio.secrets.SecretAuditLifecycle audit) {
+    this.secretAudit = audit;
+  }
+
+  private com.citi.put.checks.studio.secrets.SecretRevocationSweep secretRevocation;
+
+  @Autowired(required = false)
+  public void installSecretRevocation(
+      com.citi.put.checks.studio.secrets.SecretRevocationSweep sweep) {
+    this.secretRevocation = sweep;
+  }
 
   /**
    * The report is applied by SQL statements, not by JPA. Anything this transaction has already
@@ -130,6 +144,9 @@ public class ProgressReportService {
   /** Applies one report. Returns the acknowledgement the route sends after commit. */
   @Transactional
   public ProgressAck apply(UUID pathExecutionId, RunnerReport report) {
+    if (secretRevocation != null) {
+      secretRevocation.executionRevoked(pathExecutionId);
+    }
     registerCommitHooks(pathExecutionId);
     enforceBounds(report);
     requireMatchingIdentity(pathExecutionId, report);
@@ -144,10 +161,13 @@ public class ProgressReportService {
                         "No execution with this id is accepting reports"));
 
     boolean cancelled = statements.isCancelRequested(pathExecutionId);
+    boolean revoked =
+        statements.find(pathExecutionId).map(row -> row.get("revoked_at") != null).orElse(false);
     boolean observedPreReady =
         execution.getObservedRevisionBinding() != null
             && execution.getBrowserStartedAt() == null
             && !cancelled
+            && !revoked
             && !(RunnerReport.STARTED.equals(report.kind())
                 && report.browserStartedAt() != null
                 && ExecutionStatus.PENDING.equals(execution.getStatus()));
@@ -158,19 +178,69 @@ public class ProgressReportService {
         throw observedIdentityRefusal();
       }
       var source = OBSERVED_CONTRACTS.parse(revision.getSource());
-      RunnerReportProjection.requireObservedPreReadyFailure(
-          report, source.isArray() ? source.size() : 0);
+      RunnerReportProjection.ObservedPreReadyClause refused =
+          RunnerReportProjection.observedPreReadyRefusal(
+              report, source.isArray() ? source.size() : 0);
+      if (refused != null) {
+        // Fixed text, a server-owned id and a server-side category only: nothing from the report
+        // (012A ruling R8.2). The HTTP answer is unchanged.
+        LOGGER.warn(
+            "Studio observed pre-Ready terminal refused: executionId={} clause={}",
+            pathExecutionId,
+            refused);
+        throw RunnerReportProjection.observedPreReadyRefused();
+      }
+    }
+    if (RunnerReport.PROGRESS.equals(report.kind()) && !report.secretUse().isEmpty()) {
+      if (execution.getObservedRevisionBinding() == null) {
+        throw InternalCallbackException.badRequest(
+            InternalCallbackCodes.INVALID_REPORT, "Secret-use progress requires observed identity");
+      }
+      validateObservedAdmission(execution, report);
+      var revision = entityManager.find(UITestRevision.class, execution.getRevisionId());
+      if (revision == null) {
+        throw observedIdentityRefusal();
+      }
+      var artifact = OBSERVED_CONTRACTS.parse(revision.getArtifact());
+      var binding = OBSERVED_CONTRACTS.parse(execution.getObservedRevisionBinding());
+      if (!java.util.Objects.equals(execution.getBrowserStartedAt(), report.browserStartedAt())
+          || report.runtimeVersions() == null) {
+        throw observedIdentityRefusal();
+      }
+      try {
+        Object reportedProfile = report.runtimeVersions().get("observedProfile"),
+            reportedBuild = report.runtimeVersions().get("observedBuild");
+        if (!(reportedProfile instanceof String profile)
+            || !(reportedBuild instanceof String build)
+            || !OBSERVED_CONTRACTS.parse(profile).equals(binding.path("requiredProfile"))
+            || !OBSERVED_CONTRACTS.parse(build).equals(binding.path("requiredBuild"))) {
+          throw observedIdentityRefusal();
+        }
+      } catch (RuntimeException invalid) {
+        throw observedIdentityRefusal();
+      }
+      if (!binding.path("revisionId").asText().equals(revision.getId().toString())
+          || !binding.path("artifactHash").asText().equals(revision.getArtifactHash())
+          || !binding
+              .path("artifactHash")
+              .asText()
+              .equals(com.citi.put.checks.studio.guided.session.GuidedContracts.hash(artifact))) {
+        throw observedIdentityRefusal();
+      }
+      com.citi.put.checks.studio.secrets.ObservedProgressSecretEvidence.require(report, artifact);
     }
     RunnerReportProjection.Projected projected =
         RunnerReportProjection.project(
             report,
             originalSteps(execution),
+            revisionStepIds(execution, report, observedPreReady),
             properties.evidenceRetentionOrDefault(),
             clock.instant(),
             // Write-once and never cleared, so reading it ahead of the statement cannot be
             // contradicted by it; and a runner can only have been told to cancel after the request
             // committed (ADR-002 §29).
-            cancelled);
+            cancelled,
+            revoked);
 
     long sequence = report.runnerSequence();
     int applied =
@@ -180,7 +250,16 @@ public class ProgressReportService {
 
     if (applied == 1) {
       entityManager.clear();
+      if (RunnerReport.PROGRESS.equals(report.kind()) && !report.secretUse().isEmpty()) {
+        if (secretAudit == null) {
+          throw new IllegalStateException("Secret-use progress audit unavailable");
+        }
+        secretAudit.replayKnownUses(pathExecutionId, report.attemptId(), report.secretUse());
+      }
       if (RunnerReport.FINAL.equals(report.kind())) {
+        if (secretAudit != null && execution.getObservedRevisionBinding() != null) {
+          secretAudit.replayTerminal(pathExecutionId, report.attemptId(), report.secretUse());
+        }
         afterFinal(report, projected);
       }
       return ack(pathExecutionId, sequence, true);
@@ -281,7 +360,27 @@ public class ProgressReportService {
         projected.videoError(),
         projected.videoPartial(),
         projected.videoExpiresAt(),
-        projected.manifestKey());
+        projected.manifestKey(),
+        replayCode(projected),
+        replayStepId(projected),
+        replayStepIndex(projected),
+        replayLoginStepsPresent(projected));
+  }
+
+  private static String replayCode(RunnerReportProjection.Projected projected) {
+    return projected.replayFailure() == null ? null : projected.replayFailure().code();
+  }
+
+  private static String replayStepId(RunnerReportProjection.Projected projected) {
+    return projected.replayFailure() == null ? null : projected.replayFailure().stepId();
+  }
+
+  private static Integer replayStepIndex(RunnerReportProjection.Projected projected) {
+    return projected.replayFailure() == null ? null : projected.replayFailure().stepIndex();
+  }
+
+  private static Boolean replayLoginStepsPresent(RunnerReportProjection.Projected projected) {
+    return projected.replayFailure() == null ? null : projected.replayFailure().loginStepsPresent();
   }
 
   private int applyObservedPreReady(
@@ -322,14 +421,13 @@ public class ProgressReportService {
     try {
       binding = contracts.parse(execution.getObservedRevisionBinding());
       receipt = contracts.parse(execution.getObservedAdmissionReceipt());
-      contracts.validate("v2/replay-job#/definitions/ExecutionBinding", binding);
-      contracts.validate("v2/replay-job#/definitions/AdmissionReceipt", receipt);
+      contracts.validate("v3/replay-job#/definitions/ExecutionBinding", binding);
+      contracts.validate("v3/replay-job#/definitions/AdmissionReceipt", receipt);
     } catch (RuntimeException invalid) {
       throw observedIdentityRefusal();
     }
     var request = receipt.path("request");
     var grant = binding.path("replayGrant");
-    var account = binding.path("accountAuthorization");
     for (String field :
         List.of(
             "executionId",
@@ -344,19 +442,12 @@ public class ProgressReportService {
         throw observedIdentityRefusal();
       }
     }
-    for (String field :
-        List.of("executionId", "attemptId", "revisionDigest", "scope", "scopeHash")) {
-      if (!account.path(field).equals(binding.path(field))) {
-        throw observedIdentityRefusal();
-      }
-    }
     for (String field : List.of("principalId", "csiId", "environment")) {
       if (!binding.path("scope").path(field).equals(binding.path(field))) {
         throw observedIdentityRefusal();
       }
     }
-    if (!grant.path("accountGrantId").equals(account.path("grantId"))
-        || !grant
+    if (!grant
             .path("profileHash")
             .asText()
             .equals(GuidedContracts.hash(binding.path("requiredProfile")))
@@ -392,9 +483,6 @@ public class ProgressReportService {
     if (!request.path("profile").equals(binding.path("requiredProfile"))
         || !request.path("build").equals(binding.path("requiredBuild"))
         || !request.path("grantId").equals(binding.path("replayGrant").path("grantId"))
-        || !request
-            .path("accountGrantId")
-            .equals(binding.path("accountAuthorization").path("grantId"))
         || !request.path("admissionId").equals(receipt.path("admissionId"))
         || !binding.path("executionId").asText().equals(report.executionId().toString())
         || !binding.path("attemptId").asText().equals(report.attemptId().toString())
@@ -560,7 +648,12 @@ public class ProgressReportService {
             .map(UITestExecution::getSnapshotRevision)
             .orElse(0L);
     return new ProgressAck(
-        executionId, sequence, applied, revision, statements.isCancelRequested(executionId));
+        executionId,
+        sequence,
+        applied,
+        revision,
+        statements.isCancelRequested(executionId),
+        statements.find(executionId).map(row -> row.get("revoked_at") != null).orElse(false));
   }
 
   /** The revision's ordered source, which acceptance already wrote one entry per step of. */
@@ -574,6 +667,49 @@ public class ProgressReportService {
       return parsed == null ? List.of() : List.copyOf(parsed);
     } catch (JsonProcessingException e) {
       throw new IllegalStateException("Stored step_results are not readable", e);
+    }
+  }
+
+  /**
+   * The confirmed revision's ordered authoring step IDs, for the replay-cause derivation (T0 ruling
+   * A1.2); empty when no cause can be named.
+   *
+   * <p>Read from the replay artifact of the revision the execution ran, only for an observed FINAL
+   * whose outcome has one of the two candidate shapes. Anything the artifact does not state cleanly
+   * (a gap, a duplicate, a position that disagrees with {@code stepIndex}) yields the empty list:
+   * no cause is named, which is the fail-closed answer, and nothing is guessed.
+   */
+  private List<String> revisionStepIds(
+      UITestExecution execution, RunnerReport report, boolean observedPreReady) {
+    if (observedPreReady
+        || execution.getObservedRevisionBinding() == null
+        || !RunnerReportProjection.mayNameReplayFailure(report)) {
+      return List.of();
+    }
+    var revision = entityManager.find(UITestRevision.class, execution.getRevisionId());
+    if (revision == null || revision.getArtifact() == null) {
+      return List.of();
+    }
+    try {
+      JsonNode steps = OBSERVED_CONTRACTS.parse(revision.getArtifact()).path("steps");
+      if (!steps.isArray()) {
+        return List.of();
+      }
+      List<String> ids = new ArrayList<>(steps.size());
+      for (int index = 0; index < steps.size(); index++) {
+        JsonNode step = steps.get(index);
+        String id = step.path("stepId").isTextual() ? step.path("stepId").asText() : "";
+        if (step.path("stepIndex").asInt(-1) != index || id.isEmpty() || ids.contains(id)) {
+          return List.of();
+        }
+        ids.add(id);
+      }
+      return List.copyOf(ids);
+    } catch (RuntimeException unreadable) {
+      LOGGER.warn(
+          "Studio replay artifact unreadable for the replay cause: executionId={}",
+          execution.getId());
+      return List.of();
     }
   }
 

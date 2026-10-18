@@ -9,6 +9,8 @@ import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorizer;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -20,9 +22,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -36,7 +41,22 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class AcceptanceIT {
+
+  /**
+   * The acceptance step bound for this class. An observed revision holds at most 100 steps (its
+   * artifact contract), below the deployed bound of 200, so the bound is lowered here to stay
+   * reachable by a publishable revision: {@link #aRevisionOverTheStepBoundIsRefused} publishes
+   * {@code STEP_BOUND + 1} steps and every other test stays within it.
+   */
+  private static final int STEP_BOUND = 3;
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+    registry.add("studio.execution.quotas.max-steps-per-test", () -> STEP_BOUND);
+  }
 
   private static final String CSI_ID = "60453";
   private static final String OTHER_CSI_ID = "60454";
@@ -44,6 +64,7 @@ class AcceptanceIT {
 
   @Autowired private StudioService studioService;
   @Autowired private StudioAcceptanceService acceptanceService;
+  @Autowired private ObservedReplayAuthorizer runAuthority;
   @Autowired private TransactionTemplate transactions;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private DataSource dataSource;
@@ -63,7 +84,7 @@ class AcceptanceIT {
             .seedRunnableTest("Acceptance draft", CSI_ID, OWNER, List.of("Go to the home page"))
             .testId();
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id IN (?, ?)", CSI_ID, OTHER_CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID, OTHER_CSI_ID);
   }
 
   // ── AC-7: one transaction, durable idempotency on the unique index ───────
@@ -72,7 +93,8 @@ class AcceptanceIT {
   void acceptanceWritesTheHistoryRowItsLedgerRowAndTheIdempotencyMappingInOneTransaction() {
     String key = UUID.randomUUID().toString();
 
-    ExecutionSnapshotDto accepted = studioService.executeTest(testId, owner, key);
+    ExecutionSnapshotDto accepted =
+        studioService.executeTest(testId, owner, key, ObservedPublicationFixture.request(owner));
 
     assertThat(accepted.status()).isEqualTo("PENDING");
     assertThat(accepted.csiId()).isEqualTo(CSI_ID);
@@ -111,7 +133,9 @@ class AcceptanceIT {
             .seedRunnableTest("Three steps", CSI_ID, OWNER, List.of("One", "Two", "Three"))
             .testId();
 
-    ExecutionSnapshotDto accepted = studioService.executeTest(multiStep, owner, null);
+    ExecutionSnapshotDto accepted =
+        studioService.executeTest(
+            multiStep, owner, null, ObservedPublicationFixture.request(owner));
 
     assertThat(accepted.stepResults()).hasSize(3);
     assertThat(accepted.stepResults())
@@ -128,7 +152,7 @@ class AcceptanceIT {
     AtomicReference<UUID> loserResult = new AtomicReference<>();
     AtomicReference<Throwable> loserFailure = new AtomicReference<>();
 
-    try (SecondApplicationContext replicaB = new SecondApplicationContext(dataSource)) {
+    try (SecondApplicationContext replicaB = SecondApplicationContext.observed(dataSource)) {
       StudioService serviceOnB = replicaB.bean(StudioService.class);
 
       CompletableFuture<Void> second =
@@ -136,7 +160,11 @@ class AcceptanceIT {
               () -> {
                 try {
                   firstInserted.await(30, TimeUnit.SECONDS);
-                  loserResult.set(serviceOnB.executeTest(testId, owner, key).executionId());
+                  loserResult.set(
+                      serviceOnB
+                          .executeTest(
+                              testId, owner, key, ObservedPublicationFixture.request(owner))
+                          .executionId());
                 } catch (Throwable t) {
                   loserFailure.set(t);
                 } finally {
@@ -145,10 +173,12 @@ class AcceptanceIT {
               });
 
       // Replica A holds its acceptance transaction open past replica B's insert. B's INSERT
-      // blocks on uq_studio_dispatch_ledger_idempotency until A commits, and then fails.
+      // blocks on uq_studio_dispatch_ledger_idempotency until A commits, and then fails. A's
+      // explicit Run authority is issued before its acceptance transaction, as on a real pod.
+      var grant = runAuthority.authorize(testId, owner, ObservedPublicationFixture.request(owner));
       transactions.executeWithoutResult(
           status -> {
-            winner.set(acceptanceService.accept(testId, OWNER, key));
+            winner.set(acceptanceService.acceptObserved(testId, OWNER, key, grant));
             firstInserted.countDown();
             sleep(1500);
           });
@@ -186,9 +216,12 @@ class AcceptanceIT {
             .seedRunnableTest("Other acceptance draft", CSI_ID, OWNER, List.of("Go home"))
             .testId();
 
-    studioService.executeTest(testId, owner, key);
+    studioService.executeTest(testId, owner, key, ObservedPublicationFixture.request(owner));
 
-    assertThatThrownBy(() -> studioService.executeTest(otherTest, owner, key))
+    assertThatThrownBy(
+            () ->
+                studioService.executeTest(
+                    otherTest, owner, key, ObservedPublicationFixture.request(owner)))
         .isInstanceOf(StudioConflictException.class)
         .hasMessageContaining(key);
     assertThat(
@@ -204,8 +237,7 @@ class AcceptanceIT {
     String first = StudioAcceptanceService.requestDigest(testId, OWNER);
 
     // Server state moves; the digest does not, or every retry would become a 409.
-    jdbc.update(
-        "UPDATE ui_tests SET name = 'renamed', compile_status = 'COMPILING' WHERE id = ?", testId);
+    jdbc.update("UPDATE ui_tests SET name = 'renamed' WHERE id = ?", testId);
 
     assertThat(StudioAcceptanceService.requestDigest(testId, OWNER)).isEqualTo(first);
     assertThat(StudioAcceptanceService.requestDigest(testId, "someone.else@citi.com"))
@@ -216,35 +248,49 @@ class AcceptanceIT {
   // ── AC-8a: readiness, and what it must not key on ────────────────────────
 
   @Test
-  void aConfirmedUneditedDraftPushedStaleByAFailedOptionalRecompileIsStillAccepted() {
-    // Story 10.4 ISSUE-003: beginCompile is unconditional on current status, so a failed optional
-    // recompile drives READY -> COMPILING -> STALE on a draft the user already confirmed. An
-    // implementation that checks compile_status refuses to run an artifact that was reviewed and
-    // confirmed, and fails here.
-    fixtures.setCompileStatus(testId, "STALE");
-
-    ExecutionSnapshotDto accepted = studioService.executeTest(testId, owner, null);
-
-    assertThat(accepted.status()).isEqualTo("PENDING");
-  }
-
-  @Test
   void anUnconfirmedDraftIsCompileRequired() {
     UUID unconfirmed =
         fixtures.seedTest("Never compiled", CSI_ID, OWNER, List.of("Go to the home page"));
 
-    assertThatThrownBy(() -> studioService.executeTest(unconfirmed, owner, null))
+    assertThatThrownBy(
+            () ->
+                studioService.executeTest(
+                    unconfirmed, owner, null, ObservedPublicationFixture.request(owner)))
         .isInstanceOf(StudioConflictException.class)
-        .hasFieldOrPropertyWithValue("code", "COMPILE_REQUIRED");
+        .hasFieldOrPropertyWithValue("code", "LEARN_REQUIRED");
   }
 
   @Test
-  void anEditedDraftWhoseConfirmationNoLongerMatchesIsCompileRequired() {
-    jdbc.update("UPDATE ui_tests SET source_revision = source_revision + 1 WHERE id = ?", testId);
+  void anEditedDraftWhoseConfirmationNoLongerMatchesIsLearnRequired() {
+    // A counter-only bump is no longer an edit (OBS-015: semantic identity, not counters); change
+    // the learned text itself.
+    jdbc.update(
+        "UPDATE ui_tests SET source_revision = source_revision + 1,"
+            + " steps = CAST('[\"Go somewhere else\"]' AS jsonb) WHERE id = ?",
+        testId);
 
-    assertThatThrownBy(() -> studioService.executeTest(testId, owner, null))
+    assertThatThrownBy(
+            () ->
+                studioService.executeTest(
+                    testId, owner, null, ObservedPublicationFixture.request(owner)))
         .isInstanceOf(StudioConflictException.class)
-        .hasFieldOrPropertyWithValue("code", "COMPILE_REQUIRED");
+        .hasFieldOrPropertyWithValue("code", "LEARN_REQUIRED");
+  }
+
+  @Test
+  void aCounterOnlyBumpWithIdenticalSemanticContentStaysReady() {
+    // OBS-015: readiness keys on semantic identity, not on revision counters. Both counters move
+    // and no content does, so the learned revision still replays and the execute is accepted.
+    jdbc.update(
+        "UPDATE ui_tests SET source_revision = source_revision + 1,"
+            + " configuration_revision = configuration_revision + 1 WHERE id = ?",
+        testId);
+
+    ExecutionSnapshotDto accepted =
+        studioService.executeTest(testId, owner, null, ObservedPublicationFixture.request(owner));
+
+    assertThat(accepted.status()).isEqualTo("PENDING");
+    assertThat(accepted.revisionId()).as("the learned revision is the one replayed").isNotNull();
   }
 
   // ── AC-9: quotas are one critical section with the insert ────────────────
@@ -258,7 +304,7 @@ class AcceptanceIT {
     AtomicReference<Throwable> secondFailure = new AtomicReference<>();
     AtomicReference<UUID> secondAccepted = new AtomicReference<>();
 
-    try (SecondApplicationContext replicaB = new SecondApplicationContext(dataSource)) {
+    try (SecondApplicationContext replicaB = SecondApplicationContext.observed(dataSource)) {
       StudioService serviceOnB = replicaB.bean(StudioService.class);
 
       CompletableFuture<Void> second =
@@ -266,7 +312,11 @@ class AcceptanceIT {
               () -> {
                 try {
                   firstInside.await(30, TimeUnit.SECONDS);
-                  secondAccepted.set(serviceOnB.executeTest(testId, owner, null).executionId());
+                  secondAccepted.set(
+                      serviceOnB
+                          .executeTest(
+                              testId, owner, null, ObservedPublicationFixture.request(owner))
+                          .executionId());
                 } catch (Throwable t) {
                   secondFailure.set(t);
                 } finally {
@@ -276,9 +326,10 @@ class AcceptanceIT {
 
       // Replica A takes the last slot and holds its transaction — and therefore the
       // transaction-scoped advisory locks — open. B blocks on the lock, not on the count.
+      var grant = runAuthority.authorize(testId, owner, ObservedPublicationFixture.request(owner));
       transactions.executeWithoutResult(
           status -> {
-            acceptanceService.accept(testId, OWNER, null);
+            acceptanceService.acceptObserved(testId, OWNER, null, grant);
             firstInside.countDown();
             sleep(1500);
           });
@@ -301,12 +352,19 @@ class AcceptanceIT {
             .seedRunnableTest("Other CSI draft", OTHER_CSI_ID, OWNER, List.of("Go home"))
             .testId();
 
-    assertThatThrownBy(() -> studioService.executeTest(testId, owner, null))
+    assertThatThrownBy(
+            () ->
+                studioService.executeTest(
+                    testId, owner, null, ObservedPublicationFixture.request(owner)))
         .isInstanceOf(StudioQuotaExceededException.class);
 
     ExecutionSnapshotDto accepted =
         studioService.executeTest(
-            otherCsiTest, StudioExecutionFixtures.identity(OWNER, OTHER_CSI_ID, "owner"), null);
+            otherCsiTest,
+            StudioExecutionFixtures.identity(OWNER, OTHER_CSI_ID, "owner"),
+            null,
+            ObservedPublicationFixture.request(
+                StudioExecutionFixtures.identity(OWNER, OTHER_CSI_ID, "owner")));
     assertThat(accepted.status()).isEqualTo("PENDING");
   }
 
@@ -315,12 +373,15 @@ class AcceptanceIT {
   @Test
   void aRevisionOverTheStepBoundIsRefused() {
     List<String> tooMany = new java.util.ArrayList<>();
-    for (int index = 0; index < 201; index++) {
+    for (int index = 0; index < STEP_BOUND + 1; index++) {
       tooMany.add("Step " + index);
     }
     UUID huge = fixtures.seedRunnableTest("Too many steps", CSI_ID, OWNER, tooMany).testId();
 
-    assertThatThrownBy(() -> studioService.executeTest(huge, owner, null))
+    assertThatThrownBy(
+            () ->
+                studioService.executeTest(
+                    huge, owner, null, ObservedPublicationFixture.request(owner)))
         .isInstanceOf(StudioValidationException.class)
         .hasFieldOrPropertyWithValue("code", "STEP_LIMIT_EXCEEDED");
   }

@@ -28,7 +28,18 @@ public final class GuidedSourceReferenceValidator {
       String kind,
       String intendedSlot,
       String scopeHash,
-      boolean approvedNonsecret) {}
+      boolean approvedNonsecret,
+      String referenceName) {
+    public ConfigurationValue(
+        String value,
+        String stepId,
+        String kind,
+        String intendedSlot,
+        String scopeHash,
+        boolean approvedNonsecret) {
+      this(value, stepId, kind, intendedSlot, scopeHash, approvedNonsecret, null);
+    }
+  }
 
   public record Sources(
       String sourceRevision,
@@ -48,7 +59,7 @@ public final class GuidedSourceReferenceValidator {
   }
 
   public ObjectNode resolve(JsonNode session, Sources sources, JsonNode candidate) {
-    contracts.validate("v2/source-reference", candidate);
+    contracts.validate("v3/source-reference", candidate);
     JsonNode scope = session.path("scope");
     require(
         sources.sourceRevision().equals(scope.path("sourceRevision").asText())
@@ -96,13 +107,32 @@ public final class GuidedSourceReferenceValidator {
           sources.configuration().get(candidate.path("referenceId").asText());
       require(
           config != null
-              && config.approvedNonsecret()
+              && (config.approvedNonsecret() || kind.equals("secretRef"))
               && config.stepId().equals(step)
               && config.kind().equals(kind)
               && config.intendedSlot().equals(slot)
               && config.scopeHash().equals(session.path("scopeHash").asText()),
           "FORBIDDEN_SCOPE",
           403);
+      if (kind.equals("secretRef")) {
+        require(
+            slot.equals("fill.value")
+                && candidate.path("referenceName").asText().equals(config.referenceName())
+                && com.citi.put.checks.studio.secrets.StudioVaultProvider.isValidSecretName(
+                    config.referenceName()),
+            "FORBIDDEN_SCOPE",
+            403);
+        ObjectNode input =
+            contracts
+                .object()
+                .put("inputId", UUID.randomUUID().toString())
+                .put("sourceStepId", step)
+                .put("kind", "secretRef")
+                .put("secretId", config.referenceName())
+                .put("intendedSlot", "fill.value");
+        input.set("provenance", candidate.deepCopy());
+        return input;
+      }
       value = config.value();
     }
     require(value.getBytes(StandardCharsets.UTF_8).length <= 4096, "INVALID_CONTRACT", 422);

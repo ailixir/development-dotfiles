@@ -12,6 +12,7 @@ import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.RecordingRunnerDispatchClient;
 import com.citi.put.checks.studio.dispatch.RunJob;
 import com.citi.put.checks.studio.dispatch.StudioDispatcher;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -36,6 +38,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -50,7 +54,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioSecretsControllerIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60471";
   private static final String OWNER = "vault-secrets-owner@citi.com";
@@ -143,7 +153,7 @@ class StudioSecretsControllerIT {
     fixtures.seedUser(READER);
     fixtures.seedUser(STRANGER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     testId =
         fixtures
             .seedRunnableTest("Vault secrets draft", CSI_ID, OWNER, List.of("Go to the home page"))
@@ -334,16 +344,26 @@ class StudioSecretsControllerIT {
     assertThat(create(declaring, body("LOGIN_PW"), owner()).getStatusCode().value()).isEqualTo(201);
     UUID execution =
         studioService
-            .executeTest(declaring, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), null)
+            .executeTest(
+                declaring,
+                StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+                null,
+                ObservedPublicationFixture.request(
+                    StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
             .executionId();
+    var received = new java.util.concurrent.atomic.AtomicBoolean();
+    runner.onSend(job -> received.set(job.resolvedSecrets().get("LOGIN_PW").matches(CANARY)));
     dispatcher.dispatch(execution);
-
+    assertThat(received).isTrue();
     RunJob job =
         runner.sent().stream()
             .filter(sent -> execution.equals(sent.executionId()))
             .findFirst()
             .orElseThrow();
-    assertThat(job.resolvedSecrets()).containsEntry("LOGIN_PW", CANARY);
+    assertThat(job.resolvedSecrets()).containsKey("LOGIN_PW");
+    assertThat(job.resolvedSecrets().get("LOGIN_PW").matches(CANARY))
+        .as("owned value erased after send")
+        .isFalse();
     assertThat(databaseColumnsContaining(CANARY)).isEmpty();
   }
 
@@ -422,10 +442,13 @@ class StudioSecretsControllerIT {
   }
 
   private ResponseEntity<String> execute(UUID test) {
+    HttpHeaders headers = owner();
+    // STUDIO-OBS-014 AC-9: the replay execute route requires an Idempotency-Key.
+    headers.set("Idempotency-Key", UUID.randomUUID().toString());
     return restTemplate.exchange(
         "/api/v1/studio/tests/" + test + "/execute",
         HttpMethod.POST,
-        new HttpEntity<>("", owner()),
+        new HttpEntity<>("", headers),
         String.class);
   }
 
@@ -492,7 +515,7 @@ class StudioSecretsControllerIT {
     headers.set("X-User-Email", email);
     headers.set("X-User-Roles", roles);
     headers.set("X-User-Csi-Ownership", ownership);
-    return headers;
+    return ObservedPublicationFixture.withSession(headers);
   }
 
   private static HttpHeaders owner() {

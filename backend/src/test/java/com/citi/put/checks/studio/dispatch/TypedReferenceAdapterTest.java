@@ -22,12 +22,18 @@ class TypedReferenceAdapterTest {
 
   private final ObjectMapper mapper = new ObjectMapper();
 
+  /** The single stored shape (V21 {@code studio_015_declarations}) around the given sets. */
+  private static String revision(String sets) {
+    return "{" + sets + ",\"authoringIdentityVersion\":1,\"authoredDeclarations\":[]}";
+  }
+
   @Test
   void readsTheTwoSetsSeparatelyAndInDeclarationOrder() {
     ReferenceDeclarations declared =
         ExecutionReferences.declared(
             mapper,
-            "{\"variables\":[\"REGION\",\"TENANT\"],\"secrets\":[\"LOGIN_PW\",\"API_KEY\"]}");
+            revision(
+                "\"variables\":[\"REGION\",\"TENANT\"],\"secrets\":[\"LOGIN_PW\",\"API_KEY\"]"));
 
     // Exactly, not "contains": a mutation that appended both to one list would still contain each.
     assertThat(declared.variables()).containsExactly("REGION", "TENANT");
@@ -38,7 +44,7 @@ class TypedReferenceAdapterTest {
   void aSwapIsVisibleBecauseTheTwoSetsAreComparedSeparately() {
     ReferenceDeclarations declared =
         ExecutionReferences.declared(
-            mapper, "{\"variables\":[\"REGION\"],\"secrets\":[\"LOGIN_PW\"]}");
+            mapper, revision("\"variables\":[\"REGION\"],\"secrets\":[\"LOGIN_PW\"]"));
 
     assertThat(declared.variables()).containsExactly("REGION").doesNotContain("LOGIN_PW");
     assertThat(declared.secrets()).containsExactly("LOGIN_PW").doesNotContain("REGION");
@@ -48,7 +54,7 @@ class TypedReferenceAdapterTest {
   void namesACrossedDeclarationSoNeitherSideHasToNoticeItAlone() {
     assertThat(
             ExecutionReferences.declared(
-                    mapper, "{\"variables\":[\"PW\",\"REGION\"],\"secrets\":[\"PW\"]}")
+                    mapper, revision("\"variables\":[\"PW\",\"REGION\"],\"secrets\":[\"PW\"]"))
                 .crossedNames())
         .containsExactly("PW");
   }
@@ -56,10 +62,49 @@ class TypedReferenceAdapterTest {
   @Test
   void anEmptyDeclarationIsReadableAndIsNotTheSameThingAsAnUnreadableOne() {
     ReferenceDeclarations declared =
-        ExecutionReferences.declared(mapper, "{\"variables\":[],\"secrets\":[]}");
+        ExecutionReferences.declared(mapper, revision("\"variables\":[],\"secrets\":[]"));
 
     assertThat(declared.isEmpty()).isTrue();
     assertThat(declared).isEqualTo(ReferenceDeclarations.NONE);
+  }
+
+  /**
+   * STUDIO-OBS-015: V21 makes every revision carry the frozen authoring identity next to the two
+   * sets (contract {@code RevisionReferences}). That exact shape is the only readable one: partial
+   * or variant identity shapes, and the pre-015 two-key shape, are terminal (single path, no
+   * compatibility read).
+   */
+  @Test
+  void theGuidedPublicationIdentityShapeIsReadableAndItsVariantsAreTerminal() {
+    ReferenceDeclarations declared =
+        ExecutionReferences.declared(
+            mapper,
+            "{\"variables\":[\"REGION\"],\"secrets\":[\"LOGIN_PW\"],\"authoringIdentityVersion\":1,"
+                + "\"authoredDeclarations\":[{\"referenceId\":\"LOGIN_PW\",\"kind\":\"secretRef\","
+                + "\"secretId\":\"LOGIN_PW\"}]}");
+    assertThat(declared.variables()).containsExactly("REGION");
+    assertThat(declared.secrets()).containsExactly("LOGIN_PW");
+
+    List<String> unreadable =
+        List.of(
+            "{\"variables\":[],\"secrets\":[],\"authoringIdentityVersion\":1}",
+            "{\"variables\":[],\"secrets\":[],\"authoredDeclarations\":[]}",
+            "{\"variables\":[],\"secrets\":[],\"authoringIdentityVersion\":2,"
+                + "\"authoredDeclarations\":[]}",
+            "{\"variables\":[],\"secrets\":[],\"authoringIdentityVersion\":\"1\","
+                + "\"authoredDeclarations\":[]}",
+            "{\"variables\":[],\"secrets\":[],\"authoringIdentityVersion\":1,"
+                + "\"authoredDeclarations\":{}}",
+            "{\"variables\":[],\"secrets\":[],\"authoringIdentityVersion\":1,"
+                + "\"authoredDeclarations\":[],\"extra\":[]}",
+            "{\"secrets\":[],\"authoringIdentityVersion\":1,\"authoredDeclarations\":[]}",
+            "{\"variables\":[],\"secrets\":[]}",
+            "{\"variables\":[\"REGION\"],\"secrets\":[\"LOGIN_PW\"]}");
+    for (String document : unreadable) {
+      assertThatThrownBy(() -> ExecutionReferences.declared(mapper, document))
+          .as("document %s must be terminal", document)
+          .isInstanceOf(ExecutionReferences.UnreadableReferenceDeclarationException.class);
+    }
   }
 
   /**
@@ -74,11 +119,11 @@ class TypedReferenceAdapterTest {
         List.of(
             "[]",
             "[\"a-flat-legacy-array\"]",
-            "{\"variables\":[\"REGION\"]}",
-            "{\"secrets\":[\"LOGIN_PW\"]}",
-            "{\"variables\":[\"REGION\"],\"secrets\":[\"PW\"],\"extra\":[]}",
-            "{\"variables\":\"REGION\",\"secrets\":[]}",
-            "{\"variables\":[{\"name\":\"REGION\"}],\"secrets\":[]}",
+            revision("\"variables\":[\"REGION\"]"),
+            revision("\"secrets\":[\"LOGIN_PW\"]"),
+            revision("\"variables\":[\"REGION\"],\"secrets\":[\"PW\"],\"extra\":[]"),
+            revision("\"variables\":\"REGION\",\"secrets\":[]"),
+            revision("\"variables\":[{\"name\":\"REGION\"}],\"secrets\":[]"),
             "not json at all",
             "");
     for (String document : unreadable) {
@@ -99,7 +144,8 @@ class TypedReferenceAdapterTest {
   @Test
   void theRefusalNamesTheDeclarationAndNeverTheDocument() {
     String canary = "canary-inside-an-unreadable-declaration-8fd2";
-    String document = "{\"variables\":[\"" + canary + "\"],\"secrets\":[\"x\"],\"extra\":1}";
+    String document =
+        revision("\"variables\":[\"" + canary + "\"],\"secrets\":[\"x\"],\"extra\":1");
     assertThat(document).contains(canary);
 
     assertThatThrownBy(() -> ExecutionReferences.declared(mapper, document))
@@ -111,6 +157,24 @@ class TypedReferenceAdapterTest {
               assertThat(thrown.getCause()).isNull();
               assertThat(thrown.getMessage()).contains("reference declaration");
             });
+  }
+
+  /** AC-10 on the identity check: a refused authoring identity never echoes the document. */
+  @Test
+  void anIdentityRefusalNamesTheDeclarationAndNeverTheDocument() {
+    String canary = "canary-inside-a-refused-identity-5c19";
+    String document =
+        "{\"variables\":[],\"secrets\":[],\"authoringIdentityVersion\":2,"
+            + "\"authoredDeclarations\":[{\"referenceId\":\""
+            + canary
+            + "\",\"kind\":\"plain\"}]}";
+    assertThat(document).contains(canary);
+
+    assertThatThrownBy(() -> ExecutionReferences.declared(mapper, document))
+        .isInstanceOf(ExecutionReferences.UnreadableReferenceDeclarationException.class)
+        .hasMessageNotContaining(canary)
+        .hasMessageContaining("reference declaration")
+        .hasNoCause();
   }
 
   @Test

@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided.publication;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.mock;
@@ -16,7 +17,6 @@ import com.citi.put.checks.config.ChecksExceptionHandler;
 import com.citi.put.checks.config.StudioInternalSecurityConfig;
 import com.citi.put.checks.studio.StudioExecutionProperties;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
-import com.citi.put.checks.studio.guided.account.ReplayAccountAccess;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.internal.AdmissionCasService;
 import com.citi.put.checks.studio.internal.ExecutionControlService;
@@ -67,9 +67,19 @@ import org.springframework.test.context.ActiveProfiles;
 /**
  * C7/C12 over real HTTP and the unchanged ordinary service-token filter chain. The JDBC double
  * supplies only a read-only closed binding fixture; it never manufactures admission/readiness. Real
- * schema, policy, expiry and tuple guards execute. The production unavailable account port refuses
- * the otherwise-valid tuple. Successful PostgreSQL CAS/receipt/browser proof belongs to
- * GuidedPublicationReplayIT, not this refusal slice. No test authentication provider is installed.
+ * schema, policy, expiry and tuple guards execute. The otherwise-valid tuple reaches the real
+ * locked admission transaction, which finds no ledger row behind the double and refuses before any
+ * CAS. Successful PostgreSQL CAS/receipt/browser proof belongs to GuidedPublicationReplayIT, not
+ * this refusal slice. No test authentication provider is installed.
+ *
+ * <p>2026-10-13 (STUDIO-OBS-012A AC-7): STUDIO-OBS-007 dropped the account provider (EXT-001; login
+ * is author-written {@code <secret ID>} steps) and with it the v3 {@code accountGrantId} admission
+ * field, the account port and {@code AUTH_CONNECTION_REQUIRED}. The account cases are ported by
+ * name: {@code accountGrantId} is no longer a closed identity or stored-tuple field, it is a
+ * removed field the closed schema refuses ({@link
+ * #extraIdentityOrPrivateMetadataCannotBeSmuggledIntoObservedBody}); the account-boundary case
+ * becomes {@link
+ * #otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution}.
  */
 @SpringBootTest(
     classes = ObservedAdmissionSecurityIT.Application.class,
@@ -105,7 +115,6 @@ class ObservedAdmissionSecurityIT {
           "scopeHash",
           "currentPolicyHash",
           "grantId",
-          "accountGrantId",
           "profile",
           "build");
 
@@ -155,8 +164,8 @@ class ObservedAdmissionSecurityIT {
     }
 
     @Bean
-    ReplayAccountAccess accounts() {
-      return spy(ReplayAccountAccess.unavailable());
+    com.citi.put.checks.studio.dispatch.StudioReferenceResolver references() {
+      return mock(com.citi.put.checks.studio.dispatch.StudioReferenceResolver.class);
     }
 
     @Bean
@@ -197,7 +206,7 @@ class ObservedAdmissionSecurityIT {
         ObservedRevisionVerifier verifier,
         ObservedReplayPins pins,
         GuidedPublicationAuthorization authority,
-        ReplayAccountAccess accounts,
+        com.citi.put.checks.studio.dispatch.StudioReferenceResolver references,
         ObservedReplayProperties properties,
         StudioExecutionProperties execution) {
       return spy(
@@ -206,8 +215,7 @@ class ObservedAdmissionSecurityIT {
               CONTRACTS,
               verifier,
               pins,
-              authority,
-              accounts,
+              references,
               properties,
               execution,
               Clock.fixed(NOW, ZoneOffset.UTC)));
@@ -237,7 +245,7 @@ class ObservedAdmissionSecurityIT {
   @Autowired private ObservedReplayAuthorization observed;
   @Autowired private AdmissionCasService admission;
   @Autowired private StrictInternalBodyReader reader;
-  @Autowired private ReplayAccountAccess accounts;
+  @Autowired private com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
   @Autowired private ObservedRevisionVerifier verifier;
   @Autowired private GuidedPublicationAuthorization authority;
   @MockBean private ProgressReportService progress;
@@ -255,7 +263,7 @@ class ObservedAdmissionSecurityIT {
         observed,
         admission,
         reader,
-        accounts,
+        references,
         verifier,
         authority,
         progress,
@@ -285,7 +293,7 @@ class ObservedAdmissionSecurityIT {
         reader,
         jdbc,
         statements,
-        accounts,
+        references,
         verifier,
         authority,
         progress,
@@ -326,7 +334,7 @@ class ObservedAdmissionSecurityIT {
         403,
         "SERVICE_IDENTITY_REJECTED");
     verifyNoInteractions(
-        observed, admission, reader, jdbc, statements, accounts, verifier, authority);
+        observed, admission, reader, jdbc, statements, references, verifier, authority);
   }
 
   @Test
@@ -339,7 +347,7 @@ class ObservedAdmissionSecurityIT {
             Map.of(),
             request().toString());
     fixedIdentity(response, 401, "SERVICE_IDENTITY_REQUIRED");
-    verifyNoInteractions(observed, admission, jdbc, accounts, statements);
+    verifyNoInteractions(observed, admission, jdbc, references, statements);
   }
 
   static Stream<Arguments> malformedIdentity() {
@@ -365,13 +373,20 @@ class ObservedAdmissionSecurityIT {
         post("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), invalid.toString()),
         422,
         "INVALID_CONTRACT");
-    verifyNoInteractions(jdbc, statements, accounts, verifier, authority);
+    verifyNoInteractions(jdbc, statements, references, verifier, authority);
     noAdmission();
   }
 
   @ParameterizedTest
   @ValueSource(
-      strings = {"principalId", "account", "credential", "resolvedValues", "certificateIdentity"})
+      strings = {
+        "principalId",
+        "account",
+        "credential",
+        "resolvedValues",
+        "certificateIdentity",
+        "accountGrantId"
+      })
   void extraIdentityOrPrivateMetadataCannotBeSmuggledIntoObservedBody(String field)
       throws Exception {
     var invalid = request().put(field, METADATA);
@@ -379,7 +394,7 @@ class ObservedAdmissionSecurityIT {
         post("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), invalid.toString()),
         422,
         "INVALID_CONTRACT");
-    verifyNoInteractions(jdbc, statements, accounts);
+    verifyNoInteractions(jdbc, statements, references);
     noAdmission();
   }
 
@@ -390,7 +405,7 @@ class ObservedAdmissionSecurityIT {
         post("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), invalid),
         422,
         "INVALID_CONTRACT");
-    verifyNoInteractions(jdbc, statements, accounts);
+    verifyNoInteractions(jdbc, statements, references);
     noAdmission();
   }
 
@@ -406,7 +421,7 @@ class ObservedAdmissionSecurityIT {
         send("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), invalid),
         422,
         "INVALID_CONTRACT");
-    verifyNoInteractions(jdbc, statements, accounts);
+    verifyNoInteractions(jdbc, statements, references);
     noAdmission();
   }
 
@@ -421,7 +436,7 @@ class ObservedAdmissionSecurityIT {
             request().toString()),
         403,
         "FORBIDDEN_SCOPE");
-    verifyNoInteractions(jdbc, statements, accounts);
+    verifyNoInteractions(jdbc, statements, references);
     noAdmission();
   }
 
@@ -439,7 +454,6 @@ class ObservedAdmissionSecurityIT {
         "scopeHash",
         "currentPolicyHash",
         "grantId",
-        "accountGrantId",
         "startedAt"
       })
   void authenticatedCallerCannotChangeStoredExecutionTuple(String field) throws Exception {
@@ -457,7 +471,7 @@ class ObservedAdmissionSecurityIT {
         "FORBIDDEN_SCOPE");
     verify(observed).prepareAdmission(eq(EXECUTION), any(JsonNode.class));
     verify(jdbc).queryForList(anyString(), eq(String.class), eq(EXECUTION));
-    verifyNoInteractions(statements, accounts, verifier, authority);
+    verifyNoInteractions(statements, references, verifier, authority);
     noAdmission();
   }
 
@@ -475,24 +489,44 @@ class ObservedAdmissionSecurityIT {
         post("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), invalid.toString()),
         field.equals("profile") ? 422 : 403,
         field.equals("profile") ? "INVALID_CONTRACT" : "FORBIDDEN_SCOPE");
-    verifyNoInteractions(statements, accounts);
+    verifyNoInteractions(statements, references);
     noAdmission();
   }
 
+  /**
+   * Ported by name from {@code otherwiseValidTupleReachesRealUnavailableAccountBoundaryButNeverCas}
+   * (STUDIO-OBS-012A AC-7). STUDIO-OBS-007 removed the account boundary that used to refuse here
+   * with {@code AUTH_CONNECTION_REQUIRED}; secrets resolve at dispatch, never at admission
+   * (secret-login-design §4.4). The otherwise-valid tuple therefore passes every pre-transaction
+   * guard and enters the real locked admission transaction. The double holds no ledger row, so the
+   * row lock finds nothing and the transaction refuses with its own fixed 409: forged headers grant
+   * nothing, and no CAS statement, secret resolution, verifier or publication authority is reached.
+   */
   @Test
-  void otherwiseValidTupleReachesRealUnavailableAccountBoundaryButNeverCas() throws Exception {
-    fixedObserved(
+  void otherwiseValidTupleReachesTheLockedAdmissionTransactionButNeverCasOrSecretResolution()
+      throws Exception {
+    var response =
         post(
             "observed-admission",
             EXECUTION,
             "Bearer " + TOKEN,
             Map.of("X-Forwarded-Client-Cert", METADATA, "X-User-Id", METADATA),
-            request().toString()),
-        409,
-        "AUTH_CONNECTION_REQUIRED");
-    verify(accounts).isCurrent(any(ReplayAccountAccess.AccountAuthorization.class), eq(NOW));
+            request().toString());
+    assertThat(response.statusCode()).isEqualTo(409);
+    assertThat(CONTRACTS.parse(response.body()))
+        .isEqualTo(
+            CONTRACTS
+                .object()
+                .put("error", "EXECUTION_UNKNOWN")
+                .put("message", "Execution unavailable"));
+    privateFree(response.body());
+    verify(observed).prepareAdmission(eq(EXECUTION), any(JsonNode.class));
+    verify(admission)
+        .claimObserved(eq(EXECUTION), any(ObservedReplayAuthorization.AdmissionPermit.class));
+    verify(jdbc).queryForList(contains("FOR UPDATE OF l,e"), eq(EXECUTION));
+    verifyNoInteractions(references);
     verifyNoInteractions(statements, verifier, authority);
-    noAdmission();
+    verifyNoInteractions(progress, control);
   }
 
   @Test
@@ -507,7 +541,7 @@ class ObservedAdmissionSecurityIT {
             request().toString()),
         403,
         "FORBIDDEN_SCOPE");
-    verifyNoInteractions(statements, accounts);
+    verifyNoInteractions(statements, references);
     noAdmission();
   }
 
@@ -525,7 +559,7 @@ class ObservedAdmissionSecurityIT {
         post("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), request().toString()),
         409,
         "CANCELLED");
-    verifyNoInteractions(statements, accounts);
+    verifyNoInteractions(statements, references);
     noAdmission();
   }
 
@@ -536,7 +570,7 @@ class ObservedAdmissionSecurityIT {
         post("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), request().toString()),
         403,
         "FORBIDDEN_SCOPE");
-    verifyNoInteractions(statements, accounts);
+    verifyNoInteractions(statements, references);
     noAdmission();
   }
 
@@ -552,38 +586,50 @@ class ObservedAdmissionSecurityIT {
         post("observed-admission", EXECUTION, "Bearer " + TOKEN, Map.of(), oversize),
         413,
         "INVALID_CONTRACT");
-    verifyNoInteractions(jdbc, statements, accounts);
+    verifyNoInteractions(jdbc, statements, references);
     noAdmission();
   }
 
+  /**
+   * STUDIO-OBS-014 P1: renamed from {@code
+   * ordinaryLegacyAdmissionRetainsRealTokenAndStrictReaderBoundary} and re-pointed from the deleted
+   * legacy {@code /admission} route to {@code /progress}, the surviving consumer of the strict
+   * internal body reader. The property is unchanged: the real ordinary service token is required
+   * before the reader runs, and a valid token reaches the reader and the handler through the same
+   * boundary.
+   */
   @Test
-  void ordinaryLegacyAdmissionRetainsRealTokenAndStrictReaderBoundary() throws Exception {
+  void ordinaryProgressCallbackRetainsRealTokenAndStrictReaderBoundary() throws Exception {
     fixedIdentity(
-        post("admission", EXECUTION, null, Map.of(), "{}"), 401, "SERVICE_IDENTITY_REQUIRED");
-    verifyNoInteractions(reader, admission, statements);
-    var response = post("admission", EXECUTION, "Bearer " + TOKEN, Map.of(), "{}");
-    assertThat(response.statusCode()).isEqualTo(400);
-    assertThat(CONTRACTS.parse(response.body()).path("error").asText()).isEqualTo("INVALID_REPORT");
+        post("progress", EXECUTION, null, Map.of(), "{}"), 401, "SERVICE_IDENTITY_REQUIRED");
+    verifyNoInteractions(reader, progress, statements);
+    var response = post("progress", EXECUTION, "Bearer " + TOKEN, Map.of(), "{}");
+    assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
     privateFree(response.body());
     verify(reader)
-        .read(
-            any(byte[].class), eq(com.citi.put.checks.studio.internal.dto.AdmissionRequest.class));
-    verify(admission)
-        .claim(eq(EXECUTION), any(com.citi.put.checks.studio.internal.dto.AdmissionRequest.class));
-    verifyNoInteractions(statements, observed, accounts);
+        .read(any(byte[].class), eq(com.citi.put.checks.studio.internal.dto.RunnerReport.class));
+    verify(progress)
+        .apply(eq(EXECUTION), any(com.citi.put.checks.studio.internal.dto.RunnerReport.class));
+    verifyNoInteractions(admission, statements, observed, references);
   }
 
+  /**
+   * STUDIO-OBS-014 P1: renamed from {@code
+   * legacyStrictParserMustNotQuotePrivateMalformedIdentityValues} and re-pointed from the deleted
+   * legacy {@code /admission} route to {@code /progress}, which parses through the same strict
+   * reader. A malformed identity value is refused {@code 400 INVALID_REPORT} without quoting it,
+   * and the handler is never reached.
+   */
   @Test
-  void legacyStrictParserMustNotQuotePrivateMalformedIdentityValues() throws Exception {
+  void strictParserMustNotQuotePrivateMalformedIdentityValues() throws Exception {
     String invalid = "{\"attemptId\":\"" + METADATA + "\",\"runnerInstanceId\":\"" + COOKIE + "\"}";
-    var response = post("admission", EXECUTION, "Bearer " + TOKEN, Map.of(), invalid);
+    var response = post("progress", EXECUTION, "Bearer " + TOKEN, Map.of(), invalid);
     assertThat(response.statusCode()).isEqualTo(400);
     assertThat(CONTRACTS.parse(response.body()).path("error").asText()).isEqualTo("INVALID_REPORT");
     privateFree(response.body());
-    verifyNoInteractions(statements, observed, accounts);
-    verify(admission, never())
-        .claim(
-            any(UUID.class), any(com.citi.put.checks.studio.internal.dto.AdmissionRequest.class));
+    verifyNoInteractions(admission, statements, observed, references);
+    verify(progress, never())
+        .apply(any(UUID.class), any(com.citi.put.checks.studio.internal.dto.RunnerReport.class));
   }
 
   private void noAdmission() {
@@ -660,7 +706,7 @@ class ObservedAdmissionSecurityIT {
           CONTRACTS.parse(
               Files.readString(
                   Path.of(
-                      "../docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json")));
+                      "../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json")));
     } catch (java.io.IOException failure) {
       throw new IllegalStateException("Synthetic publication fixture unavailable", failure);
     }

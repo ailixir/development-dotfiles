@@ -3,8 +3,7 @@ package com.citi.put.checks.studio;
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEntry;
 import com.citi.put.checks.security.UserIdentity;
-import com.citi.put.checks.studio.compile.ArtifactCanonicalizer;
-import com.citi.put.checks.studio.compile.CompilePins;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -15,12 +14,17 @@ import org.springframework.security.core.Authentication;
 /**
  * Seeding shared by the story 10.7 integration tests.
  *
- * <p>Acceptance now runs the readiness gate, so an executable draft needs a <em>confirmed
- * revision</em> rather than just a row in {@code ui_tests}. That is the point of AC-8a and it is
- * why these helpers exist: every test that executes something has to say out loud that the draft
- * was compiled and confirmed, which is exactly what the product requires of a user.
+ * <p><b>STUDIO-OBS-012A (ADR-SC-005 D-A).</b> Only an observed ({@code GUIDED_RUN}) revision may
+ * execute, so {@link #confirmRevision} and {@link #seedRunnableTest} publish one through the
+ * production publication writers ({@link ObservedPublicationFixture}). A test that executes must
+ * register the trusted observed-replay configuration ({@link ObservedPublicationFixture#register}),
+ * import {@link ObservedPublicationFixture.FreshAuthority}, and send the Run with the caller's
+ * session ({@link ObservedPublicationFixture#request}).
  */
 public final class StudioExecutionFixtures {
+
+  private static final com.fasterxml.jackson.databind.ObjectMapper MAPPER =
+      new com.fasterxml.jackson.databind.ObjectMapper();
 
   private final JdbcTemplate jdbc;
 
@@ -28,22 +32,24 @@ public final class StudioExecutionFixtures {
     this.jdbc = jdbc;
   }
 
-  /** An identity with the given role on one CSI, and no administrator escape hatch. */
+  /**
+   * An identity with the given role on one CSI, and no administrator escape hatch.
+   *
+   * <p>The Core user id is the email, the shape of the Core identity contract ({@code
+   * FakeCoreServiceClient}). An observed Run records the Core user id as the execution principal
+   * (ADR-SC-005), so principal-scoped assertions and secret-use grants keyed by the email keep
+   * naming the same caller.
+   */
   public static Authentication identity(String email, String csiId, String role) {
     return new BffAuthenticationToken(
         new UserIdentity(
-            "uid-" + email,
-            email,
-            email,
-            "Ops",
-            List.of(),
-            List.of(new CsiOwnershipEntry(csiId, role))));
+            email, email, email, "Ops", List.of(), List.of(new CsiOwnershipEntry(csiId, role))));
   }
 
   /** A platform administrator: readable and executable everywhere. */
   public static Authentication admin(String email) {
     return new BffAuthenticationToken(
-        new UserIdentity("uid-" + email, email, email, "Ops", List.of("checks-admin"), List.of()));
+        new UserIdentity(email, email, email, "Ops", List.of("checks-admin"), List.of()));
   }
 
   public void seedUser(String email) {
@@ -84,36 +90,17 @@ public final class StudioExecutionFixtures {
         createdBy,
         Timestamp.from(Instant.now()),
         Timestamp.from(Instant.now()));
+    com.citi.put.checks.studio.support.CanonicalAuthoringFixture.seed(jdbc, id);
     return id;
   }
 
-  /**
-   * Compiles and confirms the draft, which is what makes it runnable (AC-8a).
-   *
-   * <p>{@code compile_status} is deliberately left wherever the caller put it: readiness keys on
-   * the confirmed revision matching both of the draft's revisions, not on {@code compile_status},
-   * because a failed <em>optional</em> recompile drives a confirmed unedited draft to {@code STALE}
-   * and must not un-run it (story 10.4 ISSUE-003).
-   *
-   * <h2>Why the hashes and the provenance stopped being placeholders</h2>
-   *
-   * <p>Story 10.7a wrote {@code 'source-hash'}, {@code 'artifact-hash-xxxx'} and an empty
-   * provenance here, because the gate it shipped against was its own provisional implementation and
-   * checked neither. Story 10.8's {@code ExecutionReadinessService} checks both: term 5 re-hashes
-   * the draft's ordered {@code originalText} and the revision's artifact, and term 7 compares the
-   * recorded validator and syntax-reference versions against the configured pin.
-   *
-   * <p>So every value below is now derived rather than invented — by {@link ArtifactCanonicalizer},
-   * the same helper the gate re-derives them with, and from {@link CompilePins}, the same constants
-   * it compares against. This is a fixture catching up with a real gate, not a gate being relaxed
-   * to a fixture: a placeholder hash <em>should</em> be refused, and the day these literals were
-   * accepted by the provisional implementation is the day the fixtures stopped describing anything
-   * a user could produce.
-   */
-  /** What {@code CompileInputs.referencesJson()} writes when nothing is declared (§8.3). */
+  /** The reference declaration of a revision that declares nothing (§8.3). */
   public static final String NO_REFERENCES = "{\"variables\":[],\"secrets\":[]}";
 
-  /** A declaration document in the one shape the typed reader recognises (AC-1). */
+  /**
+   * The publisher's input sets (AC-1). Not a stored document: the publication writes the single V21
+   * {@code RevisionReferences} shape that {@code ExecutionReferences} reads.
+   */
   public static String references(List<String> variables, List<String> secrets) {
     return "{\"variables\":["
         + variables.stream()
@@ -131,73 +118,94 @@ public final class StudioExecutionFixtures {
       "{\"browser\":\"chromium\",\"viewport\":{\"width\":1280,\"height\":720},"
           + "\"timeoutSeconds\":30,\"waitStrategy\":\"load\"}";
 
+  /**
+   * Publishes the draft's current steps and configuration as an observed revision and confirms it
+   * (ADR-SC-005: the only runnable family).
+   *
+   * @param steps the draft's steps; an observed revision always learns the draft's current text, so
+   *     these must be what the draft holds
+   * @param references the declaration document, or {@code null} for none
+   * @return the published revision id
+   */
   public UUID confirmRevision(UUID testId, String csiId, List<String> steps, String references) {
-    // The shapes the real producers write. Story 10.17 makes the readers fail closed, so a fixture
-    // that wrote a shape CompileInputs never produces would be testing a path production cannot
-    // reach — and would have kept passing while the dispatch body diverged from the contract.
-    return confirmRevision(testId, csiId, steps, references, DEFAULT_CONFIGURATION);
+    String held =
+        jdbc.queryForObject("SELECT steps::text FROM ui_tests WHERE id = ?", String.class, testId);
+    String expected = stepsJson(steps);
+    try {
+      if (!MAPPER.readTree(held).equals(MAPPER.readTree(expected))) {
+        throw new IllegalArgumentException(
+            "An observed revision learns the draft's current steps; the draft holds " + held);
+      }
+      String csi =
+          jdbc.queryForObject("SELECT csi_id FROM ui_tests WHERE id = ?", String.class, testId);
+      if (!csiId.equals(csi)) {
+        throw new IllegalArgumentException("The draft belongs to CSI " + csi);
+      }
+      com.fasterxml.jackson.databind.JsonNode declared =
+          MAPPER.readTree(references == null ? NO_REFERENCES : references);
+      List<String> variables = new java.util.ArrayList<>();
+      List<String> secrets = new java.util.ArrayList<>();
+      declared.path("variables").forEach(name -> variables.add(name.asText()));
+      declared.path("secrets").forEach(name -> secrets.add(name.asText()));
+      return new ObservedPublicationFixture(jdbc).publish(testId, variables, secrets);
+    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+      throw new IllegalArgumentException(e);
+    }
   }
 
   /**
-   * As {@link #confirmRevision(UUID, String, List, String)}, with the stored configuration chosen.
+   * An execution history row with no observed revision binding, and its dispatch-ledger locator
+   * (STUDIO-OBS-012A architect ruling R2).
    *
-   * <p>The revision row is write-once and the database enforces it, so a configuration a test needs
-   * to be unusual has to be written at INSERT. Used by the {@code DISPATCH_FAILED} branch, which
-   * exists because story 10.17 derives the runtime budget from this document (QA LOW-4).
+   * <p>The final schema still allows this row shape: {@code ui_test_executions.csi_id} is nullable
+   * (V13, core history the backfill could not resolve) and the V15 observed execution guard checks
+   * nothing on a row whose {@code observed_revision_binding} is null and whose revision is not a
+   * {@code GUIDED_RUN} publication. Only such a row may have its own CSI changed or cleared, so the
+   * route-level CSI authorization tests seat their mutation here. An observed (bound) row refuses
+   * the same mutation in the database.
+   *
+   * <p>{@code revision_id} is null: every revision under V15 is a {@code GUIDED_RUN} publication,
+   * and the guard refuses an unbound row that names one. {@code PENDING}/{@code RUNNING} rows get a
+   * {@code QUEUED} ledger row (claimable by {@code StudioDispatchLedgerStatements}); any other
+   * status is terminal and gets a {@code DONE} ledger row. No dispatcher runs under the {@code
+   * test} profile, so the queued row is not picked up.
+   *
+   * @param status the history status ({@code PENDING}, {@code RUNNING}, {@code PASSED}, {@code
+   *     FAILED} or {@code ERROR})
+   * @return the execution id
    */
-  public UUID confirmRevision(
-      UUID testId, String csiId, List<String> steps, String references, String configuration) {
-    UUID revisionId = UUID.randomUUID();
-    String artifact = "{\"steps\":[]}";
+  public UUID unboundExecution(
+      UUID testId, String csiId, String principal, String environment, String status) {
+    UUID executionId = UUID.randomUUID();
+    Timestamp acceptedAt =
+        Timestamp.from(Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS));
+    boolean terminal = !"PENDING".equals(status) && !"RUNNING".equals(status);
     jdbc.update(
-        "INSERT INTO ui_test_revisions (id, test_id, csi_id, source_revision,"
-            + " configuration_revision, source, source_hash, artifact, artifact_hash,"
-            + " artifact_schema_version, configuration, \"references\", provenance, created_by,"
-            + " created_at, confirmed_by, confirmed_at)"
-            + " VALUES (?, ?, ?, 1, 1, CAST(? AS jsonb), ?,"
-            + " CAST(? AS jsonb), ?, ?,"
-            + " CAST(? AS jsonb), CAST(? AS jsonb), CAST(? AS jsonb), 'compiler', ?,"
-            + " 'confirmer', ?)",
-        revisionId,
+        "INSERT INTO studio_dispatch_ledger (execution_id, execution_accepted_at, test_id, csi_id,"
+            + " principal, state) VALUES (?, ?, ?, ?, ?, ?)",
+        executionId,
+        acceptedAt,
         testId,
         csiId,
-        stepsJson(steps),
-        ArtifactCanonicalizer.sourceHash(steps),
-        artifact,
-        ArtifactCanonicalizer.hash(artifact),
-        CompilePins.SUPPORTED_ARTIFACT_VERSION,
-        configuration,
-        references == null ? NO_REFERENCES : references,
-        pinnedProvenance(),
-        Timestamp.from(Instant.now()),
-        Timestamp.from(Instant.now()));
-    jdbc.update("UPDATE ui_tests SET confirmed_revision_id = ? WHERE id = ?", revisionId, testId);
-    return revisionId;
+        principal,
+        terminal ? "DONE" : "QUEUED");
+    jdbc.update(
+        "INSERT INTO ui_test_executions (id, ui_test_id, status, started_at, ended_at, duration_ms,"
+            + " csi_id, principal, environment, revision_id, observed_revision_binding,"
+            + " observed_admission_receipt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, NULL)",
+        executionId,
+        testId,
+        status,
+        acceptedAt,
+        terminal ? acceptedAt : null,
+        terminal ? 0 : null,
+        csiId,
+        principal,
+        environment);
+    return executionId;
   }
 
-  /**
-   * Provenance recorded under the versions this deployment pins, so the revision is runtime
-   * compatible on the exact-match terms the backend gate owns (story 10.8 AC-25).
-   *
-   * <p>The ranged Playwright/executor terms are recorded and deliberately not compared here — that
-   * rule lives in the runner's own {@code isCompatible}, which revalidates before any browser
-   * launch. One rule, one owner.
-   *
-   * @return the provenance document
-   */
-  private static String pinnedProvenance() {
-    return "{\"model\":\"fixture-model@1\",\"promptVersion\":\""
-        + CompilePins.PROMPT_VERSION
-        + "\",\"syntaxReferenceVersion\":\""
-        + CompilePins.SYNTAX_REFERENCE_VERSION
-        + "\",\"validatorSchemaVersion\":\"2.0.0\","
-        + "\"languagePolicyVersion\":\"2.0.0\",\"executorVersion\":\"2.0.0\","
-        + "\"playwrightVersion\":\"1.63.0\",\"artifactSchemaVersion\":"
-        + CompilePins.SUPPORTED_ARTIFACT_VERSION
-        + "}";
-  }
-
-  /** A draft that is compiled, confirmed and immediately runnable. */
+  /** A draft with a published observed revision of its current steps: runnable. */
   public RunnableTest seedRunnableTest(
       String name, String csiId, String createdBy, List<String> steps) {
     UUID testId = seedTest(name, csiId, createdBy, steps);
@@ -207,10 +215,6 @@ public final class StudioExecutionFixtures {
 
   /** A runnable draft and its confirmed revision. */
   public record RunnableTest(UUID testId, UUID revisionId) {}
-
-  public void setCompileStatus(UUID testId, String status) {
-    jdbc.update("UPDATE ui_tests SET compile_status = ? WHERE id = ?", status, testId);
-  }
 
   private static String stepsJson(List<String> steps) {
     StringBuilder json = new StringBuilder("[");

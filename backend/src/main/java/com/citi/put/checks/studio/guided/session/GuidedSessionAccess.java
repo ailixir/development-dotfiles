@@ -4,14 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.security.core.Authentication;
 
-/**
- * Trusted integration boundary. Implementations lock the authoritative source/configuration and
- * recheck current CSI/account grants (including internal calls), not a caller's claims. The account
- * adapter must establish a real connection; absent support is AUTH_CONNECTION_REQUIRED, never a
- * synthetic connected account. OBS-007 supplies the handoff implementation.
- */
+/** Trusted CSI, source/configuration and names-only secret-use authorization boundary. */
 public interface GuidedSessionAccess {
-  record Snapshot(ObjectNode scope, JsonNode sourceSteps, ObjectNode authConnection) {}
+  record Snapshot(ObjectNode scope, JsonNode sourceSteps) {}
 
   Snapshot resolve(Authentication principal, JsonNode start);
 

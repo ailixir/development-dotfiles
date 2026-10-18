@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  *       one grouped query every {@code studio.execution.metrics.backlog-refresh-ms} (default 5 s).
  *       A state with no rows reads 0, never "absent".
  *   <li>{@code studio_dispatch_refusals_total} — incremented once for every {@code 429} the runner
- *       answers to {@code POST /v1/runs}, by {@link HttpRunnerDispatchClient}.
+ *       answers to {@code POST /v2/runs}, by {@link HttpRunnerDispatchClient}.
  * </ul>
  *
  * <p>Worker-only, like the dispatcher it describes. Every worker replica exports the same global
@@ -71,7 +71,7 @@ public class StudioDispatchMetrics {
     }
     this.refusals =
         Counter.builder(REFUSALS)
-            .description("Runner 429 refusals of POST /v1/runs")
+            .description("Runner 429 refusals of POST /v2/runs")
             .register(registry);
   }
 

@@ -2,7 +2,10 @@ package com.citi.put.checks.studio.guided.publication;
 
 import static com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.text;
 
+import com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.guided.session.GuidedPublicPresentationProjector;
+import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
 import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
@@ -26,6 +29,8 @@ public final class GuidedPublicationResultProjector {
   private final GuidedContracts contracts;
   private final ExecutionReadinessService readiness;
   private final ObservedReplayProperties replay;
+  private final GuidedPublicPresentationProjector presentation;
+  private GuidedEvidenceProjection evidence = GuidedEvidenceProjection.NONE;
 
   public GuidedPublicationResultProjector(
       GuidedPublicationBaseRepository bases,
@@ -35,7 +40,8 @@ public final class GuidedPublicationResultProjector {
       GuidedPublicationAuthorization authorization,
       GuidedContracts contracts,
       ExecutionReadinessService readiness,
-      ObservedReplayProperties replay) {
+      ObservedReplayProperties replay,
+      GuidedPublicPresentationProjector presentation) {
     this.bases = bases;
     this.publications = publications;
     this.sessions = sessions;
@@ -44,6 +50,20 @@ public final class GuidedPublicationResultProjector {
     this.contracts = contracts;
     this.readiness = readiness;
     this.replay = replay;
+    this.presentation = presentation;
+  }
+
+  /**
+   * Installs the recording evidence projection (STUDIO-OBS-013). Until it is installed, results
+   * carry today's literals ({@code video null}, {@code actionTimings []}). A second install is
+   * refused, as {@code GuidedSessionService.installPublication} refuses one.
+   */
+  public void installEvidence(GuidedEvidenceProjection projection) {
+    GuidedSessionException.require(
+        evidence == GuidedEvidenceProjection.NONE && projection != null,
+        "RUNTIME_INCOMPATIBLE",
+        409);
+    evidence = projection;
   }
 
   public JsonNode started(JsonNode view) {
@@ -74,9 +94,20 @@ public final class GuidedPublicationResultProjector {
               ObjectNode publicSession = contracts.object();
               for (String key :
                   List.of(
-                      "schemaVersion", "sessionId", "testId", "state", "expiresAt", "counters")) {
-                publicSession.set(key, session.document().path(key));
+                      "schemaVersion",
+                      "sessionId",
+                      "testId",
+                      "state",
+                      "expiresAt",
+                      "counters",
+                      "baseRevisionId",
+                      "firstLearnStepId")) {
+                if (session.document().has(key)) {
+                  publicSession.set(key, session.document().path(key));
+                }
               }
+              // P2: the same progress the live session view carries.
+              publicSession.set("progress", presentation.progress(session));
               return view(publicSession, result);
             });
     return Optional.of(projected);
@@ -112,15 +143,32 @@ public final class GuidedPublicationResultProjector {
             .put("scheduleActivated", false);
     boolean completed =
         current.progress().path("stepIndex").asInt(-1) == session.path("sourceSteps").size()
-            && sessions.actions(id).stream()
+            && sessions.effectiveActions(id).stream()
                 .allMatch(a -> a.path("state").asText().equals("SUCCEEDED"));
     result.put("assertionsPassed", completed);
-    result.putArray("actionTimings");
-    result.putObject("evidence").put("kind", "guidedLedger").put("ref", id).putNull("video");
+    // Learned-from-execution evidence: the guided run's own recording. It never sets
+    // replayVerified and is never conflated with replay evidence.
+    ObjectNode boundary = sessions.incremental().relearnedFrom(id);
+    if (boundary == null) {
+      result.putNull("relearnedFrom");
+    } else {
+      result.set("relearnedFrom", boundary);
+    }
+    evidence.project(id, state).writeTo(result, id);
+    // P2/P3: one shared projection of this session's own facts; it never reads the current head.
+    result.set("progress", presentation.progress(current));
+    result.set("explanation", presentation.explanation(current));
     if (current.progress().path("errorCode").isTextual()) {
       result.set("errorCode", current.progress().path("errorCode"));
     } else {
       result.putNull("errorCode");
+    }
+    if (current.progress().path("errorCode").asText().equals("LOGIN_REQUIRED")) {
+      result.set("detail", current.progress().path("detail"));
+      result
+          .putObject("failure")
+          .put("code", "LOGIN_REQUIRED")
+          .set("detail", current.progress().path("detail"));
     }
     ObjectNode publication = result.putObject("publication"),
         ready = result.putObject("currentReadiness");

@@ -12,9 +12,11 @@ management:
       show-details: when-authorized
 
 studio:
-  compile:
-    gateway:
-      provider: ${STUDIO_GATEWAY_PROVIDER:disabled}
-      model: ${STUDIO_GATEWAY_MODEL:gemini-3.8-flash}
-      credentials:
-        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
+  gateway:
+    provider: ${STUDIO_GATEWAY_PROVIDER:disabled}
+    model: ${STUDIO_GATEWAY_MODEL:gemini-3.8-flash}
+    credentials:
+      mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
+  # (see application-prod.yml: the guided chain is mandatory wherever a guided hop is wired)
+  guided-authoring:
+    mtls-required: true

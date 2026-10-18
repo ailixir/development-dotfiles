@@ -53,8 +53,8 @@ public final class ObservedReplayPins {
         entry.isObject() && entry.size() == 2 && entry.has("profile") && entry.has("build"),
         "RUNTIME_INCOMPATIBLE",
         409);
-    contracts.validate("v2/replay-profile", entry.path("profile"));
-    contracts.validate("v2/replay-profile#/definitions/BuildIdentity", entry.path("build"));
+    contracts.validate("v3/replay-profile", entry.path("profile"));
+    contracts.validate("v3/replay-profile#/definitions/BuildIdentity", entry.path("build"));
     require(
         GuidedContracts.hash(entry.path("profile"))
             .equals(text(entry.path("build"), "profileHash")),
@@ -69,14 +69,13 @@ public final class ObservedReplayPins {
     JsonNode found = null;
     for (JsonNode item : configured(properties.policiesJson())) {
       if (item.path("applicationId").equals(scope.path("applicationId"))
-          && item.path("accountRef").equals(scope.path("accountRef"))
           && item.path("environment").asText().equals(environment)) {
         require(found == null, "RUNTIME_INCOMPATIBLE", 409);
         found = item;
       }
     }
-    require(found != null, "AUTH_CONNECTION_REQUIRED", 409);
-    contracts.validate("v2/replay-ipc#/definitions/TrustedPolicy", found);
+    require(found != null, "RUNTIME_INCOMPATIBLE", 409);
+    contracts.validate("v3/replay-ipc#/definitions/TrustedPolicy", found);
     for (String key : List.of("policyId", "policyVersion", "entryPolicyId")) {
       if (scope.has(key)) {
         require(scope.path(key).equals(found.path(key)), "FORBIDDEN_SCOPE", 403);
@@ -155,7 +154,7 @@ public final class ObservedReplayPins {
   public ObjectNode requirements(JsonNode session) {
     JsonNode scope = session.path("scope"), policy = policy(scope);
     ObjectNode result = contracts.object();
-    for (String key : List.of("csiId", "applicationId", "accountRef")) {
+    for (String key : List.of("csiId", "applicationId")) {
       result.set(key, scope.path(key));
     }
     result.set("environment", scope.path("environmentId"));
@@ -170,7 +169,7 @@ public final class ObservedReplayPins {
       result.set(key, policy.path(key));
     }
     result.putObject("initialContext").put("kind", "initialBlank");
-    contracts.validate("v2/replay-profile#/definitions/ReplayRequirements", result);
+    contracts.validate("v3/replay-profile#/definitions/ReplayRequirements", result);
     return result;
   }
 }

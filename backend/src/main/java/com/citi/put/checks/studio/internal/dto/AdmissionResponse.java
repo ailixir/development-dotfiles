@@ -1,22 +1,19 @@
 package com.citi.put.checks.studio.internal.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.time.Instant;
 import java.util.UUID;
 
 /**
- * The admission acknowledgement (ADR-002 O-4 closes here).
+ * Internal value type of the admission CAS; no wire contract.
  *
- * <p>The contract left this body open only because closing a schema against an <em>imagined</em>
- * producer is how the INT-4 divergence happened. This story is the producer, so every field is now
- * named and the schema is {@code additionalProperties: false}.
+ * <p>The result {@code AdmissionCasService.claimObserved} reads to build the immutable observed
+ * admission receipt ({@code v3/replay-job#/definitions/AdmissionReceipt}), which is what the runner
+ * receives. The legacy route that returned this record on the wire, and its OpenAPI schema, were
+ * deleted in STUDIO-OBS-014 (inherited obligation P1).
  *
  * <p>{@code state} is the ledger's dispatch state, never an outcome. {@code startDeadlineAt} and
- * {@code runDeadlineAt} are the deadlines this CAS assigned, echoed so the runner can see the
- * budget it was admitted under; they are not a second source of truth and the runner does not
- * enforce them.
+ * {@code runDeadlineAt} are the deadlines this CAS assigned.
  */
-@JsonIgnoreProperties(ignoreUnknown = false)
 public record AdmissionResponse(
     UUID executionId,
     UUID attemptId,

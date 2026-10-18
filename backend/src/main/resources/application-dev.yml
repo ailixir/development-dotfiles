@@ -29,3 +29,6 @@ studio:
   secrets:
     vault:
       provider: ${STUDIO_VAULT_PROVIDER:none}
+  # STUDIO-OBS-009 AC-2: the guided chain is mandatory wherever a guided hop is wired.
+  guided-authoring:
+    mtls-required: true

@@ -35,7 +35,7 @@ public final class ObservedReferencePolicyDeriver {
     ObjectNode policy =
         contracts
             .object()
-            .put("schemaVersion", 3)
+            .put("schemaVersion", 4)
             .put("learnedPlanHash", GuidedContracts.hash(plan))
             .put("admissionProvenanceHash", GuidedContracts.hash(admissions))
             .put("publicationEvidenceHash", GuidedContracts.hash(evidence))

@@ -64,6 +64,12 @@ studio:
   # STUDIO_CALLBACK_SERVICE_TOKEN. `dev.sh` exports all three and hands the same
   # values to the runner. Without them a run is closed ERROR/DISPATCH_FAILED naming the missing
   # key, rather than left PENDING.
+  #
+  # STUDIO-OBS-009 AC-3: `local` and `test` are the only profiles that accept a plaintext
+  # studio.runner.base-url and a context with no studio.runner.tls. Without tls settings the backend's
+  # TLS identity is deny-all (StudioRunnerTls.unconfigured): http:// to a local double works, any
+  # https:// hop fails closed. To run the guided bridge locally, set studio.runner.tls.* (see
+  # application.yml) from a local CA.
   execution:
     dispatcher:
       enabled: ${STUDIO_DISPATCHER_ENABLED:true}
@@ -78,17 +84,13 @@ studio:
   secrets:
     vault:
       provider: ${STUDIO_VAULT_PROVIDER:none}
-  compile:
-    gateway:
-      # Local Studio translates from a recorded fixture corpus so the authoring, validation,
-      # dispatch, browser and evidence lifecycle can run without a gateway credential. It answers
-      # only sources recorded verbatim, so it can never be read as evidence that free-form English
-      # translates -- that proof belongs to the staging gate against the real provider. Set
-      # STUDIO_GATEWAY_PROVIDER=vertex (with endpoint, project and location) to exercise the real
-      # path locally; a deployed profile refuses anything but vertex.
-      provider: ${STUDIO_GATEWAY_PROVIDER:recorded-fixture}
-      credentials:
-        mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
+  gateway:
+    # Local Studio has no model provider unless one is configured: guided learning answers
+    # DISABLED. Set STUDIO_GATEWAY_PROVIDER=vertex (with endpoint, project and location) to exercise
+    # the real path locally; a deployed profile refuses anything but vertex.
+    provider: ${STUDIO_GATEWAY_PROVIDER:disabled}
+    credentials:
+      mode: ${STUDIO_GATEWAY_CREDENTIALS_MODE:application-default}
 
 logging:
   level:

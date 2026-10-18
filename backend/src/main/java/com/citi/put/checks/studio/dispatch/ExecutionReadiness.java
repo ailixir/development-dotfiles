@@ -22,8 +22,8 @@ public interface ExecutionReadiness {
   /** Why an execution may not be accepted, or {@link Verdict#accepted()} when it may. */
   record Verdict(boolean ready, String errorCode, String message) {
 
-    /** {@code 409 COMPILE_REQUIRED} (§4.6, §8.3). */
-    public static final String COMPILE_REQUIRED = "COMPILE_REQUIRED";
+    /** {@code 409 LEARN_REQUIRED} (ADR-SC-005, defaults "Readiness vocabulary"). */
+    public static final String LEARN_REQUIRED = "LEARN_REQUIRED";
 
     /** {@code 409 RUNTIME_INCOMPATIBLE} (§4.6, §8.3). */
     public static final String RUNTIME_INCOMPATIBLE = "RUNTIME_INCOMPATIBLE";
@@ -32,8 +32,8 @@ public interface ExecutionReadiness {
       return new Verdict(true, null, null);
     }
 
-    public static Verdict compileRequired(String message) {
-      return new Verdict(false, COMPILE_REQUIRED, message);
+    public static Verdict learnRequired(String message) {
+      return new Verdict(false, LEARN_REQUIRED, message);
     }
 
     public static Verdict runtimeIncompatible(String message) {

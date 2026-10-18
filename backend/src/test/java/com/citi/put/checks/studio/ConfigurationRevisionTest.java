@@ -3,15 +3,12 @@ package com.citi.put.checks.studio;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.citi.put.checks.studio.compile.CandidateRevision;
-import com.citi.put.checks.studio.compile.CompileRequest;
-import com.citi.put.checks.studio.compile.CompileState;
-import com.citi.put.checks.studio.compile.CompileStateService;
-import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
+import com.citi.put.checks.studio.dto.CanonicalStudioCodec;
 import com.citi.put.checks.studio.dto.TestConfiguration;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.dto.Viewport;
+import com.citi.put.checks.studio.readiness.StudioReadiness;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.UUID;
@@ -24,10 +21,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 /**
- * Story 10.4 AC-18 — which edits invalidate a confirmation (Architecture §4.2, AC-7/AC-8).
+ * Story 10.4 AC-18 — which edits advance a revision (Architecture §4.2, AC-7/AC-8; ADR-SC-005).
  *
- * <p>Name and description are metadata: a rename must not force the author to review and confirm
- * the compiled artifact again. Anything that changes what actually runs must.
+ * <p>Name and description are metadata: a rename must not force the author to learn the test again.
+ * Anything that changes what actually runs advances a revision, which is what makes a learned
+ * revision stale.
  */
 @SpringBootTest
 @ActiveProfiles("local")
@@ -37,55 +35,44 @@ class ConfigurationRevisionTest {
   private static final String CSI_ID = "60405";
 
   @Autowired StudioService studioService;
-  @Autowired CompileStateService compileStateService;
   @Autowired JdbcTemplate jdbc;
 
   private UUID testId;
-  private UUID confirmedRevisionId;
 
   @BeforeEach
   void setUp() {
     seedUser();
     seedCsi();
     testId = seedTest();
-    confirmedRevisionId = compileAndConfirm();
-    assertThat(compileStatus()).isEqualTo("READY");
+    com.citi.put.checks.studio.support.CanonicalAuthoringFixture.seed(jdbc, testId);
   }
 
   @Test
   void nameAndDescriptionChangesPreserveTheConfirmation() {
     UITestDto updated =
-        studioService.updateTest(
-            testId, request(r -> r, "Renamed draft", "A new description", 1L, 1L));
+        com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(
+            studioService,
+            jdbc,
+            testId,
+            request(r -> r, "Renamed draft", "A new description", 1L, 1L));
 
-    assertThat(updated.compileStatus()).isEqualTo(CompileState.READY);
     assertThat(updated.sourceRevision()).isEqualTo(1L);
     assertThat(updated.configurationRevision()).isEqualTo(1L);
-    assertThat(updated.confirmedRevisionId()).isEqualTo(confirmedRevisionId);
-    assertThat(updated.currentCandidateRevisionId()).isEqualTo(confirmedRevisionId);
     assertThat(updated.name()).isEqualTo("Renamed draft");
   }
 
   @Test
   void aStepTextChangeAdvancesTheSourceRevisionOnly() {
     UITestDto updated =
-        studioService.updateTest(
-            testId, request(r -> withSteps(r, "[\"Go to the login page\"]"), "Draft", "d", 1L, 1L));
+        com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(
+            studioService,
+            jdbc,
+            testId,
+            request(r -> withSteps(r, "[\"Go to the login page\"]"), "Draft", "d", 1L, 1L));
 
     assertThat(updated.sourceRevision()).isEqualTo(2L);
     assertThat(updated.configurationRevision()).isEqualTo(1L);
     assertRequiresReconfirmation(updated);
-  }
-
-  @Test
-  void reformattingTheSameStepsDoesNotAdvanceAnyRevision() {
-    UITestDto updated =
-        studioService.updateTest(
-            testId,
-            request(r -> withSteps(r, "[ \"Go to the home page\" ]"), "Draft", "d", 1L, 1L));
-
-    assertThat(updated.sourceRevision()).isEqualTo(1L);
-    assertThat(updated.compileStatus()).isEqualTo(CompileState.READY);
   }
 
   @Test
@@ -107,18 +94,20 @@ class ConfigurationRevisionTest {
   void anUnsupportedEngineIsRejectedBeforeItCanReachTheDraft() {
     UITestRequest firefox = request(r -> withBrowser(r, "firefox"), "Draft", "d", 1L, 1L);
 
-    assertThatThrownBy(() -> LegacyStudioAdapter.validateForWrite(firefox))
+    assertThatThrownBy(() -> CanonicalStudioCodec.validateForWrite(firefox))
         .isInstanceOf(StudioValidationException.class)
         .hasMessageContaining("chromium");
-    assertThat(compileStatus()).isEqualTo("READY");
+    assertThat(revisions()).isEqualTo("1/1");
   }
 
-  /** Applies one execution-affecting change to a freshly confirmed draft and checks the fallout. */
+  /** Applies one execution-affecting change to a fresh draft and checks the fallout. */
   private void assertConfigurationChange(UnaryOperator<UITestRequest> mutation) {
     testId = seedTest();
-    confirmedRevisionId = compileAndConfirm();
+    com.citi.put.checks.studio.support.CanonicalAuthoringFixture.seed(jdbc, testId);
 
-    UITestDto updated = studioService.updateTest(testId, request(mutation, "Draft", "d", 1L, 1L));
+    UITestDto updated =
+        com.citi.put.checks.studio.support.CanonicalAuthoringFixture.update(
+            studioService, jdbc, testId, request(mutation, "Draft", "d", 1L, 1L));
 
     assertThat(updated.configurationRevision()).isEqualTo(2L);
     assertThat(updated.sourceRevision()).isEqualTo(1L);
@@ -126,16 +115,10 @@ class ConfigurationRevisionTest {
   }
 
   private void assertRequiresReconfirmation(UITestDto updated) {
-    assertThat(updated.compileStatus()).isEqualTo(CompileState.STALE);
-    assertThat(updated.currentCandidateRevisionId()).isNull();
-    // The confirmed revision is retained for history even though the draft is no longer runnable.
-    assertThat(updated.confirmedRevisionId()).isEqualTo(confirmedRevisionId);
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT confirmed_by FROM ui_test_revisions WHERE id = ?",
-                String.class,
-                confirmedRevisionId))
-        .isEqualTo(OWNER);
+    // An advanced revision is never runnable until a guided run learns it again.
+    assertThat(updated.readiness()).isEqualTo(StudioReadiness.UNLEARNED);
+    assertThat(revisions())
+        .isEqualTo(updated.sourceRevision() + "/" + updated.configurationRevision());
   }
 
   // ── helpers ───────────────────────────────────────────────────────────────
@@ -151,14 +134,10 @@ class ConfigurationRevisionTest {
             name,
             description,
             CSI_ID,
-            "[\"Go to the home page\"]",
-            "[]",
-            "chrome",
-            1920,
-            1080,
-            30,
-            "networkidle",
             "Production",
+            java.util.List.of("Go to the home page"),
+            java.util.List.of(),
+            TestConfiguration.defaults(),
             sourceRevision,
             configurationRevision);
     return mutation.apply(base);
@@ -170,7 +149,7 @@ class ConfigurationRevisionTest {
         r.description(),
         r.csiId(),
         r.environment(),
-        LegacyStudioAdapter.parseSteps(stepsJson),
+        CanonicalStudioCodec.parseSteps(stepsJson),
         r.variables(),
         r.configuration(),
         r.sourceRevision(),
@@ -184,7 +163,7 @@ class ConfigurationRevisionTest {
         r.csiId(),
         r.environment(),
         r.steps(),
-        LegacyStudioAdapter.parseVariables(variablesJson),
+        CanonicalStudioCodec.parseVariables(variablesJson),
         r.configuration(),
         r.sourceRevision(),
         r.configurationRevision());
@@ -242,31 +221,11 @@ class ConfigurationRevisionTest {
         r.configurationRevision());
   }
 
-  private UUID compileAndConfirm() {
-    CompileRequest request = compileStateService.beginCompile(testId);
-    compileStateService.publishCandidate(
-        testId,
-        request,
-        new CandidateRevision(
-            request.configurationRevision(),
-            "{\"version\":1,\"steps\":[]}",
-            "source-hash",
-            "{\"version\":1,\"steps\":[]}",
-            "artifact-hash",
-            1,
-            "{\"browser\":\"chromium\"}",
-            "[]",
-            "{\"model\":\"stub-model@1\"}",
-            OWNER));
-    UUID revisionId =
-        jdbc.queryForObject(
-            "SELECT current_candidate_revision_id FROM ui_tests WHERE id = ?", UUID.class, testId);
-    return compileStateService.confirm(testId, revisionId, "artifact-hash", 1L, 1L, OWNER);
-  }
-
-  private String compileStatus() {
+  private String revisions() {
     return jdbc.queryForObject(
-        "SELECT compile_status FROM ui_tests WHERE id = ?", String.class, testId);
+        "SELECT source_revision || '/' || configuration_revision FROM ui_tests WHERE id = ?",
+        String.class,
+        testId);
   }
 
   private UUID seedTest() {

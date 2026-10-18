@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dispatch.StudioDispatcher;
 import com.citi.put.checks.studio.internal.AdmissionCasService;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import com.citi.put.checks.studio.sse.BoundedSenders;
 import com.citi.put.checks.studio.sse.SseTestClient;
 import com.citi.put.checks.studio.sse.WatchedExecutionRegistry;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -31,9 +31,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -74,7 +77,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     })
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioOverloadIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60481";
   private static final String OWNER = "overload-owner@citi.com";
@@ -93,6 +102,10 @@ class StudioOverloadIT {
   @Autowired private StudioDispatcher dispatcher;
   @Autowired private StudioDispatchLedgerStatements statements;
   @Autowired private AdmissionCasService admissionService;
+
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
   @Autowired private WatchedExecutionRegistry registry;
   @Autowired private BoundedSenders senders;
   @Autowired private TransactionTemplate transactions;
@@ -124,7 +137,7 @@ class StudioOverloadIT {
     // row on any CSI, so another class's leftovers fill it. ExecutionVideoAuthorizationIT leaves
     // one DISPATCHING row per test, 14 in all. When that class ran first, every accept here was
     // refused and both tests failed before any Studio bound was reached.
-    jdbc.update("DELETE FROM studio_dispatch_ledger");
+    ObservedPublicationFixture.clearLedger(jdbc);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     testId =
         fixtures
@@ -344,7 +357,10 @@ class StudioOverloadIT {
     List<UUID> accepted = new ArrayList<>();
     for (int index = 0; index < properties.quotasOrDefault().globalOrDefault() + 4; index++) {
       try {
-        accepted.add(studioService.executeTest(testId, owner, null).executionId());
+        accepted.add(
+            studioService
+                .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+                .executionId());
       } catch (RuntimeException e) {
         rejections.incrementAndGet();
       }
@@ -354,15 +370,16 @@ class StudioOverloadIT {
 
   private void attemptCallback(UUID executionId) {
     try {
-      UUID attemptId = UUID.randomUUID();
+      // STUDIO-OBS-014 P1: the observed Run authority's attempt and the observed admission, as the
+      // runner does (legacy claim() deleted).
+      UUID attemptId = ObservedPublicationFixture.bindingAttempt(observedReplay, executionId);
       transactions.executeWithoutResult(
           status -> {
             statements.claim(executionId, "overload", Instant.now().plusSeconds(60), Instant.now());
             statements.beginDispatch(executionId, "overload", attemptId);
           });
-      admissionService.claim(
-          executionId,
-          new AdmissionRequest(executionId, attemptId, RUNNER, UUID.randomUUID(), Map.of()));
+      ObservedPublicationFixture.admitObserved(
+          observedReplay, admissionService, executionId, RUNNER, UUID.randomUUID());
     } catch (RuntimeException e) {
       // Refusals are expected under saturation and are exactly the bounded behaviour under test.
     }

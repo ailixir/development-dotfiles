@@ -7,8 +7,8 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 /** Administrator-approved source sharing scope; no per-control author mappings. */
 @ConfigurationProperties("studio.guided-authoring.translation")
 public record GuidedTranslationProperties(
-    @DefaultValue("false") boolean enabled,
-    @DefaultValue("false") boolean allowAuthoredNonsecret,
+    @DefaultValue("true") boolean enabled,
+    @DefaultValue("true") boolean allowAuthoredNonsecret,
     List<String> applications,
     List<String> environments,
     @DefaultValue("65536") int maxInputBytes,

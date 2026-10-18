@@ -12,11 +12,11 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 /**
- * Immutable compiled candidate for a UI test (Architecture §4.2, §8.1).
+ * Immutable learned revision of a UI test, published by a guided run (ADR-SC-005).
  *
- * <p>Rows are written once. The database trigger {@code trg_ui_test_revisions_write_once} rejects
- * any UPDATE touching a column other than {@code confirmed_by}/{@code confirmed_at}, and rejects a
- * second confirmation. Nothing in ordinary test CRUD may alter revision history.
+ * <p>Rows are written once, already confirmed ({@code confirmation_source = 'GUIDED_RUN'}). The
+ * database trigger {@code trg_ui_test_revisions_write_once} rejects every UPDATE. Nothing in
+ * ordinary test CRUD may alter revision history.
  */
 @Entity
 @Table(name = "ui_test_revisions")
@@ -80,9 +80,6 @@ public class UITestRevision {
   /** ADR-SC-003 structural reference policy; {@code null} for legacy authoring. */
   @Column(name = "reference_policy", columnDefinition = "jsonb", updatable = false)
   private String referencePolicy;
-
-  @Column(name = "intent_derivation_version", length = 32, updatable = false)
-  private String intentDerivationVersion;
 
   @Column(name = "created_by", nullable = false, updatable = false)
   private String createdBy;
@@ -160,10 +157,6 @@ public class UITestRevision {
 
   public String getReferencePolicy() {
     return referencePolicy;
-  }
-
-  public String getIntentDerivationVersion() {
-    return intentDerivationVersion;
   }
 
   public String getCreatedBy() {

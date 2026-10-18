@@ -3,8 +3,9 @@ package com.citi.put.checks.studio.guided.translation;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.citi.put.checks.studio.compile.CredentialPatternScreen;
+import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.guided.session.GuidedSessionException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
@@ -56,6 +57,44 @@ class GuidedSourceClassifierTest {
   }
 
   @Test
+  void secretReferenceEmissionHasOnlyIdAndFillSlotWithTokenExcludedFromApprovedRegions() {
+    var draft = current("Enter <secret PASS> as password");
+    draft
+        .withArray("variables")
+        .addObject()
+        .put("kind", "secretRef")
+        .put("name", "password")
+        .put("secretId", "PASS");
+    var manifest = classifier().classify(draft, scope());
+    var reference = manifest.path("configurationReferences").get(0);
+    assertThat(reference.path("kind").asText()).isEqualTo("secretRef");
+    assertThat(reference.path("intendedSlot").asText()).isEqualTo("fill.value");
+    assertThat(reference.path("referenceName").asText()).isEqualTo("PASS");
+    assertThat(
+            manifest
+                .path("configurationValues")
+                .get(reference.path("referenceId").asText())
+                .has("value"))
+        .isFalse();
+    assertThat(GuidedPromptAssembler.maskSecretTokens("Enter <secret PASS> as password"))
+        .hasSize("Enter <secret PASS> as password".length())
+        .doesNotContain("<secret PASS>")
+        .startsWith("Enter ")
+        .endsWith(" as password");
+    var ref = reference.deepCopy();
+    ((ObjectNode) ref).put("referenceKind", "configuration").put("configurationRevision", "1");
+    var session = C.object().put("scopeHash", "a".repeat(64));
+    session.set("scope", scope());
+    session.putArray("sourceSteps").addObject().put("stepId", STEP);
+    var input =
+        new com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator(C)
+            .resolve(session, new GuidedSourceInputResolver(C).sources(session, manifest), ref);
+    assertThat(input.has("value")).isFalse();
+    assertThat(input.path("secretId").asText()).isEqualTo("PASS");
+    assertThat(input.path("sourceStepId").asText()).isEqualTo(STEP);
+  }
+
+  @Test
   void authoredSourceIsPermittedWhileSavedValuesHaveOnlyPrivateMaterialization() {
     ObjectNode result = classifier().classify(current("Enter London then <var city>"), scope());
     assertThat(result.path("sourceSteps").toString())
@@ -70,10 +109,19 @@ class GuidedSourceClassifierTest {
 
   @Test
   void declaredTokensCannotBecomeLiteralRegionsAndUnknownReferencesRefuse() {
-    assertThatThrownBy(() -> classifier().classify(current("Enter <var unknown>"), scope()))
-        .hasMessage("FORBIDDEN_SCOPE");
-    assertThatThrownBy(() -> classifier().classify(current("Enter <secret city>"), scope()))
-        .hasMessage("FORBIDDEN_SCOPE");
+    // OBS-015 implementation ruling section 1: a runtime reference with no declaration of its kind
+    // is 409 MISSING_SOURCE / AUTHORING_REFERENCE_MISSING (it was a FORBIDDEN_SCOPE scope refusal
+    // before the canonical identity resolver owned reference resolution).
+    for (String text : List.of("Enter <var unknown>", "Enter <secret city>")) {
+      assertThatThrownBy(() -> classifier().classify(current(text), scope()))
+          .isInstanceOfSatisfying(
+              GuidedSessionException.class,
+              refusal -> {
+                assertThat(refusal.status()).isEqualTo(409);
+                assertThat(refusal.messageCode()).isEqualTo("AUTHORING_REFERENCE_MISSING");
+              })
+          .hasMessage("MISSING_SOURCE");
+    }
   }
 
   @Test
@@ -94,15 +142,24 @@ class GuidedSourceClassifierTest {
 
   @Test
   void referencedValuesMustBeAuthoritativeStringsWhileIntentionalEmptyAndUnusedNullArePreserved() {
+    ObjectNode nullValue = current("Enter <var city>");
+    ((ObjectNode) nullValue.path("variables").get(0))
+        .set("value", com.fasterxml.jackson.databind.node.NullNode.instance);
+    assertThatThrownBy(() -> classifier().classify(nullValue, scope()))
+        .hasMessage("MISSING_SOURCE");
+    // A non-string value is not a canonical declaration at all: the strict codec refuses it as
+    // INVALID_VARIABLES before the identity resolver can treat it as a missing source.
     for (com.fasterxml.jackson.databind.JsonNode invalid :
         List.of(
-            com.fasterxml.jackson.databind.node.NullNode.instance,
             com.fasterxml.jackson.databind.node.IntNode.valueOf(42),
             com.fasterxml.jackson.databind.node.BooleanNode.TRUE,
             C.object())) {
       ObjectNode draft = current("Enter <var city>");
       ((ObjectNode) draft.path("variables").get(0)).set("value", invalid);
-      assertThatThrownBy(() -> classifier().classify(draft, scope())).hasMessage("MISSING_SOURCE");
+      assertThatThrownBy(() -> classifier().classify(draft, scope()))
+          .isInstanceOfSatisfying(
+              StudioValidationException.class,
+              refusal -> assertThat(refusal.getCode()).isEqualTo("INVALID_VARIABLES"));
     }
     ObjectNode missing = current("Enter <var city>");
     ((ObjectNode) missing.path("variables").get(0)).remove("value");
@@ -118,7 +175,7 @@ class GuidedSourceClassifierTest {
   }
 
   @Test
-  void canonicalWhitespaceAndVaultIdMatchingRemainOpaqueWithNameFallbackAndConflictChecks() {
+  void canonicalWhitespaceAndVaultIdMatchingRemainOpaqueAndTheNameFallbackIsRetired() {
     String source = "Enter <var\tcity> then <secret\nvault-id>";
     ObjectNode draft = current(source);
     draft
@@ -129,7 +186,7 @@ class GuidedSourceClassifierTest {
         .put("secretId", "vault-id");
     ObjectNode classified = classifier().classify(draft, scope());
     assertThat(classified.path("sourceSteps").get(0).path("text").textValue()).isEqualTo(source);
-    assertThat(classified.path("configurationValues").size()).isEqualTo(4);
+    assertThat(classified.path("configurationValues").size()).isEqualTo(5);
     var approved = classified.path("sourceSteps").get(0).path("regions");
     for (JsonNode region : approved) {
       assertThat(
@@ -143,8 +200,12 @@ class GuidedSourceClassifierTest {
         .put("name", "fallback-id")
         .put("kind", "secretRef")
         .putNull("secretId");
-    assertThat(classifier().classify(fallback, scope()).path("configurationValues").isEmpty())
-        .isTrue();
+    // OBS-015 implementation ruling section 1: secretId is required; the null-secretId name
+    // fallback is retired from the canonical path, so the codec refuses the declaration.
+    assertThatThrownBy(() -> classifier().classify(fallback, scope()))
+        .isInstanceOfSatisfying(
+            StudioValidationException.class,
+            refusal -> assertThat(refusal.getCode()).isEqualTo("INVALID_VARIABLES"));
     ObjectNode conflict = current("Use <var city>");
     conflict
         .withArray("variables")
@@ -152,7 +213,14 @@ class GuidedSourceClassifierTest {
         .put("name", "password")
         .put("kind", "secretRef")
         .put("secretId", "city");
+    // A plain name colliding with a secretId is ambiguous: 422 INVALID_CONTRACT (ruling section 1).
     assertThatThrownBy(() -> classifier().classify(conflict, scope()))
-        .hasMessage("FORBIDDEN_SCOPE");
+        .isInstanceOfSatisfying(
+            GuidedSessionException.class,
+            refusal -> {
+              assertThat(refusal.status()).isEqualTo(422);
+              assertThat(refusal.messageCode()).isEqualTo("AUTHORING_REFERENCE_AMBIGUOUS");
+            })
+        .hasMessage("INVALID_CONTRACT");
   }
 }

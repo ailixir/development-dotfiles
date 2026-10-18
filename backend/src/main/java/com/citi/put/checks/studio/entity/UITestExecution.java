@@ -57,6 +57,24 @@ public class UITestExecution {
   @Column(name = "error_code", length = 40)
   private String errorCode;
 
+  /**
+   * The named replay cause (STUDIO-OBS-008 T0 ruling A1), written once with the terminal status by
+   * the FINAL statement and never rewritten (the FINAL native statement is the only writer; JPA
+   * neither inserts nor updates them). All four columns are null, or one of the two shapes the V22
+   * table CHECK admits. Historical rows are null: the login detail was never stored.
+   */
+  @Column(name = "replay_failure_code", insertable = false, updatable = false)
+  private String replayFailureCode;
+
+  @Column(name = "replay_failure_step_id", insertable = false, updatable = false)
+  private String replayFailureStepId;
+
+  @Column(name = "replay_failure_step_index", insertable = false, updatable = false)
+  private Integer replayFailureStepIndex;
+
+  @Column(name = "replay_failure_login_steps_present", insertable = false, updatable = false)
+  private Boolean replayFailureLoginStepsPresent;
+
   /** Immutable confirmed revision. Null for legacy history, which never had one (§8.1). */
   @Column(name = "revision_id")
   private UUID revisionId;
@@ -316,6 +334,31 @@ public class UITestExecution {
 
   public void setErrorCode(String errorCode) {
     this.errorCode = errorCode;
+  }
+
+  public String getReplayFailureCode() {
+    return replayFailureCode;
+  }
+
+  public String getReplayFailureStepId() {
+    return replayFailureStepId;
+  }
+
+  public Integer getReplayFailureStepIndex() {
+    return replayFailureStepIndex;
+  }
+
+  public Boolean getReplayFailureLoginStepsPresent() {
+    return replayFailureLoginStepsPresent;
+  }
+
+  /** For fixtures only: production writes the four columns in the FINAL statement, not here. */
+  public void setReplayFailure(
+      String code, String stepId, Integer stepIndex, Boolean loginStepsPresent) {
+    this.replayFailureCode = code;
+    this.replayFailureStepId = stepId;
+    this.replayFailureStepIndex = stepIndex;
+    this.replayFailureLoginStepsPresent = loginStepsPresent;
   }
 
   public UUID getRevisionId() {

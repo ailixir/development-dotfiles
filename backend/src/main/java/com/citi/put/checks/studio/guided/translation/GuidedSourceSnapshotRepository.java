@@ -3,8 +3,6 @@ package com.citi.put.checks.studio.guided.translation;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.studio.StudioRepository;
-import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
-import com.citi.put.checks.studio.dto.AuthoringRevisionInputs;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
@@ -16,7 +14,10 @@ import java.util.UUID;
 public final class GuidedSourceSnapshotRepository {
   private final StudioRepository tests;
   private final GuidedContracts contracts;
-  private final ObjectMapper mapper = new ObjectMapper().findAndRegisterModules();
+  private final ObjectMapper mapper =
+      new ObjectMapper()
+          .findAndRegisterModules()
+          .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
   public GuidedSourceSnapshotRepository(StudioRepository tests, GuidedContracts contracts) {
     this.tests = tests;
@@ -24,24 +25,28 @@ public final class GuidedSourceSnapshotRepository {
   }
 
   public ObjectNode lockCurrent(UUID testId) {
+    return lockCurrent(
+        testId,
+        csi -> {
+          /* no authorization hook */
+        });
+  }
+
+  public ObjectNode lockCurrent(UUID testId, java.util.function.Consumer<String> authorize) {
     GuidedTranslationStore.transaction();
     var test =
         tests
             .findByIdForUpdate(testId)
             .orElseThrow(() -> new GuidedSessionException("FORBIDDEN_SCOPE", 403));
-    require(
-        test.getAuthoring() != null && test.getAuthoringRevisionInputs() != null,
-        "RUNTIME_INCOMPATIBLE",
-        409);
+    authorize.accept(test.getCsiId());
+    require(test.getAuthoring() != null, "RUNTIME_INCOMPATIBLE", 409);
     try {
       var authoring = contracts.parse(test.getAuthoring());
-      var inputs = contracts.parse(test.getAuthoringRevisionInputs());
-      require(
-          AuthoringRevisionIdentity.valid(
+      var identity =
+          com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.resolve(
               mapper.treeToValue(authoring, AuthoringV2Request.class),
-              mapper.treeToValue(inputs, AuthoringRevisionInputs.class)),
-          "REVISION_CONFLICT",
-          409);
+              com.citi.put.checks.studio.dto.CanonicalStudioCodec.parseVariables(
+                  test.getVariables()));
       ObjectNode result =
           contracts
               .object()
@@ -51,6 +56,9 @@ public final class GuidedSourceSnapshotRepository {
               .put("sourceRevision", Long.toString(test.getSourceRevision()))
               .put("configurationRevision", Long.toString(test.getConfigurationRevision()));
       result.set("authoring", authoring.deepCopy());
+      result.set("authoringRevisionInputs", mapper.valueToTree(identity.inputs()));
+      result.put("authoringIdentityVersion", 1);
+      result.set("authoredDeclarations", identity.references().path("authoredDeclarations"));
       result.set(
           "variables",
           test.getVariables() == null

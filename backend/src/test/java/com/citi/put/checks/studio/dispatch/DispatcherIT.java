@@ -9,6 +9,7 @@ import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
 import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import com.citi.put.checks.studio.secrets.VaultScope;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.Instant;
@@ -24,10 +25,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -41,7 +45,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class DispatcherIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60457";
   private static final String OWNER = "dispatcher-owner@citi.com";
@@ -101,13 +111,16 @@ class DispatcherIT {
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     testId =
         fixtures
             .seedRunnableTest("Dispatcher draft", CSI_ID, OWNER, List.of("Go to the home page"))
             .testId();
-    executionId = studioService.executeTest(testId, owner, null).executionId();
+    executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
   }
 
   // ── AC-12: the claim ─────────────────────────────────────────────────────
@@ -154,7 +167,10 @@ class DispatcherIT {
         steps,
         StudioExecutionFixtures.references(List.of("QUERY"), List.of()));
 
-    UUID variableExecution = studioService.executeTest(variableTest, owner, null).executionId();
+    UUID variableExecution =
+        studioService
+            .executeTest(variableTest, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     // A later draft edit cannot alter the already accepted run's input.
     jdbc.update(
         "UPDATE ui_tests SET variables = CAST(? AS jsonb) WHERE id = ?",
@@ -168,7 +184,25 @@ class DispatcherIT {
             .filter(candidate -> variableExecution.equals(candidate.executionId()))
             .findFirst()
             .orElseThrow();
-    assertThat(job.resolvedVars()).containsExactlyEntriesOf(Map.of("QUERY", "studio"));
+    // An observed job carries a plain variable as the input its configuration recipe names, with
+    // the value accepted at acceptance (STUDIO-OBS-012A: the artifact-1 resolvedVars map is gone).
+    // The synthetic observed evidence names its inputs by session, so QUERY is identified by the
+    // configuration provenance its input recipe carries, not by an input id.
+    Map<String, String> inputs = new java.util.LinkedHashMap<>();
+    job.observed()
+        .path("inputs")
+        .forEach(i -> inputs.put(i.path("inputId").asText(), i.path("value").asText()));
+    Map<String, String> byDeclaration = new java.util.LinkedHashMap<>();
+    job.observed()
+        .path("artifact")
+        .path("inputRecipes")
+        .forEach(
+            recipe ->
+                byDeclaration.put(
+                    recipe.path("provenance").path("referenceName").asText(),
+                    inputs.get(recipe.path("inputId").asText())));
+    assertThat(byDeclaration).containsEntry("QUERY", "studio");
+    assertThat(inputs).doesNotContainValue("changed");
     assertThat(job.resolvedSecrets()).isEmpty();
   }
 
@@ -381,6 +415,8 @@ class DispatcherIT {
       backlog.add(executeAnother("Backlog draft " + i));
     }
     CountingStatements counting = new CountingStatements(jdbc);
+    counting.installTerminalTransactionManager(transactionManager);
+    counting.installSecretAudit(secretAudit);
     SlowRecordingClient client = new SlowRecordingClient();
     StudioDispatcher first = secondInstance(counting, client, "dispatcher-wp8-a");
     StudioDispatcher second = secondInstance(counting, client, "dispatcher-wp8-b");
@@ -553,7 +589,10 @@ class DispatcherIT {
         VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
         "vanishing-reference",
         "a-value-that-is-about-to-vanish");
-    UUID execution = studioService.executeTest(withReference, owner, null).executionId();
+    UUID execution =
+        studioService
+            .executeTest(withReference, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
 
     // Preflight passed at acceptance; the reference disappears from the vault before the send.
     vault.delete(
@@ -585,7 +624,10 @@ class DispatcherIT {
         VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
         "LOGIN_PW",
         "value-never-logged");
-    UUID execution = studioService.executeTest(withReference, owner, null).executionId();
+    UUID execution =
+        studioService
+            .executeTest(withReference, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     vault.makeUnavailable();
 
     dispatcher.dispatch(execution);
@@ -614,13 +656,17 @@ class DispatcherIT {
   void theDispatchedPolicyIdentityIsRecordedOnTheExecution() {
     dispatcher.dispatch(executionId);
 
+    // STUDIO-OBS-012A: an observed execution records the policy identity it was authorized and
+    // dispatched under in its immutable binding (currentPolicyHash), not in the artifact-1
+    // dispatcher's configuration_snapshot key.
     assertThat(
             jdbc.queryForObject(
-                "SELECT configuration_snapshot::text FROM ui_test_executions WHERE id = ?",
+                "SELECT observed_revision_binding->>'currentPolicyHash' FROM ui_test_executions"
+                    + " WHERE id = ?",
                 String.class,
                 executionId))
         .as("the honest minimum while ADR-002 O-6 is open: decidable today, costs 10.18 nothing")
-        .contains("dispatchPolicyIdentity");
+        .matches("[0-9a-f]{64}");
   }
 
   @Test
@@ -639,19 +685,32 @@ class DispatcherIT {
         VaultScope.of(CSI_ID, ENVIRONMENT, withReference),
         "canary-reference",
         canaryValue);
-    UUID execution = studioService.executeTest(withReference, owner, null).executionId();
+    UUID execution =
+        studioService
+            .executeTest(withReference, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
 
+    var observedAtSend = new java.util.concurrent.atomic.AtomicInteger();
+    runner.onSend(
+        job -> {
+          assertThat(job.references().secrets()).contains("canary-reference");
+          assertThat(job.resolvedSecrets().get("canary-reference").matches(canaryValue)).isTrue();
+          observedAtSend.incrementAndGet();
+        });
     dispatcher.dispatch(execution);
 
     String canary = canaryValue;
     // The value *travelled*, proven first, so the absences below are not true for the wrong reason
     // (story 10.17 Anti-vacuous test requirements, row 1). Story 10.7's version of this test could
     // not make this assertion, because no value had ever reached the job.
+    assertThat(observedAtSend.get()).isEqualTo(1);
     assertThat(runner.sent())
         .isNotEmpty()
         .allSatisfy(job -> assertThat(job.references().secrets()).contains("canary-reference"))
         .allSatisfy(
-            job -> assertThat(job.resolvedSecrets()).containsEntry("canary-reference", canary));
+            job ->
+                assertThat(job.resolvedSecrets().get("canary-reference").matches(canary)).isFalse())
+        .allSatisfy(job -> assertThat(job.toString()).doesNotContain(canary));
     assertThat(
             jdbc.queryForObject(
                 "SELECT COUNT(*) FROM ui_test_executions WHERE id = ?"
@@ -742,23 +801,35 @@ class DispatcherIT {
   @Autowired private com.citi.put.checks.studio.StudioExecutionProperties executionProperties;
   @Autowired private com.fasterxml.jackson.databind.ObjectMapper objectMapper;
 
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
+  @Autowired private com.citi.put.checks.studio.secrets.SecretAuditLifecycle secretAudit;
+
+  @Autowired private org.springframework.transaction.PlatformTransactionManager transactionManager;
+
   /** A second, independent dispatcher: its own lease owner, sharing only the database. */
   private StudioDispatcher secondInstance(
       StudioDispatchLedgerStatements ledgerStatements,
       RunnerDispatchClient client,
       String instanceId) {
-    return new StudioDispatcher(
-        ledgerStatements,
-        revisionRepository,
-        dispatchAuthorization,
-        referenceResolver,
-        client,
-        executionProperties,
-        objectMapper,
-        jdbc,
-        transactions,
-        instanceId,
-        java.time.Clock.systemUTC());
+    StudioDispatcher instance =
+        new StudioDispatcher(
+            ledgerStatements,
+            revisionRepository,
+            dispatchAuthorization,
+            client,
+            executionProperties,
+            objectMapper,
+            jdbc,
+            transactions,
+            instanceId,
+            java.time.Clock.systemUTC());
+    // What Spring injects into a worker's dispatcher: the observed Run authority and its audit.
+    instance.installSecretAudit(secretAudit);
+    org.springframework.test.util.ReflectionTestUtils.setField(
+        instance, "observed", observedReplay);
+    return instance;
   }
 
   /** Runs passes until none of {@code backlog} is still queued. */
@@ -782,7 +853,9 @@ class DispatcherIT {
   private UUID executeAnother(String name) {
     UUID another =
         fixtures.seedRunnableTest(name, CSI_ID, OWNER, List.of("Go to the home page")).testId();
-    return studioService.executeTest(another, owner, null).executionId();
+    return studioService
+        .executeTest(another, owner, null, ObservedPublicationFixture.request(owner))
+        .executionId();
   }
 
   /**

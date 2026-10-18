@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.scheduling;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -12,6 +13,7 @@ import java.sql.Savepoint;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
@@ -21,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -29,6 +33,11 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  *
  * <p>This private database never uses the shared Spring/TC profile: retained identity anchors
  * intentionally reject DELETE and must not contaminate another test class's cleanup fixtures.
+ *
+ * <p>STUDIO-OBS-012A / ADR-SC-005 D-B: scheduling is the re-baselined {@code V16__scheduling},
+ * applied over a populated V15 database and then taken to the current head. Every revision is an
+ * observed publication, so each fixture activates a genuine one (production writers, every SQL
+ * guard) and every accepted history row carries the observed binding its revision requires.
  */
 @Testcontainers(disabledWithoutDocker = true)
 class StudioSchedulingSchemaIT {
@@ -48,12 +57,17 @@ class StudioSchedulingSchemaIT {
   private static final UUID[] LEGACY_EXECUTIONS = {
     UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID()
   };
+
+  /** Variants whose history row contradicts its own revision; see the parameterized case. */
+  private static final Set<String> OBSERVED_GUARD_REFUSES =
+      Set.of("test", "csi", "environment", "revision");
+
   private Connection connection;
 
   @BeforeAll
   static void upgradePopulatedBaseline() throws SQLException {
     POSTGRES.start();
-    migrate("25");
+    migrate("15");
     try (Connection baseline = connect()) {
       execute(
           baseline,
@@ -100,7 +114,8 @@ class StudioSchedulingSchemaIT {
             CSI);
       }
     }
-    migrate("26");
+    migrate("16");
+    migrate("latest");
   }
 
   @AfterAll
@@ -137,7 +152,7 @@ class StudioSchedulingSchemaIT {
           .isIn("DISPATCH_UNKNOWN", "START_TIMEOUT", "STALE");
       assertThat(scalar("SELECT trigger_source FROM ui_test_executions WHERE id=?", id)).isNull();
     }
-    assertThat(scalar("SELECT success::text FROM flyway_schema_history WHERE version='26'"))
+    assertThat(scalar("SELECT success::text FROM flyway_schema_history WHERE version='16'"))
         .isEqualTo("true");
   }
 
@@ -274,7 +289,29 @@ class StudioSchedulingSchemaIT {
           PRINCIPAL,
           HUMAN);
     }
-    if (!"missing_history".equals(mismatch)) {
+    if (OBSERVED_GUARD_REFUSES.contains(mismatch)) {
+      // These rows contradict their own revision (another test, CSI or environment), so the V15
+      // observed execution guard refuses the history row at INSERT, before the commit-time join.
+      UUID mismatchedRevision = revision;
+      UUID mismatchedActivation = activation;
+      Savepoint point = connection.setSavepoint();
+      assertThatThrownBy(
+              () ->
+                  history(
+                      f,
+                      occurrence,
+                      execution,
+                      mismatchedRevision,
+                      mismatchedActivation,
+                      PRINCIPAL,
+                      "environment".equals(mismatch) ? "UAT" : "Production",
+                      "csi".equals(mismatch) ? OTHER_CSI : CSI,
+                      "test".equals(mismatch) ? fixture().testId() : f.testId(),
+                      null))
+          .isInstanceOf(SQLException.class)
+          .hasMessageContaining("observed execution binding invalid");
+      connection.rollback(point);
+    } else if (!"missing_history".equals(mismatch)) {
       history(
           f,
           occurrence,
@@ -295,7 +332,7 @@ class StudioSchedulingSchemaIT {
   void refusalCannotAcquireFakeExecutionEvidence() throws SQLException {
     Fixture f = fixture();
     UUID occurrence = UUID.randomUUID();
-    occurrence(f, occurrence, "REFUSED", "COMPILE_REQUIRED");
+    occurrence(f, occurrence, "REFUSED", "LEARN_REQUIRED");
     history(
         f,
         occurrence,
@@ -311,16 +348,17 @@ class StudioSchedulingSchemaIT {
   void nullableLegacySourceCannotSmuggleScheduledMetadata() throws SQLException {
     Fixture f = fixture();
     UUID occurrence = UUID.randomUUID();
-    occurrence(f, occurrence, "REFUSED", "COMPILE_REQUIRED");
+    occurrence(f, occurrence, "REFUSED", "LEARN_REQUIRED");
+    UUID smuggled = UUID.randomUUID();
     sqlFails(
         "ck_ui_test_executions_trigger_source",
         "INSERT INTO"
             + " ui_test_executions(id,ui_test_id,status,started_at,csi_id,principal,environment,"
             + " revision_id,trigger_source,schedule_id,schedule_version,occurrence_id,scheduled_at,"
-            + " activation_id,activated_by,activated_at) SELECT"
-            + " ?,?,'PENDING',?,?,?,'Production',?,NULL,?,?,?,?,?,a.activated_by,a.activated_at"
-            + " FROM studio_schedule_activations a WHERE a.id=?",
-        UUID.randomUUID(),
+            + " activation_id,activated_by,activated_at,observed_revision_binding) SELECT"
+            + " ?,?,'PENDING',?,?,?,'Production',?,NULL,?,?,?,?,?,a.activated_by,a.activated_at,"
+            + "?::jsonb FROM studio_schedule_activations a WHERE a.id=?",
+        smuggled,
         f.testId(),
         ACCEPTED,
         CSI,
@@ -331,6 +369,7 @@ class StudioSchedulingSchemaIT {
         occurrence,
         DUE,
         f.activationId(),
+        binding(f.revisionId(), smuggled, PRINCIPAL),
         f.activationId());
   }
 
@@ -507,24 +546,14 @@ class StudioSchedulingSchemaIT {
   }
 
   private Fixture fixture() throws SQLException {
-    UUID test = UUID.randomUUID();
-    UUID revision = UUID.randomUUID();
+    // A genuine observed publication, committed through the production writers.
+    var published =
+        GuidedPublicationMigrationTest.publishObserved(
+            dataSource(), "schedule-" + UUID.randomUUID(), CSI, "Production", HUMAN);
+    UUID test = published.testId();
+    UUID revision = published.revisionId();
     UUID schedule = UUID.randomUUID();
     UUID activation = UUID.randomUUID();
-    insertTest(connection, test, CSI);
-    execute(
-        connection,
-        "INSERT INTO ui_test_revisions(id,test_id,csi_id,source_revision,configuration_revision, "
-            + "source,source_hash,artifact,artifact_hash,artifact_schema_version,configuration, "
-            + "\"references\",provenance,created_by,confirmed_by,confirmed_at) "
-            + "VALUES(?,?,?,1,1,'[\"Open\"]'::jsonb,'source','{}'::jsonb,?,1, "
-            + "'{\"environment\":\"Production\"}'::jsonb,'{}'::jsonb,'{}'::jsonb,?,?,NOW())",
-        revision,
-        test,
-        CSI,
-        revision.toString(),
-        HUMAN,
-        HUMAN);
     execute(
         connection,
         "INSERT INTO studio_schedules(id,test_id,csi_id,cron_expression,time_zone, "
@@ -675,9 +704,9 @@ class StudioSchedulingSchemaIT {
         "INSERT INTO"
             + " ui_test_executions(id,ui_test_id,status,started_at,csi_id,principal,environment,"
             + " revision_id,trigger_source,schedule_id,schedule_version,occurrence_id,scheduled_at,"
-            + " activation_id,activated_by,activated_at) SELECT"
-            + " ?,?,'PENDING',?,?,?,?,?,'SCHEDULED',?,?,?,?,?,COALESCE(?,a.activated_by),a.activated_at"
-            + " FROM studio_schedule_activations a WHERE a.id=?",
+            + " activation_id,activated_by,activated_at,observed_revision_binding) SELECT"
+            + " ?,?,'PENDING',?,?,?,?,?,'SCHEDULED',?,?,?,?,?,COALESCE(?,a.activated_by),a.activated_at,"
+            + "?::jsonb FROM studio_schedule_activations a WHERE a.id=?",
         execution,
         historicalTest,
         ACCEPTED,
@@ -691,7 +720,20 @@ class StudioSchedulingSchemaIT {
         DUE,
         activation,
         actorOverride,
+        binding(revision, execution, principal),
         activation);
+  }
+
+  /** The binding the accepted row's own revision requires, for the row's own principal. */
+  private static String binding(UUID revision, UUID execution, String principal) {
+    return GuidedPublicationMigrationTest.observedBinding(
+            new JdbcTemplate(dataSource()), revision, execution, ACCEPTED, principal)
+        .toString();
+  }
+
+  private static DriverManagerDataSource dataSource() {
+    return new DriverManagerDataSource(
+        POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
   }
 
   private void ledger(Fixture f, UUID occurrence, UUID execution) throws SQLException {

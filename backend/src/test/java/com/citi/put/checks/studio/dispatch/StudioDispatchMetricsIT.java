@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -13,9 +14,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -29,7 +33,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioDispatchMetricsIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60461";
   private static final String OWNER = "dispatch-metrics-owner@citi.com";
@@ -47,7 +57,7 @@ class StudioDispatchMetricsIT {
     StudioExecutionFixtures fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     testId =
         fixtures
@@ -64,7 +74,10 @@ class StudioDispatchMetricsIT {
 
     List<UUID> executions = new ArrayList<>();
     for (int i = 0; i < 3; i++) {
-      executions.add(studioService.executeTest(testId, owner, null).executionId());
+      executions.add(
+          studioService
+              .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+              .executionId());
     }
     metrics.refresh();
     assertThat(metrics.backlog(DispatchState.QUEUED) - queuedBefore).isEqualTo(3);
@@ -84,7 +97,10 @@ class StudioDispatchMetricsIT {
     long queuedBefore = metrics.backlog(DispatchState.QUEUED);
     long claimedBefore = metrics.backlog(DispatchState.CLAIMED);
 
-    UUID executionId = studioService.executeTest(testId, owner, null).executionId();
+    UUID executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     Instant now = Instant.now();
     assertThat(statements.claim(executionId, "metrics-it", now.plusSeconds(60), now)).isEqualTo(1);
     assertThat(statements.beginDispatch(executionId, "metrics-it", UUID.randomUUID())).isEqualTo(1);

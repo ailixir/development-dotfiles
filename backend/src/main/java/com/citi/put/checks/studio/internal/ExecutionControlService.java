@@ -15,6 +15,13 @@ import org.springframework.stereotype.Service;
 public class ExecutionControlService {
 
   private final StudioDispatchLedgerStatements statements;
+  private com.citi.put.checks.studio.secrets.SecretRevocationSweep revocation;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  public void installRevocation(
+      com.citi.put.checks.studio.secrets.SecretRevocationSweep revocation) {
+    this.revocation = revocation;
+  }
 
   public ExecutionControlService(StudioDispatchLedgerStatements statements) {
     this.statements = statements;
@@ -26,9 +33,17 @@ public class ExecutionControlService {
    * @throws InternalCallbackException {@code 404 EXECUTION_UNKNOWN} for an id with no ledger row
    */
   public ExecutionControl control(UUID executionId) {
+    if (revocation != null) {
+      revocation.executionRevoked(executionId);
+    }
     return statements
         .find(executionId)
-        .map(row -> new ExecutionControl(executionId, row.get("cancel_requested_at") != null))
+        .map(
+            row ->
+                new ExecutionControl(
+                    executionId,
+                    row.get("cancel_requested_at") != null,
+                    row.get("revoked_at") != null))
         .orElseThrow(
             () ->
                 InternalCallbackException.notFound(

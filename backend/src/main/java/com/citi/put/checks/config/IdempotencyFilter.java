@@ -37,8 +37,13 @@ public class IdempotencyFilter extends OncePerRequestFilter {
           new AntPathRequestMatcher("/api/v1/checks"),
           new AntPathRequestMatcher("/api/v1/reports/**"),
           new AntPathRequestMatcher("/api/v1/studio/**"),
-          new AntPathRequestMatcher("/api/v2/studio/**"),
           new AntPathRequestMatcher("/api/v1/schedules/**"));
+  // Guided sessions keep their own durable, digest-checked, principal-scoped idempotency (opaque
+  // 1..256 keys, IDEMPOTENCY_CONFLICT on reuse); the response cache must not shadow it.
+  private static final List<AntPathRequestMatcher> EXCLUDED_PATHS =
+      List.of(
+          new AntPathRequestMatcher("/api/v1/studio/guided-sessions"),
+          new AntPathRequestMatcher("/api/v1/studio/guided-sessions/**"));
 
   private final Cache<String, CachedResponse> cache;
   private final ConcurrentHashMap<String, CompletableFuture<CachedResponse>> inFlight =
@@ -62,6 +67,11 @@ public class IdempotencyFilter extends OncePerRequestFilter {
   protected boolean shouldNotFilter(HttpServletRequest request) {
     if (!IDEMPOTENT_METHODS.contains(request.getMethod().toUpperCase())) {
       return true;
+    }
+    for (AntPathRequestMatcher excluded : EXCLUDED_PATHS) {
+      if (excluded.matches(request)) {
+        return true;
+      }
     }
     for (AntPathRequestMatcher matcher : COVERED_PATHS) {
       if (matcher.matches(request)) {

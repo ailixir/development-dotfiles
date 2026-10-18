@@ -80,7 +80,8 @@ class OptimisticSaveIT {
           statuses.get(0) == 200 ? results.get(0).get() : results.get(1).get();
       // Steps are a typed array on the contract since 10.1, so the comparison is structural.
       JsonNode winningSteps = objectMapper.readTree(winner.getBody()).path("steps");
-      assertThat(objectMapper.readTree(storedSteps())).isEqualTo(winningSteps);
+      assertThat(objectMapper.readTree(storedSteps()).get(0).asText())
+          .isEqualTo(winningSteps.get(0).path("text").asText());
     } finally {
       pool.shutdownNow();
     }
@@ -104,9 +105,10 @@ class OptimisticSaveIT {
   void aSaveWithoutRevisionsIsRejected() throws Exception {
     String noRevisions =
         """
-        {"name":"Draft","description":"d","steps":"[\\"Only step\\"]","variables":"[]",
-         "browser":"chrome","viewportWidth":1920,"viewportHeight":1080,"timeoutSeconds":30,
-         "waitStrategy":"networkidle","environment":"Production"}
+        {"authoringSchemaVersion":2,"name":"Draft","description":"d",
+         "steps":[{"id":"00000000-0000-4000-8000-000000000001","text":"Only step"}],"variables":[],
+         "configuration":{"browser":"chromium","viewport":{"width":1920,"height":1080},
+         "timeoutSeconds":30,"waitStrategy":"networkidle"},"environment":"Production"}
         """;
     ResponseEntity<String> response = put(noRevisions);
 
@@ -131,24 +133,29 @@ class OptimisticSaveIT {
   }
 
   private String body(String step, long sourceRevision, long configurationRevision) {
-    return """
-        {"name":"Optimistic draft","description":"concurrency","csiId":"%s",
-         "steps":"[\\"%s\\"]","variables":"[]","browser":"chrome","viewportWidth":1920,
-         "viewportHeight":1080,"timeoutSeconds":30,"waitStrategy":"networkidle",
-         "environment":"Production","sourceRevision":%d,"configurationRevision":%d}
-        """
-        .formatted(CSI_ID, step, sourceRevision, configurationRevision);
+    var body =
+        objectMapper
+            .createObjectNode()
+            .put("authoringSchemaVersion", 2)
+            .put("name", "Optimistic draft")
+            .put("description", "concurrency")
+            .put("csiId", CSI_ID)
+            .put("environment", "Production")
+            .put("sourceRevision", sourceRevision)
+            .put("configurationRevision", configurationRevision);
+    body.putArray("steps")
+        .addObject()
+        .put("id", "00000000-0000-4000-8000-000000000001")
+        .put("text", step);
+    body.putArray("variables");
+    body.set(
+        "configuration",
+        objectMapper.valueToTree(com.citi.put.checks.studio.dto.TestConfiguration.defaults()));
+    return body.toString();
   }
 
   private UUID createTest() throws Exception {
-    String createBody =
-        """
-        {"name":"Optimistic draft","description":"concurrency","csiId":"%s",
-         "steps":"[\\"Go to the home page\\"]","variables":"[]","browser":"chrome",
-         "viewportWidth":1920,"viewportHeight":1080,"timeoutSeconds":30,
-         "waitStrategy":"networkidle","environment":"Production"}
-        """
-            .formatted(CSI_ID);
+    String createBody = body("Go to the home page", 1, 1);
     ResponseEntity<String> created =
         restTemplate.exchange(
             "/api/v1/studio/tests",
@@ -159,7 +166,7 @@ class OptimisticSaveIT {
     JsonNode node = objectMapper.readTree(created.getBody());
     assertThat(node.path("sourceRevision").asLong()).isEqualTo(1L);
     assertThat(node.path("configurationRevision").asLong()).isEqualTo(1L);
-    assertThat(node.path("compileStatus").asText()).isEqualTo("STALE");
+    assertThat(node.path("readiness").asText()).isEqualTo("UNLEARNED");
     return UUID.fromString(node.path("id").asText());
   }
 

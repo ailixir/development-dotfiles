@@ -23,12 +23,18 @@ import java.util.List;
  * reference prevents browser launch"</em>, so an unreadable, absent or unrecognised declaration is
  * now {@link UnreadableReferenceDeclarationException} and the dispatcher makes it terminal.
  *
- * <p>The recognised shape is exactly the one {@code CompileInputs.referencesJson()} writes and the
- * one the contract's {@code ReferenceDeclarations} declares: an object with {@code variables} and
- * {@code secrets}, each an array of strings, and no other key. Accepting more shapes than the
+ * <p>The recognised shape is exactly the one {@code GuidedPublicationRepository.commit} writes, the
+ * V21 {@code studio_015_declarations} constraint enforces and the contract {@code
+ * RevisionReferences} declares: an object with exactly {@code variables} and {@code secrets} (each
+ * an array of names), {@code authoringIdentityVersion} (the integer 1) and an {@code
+ * authoredDeclarations} array, all four required and no other key. Accepting more shapes than the
  * producer writes is how a reader stops being able to tell a corrupt document from an old one.
  */
 public final class ExecutionReferences {
+
+  /** The one recognised key set (V21 {@code studio_015_declarations}). */
+  private static final java.util.Set<String> SHAPE =
+      java.util.Set.of("variables", "secrets", "authoringIdentityVersion", "authoredDeclarations");
 
   private ExecutionReferences() {}
 
@@ -59,10 +65,16 @@ public final class ExecutionReferences {
           "the reference declaration on the confirmed revision is not an object");
     }
     for (String key : (Iterable<String>) node::fieldNames) {
-      if (!"variables".equals(key) && !"secrets".equals(key)) {
+      if (!SHAPE.contains(key)) {
         throw new UnreadableReferenceDeclarationException(
             "the reference declaration on the confirmed revision carries an unrecognised key");
       }
+    }
+    if (!(node.path("authoringIdentityVersion").isInt()
+        && node.path("authoringIdentityVersion").intValue() == 1
+        && node.path("authoredDeclarations").isArray())) {
+      throw new UnreadableReferenceDeclarationException(
+          "the reference declaration on the confirmed revision has no version-1 authoring identity");
     }
     return new ReferenceDeclarations(
         names(node.get("variables"), "variables"), names(node.get("secrets"), "secrets"));

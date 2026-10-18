@@ -3,7 +3,7 @@ package com.citi.put.checks.studio;
 import com.citi.put.checks.studio.dto.ExecutionLogEntry;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.ExecutionStatus;
-import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
+import com.citi.put.checks.studio.dto.ReplayFailure;
 import com.citi.put.checks.studio.dto.RuntimeVersions;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.dto.VideoEvidence;
@@ -25,9 +25,9 @@ import org.springframework.stereotype.Component;
  * the SSE {@code execution.snapshot} payload, so there is exactly one shape to render in the MFE
  * (Architecture §5.5).
  *
- * <p>Two adaptations happen here and nowhere else: legacy outcomes are normalized (§8.3), and
- * logical video expiry is enforced at read time because physical lifecycle deletion on the object
- * store is asynchronous (§6.2).
+ * <p>One adaptation happens here and nowhere else: logical video expiry is enforced at read time
+ * because physical lifecycle deletion on the object store is asynchronous (§6.2). Status and error
+ * code are read as stored; V13 holds the canonical vocabulary in a CHECK.
  */
 @Component
 public class ExecutionSnapshotMapper {
@@ -43,7 +43,7 @@ public class ExecutionSnapshotMapper {
    * {@code video.error} for a recording the runner stored where this API cannot read it. Shown
    * verbatim by the MFE for {@code UNAVAILABLE}.
    */
-  static final String NO_RECORDING_STORE =
+  public static final String NO_RECORDING_STORE =
       "Recording unavailable: this deployment has no recording store the API can read.";
 
   private final ObjectMapper objectMapper;
@@ -70,9 +70,8 @@ public class ExecutionSnapshotMapper {
    * list and single-read routes label it with {@link ExecutionSnapshotDto#withTestName}.
    */
   public ExecutionSnapshotDto toSnapshot(UITestExecution execution) {
-    String status = LegacyStudioAdapter.normalizeStatus(execution.getStatus());
-    String errorCode =
-        LegacyStudioAdapter.normalizeErrorCode(execution.getStatus(), execution.getErrorCode());
+    String status = execution.getStatus();
+    String errorCode = execution.getErrorCode();
     VideoEvidence video = videoEvidence(execution, status);
 
     return new ExecutionSnapshotDto(
@@ -102,7 +101,34 @@ public class ExecutionSnapshotMapper {
         execution.getScheduledAt(),
         execution.getActivationId(),
         execution.getActivatedBy(),
-        execution.getActivatedAt());
+        execution.getActivatedAt(),
+        replayFailure(execution));
+  }
+
+  /**
+   * The persisted replay cause as the snapshot's {@code replayFailure} (STUDIO-OBS-008 T0 ruling
+   * A1), or null when the API named none.
+   *
+   * <p>Read as stored and never re-derived: the cause was decided once, from the terminal report,
+   * in the same statement as the status. Rows the table CHECK admits are the only shapes that can
+   * arrive; a code without its coordinates is corruption and is refused rather than published.
+   */
+  private static ReplayFailure replayFailure(UITestExecution execution) {
+    String code = execution.getReplayFailureCode();
+    if (code == null) {
+      return null;
+    }
+    String stepId = execution.getReplayFailureStepId();
+    Integer stepIndex = execution.getReplayFailureStepIndex();
+    if (stepId == null || stepIndex == null) {
+      throw new IllegalStateException("Stored replay_failure is not readable as the contract");
+    }
+    try {
+      return new ReplayFailure(
+          code, stepId, stepIndex, execution.getReplayFailureLoginStepsPresent());
+    } catch (IllegalArgumentException e) {
+      throw new IllegalStateException("Stored replay_failure is not readable as the contract", e);
+    }
   }
 
   /**

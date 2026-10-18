@@ -30,6 +30,18 @@ public final class FakeStudioVaultProvider implements StudioVaultProvider {
   private final Map<String, Entry> entries = new ConcurrentHashMap<>();
   private final List<CreateCall> creates = new CopyOnWriteArrayList<>();
   private volatile boolean available = true;
+  private final java.util.concurrent.atomic.AtomicInteger reads =
+      new java.util.concurrent.atomic.AtomicInteger();
+  private final java.util.concurrent.atomic.AtomicInteger lists =
+      new java.util.concurrent.atomic.AtomicInteger();
+
+  public int readCount() {
+    return reads.get();
+  }
+
+  public int listCount() {
+    return lists.get();
+  }
 
   public FakeStudioVaultProvider(Map<String, String> seed) {
     seed.forEach((key, value) -> entries.put(key, new Entry(value, newVersionIdentifier())));
@@ -42,6 +54,7 @@ public final class FakeStudioVaultProvider implements StudioVaultProvider {
 
   @Override
   public Optional<VaultEntry> read(ReferenceKind kind, VaultScope scope, String referenceName) {
+    reads.incrementAndGet();
     requireAvailable();
     Entry entry = entries.get(key(kind, scope, referenceName));
     return entry == null
@@ -69,6 +82,7 @@ public final class FakeStudioVaultProvider implements StudioVaultProvider {
 
   @Override
   public List<String> listSecretNames(VaultScope scope) {
+    lists.incrementAndGet();
     requireAvailable();
     String prefix = key(ReferenceKind.SECRET, scope, "");
     return entries.keySet().stream()
@@ -108,11 +122,18 @@ public final class FakeStudioVaultProvider implements StudioVaultProvider {
   public void clear() {
     entries.clear();
     creates.clear();
+    reads.set(0);
+    lists.set(0);
     available = true;
   }
 
   public void makeUnavailable() {
     available = false;
+  }
+
+  /** Restore availability without resetting existing facts or attempted-read counters. */
+  public void makeAvailable() {
+    available = true;
   }
 
   public static String key(ReferenceKind kind, VaultScope scope, String referenceName) {

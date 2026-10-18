@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -24,6 +25,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -43,9 +46,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestEvidenceStores.class)
+@Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
 @Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoRangeIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60473";
   private static final String OWNER = "video-range-owner@citi.com";
@@ -88,7 +96,12 @@ class ExecutionVideoRangeIT {
         fixtures.seedRunnableTest("Range draft", CSI_ID, OWNER, List.of("Go home")).testId();
     executionId =
         studioService
-            .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), null)
+            .executeTest(
+                testId,
+                StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+                null,
+                ObservedPublicationFixture.request(
+                    StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
             .executionId();
     attemptId = video.dispatch(executionId, "video-range-dispatcher");
     derivedKey = VideoEvidenceFixtures.derivedKey(CSI_ID, testId, executionId, attemptId);

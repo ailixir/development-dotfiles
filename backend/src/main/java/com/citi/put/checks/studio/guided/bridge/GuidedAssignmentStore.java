@@ -48,7 +48,7 @@ public final class GuidedAssignmentStore {
     ObjectNode intent =
         contracts
             .object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("assignmentId", UUID.randomUUID().toString())
             .put("sessionId", id)
             .put("workerId", workerId)
@@ -60,7 +60,7 @@ public final class GuidedAssignmentStore {
             .put("expectedFence", session.path("owner").path("fence").asInt())
             .put("expiresAt", session.path("expiresAt").asText());
     intent.set("versions", session.path("versions"));
-    contracts.validate("v2/assignment", intent);
+    contracts.validate("v3/assignment", intent);
     jdbc.update(
         "INSERT INTO studio_guided_assignments"
             + "(session_id,assignment_id,scope_hash,worker_id,expected_fence,intent)"
@@ -112,7 +112,7 @@ public final class GuidedAssignmentStore {
   }
 
   public void acknowledge(JsonNode session, JsonNode receipt, Instant now) {
-    contracts.validate("v2/assignment-receipt", receipt);
+    contracts.validate("v3/assignment-receipt", receipt);
     String id = session.path("sessionId").asText();
     JsonNode intent = find(id);
     require(

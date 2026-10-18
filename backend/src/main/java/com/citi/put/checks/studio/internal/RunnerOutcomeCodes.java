@@ -73,12 +73,20 @@ public final class RunnerOutcomeCodes {
    */
   public static String errorCodeFor(
       String result, String runnerErrorCode, boolean cancelRequested) {
+    return errorCodeFor(result, runnerErrorCode, cancelRequested, false);
+  }
+
+  /** Revocation is an independently recorded API fact; user cancellation takes precedence. */
+  public static String errorCodeFor(
+      String result, String runnerErrorCode, boolean cancelRequested, boolean revoked) {
     if (!ExecutionStatus.ERROR.equals(statusFor(result)) || runnerErrorCode == null) {
       return null;
     }
     String normalized = runnerErrorCode.toUpperCase(Locale.ROOT);
     if (RUNNER_CANCELLED.equals(normalized)) {
-      return cancelRequested ? ExecutionErrorCode.CANCELLED : null;
+      return cancelRequested
+          ? ExecutionErrorCode.CANCELLED
+          : revoked ? ExecutionErrorCode.AUTHORIZATION_REVOKED : null;
     }
     return RUNNER_CODE_TO_API_CODE.get(normalized);
   }

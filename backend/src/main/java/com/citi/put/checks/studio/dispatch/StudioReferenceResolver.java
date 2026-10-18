@@ -69,6 +69,98 @@ public interface StudioReferenceResolver {
       String principal,
       ReferenceDeclarations declarations);
 
+  @FunctionalInterface
+  interface ValueReadEntry {
+    void beforeRead(String secretId);
+  }
+
+  /** The actual provider implementation must place the observer before each value-read entry. */
+  default Resolved resolve(
+      String csiId,
+      String environment,
+      UUID testId,
+      String principal,
+      ReferenceDeclarations declarations,
+      ValueReadEntry entry) {
+    throw new IllegalStateException("Reference resolver does not provide tracked value-read entry");
+  }
+
+  enum DecisionOutcome {
+    RESOLVED,
+    NOT_AUTHORIZED,
+    REVOKED,
+    UNAVAILABLE,
+    VAULT_UNAVAILABLE
+  }
+
+  /** Safe dispatch decision metadata; no value, value digest, request body or original error. */
+  record Decision(DecisionOutcome outcome, String version) {
+    public Decision {
+      java.util.Objects.requireNonNull(outcome);
+      if (version != null && (version.isBlank() || version.length() > 256)) {
+        throw new IllegalArgumentException("Invalid resolution version metadata");
+      }
+      if (outcome == DecisionOutcome.RESOLVED && version == null) {
+        throw new IllegalArgumentException("Missing resolution version metadata");
+      }
+    }
+  }
+
+  final class ResolutionFacts extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+    private final Map<String, Decision> decisions;
+    private final java.util.Set<String> positivelyNotEntered;
+
+    private ResolutionFacts(
+        Map<String, Decision> decisions, java.util.Set<String> positivelyNotEntered) {
+      super("Safe secret resolution decisions", null, false, false);
+      this.decisions = Map.copyOf(decisions);
+      this.positivelyNotEntered = java.util.Set.copyOf(positivelyNotEntered);
+      if (this.positivelyNotEntered.stream().anyMatch(decisions::containsKey)) {
+        throw new IllegalArgumentException("Contradictory resolution evidence");
+      }
+    }
+
+    public java.util.Set<String> positivelyNotEntered() {
+      return positivelyNotEntered;
+    }
+
+    public Map<String, Decision> decisions() {
+      return decisions;
+    }
+  }
+
+  static void attachDecisionFacts(RuntimeException failure, Map<String, Decision> decisions) {
+    attachDecisionFacts(failure, decisions, java.util.Set.of());
+  }
+
+  static void attachDecisionFacts(
+      RuntimeException failure,
+      Map<String, Decision> decisions,
+      java.util.Set<String> positivelyNotEntered) {
+    if (!decisions.isEmpty() || !positivelyNotEntered.isEmpty()) {
+      failure.addSuppressed(new ResolutionFacts(decisions, positivelyNotEntered));
+    }
+  }
+
+  static java.util.Set<String> positivelyNotEntered(Throwable failure) {
+    for (Throwable item : failure.getSuppressed()) {
+      if (item instanceof ResolutionFacts facts) {
+        return facts.positivelyNotEntered();
+      }
+    }
+    return java.util.Set.of();
+  }
+
+  static Map<String, Decision> decisionFacts(Throwable failure) {
+    for (Throwable item : failure.getSuppressed()) {
+      if (item instanceof ResolutionFacts facts) {
+        return facts.decisions();
+      }
+    }
+    return Map.of();
+  }
+
   /** A declared reference this CSI may not use, or that does not exist. Never carries a value. */
   class UnknownReferenceException extends RuntimeException {
 
@@ -195,6 +287,14 @@ public interface StudioReferenceResolver {
 
     public Map<String, char[]> variables() {
       return Map.copyOf(variables);
+    }
+
+    /** Owned wrappers share this resolution's arrays; close erases every path. */
+    public Map<String, com.citi.put.checks.studio.secrets.SecretValue> secretValues() {
+      var result = new LinkedHashMap<String, com.citi.put.checks.studio.secrets.SecretValue>();
+      secrets.forEach(
+          (id, value) -> result.put(id, new com.citi.put.checks.studio.secrets.SecretValue(value)));
+      return Map.copyOf(result);
     }
 
     public Map<String, char[]> secrets() {

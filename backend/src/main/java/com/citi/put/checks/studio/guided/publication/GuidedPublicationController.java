@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 /** BFF-authenticated continuation of the original Run, with fresh Core at the actual commit. */
 @RestController
 @Profile("!worker")
-@RequestMapping("/api/v3/studio/guided-sessions")
+@RequestMapping("/api/v1/studio/guided-sessions")
 public class GuidedPublicationController {
   private final GuidedPlanPublisher publisher;
 

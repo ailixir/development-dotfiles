@@ -394,7 +394,7 @@ public final class GuidedTranslationStore {
   }
 
   private void acquisitionRequestIdentity(JsonNode session, JsonNode request) {
-    contracts.validate("v2/observation-refresh", request);
+    contracts.validate("v3/observation-refresh", request);
     for (String field : List.of("schemaVersion", "sessionId", "scopeHash", "versions")) {
       require(request.path(field).equals(session.path(field)), "STALE_GENERATION", 409);
     }
@@ -633,6 +633,19 @@ public final class GuidedTranslationStore {
         available ? AcquisitionDisposition.READY : AcquisitionDisposition.WAIT, null);
   }
 
+  /** Current authorization needs only immutable provenance, not plan or active attempt state. */
+  public JsonNode currentManifest(String sessionId) {
+    transaction();
+    var rows =
+        jdbc.query(
+            "SELECT m.manifest::text FROM studio_guided_translation_state s"
+                + " JOIN studio_guided_source_manifests m USING(session_id) WHERE s.session_id=?",
+            (rs, n) -> contracts.parse(rs.getString(1)),
+            sessionId);
+    require(!rows.isEmpty(), "MISSING_SOURCE", 409);
+    return rows.getFirst();
+  }
+
   public ObjectNode state(String sessionId) {
     transaction();
     var rows =
@@ -713,20 +726,13 @@ public final class GuidedTranslationStore {
           "INVALID_CONTRACT",
           422);
     }
-    for (JsonNode old : current.path("plan").path("obligations")) {
-      require(contains(plan.path("obligations"), old), "IDEMPOTENCY_CONFLICT", 409);
-    }
-    for (JsonNode old : current.path("plan").path("needs")) {
-      // Existing information needs cannot disappear or shed consumers during a replan.
-      JsonNode next = find(plan.path("needs"), "needId", old.path("needId").asText());
-      require(
-          next != null && old.path("producerStepId").equals(next.path("producerStepId")),
-          "BINDING_ORDER",
-          422);
-      for (JsonNode consumer : old.path("consumers")) {
-        require(contains(next.path("consumers"), consumer), "BINDING_ORDER", 422);
-      }
-    }
+    var incremental =
+        new com.citi.put.checks.studio.guided.session.GuidedIncrementalStore(jdbc, contracts);
+    boolean firstSuffix = incremental.firstSuffixPending(sessionId);
+    GuidedAcceptedPlan.validateBeforeAllocation(contracts, plan);
+    sourceCoordinates(current.path("manifest"), plan);
+    new GuidedPlanHistoryAudit(jdbc, contracts)
+        .transition(session(sessionId), current.path("plan"), plan, firstSuffix);
     long revision = Math.addExact(expectedRevision, 1);
     jdbc.update(
         "INSERT INTO"
@@ -748,7 +754,86 @@ public final class GuidedTranslationStore {
             == 1,
         "REVISION_CONFLICT",
         409);
+    if (firstSuffix) {
+      jdbc.update(
+          "INSERT INTO studio_guided_suffix_acceptances"
+              + "(session_id,plan_revision,previous_plan_revision,retained_admissions)"
+              + " VALUES (?,?,?,?::jsonb)",
+          sessionId,
+          revision,
+          expectedRevision,
+          incremental.retainedAdmissions(sessionId).toString());
+    }
     return revision;
+  }
+
+  /** Server identity and source/consumer coordinates must be sound before a history row exists. */
+  private static void sourceCoordinates(JsonNode manifest, JsonNode plan) {
+    var order = new java.util.HashMap<String, Integer>();
+    for (JsonNode step : manifest.path("sourceSteps")) {
+      require(
+          order.putIfAbsent(step.path("stepId").asText(), order.size()) == null,
+          "REFERENCE_MISMATCH",
+          422);
+    }
+    require(!order.isEmpty(), "MISSING_SOURCE", 409);
+    for (JsonNode reference : plan.path("sourceReferences")) {
+      require(order.containsKey(reference.path("stepId").asText()), "REFERENCE_MISMATCH", 422);
+    }
+    int previousStep = -1, previousOrdinal = -1;
+    var needs = new java.util.HashMap<String, JsonNode>();
+    for (JsonNode need : plan.path("needs")) {
+      needs.put(need.path("needId").asText(), need);
+    }
+    for (JsonNode obligation : plan.path("obligations")) {
+      int at = order.getOrDefault(obligation.path("stepId").asText(), -1),
+          ordinal = obligation.path("occurrence").asInt();
+      require(
+          at >= 0 && (at > previousStep || at == previousStep && ordinal > previousOrdinal),
+          "BINDING_ORDER",
+          422);
+      previousStep = at;
+      previousOrdinal = ordinal;
+      String kind = obligation.path("operationKind").asText();
+      if (!obligation.path("referenceIndex").isNull()) {
+        JsonNode reference =
+            plan.path("sourceReferences").get(obligation.path("referenceIndex").asInt());
+        String slot =
+            kind.equals("navigate")
+                ? "navigate.destination"
+                : kind + (kind.equals("assert") ? ".expected" : ".value");
+        require(
+            reference.path("stepId").equals(obligation.path("stepId"))
+                && reference.path("intendedSlot").asText().equals(slot),
+            "REFERENCE_MISMATCH",
+            422);
+      }
+      if (!obligation.path("needId").isNull()) {
+        JsonNode need = needs.get(obligation.path("needId").asText());
+        require(need != null, "MISSING_SOURCE", 409);
+        if (kind.equals("read")) {
+          require(
+              need.path("producerStepId").equals(obligation.path("stepId")), "BINDING_ORDER", 422);
+        }
+      }
+    }
+    for (JsonNode need : plan.path("needs")) {
+      int producer = order.getOrDefault(need.path("producerStepId").asText(), -1);
+      boolean read = false;
+      for (JsonNode obligation : plan.path("obligations")) {
+        read |=
+            obligation.path("operationKind").asText().equals("read")
+                && obligation.path("stepId").equals(need.path("producerStepId"))
+                && obligation.path("needId").equals(need.path("needId"));
+      }
+      require(producer >= 0 && read, "BINDING_ORDER", 422);
+      for (JsonNode consumer : need.path("consumers")) {
+        require(
+            order.getOrDefault(consumer.path("stepId").asText(), -1) >= producer,
+            "BINDING_ORDER",
+            422);
+      }
+    }
   }
 
   public void continuation(String sessionId, String phase) {
@@ -756,6 +841,7 @@ public final class GuidedTranslationStore {
     require(
         Set.of(
                 "SOURCE_PLAN",
+                "REPLAYING_PREFIX",
                 "NEXT_ACTION",
                 "VERIFY_STEP",
                 "MATERIALIZE",
@@ -819,6 +905,15 @@ public final class GuidedTranslationStore {
       String translatorId,
       Instant leaseUntil) {
     transaction();
+    require(
+        !Boolean.TRUE.equals(
+            jdbc.queryForObject(
+                "SELECT studio_015_prefix_pending(?)" + " OR studio_015_delivery_pending(?)",
+                Boolean.class,
+                session.path("sessionId").asText(),
+                session.path("sessionId").asText())),
+        "REVISION_CONFLICT",
+        409);
     require(
         attempt > 0
             && attempt <= 3
@@ -996,6 +1091,7 @@ public final class GuidedTranslationStore {
       Integer inputTokens,
       Integer outputTokens) {
     transaction();
+    requireNotPruned(sessionId);
     require(
         Set.of("APPLIED", "REJECTED", "SUPERSEDED", "UNKNOWN_CALL").contains(status),
         "INVALID_CONTRACT",
@@ -1062,6 +1158,7 @@ public final class GuidedTranslationStore {
   public void recordLateUsage(
       String sessionId, String attemptId, Integer inputTokens, Integer outputTokens) {
     transaction();
+    requireNotPruned(sessionId);
     usage(inputTokens, outputTokens);
     int inserted =
         jdbc.update(
@@ -1086,7 +1183,62 @@ public final class GuidedTranslationStore {
                   attemptId)),
           "IDEMPOTENCY_CONFLICT",
           409);
+      return;
     }
+    // STUDIO-OBS-014 AC-8 (AR-2 c): usage reported above the attempt's charged ceiling is already
+    // spent, so the excess is added to the CSI's day unconditionally (never refused). Matches
+    // studio_guided_model_usage_report's GREATEST(ceiling, actual). Every production attempt
+    // carries its session scope (reserveAttempt); an attempt without a CSI charges nothing.
+    jdbc.update(
+        "INSERT INTO studio_guided_csi_token_days(csi_id,budget_day) SELECT"
+            + " identity->'scope'->>'csiId',(clock_timestamp() AT TIME ZONE 'UTC')::date FROM"
+            + " studio_guided_model_attempts WHERE session_id=? AND attempt_id=? AND"
+            + " identity->'scope'->>'csiId' IS NOT NULL ON CONFLICT DO NOTHING",
+        sessionId,
+        attemptId);
+    jdbc.update(
+        "UPDATE studio_guided_csi_token_days d SET input_tokens = d.input_tokens +"
+            + " GREATEST(0, ?::bigint - (a.identity->>'inputCeiling')::bigint), output_tokens ="
+            + " d.output_tokens + GREATEST(0, ?::bigint - (a.identity->>'outputCeiling')::bigint)"
+            + " FROM studio_guided_model_attempts a WHERE a.session_id=? AND a.attempt_id=? AND"
+            + " d.csi_id = a.identity->'scope'->>'csiId' AND d.budget_day = (clock_timestamp() AT"
+            + " TIME ZONE 'UTC')::date",
+        inputTokens == null ? 0 : inputTokens,
+        outputTokens == null ? 0 : outputTokens,
+        sessionId,
+        attemptId);
+  }
+
+  /**
+   * STUDIO-OBS-014 AC-4/5/6: the governed policy document frozen into the session at start (the
+   * side-effect stance and destructive vocabulary the validator enforces). Fails closed when the
+   * session has no frozen policy.
+   */
+  public JsonNode frozenPolicy(String sessionId) {
+    transaction();
+    List<String> rows =
+        jdbc.queryForList(
+            "SELECT v.document::text FROM studio_guided_session_policies s JOIN"
+                + " studio_guided_policy_versions v ON v.policy_id=s.policy_id AND"
+                + " v.version=s.policy_version WHERE s.session_id=?",
+            String.class,
+            sessionId);
+    require(rows.size() == 1, "RUNTIME_INCOMPATIBLE", 409);
+    return contracts.parse(rows.getFirst());
+  }
+
+  /**
+   * STUDIO-OBS-014 AC-3, ruling AR-2 S-4: a pruned session's model output is gone and its attempts
+   * accept no settlement (V19 attempt guard). A late settlement or late usage receipt for it is
+   * refused here, with the existing {@code EXPIRED}, before any SQL write reaches that guard.
+   */
+  private void requireNotPruned(String sessionId) {
+    List<Object> pruned =
+        jdbc.queryForList(
+            "SELECT pruned_at FROM studio_guided_sessions WHERE session_id=?",
+            Object.class,
+            sessionId);
+    require(pruned.isEmpty() || pruned.getFirst() == null, "EXPIRED", 409);
   }
 
   /** Immutable late receipts expressed as deltas beyond amounts already charged at settlement. */
@@ -1129,15 +1281,17 @@ public final class GuidedTranslationStore {
     jdbc.update(
         "INSERT INTO"
             + " studio_guided_obligation_admissions(session_id,obligation_id,plan_rev"
-            + "ision,meaning,proposal,proposal_digest,admission_key)"
-            + " VALUES (?,?,?,?::jsonb,?::jsonb,?,?)",
+            + "ision,meaning,proposal,proposal_digest,admission_key,attempt_ordinal)"
+            + " VALUES (?,?,?,?::jsonb,?::jsonb,?,?,?)",
         id,
         obligationId,
         head.path("planRevision").asLong(),
         meaning.toString(),
         proposal.toString(),
         GuidedContracts.hash(proposal),
-        key);
+        key,
+        new com.citi.put.checks.studio.guided.session.GuidedIncrementalStore(jdbc, contracts)
+            .attemptOrdinal(id, proposal.path("coordinate")));
     return obligation(id, obligationId);
   }
 
@@ -1224,7 +1378,8 @@ public final class GuidedTranslationStore {
         "SELECT t.session_id FROM studio_guided_translation_state t JOIN studio_guided_sessions s"
             + " USING(session_id) WHERE t.continuation NOT IN"
             + " ('AWAITING_CLARIFICATION','FINALIZING','STOPPED') AND s.state NOT IN"
-            + " ('SUCCEEDED','PUBLICATION_CONFLICT','FAILED','UNKNOWN_OUTCOME','CANCELLED','EXPIRED')"
+            + " ('SUCCEEDED','PUBLICATION_CONFLICT','FAILED','UNKNOWN_OUTCOME','CANCELLED','EXPIRED',"
+            + "'AWAITING_CLARIFICATION')"
             + " AND s.expires_at>clock_timestamp() ORDER BY t.updated_at,t.session_id LIMIT ?",
         String.class,
         limit);

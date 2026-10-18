@@ -6,6 +6,7 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.entity.UITestExecution;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -14,9 +15,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -29,7 +33,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class LastRunProjectionIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String OWNER = "projection-owner@citi.com";
   private static final String CSI_ID = "60423";
@@ -98,7 +108,9 @@ class LastRunProjectionIT {
   }
 
   private UUID accept() {
-    ExecutionSnapshotDto snapshot = studioService.executeTest(testId, identity(), null);
+    ExecutionSnapshotDto snapshot =
+        studioService.executeTest(
+            testId, identity(), null, ObservedPublicationFixture.request(identity()));
     return snapshot.executionId();
   }
 

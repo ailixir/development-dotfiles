@@ -3,9 +3,9 @@ package com.citi.put.checks.studio.dispatch;
 import com.citi.put.checks.studio.StudioExecutionProperties;
 import com.citi.put.checks.studio.UITestRevisionRepository;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
-import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.entity.UITestRevision;
 import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
+import com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver.SecretTooLongException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -66,7 +66,6 @@ public class StudioDispatcher {
   private final StudioDispatchLedgerStatements statements;
   private final UITestRevisionRepository revisions;
   private final DispatchAuthorization authorization;
-  private final StudioReferenceResolver references;
   private final RunnerDispatchClient runnerClient;
   private final StudioExecutionProperties properties;
   private final ObjectMapper objectMapper;
@@ -74,6 +73,9 @@ public class StudioDispatcher {
   private final TransactionTemplate transactions;
   private final String instanceId;
   private final Clock clock;
+
+  @Autowired(required = false)
+  private com.citi.put.checks.studio.secrets.SecretAuditLifecycle secretAudit;
 
   @Autowired(required = false)
   private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
@@ -84,7 +86,6 @@ public class StudioDispatcher {
       StudioDispatchLedgerStatements statements,
       UITestRevisionRepository revisions,
       DispatchAuthorization authorization,
-      StudioReferenceResolver references,
       RunnerDispatchClient runnerClient,
       StudioExecutionProperties properties,
       ObjectMapper objectMapper,
@@ -94,7 +95,6 @@ public class StudioDispatcher {
         statements,
         revisions,
         authorization,
-        references,
         runnerClient,
         properties,
         objectMapper,
@@ -109,7 +109,6 @@ public class StudioDispatcher {
       StudioDispatchLedgerStatements statements,
       UITestRevisionRepository revisions,
       DispatchAuthorization authorization,
-      StudioReferenceResolver references,
       RunnerDispatchClient runnerClient,
       StudioExecutionProperties properties,
       ObjectMapper objectMapper,
@@ -120,7 +119,6 @@ public class StudioDispatcher {
     this.statements = statements;
     this.revisions = revisions;
     this.authorization = authorization;
-    this.references = references;
     this.runnerClient = runnerClient;
     this.properties = properties;
     this.objectMapper = objectMapper;
@@ -128,6 +126,10 @@ public class StudioDispatcher {
     this.transactions = transactions;
     this.instanceId = instanceId;
     this.clock = clock;
+  }
+
+  void installSecretAudit(com.citi.put.checks.studio.secrets.SecretAuditLifecycle audit) {
+    this.secretAudit = audit;
   }
 
   /** This dispatcher's lease owner, stable for the life of the bean. */
@@ -196,7 +198,7 @@ public class StudioDispatcher {
       Integer applied =
           transactions.execute(
               status ->
-                  statements.closeWithError(
+                  statements.closeUndispatchedWithError(
                       executionId, ExecutionErrorCode.DISPATCH_DISABLED, clock.instant()));
       if (applied != null && applied == 1) {
         closed++;
@@ -209,7 +211,7 @@ public class StudioDispatcher {
    * Relays every recorded cancel whose run a runner holds and has not yet acknowledged (Studio v1
    * WP4, ADR-002 §29). Returns how many the runner acknowledged in this pass.
    *
-   * <p>One {@code DELETE /v1/runs/{id}} per row per pass. An acknowledged relay — {@code 202}, or
+   * <p>One {@code DELETE /v2/runs/{id}} per row per pass. An acknowledged relay — {@code 202}, or
    * {@code 409} for a run that had already finished — is recorded so no later pass repeats it. An
    * unacknowledged one is left for the next pass, because a {@code 404} can mean the request
    * reached a runner pod that does not hold the run; the running reaper bounds how long that goes
@@ -265,7 +267,8 @@ public class StudioDispatcher {
       return false;
     }
     UUID testId = (UUID) row.get("test_id");
-    String csiId = String.valueOf(row.get("csi_id"));
+    // A cast, not String.valueOf: a NULL CSI must reach the recheck as null and be refused there.
+    String csiId = (String) row.get("csi_id");
     String principal = (String) row.get("principal");
     Instant pendingDeadline = instant(row.get("pending_deadline_at"));
 
@@ -274,110 +277,44 @@ public class StudioDispatcher {
       return false;
     }
 
+    // AC-13a, §5.1.3: every claimed attempt (first dispatch, lease-expiry re-claim, post-outage
+    // retry) is rechecked here, before the observed binding lookup, refreshRetry's grant minting,
+    // any Vault read and any send. A revoked permission is terminal with an explicit code, never a
+    // retry and never a skip. The returned policy identity is discarded: the observed binding's
+    // currentPolicyHash is the recorded policy identity for this family.
+    try {
+      authorization.recheck(executionId, testId, csiId, principal);
+    } catch (DispatchAuthorization.AuthorizationRevokedException e) {
+      LOGGER.warn("Studio dispatch refused for execution {}: authorization revoked", executionId);
+      close(executionId, ExecutionErrorCode.AUTHORIZATION_REVOKED, now);
+      return false;
+    }
+
+    // One execution family (ADR-SC-005): every accepted execution carries an observed binding and
+    // is replayed by the observed adapter. A row without one, or a deployment without the observed
+    // replay beans, is closed rather than sent anywhere else.
     if (observed != null) {
       var binding = observed.binding(executionId);
       if (binding.isPresent()) {
         return dispatchObserved(executionId, binding.get(), now);
       }
     }
-
-    String policyIdentity;
-    try {
-      policyIdentity = authorization.recheck(executionId, testId, csiId, principal);
-    } catch (DispatchAuthorization.AuthorizationRevokedException e) {
-      // A revoked permission is terminal with an explicit code, never a retry and never a skip.
-      LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
-      close(executionId, ExecutionErrorCode.AUTHORIZATION_REVOKED, now);
-      return false;
-    }
-
-    UUID revisionId = revisionIdOf(executionId);
-    String environment = environmentOf(executionId);
-
-    UITestRevision revision;
-    ReferenceDeclarations declarations;
-    try {
-      revision = revisionId == null ? null : revisions.findById(revisionId).orElse(null);
-      if (revision == null) {
-        throw new ExecutionReferences.UnreadableReferenceDeclarationException(
-            "the confirmed revision this execution snapshotted cannot be read");
-      }
-      declarations = ExecutionReferences.declared(objectMapper, revision.getReferences());
-    } catch (ExecutionReferences.UnreadableReferenceDeclarationException e) {
-      // Terminal, not an empty set. The previous `orElse(List.of())` made an unreadable revision a
-      // run with no references and no secrets — for a login test, a browser opening a real
-      // application with an empty password field. @po ruled the code REFERENCE_UNAVAILABLE
-      // (ADR-002 §15.3: a fact about the draft and its environment). The message names the
-      // declaration and never the revision's contents (AC-6, AC-10).
-      LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
-      close(executionId, ExecutionErrorCode.REFERENCE_UNAVAILABLE, now);
-      return false;
-    }
-
-    UUID attemptId = UUID.randomUUID();
-    DispatchOutcome outcome;
-    // Resolution happens here and nowhere else, and the values leave this block only on the wire.
-    try (StudioReferenceResolver.Resolved resolved =
-        references.resolve(csiId, environment, testId, principal, secretsOnly(declarations))) {
-      recordDispatchPolicy(executionId, policyIdentity, resolved.secretVersions());
-      Map<String, String> plainVariables = plainVariablesOf(executionId, declarations);
-
-      RunJob job;
-      try {
-        job =
-            job(
-                executionId,
-                attemptId,
-                testId,
-                csiId,
-                revision,
-                declarations,
-                plainVariables,
-                resolved);
-      } catch (IllegalStateException e) {
-        // The revision's artifact or configuration document could not be read. Not a reference
-        // condition, so it does not borrow a reference code; it is a dispatch that could not be
-        // made. The message never carries the document.
-        LOGGER.warn("Studio dispatch failed for execution {}: {}", executionId, e.getMessage());
-        close(executionId, ExecutionErrorCode.DISPATCH_FAILED, now);
-        return false;
-      }
-
-      Integer began =
-          transactions.execute(
-              status -> statements.beginDispatch(executionId, instanceId, attemptId));
-      if (began == null || began != 1) {
-        return false;
-      }
-      // The transaction above has committed. The send happens strictly after it, so a crash here
-      // leaves a committed attempt with no send — which §5.1 permits to end as unknown rather
-      // than be replayed into a duplicate browser.
-      outcome = runnerClient.send(job);
-    } catch (StudioReferenceResolver.SecretUseRevokedException e) {
-      // A fact about the principal (ADR-002 §15.2). The send never happened.
-      LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
-      close(executionId, ExecutionErrorCode.AUTHORIZATION_REVOKED, now);
-      return false;
-    } catch (VaultProviderUnavailableException e) {
-      // No attempt was issued and no send occurred. A Vault outage is transient infrastructure,
-      // not proof that the reference vanished; release the claim so the next pass can retry until
-      // the existing pending deadline makes the final decision.
-      LOGGER.warn(
-          "Studio dispatch deferred for execution {} because Vault is unavailable", executionId);
-      transactions.execute(status -> statements.releaseClaim(executionId));
-      return false;
-    } catch (StudioReferenceResolver.ReferenceUnavailableException e) {
-      LOGGER.warn("Studio dispatch refused for execution {}: {}", executionId, e.getMessage());
-      close(executionId, ExecutionErrorCode.REFERENCE_UNAVAILABLE, now);
-      return false;
-    }
-
-    applyOutcome(executionId, attemptId, outcome, pendingDeadline, now);
-    return true;
+    LOGGER.warn(
+        "Studio dispatch refused for execution {}: no observed replay binding is available",
+        executionId);
+    close(executionId, ExecutionErrorCode.DISPATCH_FAILED, now);
+    return false;
   }
 
   private boolean dispatchObserved(
-      UUID id, com.fasterxml.jackson.databind.JsonNode binding, Instant now) {
+      UUID id, com.fasterxml.jackson.databind.JsonNode acceptedBinding, Instant now) {
+    final JsonNode binding;
+    try {
+      binding = transactions.execute(status -> observed.refreshRetry(acceptedBinding, instanceId));
+    } catch (RuntimeException refusal) {
+      close(id, observedRefusalCode(refusal), now);
+      return false;
+    }
     UUID attempt = UUID.fromString(binding.path("attemptId").asText());
     boolean sendCommitted = false;
     try {
@@ -385,41 +322,200 @@ public class StudioDispatcher {
           revisions.findById(UUID.fromString(binding.path("revisionId").asText())).orElseThrow();
       ReferenceDeclarations declared =
           ExecutionReferences.declared(objectMapper, revision.getReferences());
-      RunJob job = RunJob.observed(observed.job(binding, plainVariablesOf(id, declared)));
-      Integer began =
-          transactions.execute(
-              status -> {
-                observed.check(binding);
-                return statements.beginObservedDispatch(id, instanceId, attempt);
-              });
-      if (began == null || began != 1) {
-        return false;
-      }
-      sendCommitted = true;
-      DispatchOutcome outcome = runnerClient.send(job);
-      // No observed retry can mint/reuse account setup or replace its accepted attempt.
-      if (outcome.kind() == DispatchOutcome.Kind.DEFINITE_REFUSAL) {
-        close(id, ExecutionErrorCode.DISPATCH_FAILED, now);
-      }
-      return true;
-    } catch (com.citi.put.checks.studio.guided.session.GuidedSessionException refusal) {
-      if (sendCommitted) {
+      try (var resolvedJob =
+          observed.job(
+              binding,
+              plainVariablesOf(id, declared),
+              secretId -> {
+                if (secretAudit == null) {
+                  throw new IllegalStateException("Missing secret read-entry audit");
+                }
+                transactions.executeWithoutResult(
+                    status -> secretAudit.replayReadEntry(binding, instanceId, secretId));
+              })) {
+        RunJob job = resolvedJob.runJob();
+        int began = beginResolvedObservedDispatch(binding, declared.secrets(), resolvedJob);
+        if (began != 1) {
+          return false;
+        }
+        sendCommitted = true;
+        DispatchOutcome outcome = runnerClient.send(job);
+        // STUDIO-OBS-014 AC-10: one audit event per replay dispatch attempt.
+        com.citi.put.checks.studio.guided.audit.StudioActionAudit.replayDispatched(
+            binding,
+            switch (outcome.kind()) {
+              case ACCEPTED ->
+                  com.citi.put.checks.studio.guided.audit.StudioActionAudit.Outcome.DISPATCHED;
+              case DEFINITE_REFUSAL ->
+                  com.citi.put.checks.studio.guided.audit.StudioActionAudit.Outcome
+                      .DISPATCH_REFUSED;
+              case AMBIGUOUS ->
+                  com.citi.put.checks.studio.guided.audit.StudioActionAudit.Outcome
+                      .DISPATCH_UNKNOWN;
+            });
+        applyOutcome(
+            id,
+            attempt,
+            outcome,
+            instant(statements.find(id).orElseThrow().get("pending_deadline_at")),
+            now);
         return true;
       }
-      close(
-          id,
-          refusal.getMessage().equals("CANCELLED")
-              ? ExecutionErrorCode.CANCELLED
-              : ExecutionErrorCode.AUTHORIZATION_REVOKED,
-          now);
+    } catch (VaultProviderUnavailableException failure) {
+      settleObservedFailure(binding, failure, null, now);
+      return false;
+    } catch (StudioReferenceResolver.SecretUseRevokedException failure) {
+      settleObservedFailure(binding, failure, ExecutionErrorCode.AUTHORIZATION_REVOKED, now);
+      return false;
+    } catch (SecretTooLongException failure) {
+      settleObservedFailure(binding, failure, ExecutionErrorCode.SECRET_TOO_LONG, now);
+      return false;
+    } catch (StudioReferenceResolver.ReferenceUnavailableException failure) {
+      settleObservedFailure(binding, failure, ExecutionErrorCode.REFERENCE_UNAVAILABLE, now);
       return false;
     } catch (RuntimeException refusal) {
       if (sendCommitted) {
         return true;
       }
-      close(id, ExecutionErrorCode.DISPATCH_FAILED, now);
+      settleObservedFailure(binding, refusal, observedRefusalCode(refusal), now);
       return false;
     }
+  }
+
+  /** Captures safe actual resolution facts before the caller erases a refused resolved job. */
+  int beginResolvedObservedDispatch(
+      JsonNode binding,
+      List<String> declaredSecrets,
+      com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization.ResolvedJob
+          resolvedJob) {
+    UUID id = UUID.fromString(binding.path("executionId").asText());
+    UUID attempt = UUID.fromString(binding.path("attemptId").asText());
+    try {
+      Integer began =
+          transactions.execute(
+              status -> {
+                observed.check(binding);
+                int rows = statements.beginObservedDispatch(id, instanceId, attempt);
+                if (rows == 1 && secretAudit != null) {
+                  secretAudit.replayRelease(
+                      binding,
+                      declaredSecrets,
+                      resolvedJob.resolved().secretVersions(),
+                      com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome
+                          .RESOLVED);
+                }
+                return rows;
+              });
+      return began == null ? 0 : began;
+    } catch (RuntimeException refusal) {
+      var decisions = new java.util.LinkedHashMap<String, StudioReferenceResolver.Decision>();
+      resolvedJob
+          .resolved()
+          .secretVersions()
+          .forEach(
+              (secret, version) ->
+                  decisions.put(
+                      secret,
+                      new StudioReferenceResolver.Decision(
+                          StudioReferenceResolver.DecisionOutcome.RESOLVED, version)));
+      StudioReferenceResolver.attachDecisionFacts(refusal, decisions, java.util.Set.of());
+      throw refusal;
+    }
+  }
+
+  /** Genuine pre-send decision and its owner transition commit or roll back as one unit. */
+  void settleObservedFailure(
+      JsonNode binding, RuntimeException failure, String failureCode, Instant now) {
+    UUID id = UUID.fromString(binding.path("executionId").asText());
+    UUID attempt = UUID.fromString(binding.path("attemptId").asText());
+    transactions.executeWithoutResult(
+        status -> {
+          if (!statements.lockObservedResolutionOwner(id, instanceId, attempt)) {
+            return;
+          }
+          var owner = statements.find(id).orElseThrow();
+          String code =
+              owner.get("cancel_requested_at") != null
+                  ? ExecutionErrorCode.CANCELLED
+                  : owner.get("revoked_at") != null
+                      ? ExecutionErrorCode.AUTHORIZATION_REVOKED
+                      : failureCode;
+          auditObservedFailure(binding, failure);
+          if (java.util.Arrays.stream(failure.getSuppressed())
+              .anyMatch(StudioReferenceResolver.ResolutionFacts.class::isInstance)) {
+            if (secretAudit == null) {
+              throw new IllegalStateException("Missing secret no-send audit");
+            }
+            secretAudit.replayNoSendDecision(
+                binding,
+                instanceId,
+                StudioReferenceResolver.positivelyNotEntered(failure),
+                code == null
+                    ? com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.NoSendDisposition
+                        .REQUEUED
+                    : com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.NoSendDisposition
+                        .CLOSED);
+          }
+          int applied =
+              code == null
+                  ? statements.releaseObservedOutageClaim(id, instanceId, attempt)
+                  : statements.closeWithError(id, code, now);
+          if (applied != 1) {
+            throw new IllegalStateException("Observed failure decision lost its owner transition");
+          }
+        });
+  }
+
+  private static String observedRefusalCode(RuntimeException refusal) {
+    if (!(refusal instanceof com.citi.put.checks.studio.guided.session.GuidedSessionException)) {
+      return ExecutionErrorCode.DISPATCH_FAILED;
+    }
+    if ("CANCELLED".equals(refusal.getMessage())) {
+      return ExecutionErrorCode.CANCELLED;
+    }
+    return java.util.Set.of(
+                "AUTHORIZATION_EXPIRED",
+                "FORBIDDEN_SCOPE",
+                "SECRET_USE_REVOKED",
+                "SECRET_USE_NOT_AUTHORIZED")
+            .contains(refusal.getMessage())
+        ? ExecutionErrorCode.AUTHORIZATION_REVOKED
+        : ExecutionErrorCode.DISPATCH_FAILED;
+  }
+
+  private void auditObservedFailure(JsonNode binding, RuntimeException failure) {
+    if (!org.springframework.transaction.support.TransactionSynchronizationManager
+        .isActualTransactionActive()) {
+      throw new IllegalStateException("Observed failure audit requires its owner transaction");
+    }
+    if (secretAudit == null) {
+      return;
+    }
+    var decisions = StudioReferenceResolver.decisionFacts(failure);
+    if (decisions.isEmpty()) {
+      return;
+    }
+    var declared =
+        ExecutionReferences.declared(
+            objectMapper,
+            jdbc.queryForObject(
+                "SELECT \"references\"::text FROM ui_test_revisions WHERE id=?",
+                String.class,
+                UUID.fromString(binding.path("revisionId").asText())));
+    if (!declared.secrets().containsAll(decisions.keySet())) {
+      throw new IllegalArgumentException("Undeclared secret decision metadata");
+    }
+    decisions.forEach(
+        (id, decision) ->
+            secretAudit.replayRelease(
+                binding,
+                List.of(id),
+                decision.version() == null ? Map.of() : Map.of(id, decision.version()),
+                com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome.valueOf(
+                    decision.outcome().name())));
+    secretAudit.replayNoSend(
+        UUID.fromString(binding.path("executionId").asText()),
+        UUID.fromString(binding.path("attemptId").asText()));
   }
 
   /**
@@ -439,13 +535,31 @@ public class StudioDispatcher {
       }
       case DEFINITE_REFUSAL -> {
         boolean withinDeadline = pendingDeadline == null || pendingDeadline.isAfter(now);
-        if (outcome.retryable() && withinDeadline) {
-          // Back to QUEUED with the attempt cleared, so the next send carries a fresh attempt_id.
-          transactions.execute(
-              status -> statements.returnAfterDefiniteRefusal(executionId, attemptId));
-        } else {
-          close(executionId, ExecutionErrorCode.DISPATCH_FAILED, now);
-        }
+        transactions.executeWithoutResult(
+            status -> {
+              if (!statements.lockUnadmittedDispatch(executionId, attemptId)) {
+                return;
+              }
+              if (secretAudit != null) {
+                secretAudit.replayNoSend(executionId, attemptId);
+              }
+              var owner = statements.find(executionId).orElseThrow();
+              String stopCode =
+                  owner.get("cancel_requested_at") != null
+                      ? ExecutionErrorCode.CANCELLED
+                      : owner.get("revoked_at") != null
+                          ? ExecutionErrorCode.AUTHORIZATION_REVOKED
+                          : null;
+              if (stopCode != null) {
+                statements.closeWithError(executionId, stopCode, now);
+              } else {
+                if (outcome.retryable() && withinDeadline) {
+                  statements.returnAfterDefiniteRefusal(executionId, attemptId);
+                } else {
+                  statements.closeWithError(executionId, ExecutionErrorCode.DISPATCH_FAILED, now);
+                }
+              }
+            });
       }
       case AMBIGUOUS ->
           LOGGER.warn(
@@ -460,117 +574,6 @@ public class StudioDispatcher {
 
   private void close(UUID executionId, String errorCode, Instant now) {
     transactions.execute(status -> statements.closeWithError(executionId, errorCode, now));
-  }
-
-  /**
-   * Builds the fourteen-field job the frozen contract declares (§8.4, AC-2).
-   *
-   * <p>Every field has a source and none is invented: the artifact, its hash, the source lines and
-   * the configuration come from the confirmed revision the execution snapshotted (§8.1); the CSI is
-   * the execution's own immutable value (§9.1); the references are the revision's typed
-   * declaration; the two resolved maps are this dispatch's resolution; the deadlines are §8.5's
-   * starting values and the revision's own runtime budget, sent faithfully and clamped nowhere (the
-   * clamp is the runner's, 10.13 AC-6); and the two keys are §6.2's templates over immutable
-   * execution identity. Deriving a key is not writing an object — the objects are story 10.14's.
-   *
-   * <p>The resolved {@code char[]}s become {@link String}s here because a JSON body is text. That
-   * is the residual AC-15 names rather than claims away: {@code Resolved.close()} still erases the
-   * arrays on every exit path, and nothing in this process retains a path to the values after the
-   * send, but the serializer's transient buffers cannot be erased by any code.
-   */
-  private RunJob job(
-      UUID executionId,
-      UUID attemptId,
-      UUID testId,
-      String csiId,
-      UITestRevision revision,
-      ReferenceDeclarations declarations,
-      Map<String, String> plainVariables,
-      StudioReferenceResolver.Resolved resolved) {
-    return new RunJob(
-        executionId,
-        attemptId,
-        revision.getId(),
-        revision.getArtifactHash(),
-        document(revision.getArtifact(), "artifact"),
-        LegacyStudioAdapter.parseSteps(revision.getSource()),
-        document(revision.getConfiguration(), "configuration"),
-        csiId,
-        declarations,
-        plainVariables,
-        text(resolved.secrets()),
-        deadlines(revision),
-        RunJob.videoKeyFor(csiId, testId, executionId, attemptId),
-        RunJob.manifestKeyFor(csiId, testId, executionId, attemptId),
-        referencePolicy(revision),
-        resolved.secretOrigins());
-  }
-
-  private JsonNode referencePolicy(UITestRevision revision) {
-    if (revision.getAuthoring() == null) {
-      return null;
-    }
-    if (revision.getReferencePolicy() == null) {
-      throw new IllegalArgumentException("Authoring v2 revision requires recompilation");
-    }
-    JsonNode policy = document(revision.getReferencePolicy(), "referencePolicy");
-    if (!policy.isObject() || policy.path("version").asInt(-1) != 2) {
-      throw new IllegalArgumentException("Authoring v2 revision reference policy is corrupt");
-    }
-    return policy;
-  }
-
-  /**
-   * §8.5's admitted-start value and the server's total browser runtime, sent faithfully.
-   *
-   * <p><b>Two budgets, two sources.</b> {@code deadlines.totalRuntimeMs} is the whole-run cap and
-   * comes from {@code studio.execution.total-runtime} (§5.2: "total browser runtime 120 seconds").
-   * The revision's {@code configuration.timeoutSeconds} is the <em>per-step</em> timeout, travels
-   * untouched on the job's configuration, and is what the runner derives {@code stepTimeoutMs}
-   * from. Until this change the total was derived from the per-step value, so every run was killed
-   * at the step timeout — thirty seconds — with an orderly stop and a clean recording that ended
-   * mid-test. The per-step value is still required to be usable here, because the runner's envelope
-   * refuses a job without one and a refusal is cheaper before the send than after.
-   *
-   * <p>Nothing is clamped here. {@code effectiveRuntimeCapMs(job.deadlines.totalRuntimeMs, maxima)}
-   * is the runner's and stays there (10.13 AC-6); two clamps would be two derivations of one bound,
-   * which is this epic's most-repeated defect.
-   */
-  private RunJob.JobDeadlines deadlines(UITestRevision revision) {
-    long admittedStartMs = properties.startDeadlineOrDefault().toMillis();
-    JsonNode configuration = document(revision.getConfiguration(), "configuration");
-    long stepTimeoutSeconds = configuration.path("timeoutSeconds").asLong(0L);
-    if (stepTimeoutSeconds <= 0) {
-      throw new IllegalStateException(
-          "the confirmed revision's configuration declares no usable step timeout");
-    }
-    long totalRuntimeMs = properties.totalRuntimeOrDefault().toMillis();
-    return new RunJob.JobDeadlines(admittedStartMs, totalRuntimeMs);
-  }
-
-  /** A stored revision document, read as JSON. The message never carries the document. */
-  private JsonNode document(String json, String field) {
-    if (json == null || json.isBlank()) {
-      throw new IllegalStateException("the confirmed revision carries no '" + field + "' document");
-    }
-    try {
-      JsonNode node = objectMapper.readTree(json);
-      if (node == null || !node.isObject()) {
-        throw new IllegalStateException(
-            "the confirmed revision's '" + field + "' document is not an object");
-      }
-      return node;
-    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-      throw new IllegalStateException(
-          "the confirmed revision's '" + field + "' document is not readable JSON");
-    }
-  }
-
-  /** The wire form of a resolved map. See {@link #job} for the residual this creates. */
-  private static Map<String, String> text(Map<String, char[]> values) {
-    Map<String, String> text = new java.util.LinkedHashMap<>();
-    values.forEach((name, value) -> text.put(name, new String(value)));
-    return text;
   }
 
   /** Reads the immutable plain values snapshotted by acceptance, never the mutable draft. */
@@ -612,85 +615,6 @@ public class StudioDispatcher {
     } catch (com.fasterxml.jackson.core.JsonProcessingException exception) {
       throw new StudioReferenceResolver.ReferenceUnavailableException(
           declarations.variables().get(0));
-    }
-  }
-
-  private static ReferenceDeclarations secretsOnly(ReferenceDeclarations declarations) {
-    return new ReferenceDeclarations(List.of(), declarations.secrets());
-  }
-
-  private String environmentOf(UUID executionId) {
-    List<String> found =
-        jdbc.queryForList(
-            """
-            SELECT e.environment
-              FROM ui_test_executions e
-              JOIN studio_dispatch_ledger l
-                ON l.execution_id = e.id AND l.execution_accepted_at = e.started_at
-             WHERE l.execution_id = ?
-            """,
-            String.class,
-            executionId);
-    return found.isEmpty() ? null : found.get(0);
-  }
-
-  private UUID revisionIdOf(UUID executionId) {
-    List<UUID> found =
-        jdbc.queryForList(
-            """
-            SELECT e.revision_id
-              FROM ui_test_executions e
-              JOIN studio_dispatch_ledger l
-                ON l.execution_id = e.id AND l.execution_accepted_at = e.started_at
-             WHERE l.execution_id = ?
-            """,
-            UUID.class,
-            executionId);
-    return found.isEmpty() ? null : found.get(0);
-  }
-
-  /**
-   * Records which policy identity this dispatch ran under (AC-13b).
-   *
-   * <p>It is written into the execution's own configuration snapshot rather than onto the job body,
-   * because putting an approved-target or secret-use policy on the job is a field on a closed
-   * runner-consumed body — ADR-002 §12 Class B, architect-first — and O-6 has not been ruled. This
-   * bumps no revision: it is not a visible change on the public snapshot.
-   */
-  private void recordDispatchPolicy(
-      UUID executionId, String policyIdentity, Map<String, String> secretVersions) {
-    jdbc.update(
-        """
-        UPDATE ui_test_executions e
-           SET configuration_snapshot =
-                 COALESCE(e.configuration_snapshot, '{}'::jsonb)
-                 || jsonb_build_object('dispatchPolicyIdentity', CAST(? AS text))
-                 || jsonb_build_object('secretVaultVersions', CAST(? AS jsonb))
-          FROM studio_dispatch_ledger l
-         WHERE l.execution_id = ?
-           AND e.id = l.execution_id
-           AND e.started_at = l.execution_accepted_at
-           AND e.status = 'PENDING'
-        """,
-        policyIdentity,
-        versionsJson(secretVersions),
-        executionId);
-  }
-
-  /**
-   * The nonsecret vault version identifiers, as a jsonb document (§4.2, AC-8).
-   *
-   * <p>No migration: this rides {@code configuration_snapshot}'s jsonb exactly as 10.7's {@code
-   * dispatchPolicyIdentity} does, so this story queues behind nothing. The identifiers are opaque
-   * strings the provider supplies — never the value, never a hash of it, and never anything two
-   * values could be compared with: rotating a value to itself still changes the identifier.
-   */
-  private String versionsJson(Map<String, String> secretVersions) {
-    try {
-      return objectMapper.writeValueAsString(secretVersions);
-    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
-      // Reference ids and opaque identifiers; there is no shape of these that fails to serialize.
-      throw new IllegalStateException("vault version identifiers could not be recorded");
     }
   }
 

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
@@ -29,6 +30,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -55,9 +58,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestEvidenceStores.class)
+@Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
 @Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoRefusalEnvelopeIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60473";
   private static final String OWNER = "video-envelope-owner@citi.com";
@@ -93,7 +101,12 @@ class ExecutionVideoRefusalEnvelopeIT {
         fixtures.seedRunnableTest("Envelope draft", CSI_ID, OWNER, List.of("Go home")).testId();
     executionId =
         studioService
-            .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), null)
+            .executeTest(
+                testId,
+                StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+                null,
+                ObservedPublicationFixture.request(
+                    StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
             .executionId();
     UUID attemptId = video.dispatch(executionId, "video-envelope-dispatcher");
     video.finish(executionId, "PASSED", 12_000);

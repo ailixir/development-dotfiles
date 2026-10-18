@@ -43,7 +43,7 @@ public final class GuidedBindingStore {
             .put("needId", needId)
             .put("producerStepId", producerStep);
     allocation.set("consumers", consumers);
-    contracts.validate("v2/allocation", allocation);
+    contracts.validate("v3/allocation", allocation);
     require(stepIndex(session, producerStep) >= 0, "BINDING_ORDER", 422);
     for (JsonNode consumer : consumers) {
       require(
@@ -59,6 +59,9 @@ public final class GuidedBindingStore {
           409);
       for (JsonNode consumer : prior.path("consumers")) {
         require(contains(consumers, consumer), "IDEMPOTENCY_CONFLICT", 409);
+      }
+      if (prior.equals(allocation)) {
+        return prior;
       }
       jdbc.update(
           "UPDATE studio_guided_allocations SET document=?::jsonb WHERE session_id=? AND need_id=?",
@@ -84,6 +87,74 @@ public final class GuidedBindingStore {
     }
     materialization.bump(id);
     return allocation;
+  }
+
+  /**
+   * Trusted base import is separate from the model allocator and preserves a verified binding ID.
+   */
+  public JsonNode importPrefix(JsonNode session, JsonNode need) {
+    String id = session.path("sessionId").asText();
+    var incremental =
+        new com.citi.put.checks.studio.guided.session.GuidedIncrementalStore(jdbc, contracts);
+    require(incremental.pending(id), "REVISION_CONFLICT", 409);
+    JsonNode verified =
+        com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.unique(
+            incremental.baseArtifact(id).path("learnedPlan").path("bindings"),
+            "bindingId",
+            need.path("bindingId").asText());
+    require(
+        verified.path("producer").path("stepId").equals(need.path("producerStepId")),
+        "REFERENCE_MISMATCH",
+        422);
+    ObjectNode allocation = contracts.object();
+    for (String field : java.util.List.of("bindingId", "needId", "producerStepId", "consumers")) {
+      allocation.set(field, need.path(field));
+    }
+    contracts.validate("v3/allocation", allocation);
+    var existing =
+        jdbc.queryForList(
+            "SELECT document::text FROM studio_guided_allocations WHERE session_id=? AND binding_id=?",
+            String.class,
+            id,
+            need.path("bindingId").asText());
+    if (existing.isEmpty()) {
+      jdbc.update(
+          "INSERT INTO studio_guided_allocations(session_id,binding_id,need_id,document) VALUES (?,?,?,?::jsonb)",
+          id,
+          need.path("bindingId").asText(),
+          need.path("needId").asText(),
+          allocation.toString());
+      materialization.bump(id);
+    } else {
+      require(contracts.parse(existing.getFirst()).equals(allocation), "IDEMPOTENCY_CONFLICT", 409);
+    }
+    return allocation;
+  }
+
+  /** Actual logical allocator request: cumulative private intent, accepted plan left unchanged. */
+  public ObjectNode cumulativeRequest(JsonNode session, JsonNode need) {
+    ObjectNode request = need.deepCopy();
+    request.remove("bindingId");
+    var existing =
+        jdbc.queryForList(
+            "SELECT document::text FROM studio_guided_allocations WHERE session_id=? AND need_id=?",
+            String.class,
+            session.path("sessionId").asText(),
+            need.path("needId").asText());
+    if (existing.isEmpty()) {
+      return request;
+    }
+    JsonNode previous = contracts.parse(existing.getFirst());
+    require(
+        previous.path("producerStepId").equals(need.path("producerStepId")), "BINDING_ORDER", 422);
+    var consumers = request.putArray("consumers");
+    previous.path("consumers").forEach(value -> consumers.add(value.deepCopy()));
+    for (JsonNode accepted : need.path("consumers")) {
+      if (!contains(consumers, accepted)) {
+        consumers.add(accepted.deepCopy());
+      }
+    }
+    return request;
   }
 
   public void validateAction(JsonNode session, JsonNode proposal, JsonNode context) {
@@ -145,7 +216,12 @@ public final class GuidedBindingStore {
       require(
           input != null
               && input.path("sourceStepId").equals(proposal.path("coordinate").path("stepId"))
-              && input.path("intendedSlot").asText().equals(slot),
+              && input.path("intendedSlot").asText().equals(slot)
+              && (input.path("kind").asText().equals("secretRef")
+                  == reference.path("kind").asText().equals("secretRef"))
+              && (!input.path("kind").asText().equals("secretRef")
+                  || kind.equals("fill")
+                      && proposal.path("target").path("kind").asText().equals("passwordControl")),
           "FORBIDDEN_SCOPE",
           403);
     }
@@ -172,7 +248,7 @@ public final class GuidedBindingStore {
             .put("destinationOrigin", proposal.path("executionEvidence").path("origin").asText())
             .put("transferPolicy", "sameOrigin");
     edge.set("coordinate", proposal.path("coordinate"));
-    contracts.validate("v2/consumer-edge", edge);
+    contracts.validate("v3/consumer-edge", edge);
     jdbc.update(
         "INSERT INTO studio_guided_consumer_edges(session_id,consumer_admission_id,a"
             + "rgument_slot,binding_id,producer_admission_id,document) VALUES "
@@ -188,7 +264,7 @@ public final class GuidedBindingStore {
 
   public void successfulRead(
       JsonNode session, JsonNode proposal, JsonNode ledger, JsonNode receipt, JsonNode context) {
-    contracts.validate("v2/availability", receipt);
+    contracts.validate("v3/availability", receipt);
     String id = session.path("sessionId").asText(),
         binding = proposal.path("operation").path("bindingId").asText(),
         admission = ledger.path("admission").path("admissionId").asText();
@@ -206,7 +282,7 @@ public final class GuidedBindingStore {
     producer.set("origin", proposal.path("executionEvidence").path("origin"));
     producer.set("recipe", proposal.path("operation").path("recipe"));
     producer.set("availability", receipt);
-    contracts.validate("v2/producer", producer);
+    contracts.validate("v3/producer", producer);
     var found =
         jdbc.queryForList(
             "SELECT document::text FROM studio_guided_producers WHERE session_id=? AND binding_id=?",

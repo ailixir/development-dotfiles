@@ -1,5 +1,6 @@
 package com.citi.put.checks.studio.dispatch;
 
+import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Collection;
@@ -74,9 +75,67 @@ public class StudioDispatchLedgerStatements {
       """;
 
   private final JdbcTemplate jdbc;
+  private org.springframework.transaction.support.TransactionTemplate terminalTransactions;
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  public void installTerminalTransactionManager(
+      org.springframework.transaction.PlatformTransactionManager manager) {
+    terminalTransactions = new org.springframework.transaction.support.TransactionTemplate(manager);
+  }
+
+  private <T> T terminalTransaction(java.util.function.Supplier<T> operation) {
+    if (terminalTransactions == null) {
+      throw new IllegalStateException(
+          "Terminal transition requires a physical transaction manager");
+    }
+    return terminalTransactions.execute(
+        status -> {
+          if (status.hasSavepoint()) {
+            throw new IllegalStateException("Terminal settlement cannot use a savepoint");
+          }
+          return operation.get();
+        });
+  }
+
+  private boolean terminalSettlementBefore(
+      UUID execution, String code, Instant endedAt, boolean newCancelOnly) {
+    var rows =
+        jdbc.queryForList(
+            ("SELECT l.state,l.cancel_requested_at,e.status,e.observed_revision_binding FROM studio"
+                + "_dispatch_ledger l JOIN ui_test_executions e ON e.id=l.execution_id AND e.started_at="
+                + "l.execution_accepted_at WHERE l.execution_id=? FOR UPDATE OF l,e"),
+            execution);
+    if (rows.isEmpty()) {
+      return false;
+    }
+    var owner = rows.getFirst();
+    if (owner.get("observed_revision_binding") == null
+        || !List.of("QUEUED", "CLAIMED").contains(owner.get("state"))
+        || !"PENDING".equals(owner.get("status"))
+        || newCancelOnly && owner.get("cancel_requested_at") != null) {
+      return false;
+    }
+    if (secretAudit == null) {
+      throw new IllegalStateException("Observed terminal settlement audit unavailable");
+    }
+    return secretAudit.replayTerminalSettlement(execution, code, endedAt);
+  }
+
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private com.citi.put.checks.studio.secrets.SecretAuditLifecycle secretAudit;
+
+  public void installSecretAudit(com.citi.put.checks.studio.secrets.SecretAuditLifecycle audit) {
+    this.secretAudit = audit;
+  }
 
   public StudioDispatchLedgerStatements(JdbcTemplate jdbc) {
     this.jdbc = jdbc;
+    if (jdbc.getDataSource() != null) {
+      terminalTransactions =
+          new org.springframework.transaction.support.TransactionTemplate(
+              new org.springframework.jdbc.datasource.DataSourceTransactionManager(
+                  jdbc.getDataSource()));
+    }
   }
 
   /**
@@ -99,6 +158,32 @@ public class StudioDispatchLedgerStatements {
         from.name(),
         from.name(),
         to.name());
+  }
+
+  /**
+   * Exact live pre-send owner; locks both immutable binding and ledger in the caller transaction.
+   */
+  public boolean lockObservedResolutionOwner(UUID execution, String owner, UUID attempt) {
+    return !jdbc.queryForList(
+            ("SELECT l.execution_id FROM studio_dispatch_ledger l JOIN ui_test_executions e ON e.id"
+                + "=l.execution_id AND e.started_at=l.execution_accepted_at WHERE l.execution_id=? AND l"
+                + ".state='CLAIMED' AND l.lease_owner=? AND l.lease_expires_at>clock_timestamp() AND l.a"
+                + "ttempt_id IS NULL AND l.admission_id IS NULL AND e.observed_admission_receipt IS NULL"
+                + " AND e.observed_revision_binding->>'attemptId'=? FOR UPDATE OF l,e"),
+            execution,
+            owner,
+            attempt.toString())
+        .isEmpty();
+  }
+
+  /** The transaction's current dispatch owner, before an authoritative no-admission refusal. */
+  public boolean lockUnadmittedDispatch(UUID execution, UUID attempt) {
+    return !jdbc.queryForList(
+            ("SELECT execution_id FROM studio_dispatch_ledger WHERE execution_id=? AND attempt_id=?"
+                + " AND state='DISPATCHING' AND admission_id IS NULL FOR UPDATE"),
+            execution,
+            attempt)
+        .isEmpty();
   }
 
   /**
@@ -137,9 +222,9 @@ public class StudioDispatchLedgerStatements {
    *
    * <p>The selection is a CTE, not {@code WHERE execution_id IN (SELECT ... LIMIT ?)}. PostgreSQL
    * may re-evaluate an uncorrelated {@code IN} subquery per outer row, and the {@code LIMIT} then
-   * bounds each evaluation rather than the statement — measured on this codebase by {@link
-   * com.citi.put.checks.studio.compile.CompileStateService#sweepAbandoned}'s story. A CTE is
-   * evaluated once, so {@code limit} is a bound on how many rows this statement claims.
+   * bounds each evaluation rather than the statement — measured on this codebase by the retired
+   * abandoned-compile sweep's story. A CTE is evaluated once, so {@code limit} is a bound on how
+   * many rows this statement claims.
    *
    * @param owner the claiming dispatcher's lease owner
    * @param leaseExpiresAt the lease written onto every claimed row
@@ -209,14 +294,17 @@ public class StudioDispatchLedgerStatements {
    */
   public int beginObservedDispatch(UUID executionId, String owner, UUID attemptId) {
     return jdbc.update(
-        """
-UPDATE studio_dispatch_ledger l SET state='DISPATCHING',attempt_id=?,updated_at=now()
-FROM ui_test_executions e
-WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_id IS NULL
-  AND l.cancel_requested_at IS NULL AND e.id=l.execution_id AND e.started_at=l.execution_accepted_at
-  AND e.observed_revision_binding->>'attemptId'=?
-  AND (e.observed_revision_binding->'replayGrant'->>'expiresAt')::timestamptz>clock_timestamp()
-""",
+        ("UPDATE studio_dispatch_ledger l SET state='DISPATCHING',attempt_id=?,def"
+            + "inite_refusal_attempt_id=NULL,zero_send_decision_attempt_id=NULL,updated"
+            + "_at=now()\nFROM ui_test_executions e\nWHERE l.execution_id=? AND l.state='"
+            + "CLAIMED' AND l.lease_owner=? AND l.lease_expires_at>clock_timestamp() AN"
+            + "D l.attempt_id IS NULL AND l.admission_id IS NULL\n  AND l.cancel_request"
+            + "ed_at IS NULL AND l.revoked_at IS NULL AND (l.pending_deadline_at IS NUL"
+            + "L OR l.pending_deadline_at>clock_timestamp()) AND e.observed_admission_r"
+            + "eceipt IS NULL AND e.id=l.execution_id AND e.started_at=l.execution_acce"
+            + "pted_at\n  AND e.observed_revision_binding->>'attemptId'=?\n  AND (e.obser"
+            + "ved_revision_binding->'replayGrant'->>'expiresAt')::timestamptz>clock_ti"
+            + "mestamp()\n"),
         attemptId,
         executionId,
         owner,
@@ -262,17 +350,31 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
    */
   public int returnAfterDefiniteRefusal(UUID executionId, UUID attemptId) {
     return jdbc.update(
-        """
-        UPDATE studio_dispatch_ledger
-           SET state = 'QUEUED', attempt_id = NULL, lease_owner = NULL, lease_expires_at = NULL,
-               updated_at = now()
-         WHERE execution_id = ?
-           AND state = 'DISPATCHING'
-           AND attempt_id = ?
-           AND admission_id IS NULL
-        """,
+        ("UPDATE studio_dispatch_ledger\n   SET state = 'QUEUED', definite_refusal_"
+            + "attempt_id=CASE WHEN EXISTS(SELECT 1 FROM ui_test_executions e WHERE e.i"
+            + "d=studio_dispatch_ledger.execution_id AND e.started_at=studio_dispatch_l"
+            + "edger.execution_accepted_at AND e.observed_revision_binding IS NOT NULL)"
+            + " THEN attempt_id ELSE NULL END, attempt_id = NULL, lease_owner = NULL, l"
+            + "ease_expires_at = NULL,\n       updated_at = now()\n WHERE execution_id = "
+            + "?\n   AND state = 'DISPATCHING'\n   AND attempt_id = ?\n   AND admission_id"
+            + " IS NULL\n"),
         executionId,
         attemptId);
+  }
+
+  /** No send/attempt occurred: authority is the atomic immutable Vault-outage decision. */
+  public int releaseObservedOutageClaim(UUID id, String owner, UUID acceptedAttempt) {
+    return jdbc.update(
+        ("UPDATE studio_dispatch_ledger l SET state='QUEUED',zero_send_decision_attempt_id=?,le"
+            + "ase_owner=NULL,lease_expires_at=NULL,updated_at=now() WHERE l.execution_id=? AND l.st"
+            + "ate='CLAIMED' AND l.lease_owner=? AND l.lease_expires_at>clock_timestamp() AND l.atte"
+            + "mpt_id IS NULL AND l.admission_id IS NULL AND EXISTS(SELECT 1 FROM studio_secret_use_"
+            + "audit a WHERE a.execution_id=l.execution_id AND a.attempt_id=? AND a.decision_stage='"
+            + "DISPATCH' AND a.outcome='VAULT_UNAVAILABLE')"),
+        acceptedAttempt,
+        id,
+        owner,
+        acceptedAttempt.toString());
   }
 
   /**
@@ -484,10 +586,22 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
    * <p>{@code error_code} is written from the API's own vocabulary only; a runner-supplied code
    * never reaches this parameter (AC-16).
    *
-   * <p><b>The one {@code ADMITTED} path</b> (Studio v1 WP4, ADR-002 §29): a run cancelled before
-   * its browser reported a start sends its {@code FINAL} without a {@code STARTED}. It is applied
-   * only when the ledger records a cancel, and the edge {@code ADMITTED → FINALIZING} exists in the
-   * matrix for that case alone. Every other report still needs {@code RUNNING}.
+   * <p><b>The two recorded {@code ADMITTED} paths.</b> A run stopped before its browser reported a
+   * start sends its {@code FINAL} without a {@code STARTED}. It is applied only against a fact the
+   * backend itself recorded, and the edge {@code ADMITTED → FINALIZING} in the matrix serves both:
+   *
+   * <ul>
+   *   <li>a recorded cancel (Studio v1 WP4, ADR-002 §29): {@code cancel_requested_at} is set;
+   *   <li>a recorded revocation whose projected outcome is {@code AUTHORIZATION_REVOKED}
+   *       (STUDIO-OBS-009 ADJ-1, W1.5 ruling part 2 §2): {@code revoked_at} is set and {@code
+   *       errorCode} is {@link ExecutionErrorCode#AUTHORIZATION_REVOKED}. That code is the API's
+   *       own projection of the report (an outer {@code CANCELLED} under a recorded revocation,
+   *       with cancel taking precedence), never a runner-supplied value. Any other pre-Ready {@code
+   *       FINAL} on a revoked row is still refused and settled by the reaper: the reviewed OBS-006
+   *       reason set is not bypassed.
+   * </ul>
+   *
+   * Every other report still needs {@code RUNNING}.
    */
   public int applyFinal(
       UUID executionId,
@@ -508,7 +622,11 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
       String videoError,
       Boolean videoPartial,
       Instant videoExpiresAt,
-      String manifestKey) {
+      String manifestKey,
+      String replayFailureCode,
+      String replayFailureStepId,
+      Integer replayFailureStepIndex,
+      Boolean replayFailureLoginStepsPresent) {
     Integer applied =
         jdbc.queryForObject(
             """
@@ -521,7 +639,8 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
                  AND runner_instance_id = ?
                  AND last_runner_sequence < ?
                  AND (state = 'RUNNING'
-                      OR (state = 'ADMITTED' AND cancel_requested_at IS NOT NULL))
+                      OR (state = 'ADMITTED' AND cancel_requested_at IS NOT NULL)
+                      OR (state = 'ADMITTED' AND revoked_at IS NOT NULL AND CAST(? AS boolean)))
                FOR UPDATE
             ),
             history AS (
@@ -539,6 +658,10 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
                      video_error = CAST(? AS text),
                      video_partial = CAST(? AS boolean),
                      video_expires_at = CAST(? AS timestamptz),
+                     replay_failure_code = CAST(? AS text),
+                     replay_failure_step_id = CAST(? AS text),
+                     replay_failure_step_index = CAST(? AS integer),
+                     replay_failure_login_steps_present = CAST(? AS boolean),
                      snapshot_revision = e.snapshot_revision + 1
                 FROM owner o
                WHERE e.id = o.execution_id
@@ -563,6 +686,8 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
             admissionId,
             runnerInstanceId,
             runnerSequence,
+            // ADJ-1: the revoked-ADMITTED path serves only the FINAL the recorded revocation names.
+            ExecutionErrorCode.AUTHORIZATION_REVOKED.equals(errorCode),
             status,
             errorCode,
             endedAt == null ? null : Timestamp.from(endedAt),
@@ -576,6 +701,10 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
             videoError,
             videoPartial,
             videoExpiresAt == null ? null : Timestamp.from(videoExpiresAt),
+            replayFailureCode,
+            replayFailureStepId,
+            replayFailureStepIndex,
+            replayFailureLoginStepsPresent,
             runnerSequence,
             manifestKey);
     return applied == null ? 0 : applied;
@@ -645,7 +774,7 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
                 + " (e.observed_admission_receipt->>'startDeadlineAt')::timestamptz=d.start_deadline_at\n"
                 + "     AND"
                 + " (e.observed_admission_receipt->>'runDeadlineAt')::timestamptz=d.run_deadline_at\n"
-                + "     AND r.publication_kind='GUIDED_RUN' AND r.artifact_schema_version=2\n"
+                + "     AND r.publication_kind='GUIDED_RUN' AND r.artifact_schema_version=3\n"
                 + "   FOR UPDATE OF d,e\n"
                 + "),\n"
                 + "history AS (\n"
@@ -806,6 +935,12 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
    *     unchanged dispatched state when the request was recorded — or empty when nothing matched
    */
   public Optional<String> requestCancel(UUID executionId, String principal, Instant now) {
+    return terminalTransaction(() -> requestCancelInTransaction(executionId, principal, now));
+  }
+
+  private Optional<String> requestCancelInTransaction(
+      UUID executionId, String principal, Instant now) {
+    boolean settled = terminalSettlementBefore(executionId, "CANCELLED", now, true);
     List<String> states =
         jdbc.queryForList(
             """
@@ -853,6 +988,12 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
             Timestamp.from(now),
             Timestamp.from(now),
             principal);
+    if (settled && (states.isEmpty() || !"DONE".equals(states.getFirst()))) {
+      throw new IllegalStateException("Terminal cancel settlement lost its owner transition");
+    }
+    if (!states.isEmpty() && "DONE".equals(states.getFirst()) && secretAudit != null) {
+      secretAudit.replayOwnerTerminal(executionId);
+    }
     return states.isEmpty() ? Optional.empty() : Optional.of(states.get(0));
   }
 
@@ -929,7 +1070,14 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
 
   /** Closes a finalized row once outcome and evidence are both settled. Bumps no revision. */
   public int closeFinalized(UUID executionId) {
-    return transition(executionId, DispatchState.FINALIZING, DispatchState.DONE);
+    return terminalTransaction(
+        () -> {
+          int changed = transition(executionId, DispatchState.FINALIZING, DispatchState.DONE);
+          if (changed == 1 && secretAudit != null) {
+            secretAudit.replayOwnerTerminal(executionId);
+          }
+          return changed;
+        });
   }
 
   /**
@@ -945,8 +1093,9 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
    * its evidence being settled too. That is a structural guarantee rather than a matter of which
    * query happened to select the row.
    */
+  @org.springframework.transaction.annotation.Transactional
   public int closeWithError(UUID executionId, String errorCode, Instant endedAt) {
-    return close(executionId, errorCode, endedAt, false);
+    return terminalTransaction(() -> close(executionId, errorCode, endedAt, false, false));
   }
 
   /**
@@ -959,12 +1108,37 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
    * between the reaper's selection and its close still decides the code. A separate read would
    * leave exactly that window open.
    */
+  @org.springframework.transaction.annotation.Transactional
   public int closeByReaper(UUID executionId, String errorCode, Instant endedAt) {
-    return close(executionId, errorCode, endedAt, true);
+    return terminalTransaction(() -> close(executionId, errorCode, endedAt, true, false));
+  }
+
+  /** Kill-switch close cannot race into closing admitted/running work. */
+  public int closeUndispatchedWithError(UUID executionId, String errorCode, Instant endedAt) {
+    return terminalTransaction(() -> close(executionId, errorCode, endedAt, false, true));
   }
 
   private int close(
-      UUID executionId, String errorCode, Instant endedAt, boolean cancelledIfRequested) {
+      UUID executionId,
+      String errorCode,
+      Instant endedAt,
+      boolean cancelledIfRequested,
+      boolean undispatchedOnly) {
+    // Hold the actual owner before determining the effective terminal code and before-image.
+    var rows =
+        jdbc.queryForList(
+            "SELECT state,cancel_requested_at FROM studio_dispatch_ledger WHERE execution_id=? FOR UPDATE",
+            executionId);
+    if (rows.isEmpty()
+        || undispatchedOnly
+            && !List.of("QUEUED", "CLAIMED").contains(rows.getFirst().get("state"))) {
+      return 0;
+    }
+    String actualCode =
+        cancelledIfRequested && rows.getFirst().get("cancel_requested_at") != null
+            ? "CANCELLED"
+            : errorCode;
+    boolean settled = terminalSettlementBefore(executionId, actualCode, endedAt, false);
     Integer applied =
         jdbc.queryForObject(
             """
@@ -973,6 +1147,7 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
                 FROM studio_dispatch_ledger
                WHERE execution_id = ?
                  AND state <> 'DONE'
+                 AND (NOT CAST(? AS boolean) OR state IN ('QUEUED','CLAIMED'))
                FOR UPDATE
             ),
             history AS (
@@ -1007,10 +1182,18 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
                   """,
             Integer.class,
             executionId,
+            undispatchedOnly,
             cancelledIfRequested,
             errorCode,
             Timestamp.from(endedAt));
-    return applied == null ? 0 : applied;
+    int changed = applied == null ? 0 : applied;
+    if (settled && changed != 1) {
+      throw new IllegalStateException("Terminal settlement lost its owner transition");
+    }
+    if (changed == 1 && secretAudit != null) {
+      secretAudit.replayOwnerTerminal(executionId);
+    }
+    return changed;
   }
 
   /**
@@ -1024,6 +1207,7 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
    * <p>{@code error_code} is the API's own vocabulary; a manifest-supplied runner code is recorded
    * in the diagnostic text and never here, exactly as for a delivered report (AC-16).
    */
+  @org.springframework.transaction.annotation.Transactional
   public int applyReconciledOutcome(
       UUID executionId,
       String status,
@@ -1032,6 +1216,22 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
       String videoKey,
       String videoStatus,
       Instant videoExpiresAt) {
+    return terminalTransaction(
+        () ->
+            applyReconciledOutcomeInTransaction(
+                executionId, status, errorCode, endedAt, videoKey, videoStatus, videoExpiresAt));
+  }
+
+  private int applyReconciledOutcomeInTransaction(
+      UUID executionId,
+      String status,
+      String errorCode,
+      Instant endedAt,
+      String videoKey,
+      String videoStatus,
+      Instant videoExpiresAt) {
+    boolean settled =
+        "ERROR".equals(status) && terminalSettlementBefore(executionId, errorCode, endedAt, false);
     Integer applied =
         jdbc.queryForObject(
             """
@@ -1074,7 +1274,14 @@ WHERE l.execution_id=? AND l.state='CLAIMED' AND l.lease_owner=? AND l.attempt_i
             videoKey,
             videoStatus,
             videoExpiresAt == null ? null : Timestamp.from(videoExpiresAt));
-    return applied == null ? 0 : applied;
+    int changed = applied == null ? 0 : applied;
+    if (settled && changed != 1) {
+      throw new IllegalStateException("Reconciled terminal settlement lost its owner transition");
+    }
+    if (changed == 1 && secretAudit != null) {
+      secretAudit.replayOwnerTerminal(executionId);
+    }
+    return changed;
   }
 
   /**

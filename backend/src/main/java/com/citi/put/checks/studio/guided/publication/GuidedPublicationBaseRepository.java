@@ -13,9 +13,7 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-/**
- * Original-start snapshot. No compile request, resolved variable or account state is synthesized.
- */
+/** Original-start snapshot. No resolved variable or account state is synthesized. */
 public final class GuidedPublicationBaseRepository {
   private final JdbcTemplate jdbc;
   private final GuidedContracts contracts;
@@ -45,11 +43,9 @@ public final class GuidedPublicationBaseRepository {
     var rows =
         jdbc.query(
             "SELECT"
-                + " id,csi_id,source_revision,configuration_revision,publication_epo"
-                + "ch,compile_request_id,current_candidate_revision_id,confirmed_rev"
-                + "ision_id,authoring::text,browser,viewport_width,viewport_height,t"
-                + "imeout_seconds,wait_strategy,environment,deleted_at,quarantined_a"
-                + "t"
+                + " id,csi_id,source_revision,configuration_revision,publication_epoch,"
+                + "confirmed_revision_id,authoring::text,browser,viewport_width,viewport_height,"
+                + "timeout_seconds,wait_strategy,environment,deleted_at,quarantined_at,variables::text"
                 + " FROM ui_tests WHERE id=? FOR UPDATE",
             (rs, n) -> {
               ObjectNode d =
@@ -60,25 +56,48 @@ public final class GuidedPublicationBaseRepository {
                       .put("sourceRevision", rs.getString(3))
                       .put("configurationRevision", rs.getString(4))
                       .put("publicationEpoch", rs.getString(5));
-              d.put("compileRequestId", rs.getString(6));
-              d.put("candidateRevisionId", rs.getString(7));
-              d.put("confirmedRevisionId", rs.getString(8));
-              require(rs.getString(9) != null, "RUNTIME_INCOMPATIBLE", 409);
-              d.set("authoring", contracts.parse(rs.getString(9)));
+              d.put("confirmedRevisionId", rs.getString(6));
+              require(rs.getString(7) != null, "RUNTIME_INCOMPATIBLE", 409);
+              d.set("authoring", contracts.parse(rs.getString(7)));
               ObjectNode c =
                   d.putObject("configuration")
                       .put(
                           "browser",
-                          com.citi.put.checks.studio.dto.LegacyStudioAdapter.normalizeBrowser(
-                              rs.getString(10)));
-              c.putObject("viewport").put("width", rs.getInt(11)).put("height", rs.getInt(12));
-              c.put("timeoutSeconds", rs.getInt(13))
-                  .put("waitStrategy", rs.getString(14))
-                  .put("environment", rs.getString(15));
+                          com.citi.put.checks.studio.dto.CanonicalStudioCodec.normalizeBrowser(
+                              rs.getString(8)));
+              c.putObject("viewport").put("width", rs.getInt(9)).put("height", rs.getInt(10));
+              c.put("timeoutSeconds", rs.getInt(11))
+                  .put("waitStrategy", rs.getString(12))
+                  .put("environment", rs.getString(13));
               d.put(
                   "deletedAt",
-                  rs.getTimestamp(16) == null ? null : rs.getTimestamp(16).toInstant().toString());
-              d.put("quarantined", rs.getTimestamp(17) != null);
+                  rs.getTimestamp(14) == null ? null : rs.getTimestamp(14).toInstant().toString());
+              d.put("quarantined", rs.getTimestamp(15) != null);
+              try {
+                var mapper =
+                    new com.fasterxml.jackson.databind.ObjectMapper()
+                        .findAndRegisterModules()
+                        .disable(
+                            com.fasterxml.jackson.databind.SerializationFeature
+                                .WRITE_DATES_AS_TIMESTAMPS)
+                        .disable(
+                            com.fasterxml.jackson.databind.DeserializationFeature
+                                .ADJUST_DATES_TO_CONTEXT_TIME_ZONE);
+                var authoring =
+                    mapper.treeToValue(
+                        d.path("authoring"),
+                        com.citi.put.checks.studio.dto.AuthoringV2Request.class);
+                var identity =
+                    com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.resolve(
+                        authoring,
+                        com.citi.put.checks.studio.dto.CanonicalStudioCodec.parseVariables(
+                            rs.getString(16)));
+                d.set("authoredDeclarations", identity.references().path("authoredDeclarations"));
+                d.set("authoringRevisionInputs", mapper.valueToTree(identity.inputs()));
+              } catch (com.fasterxml.jackson.core.JsonProcessingException invalid) {
+                throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+                    "INVALID_CONTRACT", 422);
+              }
               return new PublicationContracts.CurrentSource(d);
             },
             testId);
@@ -120,8 +139,6 @@ public final class GuidedPublicationBaseRepository {
             "sourceRevision",
             "configurationRevision",
             "publicationEpoch",
-            "compileRequestId",
-            "candidateRevisionId",
             "confirmedRevisionId")) {
       d.set(key, c.path(key));
     }
@@ -182,11 +199,21 @@ public final class GuidedPublicationBaseRepository {
             "sourceRevision",
             "configurationRevision",
             "publicationEpoch",
-            "compileRequestId",
-            "candidateRevisionId",
             "confirmedRevisionId")) {
       require(b.path(key).equals(c.path(key)), "PUBLICATION_CONFLICT", 409);
     }
+    JsonNode manifest =
+        contracts.parse(
+            jdbc.queryForObject(
+                "SELECT manifest::text FROM" + " studio_guided_source_manifests WHERE session_id=?",
+                String.class,
+                b.path("sessionId").asText()));
+    require(
+        manifest.path("authoringSnapshot").equals(c.path("authoring"))
+            && manifest.path("authoredDeclarations").equals(c.path("authoredDeclarations"))
+            && manifest.path("authoringRevisionInputs").equals(c.path("authoringRevisionInputs")),
+        "PUBLICATION_CONFLICT",
+        409);
     var source = contracts.object().putArray("items");
     var ordered = contracts.object().putArray("items");
     int index = 0;

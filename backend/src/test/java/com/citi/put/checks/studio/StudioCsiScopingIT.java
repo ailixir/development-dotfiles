@@ -2,6 +2,7 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -53,8 +54,12 @@ class StudioCsiScopingIT {
 
   @BeforeEach
   void setUp() {
-    jdbc.update("DELETE FROM studio_dispatch_ledger");
-    jdbc.update("DELETE FROM ui_test_executions");
+    // Ledger rows referenced by immutable secret-use audit facts (and their executions) outlive
+    // every cleanup since STUDIO-OBS-012A's observed runs; everything else is cleared as before.
+    ObservedPublicationFixture.clearLedger(jdbc);
+    jdbc.update(
+        "DELETE FROM ui_test_executions e WHERE NOT EXISTS"
+            + " (SELECT 1 FROM studio_dispatch_ledger l WHERE l.execution_id = e.id)");
     jdbc.update("DELETE FROM ui_tests WHERE csi_id IN (?, ?)", MINE, THEIRS);
     seedUser();
     seedCsi(MINE, "Mine");

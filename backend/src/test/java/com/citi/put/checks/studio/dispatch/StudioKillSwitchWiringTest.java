@@ -133,7 +133,6 @@ class StudioKillSwitchWiringTest {
             statements,
             mock(UITestRevisionRepository.class),
             mock(DispatchAuthorization.class),
-            mock(StudioReferenceResolver.class),
             mock(RunnerDispatchClient.class),
             withSwitch(enabled),
             new ObjectMapper(),

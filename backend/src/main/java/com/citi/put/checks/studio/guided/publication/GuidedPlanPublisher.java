@@ -77,7 +77,7 @@ public final class GuidedPlanPublisher {
 
   public PublicationContracts.Receipt finalizeForUser(
       Authentication caller, HttpServletRequest request, String id, String key, JsonNode body) {
-    contracts.validate("v2/publication", body);
+    contracts.validate("v3/publication", body);
     require(key != null && !key.isBlank() && key.length() <= 256, "INVALID_CONTRACT", 422);
     String digest = GuidedContracts.hash(body);
     var previous = publications.receipt(id);
@@ -91,14 +91,13 @@ public final class GuidedPlanPublisher {
     }
     require(properties.enabled(), "PUBLICATION_DISABLED", 409);
     require(replay.enabled(), "REPLAY_DISABLED", 409);
-    // Current caller/account checks occur without a database lock; final Core proof is refreshed
-    // later.
+    // Caller scope is checked before locked preparation; fresh Core proof follows validation.
     JsonNode original = sessions.transaction(() -> sessions.lock(id).document().deepCopy());
     access.checkUser(caller, original);
-    access.checkCurrent(original);
+    LoweringPreparation lowering = prepareLowering(id, body);
     Prepared prepared;
     try {
-      prepared = sessions.transaction(() -> prepare(id, key, digest, body));
+      prepared = sessions.transaction(() -> prepare(id, key, digest, body, lowering));
     } catch (GuidedSessionException failure) {
       if (failure.getMessage().equals("PUBLICATION_CONFLICT")) {
         conflictBeforeClaim(id);
@@ -121,7 +120,7 @@ public final class GuidedPlanPublisher {
         ObjectNode outgoing =
             contracts
                 .object()
-                .put("schemaVersion", 2)
+                .put("schemaVersion", 3)
                 .put("attemptId", attempt.attemptId().toString())
                 .put("claimId", attempt.claimId().toString())
                 .put("snapshotHash", prepared.snapshot().hash())
@@ -180,7 +179,16 @@ public final class GuidedPlanPublisher {
             409);
       }
       // A long validator cannot age a pre-validation identity check into commit authority.
-      access.checkCurrent(prepared.session());
+      sessions.transaction(
+          () -> {
+            var currentSession = sessions.lock(id);
+            var base =
+                bases.find(id).orElseThrow(() -> new GuidedSessionException("MISSING_SOURCE", 409));
+            var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
+            bases.requireCurrent(base, source);
+            access.checkCurrent(currentSession.document());
+            return null;
+          });
       PublicationContracts.Grant grant =
           authorization.authorizePublication(
               caller, request, prepared.snapshot(), prepared.session());
@@ -194,13 +202,15 @@ public final class GuidedPlanPublisher {
             bases.requireCurrent(base, source);
             pins.supported(prepared.candidate().artifact().path("profile"), prepared.build());
             var raw = evidence.read(id);
+            // Ruling E-2: the derivation stays locked; the prepared snapshot's basis was validated.
             JsonNode basis =
-                builder.basis(
+                builder.basisMatching(
                     base,
                     source,
                     raw,
                     currentSession.document(),
-                    builder.learningProvenance(raw.document().path("sourceManifest")));
+                    builder.learningProvenance(raw.document().path("sourceManifest")),
+                    prepared.snapshot().basis());
             require(
                 GuidedContracts.hash(basis)
                     .equals(prepared.snapshot().identity().path("basisHash").asText()),
@@ -227,7 +237,9 @@ public final class GuidedPlanPublisher {
         sessions.transaction(
             () -> {
               sessions.lock(id);
-              publications.conflict(id, prepared.snapshot().hash(), clock.instant());
+              if (publications.conflict(id, prepared.snapshot().hash(), clock.instant())) {
+                lifecycle.publicationConflicted(id);
+              }
               return null;
             });
       }
@@ -251,11 +263,85 @@ public final class GuidedPlanPublisher {
           current.document().put("state", "PUBLICATION_CONFLICT");
           current.progress().put("errorCode", "PUBLICATION_CONFLICT");
           sessions.save(current);
+          lifecycle.publicationConflicted(id);
           return null;
         });
   }
 
-  private Prepared prepare(String id, String key, String digest, JsonNode expected) {
+  private record LoweringCapture(
+      PublicationContracts.Base base,
+      PublicationContracts.CurrentSource source,
+      PublicationContracts.Evidence evidence,
+      ObjectNode document) {}
+
+  private record LoweringInput(
+      ObjectNode basis,
+      ObjectNode profile,
+      ObjectNode build,
+      String basisRepresentation,
+      String profileRepresentation,
+      String buildRepresentation) {}
+
+  private record LoweringPreparation(
+      GuidedPlanPublisher owner, LoweringInput input, PublicationContracts.Candidate candidate) {}
+
+  private static final java.util.Set<Class<?>> LOWERING_SCALARS =
+      java.util.Set.of(
+          com.fasterxml.jackson.databind.node.TextNode.class,
+          com.fasterxml.jackson.databind.node.NullNode.class,
+          com.fasterxml.jackson.databind.node.BooleanNode.class,
+          com.fasterxml.jackson.databind.node.IntNode.class,
+          com.fasterxml.jackson.databind.node.LongNode.class,
+          com.fasterxml.jackson.databind.node.BigIntegerNode.class,
+          com.fasterxml.jackson.databind.node.FloatNode.class,
+          com.fasterxml.jackson.databind.node.DoubleNode.class,
+          com.fasterxml.jackson.databind.node.DecimalNode.class);
+
+  private static boolean sameClosedStructure(JsonNode left, JsonNode right) {
+    if (left == null || right == null || left.getClass() != right.getClass()) {
+      return false;
+    }
+    if (left.getClass() == ObjectNode.class) {
+      if (left.size() != right.size()) {
+        return false;
+      }
+      for (var fields = left.fields(); fields.hasNext(); ) {
+        var field = fields.next();
+        if (!sameClosedStructure(field.getValue(), right.get(field.getKey()))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (left.getClass() == com.fasterxml.jackson.databind.node.ArrayNode.class) {
+      if (left.size() != right.size()) {
+        return false;
+      }
+      for (int index = 0; index < left.size(); index++) {
+        if (!sameClosedStructure(left.get(index), right.get(index))) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return LOWERING_SCALARS.contains(left.getClass());
+  }
+
+  private static ObjectNode ownLoweringInput(JsonNode value) {
+    if (value == null
+        || value.getClass() != ObjectNode.class
+        || !sameClosedStructure(value, value)) {
+      return null;
+    }
+    ObjectNode owned = value.deepCopy();
+    return sameClosedStructure(value, owned)
+            && value.equals(owned)
+            && value.toString().equals(owned.toString())
+        ? owned
+        : null;
+  }
+
+  private LoweringCapture captureLoweringInput(String id, JsonNode expected) {
     var session = sessions.lock(id);
     JsonNode document = session.document();
     require(document.path("state").asText().equals("FINALIZING"), "PUBLICATION_CONFLICT", 409);
@@ -269,16 +355,107 @@ public final class GuidedPlanPublisher {
         409);
     var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
     bases.requireCurrent(base, source);
+    access.checkCurrent(document);
     var raw = evidence.read(id);
+    return new LoweringCapture(base, source, raw, session.document().deepCopy());
+  }
+
+  private LoweringInput prepareLoweringInput(LoweringCapture capture) {
     ObjectNode basis =
         builder.basis(
+            capture.base(),
+            capture.source(),
+            capture.evidence(),
+            capture.document(),
+            builder.learningProvenance(capture.evidence().document().path("sourceManifest")));
+    ObjectNode supported = pins.selected();
+    ObjectNode capturedBasis = ownLoweringInput(basis);
+    ObjectNode profile = ownLoweringInput(supported.path("profile"));
+    ObjectNode build = ownLoweringInput(supported.path("build"));
+    if (capturedBasis == null || profile == null || build == null) {
+      return null;
+    }
+    return new LoweringInput(
+        capturedBasis,
+        profile,
+        build,
+        capturedBasis.toString(),
+        profile.toString(),
+        build.toString());
+  }
+
+  private LoweringPreparation prepareLowering(String id, JsonNode expected) {
+    if (org.springframework.transaction.support.TransactionSynchronizationManager
+        .isActualTransactionActive()) {
+      return null;
+    }
+    try {
+      LoweringCapture capture = sessions.transaction(() -> captureLoweringInput(id, expected));
+      // Validation, hashing and lowering cannot retain the preliminary session/source locks.
+      LoweringInput input = prepareLoweringInput(capture);
+      if (input == null) {
+        return null;
+      }
+      PublicationContracts.Candidate candidate =
+          lowerer.lower(input.basis().deepCopy(), input.profile().deepCopy());
+      return new LoweringPreparation(this, input, candidate);
+    } catch (RuntimeException unavailable) {
+      return null;
+    }
+  }
+
+  private PublicationContracts.Candidate preparedOrOriginal(
+      ObjectNode basis, ObjectNode supported, LoweringPreparation lowering) {
+    try {
+      if (lowering != null && lowering.owner() == this) {
+        LoweringInput input = lowering.input();
+        JsonNode profile = supported.path("profile"), build = supported.path("build");
+        if (sameClosedStructure(basis, input.basis())
+            && sameClosedStructure(profile, input.profile())
+            && sameClosedStructure(build, input.build())
+            && basis.equals(input.basis())
+            && profile.equals(input.profile())
+            && build.equals(input.build())
+            && basis.toString().equals(input.basisRepresentation())
+            && profile.toString().equals(input.profileRepresentation())
+            && build.toString().equals(input.buildRepresentation())) {
+          return lowering.candidate();
+        }
+      }
+    } catch (RuntimeException unavailable) {
+      // Only optional comparison is unavailable; original lowering below retains its errors.
+    }
+    return lowerer.lower(basis, supported.path("profile"));
+  }
+
+  private Prepared prepare(
+      String id, String key, String digest, JsonNode expected, LoweringPreparation lowering) {
+    var session = sessions.lock(id);
+    JsonNode document = session.document();
+    require(document.path("state").asText().equals("FINALIZING"), "PUBLICATION_CONFLICT", 409);
+    var base = bases.find(id).orElseThrow(() -> new GuidedSessionException("MISSING_SOURCE", 409));
+    require(
+        expected.path("expectedSourceRevision").equals(base.document().path("sourceRevision"))
+            && expected
+                .path("expectedConfigurationRevision")
+                .equals(base.document().path("configurationRevision")),
+        "REVISION_CONFLICT",
+        409);
+    var source = bases.lockCurrent(UUID.fromString(text(base.document(), "testId")));
+    bases.requireCurrent(base, source);
+    access.checkCurrent(document);
+    var raw = evidence.read(id);
+    // Ruling E-2: the pre-lock lowering input is a basis() result validated outside this lock.
+    ObjectNode basis =
+        builder.basisMatching(
             base,
             source,
             raw,
             document,
-            builder.learningProvenance(raw.document().path("sourceManifest")));
+            builder.learningProvenance(raw.document().path("sourceManifest")),
+            lowering != null && lowering.owner() == this ? lowering.input().basis() : null);
     ObjectNode supported = pins.selected();
-    PublicationContracts.Candidate candidate = lowerer.lower(basis, supported.path("profile"));
+    PublicationContracts.Candidate candidate = preparedOrOriginal(basis, supported, lowering);
     ObjectNode identity = contracts.object();
     identity.set("base", base.document());
     identity.set("ownerWorkerId", document.path("owner").path("workerId"));

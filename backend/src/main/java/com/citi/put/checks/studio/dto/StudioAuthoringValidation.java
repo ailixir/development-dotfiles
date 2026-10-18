@@ -18,8 +18,8 @@ public final class StudioAuthoringValidation {
 
   private StudioAuthoringValidation() {}
 
-  /** Parses a legacy or v2 request and rejects closed-shape and cross-record violations. */
-  public static StudioAuthoring read(
+  /** Parses the single v2 request and rejects closed-shape and cross-record violations. */
+  public static AuthoringV2Request read(
       ObjectMapper objectMapper, Validator validator, JsonNode node) {
     List<Category> structural = structuralCategories(node);
     if (!structural.isEmpty()) {
@@ -28,17 +28,14 @@ public final class StudioAuthoringValidation {
 
     ObjectMapper strict = objectMapper.copy();
     strict.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-    StudioAuthoring authoring;
+    AuthoringV2Request authoring;
     try {
-      authoring =
-          node.has("authoringSchemaVersion")
-              ? strict.treeToValue(node, AuthoringV2Request.class)
-              : strict.treeToValue(node, LegacyAuthoringRequest.class);
+      authoring = strict.treeToValue(node, AuthoringV2Request.class);
     } catch (IOException | RuntimeException exception) {
       throw new InvalidAuthoringException(List.of(Category.UNSUPPORTED_FIELD), exception);
     }
 
-    Set<ConstraintViolation<StudioAuthoring>> violations = validator.validate(authoring);
+    Set<ConstraintViolation<AuthoringV2Request>> violations = validator.validate(authoring);
     if (!violations.isEmpty()) {
       throw new InvalidAuthoringException(
           violations.stream()
@@ -51,8 +48,11 @@ public final class StudioAuthoringValidation {
 
   private static List<Category> structuralCategories(JsonNode request) {
     LinkedHashSet<Category> categories = new LinkedHashSet<>();
-    if (!request.has("authoringSchemaVersion")) {
-      return List.of();
+    if (request == null
+        || !request.isObject()
+        || !request.path("authoringSchemaVersion").isInt()
+        || request.path("authoringSchemaVersion").asInt() != 2) {
+      return List.of(Category.INVALID_AUTHORING);
     }
 
     JsonNode steps = request.path("steps");
@@ -147,7 +147,7 @@ public final class StudioAuthoringValidation {
     }
   }
 
-  private static Category categoryForViolation(ConstraintViolation<StudioAuthoring> violation) {
+  private static Category categoryForViolation(ConstraintViolation<AuthoringV2Request> violation) {
     String path = violation.getPropertyPath().toString();
     return path.matches("steps\\[.*].id") ? Category.MISSING_STEP_ID : Category.INVALID_AUTHORING;
   }

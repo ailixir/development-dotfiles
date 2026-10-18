@@ -2,7 +2,6 @@ package com.citi.put.checks.studio.guided.translation;
 
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
-import com.citi.put.checks.studio.compile.CredentialPatternScreen;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -22,14 +21,24 @@ public final class GuidedSourceClassifier {
   private final GuidedContracts contracts;
   private final GuidedTranslationProperties properties;
   private final CredentialPatternScreen screen;
+  private final GuidedPromptAssembler prompts;
 
   public GuidedSourceClassifier(
       GuidedContracts contracts,
       GuidedTranslationProperties properties,
       CredentialPatternScreen screen) {
+    this(contracts, properties, screen, new GuidedPromptAssembler(contracts));
+  }
+
+  public GuidedSourceClassifier(
+      GuidedContracts contracts,
+      GuidedTranslationProperties properties,
+      CredentialPatternScreen screen,
+      GuidedPromptAssembler prompts) {
     this.contracts = contracts;
     this.properties = properties;
     this.screen = screen;
+    this.prompts = java.util.Objects.requireNonNull(prompts);
   }
 
   public void requireCurrentPolicy(JsonNode scope) {
@@ -56,31 +65,39 @@ public final class GuidedSourceClassifier {
             && !authoring.path("steps").isEmpty(),
         "RUNTIME_INCOMPATIBLE",
         409);
+    com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.Identity identity;
+    try {
+      identity =
+          com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.resolve(
+              new com.fasterxml.jackson.databind.ObjectMapper()
+                  .findAndRegisterModules()
+                  .disable(
+                      com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
+                  .treeToValue(authoring, com.citi.put.checks.studio.dto.AuthoringV2Request.class),
+              com.citi.put.checks.studio.dto.CanonicalStudioCodec.variablesFromNode(
+                  current.path("variables")));
+    } catch (com.fasterxml.jackson.core.JsonProcessingException failure) {
+      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+          "INVALID_CONTRACT", 422);
+    }
     Map<String, JsonNode> declared = new HashMap<>();
-    var secretIds = new HashSet<String>();
     for (JsonNode variable : current.path("variables")) {
-      String kind = variable.path("kind").asText();
-      require(SetKinds.allowed(kind), "INVALID_CONTRACT", 422);
-      if (kind.equals("plain")) {
-        require(
-            variable.path("name").isTextual()
-                && declared.putIfAbsent(variable.path("name").textValue(), variable) == null,
-            "INVALID_CONTRACT",
-            422);
-      } else {
-        JsonNode identifier =
-            variable.hasNonNull("secretId") ? variable.path("secretId") : variable.path("name");
-        require(identifier.isTextual(), "INVALID_CONTRACT", 422);
-        secretIds.add(identifier.textValue());
+      if (variable.path("kind").asText().equals("plain")) {
+        declared.put(variable.path("name").asText(), variable);
       }
     }
-    require(declared.keySet().stream().noneMatch(secretIds::contains), "FORBIDDEN_SCOPE", 403);
     ObjectNode result = contracts.object();
     for (String field : List.of("testId", "sourceRevision", "configurationRevision")) {
       result.set(field, current.path(field));
     }
     result.put("policy", "INPUT-POLICY-01-A");
-    result.set("schemaPins", new GuidedPromptAssembler(contracts).schemaProvenance());
+    result.set("authoringSnapshot", authoring.deepCopy());
+    result.put("authoringIdentityVersion", 1);
+    result.set("authoredDeclarations", identity.references().path("authoredDeclarations"));
+    result.set(
+        "authoringRevisionInputs",
+        new com.fasterxml.jackson.databind.ObjectMapper().valueToTree(identity.inputs()));
+    result.set("schemaPins", prompts.schemaProvenance());
     var steps = result.putArray("sourceSteps");
     var configs = result.putArray("configurationReferences");
     var privateConfigs = result.putObject("configurationValues");
@@ -99,52 +116,55 @@ public final class GuidedSourceClassifier {
       }
       require(ids.add(id) && !text.isBlank() && text.length() <= 4000, "INVALID_CONTRACT", 422);
       screen.requireNoInlineCredentials(List.of(text));
-      // Reuse the canonical reference parser; the matching regex below only masks its exact spans.
-      require(
-          com.citi.put.checks.studio.validation.VariableReferenceValidator.variableTokens(text)
-                  .stream()
-                  .allMatch(declared::containsKey)
-              && secretIds.containsAll(
-                  com.citi.put.checks.studio.validation.VariableReferenceValidator.secretTokens(
-                      text)),
-          "FORBIDDEN_SCOPE",
-          403);
       ObjectNode item = steps.addObject().put("stepId", id).put("text", text);
       var regions = item.putArray("regions");
       var token = TOKEN.matcher(text);
       int previous = 0;
       var used = new HashSet<String>();
+      var usedSecrets = new HashSet<String>();
       while (token.find()) {
         if (previous < token.start()) {
           regions.addObject().put("startUtf16", previous).put("endUtf16", token.start());
         }
         String name = token.group(2);
-        require(
-            token.group(1).equals("var") ? declared.containsKey(name) : secretIds.contains(name),
-            "FORBIDDEN_SCOPE",
-            403);
-        if (token.group(1).equals("var")) {
-          used.add(name);
-        }
         previous = token.end();
       }
       if (previous < text.length()) {
         regions.addObject().put("startUtf16", previous).put("endUtf16", text.length());
       }
-      for (JsonNode entry : step.path("context").path("entries")) {
-        if (entry.path("kind").asText().equals("variableRef")) {
-          require(entry.path("referenceId").isTextual(), "FORBIDDEN_SCOPE", 403);
-          String name = entry.path("referenceId").asText();
-          require(
-              declared.containsKey(name)
-                  && declared.get(name).path("kind").asText().equals("plain"),
-              "FORBIDDEN_SCOPE",
-              403);
-          used.add(name);
+      var references = new java.util.ArrayList<JsonNode>();
+      identity.globalReferences().forEach(references::add);
+      identity.stepReferences().path(id).forEach(references::add);
+      for (JsonNode reference : references) {
+        if (reference.path("kind").asText().equals("plain")) {
+          used.add(reference.path("referenceId").asText());
+        } else {
+          usedSecrets.add(reference.path("secretId").asText());
         }
       }
       safeContext(step.path("context"), id, contexts);
-      for (String name : used.stream().sorted().toList()) {
+      for (String name :
+          usedSecrets.stream()
+              .sorted(com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8)
+              .toList()) {
+        String reference =
+            "cfg-"
+                + UUID.nameUUIDFromBytes(
+                    (id + ":secret:" + name + ":fill.value").getBytes(StandardCharsets.UTF_8));
+        ObjectNode config =
+            configs
+                .addObject()
+                .put("referenceId", reference)
+                .put("stepId", id)
+                .put("referenceName", name)
+                .put("kind", "secretRef")
+                .put("intendedSlot", "fill.value");
+        privateConfigs.set(reference, config.deepCopy());
+      }
+      for (String name :
+          used.stream()
+              .sorted(com.citi.put.checks.studio.authoring.IncrementalAuthoringIdentity.UTF8)
+              .toList()) {
         JsonNode saved = declared.get(name).get("value");
         require(saved != null && saved.isTextual(), "MISSING_SOURCE", 409);
         // Empty text is an intentional clear-input value; null/missing is never coerced to text.

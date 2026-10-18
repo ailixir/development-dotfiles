@@ -4,15 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.ChecksApplication;
-import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CoreServiceClient;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
-import com.citi.put.checks.studio.compile.gateway.GenAiLlmGatewayClient;
-import com.citi.put.checks.studio.compile.gateway.LlmGatewayClient;
-import com.citi.put.checks.studio.compile.gateway.StudioGatewayProperties;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
-import com.citi.put.checks.studio.guided.account.ReplayAccountAccess;
+import com.citi.put.checks.studio.gateway.StudioGatewayProperties;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionAccess;
 import com.citi.put.checks.studio.guided.session.GuidedSessionException;
@@ -42,10 +38,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.core.Authentication;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -62,61 +55,7 @@ class ObservedProfileDriftTest {
       ORIGIN = "https://orders.example.test";
 
   @TestConfiguration(proxyBeanMethods = false)
-  static class AccountConnection {
-    @Bean
-    @Primary
-    GuidedProductionSessionAccess.AccountAccess profileAccountConnection() {
-      return new GuidedProductionSessionAccess.AccountAccess() {
-        @Override
-        public GuidedSessionAccess.Snapshot resolve(Authentication user, JsonNode request) {
-          GuidedSessionException.require(
-              user instanceof BffAuthenticationToken && user.isAuthenticated(),
-              "UNAUTHENTICATED",
-              401);
-          GuidedSessionException.require(
-              request.path("accountRef").asText().equals("profile-account")
-                  && request.path("applicationId").asText().equals("profile-app")
-                  && request.path("environmentId").asText().equals("Development"),
-              "AUTH_CONNECTION_REQUIRED",
-              409);
-          var scope =
-              CONTRACTS
-                  .object()
-                  .put("principalId", ((BffAuthenticationToken) user).getPrincipal().userId())
-                  .put("csiId", CSI)
-                  .put("environmentId", "Development")
-                  .put("applicationId", "profile-app")
-                  .put("accountRef", "profile-account")
-                  .put("sourceRevision", request.path("sourceRevision").asText())
-                  .put("configurationRevision", request.path("configurationRevision").asText())
-                  .put("modelDataPolicyId", "INPUT-POLICY-01-A")
-                  .putNull("valueTransferPolicyId");
-          scope.putArray("approvedOrigins").add(ORIGIN);
-          scope.putArray("capabilities").add("observe").add("navigate");
-          return new GuidedSessionAccess.Snapshot(
-              scope,
-              CONTRACTS.object().putArray("unused"),
-              CONTRACTS
-                  .object()
-                  .put("mode", "configuredAccount")
-                  .put("connectionId", "profile-fixture-connection"));
-        }
-
-        @Override
-        public void checkCurrent(JsonNode session) {
-          GuidedSessionException.require(
-              session.path("scope").path("accountRef").asText().equals("profile-account")
-                  && session
-                      .path("authConnection")
-                      .path("connectionId")
-                      .asText()
-                      .equals("profile-fixture-connection"),
-              "AUTH_CONNECTION_REQUIRED",
-              409);
-        }
-      };
-    }
-  }
+  static class AccountConnection {}
 
   static volatile Map<String, String> currentProperties = Map.of();
 
@@ -222,7 +161,6 @@ class ObservedProfileDriftTest {
               .put("policyVersion", "1")
               .put("applicationId", "profile-app")
               .put("environment", "Development")
-              .put("accountRef", "profile-account")
               .put("entryPolicyId", "blank-entry")
               .putNull("applicationPolicy");
       policy.putArray("allowedOrigins").add(ORIGIN);
@@ -265,12 +203,12 @@ class ObservedProfileDriftTest {
         "--studio.guided-authoring.translation.controller-origin=https://127.0.0.1:"
             + peer.server.getAddress().getPort(),
         "--studio.guided-authoring.controller-token-file=" + controllerToken,
-        "--studio.compile.gateway.provider=vertex",
-        "--studio.compile.gateway.endpoint=" + peer.origin(),
-        "--studio.compile.gateway.credentials.mode=none",
-        "--studio.compile.gateway.project=profile-test",
-        "--studio.compile.gateway.location=profile-region",
-        "--studio.compile.gateway.model=" + model,
+        "--studio.gateway.provider=vertex",
+        "--studio.gateway.endpoint=" + peer.origin(),
+        "--studio.gateway.credentials.mode=none",
+        "--studio.gateway.project=profile-test",
+        "--studio.gateway.location=profile-region",
+        "--studio.gateway.model=" + model,
         "--studio.runner.base-url=" + peer.origin(),
         "--studio.runner.service-identity-token=profile-runner-token"
       };
@@ -305,8 +243,6 @@ class ObservedProfileDriftTest {
         }
         assertThat(application.getBean(GuidedSessionAccess.class))
             .isInstanceOf(GuidedProductionSessionAccess.class);
-        assertThat(application.getBean(LlmGatewayClient.class))
-            .isInstanceOf(GenAiLlmGatewayClient.class);
         assertThat(application.getBean(GuidedLlmGatewayClient.class))
             .isInstanceOf(GenAiGuidedLlmGatewayClient.class);
         assertThat(application.getBean(StudioGatewayProperties.class).model()).isEqualTo(model);
@@ -330,25 +266,27 @@ class ObservedProfileDriftTest {
             .isEqualTo(entry);
         JdbcTemplate jdbc = application.getBean(JdbcTemplate.class);
         UUID testId = seedAuthoring(jdbc);
+        // STUDIO-OBS-014 S3: a learning start needs an approved governed policy for its scope.
+        com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
+            jdbc, CSI, "profile-app", "Development", java.util.List.of(ORIGIN), null, "ALLOW");
         int port = ((ServletWebServerApplicationContext) application).getWebServer().getPort();
         String origin = "http://127.0.0.1:" + port;
         HttpClient http = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
         var start =
             CONTRACTS
                 .object()
-                .put("schemaVersion", 2)
+                .put("schemaVersion", 3)
                 .put("testId", testId.toString())
                 .put("sourceRevision", "1")
                 .put("configurationRevision", "1")
                 .put("environmentId", "Development")
-                .put("applicationId", "profile-app")
-                .put("accountRef", "profile-account");
+                .put("applicationId", "profile-app");
         start.set("versions", fixture.path("artifact").path("learnedPlan").path("versions"));
-        var started = send(http, origin + "/api/v3/studio/guided-sessions", start);
+        var started = send(http, origin + "/api/v1/studio/guided-sessions", start);
         assertThat(started.statusCode()).as(started.body()).isEqualTo(202);
         JsonNode response = CONTRACTS.parse(started.body());
         JsonNode view = publication ? response.path("session") : response;
-        assertThat(response.path("schemaVersion").asInt()).isEqualTo(publication ? 3 : 2);
+        assertThat(response.path("schemaVersion").asInt()).isEqualTo(3);
         String sessionId = view.path("sessionId").asText();
         assertThat(sessionId).isNotBlank();
         assertThat(
@@ -368,24 +306,24 @@ class ObservedProfileDriftTest {
           var existing =
               http.send(
                   HttpRequest.newBuilder(
-                          URI.create(origin + "/api/v3/studio/guided-sessions/" + sessionId))
+                          URI.create(origin + "/api/v1/studio/guided-sessions/" + sessionId))
                       .header("Cookie", "put_session=profile-session")
                       .GET()
                       .build(),
                   HttpResponse.BodyHandlers.ofString());
           assertThat(existing.statusCode()).as(existing.body()).isEqualTo(200);
-          assertThat(CONTRACTS.parse(existing.body()).path("schemaVersion").asInt()).isEqualTo(2);
+          assertThat(CONTRACTS.parse(existing.body()).path("schemaVersion").asInt()).isEqualTo(3);
         }
         var finalize =
             CONTRACTS
                 .object()
-                .put("schemaVersion", 2)
+                .put("schemaVersion", 3)
                 .put("expectedSourceRevision", "1")
                 .put("expectedConfigurationRevision", "1");
         var refused =
             send(
                 http,
-                origin + "/api/v3/studio/guided-sessions/" + sessionId + "/finalize",
+                origin + "/api/v1/studio/guided-sessions/" + sessionId + "/finalize",
                 finalize);
         assertThat(refused.statusCode()).as(refused.body()).isEqualTo(409);
         assertThat(CONTRACTS.parse(refused.body()).path("code").asText())
@@ -397,7 +335,7 @@ class ObservedProfileDriftTest {
           assertThatThrownBy(
                   () ->
                       application
-                          .getBean(ObservedReplayAuthorization.class)
+                          .getBean(ObservedReplayAuthorizer.class)
                           .authorize(testId, null, null))
               .isInstanceOf(GuidedSessionException.class)
               .hasMessageContaining("RUNTIME_INCOMPATIBLE");
@@ -405,7 +343,7 @@ class ObservedProfileDriftTest {
           assertThatThrownBy(
                   () ->
                       application
-                          .getBean(ObservedReplayAuthorization.class)
+                          .getBean(ObservedReplayAuthorizer.class)
                           .authorize(testId, null, null))
               .isInstanceOf(GuidedSessionException.class)
               .hasMessageContaining("UNAUTHENTICATED");
@@ -414,16 +352,9 @@ class ObservedProfileDriftTest {
                 () -> application.getBean(ObservedRevisionVerifier.class).verify(UUID.randomUUID()))
             .isInstanceOf(GuidedSessionException.class)
             .hasMessageContaining(replay ? "MISSING_SOURCE" : "RUNTIME_INCOMPATIBLE");
-        assertThat(
-                application
-                    .getBean(ReplayAccountAccess.class)
-                    .isCurrent(
-                        new ReplayAccountAccess.AccountAuthorization(CONTRACTS.object()),
-                        java.time.Instant.now()))
-            .isFalse();
+        assertThat(application.getBeansOfType(ObservedReplayAuthorization.class)).hasSize(1);
         for (String table :
             List.of(
-                "ui_test_compile_requests",
                 "studio_guided_model_attempts",
                 "studio_guided_actions",
                 "studio_guided_publications",

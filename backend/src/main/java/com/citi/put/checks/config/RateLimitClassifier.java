@@ -35,6 +35,13 @@ public class RateLimitClassifier {
       return BucketClass.EXECUTE;
     }
 
+    // STUDIO-OBS-014 AC-8 (AR-2 d): starting a guided learning session drives a browser and model
+    // calls, so it is metered as EXECUTE. Only the start itself: its sub-routes (cancel, clarify)
+    // stay WRITE.
+    if (path.matches(".*/studio/guided-sessions$")) {
+      return BucketClass.EXECUTE;
+    }
+
     if (path.matches(".*/reports/[^/]+/send$")) {
       return BucketClass.SEND;
     }

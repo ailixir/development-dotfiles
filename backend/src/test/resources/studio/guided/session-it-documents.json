@@ -1,0 +1,186 @@
+{
+  "_comment": "GuidedSessionIT base documents (STUDIO-OBS-012A port). Exactly the documents the IT used before the v1 contract deletion, after its own v3 projection (schemaVersion 3, observation coverage.passwordControls 0, clarification phase observed, session without accountRef/authConnection, versions {contract:3}). The service validates every one against contracts/v3 at use. STUDIO-OBS-014 C2a: the clarification choice carries labelSource PAGE with role and region (AC-7).",
+  "documents": {
+    "session": {
+      "schemaVersion": 3,
+      "sessionId": "session-1",
+      "testId": "test-1",
+      "state": "SUCCEEDED",
+      "scope": {
+        "principalId": "user-1",
+        "csiId": "CSI-123",
+        "environmentId": "fixture",
+        "applicationId": "orders",
+        "approvedOrigins": [
+          "https://orders.example.test"
+        ],
+        "sourceRevision": "1",
+        "configurationRevision": "1",
+        "modelDataPolicyId": "labels-only-1",
+        "valueTransferPolicyId": null,
+        "capabilities": [
+          "observe",
+          "navigate",
+          "read",
+          "fill",
+          "click",
+          "assert"
+        ]
+      },
+      "scopeHash": "2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861",
+      "runAuthorization": {
+        "authorizationId": "authorization-1",
+        "kind": "scopedRun",
+        "authorizedAt": "2026-10-08T03:00:00Z",
+        "principalId": "user-1",
+        "scopeHash": "2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861"
+      },
+      "versions": {
+        "contract": 3
+      },
+      "owner": {
+        "workerId": "worker-1",
+        "fence": 1,
+        "leaseExpiresAt": "2026-10-08T03:10:00Z"
+      },
+      "createdAt": "2026-10-08T03:00:00Z",
+      "expiresAt": "2026-10-08T03:10:00Z",
+      "limits": {
+        "maxSessionSeconds": 600,
+        "maxActions": 200,
+        "maxObservations": 400,
+        "maxModelProposals": 100,
+        "maxModelInputTokensTotal": 128000,
+        "maxModelOutputTokensTotal": 32000,
+        "maxObservationBytes": 32768,
+        "maxObservationNodes": 500,
+        "maxObservationDepth": 8,
+        "maxSanitizedEvidenceBytesTotal": 1048576,
+        "maxRuntimeValues": 32,
+        "maxRuntimeValueBytes": 4096,
+        "maxRuntimeValuesBytesTotal": 65536,
+        "maxSourceSteps": 100,
+        "maxStatementsPerStep": 8
+      },
+      "counters": {
+        "actions": 3,
+        "observations": 3,
+        "modelProposals": 3,
+        "modelInputTokens": 500,
+        "modelOutputTokens": 100,
+        "sanitizedEvidenceBytes": 5000
+      },
+      "sourceSteps": [
+        {
+          "stepId": "00000000-0000-4000-8000-0000000000a1",
+          "requiresAssertion": false
+        },
+        {
+          "stepId": "00000000-0000-4000-8000-0000000000a2",
+          "requiresAssertion": true
+        }
+      ]
+    },
+    "observation": {
+      "schemaVersion": 3,
+      "sessionId": "session-1",
+      "documentId": "document-1",
+      "generation": 1,
+      "origin": "https://orders.example.test",
+      "scopeHash": "2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861",
+      "observedAt": "2026-10-08T03:00:01Z",
+      "coverage": {
+        "mode": "semantic",
+        "complete": true,
+        "truncated": false,
+        "withheldRegions": 0,
+        "reason": "complete",
+        "passwordControls": 0
+      },
+      "nodes": [
+        {
+          "nodeId": "node-0",
+          "documentId": "document-1",
+          "generation": 1,
+          "role": "text",
+          "name": "Order number",
+          "elementType": "text",
+          "controlType": "none",
+          "classification": "permittedBusinessData",
+          "policyRuleId": "reference-field-1",
+          "visible": true,
+          "actionable": true,
+          "depth": 0,
+          "parentNodeId": null,
+          "regionId": null,
+          "formId": null,
+          "labelNodeIds": [],
+          "locatorHints": [
+            {
+              "kind": "testId",
+              "value": "order-reference",
+              "exact": true
+            }
+          ]
+        }
+      ]
+    },
+    "clarification": {
+      "schemaVersion": 3,
+      "clarificationId": "question-1",
+      "sessionId": "session-1",
+      "scopeHash": "2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-0000000000a1",
+        "ordinal": 0
+      },
+      "documentId": "document-1",
+      "generation": 1,
+      "reason": "AMBIGUOUS_TARGET",
+      "promptCode": "CHOOSE_FIELD",
+      "choices": [
+        {
+          "choiceId": "choice-1",
+          "safeLabel": "Order reference",
+          "labelSource": "PAGE",
+          "role": "textbox",
+          "region": null,
+          "nodeId": "node-1",
+          "bindingId": null
+        }
+      ],
+      "expiresAt": "2026-10-08T03:10:00Z",
+      "phase": "observed"
+    },
+    "action": {
+      "schemaVersion": 3,
+      "sessionId": "session-1",
+      "coordinate": {
+        "stepId": "00000000-0000-4000-8000-0000000000a1",
+        "ordinal": 0
+      },
+      "scopeHash": "2fec131b52b0144e082e963564fc3d114f068e5ef4d795a82c8f3b5653186861",
+      "observationHash": "0c8751983e76247c5add39fc1dd7e3db6291588d530a7e8965cd90f79251c83c",
+      "generation": 1,
+      "target": {
+        "nodeId": "node-0",
+        "documentId": "document-1",
+        "generation": 1,
+        "locator": {
+          "kind": "testId",
+          "value": "order-reference",
+          "exact": true
+        }
+      },
+      "operation": {
+        "kind": "read",
+        "bindingId": "binding-1",
+        "recipe": {
+          "kind": "visibleText",
+          "classification": "permittedBusinessData",
+          "policyRuleId": "reference-field-1"
+        }
+      }
+    }
+  }
+}

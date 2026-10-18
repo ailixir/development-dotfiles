@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.guided.session;
 import static com.citi.put.checks.studio.guided.session.GuidedSessionException.require;
 
 import com.citi.put.checks.security.BffAuthenticationToken;
+import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.nio.charset.StandardCharsets;
@@ -21,11 +22,39 @@ public final class GuidedSessionService {
   private static final Set<String> TERMINAL =
       Set.of(
           "SUCCEEDED", "PUBLICATION_CONFLICT", "FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED");
+  private static final org.slf4j.Logger LOG =
+      org.slf4j.LoggerFactory.getLogger(GuidedSessionService.class);
+
+  /** STUDIO-OBS-015 H8: back-to-back re-sends after an uncertain stop, before the sweep. */
+  private static final int TEARDOWN_RESENDS = 2;
+
+  /** STUDIO-OBS-015 H8: at most one stop in flight per session in this JVM. */
+  private static final Set<String> TEARDOWNS_IN_FLIGHT =
+      java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+  /**
+   * STUDIO-OBS-015 H8: blocking stop sends (up to 15 s each) never run on the common pool. A full
+   * queue discards the attempt; the durable request stays for the reaper's re-drive.
+   */
+  private final java.util.concurrent.ThreadPoolExecutor teardowns = teardownExecutor();
+
+  /** STUDIO-OBS-015 aria-warn-ruling01: earliest instant of the next past-window count. */
+  private final java.util.concurrent.atomic.AtomicReference<Instant> nextAbandonedReport =
+      new java.util.concurrent.atomic.AtomicReference<>(Instant.MIN);
+
   private final GuidedSessionRepository repository;
   private final GuidedContracts contracts;
   private final GuidedSessionAccess access;
   private final GuidedSessionProperties properties;
   private final GuidedActionLedger ledger;
+  private final GuidedIncrementalStore incremental;
+  private java.util.function.Function<java.util.UUID, JsonNode> incrementalVerifier;
+
+  public void installIncrementalVerifier(
+      java.util.function.Function<java.util.UUID, JsonNode> verifier) {
+    this.incrementalVerifier = java.util.Objects.requireNonNull(verifier);
+  }
+
   private final Clock clock;
   private com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService materialization;
   private com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore preparations;
@@ -33,6 +62,39 @@ public final class GuidedSessionService {
   private com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore assignments;
   private java.util.function.BiConsumer<ObjectNode, String> stopSender;
   private PublicationLifecycle publication;
+  private java.util.function.BooleanSupplier executionEnabled = () -> true;
+
+  public void installExecutionEnabled(java.util.function.BooleanSupplier enabled) {
+    this.executionEnabled = enabled;
+  }
+
+  private com.citi.put.checks.studio.secrets.SecretAuditLifecycle secretAudit;
+
+  public void installSecretAudit(com.citi.put.checks.studio.secrets.SecretAuditLifecycle audit) {
+    this.secretAudit = audit;
+  }
+
+  private com.citi.put.checks.studio.secrets.SecretRevocationSweep secretRevocation;
+
+  public void installSecretRevocation(
+      com.citi.put.checks.studio.secrets.SecretRevocationSweep sweep) {
+    this.secretRevocation = sweep;
+  }
+
+  /**
+   * Internal names-only denial stops the owner and schedules a REVOKED bridge stop after commit.
+   */
+  public void secretRevoked(String id) {
+    repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          if (!terminal(current)) {
+            current.progress().put("errorCode", "SECRET_USE_REVOKED");
+            stop(current, "CANCELLED");
+          }
+          return null;
+        });
+  }
 
   /** Transactional original-evidence hooks; implementations cannot perform network I/O. */
   public interface PublicationLifecycle {
@@ -50,6 +112,41 @@ public final class GuidedSessionService {
   public void installPublication(PublicationLifecycle lifecycle) {
     require(publication == null, "RUNTIME_INCOMPATIBLE", 409);
     publication = java.util.Objects.requireNonNull(lifecycle);
+  }
+
+  private com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection evidence =
+      com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection.NONE;
+
+  /**
+   * STUDIO-OBS-013 (AR-1 B14_S3_hunk): the recording evidence projection result() publishes. One
+   * install, mirroring installPublication; until installed, today's literals (NONE).
+   */
+  public void installEvidence(
+      com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection projection) {
+    require(
+        evidence == com.citi.put.checks.studio.guided.evidence.GuidedEvidenceProjection.NONE
+            && projection != null,
+        "RUNTIME_INCOMPATIBLE",
+        409);
+    evidence = projection;
+  }
+
+  private com.citi.put.checks.studio.guided.policy.ObservationPolicyService policies;
+  private GuidedCsiBudget csiBudget;
+
+  /**
+   * STUDIO-OBS-014 AC-1/AC-8: the governed observation policy and the per-CSI budget that every
+   * start must pass. One install; a service without them refuses every start (fail closed).
+   */
+  public void installGovernance(
+      com.citi.put.checks.studio.guided.policy.ObservationPolicyService policies,
+      GuidedCsiBudget csiBudget) {
+    require(
+        this.policies == null && policies != null && csiBudget != null,
+        "RUNTIME_INCOMPATIBLE",
+        409);
+    this.policies = policies;
+    this.csiBudget = csiBudget;
   }
 
   private com.citi.put.checks.studio.guided.translation.GuidedTranslationStore translation;
@@ -77,10 +174,7 @@ public final class GuidedSessionService {
           owner(controller, "backend-controller", session, fence);
           active(session);
           access.checkSourceCurrent(session.document());
-          require(
-              v2(session.document()) && translation != null && translation.exists(id),
-              "RUNTIME_INCOMPATIBLE",
-              409);
+          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
           return operation.apply(session);
         });
   }
@@ -94,10 +188,7 @@ public final class GuidedSessionService {
           access.checkCurrent(session.document());
           require(
               session.document().path("owner").path("fence").asLong() == fence, "STALE_FENCE", 409);
-          require(
-              v2(session.document()) && translation != null && translation.exists(id),
-              "RUNTIME_INCOMPATIBLE",
-              409);
+          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
           return reconcileLateModelUsageLocked(session);
         });
   }
@@ -167,6 +258,15 @@ public final class GuidedSessionService {
       stop(session, "FAILED");
       return false;
     }
+    // STUDIO-OBS-014 AC-8 (AR-2 c): the per-CSI daily charge rides the same transaction as the
+    // attempt reservation, at the call's ceilings and with no refund. A zero-row verdict ends the
+    // session FAILED BUDGET_EXCEEDED on the same path as the per-session ceilings above.
+    require(csiBudget != null, "RUNTIME_INCOMPATIBLE", 409);
+    if (!csiBudget.charge(session.document().path("scope").path("csiId").asText(), input, output)) {
+      session.progress().put("errorCode", "BUDGET_EXCEEDED");
+      stop(session, "FAILED");
+      return false;
+    }
     return true;
   }
 
@@ -204,6 +304,78 @@ public final class GuidedSessionService {
   }
 
   /**
+   * STUDIO-OBS-014 AC-6 (AR-2 f): the one server-made confirmation a {@code CLARIFY_FIRST} session
+   * raises before its first side-effecting action. It is stored only in {@code progress} (the open
+   * {@code clarification} plus {@code sideEffectConfirmation}, both pruned keys), never in the
+   * clarification-context store, because it is not a model choice and must not become publication
+   * evidence. Declining is the existing cancel or the question's expiry.
+   */
+  public JsonNode sideEffectConfirmation(
+      Authentication controller, String id, long fence, JsonNode question) {
+    return sideEffectConfirmation(controller, id, fence, question, null);
+  }
+
+  public JsonNode sideEffectConfirmation(
+      Authentication controller,
+      String id,
+      long fence,
+      JsonNode question,
+      String prefixRequestDigest) {
+    contracts.validate("v3/clarification", question);
+    require(
+        question.path("reason").asText().equals("SIDE_EFFECT_CONFIRMATION")
+            && question.path("promptCode").asText().equals("CONFIRM_ACTION")
+            && question.path("choices").size() == 1,
+        "INVALID_CONTRACT",
+        422);
+    return translationTransaction(
+        controller,
+        id,
+        fence,
+        session -> {
+          require(
+              (state(session).equals("PROPOSING") || state(session).equals("REPLAYING_PREFIX"))
+                  && !session.progress().has("sideEffectConfirmation")
+                  && question.path("sessionId").asText().equals(id)
+                  && question.path("scopeHash").equals(session.document().path("scopeHash")),
+              "STALE_GENERATION",
+              409);
+          session.progress().set("clarification", question.deepCopy());
+          session
+              .progress()
+              .putObject("sideEffectConfirmation")
+              .put("clarificationId", question.path("clarificationId").asText())
+              .put("status", "PENDING");
+          boolean prefix = incremental.pending(id);
+          if (prefix) {
+            require(
+                prefixRequestDigest != null
+                    && state(session).equals("REPLAYING_PREFIX")
+                    && translation
+                        .frozenPolicy(id)
+                        .path("sideEffectStance")
+                        .asText("CLARIFY_FIRST")
+                        .equals("CLARIFY_FIRST"),
+                "STALE_GENERATION",
+                409);
+            session
+                .progress()
+                .withObject("/sideEffectConfirmation")
+                .put("prefixRequestDigest", prefixRequestDigest);
+            incremental.confirmationRequest(session.document(), session.progress(), true);
+          } else {
+            require(prefixRequestDigest == null, "INVALID_CONTRACT", 422);
+          }
+          session.document().put("state", "AWAITING_CLARIFICATION");
+          if (translation != null && translation.exists(id)) {
+            translation.continuation(id, prefix ? "REPLAYING_PREFIX" : "AWAITING_CLARIFICATION");
+          }
+          repository.save(session);
+          return question.deepCopy();
+        });
+  }
+
+  /**
    * Revocation may stop a frozen run even after its source revision changed; it grants no action.
    */
   public void failTranslation(Authentication controller, String id, long fence, String code) {
@@ -217,7 +389,10 @@ public final class GuidedSessionService {
                 "REVISION_CONFLICT",
                 "BINDING_ORDER",
                 "STALE_GENERATION",
-                "UNSUPPORTED_SURFACE")
+                "UNSUPPORTED_SURFACE",
+                // STUDIO-OBS-014 AR-2 a: a governed refusal (UNGROUNDED_TARGET, DESTRUCTIVE_VERB,
+                // SIDE_EFFECT_DENIED) ends the session with progress.errorCode POLICY_DENIED.
+                "POLICY_DENIED")
             .contains(code),
         "INVALID_CONTRACT",
         422);
@@ -227,18 +402,55 @@ public final class GuidedSessionService {
           access.checkCurrent(session.document());
           owner(controller, "backend-controller", session, fence);
           active(session);
-          require(
-              v2(session.document()) && translation != null && translation.exists(id),
-              "RUNTIME_INCOMPATIBLE",
-              409);
+          require(translation != null && translation.exists(id), "RUNTIME_INCOMPATIBLE", 409);
           session.progress().put("errorCode", code);
           stop(session, "FAILED");
           return null;
         });
   }
 
+  /** Annotates an already rejected proposal; passing actions never enter this method. */
+  public boolean annotateLoginFailure(Authentication controller, String id, long fence) {
+    GuidedInternalSecurity.requireRole(controller, "backend-controller");
+    return repository.transaction(
+        () -> {
+          var current = repository.lock(id);
+          owner(controller, "backend-controller", current, fence);
+          if (terminal(current)
+              || !com.citi.put.checks.studio.guided.translation.LoginRequiredSignature.matches(
+                  current.progress().path("observation"))) {
+            return false;
+          }
+          int step = current.progress().path("stepIndex").asInt();
+          String stepId = current.document().path("sourceSteps").get(step).path("stepId").asText();
+          boolean dispatched = false;
+          for (ObjectNode action : repository.actions(id)) {
+            if (action.path("dispatchCount").asInt() > 0) {
+              JsonNode proposal =
+                  repository.proposal(action.path("admission").path("admissionId").asText());
+              dispatched |=
+                  proposal
+                      .path("operation")
+                      .path("value")
+                      .path("kind")
+                      .asText()
+                      .equals("secretRef");
+            }
+          }
+          current.progress().put("errorCode", "LOGIN_REQUIRED");
+          current
+              .progress()
+              .putObject("detail")
+              .put("stepId", stepId)
+              .put("loginStepsPresent", dispatched);
+          stop(current, "FAILED");
+          return true;
+        });
+  }
+
   public List<ObjectNode> translationActions(Authentication controller, String id, long fence) {
-    return translationTransaction(controller, id, fence, session -> repository.actions(id));
+    return translationTransaction(
+        controller, id, fence, session -> repository.effectiveActions(id));
   }
 
   public void installStopSender(java.util.function.BiConsumer<ObjectNode, String> sender) {
@@ -257,10 +469,6 @@ public final class GuidedSessionService {
     this.assignments = assignments;
   }
 
-  private static boolean v2(JsonNode session) {
-    return session.path("schemaVersion").asInt() == 2;
-  }
-
   public GuidedSessionService(
       GuidedSessionRepository repository,
       GuidedContracts contracts,
@@ -273,6 +481,140 @@ public final class GuidedSessionService {
     this.properties = properties;
     this.clock = clock;
     this.ledger = new GuidedActionLedger(contracts);
+    this.incremental = repository.incremental();
+  }
+
+  public void recordSecretDecision(
+      String id,
+      JsonNode admission,
+      String secret,
+      String version,
+      com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome outcome) {
+    recordSecretDecision(id, admission, secret, version, outcome, null);
+  }
+
+  public void recordSecretDecision(
+      String id,
+      JsonNode admission,
+      String secret,
+      String version,
+      com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome outcome,
+      String failureCode) {
+    require(
+        failureCode == null || Set.of("SECRET_TOO_LONG").contains(failureCode),
+        "INVALID_CONTRACT",
+        422);
+    repository.transaction(
+        () -> {
+          var session = repository.lock(id);
+          ObjectNode action = action(id, admission.path("admission").path("admissionId").asText());
+          require(
+              action.path("state").asText().equals("DISPATCHING")
+                  && action
+                      .path("ownerFence")
+                      .equals(session.document().path("owner").path("fence")),
+              "STALE_FENCE",
+              409);
+          if (secretAudit != null) {
+            var release =
+                secretAudit.guidedRelease(session.document(), action, secret, version, outcome);
+            session
+                .progress()
+                .withObject("/secretReleaseDecisions")
+                .put(
+                    action.path("admission").path("admissionId").asText(), release.id().toString());
+          }
+          if (outcome
+              != com.citi.put.checks.studio.secrets.SecretUseAuditRecorder.ResolutionOutcome
+                  .RESOLVED) {
+            action.put("state", "FAILED").put("outcomeCode", "POLICY_DENIED");
+            repository.saveAction(action);
+            if (secretAudit != null) {
+              secretAudit.guidedNoSend(session.document(), action);
+            }
+            ObjectNode progress = session.progress();
+            String resolutionCode = failureCode;
+            if (resolutionCode == null) {
+              switch (outcome) {
+                case REVOKED:
+                  resolutionCode = "SECRET_USE_REVOKED";
+                  break;
+                case NOT_AUTHORIZED:
+                  resolutionCode = "SECRET_USE_NOT_AUTHORIZED";
+                  break;
+                case UNAVAILABLE:
+                  resolutionCode = "SECRET_UNAVAILABLE";
+                  break;
+                case VAULT_UNAVAILABLE:
+                  resolutionCode = "VAULT_UNAVAILABLE";
+                  break;
+                default:
+                  resolutionCode = "INVALID_CONTRACT";
+                  break;
+              }
+            }
+            progress.put("errorCode", resolutionCode);
+            stop(session, "FAILED");
+          } else {
+            repository.save(session);
+          }
+          return null;
+        });
+  }
+
+  /** A resolved but policy-refused admission is known not to have sent a secret frame. */
+  public void refuseResolvedSecret(String id, JsonNode admission) {
+    repository.transaction(
+        () -> {
+          var session = repository.lock(id);
+          String admissionId = admission.path("admission").path("admissionId").asText();
+          ObjectNode action = action(id, admissionId);
+          require(
+              action.path("state").asText().equals("DISPATCHING")
+                  && action
+                      .path("ownerFence")
+                      .equals(session.document().path("owner").path("fence")),
+              "STALE_FENCE",
+              409);
+          require(
+              secretAudit == null
+                  || session.progress().path("secretReleaseDecisions").has(admissionId),
+              "RUNTIME_INCOMPATIBLE",
+              409);
+          action.put("state", "FAILED").put("outcomeCode", "POLICY_DENIED");
+          repository.saveAction(action);
+          if (secretAudit != null) {
+            secretAudit.guidedNoSend(session.document(), action);
+          }
+          session.progress().put("errorCode", "ORIGIN_NOT_ALLOWED");
+          stop(session, "FAILED");
+          return null;
+        });
+  }
+
+  /**
+   * Safe frozen scope needed by post-commit dispatch; contains references, never resolved values.
+   */
+  public ObjectNode secretSession(String id) {
+    return repository.transaction(() -> repository.lock(id).document().deepCopy());
+  }
+
+  /**
+   * STUDIO-OBS-008 P2/P3: the shared public presentation. Until the production projector is
+   * installed a service states only its frozen step list and claims nothing else.
+   */
+  private GuidedPublicPresentationProjector presentation;
+
+  public void installPresentation(GuidedPublicPresentationProjector projector) {
+    require(projector != null, "RUNTIME_INCOMPATIBLE", 409);
+    presentation = projector;
+  }
+
+  public GuidedPublicPresentationProjector presentation() {
+    if (presentation == null) {
+      presentation = GuidedPublicPresentationProjector.withoutFacts(contracts);
+    }
+    return presentation;
   }
 
   public JsonNode start(Authentication user, String key, JsonNode request) {
@@ -280,7 +622,7 @@ public final class GuidedSessionService {
     key(key);
     require(
         user instanceof BffAuthenticationToken && user.isAuthenticated(), "UNAUTHENTICATED", 401);
-    require(properties.enabled(), "RUNTIME_INCOMPATIBLE", 409);
+    require(properties.enabled() && executionEnabled.getAsBoolean(), "RUNTIME_INCOMPATIBLE", 409);
     String principal = ((BffAuthenticationToken) user).getPrincipal().userId();
     ObjectNode identity =
         contracts
@@ -296,37 +638,57 @@ public final class GuidedSessionService {
             var existing = repository.lock(previous.path("sessionId").asText());
             access.checkUser(user, existing.document());
             access.checkCurrent(existing.document());
-            return view(existing.document());
+            return view(existing);
           }
           var snapshot = access.resolve(user, request);
           ObjectNode scope = snapshot.scope().deepCopy();
           require(scope.path("principalId").asText().equals(principal), "FORBIDDEN_SCOPE", 403);
           for (String field :
               List.of(
-                  "sourceRevision",
-                  "configurationRevision",
-                  "environmentId",
-                  "applicationId",
-                  "accountRef")) {
+                  "sourceRevision", "configurationRevision", "environmentId", "applicationId")) {
             require(scope.path(field).equals(request.path(field)), "REVISION_CONFLICT", 409);
           }
+          // STUDIO-OBS-014 AC-1 / c2b-spec startGuidedSession steps 3-6: the approved, current
+          // governed policy (POLICY_NOT_APPROVED otherwise), its origins inside the trusted policy
+          // (RUNTIME_INCOMPATIBLE otherwise), the learning origins narrowed to the governed ones,
+          // then the per-CSI budget under the CSI guard-row lock (AC-8). Nothing is written on a
+          // refusal: no session, no publication base, no budget charge.
+          require(policies != null && csiBudget != null, "RUNTIME_INCOMPATIBLE", 409);
+          var governed = policies.activeForStart(scope);
+          scope.set("approvedOrigins", governed.document().path("allowedOrigins").deepCopy());
+          GuidedIncrementalStore.Selection selection =
+              access
+                      instanceof
+                      com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess
+                  ? incremental.select(request, scope.path("approvedOrigins"))
+                  : null;
+          if (selection != null && selection.program() != null && selection.index() > 0) {
+            require(incrementalVerifier != null, "RUNTIME_INCOMPATIBLE", 409);
+            JsonNode verified = incrementalVerifier.apply(selection.change().baseRevisionId());
+            require(
+                verified.path("artifact").equals(selection.change().baseArtifact()),
+                "EVIDENCE_MISMATCH",
+                409);
+          }
+          csiBudget.admitStart(scope.path("csiId").asText());
           for (String field : List.of("approvedOrigins", "capabilities")) {
             var values = new java.util.TreeSet<String>();
             scope.path(field).forEach(n -> values.add(n.asText()));
             var array = scope.putArray(field);
             values.forEach(array::add);
           }
-          require(
-              !snapshot.authConnection().path("mode").asText().equals("unavailable")
-                  && !snapshot.authConnection().path("connectionId").isNull(),
-              "AUTH_CONNECTION_REQUIRED",
-              409);
           ObjectNode session = contracts.object();
           Instant now = clock.instant();
           session.put("schemaVersion", request.path("schemaVersion").asInt());
           session.put("sessionId", UUID.randomUUID().toString());
           session.set("testId", request.path("testId"));
           session.put("state", "PREPARING");
+          if (selection != null && selection.program() != null) {
+            session.put("baseRevisionId", selection.change().baseRevisionId().toString());
+            session.put(
+                "firstLearnStepId",
+                selection.change().authoring().steps().get(selection.index()).id().toString());
+          }
           session.set("scope", scope);
           session.put("scopeHash", GuidedContracts.hash(scope));
           session
@@ -336,16 +698,8 @@ public final class GuidedSessionService {
               .put("authorizedAt", now.toString())
               .put("principalId", principal)
               .put("scopeHash", GuidedContracts.hash(scope));
-          session.set(
-              "versions",
-              contracts.parse(
-                  "{\"contract\":1,\"learnedPlan\":1,\"observation\":1,\"guidedPolicy\":1,"
-                      + "\"referencePolicy\":3,\"lowering\":1,\"artifact\":2,"
-                      + "\"language\":\"observed-1\",\"executor\":\"observed-1\"}"));
-          if (v2(session)) {
-            contracts.validate("v2/versions", request.path("versions"));
-            session.set("versions", request.path("versions"));
-          }
+          contracts.validate("v3/versions", request.path("versions"));
+          session.set("versions", request.path("versions"));
           session
               .putObject("owner")
               .put("workerId", "unclaimed")
@@ -372,22 +726,25 @@ public final class GuidedSessionService {
               "BUDGET_EXCEEDED",
               429);
           session.set("sourceSteps", snapshot.sourceSteps().deepCopy());
-          session.set("authConnection", snapshot.authConnection().deepCopy());
           contracts.validate("session", session);
           access.checkCurrent(session);
           access.checkSourceCurrent(session);
           repository.insert(session);
-          if (v2(session)
-              && access
-                  instanceof
-                  com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess
-                          production) {
+          // Step 8: the start-time freeze, in the same transaction (V19 re-checks it).
+          policies.freeze(session.path("sessionId").asText(), governed);
+          if (access
+              instanceof
+              com.citi.put.checks.studio.guided.translation.GuidedProductionSessionAccess
+                      production) {
             production.initialize(session);
           }
-          if (v2(session) && publication != null) {
+          if (publication != null) {
             publication.started(session, now);
           }
-          JsonNode result = view(session);
+          if (selection != null) {
+            incremental.freeze(session, selection);
+          }
+          JsonNode result = view(repository.lock(session.path("sessionId").asText()));
           repository.command(namespace, "start", key, digest, result);
           return result;
         });
@@ -401,7 +758,7 @@ public final class GuidedSessionService {
           access.checkCurrent(session.document());
           if (projection.equals("result")) {
             if (!terminal(session)) {
-              return view(session.document());
+              return view(session);
             }
             return result(session);
           }
@@ -411,7 +768,7 @@ public final class GuidedSessionService {
             }
             return session.progress().get("clarification").deepCopy();
           }
-          return view(session.document());
+          return view(session);
         });
   }
 
@@ -427,7 +784,7 @@ public final class GuidedSessionService {
           if (!terminal(session)) {
             stop(session, "CANCELLED");
           }
-          return view(session.document());
+          return view(session);
         });
   }
 
@@ -442,8 +799,7 @@ public final class GuidedSessionService {
         session -> {
           active(session);
           JsonNode question = session.progress().path("clarification");
-          boolean sourceQuestion =
-              v2(session.document()) && question.path("phase").asText().equals("source");
+          boolean sourceQuestion = question.path("phase").asText().equals("source");
           require(
               state(session).equals("AWAITING_CLARIFICATION")
                   && question.path("clarificationId").equals(request.path("clarificationId"))
@@ -465,6 +821,35 @@ public final class GuidedSessionService {
             }
           }
           require(selected != null, "INVALID_CONTRACT", 422);
+          if (question.path("reason").asText().equals("SIDE_EFFECT_CONFIRMATION")) {
+            // STUDIO-OBS-014 AC-6: the author confirmed the first side-effecting action. Recorded
+            // in progress only; no clarification context, no model selection, no publication
+            // evidence. The next proposal passes the CLARIFY_FIRST stance.
+            ObjectNode confirmation =
+                (ObjectNode) session.progress().path("sideEffectConfirmation");
+            require(
+                confirmation.path("clarificationId").equals(question.path("clarificationId")),
+                "STALE_GENERATION",
+                409);
+            if (incremental.pending(id)) {
+              require(
+                  confirmation.path("status").asText().equals("PENDING"), "STALE_GENERATION", 409);
+              ownerFromLivePrefix(session);
+              access.checkSourceCurrent(session.document());
+              incremental.confirmationRequest(session.document(), session.progress(), true);
+            }
+            confirmation.put("status", "CONFIRMED");
+            session.progress().remove("clarification");
+            session
+                .document()
+                .put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "OBSERVING");
+            if (translation != null && translation.exists(id)) {
+              translation.continuation(
+                  id, incremental.pending(id) ? "REPLAYING_PREFIX" : "REFRESH");
+            }
+            repository.save(session);
+            return view(session);
+          }
           ObjectNode answers = session.progress().withObject("/resolvedClarifications");
           String questionId = question.path("clarificationId").asText();
           require(!answers.has(questionId), "IDEMPOTENCY_CONFLICT", 409);
@@ -500,7 +885,7 @@ public final class GuidedSessionService {
           session.progress().remove("clarification");
           session.document().put("state", sourceQuestion ? "PREPARING" : "OBSERVING");
           repository.save(session);
-          return view(session.document());
+          return view(session);
         });
   }
 
@@ -539,12 +924,6 @@ public final class GuidedSessionService {
           var session = repository.lock(id);
           access.checkUser(user, session.document());
           access.checkCurrent(session.document());
-          if (route.equals("clarify")) {
-            require(
-                session.document().path("schemaVersion").equals(request.path("schemaVersion")),
-                "RUNTIME_INCOMPATIBLE",
-                409);
-          }
           String digest = GuidedContracts.hash(request);
           JsonNode previous = repository.duplicate(id, route, key, digest);
           if (previous != null) {
@@ -568,94 +947,233 @@ public final class GuidedSessionService {
     key(key);
     GuidedInternalSecurity.requireRole(worker, "owning-worker");
     require(worker.getName().equals(request.path("workerId").asText()), "FORBIDDEN_SCOPE", 403);
-    return repository.transaction(
-        () -> {
-          var session = repository.lock(id);
-          access.checkCurrent(session.document());
-          active(session);
-          access.checkSourceCurrent(session.document());
-          if (v2(session.document())) {
-            require(assignments != null, "RUNTIME_INCOMPATIBLE", 409);
-            assignments.authorizeClaim(session.document(), worker.getName(), clock.instant());
-          }
-          String digest = GuidedContracts.hash(request);
-          JsonNode previous = repository.duplicate(id, "claim", key, digest);
-          if (previous != null) {
-            return session.document().deepCopy();
-          }
-          require(
-              session.document().path("schemaVersion").equals(request.path("schemaVersion")),
-              "RUNTIME_INCOMPATIBLE",
-              409);
-          if (v2(session.document())) {
-            require(
-                session.document().path("versions").equals(request.path("versions")),
-                "RUNTIME_INCOMPATIBLE",
-                409);
-          }
-          JsonNode owner = session.document().path("owner");
-          int fence = owner.path("fence").asInt();
-          require(
-              fence == request.path("expectedFence").asInt()
-                  && (fence < Integer.MAX_VALUE || v2(session.document())),
-              "STALE_FENCE",
-              409);
-          boolean same = worker.getName().equals(owner.path("workerId").asText());
-          boolean liveLease =
-              Instant.parse(owner.path("leaseExpiresAt").asText()).isAfter(clock.instant());
-          require(same || !liveLease, "STALE_FENCE", 409);
-          Instant deadline = Instant.parse(session.document().path("expiresAt").asText());
-          Instant lease = clock.instant().plusSeconds(30);
-          if (lease.isAfter(deadline)) {
-            lease = deadline;
-          }
-          if (same && liveLease) {
-            // Ownership maintenance is not an acquisition or a workflow transition. Keeping the
-            // fence also preserves outstanding admission/callback identities for this live owner.
-            ((ObjectNode) owner).put("leaseExpiresAt", lease.toString());
-            repository.save(session);
-            repository.command(id, "claim", key, digest, session.document());
-            return session.document().deepCopy();
-          }
-          require(fence < Integer.MAX_VALUE, "STALE_FENCE", 409);
-          List<ObjectNode> actions = repository.actions(id);
-          if (actions.stream().anyMatch(a -> a.path("state").asText().equals("DISPATCHING"))
-              || (fence > 0
-                  && !(v2(session.document())
-                      && owner.path("workerId").asText().equals("unclaimed"))
-                  && (actions.stream().anyMatch(a -> a.path("dispatchCount").asInt() > 0)
-                      || !access.recoverableContext(id, worker.getName())))) {
-            stop(session, "UNKNOWN_OUTCOME");
-            repository.command(id, "claim", key, digest, session.document());
-            return session.document().deepCopy();
-          }
-          for (ObjectNode action : actions) {
-            if (action.path("state").asText().equals("ADMITTED")) {
-              action.put("state", "REVOKED");
-              action.put("outcomeCode", "CANCELLED");
-              repository.saveAction(action);
-            }
-          }
-          session
-              .document()
-              .putObject("owner")
-              .put("workerId", worker.getName())
-              .put("fence", fence + 1)
-              .put("leaseExpiresAt", lease.toString());
-          if (!Set.of("AWAITING_CLARIFICATION", "AWAITING_AUTH", "FINALIZING")
-              .contains(state(session))) {
-            session.document().put("state", v2(session.document()) ? "PREPARING" : "OBSERVING");
-            session.progress().remove("observationHash");
-          }
-          repository.save(session);
-          repository.command(id, "claim", key, digest, session.document());
-          return session.document().deepCopy();
-        });
+    record ClaimDecision(boolean revoked, JsonNode response) {}
+    ClaimDecision decision =
+        repository.transaction(
+            () -> {
+              if (secretRevocation != null && secretRevocation.guidedRevoked(id)) {
+                return new ClaimDecision(true, null);
+              }
+              return new ClaimDecision(
+                  false,
+                  repository.transaction(
+                      () -> {
+                        var session = repository.lock(id);
+                        access.checkCurrent(session.document());
+                        active(session);
+                        access.checkSourceCurrent(session.document());
+                        require(assignments != null, "RUNTIME_INCOMPATIBLE", 409);
+                        assignments.authorizeClaim(
+                            session.document(), worker.getName(), clock.instant());
+                        String digest = GuidedContracts.hash(request);
+                        JsonNode previous = repository.duplicate(id, "claim", key, digest);
+                        if (previous != null) {
+                          return session.document().deepCopy();
+                        }
+                        require(
+                            session.document().path("versions").equals(request.path("versions")),
+                            "RUNTIME_INCOMPATIBLE",
+                            409);
+                        JsonNode owner = session.document().path("owner");
+                        int fence = owner.path("fence").asInt();
+                        require(fence == request.path("expectedFence").asInt(), "STALE_FENCE", 409);
+                        boolean same = worker.getName().equals(owner.path("workerId").asText());
+                        boolean liveLease =
+                            Instant.parse(owner.path("leaseExpiresAt").asText())
+                                .isAfter(clock.instant());
+                        require(same || !liveLease, "STALE_FENCE", 409);
+                        Instant deadline =
+                            Instant.parse(session.document().path("expiresAt").asText());
+                        Instant lease = clock.instant().plusSeconds(30);
+                        if (lease.isAfter(deadline)) {
+                          lease = deadline;
+                        }
+                        if (same && liveLease) {
+                          // Ownership maintenance is not an acquisition or a workflow transition.
+                          // Keeping the
+                          // fence also preserves outstanding admission/callback identities for this
+                          // live owner.
+                          ((ObjectNode) owner).put("leaseExpiresAt", lease.toString());
+                          repository.saveRenewalAndCommand(session, key, digest);
+                          return session.document().deepCopy();
+                        }
+                        require(fence < Integer.MAX_VALUE, "STALE_FENCE", 409);
+                        List<ObjectNode> actions = repository.actions(id);
+                        if (actions.stream()
+                                .anyMatch(a -> a.path("state").asText().equals("DISPATCHING"))
+                            || (fence > 0
+                                && !owner.path("workerId").asText().equals("unclaimed")
+                                && (actions.stream()
+                                        .anyMatch(a -> a.path("dispatchCount").asInt() > 0)
+                                    || !access.recoverableContext(id, worker.getName())))) {
+                          stop(session, "UNKNOWN_OUTCOME");
+                          repository.command(id, "claim", key, digest, session.document());
+                          return session.document().deepCopy();
+                        }
+                        for (ObjectNode action : actions) {
+                          if (action.path("state").asText().equals("ADMITTED")) {
+                            action.put("state", "REVOKED");
+                            action.put("outcomeCode", "CANCELLED");
+                            repository.saveAction(action);
+                          }
+                        }
+                        session
+                            .document()
+                            .putObject("owner")
+                            .put("workerId", worker.getName())
+                            .put("fence", fence + 1)
+                            .put("leaseExpiresAt", lease.toString());
+                        if (!Set.of("AWAITING_CLARIFICATION", "FINALIZING")
+                            .contains(state(session))) {
+                          session.document().put("state", "PREPARING");
+                          session.progress().remove("observationHash");
+                        }
+                        repository.save(session);
+                        repository.command(id, "claim", key, digest, session.document());
+                        return session.document().deepCopy();
+                      }));
+            });
+    // A real revocation and its stop/audit effects commit before the original public refusal.
+    if (decision.revoked()) {
+      throw new GuidedSessionException("SECRET_USE_REVOKED", 409);
+    }
+    return decision.response();
+  }
+
+  private static String hashObservationBytes(byte[] canonicalObservation) {
+    try {
+      return java.util.HexFormat.of()
+          .formatHex(
+              java.security.MessageDigest.getInstance("SHA-256").digest(canonicalObservation));
+    } catch (java.security.NoSuchAlgorithmException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  private enum ObservationFailure {
+    INVALID_CONTRACT("INVALID_CONTRACT", 422),
+    RUNTIME_INCOMPATIBLE("RUNTIME_INCOMPATIBLE", 409);
+
+    private final String code;
+    private final int status;
+
+    ObservationFailure(String code, int status) {
+      this.code = code;
+      this.status = status;
+    }
+
+    private static ObservationFailure known(GuidedSessionException failure) {
+      for (ObservationFailure candidate : values()) {
+        if (candidate.code.equals(failure.getMessage()) && candidate.status == failure.status()) {
+          return candidate;
+        }
+      }
+      return null;
+    }
+  }
+
+  private static final class ObservationValidation {
+    private final GuidedSessionService owner;
+    private final JsonNode originalObservation;
+    private final ObjectNode snapshot;
+    private final String representation;
+    private final ObservationFailure failure;
+
+    private ObservationValidation(
+        GuidedSessionService owner,
+        JsonNode originalObservation,
+        ObjectNode snapshot,
+        String representation,
+        ObservationFailure failure) {
+      this.owner = owner;
+      this.originalObservation = originalObservation;
+      this.snapshot = snapshot;
+      this.representation = representation;
+      this.failure = failure;
+    }
+  }
+
+  private ObservationValidation prepareObservation(JsonNode observation) {
+    ObjectNode snapshot = ledger.copyOutcomeRequest(observation);
+    if (snapshot == null) {
+      return null;
+    }
+    try {
+      String representation = snapshot.toString();
+      ObservationFailure preparedFailure = null;
+      try {
+        contracts.validate("observation", snapshot);
+      } catch (GuidedSessionException failure) {
+        preparedFailure = ObservationFailure.known(failure);
+        if (preparedFailure == null) {
+          return null;
+        }
+      }
+      return new ObservationValidation(
+          this, observation, snapshot, representation, preparedFailure);
+    } catch (RuntimeException unavailable) {
+      return null;
+    }
+  }
+
+  private void validateObservationAtOriginalPoint(
+      JsonNode observation, ObservationValidation prepared) {
+    boolean matching = false;
+    try {
+      matching =
+          prepared != null
+              && prepared.owner == this
+              && prepared.originalObservation == observation
+              && observation.equals(prepared.snapshot)
+              && observation.toString().equals(prepared.representation);
+    } catch (RuntimeException unavailable) {
+      // Unknown comparison cannot establish original observation schema validity.
+    }
+    if (!matching) {
+      contracts.validate("observation", observation);
+      return;
+    }
+    if (prepared.failure != null) {
+      throw new GuidedSessionException(prepared.failure.code, prepared.failure.status);
+    }
   }
 
   public JsonNode observe(
       Authentication worker, String id, long fence, String key, JsonNode observation) {
-    contracts.validate("observation", observation);
+    return observe(worker, id, fence, key, observation, null);
+  }
+
+  private JsonNode observe(
+      Authentication worker,
+      String id,
+      long fence,
+      String key,
+      JsonNode observation,
+      GuidedSessionRepository.Session alreadyLocked) {
+    return observe(worker, id, fence, key, observation, alreadyLocked, null);
+  }
+
+  private JsonNode observe(
+      Authentication worker,
+      String id,
+      long fence,
+      String key,
+      JsonNode observation,
+      GuidedSessionRepository.Session alreadyLocked,
+      ObservationValidation prepared) {
+    return observe(worker, id, fence, key, observation, alreadyLocked, prepared, null);
+  }
+
+  private JsonNode observe(
+      Authentication worker,
+      String id,
+      long fence,
+      String key,
+      JsonNode observation,
+      GuidedSessionRepository.Session alreadyLocked,
+      ObservationValidation prepared,
+      GuidedMaterializationService.VerifiedContext verifiedContext) {
+    validateObservationAtOriginalPoint(observation, prepared);
     path(id, observation);
     return internal(
         worker,
@@ -665,20 +1183,17 @@ public final class GuidedSessionService {
         "observations",
         key,
         observation,
+        alreadyLocked,
         session -> {
           require(
-              state(session).equals("OBSERVING")
-                  || v2(session.document()) && state(session).equals("PREPARING"),
+              Set.of("OBSERVING", "PREPARING", "REPLAYING_PREFIX").contains(state(session)),
               "STALE_GENERATION",
-              409);
-          require(
-              session.document().path("schemaVersion").equals(observation.path("schemaVersion")),
-              "RUNTIME_INCOMPATIBLE",
               409);
           scoped(session, observation);
           JsonNode limits = session.document().path("limits");
-          int bytes =
-              GuidedContracts.canonical(observation).getBytes(StandardCharsets.UTF_8).length;
+          byte[] canonicalObservation =
+              GuidedContracts.canonical(observation).getBytes(StandardCharsets.UTF_8);
+          int bytes = canonicalObservation.length;
           require(
               bytes <= limits.path("maxObservationBytes").asInt()
                   && observation.path("nodes").size() <= limits.path("maxObservationNodes").asInt(),
@@ -704,36 +1219,61 @@ public final class GuidedSessionService {
           require(origin, "ORIGIN_NOT_ALLOWED", 403);
           reserve(session, "observations", 1, "maxObservations");
           reserve(session, "sanitizedEvidenceBytes", bytes, "maxSanitizedEvidenceBytesTotal");
+          String observationHash = hashObservationBytes(canonicalObservation);
           session
               .progress()
               .put("generation", generation)
               .put("documentId", observation.path("documentId").asText())
-              .put("observationHash", GuidedContracts.hash(observation))
+              .put("observationHash", observationHash)
               .put("origin", observation.path("origin").asText());
-          if (v2(session.document())) {
-            ObjectNode evidence =
-                contracts
-                    .object()
-                    .put("kind", "observedDocument")
-                    .put("sessionId", id)
-                    .put(
-                        "contextId",
-                        materialization.context(session.document()).path("contextId").asText())
-                    .put("documentId", observation.path("documentId").asText())
-                    .put("generation", generation)
-                    .put("origin", observation.path("origin").asText())
-                    .put("observationHash", GuidedContracts.hash(observation));
-            session.progress().set("executionEvidence", evidence);
-            session.progress().set("observation", observation.deepCopy());
-            session.progress().put("evidenceHash", GuidedContracts.hash(evidence));
-          }
-          session.document().put("state", "PROPOSING");
+          ObjectNode evidence =
+              contracts
+                  .object()
+                  .put("kind", "observedDocument")
+                  .put("sessionId", id)
+                  .put(
+                      "contextId",
+                      (verifiedContext == null
+                              ? materialization.context(session.document())
+                              : materialization.context(session.document(), verifiedContext))
+                          .path("contextId")
+                          .asText())
+                  .put("documentId", observation.path("documentId").asText())
+                  .put("generation", generation)
+                  .put("origin", observation.path("origin").asText())
+                  .put("observationHash", observationHash);
+          session.progress().set("executionEvidence", evidence);
+          session.progress().set("observation", observation.deepCopy());
+          session.progress().put("evidenceHash", GuidedContracts.hash(evidence));
+          session
+              .document()
+              .put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "PROPOSING");
           repository.save(session);
           return session.document().deepCopy();
         });
   }
 
   public JsonNode admit(
+      Authentication controller, String id, long fence, String key, JsonNode proposal) {
+    try {
+      return admitChecked(controller, id, fence, key, proposal);
+    } catch (GuidedSessionException refusal) {
+      if (refusal.getMessage().equals("POLICY_DENIED")
+          && com.citi.put.checks.studio.guided.policy.GuidedPolicyReason.of(refusal.messageCode())
+              != null) {
+        // Persist the governed refusal in its own authenticated transaction after admission rolls
+        // back. Never reserve a native admission or leave a refused prefix runnable.
+        try {
+          failTranslation(controller, id, fence, "POLICY_DENIED");
+        } catch (GuidedSessionException noCurrentAuthority) {
+          // Cancellation, expiry or a replaced fence already prevents any further effect.
+        }
+      }
+      throw refusal;
+    }
+  }
+
+  private JsonNode admitChecked(
       Authentication controller, String id, long fence, String key, JsonNode proposal) {
     contracts.validate("action", proposal);
     path(id, proposal);
@@ -746,10 +1286,13 @@ public final class GuidedSessionService {
         key,
         proposal,
         session -> {
-          require(state(session).equals("PROPOSING"), "STALE_GENERATION", 409);
+          require(
+              Set.of("PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+              "STALE_GENERATION",
+              409);
+          materialization.requireAcknowledged(id);
           scoped(session, proposal);
-          for (String field :
-              List.of("generation", v2(session.document()) ? "evidenceHash" : "observationHash")) {
+          for (String field : List.of("generation", "evidenceHash")) {
             require(
                 proposal.path(field).equals(session.progress().path(field)),
                 "STALE_GENERATION",
@@ -763,10 +1306,42 @@ public final class GuidedSessionService {
                   && proposal.path("target").path("generation").equals(proposal.path("generation")),
               "STALE_GENERATION",
               409);
+          if (incremental.pending(id)) {
+            var decision =
+                com.citi.put.checks.studio.guided.translation.GuidedActionGuard.evaluateProposal(
+                    session.progress(),
+                    translation.currentManifest(id),
+                    proposal,
+                    translation.frozenPolicy(id));
+            if (decision.refused()) {
+              throw new GuidedSessionException(
+                  "POLICY_DENIED", 422, decision.refusal().name(), false, null);
+            }
+            require(!decision.confirmFirst(), "STALE_GENERATION", 409);
+            JsonNode confirmation = session.progress().path("sideEffectConfirmation");
+            if (confirmation.has("prefixRequestDigest")) {
+              JsonNode old =
+                  incremental.confirmationRequest(session.document(), session.progress(), false);
+              require(
+                  confirmation.path("status").asText().equals("CONFIRMED")
+                      && !old.path("evidenceHash").equals(proposal.path("evidenceHash")),
+                  "STALE_GENERATION",
+                  409);
+            }
+          }
           JsonNode coordinate = proposal.path("coordinate");
           List<ObjectNode> actions = repository.actions(id);
-          for (ObjectNode action : actions) {
-            require(!action.path("coordinate").equals(coordinate), "IDEMPOTENCY_CONFLICT", 409);
+          int attemptOrdinal = incremental.attemptOrdinal(id, coordinate);
+          for (ObjectNode prior : actions) {
+            if (prior.path("coordinate").equals(coordinate)) {
+              require(
+                  attemptOrdinal == 1
+                      && prior.path("attemptOrdinal").asInt() == 0
+                      && prior.path("state").asText().equals("FAILED")
+                      && prior.path("outcomeCode").asText().equals("TARGET_CHANGED"),
+                  "IDEMPOTENCY_CONFLICT",
+                  409);
+            }
           }
           int stepIndex = session.progress().path("stepIndex").asInt(0);
           require(
@@ -782,7 +1357,9 @@ public final class GuidedSessionService {
           long ordinal =
               actions.stream()
                   .filter(
-                      a -> a.path("coordinate").path("stepId").equals(coordinate.path("stepId")))
+                      a ->
+                          a.path("coordinate").path("stepId").equals(coordinate.path("stepId"))
+                              && a.path("state").asText().equals("SUCCEEDED"))
                   .count();
           require(coordinate.path("ordinal").asLong() == ordinal, "BINDING_ORDER", 422);
           require(
@@ -796,39 +1373,44 @@ public final class GuidedSessionService {
             }
           }
           require(capability, "FORBIDDEN_SCOPE", 403);
-          JsonNode proof = null;
-          String policyHash;
-          if (v2(session.document())) {
+          require(
+              proposal
+                  .path("executionEvidence")
+                  .equals(session.progress().path("executionEvidence")),
+              "STALE_GENERATION",
+              409);
+          ObjectNode context = materialization.context(session.document());
+          require(
+              proposal.path("authoredInputsHash").equals(context.path("authoredInputsHash"))
+                  && proposal.path("contextRevision").equals(context.path("contextRevision")),
+              "REVISION_CONFLICT",
+              409);
+          if (proposal.path("executionEvidence").path("kind").asText().equals("initialBlank")) {
             require(
-                proposal.path("schemaVersion").asInt() == 2
-                    && proposal
-                        .path("executionEvidence")
-                        .equals(session.progress().path("executionEvidence")),
-                "STALE_GENERATION",
-                409);
-            ObjectNode context = materialization.context(session.document());
-            require(
-                proposal.path("authoredInputsHash").equals(context.path("authoredInputsHash"))
-                    && proposal.path("contextRevision").equals(context.path("contextRevision")),
-                "REVISION_CONFLICT",
-                409);
-            if (proposal.path("executionEvidence").path("kind").asText().equals("initialBlank")) {
-              require(
-                  actions.isEmpty()
-                      && stepIndex == 0
-                      && ordinal == 0
-                      && proposal.path("operation").path("kind").asText().equals("navigate")
-                      && proposal.path("target").path("kind").asText().equals("page"),
-                  "INVALID_CONTRACT",
-                  422);
-            }
-            bindings.validateAction(session.document(), proposal, context);
-            proof = preparations.authorize(session.document(), proposal, context, clock.instant());
-            policyHash = access.authorizeAction(session.document(), proposal, proof);
-          } else {
-            require(proposal.path("schemaVersion").asInt() == 1, "RUNTIME_INCOMPATIBLE", 409);
-            policyHash = access.authorizeAction(session.document(), proposal);
+                repository.effectiveActions(id).isEmpty()
+                    && stepIndex == 0
+                    && ordinal == 0
+                    && proposal.path("operation").path("kind").asText().equals("navigate")
+                    && proposal.path("target").path("kind").asText().equals("page"),
+                "INVALID_CONTRACT",
+                422);
           }
+          bindings.validateAction(session.document(), proposal, context);
+          if (proposal.path("target").path("kind").asText().equals("passwordControl")) {
+            require(
+                session
+                        .progress()
+                        .path("observation")
+                        .path("coverage")
+                        .path("passwordControls")
+                        .asInt(-1)
+                    == 1,
+                "POLICY_DENIED",
+                422);
+          }
+          JsonNode proof =
+              preparations.authorize(session.document(), proposal, context, clock.instant());
+          String policyHash = access.authorizeAction(session.document(), proposal, proof);
 
           reserve(session, "actions", 1, "maxActions");
           ObjectNode action =
@@ -839,141 +1421,38 @@ public final class GuidedSessionService {
                   policyHash,
                   session.progress().path("origin").asText(),
                   clock.instant());
-          if (v2(session.document())) {
-            action.put("schemaVersion", 2);
-            action.remove("observationHash");
-            for (String field :
-                List.of(
-                    "executionEvidence", "evidenceHash", "authoredInputsHash", "contextRevision")) {
-              action.set(field, proposal.path(field));
-            }
-            action.put("preparationId", proof.path("preparationId").asText());
-            ObjectNode operation = contracts.object();
-            operation.set("coordinate", proposal.path("coordinate"));
-            operation.set("origin", proposal.path("executionEvidence").path("origin"));
-            operation.set(
-                "locator",
-                proposal.path("target").has("locator")
-                    ? proposal.path("target").path("locator")
-                    : com.fasterxml.jackson.databind.node.NullNode.instance);
-            operation.set("operation", proposal.path("operation"));
-            action.put("operationHash", GuidedContracts.hash(operation));
+          for (String field :
+              List.of(
+                  "executionEvidence", "evidenceHash", "authoredInputsHash", "contextRevision")) {
+            action.set(field, proposal.path(field));
           }
+          action.put("preparationId", proof.path("preparationId").asText());
+          action.put("attemptOrdinal", attemptOrdinal);
+          ObjectNode operation = contracts.object();
+          operation.set("coordinate", proposal.path("coordinate"));
+          operation.set("origin", proposal.path("executionEvidence").path("origin"));
+          operation.set(
+              "locator",
+              proposal.path("target").has("locator")
+                  ? proposal.path("target").path("locator")
+                  : com.fasterxml.jackson.databind.node.NullNode.instance);
+          operation.set("operation", proposal.path("operation"));
+          action.put("operationHash", GuidedContracts.hash(operation));
           repository.insertAction(action, proposal);
           if (translation != null && translation.exists(id)) {
             translation.attachAdmission(id, key, action);
           }
-          if (v2(session.document())) {
-            preparations.attach(action);
-            bindings.attachConsumer(session.document(), proposal, action);
-            if (publication != null) {
-              publication.admitted(session.document(), action, proposal, clock.instant());
-            }
+          preparations.attach(action);
+          bindings.attachConsumer(session.document(), proposal, action);
+          if (publication != null) {
+            publication.admitted(session.document(), action, proposal, clock.instant());
           }
-          session.document().put("state", "ACTING");
+          session.document().put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "ACTING");
           repository.save(session);
+          // STUDIO-OBS-014 AC-10: emitted after this transaction commits, never on rollback.
+          com.citi.put.checks.studio.guided.audit.StudioActionAudit.guidedActionAdmitted(
+              session.document(), action.path("admission").path("admissionId").asText(), proposal);
           return action.deepCopy();
-        });
-  }
-
-  /**
-   * This transaction is the dispatch permit. A duplicate receives count=1, never a fresh permit.
-   */
-  public JsonNode advance(
-      Authentication controller, String id, long fence, String key, JsonNode request) {
-    require(request.path("schemaVersion").asInt() != 2, "RUNTIME_INCOMPATIBLE", 409);
-    contracts.validate("commands#/definitions/advance", request);
-    path(id, request);
-    require(request.path("ownerFence").asLong() == fence, "STALE_FENCE", 409);
-    return internal(
-        controller,
-        "backend-controller",
-        id,
-        fence,
-        "advance",
-        key,
-        request,
-        session -> {
-          ObjectNode action = action(id, request.path("admissionId").asText());
-          require(
-              action.path("operationHash").equals(request.path("operationHash"))
-                  && action.path("ownerFence").asLong() == fence,
-              "STALE_FENCE",
-              409);
-          require(state(session).equals("ACTING"), "UNKNOWN_OUTCOME", 409);
-          if (action.path("dispatchCount").asInt() == 1) {
-            return action.deepCopy();
-          }
-          require(
-              action.path("state").asText().equals("ADMITTED")
-                  && action.path("generation").equals(session.progress().path("generation"))
-                  && action
-                      .path("observationHash")
-                      .equals(session.progress().path("observationHash")),
-              "STALE_GENERATION",
-              409);
-          action.put("dispatchCount", 1).put("state", "DISPATCHING");
-          repository.saveAction(action);
-          return action.deepCopy();
-        });
-  }
-
-  public JsonNode outcome(
-      Authentication worker, String id, long fence, String key, JsonNode request) {
-    require(request.path("schemaVersion").asInt() == 1, "RUNTIME_INCOMPATIBLE", 409);
-    contracts.validate("commands#/definitions/outcome", request);
-    path(id, request.path("ledger"));
-    return internal(
-        worker,
-        "owning-worker",
-        id,
-        fence,
-        "outcomes",
-        key,
-        request,
-        session -> {
-          ObjectNode report = (ObjectNode) request.path("ledger");
-          ObjectNode stored = action(id, report.path("admission").path("admissionId").asText());
-          ledger.verifyReport(stored, report);
-          boolean assertion =
-              repository
-                  .proposal(stored.path("admission").path("admissionId").asText())
-                  .path("operation")
-                  .path("kind")
-                  .asText()
-                  .equals("assert");
-          require(
-              assertion
-                  ? (!report.path("state").asText().equals("SUCCEEDED")
-                      || report.path("assertionPassed").asBoolean())
-                  : report.path("assertionPassed").isNull(),
-              "INVALID_CONTRACT",
-              422);
-          if (stored.equals(report)) {
-            return session.document().deepCopy();
-          }
-          require(
-              stored.path("state").asText().equals("DISPATCHING")
-                  && stored.path("ownerFence").asLong() == fence,
-              "UNKNOWN_OUTCOME",
-              409);
-          repository.saveAction(report);
-          if (report.path("state").asText().equals("SUCCEEDED")) {
-            session.document().put("state", "OBSERVING");
-          } else {
-            session.document().set("state", report.path("state"));
-            session
-                .progress()
-                .put(
-                    "errorCode",
-                    report.path("outcomeCode").asText().equals("ASSERTION_FAILED")
-                        ? "ASSERTION_FAILED"
-                        : "UNKNOWN_OUTCOME".equals(report.path("state").asText())
-                            ? "UNKNOWN_OUTCOME"
-                            : "INVALID_CONTRACT");
-          }
-          repository.save(session);
-          return session.document().deepCopy();
         });
   }
 
@@ -993,7 +1472,9 @@ public final class GuidedSessionService {
         completion,
         session -> {
           require(
-              Set.of("OBSERVING", "PROPOSING").contains(state(session)), "INVALID_CONTRACT", 409);
+              Set.of("OBSERVING", "PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+              "INVALID_CONTRACT",
+              409);
           int index = session.progress().path("stepIndex").asInt(0);
           JsonNode step = session.document().path("sourceSteps").get(index);
           require(
@@ -1001,7 +1482,7 @@ public final class GuidedSessionService {
               "BINDING_ORDER",
               422);
           var actions =
-              repository.actions(id).stream()
+              repository.effectiveActions(id).stream()
                   .filter(a -> a.path("coordinate").path("stepId").equals(step.path("stepId")))
                   .toList();
           require(
@@ -1029,60 +1510,18 @@ public final class GuidedSessionService {
               .document()
               .put(
                   "state",
-                  index + 1 == session.document().path("sourceSteps").size()
-                      ? "FINALIZING"
-                      : "OBSERVING");
+                  incremental.pending(id)
+                      ? "REPLAYING_PREFIX"
+                      : index + 1 == session.document().path("sourceSteps").size()
+                          ? "FINALIZING"
+                          : "OBSERVING");
           repository.save(session);
-          return view(session.document());
+          return view(session);
         });
   }
 
   public interface StepVerifier {
     boolean complete(JsonNode session, JsonNode completion, List<ObjectNode> actions);
-  }
-
-  public JsonNode finalizeSession(
-      Authentication controller, String id, long fence, String key, JsonNode request) {
-    require(request.path("schemaVersion").asInt() != 2, "RUNTIME_INCOMPATIBLE", 409);
-    contracts.validate("commands#/definitions/finalize", request);
-    path(id, request);
-    require(request.path("ownerFence").asLong() == fence, "STALE_FENCE", 409);
-    return internal(
-        controller,
-        "backend-controller",
-        id,
-        fence,
-        "finalize",
-        key,
-        request,
-        session -> {
-          require(!v2(session.document()), "RUNTIME_INCOMPATIBLE", 409);
-          require(state(session).equals("FINALIZING"), "PUBLICATION_CONFLICT", 409);
-          JsonNode scope = session.document().path("scope");
-          if (!scope.path("sourceRevision").equals(request.path("expectedSourceRevision"))
-              || !scope
-                  .path("configurationRevision")
-                  .equals(request.path("expectedConfigurationRevision"))) {
-            stop(session, "PUBLICATION_CONFLICT");
-            return result(session);
-          }
-          var actions = repository.actions(id);
-          require(
-              !actions.isEmpty()
-                  && actions.stream()
-                      .allMatch(
-                          a ->
-                              a.path("state").asText().equals("SUCCEEDED")
-                                  && a.path("dispatchCount").asInt() == 1)
-                  && session.progress().path("stepIndex").asInt()
-                      == session.document().path("sourceSteps").size(),
-              "PUBLICATION_CONFLICT",
-              409);
-          repository.finalizationIdentity(id, GuidedContracts.hash(request));
-          // OBS-006 must reconstruct and verify exact exercised plan/lowering in this transaction.
-          // No callback or supplied hash can make a revision ready without that verifier.
-          throw new GuidedSessionException("RUNTIME_INCOMPATIBLE", 409);
-        });
   }
 
   /** Reserve before a gateway call. The reservation survives timeouts and missing usage reports. */
@@ -1099,6 +1538,8 @@ public final class GuidedSessionService {
         key,
         request,
         session -> {
+          require(!incremental.pending(id), "REVISION_CONFLICT", 409);
+          materialization.requireAcknowledged(id);
           reserve(session, "modelProposals", 1, "maxModelProposals");
           reserve(session, "modelInputTokens", input, "maxModelInputTokensTotal");
           reserve(session, "modelOutputTokens", output, "maxModelOutputTokensTotal");
@@ -1183,6 +1624,53 @@ public final class GuidedSessionService {
     }
   }
 
+  /**
+   * STUDIO-OBS-015 H8: re-sends the durable idempotent stop of every terminal session whose
+   * teardown is still unacknowledged and whose hard expiry is inside {@code window}. The caller's
+   * thread never blocks on the network. Rows past the window stay PENDING (no proof of teardown);
+   * {@link #reportAbandonedTeardowns} counts them.
+   */
+  public void redriveTeardowns(java.time.Duration window, int batch) {
+    if (stopSender == null) {
+      return;
+    }
+    Instant now = clock.instant();
+    for (String id : repository.pendingTeardowns(now, window, batch)) {
+      if (TEARDOWNS_IN_FLIGHT.contains(id)) {
+        continue;
+      }
+      JsonNode request = repository.transaction(() -> repository.teardownRequest(id));
+      if (request == null
+          || !request.path("target").isObject()
+          || !request.path("reason").isTextual()) {
+        continue;
+      }
+      ObjectNode target = (ObjectNode) request.path("target");
+      String reason = request.path("reason").asText();
+      teardowns.execute(() -> teardownAttempt(id, target, reason));
+    }
+  }
+
+  /**
+   * STUDIO-OBS-015 aria-warn-ruling01: at most once per {@code interval} per process, counts the
+   * unacknowledged teardowns whose re-drive window has passed and logs the count only. Reads no
+   * identifier, writes nothing; the rows stay PENDING (no proof of teardown).
+   */
+  public void reportAbandonedTeardowns(java.time.Duration window, java.time.Duration interval) {
+    if (stopSender == null) {
+      return;
+    }
+    Instant now = clock.instant();
+    Instant due = nextAbandonedReport.get();
+    if (now.isBefore(due) || !nextAbandonedReport.compareAndSet(due, now.plus(interval))) {
+      return;
+    }
+    int abandoned = repository.abandonedTeardowns(now, window);
+    if (abandoned > 0) {
+      LOG.warn("Guided teardown unacknowledged past the re-drive window: {} session(s)", abandoned);
+    }
+  }
+
   public void lostAcknowledgment(String id) {
     repository.transaction(
         () -> {
@@ -1256,10 +1744,6 @@ public final class GuidedSessionService {
         key,
         question,
         session -> {
-          require(
-              session.document().path("schemaVersion").equals(question.path("schemaVersion")),
-              "RUNTIME_INCOMPATIBLE",
-              409);
           scoped(session, question);
           require(
               !session
@@ -1270,8 +1754,7 @@ public final class GuidedSessionService {
               409);
           require(
               question.path("phase").asText().equals("source")
-                  ? v2(session.document())
-                      && state(session).equals("PREPARING")
+                  ? state(session).equals("PREPARING")
                       && repository.actions(id).isEmpty()
                       && !session.progress().has("documentId")
                       && question.path("generation").asInt() == 0
@@ -1304,7 +1787,7 @@ public final class GuidedSessionService {
           access.checkCurrent(session.document());
           active(session);
           access.checkSourceCurrent(session.document());
-          require(v2(session.document()) && assignments != null, "RUNTIME_INCOMPATIBLE", 409);
+          require(assignments != null, "RUNTIME_INCOMPATIBLE", 409);
           String digest = GuidedContracts.hash(request);
           JsonNode prior = repository.duplicate(id, "assignment", key, digest);
           if (prior != null) {
@@ -1333,7 +1816,7 @@ public final class GuidedSessionService {
       Authentication worker, String id, String key, JsonNode request) {
     GuidedInternalSecurity.requireRole(worker, "owning-worker");
     key(key);
-    contracts.validate("v2/assignment-lifecycle", request);
+    contracts.validate("v3/assignment-lifecycle", request);
     path(id, request.path("assignment"));
     return repository.transaction(
         () -> {
@@ -1374,9 +1857,16 @@ public final class GuidedSessionService {
           access.checkSourceCurrent(session.document());
           JsonNode previous =
               repository.duplicate(id, "admissions", key, GuidedContracts.hash(proposal));
-          return previous == null
-              ? null
-              : action(id, previous.path("admission").path("admissionId").asText());
+          if (previous != null) {
+            return action(id, previous.path("admission").path("admissionId").asText());
+          }
+          // A new prepare/admit attempt must not contact the runner while human confirmation
+          // pauses this prefix. Existing admission recovery retains its original idempotency.
+          require(
+              Set.of("PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+              "STALE_GENERATION",
+              409);
+          return null;
         });
   }
 
@@ -1392,12 +1882,28 @@ public final class GuidedSessionService {
         key,
         references,
         session -> {
-          require(v2(session.document()) && materialization != null, "RUNTIME_INCOMPATIBLE", 409);
+          require(materialization != null, "RUNTIME_INCOMPATIBLE", 409);
           access.checkSourceCurrent(session.document());
           assignments.requireOwned(session.document());
+          var stable =
+              incremental.pending(id)
+                  ? incremental.prefixInputs(session.document()).stableIds()
+                  : java.util.Map.<String, String>of();
           return materialization.freeze(
-              session.document(), access.sources(session.document()), references);
+              session.document(), access.sources(session.document()), references, stable);
         });
+  }
+
+  public JsonNode importPrefixBinding(
+      Authentication controller, String id, long fence, JsonNode need) {
+    return translationTransaction(
+        controller, id, fence, current -> bindings.importPrefix(current.document(), need));
+  }
+
+  public ObjectNode cumulativeAllocationRequest(
+      Authentication controller, String id, long fence, JsonNode need) {
+    return translationTransaction(
+        controller, id, fence, current -> bindings.cumulativeRequest(current.document(), need));
   }
 
   public JsonNode allocateBinding(
@@ -1412,8 +1918,7 @@ public final class GuidedSessionService {
         request,
         session -> {
           require(
-              v2(session.document())
-                  && request.isObject()
+              request.isObject()
                   && request.size() == 3
                   && request.has("needId")
                   && request.has("producerStepId")
@@ -1439,7 +1944,7 @@ public final class GuidedSessionService {
           owner(controller, "backend-controller", session, fence);
           active(session);
           access.checkSourceCurrent(session.document());
-          require(v2(session.document()) && materialization != null, "RUNTIME_INCOMPATIBLE", 409);
+          require(materialization != null, "RUNTIME_INCOMPATIBLE", 409);
           return materialization.context(session.document());
         });
   }
@@ -1450,7 +1955,7 @@ public final class GuidedSessionService {
   public void storePreparation(
       Authentication controller, String id, long fence, JsonNode proposal, JsonNode proof) {
     GuidedInternalSecurity.requireRole(controller, "backend-controller");
-    contracts.validate("v2/action", proposal);
+    contracts.validate("v3/action", proposal);
     repository.transaction(
         () -> {
           var session = repository.lock(id);
@@ -1467,7 +1972,9 @@ public final class GuidedSessionService {
                   <= 0,
               "EXPIRED",
               409);
-          preparations.store(proof, proposal, clock.instant());
+          if (!preparations.store(proof, proposal, clock.instant())) {
+            return null;
+          }
           if (publication != null) {
             publication.prepared(session, proposal, proof, clock.instant());
           }
@@ -1477,7 +1984,7 @@ public final class GuidedSessionService {
 
   public JsonNode bootstrap(
       Authentication worker, String id, long fence, String key, JsonNode request) {
-    contracts.validate("v2/bridge#/definitions/bootstrap", request);
+    contracts.validate("v3/bridge#/definitions/bootstrap", request);
     path(id, request);
     return internal(
         worker,
@@ -1522,7 +2029,9 @@ public final class GuidedSessionService {
           session.progress().set("evidenceHash", request.path("evidenceHash"));
           session.progress().set("documentId", evidence.path("documentId"));
           session.progress().put("generation", 0).putNull("origin");
-          session.document().put("state", "PROPOSING");
+          session
+              .document()
+              .put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "PROPOSING");
           repository.save(session);
           return session.document().deepCopy();
         });
@@ -1531,7 +2040,7 @@ public final class GuidedSessionService {
   /** A refresh intent commits before RPC; it never consumes an action or changes bindings. */
   public JsonNode beginObservationRefresh(
       Authentication controller, String id, long fence, String key, JsonNode request) {
-    contracts.validate("v2/observation-refresh", request);
+    contracts.validate("v3/observation-refresh", request);
     path(id, request);
     key(key);
     GuidedInternalSecurity.requireRole(controller, "backend-controller");
@@ -1562,7 +2071,7 @@ public final class GuidedSessionService {
                 "STALE_GENERATION",
                 409);
             require(
-                state(session).equals("OBSERVING")
+                Set.of("OBSERVING", "REPLAYING_PREFIX").contains(state(session))
                     && request
                         .path("expectedGeneration")
                         .equals(session.progress().path("generation")),
@@ -1571,7 +2080,9 @@ public final class GuidedSessionService {
             return null;
           }
           require(
-              Set.of("OBSERVING", "PROPOSING").contains(state(session)), "STALE_GENERATION", 409);
+              Set.of("OBSERVING", "PROPOSING", "REPLAYING_PREFIX").contains(state(session)),
+              "STALE_GENERATION",
+              409);
           require(!session.progress().has("observationRefresh"), "STALE_GENERATION", 409);
           require(
               request.path("expectedGeneration").equals(session.progress().path("generation"))
@@ -1600,7 +2111,9 @@ public final class GuidedSessionService {
           ObjectNode intent = contracts.object().put("callbackKey", callbackKey);
           intent.set("request", request.deepCopy());
           session.progress().set("observationRefresh", intent);
-          session.document().put("state", "OBSERVING");
+          session
+              .document()
+              .put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "OBSERVING");
           repository.save(session);
           repository.command(id, "observation-refresh", key, digest, request);
           return null;
@@ -1615,11 +2128,11 @@ public final class GuidedSessionService {
       String key,
       JsonNode request,
       JsonNode response) {
-    contracts.validate("v2/observation-refresh", request);
+    contracts.validate("v3/observation-refresh", request);
     path(id, request);
     key(key);
     if (response != null) {
-      contracts.validate("v2/bridge#/definitions/observation", response);
+      contracts.validate("v3/bridge#/definitions/observation", response);
     }
     GuidedInternalSecurity.requireRole(controller, "backend-controller");
     return repository.transaction(
@@ -1665,7 +2178,12 @@ public final class GuidedSessionService {
     }
     JsonNode observation = result.path("observation");
     require(
-        state(session).equals("PROPOSING")
+        // STUDIO-OBS-015 F2: the same predicate the observation writer uses.
+        state(session)
+                .equals(
+                    incremental.pending(session.document().path("sessionId").asText())
+                        ? "REPLAYING_PREFIX"
+                        : "PROPOSING")
             && observation.path("generation").asLong() > request.path("expectedGeneration").asLong()
             && observation.path("generation").equals(session.progress().path("generation"))
             && GuidedContracts.hash(observation)
@@ -1686,9 +2204,13 @@ public final class GuidedSessionService {
   }
 
   public JsonNode observeV2(
-      Authentication worker, String id, long fence, String key, JsonNode request) {
-    contracts.validate("v2/bridge#/definitions/observation", request);
+      Authentication worker, String id, long fence, String key, JsonNode suppliedRequest) {
+    ObjectNode ownedRequest = ledger.copyOutcomeRequest(suppliedRequest);
+    JsonNode request = ownedRequest == null ? suppliedRequest : ownedRequest;
+    contracts.validate("v3/bridge#/definitions/observation", request);
     path(id, request);
+    ObservationValidation prepared =
+        ownedRequest == null ? null : prepareObservation(request.path("observation"));
     // The outer transaction keeps identity verification and the existing collector admission
     // atomic.
     return repository.transaction(
@@ -1697,7 +2219,8 @@ public final class GuidedSessionService {
           access.checkCurrent(session.document());
           owner(worker, "owning-worker", session, fence);
           active(session);
-          materialization.verify(session.document(), request);
+          GuidedMaterializationService.VerifiedContext verifiedContext =
+              materialization.verifyAndCapture(session.document(), request);
           JsonNode observation = request.path("observation");
           if (repository.duplicate(id, "observations", key, GuidedContracts.hash(observation))
               != null) {
@@ -1717,7 +2240,11 @@ public final class GuidedSessionService {
                 "STALE_GENERATION",
                 409);
           }
-          JsonNode result = observe(worker, id, fence, key, observation);
+          JsonNode result =
+              observe(worker, id, fence, key, observation, session, prepared, verifiedContext);
+          if (intent.isMissingNode()) {
+            return result;
+          }
           var committed = repository.lock(id);
           if (refresh) {
             repository.command(
@@ -1728,8 +2255,9 @@ public final class GuidedSessionService {
                 request);
           }
           // A legitimate unrelated observation supersedes an outstanding refresh intent.
-          committed.progress().remove("observationRefresh");
-          repository.save(committed);
+          if (committed.progress().remove("observationRefresh") != null) {
+            repository.save(committed);
+          }
           return result;
         });
   }
@@ -1749,7 +2277,7 @@ public final class GuidedSessionService {
             .isActualTransactionActive(),
         "RUNTIME_INCOMPATIBLE",
         409);
-    contracts.validate("v2/commands#/definitions/advance", request);
+    contracts.validate("v3/commands#/definitions/advance", request);
     path(id, request);
     key(key);
     GuidedInternalSecurity.requireRole(controller, "backend-controller");
@@ -1760,10 +2288,7 @@ public final class GuidedSessionService {
           owner(controller, "backend-controller", session, fence);
           active(session);
           access.checkSourceCurrent(session.document());
-          require(
-              v2(session.document()) && request.path("ownerFence").asLong() == fence,
-              "STALE_FENCE",
-              409);
+          require(request.path("ownerFence").asLong() == fence, "STALE_FENCE", 409);
           ObjectNode action = action(id, request.path("admissionId").asText());
           require(
               action.path("ownerFence").asLong() == fence
@@ -1780,12 +2305,20 @@ public final class GuidedSessionService {
             return new AlreadyConsumed(action.deepCopy());
           }
           require(
-              state(session).equals("ACTING")
+              Set.of("ACTING", "REPLAYING_PREFIX").contains(state(session))
                   && action.path("state").asText().equals("ADMITTED")
                   && action.path("evidenceHash").equals(session.progress().path("evidenceHash")),
               "STALE_GENERATION",
               409);
+          materialization.verify(
+              session.document(),
+              materialization.identity(materialization.context(session.document())));
           ObjectNode context = materialization.context(session.document());
+          require(
+              action.path("contextRevision").equals(context.path("contextRevision"))
+                  && action.path("authoredInputsHash").equals(context.path("authoredInputsHash")),
+              "STALE_FENCE",
+              409);
           preparations.checkUnexpired(action, clock.instant());
           JsonNode proposal =
               repository.proposal(action.path("admission").path("admissionId").asText());
@@ -1799,9 +2332,16 @@ public final class GuidedSessionService {
   }
 
   public JsonNode outcomeV2(
-      Authentication worker, String id, long fence, String key, JsonNode request) {
-    contracts.validate("v2/bridge#/definitions/outcome", request);
+      Authentication worker, String id, long fence, String key, JsonNode suppliedRequest) {
+    if (suppliedRequest.path("kind").asText().equals("prefixDrift")) {
+      return prefixDrift(worker, id, fence, key, suppliedRequest);
+    }
+    ObjectNode ownedRequest = ledger.copyOutcomeRequest(suppliedRequest);
+    JsonNode request = ownedRequest == null ? suppliedRequest : ownedRequest;
+    contracts.validate("v3/bridge#/definitions/outcome", request);
     path(id, request);
+    GuidedActionLedger.PreparedReport preparedReport =
+        ownedRequest == null ? null : ledger.prepareReport((ObjectNode) request.path("ledger"));
     return internal(
         worker,
         "owning-worker",
@@ -1815,7 +2355,7 @@ public final class GuidedSessionService {
           ObjectNode report = (ObjectNode) request.path("ledger");
           path(id, report);
           ObjectNode stored = action(id, report.path("admission").path("admissionId").asText());
-          ledger.verifyReport(stored, report);
+          ledger.verifyReport(stored, report, preparedReport);
           require(stored.path("ownerFence").asLong() == fence, "STALE_FENCE", 409);
           JsonNode proposal =
               repository.proposal(report.path("admission").path("admissionId").asText());
@@ -1844,9 +2384,18 @@ public final class GuidedSessionService {
           if (stored.equals(report)) {
             return session.document().deepCopy();
           }
-          repository.saveAction(report);
+          if (preparedReport == null) {
+            repository.saveAction(report);
+          } else {
+            repository.saveAction(report, preparedReport);
+          }
+          if (secretAudit != null) {
+            secretAudit.guidedOutcome(session.document(), report);
+          }
           if (report.path("state").asText().equals("SUCCEEDED")) {
-            session.document().put("state", "OBSERVING");
+            session
+                .document()
+                .put("state", incremental.pending(id) ? "REPLAYING_PREFIX" : "OBSERVING");
           } else {
             stop(session, report.path("state").asText());
           }
@@ -1855,9 +2404,103 @@ public final class GuidedSessionService {
         });
   }
 
+  /** Only an authenticated owning worker may commit a positive no-native-invocation receipt. */
+  private JsonNode prefixDrift(
+      Authentication worker, String id, long fence, String key, JsonNode callback) {
+    ObjectNode owned = ledger.copyOutcomeRequest(callback);
+    require(owned != null, "INVALID_CONTRACT", 422);
+    contracts.validate("v3/bridge#/definitions/PrefixDriftCallback", owned);
+    GuidedInternalSecurity.requireRole(worker, "owning-worker");
+    key(key);
+    JsonNode receipt = owned.path("receipt");
+    path(id, receipt);
+    return repository.transaction(
+        () -> {
+          var session = repository.lock(id);
+          require(
+              worker.getName().equals(session.document().path("owner").path("workerId").asText())
+                  && session.document().path("owner").path("fence").asLong() == fence,
+              "FORBIDDEN_SCOPE",
+              403);
+          if (incremental.duplicateReceipt(id, receipt)) {
+            return session.document().deepCopy();
+          }
+          active(session);
+          owner(worker, "owning-worker", session, fence);
+          access.checkCurrent(session.document());
+          access.checkSourceCurrent(session.document());
+          materialization.verifyPrefixReceipt(session.document(), receipt);
+          require(
+              state(session).equals("REPLAYING_PREFIX") && incremental.pending(id),
+              "STALE_GENERATION",
+              409);
+          boolean admitted = receipt.path("phase").asText().equals("ADMITTED_PRE_INVOCATION");
+          ObjectNode reported = null;
+          if (admitted) {
+            require(owned.path("ledger").isObject(), "INVALID_CONTRACT", 422);
+            reported = (ObjectNode) owned.path("ledger");
+            ObjectNode original = action(id, receipt.path("admissionId").asText());
+            ledger.verifyReport(original, reported);
+            require(
+                original.path("state").asText().equals("DISPATCHING")
+                    && original.path("attemptOrdinal").asInt() == 0
+                    && reported.path("state").asText().equals("FAILED")
+                    && reported.path("outcomeCode").asText().equals("TARGET_CHANGED")
+                    && reported
+                        .path("admission")
+                        .path("admissionId")
+                        .equals(receipt.path("admissionId"))
+                    && reported.path("preparationId").equals(receipt.path("preparationId")),
+                "EVIDENCE_MISMATCH",
+                409);
+          } else {
+            require(owned.path("ledger").isNull(), "INVALID_CONTRACT", 422);
+          }
+          incremental.receipt(session.document(), receipt);
+          if (admitted) {
+            repository.saveAction(reported);
+            if (secretAudit != null) {
+              secretAudit.guidedOutcome(session.document(), reported);
+            }
+          } else {
+            incremental.settle(id, receipt.path("requestDigest").asText(), "DRIFT");
+          }
+          int index =
+              GuidedIncrementalStore.stepIndex(
+                  session.document(), receipt.path("coordinate").path("stepId").asText());
+          incremental.switchToLearning(
+              session.document(),
+              "DRIFT",
+              index,
+              receipt.path("coordinate").path("ordinal").asInt(),
+              receipt.path("receiptHash").asText());
+          session.progress().put("stepIndex", index);
+          session.document().put("state", "OBSERVING");
+          repository.save(session);
+          return session.document().deepCopy();
+        });
+  }
+
+  public String contextDeliveryId(Authentication controller, String id, long fence) {
+    return translationTransaction(
+        controller, id, fence, current -> materialization.pendingDeliveryId(id));
+  }
+
+  public void acknowledgeContext(
+      Authentication controller, String id, long fence, JsonNode acknowledgement) {
+    translationTransaction(
+        controller,
+        id,
+        fence,
+        current -> {
+          materialization.acknowledge(current.document(), acknowledgement);
+          return null;
+        });
+  }
+
   public JsonNode lifecycle(
       Authentication worker, String id, long fence, String key, JsonNode request) {
-    contracts.validate("v2/bridge#/definitions/lifecycle", request);
+    contracts.validate("v3/bridge#/definitions/lifecycle", request);
     path(id, request);
     return internal(
         worker,
@@ -1868,11 +2511,20 @@ public final class GuidedSessionService {
         key,
         request,
         session -> {
-          materialization.verify(session.document(), request);
+          // OBS-015 B2B-01 L1: owner/browser loss must land while an append ACK is pending.
+          materialization.verifyLifecycle(session.document(), request);
           boolean uncertain =
               repository.actions(id).stream()
                   .anyMatch(a -> a.path("state").asText().equals("DISPATCHING"));
-          stop(session, uncertain ? "UNKNOWN_OUTCOME" : "FAILED");
+          // STUDIO-OBS-009 LIFECYCLE-REASON-01: the runner's stop reason maps as it does on the
+          // no-browser path (assignmentLifecycle). An uncertain action still wins; every reason
+          // but EXPIRED stays FAILED. No tolerance: the backend does not second-guess the worker's
+          // clock (T0 ruling, R9/R10 precedent).
+          stop(
+              session,
+              uncertain
+                  ? "UNKNOWN_OUTCOME"
+                  : request.path("reason").asText().equals("EXPIRED") ? "EXPIRED" : "FAILED");
           return session.document().deepCopy();
         });
   }
@@ -1886,52 +2538,57 @@ public final class GuidedSessionService {
       String key,
       JsonNode request,
       Function<GuidedSessionRepository.Session, JsonNode> transition) {
+    return internal(caller, role, id, fence, route, key, request, null, transition);
+  }
+
+  private JsonNode internal(
+      Authentication caller,
+      String role,
+      String id,
+      long fence,
+      String route,
+      String key,
+      JsonNode request,
+      GuidedSessionRepository.Session alreadyLocked,
+      Function<GuidedSessionRepository.Session, JsonNode> transition) {
     GuidedInternalSecurity.requireRole(caller, role);
     key(key);
     return repository.transaction(
         () -> {
-          var session = repository.lock(id);
+          var session = alreadyLocked == null ? repository.lock(id) : alreadyLocked;
           access.checkCurrent(session.document());
           owner(caller, role, session, fence);
           String digest = GuidedContracts.hash(request);
           JsonNode duplicate = repository.duplicate(id, route, key, digest);
           if (duplicate != null) {
-            if (route.equals("admissions") || route.equals("advance")) {
+            if (route.equals("admissions")) {
               return action(id, duplicate.path("admission").path("admissionId").asText());
             }
-            if (route.equals("observations") || route.equals("outcomes")) {
+            if (route.equals("observations")) {
               return session.document().deepCopy();
             }
             return duplicate;
           }
           active(session);
-          try {
-            if (Set.of(
-                    "admissions",
-                    "advance",
-                    "observations",
-                    "model-reserve",
-                    "step-complete",
-                    "clarification",
-                    "finalize")
-                .contains(route)) {
-              access.checkSourceCurrent(session.document());
-            }
-          } catch (GuidedSessionException failure) {
-            if (!route.equals("finalize")
-                || !state(session).equals("FINALIZING")
-                || !failure.getMessage().equals("REVISION_CONFLICT")) {
-              throw failure;
-            }
-            stop(session, "PUBLICATION_CONFLICT");
-            JsonNode response = result(session);
-            repository.command(id, route, key, digest, response);
-            return response;
+          if (Set.of(
+                  "admissions", "observations", "model-reserve", "step-complete", "clarification")
+              .contains(route)) {
+            access.checkSourceCurrent(session.document());
           }
           JsonNode response = transition.apply(session);
           repository.command(id, route, key, digest, response);
           return response;
         });
+  }
+
+  private void ownerFromLivePrefix(GuidedSessionRepository.Session session) {
+    require(
+        session.document().path("owner").path("fence").asInt() > 0
+            && !session.document().path("owner").path("workerId").asText().equals("unclaimed")
+            && Instant.parse(session.document().path("owner").path("leaseExpiresAt").asText())
+                .isAfter(clock.instant()),
+        "STALE_FENCE",
+        409);
   }
 
   private void owner(
@@ -1983,52 +2640,71 @@ public final class GuidedSessionService {
     }
   }
 
+  /**
+   * STUDIO-OBS-015 aria-conflict-stop-ruling01: publication owns the PUBLICATION_CONFLICT write;
+   * the transaction that made it requests the one monotone teardown (H8: the durable request
+   * commits with the terminal state; the send runs after commit).
+   */
+  public void publicationConflicted(String id) {
+    require(
+        org.springframework.transaction.support.TransactionSynchronizationManager
+            .isActualTransactionActive(),
+        "RUNTIME_INCOMPATIBLE",
+        409);
+    var session = repository.lock(id);
+    require(state(session).equals("PUBLICATION_CONFLICT"), "PUBLICATION_CONFLICT", 409);
+    if (!session.progress().has("teardownStatus")) {
+      stop(session, "PUBLICATION_CONFLICT");
+    }
+  }
+
   private void stop(GuidedSessionRepository.Session session, String state) {
     ObjectNode stoppedContext = null;
-    if (materialization != null && v2(session.document())) {
+    if (materialization != null) {
       try {
         stoppedContext = materialization.context(session.document());
       } catch (GuidedSessionException ignored) {
         /* A pending assignment still needs monotone stop before context/browser creation. */
       }
-      if (stoppedContext == null && assignments != null) {
-        stoppedContext = assignments.find(session.document().path("sessionId").asText());
+      if (assignments != null
+          && (stoppedContext == null
+              || unacknowledgedBootstrap(session)
+              || unacknowledgedAppend(session))) {
+        // An unacknowledged bootstrap context may never have reached the runner, which then holds
+        // only the assignment and refuses a stop naming the unknown context. Address the one
+        // monotone stop to the assignment the runner does hold; it stops any runtime under it.
+        ObjectNode assignment = assignments.find(session.document().path("sessionId").asText());
+        if (assignment != null || stoppedContext == null) {
+          stoppedContext = assignment;
+        }
       }
     }
-    final ObjectNode notifyContext = stoppedContext;
-    if (notifyContext != null) {
+    // STUDIO-OBS-015 H8: the value-free stop request commits with the terminal state, so a lost
+    // acknowledgement or a restart can re-drive the same idempotent stop. A session with no stop
+    // target (never assigned, or no identity can be formed) records no teardown at all.
+    final ObjectNode target = stoppedContext == null ? null : teardownTarget(stoppedContext);
+    if (target != null) {
       session.progress().put("teardownStatus", "PENDING");
+      final String reason =
+          session.progress().path("errorCode").asText().equals("SECRET_USE_REVOKED")
+              ? "REVOKED"
+              : java.util.Set.of("CANCELLED", "EXPIRED").contains(state)
+                  ? state
+                  : "UNKNOWN_OUTCOME";
+      final String sessionId = session.document().path("sessionId").asText();
+      ObjectNode request = session.progress().putObject("teardownRequest");
+      request.set("target", target);
+      request.put("reason", reason);
       if (stopSender != null) {
+        final ObjectNode sent = target.deepCopy();
         org.springframework.transaction.support.TransactionSynchronizationManager
             .registerSynchronization(
                 new org.springframework.transaction.support.TransactionSynchronization() {
                   @Override
                   public void afterCompletion(int status) {
-                    if (status != STATUS_COMMITTED) {
-                      return;
+                    if (status == STATUS_COMMITTED) {
+                      teardowns.execute(() -> teardownAttempt(sessionId, sent, reason));
                     }
-                    java.util.concurrent.CompletableFuture.runAsync(
-                        () -> {
-                          try {
-                            stopSender.accept(
-                                notifyContext,
-                                java.util.Set.of("CANCELLED", "EXPIRED").contains(state)
-                                    ? state
-                                    : "UNKNOWN_OUTCOME");
-                            repository.transaction(
-                                () -> {
-                                  var stopped =
-                                      repository.lock(notifyContext.path("sessionId").asText());
-                                  if (terminal(stopped)) {
-                                    stopped.progress().put("teardownStatus", "CONFIRMED");
-                                    repository.save(stopped);
-                                  }
-                                  return null;
-                                });
-                          } catch (RuntimeException ignored) {
-                            /* A lost acknowledgement never confirms teardown. */
-                          }
-                        });
                   }
                 });
       }
@@ -2038,16 +2714,113 @@ public final class GuidedSessionService {
       if (action.path("state").asText().equals("ADMITTED")) {
         action.put("state", "REVOKED").put("outcomeCode", "CANCELLED");
         repository.saveAction(action);
-      } else if (action.path("state").asText().equals("DISPATCHING")) {
-        action.put("state", "UNKNOWN_OUTCOME").put("outcomeCode", "ACK_LOST");
-        repository.saveAction(action);
+      } else {
+        if (action.path("state").asText().equals("DISPATCHING")) {
+          action.put("state", "UNKNOWN_OUTCOME").put("outcomeCode", "ACK_LOST");
+          repository.saveAction(action);
+        }
       }
     }
-    if (materialization != null && v2(session.document())) {
+    if (materialization != null) {
       materialization.stop(session.document().path("sessionId").asText());
       assignments.stop(session.document().path("sessionId").asText());
     }
     repository.save(session);
+    if (secretAudit != null) {
+      secretAudit.guidedTerminal(session.document());
+    }
+  }
+
+  /**
+   * The value-free stop target: the assignment intent, or the context identity (never the full
+   * runner context, which carries authored inputs and policy). Null if no identity can be formed.
+   */
+  private ObjectNode teardownTarget(ObjectNode context) {
+    if (context.has("assignmentId")) {
+      return context.deepCopy();
+    }
+    try {
+      return materialization.identity(context);
+    } catch (RuntimeException invalid) {
+      return null;
+    }
+  }
+
+  /**
+   * STUDIO-OBS-015 H8: one stop attempt outside any transaction, with at most {@link
+   * #TEARDOWN_RESENDS} immediate re-sends after an uncertain outcome (each joins the runner's
+   * pending close). Only a normal return, which follows a validated runner 200, confirms. Never
+   * touches state, actions, ledger, counters or evidence.
+   */
+  private void teardownAttempt(String id, ObjectNode target, String reason) {
+    java.util.function.BiConsumer<ObjectNode, String> sender = stopSender;
+    if (sender == null || !TEARDOWNS_IN_FLIGHT.add(id)) {
+      return;
+    }
+    try {
+      for (int attempt = 0; ; attempt++) {
+        try {
+          sender.accept(target, reason);
+          break;
+        } catch (GuidedSessionException failure) {
+          if (!"UNKNOWN_OUTCOME".equals(failure.getMessage()) || attempt >= TEARDOWN_RESENDS) {
+            return;
+          }
+        }
+      }
+      repository.transaction(
+          () -> {
+            var stopped = repository.lock(id);
+            if (terminal(stopped)
+                && "PENDING".equals(stopped.progress().path("teardownStatus").asText())) {
+              stopped.progress().put("teardownStatus", "CONFIRMED");
+              stopped.progress().remove("teardownRequest");
+              repository.save(stopped);
+            }
+            return null;
+          });
+    } catch (RuntimeException ignored) {
+      /* A lost acknowledgement never confirms teardown; the reaper re-drives the request. */
+    } finally {
+      TEARDOWNS_IN_FLIGHT.remove(id);
+    }
+  }
+
+  /** Test seam: whether this JVM has a stop attempt in flight for the session. */
+  boolean teardownInFlight(String id) {
+    return TEARDOWNS_IN_FLIGHT.contains(id);
+  }
+
+  private static java.util.concurrent.ThreadPoolExecutor teardownExecutor() {
+    var executor =
+        new java.util.concurrent.ThreadPoolExecutor(
+            2,
+            2,
+            30,
+            java.util.concurrent.TimeUnit.SECONDS,
+            new java.util.concurrent.ArrayBlockingQueue<>(64),
+            runnable -> {
+              Thread thread = new Thread(runnable, "guided-teardown");
+              thread.setDaemon(true);
+              return thread;
+            },
+            new java.util.concurrent.ThreadPoolExecutor.DiscardPolicy());
+    executor.allowCoreThreadTimeOut(true);
+    return executor;
+  }
+
+  /**
+   * OBS-015 B2B-01 P3: a PENDING append delivery leaves the runner at v(n-1) or, if only the ACK
+   * was lost, v(n); only the assignment addresses both.
+   */
+  private boolean unacknowledgedAppend(GuidedSessionRepository.Session session) {
+    return materialization.pendingDeliveryId(session.document().path("sessionId").asText()) != null;
+  }
+
+  private static boolean unacknowledgedBootstrap(GuidedSessionRepository.Session session) {
+    JsonNode bootstrap = session.progress().path("translationBootstrap");
+    return bootstrap.path("phase").asText().equals("CONTEXT_PENDING")
+        && !bootstrap.has("metadataAcknowledgement");
   }
 
   private ObjectNode action(String id, String admission) {
@@ -2088,43 +2861,79 @@ public final class GuidedSessionService {
     return TERMINAL.contains(state(s));
   }
 
-  private ObjectNode view(JsonNode session) {
+  private ObjectNode view(GuidedSessionRepository.Session current) {
+    JsonNode session = current.document();
     ObjectNode out = contracts.object();
     for (String f :
         List.of("schemaVersion", "sessionId", "testId", "state", "expiresAt", "counters")) {
       out.set(f, session.path(f).deepCopy());
     }
-    contracts.validate("session-view", out);
+    out.set("progress", presentation().progress(current));
+    for (String field : List.of("baseRevisionId", "firstLearnStepId")) {
+      if (session.has(field)) {
+        out.set(field, session.path(field));
+      }
+    }
+    contracts.validate("v3/session-view#/definitions/PublicSession", out);
     return out;
   }
 
   private ObjectNode result(GuidedSessionRepository.Session session) {
-    ObjectNode out = contracts.object();
-    out.put("schemaVersion", session.document().path("schemaVersion").asInt())
-        .put("executionId", session.document().path("sessionId").asText())
-        .put("sessionId", session.document().path("sessionId").asText());
-    out.set("scopeHash", session.document().path("scopeHash"));
-    boolean completed =
-        session.progress().path("stepIndex").asInt()
-                == session.document().path("sourceSteps").size()
-            && repository.actions(session.document().path("sessionId").asText()).stream()
-                .allMatch(action -> action.path("state").asText().equals("SUCCEEDED"));
-    out.put("assertionsPassed", completed).put("scheduleActivated", false).putNull("evidenceRef");
-    if (session.progress().has("evidenceRef")) {
-      out.set("evidenceRef", session.progress().path("evidenceRef"));
+    String id = session.document().path("sessionId").asText(), state = state(session);
+    ObjectNode out =
+        contracts
+            .object()
+            .put("schemaVersion", 3)
+            .put("sessionId", id)
+            .put("executionId", id)
+            .put("scopeHash", session.document().path("scopeHash").asText())
+            .put("mode", "guided")
+            .put("outcome", state)
+            .put(
+                "assertionsPassed",
+                session.progress().path("stepIndex").asInt()
+                        == session.document().path("sourceSteps").size()
+                    && repository.effectiveActions(id).stream()
+                        .allMatch(a -> a.path("state").asText().equals("SUCCEEDED")))
+            .put("learnedFromThisRun", false)
+            .put("replayVerified", false)
+            .put("scheduleActivated", false);
+    ObjectNode boundary = incremental.relearnedFrom(id);
+    if (boundary == null) {
+      out.putNull("relearnedFrom");
+    } else {
+      out.set("relearnedFrom", boundary);
     }
-    out.putArray("actionTimings");
-    out.put("mode", "guided")
-        .put("outcome", state(session))
-        .put("learnedFromThisRun", false)
-        .put("replayVerified", false)
-        .putNull("readyRevisionId")
+    out.putObject("publication")
         .put(
-            "errorCode",
-            state(session).equals("FAILED")
-                ? session.progress().path("errorCode").asText("INVALID_CONTRACT")
-                : state(session));
-    contracts.validate("result", out);
+            "status",
+            state.equals("PUBLICATION_CONFLICT")
+                ? "CONFLICT"
+                : Set.of("FAILED", "CANCELLED", "EXPIRED", "UNKNOWN_OUTCOME").contains(state)
+                    ? "REFUSED"
+                    : "PENDING")
+        .putNull("receipt");
+    out.putObject("currentReadiness")
+        .putNull("revisionId")
+        .put("ready", false)
+        .put("code", "NOT_PUBLISHED");
+    // Learned-from-execution evidence (STUDIO-OBS-013): actionTimings + evidence.video.
+    evidence.project(id, state).writeTo(out, id);
+    // STUDIO-OBS-008 P2/P3: the same projection the receipt-backed result publishes.
+    out.set("progress", presentation().progress(session));
+    out.set("explanation", presentation().explanation(session));
+    if (session.progress().has("errorCode")) {
+      out.set("errorCode", session.progress().path("errorCode"));
+    } else {
+      out.putNull("errorCode");
+    }
+    if (session.progress().path("errorCode").asText().equals("LOGIN_REQUIRED")) {
+      out.set("detail", session.progress().path("detail"));
+      out.putObject("failure")
+          .put("code", "LOGIN_REQUIRED")
+          .set("detail", session.progress().path("detail"));
+    }
+    contracts.validate("v3/result", out);
     return out;
   }
 }

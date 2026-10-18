@@ -57,7 +57,7 @@ public class StudioSecretsService {
    * Upper bound on a value, in UTF-16 units. With the worst-case JSON escaping and the origin list,
    * a stored entry stays under the 64 KiB read cap it must later be read back through.
    */
-  static final int MAX_VALUE_LENGTH = 8192;
+  static final int MAX_VALUE_LENGTH = 4096;
 
   static final String INVALID_REQUEST = "INVALID_SECRET_REQUEST";
   static final String INVALID_NAME = "INVALID_SECRET_NAME";

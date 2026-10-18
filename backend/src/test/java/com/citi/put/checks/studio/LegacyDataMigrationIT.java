@@ -17,8 +17,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Story 10.1 AC-9/AC-10/AC-11/AC-17 — V13 and V14 applied to a database that <em>already holds</em>
- * ui_tests and ui_test_executions rows.
+ * Story 10.1 AC-9/AC-10/AC-11/AC-17 — the Studio baseline (V12–V18, STUDIO-OBS-012A / ADR-SC-005
+ * D-B) applied to an untouched core V11 database that <em>already holds</em> ui_tests and
+ * ui_test_executions rows. The transformations once owned by the old V12/V14 now live in the
+ * re-baselined V12 (quarantine, canonical browser) and V13 (CSI backfill, logs, locators).
  *
  * <p>Every other migration test in the repository builds the schema from scratch and inserts
  * afterwards, so V14's data-transformation statements always match zero rows. That blind spot hid a
@@ -55,9 +57,9 @@ class LegacyDataMigrationIT {
   static void migrateInTwoStages() throws SQLException {
     POSTGRES.start();
 
-    flywayTo("12");
+    flywayTo("11");
     seedLegacyRows();
-    flywayTo("14");
+    flywayTo("18");
   }
 
   @AfterAll
@@ -100,7 +102,8 @@ class LegacyDataMigrationIT {
     execute(insertLegacyTest(chromeTestId, "'" + REGISTERED_CSI + "'", "Chrome draft", "chrome"));
     execute(
         insertLegacyTest(firefoxTestId, "'" + REGISTERED_CSI + "'", "Firefox draft", "firefox"));
-    // V12's ck_ui_tests_csi_registered means a CSI-less row can only exist quarantined.
+    // Core V11 has no quarantine column and no CSI CHECK, so a CSI-less draft is ordinary core
+    // data here; V12 must quarantine it rather than invent a CSI.
     execute(insertLegacyTest(noCsiTestId, "NULL", "Orphan draft", "edge"));
 
     // 2026_05 partition, free-text logs.
@@ -119,7 +122,7 @@ class LegacyDataMigrationIT {
 
   private static String insertLegacyTest(UUID id, String csiLiteral, String name, String browser) {
     return "INSERT INTO ui_tests (id, name, csi_id, environment, browser, steps, variables,"
-        + " created_by, created_at, updated_at, quarantined_at) VALUES ('"
+        + " created_by, created_at, updated_at) VALUES ('"
         + id
         + "', '"
         + name
@@ -127,8 +130,7 @@ class LegacyDataMigrationIT {
         + csiLiteral
         + ", 'Production', '"
         + browser
-        + "', '[\"Go to the home page\"]'::jsonb, '[]'::jsonb, 'legacy-v14@citi.com', NOW(), NOW(),"
-        + ("NULL".equals(csiLiteral) ? " NOW())" : " NULL)");
+        + "', '[\"Go to the home page\"]'::jsonb, '[]'::jsonb, 'legacy-v14@citi.com', NOW(), NOW())";
   }
 
   private static String insertLegacyExecution(
@@ -154,9 +156,9 @@ class LegacyDataMigrationIT {
   // ── The migration reaches the end on a non-empty database ──────────────────
 
   @Test
-  void v14AppliesSuccessfullyToADatabaseThatAlreadyHoldsRows() throws SQLException {
+  void studioBaselineAppliesSuccessfullyToADatabaseThatAlreadyHoldsRows() throws SQLException {
     assertThat(scalarString("SELECT MAX(version::numeric)::text FROM flyway_schema_history"))
-        .isEqualTo("14");
+        .isEqualTo("18");
     assertThat(scalarInt("SELECT COUNT(*) FROM flyway_schema_history WHERE success = false"))
         .isZero();
   }
@@ -199,6 +201,12 @@ class LegacyDataMigrationIT {
     assertThat(csiOf(orphanExecutionId)).isNull();
     assertThat(scalarInt("SELECT COUNT(*) FROM ui_test_executions WHERE csi_id IS NULL"))
         .isEqualTo(1);
+    assertThat(
+            scalarString(
+                "SELECT string_agg(name, ',' ORDER BY name) FROM ui_tests"
+                    + " WHERE quarantined_at IS NOT NULL"))
+        .as("V12 quarantines exactly the core draft whose CSI is absent, keeping its row")
+        .isEqualTo("Orphan draft");
   }
 
   @Test

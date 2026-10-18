@@ -6,8 +6,8 @@ import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.UITestExecutionRepository;
 import com.citi.put.checks.studio.UITestRevisionRepository;
+import com.citi.put.checks.studio.dto.CanonicalStudioCodec;
 import com.citi.put.checks.studio.dto.ExecutionStatus;
-import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.dto.StudioVariable;
 import com.citi.put.checks.studio.entity.StudioDispatchLedger;
 import com.citi.put.checks.studio.entity.UITest;
@@ -207,7 +207,11 @@ public class StudioAcceptanceService {
   }
 
   /**
-   * Accepts an execution, or refuses it. Returns the accepted execution id.
+   * An execute that carries no observed Run authorization. It can never create an execution: it
+   * answers the kill switch, the lifecycle, an idempotent replay of an execution already accepted
+   * under the same key, or the readiness refusal ({@code 409 LEARN_REQUIRED} for a test with no
+   * learned revision) in that order, and an observed revision without a grant is {@code 409
+   * AUTHORIZATION_REQUIRED}.
    *
    * @throws StudioDispatchDisabledException the kill switch is engaged ({@code 503})
    * @throws StudioConflictException readiness or idempotency-key reuse ({@code 409})
@@ -313,24 +317,28 @@ public class StudioAcceptanceService {
             .orElseThrow(
                 () ->
                     new StudioConflictException(
-                        ExecutionReadiness.Verdict.COMPILE_REQUIRED,
-                        "The confirmed revision for this draft is no longer available"));
+                        ExecutionReadiness.Verdict.LEARN_REQUIRED,
+                        "The learned revision for this draft is no longer available"));
 
-    boolean observedFamily = revision.getArtifactSchemaVersion() == 2;
-    if (observedFamily && scheduled != null) {
+    // One execution family (ADR-SC-005): only an observed revision runs, and only under a fresh
+    // explicit Run authorization. Readiness has already refused every other revision.
+    if (revision.getArtifactSchemaVersion() < 2) {
       throw new StudioConflictException(
-          "OBSERVED_SCHEDULE_AUTH_REQUIRED",
-          "Observed schedules require fresh execution authority");
+          ExecutionReadiness.Verdict.LEARN_REQUIRED,
+          "This test has no learned revision. Run it to learn the steps before it can replay.");
     }
-    if (observedFamily && (observedGrant == null || observed == null)) {
+    if (scheduled != null && observedGrant == null && observed != null) {
+      // STUDIO-OBS-009 AC-6 (A17): an observed schedule runs under background authority. The
+      // scheduler has required the live background grant for this principal before it got here and
+      // requires it again in beforeWrite; this mints the same binding an explicit Run carries.
+      observedGrant = observed.prepareScheduled(test, revision, principal);
+    }
+    if (observedGrant == null || observed == null) {
       throw new StudioConflictException(
           "AUTHORIZATION_REQUIRED", "Observed replay needs fresh explicit Run authorization");
     }
-    if (!observedFamily && observedGrant != null) {
-      throw new StudioConflictException("RUNTIME_INCOMPATIBLE", "Execution family changed");
-    }
 
-    List<String> steps = LegacyStudioAdapter.parseSteps(revision.getSource());
+    List<String> steps = CanonicalStudioCodec.parseSteps(revision.getSource());
     int maxSteps = properties.quotasOrDefault().maxStepsPerTestOrDefault();
     if (steps.size() > maxSteps) {
       throw new StudioValidationException(
@@ -361,28 +369,20 @@ public class StudioAcceptanceService {
     beforeWrite.run();
 
     Instant acceptedAt =
-        observedFamily
-            ? com.citi.put.checks.studio.guided.publication.PublicationContracts.millisecond(
-                clock.instant())
-            : clock.instant();
-    JsonNode observedBinding =
-        observedFamily ? observed.bind(observedGrant, test, revision, acceptedAt) : null;
-    if (observedBinding != null
-        && !observedBinding.path("principalId").asText().equals(principal)) {
+        com.citi.put.checks.studio.guided.publication.PublicationContracts.millisecond(
+            clock.instant());
+    JsonNode observedBinding = observed.bind(observedGrant, test, revision, acceptedAt);
+    if (!observedBinding.path("principalId").asText().equals(principal)) {
       throw new StudioConflictException("AUTHORIZATION_REQUIRED", "Execution principal changed");
     }
     UITestExecution execution =
-        observedFamily
-            ? new UITestExecution(
-                UUID.fromString(observedBinding.path("executionId").asText()),
-                testId,
-                ExecutionStatus.PENDING,
-                acceptedAt,
-                test.getCsiId())
-            : new UITestExecution(testId, ExecutionStatus.PENDING, acceptedAt, test.getCsiId());
-    if (observedBinding != null) {
-      execution.setObservedRevisionBinding(observedBinding.toString());
-    }
+        new UITestExecution(
+            UUID.fromString(observedBinding.path("executionId").asText()),
+            testId,
+            ExecutionStatus.PENDING,
+            acceptedAt,
+            test.getCsiId());
+    execution.setObservedRevisionBinding(observedBinding.toString());
     execution.markFullExecution();
     execution.setPrincipal(principal);
     execution.setEnvironment(test.getEnvironment());
@@ -541,7 +541,7 @@ public class StudioAcceptanceService {
   private static Map<String, String> plainVariableValues(
       UITest test, ReferenceDeclarations declarations) {
     Map<String, String> available = new LinkedHashMap<>();
-    for (StudioVariable variable : LegacyStudioAdapter.parseVariables(test.getVariables())) {
+    for (StudioVariable variable : CanonicalStudioCodec.parseVariables(test.getVariables())) {
       if (StudioVariable.KIND_PLAIN.equals(variable.kind()) && variable.value() != null) {
         available.put(variable.name(), variable.value());
       }

@@ -7,8 +7,11 @@ import com.citi.put.checks.studio.SecondApplicationContext;
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
-import com.citi.put.checks.studio.internal.dto.AdmissionResponse;
+import com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization;
+import com.citi.put.checks.studio.guided.session.GuidedSessionException;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -24,15 +27,25 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Story 10.7 AC-17 – AC-19 — the admission compare-and-set.
+ *
+ * <p>STUDIO-OBS-014 inherited obligation P1 (AR-3 b): the CAS is reached only through the observed
+ * admission now. Old→new: 16 → 15 tests. {@code legacyAdmissionCannotUseObservedPreReadyFailure} is
+ * dropped by name (its subject, the legacy admission, is deleted; covering case: {@code
+ * StudioAuthorizationIT.theLegacyAdmissionRouteIsGoneAndWritesNothing}); {@code
+ * anUnknownExecutionIsA409AndNeverA404} is renamed {@code anUnknownExecutionIsRefusedAndNeverA404};
+ * the others keep their names.
  *
  * <p>The race is proven by interleaving two application contexts against one database with the
  * first transaction held open across the second's attempt, not by two sequential calls: the CAS is
@@ -42,7 +55,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class AdmissionCasIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60455";
   private static final String OWNER = "admission-owner@citi.com";
@@ -53,6 +72,7 @@ class AdmissionCasIT {
   @Autowired private TransactionTemplate transactions;
   @Autowired private JdbcTemplate jdbc;
   @Autowired private DataSource dataSource;
+  @Autowired private ObservedReplayAuthorization observed;
 
   private StudioExecutionFixtures fixtures;
   private UUID executionId;
@@ -63,27 +83,33 @@ class AdmissionCasIT {
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     UUID testId =
         fixtures
             .seedRunnableTest("Admission draft", CSI_ID, OWNER, List.of("Go to the home page"))
             .testId();
     Authentication owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
-    executionId = studioService.executeTest(testId, owner, null).executionId();
+    executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     attemptId = dispatchTo(executionId);
   }
 
   // ── AC-17: the CAS and its four refusals ─────────────────────────────────
+  //
+  // STUDIO-OBS-014 inherited obligation P1 (AR-3 b): every case below was re-pointed from the
+  // deleted legacy AdmissionCasService.claim() to the observed admission (prepareAdmission +
+  // claimObserved), which is the only entry into the CAS. Where the observed path refuses before
+  // the CAS, the recorded oracle is the observed refusal (S-7), and the ledger is unchanged.
 
   @Test
   void aFreshAdmissionOwnsTheAttempt() {
     UUID admissionId = UUID.randomUUID();
 
-    AdmissionResponse response =
-        admissionService.claim(executionId, request(attemptId, admissionId, "studio-runner-0"));
+    JsonNode receipt = admit(admissionId, "studio-runner-0");
 
-    assertThat(response.state()).isEqualTo("ADMITTED");
-    assertThat(response.admissionId()).isEqualTo(admissionId);
+    assertThat(receipt.path("admissionId").asText()).isEqualTo(admissionId.toString());
     assertThat(ledger().get("state")).isEqualTo("ADMITTED");
     assertThat(ledger().get("admission_id")).hasToString(admissionId.toString());
     assertThat(ledger().get("runner_instance_id")).isEqualTo("studio-runner-0");
@@ -92,96 +118,98 @@ class AdmissionCasIT {
   @Test
   void theSameIdentityArrivingAgainIsAcknowledgedIdempotentlyAndNotByCloseEnough() {
     UUID admissionId = UUID.randomUUID();
-    AdmissionResponse first =
-        admissionService.claim(executionId, request(attemptId, admissionId, "studio-runner-0"));
+    JsonNode first = admit(admissionId, "studio-runner-0");
 
-    AdmissionResponse second =
-        admissionService.claim(executionId, request(attemptId, admissionId, "studio-runner-0"));
+    JsonNode second = admit(admissionId, "studio-runner-0");
 
-    assertThat(second.admissionId()).isEqualTo(first.admissionId());
-    assertThat(second.state()).isEqualTo("ADMITTED");
+    assertThat(second).as("the identical receipt").isEqualTo(first);
+    assertThat(second.path("admissionId").asText()).isEqualTo(admissionId.toString());
+    assertThat(ledger().get("state")).isEqualTo("ADMITTED");
     // The exactly-matching identity is what is matched; a different one on the same attempt is
     // refused by the next test, which is what "never close enough" means.
-    assertThat(second.startDeadlineAt()).isEqualTo(first.startDeadlineAt());
+    assertThat(second.path("startDeadlineAt")).isEqualTo(first.path("startDeadlineAt"));
   }
 
   @Test
   void aDifferentAdmissionIdentityOnAnOwnedAttemptIsRefused() {
-    admissionService.claim(executionId, request(attemptId, UUID.randomUUID(), "studio-runner-0"));
+    admit(UUID.randomUUID(), "studio-runner-0");
 
-    assertThatThrownBy(
-            () ->
-                admissionService.claim(
-                    executionId, request(attemptId, UUID.randomUUID(), "studio-runner-0")))
+    assertThatThrownBy(() -> admit(UUID.randomUUID(), "studio-runner-0"))
         .isInstanceOf(InternalCallbackException.class)
         .hasFieldOrPropertyWithValue("status", HttpStatus.CONFLICT)
         .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.ADMISSION_OWNED);
 
-    assertThatThrownBy(
-            () ->
-                admissionService.claim(
-                    executionId, request(attemptId, UUID.randomUUID(), "studio-runner-1")))
+    assertThatThrownBy(() -> admit(UUID.randomUUID(), "studio-runner-1"))
         .isInstanceOf(InternalCallbackException.class)
         .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.ADMISSION_OWNED);
   }
 
+  /**
+   * A request carrying a stale attempt id. The observed path binds the attempt in {@code
+   * prepareAdmission}, so it is refused there with {@code 403 FORBIDDEN_SCOPE}, before the CAS
+   * (legacy oracle: {@code 409 ATTEMPT_SUPERSEDED} from the CAS).
+   */
   @Test
   void aSupersededAttemptIsRefused() {
-    assertThatThrownBy(
-            () ->
-                admissionService.claim(
-                    executionId, request(UUID.randomUUID(), UUID.randomUUID(), "studio-runner-0")))
-        .isInstanceOf(InternalCallbackException.class)
-        .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.ATTEMPT_SUPERSEDED);
+    Map<String, Object> before = ledger();
+    ObjectNode request = request(UUID.randomUUID(), "studio-runner-0");
+    request.put("attemptId", UUID.randomUUID().toString());
+
+    assertThatThrownBy(() -> claim(executionId, request))
+        .isInstanceOf(GuidedSessionException.class)
+        .hasMessage("FORBIDDEN_SCOPE")
+        .satisfies(
+            refusal -> assertThat(((GuidedSessionException) refusal).status()).isEqualTo(403));
+    assertThat(ledger()).isEqualTo(before);
   }
 
   @Test
   void aRowPastItsPendingDeadlineIsRefused() {
     jdbc.update(
-        "UPDATE studio_dispatch_ledger SET pending_deadline_at = ? WHERE execution_id = ?",
-        Timestamp.from(Instant.now().minusSeconds(60)),
+        "UPDATE studio_dispatch_ledger SET pending_deadline_at = clock_timestamp() - interval"
+            + " '60 seconds' WHERE execution_id = ?",
         executionId);
 
-    assertThatThrownBy(
-            () ->
-                admissionService.claim(
-                    executionId, request(attemptId, UUID.randomUUID(), "studio-runner-0")))
+    assertThatThrownBy(() -> admit(UUID.randomUUID(), "studio-runner-0"))
         .isInstanceOf(InternalCallbackException.class)
         .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.ADMISSION_EXPIRED);
+    assertThat(ledger().get("admission_id")).isNull();
   }
 
+  /**
+   * A settled ledger row. The observed path refuses it before the CAS: {@code
+   * ObservedReplayAuthorization.check} treats {@code state = 'DONE'} as cancelled, {@code 409
+   * CANCELLED} (legacy oracle: {@code 409 EXECUTION_SETTLED} from the CAS). Recorded per AR-3 S-7.
+   */
   @Test
   void aSettledExecutionIsRefused() {
     jdbc.update(
         "UPDATE studio_dispatch_ledger SET state = 'DONE' WHERE execution_id = ?", executionId);
 
-    assertThatThrownBy(
-            () ->
-                admissionService.claim(
-                    executionId, request(attemptId, UUID.randomUUID(), "studio-runner-0")))
-        .isInstanceOf(InternalCallbackException.class)
-        .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.EXECUTION_SETTLED);
+    assertThatThrownBy(() -> admit(UUID.randomUUID(), "studio-runner-0"))
+        .isInstanceOf(GuidedSessionException.class)
+        .hasMessage("CANCELLED")
+        .satisfies(
+            refusal -> assertThat(((GuidedSessionException) refusal).status()).isEqualTo(409));
+    assertThat(ledger().get("admission_id")).isNull();
   }
 
+  /**
+   * Renamed from {@code anUnknownExecutionIsA409AndNeverA404} (STUDIO-OBS-014 P1). An execution
+   * with no observed binding is a definite refusal, {@code 403 FORBIDDEN_SCOPE}, and never a {@code
+   * 404}, which the observed-admission contract does not declare.
+   */
   @Test
-  void anUnknownExecutionIsA409AndNeverA404() {
-    // The frozen contract declares 200/400/401/403/409 for this operation and no 404, so an
-    // unknown or expired execution has to be a definite refusal rather than a status the runner
-    // holds no rule for.
+  void anUnknownExecutionIsRefusedAndNeverA404() {
     UUID unknown = UUID.randomUUID();
-    assertThatThrownBy(
-            () ->
-                admissionService.claim(
-                    unknown,
-                    new AdmissionRequest(
-                        unknown,
-                        UUID.randomUUID(),
-                        "studio-runner-0",
-                        UUID.randomUUID(),
-                        Map.of())))
-        .isInstanceOf(InternalCallbackException.class)
-        .hasFieldOrPropertyWithValue("status", HttpStatus.CONFLICT)
-        .hasFieldOrPropertyWithValue("code", InternalCallbackCodes.EXECUTION_UNKNOWN);
+    ObjectNode request = request(UUID.randomUUID(), "studio-runner-0");
+    request.put("executionId", unknown.toString());
+
+    assertThatThrownBy(() -> claim(unknown, request))
+        .isInstanceOf(GuidedSessionException.class)
+        .hasMessage("FORBIDDEN_SCOPE")
+        .satisfies(
+            refusal -> assertThat(((GuidedSessionException) refusal).status()).isEqualTo(403));
   }
 
   // ── AC-18: two replicas cannot both grant an attempt ─────────────────────
@@ -196,15 +224,21 @@ class AdmissionCasIT {
     AtomicInteger refused = new AtomicInteger();
     AtomicReference<Throwable> unexpected = new AtomicReference<>();
 
-    try (SecondApplicationContext replicaB = new SecondApplicationContext(dataSource)) {
+    try (SecondApplicationContext replicaB = SecondApplicationContext.observed(dataSource)) {
       AdmissionCasService serviceOnB = replicaB.bean(AdmissionCasService.class);
+      ObservedReplayAuthorization observedOnB = replicaB.bean(ObservedReplayAuthorization.class);
+      // Both permits are prepared outside any transaction, as the controller does; the CAS under
+      // claimObserved is what the two replicas race on.
+      var permitA = observed.prepareAdmission(executionId, request(admissionA, "studio-runner-0"));
+      var permitB =
+          observedOnB.prepareAdmission(executionId, request(admissionB, "studio-runner-1"));
 
       CompletableFuture<Void> second =
           CompletableFuture.runAsync(
               () -> {
                 try {
                   firstInside.await(30, TimeUnit.SECONDS);
-                  serviceOnB.claim(executionId, request(attemptId, admissionB, "studio-runner-1"));
+                  serviceOnB.claimObserved(executionId, permitB);
                   granted.incrementAndGet();
                 } catch (InternalCallbackException expected) {
                   refused.incrementAndGet();
@@ -217,7 +251,7 @@ class AdmissionCasIT {
 
       transactions.executeWithoutResult(
           status -> {
-            admissionService.claim(executionId, request(attemptId, admissionA, "studio-runner-0"));
+            admissionService.claimObserved(executionId, permitA);
             granted.incrementAndGet();
             firstInside.countDown();
             sleep(1500);
@@ -240,12 +274,9 @@ class AdmissionCasIT {
     // The API commits the CAS; the runner's read of the response is lost. 10.6 AC-9 makes the
     // runner never re-admit, and this is the complementary property from the API side: even a
     // misbehaving or future runner cannot obtain a second owner.
-    admissionService.claim(executionId, request(attemptId, admissionId, "studio-runner-0"));
+    admit(admissionId, "studio-runner-0");
 
-    assertThatThrownBy(
-            () ->
-                admissionService.claim(
-                    executionId, request(attemptId, UUID.randomUUID(), "studio-runner-0")))
+    assertThatThrownBy(() -> admit(UUID.randomUUID(), "studio-runner-0"))
         .isInstanceOf(InternalCallbackException.class);
 
     assertThat(ledger().get("admission_id")).hasToString(admissionId.toString());
@@ -266,7 +297,7 @@ class AdmissionCasIT {
         executionId);
 
     Instant admittedAt = Instant.now();
-    admissionService.claim(executionId, request(attemptId, UUID.randomUUID(), "studio-runner-0"));
+    admit(UUID.randomUUID(), "studio-runner-0");
 
     Instant startDeadline = instant(ledger().get("start_deadline_at"));
     Instant runDeadline = instant(ledger().get("run_deadline_at"));
@@ -287,34 +318,27 @@ class AdmissionCasIT {
     assertThat(acceptedAt).isNotNull();
   }
 
-  @Autowired private ProgressReportService reports;
-
-  @Test
-  void legacyAdmissionCannotUseObservedPreReadyFailure() {
-    UUID admission = UUID.randomUUID();
-    admissionService.claim(executionId, request(attemptId, admission, "studio-runner-0"));
-    var before =
-        jdbc.queryForMap(
-            "SELECT status,snapshot_revision,step_results::text FROM ui_test_executions WHERE id=?",
-            executionId);
-    var report =
-        preReady(admission, List.of(skipped(0)), "ERROR", "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
-    assertThatThrownBy(() -> reports.apply(executionId, report))
-        .isInstanceOf(InternalCallbackException.class);
-    assertThat(
-            jdbc.queryForMap(
-                "SELECT status,snapshot_revision,step_results::text FROM ui_test_executions WHERE"
-                    + " id=?",
-                executionId))
-        .isEqualTo(before);
-    assertThat(ledger().get("state")).isEqualTo("ADMITTED");
-    assertThat(((Number) ledger().get("last_runner_sequence")).longValue()).isZero();
-  }
-
+  /**
+   * Defence in depth on the SQL guard: an admission with no observed receipt cannot borrow the
+   * observed pre-Ready failure statement. No route can produce that state since STUDIO-OBS-014 P1
+   * deleted the legacy admission, so the setup builds it at the statement level (AR-3 b).
+   */
   @Test
   void observedSqlCannotBorrowAnOrdinaryAdmissionOrAbsentProof() {
     UUID admission = UUID.randomUUID();
-    admissionService.claim(executionId, request(attemptId, admission, "studio-runner-0"));
+    Instant now = Instant.now();
+    Integer admitted =
+        transactions.execute(
+            status ->
+                statements.admit(
+                    executionId,
+                    attemptId,
+                    admission,
+                    "studio-runner-0",
+                    now.plusSeconds(60),
+                    now.plusSeconds(600),
+                    now));
+    assertThat(admitted).isEqualTo(1);
     for (String proof : new String[] {null, "{}"}) {
       int changed =
           transactions.execute(
@@ -346,6 +370,13 @@ class AdmissionCasIT {
     assertThat(ledger().get("state")).isEqualTo("ADMITTED");
   }
 
+  /**
+   * The three {@code rawObservedFailure*} cases were ported by name on 2026-10-13 (STUDIO-OBS-012A
+   * AC-7): their valid baseline reason was {@code ACCOUNT_UNAVAILABLE}, which STUDIO-OBS-007
+   * removed with the account machinery (story "Codes" table: {@code ACCOUNT_UNAVAILABLE}, {@code
+   * ACCOUNT_UNKNOWN} removed from v3 and emitters; EXT-001 dropped). The baseline now uses {@code
+   * REFERENCE_MISMATCH}, and the two removed codes are asserted refused.
+   */
   @Test
   void rawObservedFailureAcceptsOnlyCompleteUntimedSkippedCoordinates() {
     var baseline =
@@ -354,7 +385,7 @@ class AdmissionCasIT {
             List.of(skipped(0), skipped(1)),
             "ERROR",
             "RUN_ERROR",
-            "ACCOUNT_UNAVAILABLE");
+            "REFERENCE_MISMATCH");
     RunnerReportProjection.requireObservedPreReadyFailure(baseline, 2);
     List<List<com.citi.put.checks.studio.internal.dto.RunnerStepState>> invalid =
         new java.util.ArrayList<>();
@@ -384,7 +415,7 @@ class AdmissionCasIT {
     for (var steps : invalid) {
       RunnerReportProjection.requireObservedPreReadyFailure(baseline, 2);
       var mutation =
-          preReady(baseline.admissionId(), steps, "ERROR", "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
+          preReady(baseline.admissionId(), steps, "ERROR", "RUN_ERROR", "REFERENCE_MISMATCH");
       assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 2))
           .isInstanceOf(InternalCallbackException.class);
     }
@@ -398,8 +429,8 @@ class AdmissionCasIT {
             "PROFILE_MISMATCH",
             "POLICY_REFUSED",
             "AUTHORIZATION_EXPIRED",
-            "ACCOUNT_UNAVAILABLE",
-            "ACCOUNT_UNKNOWN",
+            "REFERENCE_MISMATCH",
+            "PASSWORD_CONTROL_READ_REFUSED",
             "TARGET_DRIFT",
             "TIMEOUT",
             "CANCELLED",
@@ -413,8 +444,10 @@ class AdmissionCasIT {
             "ASSERTION_FAILED",
             "REFERENCE_REFUSED",
             "OUTCOME_UNKNOWN",
-            "account_unavailable",
-            "ACCOUNT_UNAVAILABLE detail",
+            "ACCOUNT_UNAVAILABLE",
+            "ACCOUNT_UNKNOWN",
+            "reference_mismatch",
+            "REFERENCE_MISMATCH detail",
             "BROWSER_LAUNCH_FAILED",
             "START_DEADLINE_EXCEEDED")) {
       var mutation = preReady(UUID.randomUUID(), List.of(skipped(0)), "ERROR", "RUN_ERROR", reason);
@@ -424,7 +457,7 @@ class AdmissionCasIT {
     for (String result : List.of("PASSED", "FAILED")) {
       var mutation =
           preReady(
-              UUID.randomUUID(), List.of(skipped(0)), result, "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
+              UUID.randomUUID(), List.of(skipped(0)), result, "RUN_ERROR", "REFERENCE_MISMATCH");
       assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 1))
           .isInstanceOf(InternalCallbackException.class);
     }
@@ -438,7 +471,7 @@ class AdmissionCasIT {
   void rawObservedFailureRejectsOriginLogsAndNonfinalKindsEvenWhenReduced() {
     var baseline =
         preReady(
-            UUID.randomUUID(), List.of(skipped(0)), "ERROR", "RUN_ERROR", "ACCOUNT_UNAVAILABLE");
+            UUID.randomUUID(), List.of(skipped(0)), "ERROR", "RUN_ERROR", "REFERENCE_MISMATCH");
     RunnerReportProjection.requireObservedPreReadyFailure(baseline, 1);
     for (int variant = 0; variant < 6; variant++) {
       var mutation =
@@ -461,7 +494,8 @@ class AdmissionCasIT {
               Map.of(),
               baseline.outcome(),
               null,
-              true);
+              true,
+              Map.of());
       assertThatThrownBy(() -> RunnerReportProjection.requireObservedPreReadyFailure(mutation, 1))
           .isInstanceOf(InternalCallbackException.class);
     }
@@ -486,9 +520,10 @@ class AdmissionCasIT {
         List.of(),
         false,
         Map.of(),
-        new com.citi.put.checks.studio.internal.dto.RunOutcome(result, code, reason),
+        new com.citi.put.checks.studio.internal.dto.RunOutcome(result, code, reason, null),
         null,
-        true);
+        true,
+        Map.of());
   }
 
   private static com.citi.put.checks.studio.internal.dto.RunnerStepState skipped(Integer index) {
@@ -498,13 +533,24 @@ class AdmissionCasIT {
 
   // ── helpers ──────────────────────────────────────────────────────────────
 
-  private AdmissionRequest request(UUID attempt, UUID admission, String runnerInstanceId) {
-    return new AdmissionRequest(
-        executionId, attempt, runnerInstanceId, admission, Map.of("playwright", "1.63.0"));
+  /** The v3 observed admission request the runner sends for this execution. */
+  private ObjectNode request(UUID admission, String runnerInstanceId) {
+    return ObservedPublicationFixture.observedAdmissionRequest(
+        observed.binding(executionId).orElseThrow(), runnerInstanceId, admission);
   }
 
+  /** Admits the way the runner does; returns the observed admission receipt. */
+  private JsonNode admit(UUID admission, String runnerInstanceId) {
+    return claim(executionId, request(admission, runnerInstanceId));
+  }
+
+  private JsonNode claim(UUID execution, JsonNode request) {
+    return admissionService.claimObserved(execution, observed.prepareAdmission(execution, request));
+  }
+
+  /** Claims and begins the dispatch under the attempt the observed Run authority issued. */
   private UUID dispatchTo(UUID execution) {
-    UUID attempt = UUID.randomUUID();
+    UUID attempt = ObservedPublicationFixture.bindingAttempt(observed, execution);
     transactions.executeWithoutResult(
         status -> {
           statements.claim(

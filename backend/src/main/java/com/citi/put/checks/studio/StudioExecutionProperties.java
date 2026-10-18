@@ -34,7 +34,7 @@ import org.springframework.boot.context.properties.bind.ConstructorBinding;
  * @param runDeadline browser runtime cap plus bounded finalization and delivery margins
  * @param totalRuntime the total browser runtime budget sent on every job (§5.2, §8.5); strictly
  *     inside {@code runDeadline} so finalization and delivery keep their margin
- * @param admissionTimeout the dispatcher's HTTP timeout on {@code POST /v1/runs}
+ * @param admissionTimeout the dispatcher's HTTP timeout on {@code POST /v2/runs}
  */
 @ConfigurationProperties(prefix = "studio.execution")
 public record StudioExecutionProperties(

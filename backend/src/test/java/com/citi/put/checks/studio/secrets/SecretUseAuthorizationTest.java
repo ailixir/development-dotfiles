@@ -421,11 +421,17 @@ class SecretUseAuthorizationTest {
    * D9: a declared id that is not a valid secret name — a legacy {@code vault://…} id — is refused
    * as a reference fault before the provider is called, even for a principal entitled to it. Were
    * the provider called, its path-safety check would report a Vault outage instead.
+   *
+   * <p>Ported 2026-10-13 (STUDIO-OBS-012A AC-7) to STUDIO-OBS-007 AC-6 / secret-login-design §4.4:
+   * preflight checks {@code mayUse} plus existence by <b>name only</b>, with zero value reads. The
+   * provider is therefore reached through {@code listSecretNames}, not {@code read}; both are
+   * counted, and the invalid name must reach neither.
    */
   @Test
   void aDeclaredIdThatIsNotASecretNameIsRefusedBeforeTheProviderIsCalled() {
     String legacy = "vault://studio/pilot-pw";
     AtomicInteger reads = new AtomicInteger();
+    AtomicInteger listings = new AtomicInteger();
     StudioVaultProvider counting =
         new StudioVaultProvider() {
           @Override
@@ -447,7 +453,8 @@ class SecretUseAuthorizationTest {
 
           @Override
           public List<String> listSecretNames(VaultScope scope) {
-            throw new AssertionError("not used");
+            listings.incrementAndGet();
+            return vault.listSecretNames(scope);
           }
         };
     VaultStudioReferenceResolver guarded =
@@ -466,11 +473,14 @@ class SecretUseAuthorizationTest {
         .isInstanceOf(StudioReferenceResolver.ReferenceUnavailableException.class)
         .hasMessageContaining(legacy);
     assertThat(reads).as("the provider must never be asked for an invalid name").hasValue(0);
+    assertThat(listings).as("the provider must never be asked for an invalid name").hasValue(0);
 
-    // The permit companion: a valid name through the same guarded resolver does reach the provider.
+    // The permit companion: a valid name through the same guarded resolver does reach the
+    // provider, by name only (OBS-007 AC-6: preflight performs zero value reads).
     assertThatCode(
             () -> guarded.preflight(CSI, ENVIRONMENT, TEST_ID, OWNER, secretsOnly("LOGIN_PW")))
         .doesNotThrowAnyException();
-    assertThat(reads).hasValue(1);
+    assertThat(listings).hasValue(1);
+    assertThat(reads).as("preflight never reads a secret value").hasValue(0);
   }
 }

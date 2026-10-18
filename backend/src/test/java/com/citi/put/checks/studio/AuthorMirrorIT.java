@@ -58,8 +58,10 @@ class AuthorMirrorIT {
         .isZero();
 
     UITestDto created =
-        studioService.createTest(
-            draft("Draft by an unmirrored author"), new BffAuthenticationToken(author));
+        com.citi.put.checks.studio.support.CanonicalAuthoringFixture.create(
+            studioService,
+            draft("Draft by an unmirrored author"),
+            new BffAuthenticationToken(author));
 
     assertThat(storedAuthorOf(created.id()))
         .as("the draft records the authenticated author, which is what the foreign key binds")
@@ -82,8 +84,8 @@ class AuthorMirrorIT {
         Timestamp.from(recordedLogin),
         author.email());
 
-    studioService.createTest(
-        draft("Draft by a mirrored author"), new BffAuthenticationToken(author));
+    com.citi.put.checks.studio.support.CanonicalAuthoringFixture.create(
+        studioService, draft("Draft by a mirrored author"), new BffAuthenticationToken(author));
 
     assertThat(mirrorRowsFor(author.email())).isEqualTo(1);
     assertThat(

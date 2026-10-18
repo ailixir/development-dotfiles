@@ -39,6 +39,32 @@ public final class ContractDocument {
     return root;
   }
 
+  /**
+   * Follows a local {@code $ref} ({@code #/...}) to the node it names, repeatedly, and returns any
+   * other node unchanged (STUDIO-OBS-013 E-1). A route that declares a response by {@code $ref} and
+   * one that declares the same response literally therefore read the same values through this
+   * method; only the read path differs, never the asserted value. A dangling or non-local reference
+   * returns null, so an assertion reading through it fails rather than passing on the reference
+   * string itself.
+   */
+  public Object deref(Object node) {
+    Object current = node;
+    for (int hops = 0; hops < 16; hops++) {
+      if (!(current instanceof Map<?, ?> map) || !(map.get("$ref") instanceof String ref)) {
+        return current;
+      }
+      if (!ref.startsWith("#/")) {
+        return null;
+      }
+      Object target = root;
+      for (String segment : ref.substring(2).split("/")) {
+        target = at(target, segment.replace("~1", "/").replace("~0", "~"));
+      }
+      current = target;
+    }
+    return null;
+  }
+
   @SuppressWarnings("unchecked")
   public Map<String, Object> paths() {
     return (Map<String, Object>) root.get("paths");

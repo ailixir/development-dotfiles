@@ -11,3 +11,8 @@ checks:
   reports:
     delivery-enabled: false
   worker-mode: false
+
+# The API role (STUDIO-OBS-009 AC-5): the guided expiry reaper and the translation coordinator are
+# `@Profile("!api | worker")` and do not run here; the worker owns them. An API pod does host the
+# guided TLS connector (studio.guided-authoring.connector.port), where the runner and the worker
+# present their client certificates to /internal/v2/studio/guided-sessions/**.

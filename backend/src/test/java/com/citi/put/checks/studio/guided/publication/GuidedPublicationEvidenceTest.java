@@ -16,21 +16,54 @@ import org.junit.jupiter.api.Test;
 
 class GuidedPublicationEvidenceTest {
   static JsonNode setup(GuidedPublicationMigrationTest.Database db) throws Exception {
-    String fixture =
-        Files.readString(
-            Path.of("../docs/specs/studio-observed-authoring/contracts/v2/fixtures.json"));
-    JsonNode original = C.parse(fixture).path("documents").path("flow");
-    fixture =
-        original
-            .toString()
-            .replace("session-1", "session")
-            .replace("step-1", db.stepId.toString())
-            .replace("source-1", "1")
-            .replace("config-1", "1")
-            .replace(
-                original.path("session").path("scopeHash").asText(),
-                db.session.path("scopeHash").asText());
-    JsonNode flow = C.parse(fixture);
+    JsonNode original =
+        C.parse(
+                Files.readString(
+                    Path.of("../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")))
+            .path("documents")
+            .path("flow");
+    String originalFirstStep =
+        original.path("session").path("sourceSteps").get(0).path("stepId").asText();
+    var identities =
+        java.util.Map.of(
+            original.path("session").path("sessionId").asText(),
+            "session",
+            originalFirstStep,
+            db.stepId.toString(),
+            original.path("source").path("sourceRevision").asText(),
+            "1",
+            original.path("source").path("configurationRevision").asText(),
+            "1",
+            original.path("session").path("scopeHash").asText(),
+            db.session.path("scopeHash").asText());
+    ObjectNode flow = (ObjectNode) rebindIdentity(original, identities);
+    // Rebuild dependent hashes from structurally rebound facts. No text replacement can safely
+    // identify a UUID coordinate or distinguish it from authored English/private input content.
+    for (JsonNode item : flow.path("contexts")) {
+      ((ObjectNode) item)
+          .put("authoredInputsHash", GuidedContracts.hash(item.path("authoredInputs")));
+    }
+    for (int index = 0; index < flow.path("proposals").size(); index++) {
+      ObjectNode proposal = (ObjectNode) flow.path("proposals").get(index);
+      ObjectNode evidence = (ObjectNode) proposal.path("executionEvidence");
+      if (evidence.path("kind").asText().equals("observedDocument")) {
+        for (JsonNode observed : flow.path("observations")) {
+          if (observed.path("documentId").equals(evidence.path("documentId"))
+              && observed.path("generation").equals(evidence.path("generation"))) {
+            evidence.put("observationHash", GuidedContracts.hash(observed));
+          }
+        }
+      }
+      JsonNode at = flow.path("contexts").get(flow.path("contextAtAction").get(index).asInt());
+      proposal
+          .put("authoredInputsHash", at.path("authoredInputsHash").asText())
+          .put("evidenceHash", GuidedContracts.hash(evidence));
+      ObjectNode proof = (ObjectNode) flow.path("preparations").get(index);
+      proof
+          .put("authoredInputsHash", proposal.path("authoredInputsHash").asText())
+          .put("evidenceHash", proposal.path("evidenceHash").asText())
+          .put("requestDigest", GuidedContracts.hash(proposal));
+    }
     var context = flow.path("contexts").get(0);
     var inputs = context.path("authoredInputs");
     db.tx.executeWithoutResult(
@@ -71,19 +104,25 @@ class GuidedPublicationEvidenceTest {
                   + " WHERE session_id='session'",
               owner.toString());
           var plan = C.object();
+          plan.putArray("sourceReferences")
+              .add(inputs.path("inputs").get(0).path("provenance").deepCopy());
           plan.putArray("obligations")
               .addObject()
               .put("obligationId", "00000000-0000-0000-0000-000000000001")
               .put("stepId", db.stepId.toString())
               .put("occurrence", 0)
               .put("operationKind", "navigate")
-              .put("targetIntent", "Open");
+              .put("targetIntent", "Open")
+              .put("referenceIndex", 0)
+              .putNull("needId")
+              .putNull("predicate");
           plan.putArray("needs")
               .addObject()
               .put("needId", "need")
               .put("bindingId", "server-binding")
               .put("producerStepId", db.stepId.toString())
               .putArray("consumers");
+          com.citi.put.checks.studio.guided.translation.GuidedAcceptedPlan.validate(C, plan);
           db.jdbc.update(
               "INSERT INTO"
                   + " studio_guided_translation_plans(session_id,plan_revision,parent_revision,plan,plan_hash)"
@@ -95,6 +134,29 @@ class GuidedPublicationEvidenceTest {
                   + " session_id='session'");
         });
     return flow;
+  }
+
+  private static JsonNode rebindIdentity(JsonNode node, java.util.Map<String, String> identities) {
+    if (node.isTextual()) {
+      return com.fasterxml.jackson.databind.node.TextNode.valueOf(
+          identities.getOrDefault(node.textValue(), node.textValue()));
+    }
+    if (node.isArray()) {
+      var result = C.object().putArray("items");
+      node.forEach(item -> result.add(rebindIdentity(item, identities)));
+      return result;
+    }
+    if (node.isObject()) {
+      ObjectNode result = C.object();
+      node.fields()
+          .forEachRemaining(
+              field ->
+                  result.set(
+                      identities.getOrDefault(field.getKey(), field.getKey()),
+                      rebindIdentity(field.getValue(), identities)));
+      return result;
+    }
+    return node.deepCopy();
   }
 
   static void capture(GuidedPublicationMigrationTest.Database db, JsonNode flow, int index) {
@@ -288,7 +350,7 @@ class GuidedPublicationEvidenceTest {
           var current = db.sessions.lock("session");
           ObjectNode question =
               C.object()
-                  .put("schemaVersion", 2)
+                  .put("schemaVersion", 3)
                   .put("phase", "observed")
                   .put("clarificationId", questionId)
                   .put("sessionId", "session")
@@ -307,6 +369,10 @@ class GuidedPublicationEvidenceTest {
                 .addObject()
                 .put("choiceId", choiceId)
                 .put("safeLabel", "Observed candidate " + i)
+                // STUDIO-OBS-014 AC-7 (C2a): an observed-phase choice names a page node.
+                .put("labelSource", "PAGE")
+                .put("role", "button")
+                .putNull("region")
                 .put("nodeId", nodeId)
                 .putNull("bindingId");
             ObjectNode meaning =
@@ -323,7 +389,7 @@ class GuidedPublicationEvidenceTest {
                     .put("exact", true));
             meanings.addObject().put("choiceId", choiceId).set("meaning", meaning);
           }
-          C.validate("v2/clarification", question);
+          C.validate("v3/clarification", question);
           var contexts =
               new com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore(
                   db.jdbc, C);
@@ -389,5 +455,77 @@ class GuidedPublicationEvidenceTest {
                           + " observed_choice_receipt='{}'::jsonb WHERE session_id='session'"))
           .hasMessageContaining("immutable");
     }
+  }
+
+  /**
+   * qa-review01 H3 follow-up (negative regression for the prefix-request observation binding in
+   * {@code GuidedPublicationEvidenceRepository.read}): an observation enters the evidence read only
+   * when this session's own prefix request committed to it. A request hashed for another session,
+   * for another context, or naming another observation binds nothing.
+   */
+  @Test
+  void prefixRequestBindsOnlyTheObservationItsOwnSessionContextAndHashCommitTo() {
+    String session = "00000000-0000-4000-8000-0000000000a1";
+    String foreign = "00000000-0000-4000-8000-0000000000b2";
+    var observations = C.object().putArray("observations");
+    ObjectNode committed = observations.addObject().put("observationHash", "observation-a");
+    committed
+        .putObject("observation")
+        .put("documentId", "document-1")
+        .put("generation", 2)
+        .put("origin", "https://app.example.invalid");
+    ObjectNode uncommitted = observations.addObject().put("observationHash", "observation-b");
+    uncommitted
+        .putObject("observation")
+        .put("documentId", "document-2")
+        .put("generation", 3)
+        .put("origin", "https://app.example.invalid");
+
+    assertThat(bound(session, observations, request("context-1", session, "context-1", committed)))
+        .as("this session's own request binds exactly the observation it committed to")
+        .containsExactly("observation-a");
+    assertThat(bound(session, observations, request("context-1", foreign, "context-1", committed)))
+        .as("wrong session: a request hashed for another session binds nothing")
+        .isEmpty();
+    assertThat(bound(session, observations, request("context-2", session, "context-1", committed)))
+        .as("wrong context: the request's own contextId must be the committed one")
+        .isEmpty();
+    ObjectNode forged = committed.deepCopy().put("observationHash", "observation-forged");
+    assertThat(bound(session, observations, request("context-1", session, "context-1", forged)))
+        .as("wrong hash: a request naming no stored observation binds nothing")
+        .isEmpty();
+    assertThat(
+            GuidedPublicationEvidenceRepository.prefixRequestObservations(
+                C, session, null, observations))
+        .as("no incremental evidence binds nothing")
+        .isEmpty();
+  }
+
+  private static java.util.Set<String> bound(
+      String session, JsonNode observations, ObjectNode request) {
+    ObjectNode incremental = C.object();
+    incremental.putArray("prefixRequests").add(request);
+    return GuidedPublicationEvidenceRepository.prefixRequestObservations(
+        C, session, incremental, observations);
+  }
+
+  /**
+   * A prefix request with {@code contextId}, whose evidenceHash commits to {@code row} as seen by
+   * {@code hashedSession} in {@code hashedContext}.
+   */
+  private static ObjectNode request(
+      String contextId, String hashedSession, String hashedContext, JsonNode row) {
+    ObjectNode execution =
+        C.object()
+            .put("kind", "observedDocument")
+            .put("sessionId", hashedSession)
+            .put("contextId", hashedContext);
+    for (String field : List.of("documentId", "generation", "origin")) {
+      execution.set(field, row.path("observation").path(field));
+    }
+    execution.put("observationHash", row.path("observationHash").asText());
+    return C.object()
+        .put("contextId", contextId)
+        .put("evidenceHash", GuidedContracts.hash(execution));
   }
 }

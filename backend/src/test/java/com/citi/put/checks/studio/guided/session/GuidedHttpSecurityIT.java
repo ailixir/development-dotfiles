@@ -41,7 +41,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @ActiveProfiles("test")
 class GuidedHttpSecurityIT {
   private static final KeyPair KEYS = keys();
-  private static final String CLAIM = "/internal/v1/studio/guided-sessions/session-1/claim";
+  private static final String CLAIM = "/internal/v2/studio/guided-sessions/session-1/claim";
   @Autowired private MockMvc mvc;
   @Autowired private ObjectMapper json;
   @MockBean private GuidedSessionService service;
@@ -125,7 +125,7 @@ class GuidedHttpSecurityIT {
                     "jakarta.servlet.request.X509Certificate",
                     new X509Certificate[] {org.mockito.Mockito.mock(X509Certificate.class)})
                 .contentType("application/json")
-                .content("{}"))
+                .content("{\"schemaVersion\":3}"))
         .andExpect(status().isAccepted());
     ArgumentCaptor<Authentication> identity = ArgumentCaptor.forClass(Authentication.class);
     verify(service)
@@ -143,7 +143,7 @@ class GuidedHttpSecurityIT {
     // base. The real start/domain/published-view flow is exercised by the joined tests.
     var started =
         json.createObjectNode()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("sessionId", "security-no-publication-base")
             .put("testId", "security-test")
             .put("state", "PREPARING")
@@ -161,7 +161,7 @@ class GuidedHttpSecurityIT {
     }
     when(service.start(any(), anyString(), any())).thenReturn(started);
     mvc.perform(
-            post("/api/v3/studio/guided-sessions")
+            post("/api/v1/studio/guided-sessions")
                 .header("X-User-Id", "user@example.test")
                 .header("Idempotency-Key", "k".repeat(256))
                 .contentType("application/json")
@@ -173,7 +173,7 @@ class GuidedHttpSecurityIT {
         .start(principal.capture(), org.mockito.ArgumentMatchers.eq("k".repeat(256)), any());
     assertThat(principal.getValue().getPrincipal().userId()).isEqualTo("user@example.test");
     mvc.perform(
-            post("/api/v3/studio/guided-sessions")
+            post("/api/v1/studio/guided-sessions")
                 .header("Authorization", "Bearer " + token())
                 .header("Idempotency-Key", "key")
                 .contentType("application/json")
@@ -186,11 +186,11 @@ class GuidedHttpSecurityIT {
     when(service.read(any(), anyString(), org.mockito.ArgumentMatchers.eq("result")))
         .thenReturn(json.createObjectNode().put("state", "OBSERVING"));
     mvc.perform(
-            get("/api/v3/studio/guided-sessions/session-1/result")
+            get("/api/v1/studio/guided-sessions/session-1/result")
                 .header("X-User-Id", "user@example.test"))
         .andExpect(status().isAccepted());
     mvc.perform(
-            get("/api/v3/studio/guided-sessions/session-1/clarification")
+            get("/api/v1/studio/guided-sessions/session-1/clarification")
                 .header("X-User-Id", "user@example.test"))
         .andExpect(status().isNoContent());
   }
@@ -215,7 +215,7 @@ class GuidedHttpSecurityIT {
             .parse(
                 java.nio.file.Files.readString(
                     java.nio.file.Path.of(
-                        "../docs/specs/studio-observed-authoring/contracts/v2/wire-parity.fixtures.json")));
+                        "../docs/specs/studio-observed-authoring/contracts/v3/wire-parity.fixtures.json")));
     org.mockito.Mockito.clearInvocations(service);
     for (var vector : parity.path("rawJson")) {
       if (vector.path("accepted").asBoolean()) {
@@ -223,7 +223,7 @@ class GuidedHttpSecurityIT {
       }
       byte[] bytes = Base64.getDecoder().decode(vector.path("base64").asText());
       mvc.perform(
-              post("/api/v3/studio/guided-sessions")
+              post("/api/v1/studio/guided-sessions")
                   .header("X-User-Id", "user@example.test")
                   .header("Idempotency-Key", "malformed")
                   .contentType("application/json")
@@ -241,7 +241,7 @@ class GuidedHttpSecurityIT {
           .andExpect(status().isUnprocessableEntity());
     }
     mvc.perform(
-            post("/api/v3/studio/guided-sessions")
+            post("/api/v1/studio/guided-sessions")
                 .header("X-User-Id", "user@example.test")
                 .header("Idempotency-Key", "wrong-charset")
                 .contentType("application/json;charset=ISO-8859-1")

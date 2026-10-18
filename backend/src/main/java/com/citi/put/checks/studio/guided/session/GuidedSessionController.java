@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 /** Public BFF identity remains the platform contract; there is no public JWT resource-server. */
 @RestController
-@RequestMapping("/api/v3/studio/guided-sessions")
+@RequestMapping("/api/v1/studio/guided-sessions")
 public class GuidedSessionController {
   private final GuidedSessionService service;
   private com.citi.put.checks.studio.guided.publication.GuidedPublicationResultProjector
@@ -102,6 +102,11 @@ public class GuidedSessionController {
 
   @ExceptionHandler(GuidedSessionException.class)
   public ResponseEntity<?> failure(GuidedSessionException failure) {
-    return ResponseEntity.status(failure.status()).body(failure.response());
+    var response = ResponseEntity.status(failure.status());
+    if (failure.retryAfterSeconds() != null) {
+      // STUDIO-OBS-014 AC-8 (AR-2 d): only the per-CSI budget refusals carry it.
+      response.header("Retry-After", String.valueOf(failure.retryAfterSeconds()));
+    }
+    return response.body(failure.response());
   }
 }

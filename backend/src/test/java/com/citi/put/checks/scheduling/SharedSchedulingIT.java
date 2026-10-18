@@ -16,6 +16,7 @@ import com.citi.put.checks.studio.scheduling.StudioScheduleDtos;
 import com.citi.put.checks.studio.scheduling.StudioScheduleService;
 import com.citi.put.checks.studio.scheduling.StudioScheduledTarget;
 import com.citi.put.checks.studio.scheduling.StudioSchedulingProperties;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import java.sql.Timestamp;
@@ -42,6 +43,7 @@ import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor;
@@ -76,7 +78,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles({"test", "worker"})
 @Testcontainers(disabledWithoutDocker = true)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class SharedSchedulingIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
+
   @Container
   static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
 
@@ -175,12 +184,8 @@ class SharedSchedulingIT {
     fixtures.seedCsi(csi, OWNER);
     List<String> steps = List.of("Go to the fixture page");
     studioTest = fixtures.seedTest("Shared Studio", csi, OWNER, steps);
-    String configuration = StudioExecutionFixtures.DEFAULT_CONFIGURATION;
-    configuration =
-        configuration.substring(0, configuration.length() - 1) + ",\"environment\":\"Production\"}";
     revision =
-        fixtures.confirmRevision(
-            studioTest, csi, steps, StudioExecutionFixtures.NO_REFERENCES, configuration);
+        fixtures.confirmRevision(studioTest, csi, steps, StudioExecutionFixtures.NO_REFERENCES);
     properties.getLocalGrants().put(csi + "|Production", PRINCIPAL);
     SERVER.stubFor(get(urlEqualTo("/health")).willReturn(okJson("{\"status\":\"UP\"}")));
     SERVER.stubFor(
@@ -378,22 +383,23 @@ class SharedSchedulingIT {
         new SpringApplicationBuilder(ChecksApplication.class, FixtureConfiguration.class)
             .web(WebApplicationType.SERVLET)
             .run(
-                "--spring.profiles.active=test,worker",
-                "--server.port=0",
-                "--management.server.port=0",
-                "--spring.datasource.url=" + DATABASE.getJdbcUrl(),
-                "--spring.datasource.username=" + DATABASE.getUsername(),
-                "--spring.datasource.password=" + DATABASE.getPassword(),
-                "--spring.datasource.driver-class-name=org.postgresql.Driver",
-                "--spring.flyway.enabled=false",
-                "--checks.scheduling.dispatcher-enabled=false",
-                "--checks.scheduling.retry-enabled=false",
-                "--checks.dc.base-url=" + SERVER.baseUrl(),
-                "--studio.scheduling.enabled=true",
-                "--studio.scheduling.local-grants-enabled=true",
-                "--studio.scheduling.poll-interval-ms=PT5S",
-                "--studio.execution.dispatcher.enabled=false",
-                "--studio.scheduling.local-grants[" + csi + "|Production]=" + PRINCIPAL)) {
+                withObservedReplay(
+                    "--spring.profiles.active=test,worker",
+                    "--server.port=0",
+                    "--management.server.port=0",
+                    "--spring.datasource.url=" + DATABASE.getJdbcUrl(),
+                    "--spring.datasource.username=" + DATABASE.getUsername(),
+                    "--spring.datasource.password=" + DATABASE.getPassword(),
+                    "--spring.datasource.driver-class-name=org.postgresql.Driver",
+                    "--spring.flyway.enabled=false",
+                    "--checks.scheduling.dispatcher-enabled=false",
+                    "--checks.scheduling.retry-enabled=false",
+                    "--checks.dc.base-url=" + SERVER.baseUrl(),
+                    "--studio.scheduling.enabled=true",
+                    "--studio.scheduling.local-grants-enabled=true",
+                    "--studio.scheduling.poll-interval-ms=PT5S",
+                    "--studio.execution.dispatcher.enabled=false",
+                    "--studio.scheduling.local-grants[" + csi + "|Production]=" + PRINCIPAL))) {
       assertThat(replica.getBeansOfType(CronDispatcher.class)).isEmpty();
       var second = replica.getBean(SchedulingCoordinator.class);
       assertThat(second.isRunning()).isTrue();
@@ -414,6 +420,18 @@ class SharedSchedulingIT {
                   studioTest))
           .isEqualTo(1);
     }
+  }
+
+  /**
+   * STUDIO-OBS-012A R1: the replica gets the same trusted observed-replay configuration as this
+   * class's own context ({@link ObservedPublicationFixture#register}). Without it the replica's
+   * readiness cannot verify the learned revision, so which coordinator wins the occurrence would
+   * decide its refusal code.
+   */
+  private static String[] withObservedReplay(String... args) {
+    List<String> all = new java.util.ArrayList<>(List.of(args));
+    all.addAll(ObservedPublicationFixture.commandLineProperties());
+    return all.toArray(String[]::new);
   }
 
   private static void eventually(BooleanSupplier ready) throws Exception {

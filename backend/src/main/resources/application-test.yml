@@ -27,11 +27,14 @@ logging:
     org.flywaydb: INFO
 
 # Studio secret resolution is disabled unless an individual test supplies a test-only provider.
+#
+# STUDIO-OBS-009 AC-3: `test` (like `local`) accepts a plaintext studio.runner.base-url and a
+# context with no studio.runner.tls. A test that talks TLS to a runner double supplies
+# studio.runner.tls.* from RunnerTestTls; the unconfigured identity is deny-all, never a JVM default.
 studio:
-  compile:
-    gateway:
-      # Tests that exercise Vertex opt in explicitly with test credentials.
-      provider: disabled
+  gateway:
+    # Tests that exercise Vertex opt in explicitly with test credentials.
+    provider: disabled
   secrets:
     vault:
       provider: none

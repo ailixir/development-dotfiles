@@ -55,7 +55,7 @@ class VariableReferenceValidatorTest {
   @Test
   void aReferencedVariableWithNoValueIsMissingUntilTheCallerSuppliesOne() {
     List<String> steps = List.of("Go to \"<var BASE_URL>\"");
-    List<StudioVariable> declared = List.of(StudioVariable.plain("BASE_URL", " "));
+    List<StudioVariable> declared = List.of(StudioVariable.plain("BASE_URL", null));
 
     VariableReferenceValidator.Result unsupplied =
         VariableReferenceValidator.validate(steps, declared, Map.of());
@@ -72,6 +72,19 @@ class VariableReferenceValidatorTest {
                     steps, declared, Map.of("BASE_URL", "https://example.test"))
                 .isValid())
         .isTrue();
+  }
+
+  @Test
+  void anIntentionalEmptyOrWhitespaceValueIsAnExactValueNotAMissingOne() {
+    List<String> steps = List.of("Go to \"<var BASE_URL>\"");
+
+    for (String exact : List.of("", " ")) {
+      VariableReferenceValidator.Result result =
+          VariableReferenceValidator.validate(
+              steps, List.of(StudioVariable.plain("BASE_URL", exact)), Map.of());
+      assertThat(result.isValid()).isTrue();
+      assertThat(result.unvalued()).isEmpty();
+    }
   }
 
   @Test

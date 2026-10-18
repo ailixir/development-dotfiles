@@ -19,14 +19,30 @@ public class PartitionManager {
   private static final DateTimeFormatter SQL_DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
   private static final Set<String> ALLOWED_TABLES =
-      Set.of("execution_results", "ui_test_executions", "report_executions");
+      Set.of(
+          "execution_results",
+          "ui_test_executions",
+          "report_executions",
+          "studio_secret_use_audit",
+          "studio_observed_secret_read_entries",
+          "studio_observed_no_send_decisions",
+          "studio_observed_terminal_secret_settlements");
 
   /** The range-partition key of each managed table (V1, V7). */
   private static final Map<String, String> PARTITION_KEYS =
       Map.of(
           "execution_results", "started_at",
           "ui_test_executions", "started_at",
-          "report_executions", "executed_at");
+          "report_executions", "executed_at",
+          "studio_secret_use_audit", "release_occurred_at",
+          "studio_observed_secret_read_entries", "occurred_at",
+          "studio_observed_no_send_decisions", "occurred_at",
+          "studio_observed_terminal_secret_settlements", "occurred_at");
+
+  private static final Set<String> SECRET_EVIDENCE_TABLES =
+      Set.of(
+          "studio_secret_use_audit", "studio_observed_secret_read_entries",
+          "studio_observed_no_send_decisions", "studio_observed_terminal_secret_settlements");
 
   private final JdbcTemplate jdbc;
   private final String parentTable;
@@ -100,18 +116,25 @@ public class PartitionManager {
    *
    * <p>One {@code DO} block is one statement and so one transaction: the rows are moved aside out
    * of DEFAULT (a single {@code DELETE … RETURNING}), the partition is created and the rows are
-   * re-inserted through the parent, or none of it happens. {@code CREATE … PARTITION OF} locks and
-   * rescans DEFAULT, so a row for the month committed in between fails the block rather than being
-   * stranded. A transaction-scoped advisory lock per parent table serialises concurrent callers
-   * (every pod bootstraps), and the existence check is repeated under it.
+   * re-inserted through the parent, and all applicable evidence guards installed, or none of it
+   * happens. Existing leaves are repaired under the same creation lock. {@code CREATE … PARTITION
+   * OF} locks and rescans DEFAULT, so a row for the month committed in between fails the block
+   * rather than being stranded. A transaction-scoped advisory lock per parent table serialises
+   * concurrent callers (every pod bootstraps), and the existence check is repeated under it.
    *
    * @return {@code true} when the partition was absent before the call and exists after it
    */
   boolean ensurePartition(YearMonth month) {
     String partitionName = partitionName(month);
-    if (listPartitions().contains(partitionName)) {
-      return false;
-    }
+    boolean existed = listPartitions().contains(partitionName);
+    String guardInstallation =
+        SECRET_EVIDENCE_TABLES.contains(parentTable)
+            ? "PERFORM studio_secret_install_partition_guards('"
+                + parentTable
+                + "','"
+                + partitionName
+                + "');"
+            : "";
     String rangeStart = month.atDay(1).format(SQL_DATE_FMT);
     String rangeEnd = month.plusMonths(1).atDay(1).format(SQL_DATE_FMT);
     String defaultPartition = parentTable + "_default";
@@ -120,7 +143,7 @@ public class PartitionManager {
 
     // Every interpolated value is a whitelisted table name, a name derived from it, or a date this
     // class formatted; inside the block they are quoted again with %I / %L.
-    String block =
+    String blockTemplate =
         """
         DO $partition$
         DECLARE
@@ -129,6 +152,8 @@ public class PartitionManager {
         BEGIN
           PERFORM pg_advisory_xact_lock(hashtext('checks-partition:' || '%1$s'));
           IF to_regclass('%2$s') IS NOT NULL THEN
+            EXECUTE format('LOCK TABLE %%I IN ACCESS EXCLUSIVE MODE', '%2$s');
+            %8$s
             RETURN;
           END IF;
           IF to_regclass('%3$s') IS NOT NULL THEN
@@ -146,21 +171,24 @@ public class PartitionManager {
           END IF;
           EXECUTE format('CREATE TABLE %%I PARTITION OF %%I FOR VALUES FROM (%%L) TO (%%L)',
                          '%2$s', '%1$s', '%4$s', '%5$s');
+          %8$s
           IF moved > 0 THEN
             EXECUTE format('INSERT INTO %%I (%%s) SELECT %%s FROM %%I', '%1$s', cols, cols, '%6$s');
             RAISE NOTICE 'partition %% created with %% row(s) moved from %%', '%2$s', moved, '%3$s';
           END IF;
         END
         $partition$
-        """
-            .formatted(
-                parentTable,
-                partitionName,
-                defaultPartition,
-                rangeStart,
-                rangeEnd,
-                staging,
-                partitionKey);
+        """;
+    String block =
+        blockTemplate.formatted(
+            parentTable,
+            partitionName,
+            defaultPartition,
+            rangeStart,
+            rangeEnd,
+            staging,
+            partitionKey,
+            guardInstallation);
 
     jdbc.execute(block);
     boolean created = listPartitions().contains(partitionName);
@@ -170,7 +198,7 @@ public class PartitionManager {
         rangeStart,
         rangeEnd,
         created);
-    return created;
+    return !existed && created;
   }
 
   private String partitionName(YearMonth month) {
@@ -179,7 +207,9 @@ public class PartitionManager {
 
   public PartitionHealthStatus checkHealth(int lookaheadDays) {
     if (!isPartitionedTable()) {
-      return new PartitionHealthStatus(true, null);
+      return new PartitionHealthStatus(
+          !SECRET_EVIDENCE_TABLES.contains(parentTable),
+          SECRET_EVIDENCE_TABLES.contains(parentTable) ? parentTable : null);
     }
 
     YearMonth targetMonth =
@@ -188,10 +218,60 @@ public class PartitionManager {
 
     Set<String> existingPartitions = listPartitions();
 
+    if (SECRET_EVIDENCE_TABLES.contains(parentTable)) {
+      for (String leaf : existingPartitions) {
+        if (!hasApplicableSecretGuards(leaf)) {
+          return new PartitionHealthStatus(false, leaf);
+        }
+      }
+    }
     if (existingPartitions.contains(expectedPartition)) {
       return new PartitionHealthStatus(true, null);
     }
     return new PartitionHealthStatus(false, expectedPartition);
+  }
+
+  private boolean hasApplicableSecretGuards(String leaf) {
+    String commitFunction;
+    switch (parentTable) {
+      case "studio_observed_no_send_decisions":
+        commitFunction = "studio_observed_no_send_commit_guard()";
+        break;
+      case "studio_observed_terminal_secret_settlements":
+        commitFunction = "studio_observed_terminal_commit_guard()";
+        break;
+      default:
+        commitFunction = null;
+    }
+    Boolean immutable =
+        jdbc.queryForObject(
+            ("SELECT EXISTS(SELECT 1 FROM pg_trigger t WHERE t.tgrelid=to_regclass(?) "
+                + "AND t.tgname='tr_secret_evidence_leaf_truncate' AND "
+                + "t.tgfoid=to_regprocedure('studio_secret_audit_immutable()') AND "
+                + "t.tgtype=34 AND t.tgenabled IN ('O','A')) AND EXISTS(SELECT 1 FROM "
+                + "pg_trigger t WHERE t.tgrelid=to_regclass(?) AND "
+                + "t.tgfoid=to_regprocedure('studio_secret_audit_immutable()') AND "
+                + "(t.tgtype & 27)=27 AND t.tgenabled IN ('O','A')) AND (SELECT "
+                + "pg_get_expr(relpartbound,oid)<>'DEFAULT' FROM pg_class WHERE "
+                + "oid=to_regclass(?))"),
+            Boolean.class,
+            leaf,
+            leaf,
+            leaf);
+    if (!Boolean.TRUE.equals(immutable)) {
+      return false;
+    }
+    if (commitFunction == null) {
+      return true;
+    }
+    return Boolean.TRUE.equals(
+        jdbc.queryForObject(
+            ("SELECT EXISTS(SELECT 1 FROM pg_trigger t WHERE t.tgrelid=to_regclass(?) "
+                + "AND t.tgfoid=to_regprocedure(?) AND t.tgtype=5 AND t.tgconstraint<>0 AND "
+                + "t.tgdeferrable AND t.tginitdeferred AND t.tgenabled IN ('O','A'))"),
+            Boolean.class,
+            leaf,
+            commitFunction));
   }
 
   public int countFuturePartitions() {

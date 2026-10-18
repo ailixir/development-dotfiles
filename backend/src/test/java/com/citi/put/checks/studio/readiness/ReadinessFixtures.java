@@ -1,10 +1,5 @@
 package com.citi.put.checks.studio.readiness;
 
-import com.citi.put.checks.studio.compile.ArtifactCanonicalizer;
-import com.citi.put.checks.studio.compile.CandidateRevision;
-import com.citi.put.checks.studio.compile.CompilePins;
-import com.citi.put.checks.studio.compile.CompileRequest;
-import com.citi.put.checks.studio.compile.CompileStateService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -15,12 +10,11 @@ import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
- * Seeding for the readiness tests: a draft, and a draft that has genuinely been through the compile
- * state machine to a confirmed revision.
+ * Seeding for the readiness tests: a draft and a guided learning session for it.
  *
- * <p>The confirmation is driven through {@link CompileStateService} rather than by inserting a row,
- * so the fixture cannot accidentally construct a state the real transitions would refuse. A test
- * whose "confirmed" revision was hand-written would prove that the gate accepts hand-written rows.
+ * <p>Since ADR-SC-005 the only revision family is an observed ({@code GUIDED_RUN}) publication,
+ * which only a guided run produces; tests that need one publish it through {@code
+ * ObservedPublicationFixture}. A revision of any other family cannot be stored (V15).
  */
 final class ReadinessFixtures {
 
@@ -31,7 +25,7 @@ final class ReadinessFixtures {
 
   private ReadinessFixtures() {}
 
-  /** A draft, {@code STALE}, never compiled. */
+  /** A draft that has never been learned. */
   static UUID seedDraft(JdbcTemplate jdbc, List<String> steps) {
     UUID id = UUID.randomUUID();
     ArrayNode stepsJson = MAPPER.createArrayNode();
@@ -49,93 +43,24 @@ final class ReadinessFixtures {
     return id;
   }
 
-  /**
-   * Drives a draft all the way to a confirmed revision through the real transitions.
-   *
-   * @return the confirmed revision id
-   */
-  static UUID confirm(
-      CompileStateService states, JdbcTemplate jdbc, UUID testId, List<String> steps) {
-    return confirm(
-        states,
-        jdbc,
-        testId,
-        steps,
-        provenance(CompilePins.SYNTAX_REFERENCE_VERSION, "2.0.0"),
-        CompilePins.SUPPORTED_ARTIFACT_VERSION);
-  }
-
-  /** The same, with a provenance and schema version the caller chooses — for AC-25. */
-  static UUID confirm(
-      CompileStateService states,
-      JdbcTemplate jdbc,
-      UUID testId,
-      List<String> steps,
-      String provenanceJson,
-      int artifactSchemaVersion) {
-    CompileRequest request = states.beginCompile(testId);
-    CandidateRevision candidate =
-        candidate(steps, request.configurationRevision(), provenanceJson, artifactSchemaVersion);
-    states.publishCandidate(testId, request, candidate);
-    UUID revisionId =
-        jdbc.queryForObject(
-            "SELECT current_candidate_revision_id FROM ui_tests WHERE id = ?", UUID.class, testId);
-    states.confirm(
-        testId,
-        revisionId,
-        candidate.artifactHash(),
-        request.sourceRevision(),
-        request.configurationRevision(),
-        OWNER);
-    return revisionId;
-  }
-
-  /** A candidate whose hashes are produced by the same helper the gate re-derives them with. */
-  static CandidateRevision candidate(
-      List<String> steps,
-      long configurationRevision,
-      String provenanceJson,
-      int artifactSchemaVersion) {
-    String source = ArtifactCanonicalizer.canonicalSource(steps);
-    String artifact = ArtifactCanonicalizer.canonicalize(artifactFor(steps));
-    return new CandidateRevision(
-        configurationRevision,
-        source,
-        ArtifactCanonicalizer.hash(source),
-        artifact,
-        ArtifactCanonicalizer.hash(artifact),
-        artifactSchemaVersion,
-        "{\"browser\":\"chromium\",\"environment\":\"Production\"}",
-        "{\"variables\":[],\"secrets\":[]}",
-        provenanceJson,
-        OWNER);
-  }
-
-  /** An index-aligned artifact for the given source, in the §4.4 shape. */
-  static String artifactFor(List<String> steps) {
-    ObjectNode artifact = MAPPER.createObjectNode();
-    artifact.put("version", CompilePins.SUPPORTED_ARTIFACT_VERSION);
-    ArrayNode stepNodes = artifact.putArray("steps");
-    for (int index = 0; index < steps.size(); index++) {
-      ObjectNode step = stepNodes.addObject();
-      step.put("stepIndex", index);
-      step.put("originalText", steps.get(index));
-      step.put("code", "await page.goto('https://example.com/');");
-    }
-    return artifact.toString();
-  }
-
-  static String provenance(String syntaxReferenceVersion, String validatorSchemaVersion) {
-    ObjectNode provenance = MAPPER.createObjectNode();
-    provenance.put("model", "stub-model@1");
-    provenance.put("promptVersion", CompilePins.PROMPT_VERSION);
-    provenance.put("syntaxReferenceVersion", syntaxReferenceVersion);
-    provenance.put("validatorSchemaVersion", validatorSchemaVersion);
-    provenance.put("languagePolicyVersion", validatorSchemaVersion);
-    provenance.put("executorVersion", "2.0.0");
-    provenance.put("playwrightVersion", "1.63.0");
-    provenance.put("artifactSchemaVersion", CompilePins.SUPPORTED_ARTIFACT_VERSION);
-    return provenance.toString();
+  /** A guided learning session for the draft in the given state, expiring in ten minutes. */
+  static String learningSession(JdbcTemplate jdbc, UUID testId, String state) {
+    String sessionId = "readiness-" + UUID.randomUUID();
+    String scopeHash = "b".repeat(64);
+    ObjectNode document = MAPPER.createObjectNode();
+    document.put("sessionId", sessionId).put("scopeHash", scopeHash).put("state", state);
+    document.putObject("scope").put("principalId", OWNER);
+    jdbc.update(
+        "INSERT INTO studio_guided_sessions (session_id, test_id, principal_id, scope_hash, state,"
+            + " expires_at, document) VALUES (?, ?, ?, ?, ?, now() + interval '10 minutes',"
+            + " CAST(? AS jsonb))",
+        sessionId,
+        testId.toString(),
+        OWNER,
+        scopeHash,
+        state,
+        document.toString());
+    return sessionId;
   }
 
   static void seedUser(JdbcTemplate jdbc, String email) {

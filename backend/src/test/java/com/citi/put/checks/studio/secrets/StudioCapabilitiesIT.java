@@ -1,0 +1,367 @@
+package com.citi.put.checks.studio.secrets;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import com.citi.put.checks.studio.StudioExecutionFixtures;
+import com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository;
+import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Testcontainers;
+
+/**
+ * STUDIO-OBS-008 P1 and P6 over real HTTP, through the whole filter chain: {@code GET
+ * /tests/{id}/capabilities}.
+ *
+ * <p>The vault is a counting double whose provider name can be switched. Every call that would
+ * reach a Vault ({@code read}, {@code create}, {@code listSecretNames}) is counted and fails as an
+ * unreachable Vault would, so "configuration is not health" and "no outbound Vault call" are
+ * asserted on the double, not on source text.
+ */
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
+class StudioCapabilitiesIT {
+
+  private static final String SECOND_APPLICATION = "studio-fixture-second";
+  private static final String ENVIRONMENT = "Production";
+
+  @DynamicPropertySource
+  static void configuration(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+    // A second trusted application, so one CSI can have two candidate applications.
+    registry.add(
+        "studio.observed-replay.policies-json",
+        () -> ObservedPublicationFixture.policiesJsonWith(trustedSecondApplication()));
+    registry.add(
+        "studio.guided-authoring.translation.applications",
+        () -> ObservedPublicationFixture.APPLICATION + "," + SECOND_APPLICATION);
+    registry.add("studio.guided-authoring.translation.environments", () -> ENVIRONMENT);
+  }
+
+  private static ObjectNode trustedSecondApplication() {
+    var contracts = new GuidedContracts();
+    ObjectNode policy =
+        contracts
+            .object()
+            .put("version", 1)
+            .put("policyId", "policy-" + SECOND_APPLICATION)
+            .put("policyVersion", "1")
+            .put("applicationId", SECOND_APPLICATION)
+            .put("environment", ENVIRONMENT)
+            .put("entryPolicyId", "entry-" + SECOND_APPLICATION);
+    policy.putArray("allowedOrigins").add(ObservedPublicationFixture.ORIGIN);
+    policy
+        .putObject("applicationPolicy")
+        .put("policyRuleId", "app")
+        .put("allowStructuralDiscovery", true)
+        .putArray("readGrants");
+    policy.putArray("rules");
+    return policy;
+  }
+
+  private static final String CSI_ONE = "60481";
+  private static final String CSI_TWO = "60482";
+  private static final String CSI_PENDING = "60483";
+  private static final String OWNER = "capabilities-owner@citi.com";
+  private static final String READER = "capabilities-reader@citi.com";
+  private static final String STRANGER = "capabilities-stranger@citi.com";
+
+  /** Counts every call that would leave the process; each fails like an unreachable Vault. */
+  static final class CountingVault implements StudioVaultProvider {
+    final AtomicInteger calls = new AtomicInteger();
+    volatile String name = DisabledStudioVaultProvider.NAME;
+
+    @Override
+    public String name() {
+      return name;
+    }
+
+    @Override
+    public Optional<VaultEntry> read(ReferenceKind kind, VaultScope scope, String referenceName) {
+      calls.incrementAndGet();
+      throw new VaultProviderUnavailableException("capability probe must never call Vault");
+    }
+
+    @Override
+    public String create(VaultScope scope, String name, char[] value, List<String> origins) {
+      calls.incrementAndGet();
+      throw new VaultProviderUnavailableException("capability probe must never call Vault");
+    }
+
+    @Override
+    public List<String> listSecretNames(VaultScope scope) {
+      calls.incrementAndGet();
+      throw new VaultProviderUnavailableException("capability probe must never call Vault");
+    }
+  }
+
+  @TestConfiguration
+  static class Doubles {
+    @Bean
+    @Primary
+    CountingVault countingVault() {
+      return new CountingVault();
+    }
+  }
+
+  @Autowired private TestRestTemplate restTemplate;
+  @Autowired private ObjectMapper objectMapper;
+  @Autowired private JdbcTemplate jdbc;
+  @Autowired private CountingVault vault;
+
+  private StudioExecutionFixtures fixtures;
+  private UUID testOne;
+
+  @BeforeEach
+  void setUp() {
+    vault.calls.set(0);
+    vault.name = DisabledStudioVaultProvider.NAME;
+    fixtures = new StudioExecutionFixtures(jdbc);
+    for (String user : List.of(OWNER, READER, STRANGER)) {
+      fixtures.seedUser(user);
+    }
+    for (String csi : List.of(CSI_ONE, CSI_TWO, CSI_PENDING)) {
+      fixtures.seedCsi(csi, OWNER);
+    }
+    // CSI one governs only the fixture application; CSI two governs two trusted applications.
+    ObservedPublicationFixture.seedApprovedPolicies(jdbc, CSI_ONE, CSI_TWO);
+    ObservedPublicationFixture.ensurePolicy(
+        jdbc,
+        CSI_TWO,
+        SECOND_APPLICATION,
+        ENVIRONMENT,
+        List.of(ObservedPublicationFixture.ORIGIN),
+        null,
+        "ALLOW");
+    testOne = fixtures.seedTest("Capabilities draft", CSI_ONE, OWNER, List.of("Open page"));
+  }
+
+  // ── P1: authorization first ──────────────────────────────────────────────
+
+  @Test
+  void authorizesBeforeProviderAndScopedPolicyLookup() throws Exception {
+    UUID absent = UUID.randomUUID();
+
+    ResponseEntity<String> stranger = get(testOne, stranger());
+    ResponseEntity<String> missing = get(absent, owner(CSI_ONE));
+    ResponseEntity<String> unauthenticated = get(testOne, new HttpHeaders());
+
+    assertThat(stranger.getStatusCode().value()).isEqualTo(403);
+    assertThat(missing.getStatusCode().value()).isEqualTo(403);
+    assertThat(stranger.getBody())
+        .as("an absent test and a denied CSI are indistinguishable")
+        .isEqualTo(missing.getBody());
+    assertThat(unauthenticated.getStatusCode().value()).isEqualTo(401);
+    assertThat(vault.calls.get()).isZero();
+
+    ResponseEntity<String> ok = get(testOne, owner(CSI_ONE));
+    assertThat(ok.getStatusCode().value()).isEqualTo(200);
+    assertThat(ok.getHeaders().getFirst("Cache-Control")).contains("no-store");
+    JsonNode body = objectMapper.readTree(ok.getBody());
+    assertThat(fieldNames(body)).containsExactlyInAnyOrder("vaultSecrets", "guidedStart");
+    assertThat(vault.calls.get()).as("a capability read never calls the provider").isZero();
+  }
+
+  @Test
+  void capabilityTrueNeverGrantsWriteOrSecretUse() throws Exception {
+    vault.name = "hashicorp";
+
+    JsonNode reader = objectMapper.readTree(get(testOne, reader(CSI_ONE)).getBody());
+    ResponseEntity<String> create =
+        restTemplate.exchange(
+            "/api/v1/studio/tests/" + testOne + "/secrets",
+            HttpMethod.POST,
+            new HttpEntity<>(
+                "{\"name\":\"PW\",\"value\":\"x\",\"allowedOrigins\":[]}", reader(CSI_ONE)),
+            String.class);
+
+    assertThat(reader.path("vaultSecrets").asBoolean()).isTrue();
+    assertThat(create.getStatusCode().value())
+        .as("create still needs canWrite, whatever the capability says")
+        .isEqualTo(403);
+  }
+
+  // ── P1: configuration is not provider health ─────────────────────────────
+
+  @Test
+  void configurationIsNotProviderHealth() throws Exception {
+    vault.name = DisabledStudioVaultProvider.NAME;
+    assertThat(objectMapper.readTree(get(testOne, owner(CSI_ONE)).getBody()).path("vaultSecrets"))
+        .isEqualTo(objectMapper.getNodeFactory().booleanNode(false));
+
+    vault.name = "hashicorp";
+    JsonNode configured = objectMapper.readTree(get(testOne, owner(CSI_ONE)).getBody());
+
+    assertThat(configured.path("vaultSecrets").asBoolean())
+        .as("a configured but unreachable Vault still reports true")
+        .isTrue();
+    assertThat(configured.toString())
+        .doesNotContain("hashicorp")
+        .doesNotContain("none")
+        .doesNotContain("token")
+        .doesNotContain("address");
+    assertThat(vault.calls.get()).as("lookup, list and read are never called").isZero();
+  }
+
+  // ── P6: the start context ────────────────────────────────────────────────
+
+  @Test
+  void startContextUsesExactPersistedScopeAndUniqueApplication() throws Exception {
+    int sessionsBefore = rows("studio_guided_sessions");
+    int guardsBefore = rows("studio_guided_csi_guards") + rows("studio_guided_csi_token_days");
+
+    JsonNode start =
+        objectMapper.readTree(get(testOne, owner(CSI_ONE)).getBody()).path("guidedStart");
+
+    assertThat(start.path("available").asBoolean()).isTrue();
+    JsonNode context = start.path("context");
+    assertThat(fieldNames(context))
+        .containsExactlyInAnyOrder(
+            "schemaVersion",
+            "testId",
+            "sourceRevision",
+            "configurationRevision",
+            "environmentId",
+            "applicationId",
+            "versions");
+    assertThat(context.path("schemaVersion").asInt()).isEqualTo(3);
+    assertThat(context.path("testId").asText()).isEqualTo(testOne.toString());
+    assertThat(context.path("environmentId").asText()).isEqualTo(ENVIRONMENT);
+    assertThat(context.path("applicationId").asText())
+        .isEqualTo(ObservedPublicationFixture.APPLICATION);
+    assertThat(context.path("sourceRevision").asText())
+        .isEqualTo(
+            jdbc.queryForObject(
+                "SELECT source_revision::text FROM ui_tests WHERE id=?", String.class, testOne));
+    assertThat(context.path("configurationRevision").asText())
+        .isEqualTo(
+            jdbc.queryForObject(
+                "SELECT configuration_revision::text FROM ui_tests WHERE id=?",
+                String.class,
+                testOne));
+    assertThat(context.path("versions").toString()).isEqualTo("{\"contract\":3}");
+    assertThat(rows("studio_guided_sessions"))
+        .as("no session is created")
+        .isEqualTo(sessionsBefore);
+    assertThat(rows("studio_guided_csi_guards") + rows("studio_guided_csi_token_days"))
+        .as("no budget row")
+        .isEqualTo(guardsBefore);
+  }
+
+  @Test
+  void zeroOrSeveralCandidatesAreRuntimeIncompatible() throws Exception {
+    UUID two = fixtures.seedTest("Two applications", CSI_TWO, OWNER, List.of("Open page"));
+    JsonNode several =
+        objectMapper.readTree(get(two, owner(CSI_TWO)).getBody()).path("guidedStart");
+    assertThat(several.toString())
+        .as("two governed, permitted, trusted applications: nothing is chosen")
+        .isEqualTo("{\"available\":false,\"code\":\"RUNTIME_INCOMPATIBLE\"}");
+
+    jdbc.update("UPDATE ui_tests SET environment='Nowhere' WHERE id=?", testOne);
+    JsonNode none =
+        objectMapper.readTree(get(testOne, owner(CSI_ONE)).getBody()).path("guidedStart");
+    assertThat(none.toString())
+        .as("no governed policy scope for this environment")
+        .isEqualTo("{\"available\":false,\"code\":\"RUNTIME_INCOMPATIBLE\"}");
+  }
+
+  @Test
+  void anUnapprovedScopeStillNamesItsCandidateSoTheRealStartCanRefuseIt() throws Exception {
+    new ObservationPolicyRepository(jdbc, new GuidedContracts())
+        .insertPolicy(
+            UUID.randomUUID(),
+            CSI_PENDING,
+            ObservedPublicationFixture.APPLICATION,
+            ENVIRONMENT,
+            OWNER);
+    UUID pending = fixtures.seedTest("Unapproved scope", CSI_PENDING, OWNER, List.of("Open page"));
+
+    JsonNode start =
+        objectMapper.readTree(get(pending, owner(CSI_PENDING)).getBody()).path("guidedStart");
+
+    assertThat(start.path("available").asBoolean()).isTrue();
+    assertThat(start.path("context").path("applicationId").asText())
+        .isEqualTo(ObservedPublicationFixture.APPLICATION);
+  }
+
+  @Test
+  void aReaderWithoutExecuteGetsForbiddenScopeWhileVaultStillReportsConfiguration()
+      throws Exception {
+    vault.name = "hashicorp";
+
+    JsonNode body = objectMapper.readTree(get(testOne, reader(CSI_ONE)).getBody());
+
+    assertThat(body.path("vaultSecrets").asBoolean()).isTrue();
+    assertThat(body.path("guidedStart").toString())
+        .isEqualTo("{\"available\":false,\"code\":\"FORBIDDEN_SCOPE\"}");
+  }
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  private int rows(String table) {
+    return jdbc.queryForObject("SELECT count(*) FROM " + table, Integer.class);
+  }
+
+  private ResponseEntity<String> get(UUID test, HttpHeaders headers) {
+    return restTemplate.exchange(
+        "/api/v1/studio/tests/" + test + "/capabilities",
+        HttpMethod.GET,
+        new HttpEntity<>(headers),
+        String.class);
+  }
+
+  private static List<String> fieldNames(JsonNode json) {
+    List<String> names = new ArrayList<>();
+    json.fieldNames().forEachRemaining(names::add);
+    return names;
+  }
+
+  private static HttpHeaders identity(String email, String ownership) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.set("X-User-Id", "uid-" + email);
+    headers.set("X-User-Email", email);
+    headers.set("X-User-Roles", "");
+    headers.set("X-User-Csi-Ownership", ownership);
+    return ObservedPublicationFixture.withSession(headers);
+  }
+
+  private static HttpHeaders owner(String csi) {
+    return identity(OWNER, csi + ":owner");
+  }
+
+  private static HttpHeaders reader(String csi) {
+    return identity(READER, csi + ":viewer");
+  }
+
+  private static HttpHeaders stranger() {
+    return identity(STRANGER, "");
+  }
+}

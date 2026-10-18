@@ -13,8 +13,7 @@ import java.util.List;
 public record AuthoringV2Request(
     @Min(2) @Max(2) int authoringSchemaVersion,
     @Valid GlobalAuthoringContext globalContext,
-    @NotNull @Size(max = 100) List<@Valid AuthoringStep> steps)
-    implements StudioAuthoring {
+    @NotNull @Size(max = 100) List<@Valid AuthoringStep> steps) {
 
   public AuthoringV2Request {
     globalContext = globalContext == null ? GlobalAuthoringContext.empty() : globalContext;

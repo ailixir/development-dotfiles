@@ -12,7 +12,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
-import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -148,7 +147,7 @@ class StudioDispatchMetricsTest {
 
   private static void stub(int status) {
     wireMock.resetAll();
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(status)));
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(status)));
   }
 
   private static HttpRunnerDispatchClient client() {
@@ -157,9 +156,6 @@ class StudioDispatchMetricsTest {
         new StudioExecutionProperties(
             true, null, null, null, Duration.ofSeconds(5), null, null, null, null, null, null),
         new StudioRunnerProperties(
-            "http://localhost:" + wireMock.port(),
-            "test-runner-token",
-            Duration.ofSeconds(5),
-            Duration.ofSeconds(2)));
+            "http://localhost:" + wireMock.port(), "test-runner-token", Duration.ofSeconds(2)));
   }
 }

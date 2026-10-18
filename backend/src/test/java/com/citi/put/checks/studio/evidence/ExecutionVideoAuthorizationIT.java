@@ -1,10 +1,12 @@
 package com.citi.put.checks.studio.evidence;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.nio.charset.StandardCharsets;
@@ -26,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -33,6 +37,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -53,9 +59,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestEvidenceStores.class)
+@Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
 @Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoAuthorizationIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60470";
   private static final String OTHER_CSI_ID = "60471";
@@ -94,7 +105,12 @@ class ExecutionVideoAuthorizationIT {
         fixtures.seedRunnableTest("Video authz draft", CSI_ID, OWNER, List.of("Go home")).testId();
     executionId =
         studioService
-            .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), null)
+            .executeTest(
+                testId,
+                StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+                null,
+                ObservedPublicationFixture.request(
+                    StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
             .executionId();
     UUID attemptId = video.dispatch(executionId, "video-authz-dispatcher");
     video.finish(executionId, "PASSED", 42_000);
@@ -247,12 +263,22 @@ class ExecutionVideoAuthorizationIT {
    */
   @Test
   void movingTheExecutionRowsOwnCsiFlipsTheAnswer() {
+    // STUDIO-OBS-012A R2 precondition: an observed (bound) execution's CSI cannot move at all.
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE ui_test_executions SET csi_id = ? WHERE id = ?",
+                    OTHER_CSI_ID,
+                    executionId))
+        .isInstanceOf(DataAccessException.class)
+        .hasMessageContaining("observed execution binding invalid");
+    UUID unbound = unboundRecording(testId);
     HttpHeaders reader = VideoEvidenceFixtures.identity(READER, "", CSI_ID + ":viewer");
-    assertThat(get(videoPath(false), reader).getStatusCode().value()).isEqualTo(200);
+    assertThat(get(videoPath(unbound, false), reader).getStatusCode().value()).isEqualTo(200);
 
-    jdbc.update("UPDATE ui_test_executions SET csi_id = ? WHERE id = ?", OTHER_CSI_ID, executionId);
+    jdbc.update("UPDATE ui_test_executions SET csi_id = ? WHERE id = ?", OTHER_CSI_ID, unbound);
 
-    assertThat(get(videoPath(false), reader).getStatusCode().value())
+    assertThat(get(videoPath(unbound, false), reader).getStatusCode().value())
         .as("the execution's own immutable CSI is what this route authorizes against")
         .isEqualTo(403);
   }
@@ -264,13 +290,23 @@ class ExecutionVideoAuthorizationIT {
    */
   @Test
   void movingTheParentTestsCsiDoesNotChangeTheAnswer() {
+    // STUDIO-OBS-012A R2 precondition: a published test's CSI is pinned by its publication rows.
+    assertThatThrownBy(
+            () -> jdbc.update("UPDATE ui_tests SET csi_id = ? WHERE id = ?", OTHER_CSI_ID, testId))
+        .isInstanceOf(DataIntegrityViolationException.class)
+        .hasMessageContaining("foreign key");
+    // The parent of the unbound row is an unpublished draft with no secret-use audit rows.
+    UUID unpublished =
+        new StudioExecutionFixtures(jdbc)
+            .seedTest("Video authz unpublished draft", CSI_ID, OWNER, List.of("Go home"));
+    UUID unbound = unboundRecording(unpublished);
     HttpHeaders reader = VideoEvidenceFixtures.identity(READER, "", CSI_ID + ":viewer");
-    ResponseEntity<byte[]> before = get(videoPath(false), reader);
+    ResponseEntity<byte[]> before = get(videoPath(unbound, false), reader);
     assertThat(before.getStatusCode().value()).isEqualTo(200);
 
-    jdbc.update("UPDATE ui_tests SET csi_id = ? WHERE id = ?", OTHER_CSI_ID, testId);
+    jdbc.update("UPDATE ui_tests SET csi_id = ? WHERE id = ?", OTHER_CSI_ID, unpublished);
 
-    ResponseEntity<byte[]> after = get(videoPath(false), reader);
+    ResponseEntity<byte[]> after = get(videoPath(unbound, false), reader);
     assertThat(after.getStatusCode().value())
         .as("historical access uses the execution CSI, not a mutable parent lookup (§9.1)")
         .isEqualTo(200);
@@ -304,15 +340,24 @@ class ExecutionVideoAuthorizationIT {
                 .filter(ExecutionVideoAuthorizationIT::isIdentityless))
         .as("the 401 expectation is an exemption for exactly one identityless row, not a pattern")
         .hasSize(1);
+    // STUDIO-OBS-012A R2 precondition: an observed (bound) execution cannot lose its CSI at all.
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE ui_test_executions SET csi_id = NULL WHERE id = ?", executionId))
+        .isInstanceOf(DataAccessException.class)
+        .hasMessageContaining("observed execution binding invalid");
+    // The quarantine is seated on an unbound history row, the one shape that may carry no CSI.
+    UUID unbound = unboundRecording(testId);
     for (boolean download : new boolean[] {false, true}) {
-      assertThat(get(videoPath(download), administrators.get(0)).getStatusCode().value())
+      assertThat(get(videoPath(unbound, download), administrators.get(0)).getStatusCode().value())
           .as(
               "the control: before quarantine the administrator is served, so the 403 below is "
                   + "the quarantine's and not a refusal the administrator would get anyway")
           .isEqualTo(200);
     }
 
-    jdbc.update("UPDATE ui_test_executions SET csi_id = NULL WHERE id = ?", executionId);
+    jdbc.update("UPDATE ui_test_executions SET csi_id = NULL WHERE id = ?", unbound);
 
     AtomicInteger administratorRefusals = new AtomicInteger();
     identities()
@@ -329,9 +374,9 @@ class ExecutionVideoAuthorizationIT {
                       : "%s: a null-CSI row must be refused (403), and by the snapshot route's "
                           + "own answer";
               ResponseEntity<byte[]> snapshot =
-                  get("/api/v1/studio/executions/" + executionId, identity);
+                  get("/api/v1/studio/executions/" + unbound, identity);
               for (boolean download : new boolean[] {false, true}) {
-                ResponseEntity<byte[]> answer = get(videoPath(download), identity);
+                ResponseEntity<byte[]> answer = get(videoPath(unbound, download), identity);
                 assertThat(answer.getStatusCode().value())
                     .as(reason, arguments.get()[0])
                     .isEqualTo(expected)
@@ -488,10 +533,32 @@ class ExecutionVideoAuthorizationIT {
   // ── helpers ──────────────────────────────────────────────────────────────
 
   private String videoPath(boolean download) {
-    return "/api/v1/studio/executions/"
-        + executionId
-        + "/video"
-        + (download ? "?download=true" : "");
+    return videoPath(executionId, download);
+  }
+
+  private String videoPath(UUID execution, boolean download) {
+    return "/api/v1/studio/executions/" + execution + "/video" + (download ? "?download=true" : "");
+  }
+
+  /**
+   * STUDIO-OBS-012A R2: an unbound execution of {@code parentTestId} on {@link #CSI_ID},
+   * dispatched, finished and holding a recording exactly as {@link #setUp()} arranges the observed
+   * one. Only an unbound row may have its own CSI changed or cleared under the final schema.
+   */
+  private UUID unboundRecording(UUID parentTestId) {
+    UUID unbound =
+        new StudioExecutionFixtures(jdbc)
+            .unboundExecution(parentTestId, CSI_ID, OWNER, "Production", "PENDING");
+    UUID attemptId = video.dispatch(unbound, "video-authz-dispatcher");
+    video.finish(unbound, "PASSED", 42_000);
+    video.evidence(
+        unbound,
+        "AVAILABLE",
+        Instant.now().plus(7, ChronoUnit.DAYS),
+        false,
+        "studio/should-never-be-read/decoy.webm");
+    store.put(VideoEvidenceFixtures.derivedKey(CSI_ID, parentTestId, unbound, attemptId), object);
+    return unbound;
   }
 
   private ResponseEntity<byte[]> get(String path, HttpHeaders headers) {

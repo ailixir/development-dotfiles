@@ -9,13 +9,8 @@ import com.citi.put.checks.studio.dto.DefaultVariableValue;
 import com.citi.put.checks.studio.dto.GlobalAuthoringContext;
 import com.citi.put.checks.studio.dto.StepAuthoringContext;
 import com.citi.put.checks.studio.dto.VariableReference;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +20,10 @@ import java.util.UUID;
 /** Pure construction and verification of the complete immutable authoring revision identity. */
 public final class AuthoringRevisionIdentity {
 
-  private static final ObjectMapper MAPPER = new ObjectMapper().findAndRegisterModules();
+  private static final ObjectMapper MAPPER =
+      new ObjectMapper()
+          .findAndRegisterModules()
+          .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
   private static final int MAX_STEPS = 100;
   private static final int MAX_COLLECTION = 500;
   private static final java.util.regex.Pattern HASH =
@@ -46,6 +44,33 @@ public final class AuthoringRevisionIdentity {
         stepContexts,
         nonsecret,
         evidence);
+  }
+
+  /** Rebuild the same context digest from immutable declaration hashes, without private values. */
+  public static AuthoringRevisionInputs fromReferenceHashes(
+      AuthoringV2Request authoring,
+      List<AuthoringRevisionInputs.NonsecretReferenceHash> references) {
+    String global = hashJson(authoring.globalContext());
+    var contexts = stepContexts(authoring);
+    var selected = evidence(authoring);
+    var sorted =
+        references.stream()
+            .sorted(
+                java.util.Comparator.comparing(
+                    AuthoringRevisionInputs.NonsecretReferenceHash::referenceId,
+                    IncrementalAuthoringIdentity.UTF8))
+            .toList();
+    AuthoringRevisionInputs result =
+        new AuthoringRevisionInputs(
+            contextDigest(authoring, global, contexts, sorted, selected),
+            global,
+            contexts,
+            sorted,
+            selected);
+    if (!valid(authoring, result)) {
+      throw IncrementalAuthoringIdentity.incomplete();
+    }
+    return result;
   }
 
   public static boolean valid(AuthoringV2Request authoring, AuthoringRevisionInputs identity) {
@@ -77,7 +102,7 @@ public final class AuthoringRevisionIdentity {
           identity.nonsecretReferencedValues().get(index);
       if (item == null
           || !referenceIds.get(index).equals(item.referenceId())
-          || item.referenceId().isBlank()
+          || item.referenceId().isEmpty()
           || !uniqueReferences.add(item.referenceId())
           || !hash(item.valueHash())) {
         return false;
@@ -129,7 +154,10 @@ public final class AuthoringRevisionIdentity {
     List<String> ids = referencedIds(authoring);
     List<AuthoringRevisionInputs.NonsecretReferenceHash> result = new ArrayList<>();
     for (String id : ids) {
-      result.add(new AuthoringRevisionInputs.NonsecretReferenceHash(id, hashJson(values.get(id))));
+      if (values.containsKey(id) && values.get(id) != null) {
+        result.add(
+            new AuthoringRevisionInputs.NonsecretReferenceHash(id, hashJson(values.get(id))));
+      }
     }
     return List.copyOf(result);
   }
@@ -139,11 +167,13 @@ public final class AuthoringRevisionIdentity {
     collectReferences(authoring.globalContext().entries(), ids);
     for (AuthoringStep step : authoring.steps()) {
       collectReferences(step.context().entries(), ids);
+      com.citi.put.checks.studio.validation.VariableReferenceValidator.variableTokens(step.text())
+          .forEach(id -> ids.putIfAbsent(id, Boolean.TRUE));
     }
     if (ids.size() > MAX_COLLECTION) {
       throw new IllegalArgumentException("nonsecret reference identity exceeds its bound");
     }
-    return List.copyOf(ids.keySet());
+    return ids.keySet().stream().sorted(IncrementalAuthoringIdentity.UTF8).toList();
   }
 
   private static void collectReferences(List<?> entries, Map<String, Boolean> ids) {
@@ -222,16 +252,8 @@ public final class AuthoringRevisionIdentity {
     return value != null && HASH.matcher(value).matches();
   }
 
-  private static String hashJson(Object value) {
-    try {
-      MessageDigest digest = MessageDigest.getInstance("SHA-256");
-      return HexFormat.of()
-          .formatHex(
-              digest.digest(MAPPER.writeValueAsString(value).getBytes(StandardCharsets.UTF_8)));
-    } catch (NoSuchAlgorithmException exception) {
-      throw new IllegalStateException("SHA-256 is unavailable", exception);
-    } catch (JsonProcessingException exception) {
-      throw new IllegalArgumentException("authoring identity cannot be serialized", exception);
-    }
+  public static String hashJson(Object value) {
+    return com.citi.put.checks.studio.guided.session.GuidedContracts.hash(
+        MAPPER.valueToTree(value));
   }
 }

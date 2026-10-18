@@ -3,12 +3,8 @@ package com.citi.put.checks.studio;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import com.citi.put.checks.studio.dto.CompileAcceptedDto;
-import com.citi.put.checks.studio.dto.CompileDiagnosticDto;
-import com.citi.put.checks.studio.dto.CompileDiagnosticsDto;
-import com.citi.put.checks.studio.dto.CompileErrorDto;
-import com.citi.put.checks.studio.dto.CompileStepDiagnosticsDto;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.dto.ReplayFailure;
 import com.citi.put.checks.studio.dto.RuntimeVersions;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.dto.StudioVariable;
@@ -17,8 +13,6 @@ import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.citi.put.checks.studio.dto.Viewport;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
-import com.citi.put.checks.studio.internal.dto.AdmissionResponse;
 import com.citi.put.checks.studio.internal.dto.ProgressAck;
 import com.citi.put.checks.studio.internal.dto.RunOutcome;
 import com.citi.put.checks.studio.internal.dto.RunnerEvidence;
@@ -36,6 +30,7 @@ import java.lang.reflect.RecordComponent;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedHashSet;
@@ -79,6 +74,25 @@ class StudioContractTest {
 
   private static final Path CONTRACT = Path.of("..", "docs", "specs", "studio", "openapi.yaml");
   private static final String PUBLIC_BASE = "/api/v1/studio";
+  // STUDIO-OBS-015 C3a/C3b deliberately replaces the C2b OpenAPI pin:
+  // old "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183";
+  // new "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d"; one contract-generation
+  // receipt.
+  // STUDIO-OBS-015 aria-cap-ruling01 re-anchors it again (SOURCE_LINE_TOO_LONG and the
+  // AuthoringStep.text description state the single 500 bound); previous digest 54fd12cd9951….
+  // STUDIO-OBS-008 C-int W1 (P1-P3 + T0 A1): getStudioTestCapabilities, PublicProgress,
+  // PublicExplanation and ExecutionSnapshot.replayFailure; operations 43 -> 44.
+  // old "c053a7f75656628a1b3e031e02f40f4982aa3a85fc241a4c87c7229460f5d70f";
+  // C-int fix unit 2 (ReplayFailure else-branch admits null); previous digest c377e480…99ce515.
+  // STUDIO-OBS-008 C-int unit 3 (secret value bound 4096, OBS-007 AC-12);
+  // previous digest 2f4041ae…1700.
+  // STUDIO-OBS-009 C9 (AC-1 P2 c + C-OBS008-4, one unit): RuntimeVersions and
+  // ReportedRuntimeVersions describe the observed identities (T0 A7) and startGuidedSession
+  // declares 422 INVALID_CONTRACT (AUTHORING_REFERENCE_AMBIGUOUS); operations stay 44.
+  // Previous digest b5ecdcad…ae29244.
+  // new "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4".
+  private static final String BASE_SHA256 =
+      "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4";
 
   private static Map<String, Object> contract;
 
@@ -90,6 +104,15 @@ class StudioContractTest {
   static void loadContract() throws IOException {
     contract =
         (Map<String, Object>) new Yaml().load(Files.readString(CONTRACT, StandardCharsets.UTF_8));
+  }
+
+  @Test
+  void theWholeReviewedOpenApiDocumentMatchesTheContractOwnerPin() throws Exception {
+    assertThat(
+            java.util.HexFormat.of()
+                .formatHex(
+                    MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(CONTRACT))))
+        .isEqualTo(BASE_SHA256);
   }
 
   @Test
@@ -147,16 +170,16 @@ class StudioContractTest {
     assertThat(internal.stream().map(InternalOperation::key))
         .as(
             "architecture §8.4 tabulates six internal routes and ADR-002 §3.1 declares all six;"
-                + " ADR-002 §29 adds cancel/control; approved OBS006 adds three observed routes")
-        .hasSize(11)
+                + " ADR-002 §29 adds cancel/control; approved OBS006 adds three observed routes;"
+                + " STUDIO-OBS-012A removes the artifact-1 POST /v1/validate, POST /v1/runs and"
+                + " moves cancel to DELETE /v2/runs/{id} (11 -> 9); STUDIO-OBS-014 (AR-3)"
+                + " deletes the legacy POST /internal/studio/executions/{id}/admission (9 -> 8)")
+        .hasSize(8)
         .containsExactlyInAnyOrder(
-            "POST /v1/validate",
-            "POST /v1/runs",
-            "DELETE /v1/runs/{id}",
+            "DELETE /v2/runs/{id}",
             "GET /internal/studio/executions/{id}/control",
             "GET /health",
             "GET /ready",
-            "POST /internal/studio/executions/{id}/admission",
             "POST /internal/studio/executions/{id}/progress",
             "POST /v2/validate-observed",
             "POST /v2/runs",
@@ -184,80 +207,6 @@ class StudioContractTest {
           .as("%s: x-served-by and the component tag disagree about who serves it", key)
           .isEqualTo(component);
     }
-  }
-
-  /**
-   * Story 10.8 AC-1 — the compile route is shipped, and the marker came off for it alone.
-   *
-   * <p>The two gates above already fail if a route is declared as shipped and unreachable, or
-   * reachable and undeclared. What they cannot see is the marker being removed from an operation
-   * whose story has not landed — {@code x-not-yet-implemented} is how the document says "declared
-   * so dependants can build, not served yet", and quietly clearing it on a neighbour would present
-   * three unimplemented routes as shipped. So this asserts both directions at once.
-   */
-  @Test
-  void theCompileRouteIsShippedAndTheMarkerCameOffForThatOperationOnly() throws IOException {
-    assertThat(implementedStudioOperations())
-        .as("T-10.8.1 landed POST /tests/{id}/compile")
-        .contains("POST " + PUBLIC_BASE + "/tests/{id}/compile");
-    assertThat(declaredOperations(false))
-        .as("and the document no longer flags it as pending")
-        .contains("POST " + PUBLIC_BASE + "/tests/{id}/compile");
-    assertThat(pendingOperations())
-        .as(
-            "story 10.15 ships GET /executions/{id}/video, which section 13's last row recorded as"
-                + " the ONLY remaining pending operation, so this set is now EMPTY. That is why"
-                + " the expectation changed and not because a marker was quietly cleared: the"
-                + " mirror assertion in"
-                + " theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly proves that"
-                + " route is actually reachable rather than merely unflagged, and"
-                + " ExecutionVideoContractTest points this same reader at a scratch copy carrying"
-                + " a marker on a different operation, because an isEmpty() assertion is otherwise"
-                + " satisfied by a helper that has stopped working. The SSE stream lost its marker"
-                + " in 10.7, the confirm route in 10.9 (ADR-002 section 13)")
-        .isEmpty();
-  }
-
-  /**
-   * Story 10.9 AC-2 — the confirmation route is shipped, and the marker came off for it alone.
-   *
-   * <p>The mirror of the assertion above, and it is the half that keeps the edit honest. Removing
-   * {@code x-not-yet-implemented} is one line, and a story that removed it without landing the
-   * route would present an unimplemented operation as shipped — which is the precise failure {@code
-   * everyRouteTheContractPresentsAsShippedIsActuallyReachable} exists to catch, and which that gate
-   * can only catch because this one insists the route really is reachable.
-   *
-   * <p>{@code x-implemented-by} stays: ADR-002 §14.8 item 5 set the precedent on {@code
-   * compileTest}, and the marker records <em>who shipped it</em>, not <em>whether it is
-   * pending</em>.
-   *
-   * <p><b>Amended by story 10.15.</b> The video-route assertion at the end of this method has been
-   * inverted — that route is now shipped, by 10.15, and its marker is gone. It is amended rather
-   * than deleted: it is still the assertion that stops a story clearing a neighbour's marker.
-   */
-  @Test
-  void theConfirmRouteIsShippedAndTheMarkerCameOffForThatOperationOnly() throws IOException {
-    String route = "POST " + PUBLIC_BASE + "/tests/{id}/confirm-compile";
-    assertThat(implementedStudioOperations())
-        .as("T-10.9.1 landed POST /tests/{id}/confirm-compile")
-        .contains(route);
-    assertThat(declaredOperations(false))
-        .as("and the document no longer flags it as pending")
-        .contains(route);
-    assertThat(operationFlag("/tests/{id}/confirm-compile", "x-not-yet-implemented"))
-        .as("the marker is gone for this operation")
-        .isNull();
-    assertThat(operationFlag("/tests/{id}/confirm-compile", "x-implemented-by"))
-        .as("and x-implemented-by stays, as ADR-002 §14.8 item 5 requires")
-        .isEqualTo("10.9");
-    assertThat(operationFlag("/executions/{id}/video", "x-not-yet-implemented"))
-        .as(
-            "the video route's marker came off in story 10.15, which ships GET"
-                + " /executions/{id}/video; the direction of this assertion is INVERTED from what"
-                + " it asserted through wave 5, and the story that inverted it is the story that"
-                + " landed the route. Its own mirror is"
-                + " theVideoRouteIsShippedAndTheMarkerCameOffForThatOperationOnly below")
-        .isNull();
   }
 
   /**
@@ -325,8 +274,7 @@ class StudioContractTest {
   void declaredOperationStatusSetsAndMarkersMatchTheReviewedContract() {
     Map<String, String> expected = new TreeMap<>();
     expected.put("DELETE /tests/{id}", "204,400,401,403");
-    // Studio v1 WP4 (ADR-002 §29): the public cancel and the runner's DELETE, added deliberately.
-    expected.put("DELETE /v1/runs/{id}", "202,401,403,404,409");
+    // Studio v1 WP4 (ADR-002 §29): the public cancel, added deliberately.
     expected.put("POST /executions/{id}/cancel", "202,400,401,403,409");
     // ADR-002 §29.4: the owning runner's control read.
     expected.put("GET /internal/studio/executions/{id}/control", "200,400,401,403,404");
@@ -341,15 +289,12 @@ class StudioContractTest {
     expected.put("GET /tests/{id}", "200,400,401,403");
     // ADR-002 §32 (studio-vault-secrets): a test's Vault-backed secrets, names only on read.
     expected.put("GET /tests/{id}/secrets", "200,400,401,403,503");
-    expected.put("POST /internal/studio/executions/{id}/admission", "200,400,401,403,409");
     expected.put("POST /internal/studio/executions/{id}/progress", "200,400,401,403,409,413");
     expected.put("POST /tests", "201,400,401,403");
-    expected.put("POST /tests/{id}/compile", "202,400,401,403,409");
-    expected.put("POST /tests/{id}/confirm-compile", "200,400,401,403,409");
     expected.put("POST /tests/{id}/execute", "202,400,401,403,409,429,503");
     expected.put("POST /tests/{id}/secrets", "201,400,401,403,409,503");
-    expected.put("POST /v1/runs", "202,400,401,403,409,429,503");
-    expected.put("POST /v1/validate", "200,400,401,403,413,503");
+    // STUDIO-OBS-008 P1: one saved test's runtime capabilities; absent and denied both answer 403.
+    expected.put("GET /tests/{id}/capabilities", "200,400,401,403");
     expected.put("PUT /tests/{id}", "200,400,401,403,409");
     // STUDIO-SCHED-001 adds these eight operations; the prior 23 status sets stay pinned.
     expected.put("GET /tests/{id}/schedule", "200,401,403");
@@ -365,13 +310,40 @@ class StudioContractTest {
     expected.put("POST /v2/runs", "202,400,401,403,409,413,429,503");
     expected.put(
         "POST /internal/studio/executions/{id}/observed-admission", "200,400,401,403,409,413,422");
+    // STUDIO-OBS-012A (AC-2, AC-5): the one public document. Removed: compile, confirm-compile,
+    // POST /v1/validate, POST /v1/runs, DELETE /v1/runs/{id}. Added: validate-variables, the seven
+    // guided-session routes under /api/v1/studio, and the observed cancel DELETE /v2/runs/{id}.
+    expected.put("POST /tests/{id}/validate-variables", "200,400,401,403");
+    // STUDIO-OBS-009 C9 (C-OBS008-4): startGuidedSession declares 422 (ambiguous declarations).
+    expected.put("POST /guided-sessions", "202,400,401,403,409,422,429,503");
+    expected.put("GET /guided-sessions/{id}", "200,400,401,403,409,503");
+    expected.put("GET /guided-sessions/{id}/result", "200,202,400,401,403,409,503");
+    expected.put("GET /guided-sessions/{id}/clarification", "200,204,400,401,403,409,503");
+    expected.put("POST /guided-sessions/{id}/clarify", "202,400,401,403,409,503");
+    expected.put("POST /guided-sessions/{id}/cancel", "202,400,401,403,409,503");
+    expected.put("POST /guided-sessions/{id}/finalize", "200,400,401,403,409,503");
+    expected.put("DELETE /v2/runs/{id}", "202,401,403,404,409");
+    // STUDIO-OBS-013 C1 (AR-1): the guided recording, getExecutionVideo's status set unchanged.
+    expected.put("GET /guided-sessions/{id}/video", "200,206,401,403,404,410,416,503");
+    // STUDIO-OBS-014 C2b (c2b-spec.json): five public Class C guided-policies operations, and
+    // startGuidedSession gains 429 (409 now documents POLICY_NOT_APPROVED).
+    expected.put("GET /guided-policies", "200,400,401,403,404");
+    expected.put("POST /guided-policies", "201,400,401,403,409");
+    expected.put("GET /guided-policies/{id}", "200,400,401,403");
+    expected.put("POST /guided-policies/{id}/versions", "201,400,401,403,409");
+    expected.put("POST /guided-policies/{id}/versions/{version}/approval", "200,400,401,403,409");
 
     Map<String, String> declared = declaredStatusSets();
 
+    // OBS-007 re-anchor: 34 -> 34. STUDIO-OBS-012A re-anchor: 34 -> 38 (5 removed, 9 added).
+    // STUDIO-OBS-013 C1 re-anchor: 38 -> 39 (getGuidedSessionVideo added).
+    // STUDIO-OBS-014 C2a re-anchor: 39 -> 38 (claimAdmission deleted, AR-3).
+    // STUDIO-OBS-014 C2b re-anchor: 38 -> 43 (five guided-policies operations).
+    // STUDIO-OBS-008 P1 re-anchor: 43 -> 44 (getStudioTestCapabilities).
     // The total, asserted separately. Without it, both comparisons below could agree on a set that
     // had silently shrunk to nothing on both sides at once.
-    assertThat(declared).as("the document declares a different number of operations").hasSize(34);
-    assertThat(expected).hasSize(34);
+    assertThat(declared).as("the document declares a different number of operations").hasSize(44);
+    assertThat(expected).hasSize(44);
 
     assertThat(declared.keySet())
         .as("an operation the document declares that this copy does not name")
@@ -387,7 +359,13 @@ class StudioContractTest {
                 + "/tests/{id}/secrets by ADR-002 §32's ruling, and story 10.46's GET /tests and "
                 + "GET /executions gaining 400 for their validated list parameters, and "
                 + "STUDIO-SCHED-001's eight public scheduling operations and OBS006's three "
-                + "internal observed operations. Every earlier "
+                + "internal observed operations and STUDIO-OBS-012A's nine added operations "
+                + "and STUDIO-OBS-013's GET /guided-sessions/{id}/video, and STUDIO-OBS-014's "
+                + "deletion of POST /internal/studio/executions/{id}/admission (AR-3), and "
+                + "STUDIO-OBS-014 C2b's five guided-policies operations and POST /guided-sessions "
+                + "gaining 429, and STUDIO-OBS-008's GET /tests/{id}/capabilities, and "
+                + "STUDIO-OBS-009 C9's POST /guided-sessions gaining 422 (C-OBS008-4). "
+                + "Every earlier "
                 + "row remains pinned, and a "
                 + "row that moves without a ruling is the drift this copy exists to catch")
         .isEqualTo(expected);
@@ -414,6 +392,13 @@ class StudioContractTest {
           .as("%s is implemented rather than a pending contract promise", operation)
           .isNull();
     }
+    // STUDIO-OBS-008 P1: the capability route is attributed to the story that serves it.
+    assertThat(operationFlag("/tests/{id}/capabilities", "get", "x-implemented-by"))
+        .as("GET /tests/{id}/capabilities must carry its reviewed implementation attribution")
+        .isEqualTo("STUDIO-OBS-008");
+    assertThat(operationFlag("/tests/{id}/capabilities", "get", "x-not-yet-implemented"))
+        .as("and is implemented rather than a pending contract promise")
+        .isNull();
   }
 
   /** Every declared operation, keyed {@code METHOD /path}, valued as its sorted status set. */
@@ -443,28 +428,82 @@ class StudioContractTest {
 
   @Test
   void theFrozenSchemasAndTheJavaTypesShareTheSameFieldNames() {
-    assertSchemaMatchesRecord("CompileAccepted", CompileAcceptedDto.class);
     assertSchemaMatchesRecord("ExecutionSnapshot", ExecutionSnapshotDto.class);
+    // STUDIO-OBS-008 T0 ruling A1.5 item 15: the replay cause component, beside the snapshot.
+    assertSchemaMatchesRecord("ReplayFailure", ReplayFailure.class);
     assertSchemaMatchesRecord("StepResult", StepResult.class);
     assertSchemaMatchesRecord("VideoEvidence", VideoEvidence.class);
     assertSchemaMatchesRecord("RuntimeVersions", RuntimeVersions.class);
     assertSchemaMatchesRecord("Viewport", Viewport.class);
     assertSchemaMatchesRecord("TestConfiguration", TestConfiguration.class);
     assertSchemaMatchesRecord("Variable", StudioVariable.class);
-    assertSchemaMatchesRecord("TestRequest", UITestRequest.class);
-    // ADR-002 §16.9 item 4 — TestDto's absence from this list is why `compileError` and
-    // `compileDiagnostics` stayed persisted-but-undeclared for four waves: a conformance gate is
-    // only as wide as its enumeration. Its four component shapes join it for the same reason.
+    // TestRequest composes canonical authoring with the metadata record; no v1 request route
+    // exists.
+    Set<String> requestMetadata = new TreeSet<>(schemaProperties("TestRequest"));
+    requestMetadata.removeAll(Set.of("authoringSchemaVersion", "globalContext"));
+    assertThat(requestMetadata)
+        .isEqualTo(
+            Arrays.stream(UITestRequest.class.getRecordComponents())
+                .map(RecordComponent::getName)
+                .collect(Collectors.toCollection(TreeSet::new)));
+    // ADR-002 §16.9 item 4 — a conformance gate is only as wide as its enumeration.
     assertSchemaMatchesRecord("TestDto", UITestDto.class);
-    assertSchemaMatchesRecord("CompileError", CompileErrorDto.class);
-    assertSchemaMatchesRecord("CompileDiagnostic", CompileDiagnosticDto.class);
-    assertSchemaMatchesRecord("CompileStepDiagnostics", CompileStepDiagnosticsDto.class);
-    assertSchemaMatchesRecord("CompileDiagnostics", CompileDiagnosticsDto.class);
     // ADR-002 §32 (studio-vault-secrets).
     assertSchemaMatchesRecord("StudioSecretName", StudioSecretNameDto.class);
     assertSchemaMatchesRecord("StudioSecretList", StudioSecretListDto.class);
     assertSchemaMatchesRecord("StudioSecret", StudioSecretDto.class);
     assertSchemaMatchesRecord("CreateStudioSecretRequest", CreateStudioSecretRequest.class);
+  }
+
+  /**
+   * STUDIO-OBS-013 AR-1 R1 — the guided result's {@code evidence.video} reuses the public {@code
+   * VideoEvidence} shape exactly: same four names as the record and the public schema, and the
+   * {@code VideoStatus} vocabulary verbatim, with no runner state ({@code STORED}, {@code PENDING})
+   * leaking in.
+   */
+  @Test
+  @SuppressWarnings("unchecked")
+  void theGuidedVideoEvidenceIsThePublicVideoEvidenceShape() throws IOException {
+    JsonNode guided =
+        objectMapper
+            .readTree(
+                Files.readString(
+                    Path.of(
+                        "..",
+                        "docs",
+                        "specs",
+                        "studio-observed-authoring",
+                        "contracts",
+                        "v3",
+                        "result.schema.json"),
+                    StandardCharsets.UTF_8))
+            .path("definitions")
+            .path("videoEvidence");
+    Set<String> guidedProperties = new TreeSet<>();
+    guided.path("properties").fieldNames().forEachRemaining(guidedProperties::add);
+    Set<String> recordComponents =
+        Arrays.stream(VideoEvidence.class.getRecordComponents())
+            .map(RecordComponent::getName)
+            .collect(Collectors.toCollection(TreeSet::new));
+    assertThat(guidedProperties)
+        .as("v3 result#/definitions/videoEvidence vs the VideoEvidence record")
+        .isEqualTo(recordComponents)
+        .isEqualTo(new TreeSet<>(schemaProperties("VideoEvidence")));
+
+    Set<String> guidedStatuses = new TreeSet<>();
+    guided
+        .path("properties")
+        .path("status")
+        .path("enum")
+        .forEach(s -> guidedStatuses.add(s.asText()));
+    Map<String, Object> schemas =
+        (Map<String, Object>) ((Map<String, Object>) contract.get("components")).get("schemas");
+    List<String> publicStatuses =
+        (List<String>) ((Map<String, Object>) schemas.get("VideoStatus")).get("enum");
+    assertThat(guidedStatuses)
+        .as("the guided status vocabulary is VideoStatus verbatim")
+        .isEqualTo(new TreeSet<>(publicStatuses))
+        .doesNotContain("STORED", "PENDING");
   }
 
   /**
@@ -488,25 +527,23 @@ class StudioContractTest {
     assertSchemaMatchesRecord("RunnerStepState", RunnerStepState.class);
     assertSchemaMatchesRecord("RunnerLogEntry", RunnerLogEntry.class);
     assertSchemaMatchesRecord("RunOutcome", RunOutcome.class);
-    assertSchemaMatchesRecord("AdmissionRequest", AdmissionRequest.class);
-    assertSchemaMatchesRecord("AdmissionResponse", AdmissionResponse.class);
     assertSchemaMatchesRecord("ProgressAck", ProgressAck.class);
   }
 
   /**
    * The control for the gate above: the shape that existed before this story <b>fails</b> it.
    *
-   * <p>A conformance list is the easiest kind of vacuous test to write — eight green assertions
-   * prove nothing unless the comparison can go red. {@code RunnerEvidenceBeforeStory1014} is the
-   * exact record `DEF-02` was found on: three components, no {@code partial}, while the document
-   * had declared the property since ADR-002 §17. This asserts the gate would have caught it, which
-   * is the claim AC-24 actually makes.
+   * <p>A conformance list is the easiest kind of vacuous test to write — six green assertions prove
+   * nothing unless the comparison can go red. {@code RunnerEvidenceBeforeStory1014} is the exact
+   * record `DEF-02` was found on: three components, no {@code partial}, while the document had
+   * declared the property since ADR-002 §17. This asserts the gate would have caught it, which is
+   * the claim AC-24 actually makes.
    */
   @Test
   void theInternalDriftCheckWouldHaveCaughtTheRecordThatCausedDef02() {
     assertThatThrownBy(
             () -> assertSchemaMatchesRecord("RunnerEvidence", RunnerEvidenceBeforeStory1014.class))
-        .as("if this does not throw, the eight assertions above are decoration")
+        .as("if this does not throw, the six assertions above are decoration")
         .isInstanceOf(AssertionError.class)
         .hasMessageContaining("partial");
   }
@@ -574,18 +611,21 @@ class StudioContractTest {
   }
 
   @Test
-  void theLegacyAdapterExamplesAreAcceptedByTheTypedRequestType() throws IOException {
+  @SuppressWarnings("unchecked")
+  void authoringWriteExamplesUseOnlyCanonicalV2Steps() {
     Map<String, Object> createExamples = createRequestExamples();
-    assertThat(createExamples.keySet()).contains("create", "legacyCreate", "legacyTestIrCreate");
+    assertThat(createExamples.keySet()).containsExactly("create");
 
     for (Map.Entry<String, Object> entry : createExamples.entrySet()) {
-      UITestRequest request =
-          objectMapper.readValue(
-              objectMapper.writeValueAsString(valueOf(entry.getValue())), UITestRequest.class);
-      assertThat(request.steps()).as("%s.steps", entry.getKey()).isNotNull();
-      assertThat(request.configuration().browser())
-          .as("%s adapts to the canonical engine", entry.getKey())
-          .isEqualTo(TestConfiguration.CANONICAL_BROWSER);
+      Map<String, Object> value = (Map<String, Object>) valueOf(entry.getValue());
+      assertThat(value.get("authoringSchemaVersion")).isEqualTo(2);
+      List<Map<String, Object>> steps = (List<Map<String, Object>>) value.get("steps");
+      assertThat(steps).isNotEmpty();
+      for (Map<String, Object> step : steps) {
+        assertThat(step.keySet()).containsExactlyInAnyOrder("id", "text");
+        assertThat(step.get("id").toString()).matches("[0-9a-f-]{36}");
+        assertThat(step.get("text")).isInstanceOf(String.class);
+      }
     }
   }
 
@@ -806,9 +846,8 @@ class StudioContractTest {
                   .forEachRemaining(
                       method -> operations.add(method.toUpperCase(Locale.ROOT) + " " + path));
             });
-    // Routes that exist in the prototype but are not part of the frozen contract: the variable
-    // validator endpoint is deliberately not frozen here.
-    operations.removeIf(operation -> operation.contains("validate-variables"));
+    // POST /tests/{id}/validate-variables is kept and documented (STUDIO-OBS-012A AC-2, CLN-12),
+    // so it is no longer excluded from the served set.
     return operations;
   }
 }

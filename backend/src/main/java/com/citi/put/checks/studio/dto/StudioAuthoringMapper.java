@@ -2,7 +2,7 @@ package com.citi.put.checks.studio.dto;
 
 import com.citi.put.checks.studio.StudioService.AuthoringDraft;
 import com.citi.put.checks.studio.StudioValidationException;
-import com.citi.put.checks.studio.compile.AuthoringLimits;
+import com.citi.put.checks.studio.authoring.AuthoringLimits;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,16 +38,22 @@ public class StudioAuthoringMapper {
     this.authoringLimits = authoringLimits;
   }
 
-  public UITestRequest legacy(JsonNode body) {
+  private UITestRequest metadata(JsonNode body) {
     try {
-      UITestRequest request = mapper.treeToValue(body, UITestRequest.class);
+      UITestRequest request =
+          mapper
+              .copy()
+              .enable(
+                  com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+              .treeToValue(body, UITestRequest.class);
       if (request == null) {
         throw new StudioValidationException("INVALID_AUTHORING", "Request must be an object");
       }
-      // VAL-024: the compile step-count and line-length bounds apply at save too, first, so an
-      // over-limit draft is refused with the code and message compile would give, not only on Run.
+      // VAL-024: the step-count and line-length bounds apply at save, first, so an over-limit draft
+      // is refused with a stable code before anything is written.
       authoringLimits.requireSaveable(request.steps());
-      LegacyStudioAdapter.validateForWrite(request);
+      CanonicalStudioCodec.validateForWrite(request);
+      CanonicalStudioCodec.variablesToJson(request.variables());
       return request;
     } catch (JsonProcessingException exception) {
       throw new StudioValidationException("INVALID_AUTHORING", "Invalid draft request");
@@ -76,19 +82,31 @@ public class StudioAuthoringMapper {
     if (body.has("globalContext")) {
       source.set("globalContext", body.get("globalContext"));
     }
+    if (body.path("steps").isArray()) {
+      java.util.List<String> lines = new java.util.ArrayList<>();
+      boolean canonical = true;
+      for (JsonNode step : body.path("steps")) {
+        canonical &= step.isObject() && step.path("text").isTextual();
+        lines.add(step.path("text").asText());
+      }
+      if (canonical) {
+        authoringLimits.requireSaveable(lines);
+      }
+    }
     AuthoringV2Request authoring;
     try {
-      authoring = (AuthoringV2Request) StudioAuthoringValidation.read(mapper, validator, source);
+      authoring = StudioAuthoringValidation.read(mapper, validator, source);
     } catch (StudioAuthoringValidation.InvalidAuthoringException exception) {
       throw new StudioValidationException(
           exception.categories().getFirst().name(), "Invalid authoring source");
     }
     if (update) {
-      for (String revision : Set.of("sourceRevision", "configurationRevision")) {
+      // A fixed order, so a body missing both names the same field every time.
+      for (String revision : java.util.List.of("sourceRevision", "configurationRevision")) {
         JsonNode token = body.path(revision);
         if (!token.isIntegralNumber() || !token.canConvertToLong() || token.longValue() < 1) {
           throw new StudioValidationException(
-              "INVALID_AUTHORING", "Positive revision tokens are required");
+              "INVALID_AUTHORING", revision + " must be a positive integer");
         }
       }
     }
@@ -96,13 +114,16 @@ public class StudioAuthoringMapper {
     metadata.remove(Set.of("authoringSchemaVersion", "globalContext"));
     metadata.set(
         "steps", mapper.valueToTree(authoring.steps().stream().map(AuthoringStep::text).toList()));
-    return new ParsedWrite(legacy(metadata), authoring);
+    return new ParsedWrite(metadata(metadata), authoring);
   }
 
   public ObjectNode response(AuthoringDraft draft) {
     ObjectNode result = mapper.valueToTree(draft.test());
     ObjectNode authoring = mapper.valueToTree(draft.authoring());
     result.setAll(authoring);
+    if (draft.readinessReason() != null) {
+      result.put("readinessReason", draft.readinessReason());
+    }
     return result;
   }
 

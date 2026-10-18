@@ -2,6 +2,7 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -20,6 +22,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -32,7 +36,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioApiIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String OWNER = "api-owner@citi.com";
   private static final String CSI_ID = "60441";
@@ -51,33 +61,35 @@ class StudioApiIT {
   }
 
   @Test
-  void aLegacyFlattenedCreateBodyIsAnsweredWithTheTypedContract() throws Exception {
-    String legacy =
+  void canonicalAuthoringCreateReturnsStableStepIdentityAndConfiguration() throws Exception {
+    String canonical =
         """
-        {"name":"Legacy created draft","description":"flattened body","csiId":"%s",
-         "steps":"[\\"Go to the home page\\"]","variables":"[]","browser":"chrome",
-         "viewportWidth":1280,"viewportHeight":720,"timeoutSeconds":45,
-         "waitStrategy":"load","environment":"Production"}
+        {"authoringSchemaVersion":2,"name":"Created draft","description":"canonical body","csiId":"%s",
+        "steps":[{"id":"00000000-0000-4000-8000-000000000001","text":"Go to the home page"}],"variables":[],
+        "configuration":{"browser":"chromium","viewport":{"width":1280,"height":720},\
+        "timeoutSeconds":45,"waitStrategy":"load"},
+        "environment":"Production"}
         """
             .formatted(CSI_ID);
 
-    ResponseEntity<String> response = post("/api/v1/studio/tests", legacy);
+    ResponseEntity<String> response = post("/api/v1/studio/tests", canonical);
 
     assertThat(response.getStatusCode().value()).isEqualTo(201);
     JsonNode body = objectMapper.readTree(response.getBody());
     assertThat(body.path("steps").isArray()).isTrue();
-    assertThat(body.path("steps").get(0).asText()).isEqualTo("Go to the home page");
+    assertThat(body.path("steps").get(0).path("text").asText()).isEqualTo("Go to the home page");
     assertThat(body.path("configuration").path("browser").asText()).isEqualTo("chromium");
     assertThat(body.path("configuration").path("viewport").path("width").asInt()).isEqualTo(1280);
     assertThat(body.path("configuration").path("timeoutSeconds").asInt()).isEqualTo(45);
-    assertThat(body.path("compileStatus").asText()).isEqualTo("STALE");
+    assertThat(body.path("readiness").asText()).isEqualTo("UNLEARNED");
   }
 
   @Test
   void anUnsupportedEngineIsRejectedWithAMachineReadableCode() throws Exception {
     String firefox =
         """
-        {"name":"Firefox draft","csiId":"%s","environment":"Production","steps":["Go home"],
+        {"authoringSchemaVersion":2,"name":"Firefox draft","csiId":"%s","environment":"Production",
+        "steps":[{"id":"00000000-0000-4000-8000-000000000001","text":"Go home"}],
          "variables":[],
          "configuration":{"browser":"firefox","viewport":{"width":1920,"height":1080},
                           "timeoutSeconds":30,"waitStrategy":"networkidle"}}
@@ -94,7 +106,7 @@ class StudioApiIT {
 
   @Test
   void executeAcceptsTheRunAndTheSnapshotIsImmediatelyReadable() throws Exception {
-    ResponseEntity<String> accepted = post("/api/v1/studio/tests/" + testId + "/execute", null);
+    ResponseEntity<String> accepted = postWithIdempotencyKey(UUID.randomUUID().toString());
 
     assertThat(accepted.getStatusCode().value()).isEqualTo(202);
     JsonNode acceptedBody = objectMapper.readTree(accepted.getBody());
@@ -121,16 +133,49 @@ class StudioApiIT {
     // The platform idempotency filter requires the header to be a UUID; see the contract.
     String key = UUID.randomUUID().toString();
 
-    String first = executionIdOf(postWithIdempotencyKey(key));
-    String retry = executionIdOf(postWithIdempotencyKey(key));
+    ResponseEntity<String> firstResponse = postWithIdempotencyKey(key);
+    ResponseEntity<String> retryResponse = postWithIdempotencyKey(key);
+    String first = executionIdOf(firstResponse);
+    String retry = executionIdOf(retryResponse);
 
     assertThat(retry).isEqualTo(first);
+    // STUDIO-OBS-014 AC-9 (AR-3): the replay is the identical cached response, marked as a replay
+    // by the platform filter (in-replica cache). Whether a cached 2xx may be replayed without
+    // re-authorization (GA plan D-2b) stays open for @qa (security); this does not decide it.
+    assertThat(retryResponse.getBody()).isEqualTo(firstResponse.getBody());
+    assertThat(firstResponse.getHeaders().getFirst("Idempotent-Replayed")).isNull();
+    assertThat(retryResponse.getHeaders().getFirst("Idempotent-Replayed")).isEqualTo("true");
     assertThat(
             jdbc.queryForObject(
                 "SELECT COUNT(*) FROM ui_test_executions WHERE ui_test_id = ?",
                 Integer.class,
                 testId))
         .isEqualTo(1);
+  }
+
+  /**
+   * STUDIO-OBS-014 AC-9 (AR-3): the replay execute route requires an {@code Idempotency-Key}. An
+   * absent header is {@code 400 IDEMPOTENCY_KEY_REQUIRED} from the controller and writes nothing:
+   * no execution row and no dispatch-ledger row.
+   */
+  @Test
+  void anExecuteWithoutAnIdempotencyKeyIsRefusedBeforeAnyWrite() throws Exception {
+    int executionsBefore = executionRows();
+    int ledgerBefore = ledgerRows();
+
+    ResponseEntity<String> refused = post("/api/v1/studio/tests/" + testId + "/execute", null);
+
+    assertThat(refused.getStatusCode().value()).isEqualTo(400);
+    JsonNode body = objectMapper.readTree(refused.getBody());
+    assertThat(body.path("error").asText()).isEqualTo("IDEMPOTENCY_KEY_REQUIRED");
+    assertThat(body.path("message").asText()).isEqualTo("Idempotency-Key header is required");
+    assertThat(executionRows()).isEqualTo(executionsBefore).isZero();
+    assertThat(ledgerRows()).isEqualTo(ledgerBefore).isZero();
+
+    ResponseEntity<String> accepted = postWithIdempotencyKey(UUID.randomUUID().toString());
+    assertThat(accepted.getStatusCode().value())
+        .as("control: the same request with a key is accepted")
+        .isEqualTo(202);
   }
 
   @Test
@@ -151,8 +196,13 @@ class StudioApiIT {
 
   @Test
   void variableValidationReadsTheTypedVariables() throws Exception {
+    // A draft that declares nothing. The runnable seed publishes an observed revision, and that
+    // publication declares its own navigation variable on the draft, so it cannot be the control.
+    UUID undeclared =
+        new StudioExecutionFixtures(jdbc)
+            .seedTest("Api undeclared draft", CSI_ID, OWNER, List.of("Go to the home page"));
     ResponseEntity<String> response =
-        post("/api/v1/studio/tests/" + testId + "/validate-variables", "{}");
+        post("/api/v1/studio/tests/" + undeclared + "/validate-variables", "{}");
 
     assertThat(response.getStatusCode().value()).isEqualTo(200);
     JsonNode body = objectMapper.readTree(response.getBody());
@@ -166,7 +216,7 @@ class StudioApiIT {
     jdbc.update(
         "UPDATE ui_tests SET steps = ?::jsonb, variables = ?::jsonb WHERE id = ?",
         "[\"Go to \\\"<var BASE_URL>\\\"\", \"Type \\\"<var USRENAME>\\\" in the \\\"User\\\" field\"]",
-        "[{\"name\":\"BASE_URL\",\"kind\":\"plain\",\"value\":\"\"}]",
+        "[{\"name\":\"BASE_URL\",\"kind\":\"plain\"}]",
         testId);
 
     JsonNode refused =
@@ -194,6 +244,16 @@ class StudioApiIT {
   private String executionIdOf(ResponseEntity<String> response) throws Exception {
     assertThat(response.getStatusCode().value()).isEqualTo(202);
     return objectMapper.readTree(response.getBody()).path("executionId").asText();
+  }
+
+  private int executionRows() {
+    return jdbc.queryForObject(
+        "SELECT COUNT(*) FROM ui_test_executions WHERE ui_test_id = ?", Integer.class, testId);
+  }
+
+  private int ledgerRows() {
+    return jdbc.queryForObject(
+        "SELECT COUNT(*) FROM studio_dispatch_ledger WHERE test_id = ?", Integer.class, testId);
   }
 
   private ResponseEntity<String> postWithIdempotencyKey(String key) {
@@ -236,12 +296,12 @@ class StudioApiIT {
     headers.set("X-User-Email", OWNER);
     headers.set("X-User-Roles", "checks-admin");
     headers.set("X-User-Csi-Ownership", CSI_ID + ":owner");
-    return headers;
+    return ObservedPublicationFixture.withSession(headers);
   }
 
   /**
    * A compiled and confirmed draft. From story 10.7 onwards acceptance runs the readiness gate, so
-   * an unconfirmed draft is {@code 409 COMPILE_REQUIRED} rather than an accepted run.
+   * an unlearned draft is {@code 409 LEARN_REQUIRED} rather than an accepted run.
    */
   private UUID seedTest() {
     return new StudioExecutionFixtures(jdbc)

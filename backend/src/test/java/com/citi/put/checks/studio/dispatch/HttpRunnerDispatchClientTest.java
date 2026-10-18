@@ -7,7 +7,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
-import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
@@ -54,16 +53,34 @@ class HttpRunnerDispatchClientTest {
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
             new StudioRunnerProperties(
-                "http://localhost:" + wireMock.port(),
-                "test-runner-token",
-                Duration.ofSeconds(5),
-                Duration.ofSeconds(2)));
+                "http://localhost:" + wireMock.port(), "test-runner-token", Duration.ofSeconds(2)));
+  }
+
+  @Test
+  void ownedBytePublisherAndSecretArraysAreErasedAcrossAcceptedRefusedAndAmbiguousResponses() {
+    for (int status : List.of(202, 429, 403, 503)) {
+      wireMock.resetAll();
+      wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(status)));
+      var bytes = new java.util.concurrent.atomic.AtomicReference<byte[]>();
+      client.observeRequestBytes(
+          value -> {
+            assertThat(new String(value, java.nio.charset.StandardCharsets.UTF_8))
+                .contains("fixture-password");
+            bytes.set(value);
+          });
+      var job = RunJobFixtures.conformingJob();
+      client.send(job);
+      assertThat(bytes.get()).as("owned body after status %s", status).containsOnly((byte) 0);
+      assertThat(job.resolvedSecrets().get("LOGIN_PW").matches("fixture-password")).isFalse();
+      assertThat(job.toString()).doesNotContain("fixture-password");
+      assertThat(wireMock.getAllServeEvents()).hasSize(1);
+    }
   }
 
   @Test
   void dispatchCarriesTheRunnerIdentityAndMissingIdentitySendsNothing() {
     wireMock.stubFor(
-        post(urlPathEqualTo("/v1/runs"))
+        post(urlPathEqualTo("/v2/runs"))
             .withHeader(
                 "Authorization",
                 com.github.tomakehurst.wiremock.client.WireMock.equalTo("Bearer test-runner-token"))
@@ -76,8 +93,7 @@ class HttpRunnerDispatchClientTest {
             new ObjectMapper(),
             new StudioExecutionProperties(
                 true, null, null, null, Duration.ofSeconds(2), null, null, null, null, null, null),
-            new com.citi.put.checks.studio.compile.validator.StudioRunnerProperties(
-                wireMock.baseUrl(), "", Duration.ofSeconds(2), Duration.ofSeconds(2)));
+            new StudioRunnerProperties(wireMock.baseUrl(), "", Duration.ofSeconds(2)));
     assertThat(missingIdentity.send(RunJobFixtures.conformingJob()).kind())
         .isEqualTo(DispatchOutcome.Kind.DEFINITE_REFUSAL);
     assertThat(wireMock.getAllServeEvents()).isEmpty();
@@ -101,7 +117,7 @@ class HttpRunnerDispatchClientTest {
     assertExactlyOneRequest("5xx", aResponse().withStatus(503), DispatchOutcome.Kind.AMBIGUOUS);
     assertExactlyOneRequest(
         "redirect",
-        aResponse().withStatus(302).withHeader("Location", "/v1/runs-elsewhere"),
+        aResponse().withStatus(302).withHeader("Location", "/v2/runs-elsewhere"),
         DispatchOutcome.Kind.AMBIGUOUS);
   }
 
@@ -115,32 +131,32 @@ class HttpRunnerDispatchClientTest {
   }
 
   /**
-   * DEF-05: {@code POST /v1/runs} declares {@code serviceIdentity}, so the dispatch presents the
-   * same bearer the {@code /v1/validate} client presents. Asserted on the request the socket
+   * DEF-05: {@code POST /v2/runs} declares {@code serviceIdentity}, so the dispatch presents the
+   * same bearer the observed validation client presents. Asserted on the request the socket
    * actually received, not on what the client meant to send.
    */
   @Test
   void theDispatchPresentsTheRunnerServiceIdentityAsABearer() {
     wireMock.resetAll();
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(202)));
 
     assertThat(client.send(job()).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
 
-    var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v1/runs")));
+    var requests = wireMock.findAll(postRequestedFor(urlPathEqualTo("/v2/runs")));
     assertThat(requests).hasSize(1);
     assertThat(requests.get(0).getHeaders().getHeader("Authorization").values())
         .containsExactly("Bearer test-runner-token");
   }
 
   /**
-   * Studio v1 WP4: the cancel relay is {@code DELETE /v1/runs/{executionId}} with the same bearer
+   * Studio v1 WP4: the cancel relay is {@code DELETE /v2/runs/{executionId}} with the same bearer
    * as the dispatch, sent exactly once, with no body.
    */
   @Test
   void theCancelRelayIsOneDeleteCarryingTheSameBearer() {
     wireMock.resetAll();
     java.util.UUID executionId = java.util.UUID.randomUUID();
-    String path = "/v1/runs/" + executionId;
+    String path = "/v2/runs/" + executionId;
     wireMock.stubFor(
         com.github.tomakehurst.wiremock.client.WireMock.delete(urlPathEqualTo(path))
             .willReturn(aResponse().withStatus(202)));
@@ -238,116 +254,95 @@ class HttpRunnerDispatchClientTest {
 
   @Test
   void immutableReferencePolicyIsSentWithoutAnyResolvedValueInIt() throws Exception {
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
-    RunJob base = job();
-    RunJob withPolicy =
-        new RunJob(
-            base.executionId(),
-            base.attemptId(),
-            base.revisionId(),
-            base.artifactHash(),
-            base.artifact(),
-            base.source(),
-            base.configuration(),
-            base.csi(),
-            base.references(),
-            base.resolvedVars(),
-            base.resolvedSecrets(),
-            base.deadlines(),
-            base.videoKey(),
-            base.manifestKey(),
-            new ObjectMapper()
-                .readTree(
-                    "{\"version\":2,\"steps\":[{\"stepIndex\":0,"
-                        + "\"required\":{\"variables\":[\"REGION\"],\"secrets\":[\"PW\"]},"
-                        + "\"allowed\":{\"variables\":[\"REGION\"],\"secrets\":[\"PW\"]}}]}"));
-    assertThat(client.send(withPolicy).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(202)));
+    RunJob job = job();
+    assertThat(client.send(job).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
     String body =
         wireMock
             .findAll(
                 com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor(
-                    urlPathEqualTo("/v1/runs")))
+                    urlPathEqualTo("/v2/runs")))
             .get(0)
             .getBodyAsString();
-    assertThat(body).doesNotContain("expectedIntent");
-    assertThat(new ObjectMapper().readTree(body).path("referencePolicy").path("version").asInt())
-        .isEqualTo(2);
-    assertThat(new ObjectMapper().readTree(body).path("referencePolicy").toString())
-        .doesNotContain("fixture-password", "emea");
+    com.fasterxml.jackson.databind.JsonNode policy =
+        new ObjectMapper().readTree(body).path("artifact").path("replayPolicy");
+    assertThat(policy).isEqualTo(job.referencePolicy());
+    assertThat(policy.path("schemaVersion").asInt()).isEqualTo(4);
+    assertThat(policy.toString()).doesNotContain("fixture-password", "emea");
   }
 
   @Test
   void eachSecretsAllowedOriginsAreSentBesideButApartFromItsValue() throws Exception {
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
-    RunJob base = job();
-    RunJob withOrigins =
-        new RunJob(
-            base.executionId(),
-            base.attemptId(),
-            base.revisionId(),
-            base.artifactHash(),
-            base.artifact(),
-            base.source(),
-            base.configuration(),
-            base.csi(),
-            base.references(),
-            base.resolvedVars(),
-            base.resolvedSecrets(),
-            base.deadlines(),
-            base.videoKey(),
-            base.manifestKey(),
-            null,
-            java.util.Map.of("LOGIN_PW", List.of("https://login.app.example")));
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(202)));
 
-    assertThat(client.send(withOrigins).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
+    assertThat(client.send(job()).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
     com.fasterxml.jackson.databind.JsonNode body =
         new ObjectMapper()
             .readTree(
                 wireMock
                     .findAll(
                         com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor(
-                            urlPathEqualTo("/v1/runs")))
+                            urlPathEqualTo("/v2/runs")))
                     .get(0)
                     .getBodyAsString());
     assertThat(body.path("secretOrigins").path("LOGIN_PW").isArray()).isTrue();
     assertThat(body.path("secretOrigins").path("LOGIN_PW").get(0).asText())
-        .isEqualTo("https://login.app.example");
+        .isEqualTo(RunJobFixtures.SECRET_ORIGIN);
     assertThat(body.path("secretOrigins").toString()).doesNotContain("fixture-password");
   }
 
   @Test
   void aJobWithoutOriginsSendsAnEmptyMapWhichTheRunnerReadsAsBoundToNone() throws Exception {
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(aResponse().withStatus(202)));
-    RunJob base = job();
-    // The fourteen-argument constructor: a producer that knows nothing about origins.
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(aResponse().withStatus(202)));
+    // A producer that knows nothing about origins.
     RunJob withoutOrigins =
-        new RunJob(
-            base.executionId(),
-            base.attemptId(),
-            base.revisionId(),
-            base.artifactHash(),
-            base.artifact(),
-            base.source(),
-            base.configuration(),
-            base.csi(),
-            base.references(),
-            base.resolvedVars(),
-            base.resolvedSecrets(),
-            base.deadlines(),
-            base.videoKey(),
-            base.manifestKey());
+        RunJobFixtures.observedJob(
+            java.util.Map.of(),
+            java.util.Map.of("LOGIN_PW", "fixture-password"),
+            java.util.Map.of());
     assertThat(client.send(withoutOrigins).kind()).isEqualTo(DispatchOutcome.Kind.ACCEPTED);
     String body =
         wireMock
             .findAll(
                 com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor(
-                    urlPathEqualTo("/v1/runs")))
+                    urlPathEqualTo("/v2/runs")))
             .get(0)
             .getBodyAsString();
     com.fasterxml.jackson.databind.JsonNode origins =
         new ObjectMapper().readTree(body).path("secretOrigins");
     assertThat(origins.isObject()).isTrue();
     assertThat(origins.size()).isZero();
+  }
+
+  /** ADR-SC-005: one run family. A job without an observed binding never leaves the process. */
+  @Test
+  void aJobWithoutAnObservedBindingIsATerminalNamedRefusalAndSendsNothing() throws Exception {
+    wireMock.resetAll();
+    RunJob observed = job();
+    RunJob notObserved =
+        new RunJob(
+            observed.executionId(),
+            observed.attemptId(),
+            observed.revisionId(),
+            observed.artifactHash(),
+            observed.artifact(),
+            List.of(),
+            observed.configuration(),
+            observed.csi(),
+            observed.references(),
+            java.util.Map.of(),
+            observed.resolvedSecrets(),
+            observed.deadlines(),
+            observed.videoKey(),
+            observed.manifestKey());
+
+    DispatchOutcome outcome = client.send(notObserved);
+
+    assertThat(outcome.kind()).isEqualTo(DispatchOutcome.Kind.DEFINITE_REFUSAL);
+    assertThat(outcome.retryable()).isFalse();
+    assertThat(outcome.detail()).isEqualTo(HttpRunnerDispatchClient.NOT_OBSERVED);
+    assertThat(notObserved.resolvedSecrets().get("LOGIN_PW").matches("fixture-password")).isFalse();
+    assertThat(wireMock.getAllServeEvents()).isEmpty();
   }
 
   @Test
@@ -377,7 +372,7 @@ class HttpRunnerDispatchClientTest {
       com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder response,
       DispatchOutcome.Kind expected) {
     wireMock.resetAll();
-    wireMock.stubFor(post(urlPathEqualTo("/v1/runs")).willReturn(response));
+    wireMock.stubFor(post(urlPathEqualTo("/v2/runs")).willReturn(response));
 
     DispatchOutcome outcome = client.send(job());
 
@@ -386,7 +381,7 @@ class HttpRunnerDispatchClientTest {
             wireMock
                 .findAll(
                     com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor(
-                        urlPathEqualTo("/v1/runs")))
+                        urlPathEqualTo("/v2/runs")))
                 .size())
         .as("exactly one request left the process for '%s'", label)
         .isEqualTo(1);
@@ -397,7 +392,7 @@ class HttpRunnerDispatchClientTest {
         new ObjectMapper(),
         new StudioExecutionProperties(
             true, null, null, null, Duration.ofMillis(500), null, null, null, null, null, null),
-        new StudioRunnerProperties(baseUrl, token, Duration.ofSeconds(5), Duration.ofSeconds(2)));
+        new StudioRunnerProperties(baseUrl, token, Duration.ofSeconds(2)));
   }
 
   private static RunJob job() {

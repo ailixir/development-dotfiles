@@ -5,8 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.internal.ProgressReportService;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -24,6 +26,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -32,6 +36,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -52,7 +58,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = "studio.execution.callback.service-token=test-service-identity-token")
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class StudioAuthorizationIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60458";
   private static final String OTHER_CSI_ID = "60459";
@@ -100,6 +112,9 @@ class StudioAuthorizationIT {
   @Autowired private StudioDispatchLedgerStatements statements;
   @Autowired private TransactionTemplate transactions;
 
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observed;
+
   private StudioExecutionFixtures fixtures;
   private UUID testId;
   private UUID otherCsiTestId;
@@ -116,7 +131,7 @@ class StudioAuthorizationIT {
     fixtures.seedUser(CONTRIBUTOR);
     fixtures.seedCsi(CSI_ID, OWNER);
     fixtures.seedCsi(OTHER_CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id IN (?, ?)", CSI_ID, OTHER_CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID, OTHER_CSI_ID);
     testId =
         fixtures
             .seedRunnableTest("Authz draft", CSI_ID, OWNER, List.of("Go to the home page"))
@@ -127,14 +142,21 @@ class StudioAuthorizationIT {
             .testId();
     executionId =
         studioService
-            .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), null)
+            .executeTest(
+                testId,
+                StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+                null,
+                ObservedPublicationFixture.request(
+                    StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
             .executionId();
     otherCsiExecutionId =
         studioService
             .executeTest(
                 otherCsiTestId,
                 StudioExecutionFixtures.identity(OWNER, OTHER_CSI_ID, "owner"),
-                null)
+                null,
+                ObservedPublicationFixture.request(
+                    StudioExecutionFixtures.identity(OWNER, OTHER_CSI_ID, "owner")))
             .executionId();
   }
 
@@ -155,8 +177,7 @@ class StudioAuthorizationIT {
 
     SoftAssertions softly = new SoftAssertions();
     for (Caller caller : callersWithoutExecute()) {
-      ResponseEntity<String> refused =
-          post("/api/v1/studio/tests/" + testId + "/execute", caller.headers());
+      ResponseEntity<String> refused = execute(testId, caller.headers());
       softly
           .assertThat(refused.getStatusCode().value())
           .as(
@@ -166,12 +187,11 @@ class StudioAuthorizationIT {
     }
     softly.assertAll();
 
-    assertThat(post("/api/v1/studio/tests/" + testId + "/execute", owner()).getStatusCode().value())
+    assertThat(execute(testId, owner()).getStatusCode().value())
         .as("the owner of the test's CSI executes")
         .isEqualTo(202);
     fixtures.seedUser(ADMIN);
-    ResponseEntity<String> adminAccepted =
-        post("/api/v1/studio/tests/" + testId + "/execute", administrator());
+    ResponseEntity<String> adminAccepted = execute(testId, administrator());
     assertThat(adminAccepted.getStatusCode().value())
         .as(
             "an administrator executes on a CSI it owns nothing on (body: %s)",
@@ -244,12 +264,11 @@ class StudioAuthorizationIT {
   @Test
   void authorizationIsDecidedBeforeReadinessQuotaAndIdempotency() throws Exception {
     UUID notReady = fixtures.seedTest("Not ready", CSI_ID, OWNER, List.of(DRAFT_STEP));
-    ResponseEntity<String> ownerNotReady =
-        post("/api/v1/studio/tests/" + notReady + "/execute", owner());
+    ResponseEntity<String> ownerNotReady = execute(notReady, owner());
     assertThat(ownerNotReady.getStatusCode().value())
         .as("control: the owner is told 409 (body: %s)", ownerNotReady.getBody())
         .isEqualTo(409);
-    assertThat(json(ownerNotReady).path("error").asText()).isEqualTo("COMPILE_REQUIRED");
+    assertThat(json(ownerNotReady).path("error").asText()).isEqualTo("LEARN_REQUIRED");
 
     String key = UUID.randomUUID().toString();
     ResponseEntity<String> ownerKeyed =
@@ -259,13 +278,12 @@ class StudioAuthorizationIT {
 
     SoftAssertions softly = new SoftAssertions();
     for (Caller caller : callersWithoutExecute()) {
-      ResponseEntity<String> onNotReady =
-          post("/api/v1/studio/tests/" + notReady + "/execute", caller.headers());
+      ResponseEntity<String> onNotReady = execute(notReady, caller.headers());
       softly
           .assertThat(onNotReady.getStatusCode().value())
-          .as("%s on a test that is not READY: 403, never COMPILE_REQUIRED", caller)
+          .as("%s on a test that is not READY: 403, never LEARN_REQUIRED", caller)
           .isEqualTo(403);
-      softly.assertThat(onNotReady.getBody()).doesNotContain("COMPILE_REQUIRED");
+      softly.assertThat(onNotReady.getBody()).doesNotContain("LEARN_REQUIRED");
 
       ResponseEntity<String> replay =
           postWithKey("/api/v1/studio/tests/" + testId + "/execute", caller.headers(), key);
@@ -281,15 +299,12 @@ class StudioAuthorizationIT {
     }
 
     fillCsiToItsQuota(CSI_ID);
-    assertThat(post("/api/v1/studio/tests/" + testId + "/execute", owner()).getStatusCode().value())
+    assertThat(execute(testId, owner()).getStatusCode().value())
         .as("control: the owner is told the CSI is full")
         .isEqualTo(429);
     for (Caller caller : callersWithoutExecute()) {
       softly
-          .assertThat(
-              post("/api/v1/studio/tests/" + testId + "/execute", caller.headers())
-                  .getStatusCode()
-                  .value())
+          .assertThat(execute(testId, caller.headers()).getStatusCode().value())
           .as("%s on a full CSI: 403, never 429", caller)
           .isEqualTo(403);
     }
@@ -313,18 +328,31 @@ class StudioAuthorizationIT {
     String key = UUID.randomUUID().toString();
     UUID stored =
         studioService
-            .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), key)
+            .executeTest(
+                testId,
+                StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+                key,
+                ObservedPublicationFixture.request(
+                    StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
             .executionId();
     assertThat(
             studioService
-                .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), key)
+                .executeTest(
+                    testId,
+                    StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+                    key,
+                    ObservedPublicationFixture.request(
+                        StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
                 .executionId())
         .as("control: while still an owner, the replay resolves to the stored run")
         .isEqualTo(stored);
 
     Authentication demoted = StudioExecutionFixtures.identity(OWNER, CSI_ID, "viewer");
 
-    assertThatThrownBy(() -> studioService.executeTest(testId, demoted, key))
+    assertThatThrownBy(
+            () ->
+                studioService.executeTest(
+                    testId, demoted, key, ObservedPublicationFixture.request(demoted)))
         .as("the demoted owner's replay is refused, not resolved to %s", stored)
         .isExactlyInstanceOf(StudioAccessDeniedException.class);
     assertThat(ledgerRowsKeyed(key)).as("still exactly the one keyed row").isEqualTo(1);
@@ -332,8 +360,7 @@ class StudioAuthorizationIT {
 
   @Test
   void anOwnerMayExecute() {
-    assertThat(post("/api/v1/studio/tests/" + testId + "/execute", owner()).getStatusCode().value())
-        .isEqualTo(202);
+    assertThat(execute(testId, owner()).getStatusCode().value()).isEqualTo(202);
   }
 
   @Test
@@ -397,9 +424,22 @@ class StudioAuthorizationIT {
 
   @Test
   void aQuarantinedExecutionWithNoCsiIsUnreadableByEveryoneIncludingAdministrators() {
-    jdbc.update("UPDATE ui_test_executions SET csi_id = NULL WHERE id = ?", executionId);
+    // STUDIO-OBS-012A R2 precondition: an observed (bound) execution cannot lose its CSI at all.
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE ui_test_executions SET csi_id = NULL WHERE id = ?", executionId))
+        .isInstanceOf(DataAccessException.class)
+        .hasMessageContaining("observed execution binding invalid");
+    // The quarantine is seated on an unbound history row, the one shape that may carry no CSI.
+    UUID unbound = fixtures.unboundExecution(testId, CSI_ID, OWNER, "Production", "PASSED");
+    assertThat(get("/api/v1/studio/executions/" + unbound, admin()).getStatusCode().value())
+        .as("control: before quarantine the administrator is served the unbound row")
+        .isEqualTo(200);
 
-    assertThat(get("/api/v1/studio/executions/" + executionId, admin()).getStatusCode().value())
+    jdbc.update("UPDATE ui_test_executions SET csi_id = NULL WHERE id = ?", unbound);
+
+    assertThat(get("/api/v1/studio/executions/" + unbound, admin()).getStatusCode().value())
         .isEqualTo(403);
   }
 
@@ -407,22 +447,24 @@ class StudioAuthorizationIT {
 
   @Test
   void bothCallbacksAreUnreachableWithoutServiceIdentity() {
-    assertThat(postInternal("/admission", null, "{}").statusCode()).isEqualTo(401);
+    assertThat(postInternal("/observed-admission", null, "{}").statusCode()).isEqualTo(401);
     assertThat(postInternal("/progress", null, "{}").statusCode()).isEqualTo(401);
   }
 
   @Test
   void aBlankMalformedOrWrongCredentialIsRefusedBeforeAnyHandlerWork() {
-    assertThat(postInternal("/admission", "", "{}").statusCode()).isEqualTo(401);
-    assertThat(postInternal("/admission", "not-a-bearer-scheme", "{}").statusCode()).isEqualTo(401);
-    assertThat(postInternal("/admission", "Bearer ", "{}").statusCode()).isEqualTo(401);
-    assertThat(postInternal("/admission", "Bearer wrong-token", "{}").statusCode()).isEqualTo(403);
+    assertThat(postInternal("/observed-admission", "", "{}").statusCode()).isEqualTo(401);
+    assertThat(postInternal("/observed-admission", "not-a-bearer-scheme", "{}").statusCode())
+        .isEqualTo(401);
+    assertThat(postInternal("/observed-admission", "Bearer ", "{}").statusCode()).isEqualTo(401);
+    assertThat(postInternal("/observed-admission", "Bearer wrong-token", "{}").statusCode())
+        .isEqualTo(403);
   }
 
   @Test
   void theRejectionBodyCarriesACodeAndNoExecutionDetail() {
     HttpResponse<String> refused =
-        postInternal("/admission", null, "{\"executionId\":\"" + executionId + "\"}");
+        postInternal("/observed-admission", null, "{\"executionId\":\"" + executionId + "\"}");
 
     assertThat(refused.statusCode()).isEqualTo(401);
     assertThat(refused.body())
@@ -436,7 +478,10 @@ class StudioAuthorizationIT {
   void theCredentialIsNotAcceptedFromAurlOrAQueryParameter() {
     HttpResponse<String> viaQuery =
         postInternalPath(
-            "/internal/studio/executions/" + executionId + "/admission?access_token=" + TOKEN,
+            "/internal/studio/executions/"
+                + executionId
+                + "/observed-admission?access_token="
+                + TOKEN,
             null,
             "{}");
 
@@ -457,46 +502,82 @@ class StudioAuthorizationIT {
     assertThat(paths).noneMatch(path -> path.startsWith("/internal/"));
   }
 
+  /**
+   * STUDIO-OBS-014 P1 (AR-3): re-pointed from the deleted legacy {@code /admission} route to {@code
+   * /observed-admission}. A well-formed v3 request for a superseded attempt: the chain lets it
+   * through and the handler answers on the merits. A chain refusal and a handler refusal can share
+   * a status, so the oracle is the body: the handler's envelope is {@code {code}}, the chain's is
+   * {@code {error, message}}.
+   */
   @Test
   void aValidServiceIdentityReachesTheHandler() {
-    // A well-formed but stale admission: the chain let it through, and the handler answered on
-    // the merits. What matters here is that the answer came from the handler and not from the
-    // chain — 409 is a handler verdict; 401/403 would not be.
-    HttpResponse<String> answered =
-        postInternal(
-            "/admission",
-            "Bearer " + TOKEN,
-            "{\"executionId\":\""
-                + executionId
-                + "\",\"attemptId\":\""
-                + UUID.randomUUID()
-                + "\",\"runnerInstanceId\":\"studio-runner-0\",\"admissionId\":\""
-                + UUID.randomUUID()
-                + "\",\"runtimeVersions\":{}}");
+    ObjectNode request =
+        ObservedPublicationFixture.observedAdmissionRequest(
+            observed.binding(executionId).orElseThrow(), "studio-runner-0", UUID.randomUUID());
+    request.put("attemptId", UUID.randomUUID().toString());
 
-    assertThat(answered.statusCode()).isEqualTo(409);
-    assertThat(answered.body()).contains("ATTEMPT_SUPERSEDED");
+    HttpResponse<String> answered =
+        postInternal("/observed-admission", "Bearer " + TOKEN, request.toString());
+
+    assertThat(answered.statusCode()).isIn(403, 409);
+    JsonNode body = parse(answered.body());
+    assertThat(body.path("code").asText())
+        .as("the handler's refusal envelope, not the chain's (body: %s)", answered.body())
+        .isEqualTo("FORBIDDEN_SCOPE");
+    assertThat(body.has("error")).isFalse();
   }
 
   // ── AC-24 / AC-26 at the wire boundary ───────────────────────────────────
 
+  /**
+   * STUDIO-OBS-014 P1 (AR-3): renamed from {@code aFieldTheClosedSchemaDoesNotNameIsA400} and
+   * re-pointed to {@code /observed-admission}, whose closed v3 schema refuses an extra field with
+   * {@code 422 INVALID_CONTRACT} (the observed-admission contract).
+   */
   @Test
-  void aFieldTheClosedSchemaDoesNotNameIsA400() {
+  void aFieldTheClosedSchemaDoesNotNameIsRefused() {
+    ObjectNode request =
+        ObservedPublicationFixture.observedAdmissionRequest(
+            observed.binding(executionId).orElseThrow(), "studio-runner-0", UUID.randomUUID());
+    request.put("recordingOriginMs", 1234);
+
     HttpResponse<String> refused =
+        postInternal("/observed-admission", "Bearer " + TOKEN, request.toString());
+
+    assertThat(refused.statusCode())
+        .as("an open schema over a wire body is not a contract (ADR-002 §6.2)")
+        .isEqualTo(422);
+    assertThat(parse(refused.body()).path("code").asText()).isEqualTo("INVALID_CONTRACT");
+  }
+
+  /**
+   * STUDIO-OBS-014 inherited obligation P1 (d): the legacy {@code POST
+   * /internal/studio/executions/{id}/admission} route is deleted, not guarded. With a valid service
+   * identity and a well-formed legacy body for the attempt that is current, it answers {@code 404}
+   * or {@code 405} and writes nothing: the ledger row, the execution row and the secret-use audit
+   * are byte-identical before and after.
+   */
+  @Test
+  void theLegacyAdmissionRouteIsGoneAndWritesNothing() {
+    UUID attemptId = dispatch(executionId);
+    Map<String, Object> ledgerBefore = legacyAdmissionWitness();
+    long auditBefore = secretUseAuditRows();
+
+    HttpResponse<String> gone =
         postInternal(
             "/admission",
             "Bearer " + TOKEN,
             "{\"executionId\":\""
                 + executionId
                 + "\",\"attemptId\":\""
-                + UUID.randomUUID()
+                + attemptId
                 + "\",\"runnerInstanceId\":\"studio-runner-0\",\"admissionId\":\""
                 + UUID.randomUUID()
-                + "\",\"runtimeVersions\":{},\"recordingOriginMs\":1234}");
+                + "\",\"runtimeVersions\":{}}");
 
-    assertThat(refused.statusCode())
-        .as("an open schema over a wire body is not a contract (ADR-002 §6.2)")
-        .isEqualTo(400);
+    assertThat(gone.statusCode()).as("body: %s", gone.body()).isIn(404, 405);
+    assertThat(legacyAdmissionWitness()).isEqualTo(ledgerBefore);
+    assertThat(secretUseAuditRows()).isEqualTo(auditBefore);
   }
 
   @Test
@@ -589,7 +670,7 @@ class StudioAuthorizationIT {
           .contains(StudioAccessDeniedException.CODE);
       softly
           .assertThat(rowState(draft))
-          .as("%s: the five named columns, read from the database", caller)
+          .as("%s: the named columns, read from the database", caller)
           .isEqualTo(before);
       softly
           .assertThat(rowImage(draft))
@@ -707,7 +788,7 @@ class StudioAuthorizationIT {
 
     for (UUID draft : List.of(softDeleted, quarantined)) {
       ResponseEntity<String> control =
-          put(draft, saveBody(draft, "Administrator control", DRAFT_STEP), admin());
+          put(draft, nameOnlySaveBody(draft, "Administrator control"), admin());
       assertThat(control.getStatusCode().value())
           .as(
               "control: the administrator reaches the save on this row (body: %s)",
@@ -810,8 +891,10 @@ class StudioAuthorizationIT {
   void theOwnerMaySaveAndDeleteTheirOwnDraft() {
     UUID draft = seedWritableDraft("Owner control");
 
+    // A learned draft carries stable v2 step identities (STUDIO-OBS-012A: the only runnable
+    // revision is an observed publication of authored steps), so its step edit is the v2 save.
     ResponseEntity<String> saved =
-        put(draft, saveBody(draft, "Saved by the owner", "Edited by the owner"), owner());
+        put(draft, v2SaveBody(draft, "Saved by the owner", "Edited by the owner"), owner());
     assertThat(saved.getStatusCode().value())
         .as("the owner saves (body: %s)", saved.getBody())
         .isEqualTo(200);
@@ -905,6 +988,16 @@ class StudioAuthorizationIT {
     }
   }
 
+  /**
+   * {@code POST /tests/{id}/execute} with a fresh {@code Idempotency-Key}, which the route requires
+   * (STUDIO-OBS-014 AC-9). A fresh key per call keeps each request independent of the response
+   * cache, so every status asserted here is the route's own decision.
+   */
+  private ResponseEntity<String> execute(UUID test, HttpHeaders headers) {
+    return postWithKey(
+        "/api/v1/studio/tests/" + test + "/execute", headers, UUID.randomUUID().toString());
+  }
+
   private ResponseEntity<String> postWithKey(String path, HttpHeaders headers, String key) {
     HttpHeaders keyed = new HttpHeaders();
     keyed.putAll(headers);
@@ -912,27 +1005,17 @@ class StudioAuthorizationIT {
     return post(path, keyed);
   }
 
-  /**
-   * A draft on {@code CSI_ID} in a state a successful save visibly changes: confirmed, {@code
-   * READY}, with a candidate. A save that moves a revision returns it to {@code STALE} and clears
-   * the candidate (Architecture §4.2).
-   */
+  /** A confirmed draft on {@code CSI_ID}; a successful save visibly moves its revisions. */
   private UUID seedWritableDraft(String name) {
     StudioExecutionFixtures.RunnableTest draft =
         fixtures.seedRunnableTest(name, CSI_ID, OWNER, List.of(DRAFT_STEP));
-    jdbc.update(
-        "UPDATE ui_tests SET compile_status = 'READY', current_candidate_revision_id = ?"
-            + " WHERE id = ?",
-        draft.revisionId(),
-        draft.testId());
     return draft.testId();
   }
 
-  /** The five columns AC-2 names, read directly from the database. */
+  /** The AC-2 columns that survive the STUDIO-OBS-012A re-baseline, read from the database. */
   private Map<String, Object> rowState(UUID id) {
     return jdbc.queryForMap(
-        "SELECT source_revision, configuration_revision, deleted_at, compile_status,"
-            + " current_candidate_revision_id FROM ui_tests WHERE id = ?",
+        "SELECT source_revision, configuration_revision, deleted_at FROM ui_tests WHERE id = ?",
         id);
   }
 
@@ -973,6 +1056,65 @@ class StudioAuthorizationIT {
   }
 
   /** A save carrying the row's current revisions, so only authorization can refuse it. */
+  /**
+   * {@link #saveBody(UUID, String, String)} in the v2 authoring shape: the stored step identity is
+   * kept and only its text changes, with the seeded draft's metadata and configuration.
+   */
+  private String v2SaveBody(UUID id, String name, String step) {
+    try {
+      com.fasterxml.jackson.databind.node.ObjectNode body =
+          (com.fasterxml.jackson.databind.node.ObjectNode)
+              objectMapper.readTree(
+                  jdbc.queryForObject(
+                      "SELECT authoring::text FROM ui_tests WHERE id = ?", String.class, id));
+      ((com.fasterxml.jackson.databind.node.ObjectNode) body.path("steps").get(0))
+          .put("text", step);
+      com.fasterxml.jackson.databind.JsonNode typed =
+          objectMapper.readTree(saveBody(id, name, step));
+      typed
+          .fields()
+          .forEachRemaining(
+              field -> {
+                if (!"steps".equals(field.getKey())) {
+                  body.set(field.getKey(), field.getValue());
+                }
+              });
+      return body.toString();
+    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
+   * A save that changes the name and nothing else. A runnable draft is published through {@link
+   * ObservedPublicationFixture}, which gives it a declared destination variable and a step context
+   * reference, so {@link #saveBody(UUID, String, String)} (empty variables, no context) is a source
+   * and configuration change. This carries the stored steps, global context and variable
+   * declarations back as they are, with the current revisions.
+   */
+  private String nameOnlySaveBody(UUID id, String name) {
+    try {
+      com.fasterxml.jackson.databind.node.ObjectNode body =
+          (com.fasterxml.jackson.databind.node.ObjectNode)
+              objectMapper.readTree(saveBody(id, name, DRAFT_STEP));
+      Map<String, Object> stored =
+          jdbc.queryForMap(
+              "SELECT authoring::text AS authoring, variables::text AS variables"
+                  + " FROM ui_tests WHERE id = ?",
+              id);
+      com.fasterxml.jackson.databind.JsonNode authoring =
+          objectMapper.readTree((String) stored.get("authoring"));
+      body.set("steps", authoring.path("steps"));
+      if (authoring.has("globalContext")) {
+        body.set("globalContext", authoring.path("globalContext"));
+      }
+      body.set("variables", objectMapper.readTree((String) stored.get("variables")));
+      return body.toString();
+    } catch (com.fasterxml.jackson.core.JsonProcessingException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
   private String saveBody(UUID id, String name, String step) {
     List<Long> current = revisions(id);
     return saveBody(current.get(0), current.get(1), name, step);
@@ -985,13 +1127,15 @@ class StudioAuthorizationIT {
   private static String saveBody(
       Long sourceRevision, Long configurationRevision, String name, String step) {
     StringBuilder body =
-        new StringBuilder("{\"name\":\"")
+        new StringBuilder("{\"authoringSchemaVersion\":2,\"name\":\"")
             .append(name)
             .append("\",\"description\":null,\"csiId\":\"")
             .append(CSI_ID)
-            .append("\",\"environment\":\"Production\",\"steps\":[\"")
+            .append(
+                "\",\"environment\":\"Production\",\"steps\":[{\"id\":\"00000000-0000-4000-8000-000000000001\","
+                    + "\"text\":\"")
             .append(step)
-            .append("\"],\"variables\":[],")
+            .append("\"}],\"variables\":[],")
             .append("\"configuration\":{\"browser\":\"chromium\",")
             .append("\"viewport\":{\"width\":1920,\"height\":1080},")
             .append("\"timeoutSeconds\":30,\"waitStrategy\":\"networkidle\"}");
@@ -1006,7 +1150,7 @@ class StudioAuthorizationIT {
 
   /** A create with no steps, so no compile is enqueued by a create that succeeds. */
   private static String createBody(String name, String csiId) {
-    return "{\"name\":\""
+    return "{\"authoringSchemaVersion\":2,\"name\":\""
         + name
         + "\",\"description\":\"authz\",\"csiId\":\""
         + csiId
@@ -1034,8 +1178,9 @@ class StudioAuthorizationIT {
         path, HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
   }
 
+  /** Claims and begins the dispatch under the attempt the observed Run authority issued. */
   private UUID dispatch(UUID execution) {
-    UUID attempt = UUID.randomUUID();
+    UUID attempt = ObservedPublicationFixture.bindingAttempt(observed, execution);
     transactions.executeWithoutResult(
         status -> {
           statements.claim(
@@ -1045,17 +1190,39 @@ class StudioAuthorizationIT {
     return attempt;
   }
 
+  /**
+   * Admits over HTTP the way the runner does (STUDIO-OBS-014 P1: re-pointed from the deleted legacy
+   * {@code /admission} route): the v3 request built from the execution's stored binding, exactly as
+   * {@link ObservedPublicationFixture#admitObserved} builds it, so the whole internal chain is
+   * still exercised. {@code attemptId} is the binding's attempt, which {@link #dispatch} began.
+   */
   private HttpResponse<String> admit(UUID attemptId, UUID admissionId) {
-    return postInternal(
-        "/admission",
-        "Bearer " + TOKEN,
-        "{\"executionId\":\""
-            + executionId
-            + "\",\"attemptId\":\""
-            + attemptId
-            + "\",\"runnerInstanceId\":\"studio-runner-0\",\"admissionId\":\""
-            + admissionId
-            + "\",\"runtimeVersions\":{}}");
+    ObjectNode request =
+        ObservedPublicationFixture.observedAdmissionRequest(
+            observed.binding(executionId).orElseThrow(), "studio-runner-0", admissionId);
+    assertThat(request.path("attemptId").asText()).isEqualTo(attemptId.toString());
+    return postInternal("/observed-admission", "Bearer " + TOKEN, request.toString());
+  }
+
+  private Map<String, Object> legacyAdmissionWitness() {
+    return jdbc.queryForMap(
+        "SELECT l.state, l.attempt_id, l.admission_id, l.runner_instance_id,"
+            + " l.last_runner_sequence, e.status, e.observed_admission_receipt::text AS receipt"
+            + " FROM studio_dispatch_ledger l JOIN ui_test_executions e ON e.id = l.execution_id"
+            + " AND e.started_at = l.execution_accepted_at WHERE l.execution_id = ?",
+        executionId);
+  }
+
+  private long secretUseAuditRows() {
+    return jdbc.queryForObject("SELECT count(*) FROM studio_secret_use_audit", Long.class);
+  }
+
+  private JsonNode parse(String body) {
+    try {
+      return objectMapper.readTree(body);
+    } catch (Exception e) {
+      throw new AssertionError("not JSON: " + body, e);
+    }
   }
 
   private HttpResponse<String> started(UUID attemptId, UUID admissionId, long sequence) {
@@ -1122,7 +1289,7 @@ class StudioAuthorizationIT {
     headers.set("X-User-Email", email);
     headers.set("X-User-Roles", roles);
     headers.set("X-User-Csi-Ownership", ownership);
-    return headers;
+    return ObservedPublicationFixture.withSession(headers);
   }
 
   private static HttpHeaders owner() {

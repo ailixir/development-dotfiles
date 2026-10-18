@@ -1,6 +1,6 @@
 package com.citi.put.checks.studio.guided.translation;
 
-import com.citi.put.checks.studio.compile.gateway.GenAiGatewayTransport;
+import com.citi.put.checks.studio.gateway.GenAiGatewayTransport;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;

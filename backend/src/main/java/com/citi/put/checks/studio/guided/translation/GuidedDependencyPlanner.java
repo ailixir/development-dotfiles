@@ -46,14 +46,16 @@ public final class GuidedDependencyPlanner {
   public void allocate(Authentication controller, JsonNode session, ObjectNode plan) {
     String id = session.path("sessionId").asText();
     for (JsonNode need : plan.path("needs")) {
-      ObjectNode request = ((ObjectNode) need).deepCopy();
-      request.remove("bindingId");
+      ObjectNode request =
+          sessions.cumulativeAllocationRequest(
+              controller, id, session.path("owner").path("fence").asLong(), need);
       JsonNode allocation =
           sessions.allocateBinding(
               controller,
               id,
               session.path("owner").path("fence").asLong(),
-              "need-" + need.path("needId").asText(),
+              "allocation-"
+                  + com.citi.put.checks.studio.guided.session.GuidedContracts.hash(request),
               request);
       ((ObjectNode) need).set("bindingId", allocation.path("bindingId"));
     }

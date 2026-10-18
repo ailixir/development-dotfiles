@@ -52,6 +52,8 @@ public final class ExecutionErrorCode {
    */
   public static final String CANCELLED = "CANCELLED";
 
+  public static final String SECRET_TOO_LONG = "SECRET_TOO_LONG";
+
   private static final Set<String> VALUES =
       Set.of(
           TIMEOUT,
@@ -62,7 +64,8 @@ public final class ExecutionErrorCode {
           DISPATCH_DISABLED,
           AUTHORIZATION_REVOKED,
           REFERENCE_UNAVAILABLE,
-          CANCELLED);
+          CANCELLED,
+          SECRET_TOO_LONG);
 
   /** Codes the reapers own. A dispatcher must never emit one of these (AC-13a disjointness). */
   private static final Set<String> REAPER_ASSIGNED = Set.of(START_TIMEOUT, STALE, TIMEOUT);

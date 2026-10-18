@@ -1,7 +1,6 @@
 package com.citi.put.checks.studio.dispatch;
 
 import com.citi.put.checks.studio.StudioExecutionProperties;
-import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -36,11 +35,15 @@ import org.springframework.stereotype.Component;
  * interceptor, no {@code RetryTemplate} and no resilience4j instance on this path, and that absence
  * is the policy rather than an oversight.
  *
- * <p><b>Service identity (DEF-05).</b> {@code POST /v1/runs} declares {@code serviceIdentity}, and
+ * <p><b>Observed jobs only (ADR-SC-005).</b> The runner serves one run family, {@code POST
+ * /v2/runs}, and a job that does not carry an observed binding is refused terminally before
+ * anything is serialized: there is no second body shape and no second route.
+ *
+ * <p><b>Service identity (DEF-05).</b> {@code POST /v2/runs} declares {@code serviceIdentity}, and
  * the runner refuses an unauthenticated caller before it parses the body. The base URL and the
- * bearer therefore come from the same {@link StudioRunnerProperties} the {@code /v1/validate}
- * client uses, so the two runner routes cannot be configured apart. When either is missing this
- * client refuses terminally, with a detail naming the missing key, and sends nothing: an
+ * bearer therefore come from {@link StudioRunnerProperties}, the same source the observed
+ * validation client uses, so the runner routes cannot be configured apart. When either is missing
+ * this client refuses terminally, with a detail naming the missing key, and sends nothing: an
  * unauthenticated send is a request the runner is certain to refuse and would only hide the
  * misconfiguration behind the runner's {@code 401}.
  */
@@ -50,6 +53,10 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   /** {@code detail()} of the terminal refusal when no runner base URL is configured. */
   public static final String RUNNER_NOT_CONFIGURED =
       "studio.runner.base-url is not configured; nothing was sent";
+
+  /** {@code detail()} of the terminal refusal for a job without an observed binding. */
+  public static final String NOT_OBSERVED =
+      "only observed replay jobs are dispatched; nothing was sent";
 
   /** {@code detail()} of the terminal refusal when no service identity is configured. */
   public static final String SERVICE_IDENTITY_NOT_CONFIGURED =
@@ -63,15 +70,50 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   private final StudioRunnerProperties runner;
   private StudioDispatchMetrics metrics;
 
+  /**
+   * The client without a configured TLS identity, for tests that talk plain {@code http://} to a
+   * local double. The Spring constructor below is the only one a deployed context uses.
+   *
+   * @param objectMapper serializer of the run body
+   * @param properties execution bounds
+   * @param runner the runner endpoint and service identity
+   */
   public HttpRunnerDispatchClient(
       ObjectMapper objectMapper,
       StudioExecutionProperties properties,
       StudioRunnerProperties runner) {
+    this(objectMapper, properties, runner, HttpClient.newBuilder());
+  }
+
+  /**
+   * The deployed client: TLS comes from {@link StudioRunnerTls} (client certificate, the runner's
+   * issuer as the only trust anchor, host-name verification), never from a JVM default
+   * (STUDIO-OBS-009 AC-3, ruling A4).
+   *
+   * @param objectMapper serializer of the run body
+   * @param properties execution bounds
+   * @param runner the runner endpoint and service identity
+   * @param tls the backend's identity on the runner hop
+   */
+  @Autowired
+  public HttpRunnerDispatchClient(
+      ObjectMapper objectMapper,
+      StudioExecutionProperties properties,
+      StudioRunnerProperties runner,
+      StudioRunnerTls tls) {
+    this(objectMapper, properties, runner, tls.configure(HttpClient.newBuilder()));
+  }
+
+  private HttpRunnerDispatchClient(
+      ObjectMapper objectMapper,
+      StudioExecutionProperties properties,
+      StudioRunnerProperties runner,
+      HttpClient.Builder builder) {
     this.objectMapper = objectMapper;
     this.properties = properties;
     this.runner = runner;
     this.httpClient =
-        HttpClient.newBuilder()
+        builder
             .followRedirects(HttpClient.Redirect.NEVER)
             .connectTimeout(properties.admissionTimeoutOrDefault())
             .build();
@@ -88,6 +130,12 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     return httpClient.followRedirects();
   }
 
+  void observeRequestBytes(java.util.function.Consumer<byte[]> observer) {
+    this.requestBytesObserver = observer;
+  }
+
+  private java.util.function.Consumer<byte[]> requestBytesObserver;
+
   @Override
   public DispatchOutcome send(RunJob job) {
     String misconfiguration = misconfiguration();
@@ -97,30 +145,41 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
           "Dispatch of execution {} refused before sending: {}",
           job.executionId(),
           misconfiguration);
+      job.resolvedSecrets().values().forEach(com.citi.put.checks.studio.secrets.SecretValue::close);
       return DispatchOutcome.refusedTerminal(misconfiguration);
     }
+    if (job.observed() == null) {
+      LOGGER.warn(
+          "Dispatch of execution {} refused before sending: {}", job.executionId(), NOT_OBSERVED);
+      job.resolvedSecrets().values().forEach(com.citi.put.checks.studio.secrets.SecretValue::close);
+      return DispatchOutcome.refusedTerminal(NOT_OBSERVED);
+    }
     HttpRequest request;
+    byte[] requestBytes = null;
     try {
+      requestBytes =
+          com.citi.put.checks.studio.secrets.SecretWireWriter.bytes(
+              objectMapper, observedBody(job));
       request =
-          HttpRequest.newBuilder(
-                  URI.create(
-                      job.observed() == null
-                          ? runner.runsUrl()
-                          : runner.baseUrl().replaceAll("/+$", "") + "/v2/runs"))
+          HttpRequest.newBuilder(URI.create(runner.runsUrl()))
               .timeout(properties.admissionTimeoutOrDefault())
               .header("Content-Type", "application/json")
               .header("Authorization", "Bearer " + runner.serviceIdentityToken())
-              .POST(
-                  HttpRequest.BodyPublishers.ofString(
-                      objectMapper.writeValueAsString(
-                          job.observed() == null ? body(job) : job.observed())))
+              .POST(HttpRequest.BodyPublishers.ofByteArray(requestBytes))
               .build();
-    } catch (JsonProcessingException e) {
+    } catch (IOException | RuntimeException e) {
+      if (requestBytes != null) {
+        java.util.Arrays.fill(requestBytes, (byte) 0);
+      }
+      job.resolvedSecrets().values().forEach(com.citi.put.checks.studio.secrets.SecretValue::close);
       return DispatchOutcome.refusedTerminal("the run job could not be serialized");
     }
 
     HttpResponse<String> response;
     try {
+      if (requestBytesObserver != null) {
+        requestBytesObserver.accept(requestBytes);
+      }
       response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
     } catch (HttpTimeoutException e) {
       return DispatchOutcome.ambiguous("timeout");
@@ -129,6 +188,8 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       return DispatchOutcome.ambiguous("interrupted");
+    } finally {
+      java.util.Arrays.fill(requestBytes, (byte) 0);
     }
     if (response.statusCode() == 429 && metrics != null) {
       metrics.recordRefusal();
@@ -138,7 +199,7 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   }
 
   /**
-   * {@code DELETE /v1/runs/{executionId}} with the same base URL and the same bearer as {@link
+   * {@code DELETE /v2/runs/{executionId}} with the same base URL and the same bearer as {@link
    * #send} (Studio v1 WP4). No body, no redirect followed, no automatic retry: the dispatcher's
    * next pass is the retry, and it happens only for an outcome that did not {@linkplain
    * CancelOutcome#settled() settle}.
@@ -220,46 +281,14 @@ public class HttpRunnerDispatchClient implements RunnerDispatchClient {
   }
 
   /**
-   * The body, and it is the only place this API decides what {@code POST /v1/runs} looks like.
-   *
-   * <p>Exactly the keys the frozen {@code RunJob} declares — its fourteen required ones plus the
-   * optional {@code referencePolicy} and {@code secretOrigins} — and nothing else. The closed key
-   * set is a security control rather than tidiness — it is what stops a job naming its own callback
-   * destination — and a producer that writes an undeclared key is refused by the runner before
-   * capacity, before admission and before a browser.
-   *
-   * <p>{@code InternalBodyContractConformanceTest} validates the bytes this method produces against
-   * the schema read from {@code docs/specs/studio/openapi.yaml}, off a real socket. That assertion
-   * landed red, in its own commit, before this method was corrected.
+   * The observed body: the binding-derived wire document the replay authorization produced, plus
+   * the two ephemeral secret maps resolved for this one send. Nothing else is added here.
    */
-  private Map<String, Object> body(RunJob job) {
-    Map<String, Object> body = new LinkedHashMap<>();
-    body.put("executionId", job.executionId());
-    body.put("attemptId", job.attemptId());
-    body.put("revisionId", job.revisionId());
-    body.put("artifactHash", job.artifactHash());
-    body.put("artifact", job.artifact());
-    body.put("source", job.source());
-    body.put("configuration", job.configuration());
-    body.put("csi", job.csi());
-    Map<String, Object> references = new LinkedHashMap<>();
-    references.put("variables", job.references().variables());
-    references.put("secrets", job.references().secrets());
-    body.put("references", references);
-    body.put("resolvedVars", job.resolvedVars());
-    body.put("resolvedSecrets", job.resolvedSecrets());
-    Map<String, Object> deadlines = new LinkedHashMap<>();
-    deadlines.put("admittedStartMs", job.deadlines().admittedStartMs());
-    deadlines.put("totalRuntimeMs", job.deadlines().totalRuntimeMs());
-    body.put("deadlines", deadlines);
-    body.put("videoKey", job.videoKey());
-    body.put("manifestKey", job.manifestKey());
-    if (job.referencePolicy() != null) {
-      body.put("referencePolicy", job.referencePolicy());
-    }
-    // Nonsecret, and always sent: an empty map is the runner's fail-closed reading anyway, but an
-    // explicit one says this producer knows the field.
-    body.put("secretOrigins", job.secretOrigins());
-    return body;
+  private Map<String, Object> observedBody(RunJob job) {
+    Map<String, Object> result = new LinkedHashMap<>();
+    job.observed().fields().forEachRemaining(entry -> result.put(entry.getKey(), entry.getValue()));
+    result.put("secrets", job.resolvedSecrets());
+    result.put("secretOrigins", job.secretOrigins());
+    return result;
   }
 }

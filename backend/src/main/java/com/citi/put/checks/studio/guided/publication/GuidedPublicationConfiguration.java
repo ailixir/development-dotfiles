@@ -2,8 +2,10 @@ package com.citi.put.checks.studio.guided.publication;
 
 import com.citi.put.checks.security.CoreServiceClient;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
-import com.citi.put.checks.studio.compile.validator.StudioRunnerProperties;
+import com.citi.put.checks.studio.dispatch.StudioRunnerProperties;
+import com.citi.put.checks.studio.dispatch.StudioRunnerTls;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
+import com.citi.put.checks.studio.guided.session.GuidedPublicPresentationProjector;
 import com.citi.put.checks.studio.guided.session.GuidedSessionAccess;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
@@ -32,19 +34,12 @@ public class GuidedPublicationConfiguration {
 
   @Bean
   GuidedPublicationEvidenceRepository publicationEvidence(
-      JdbcTemplate jdbc, GuidedContracts contracts) {
-    return new GuidedPublicationEvidenceRepository(jdbc, contracts);
-  }
-
-  @Bean
-  GuidedPublicationRepository publications(JdbcTemplate jdbc, GuidedContracts contracts) {
-    return new GuidedPublicationRepository(jdbc, contracts);
-  }
-
-  @Bean
-  ObservedReplayPins observedReplayPins(
-      GuidedContracts contracts, ObservedReplayProperties properties) {
-    return new ObservedReplayPins(contracts, properties);
+      JdbcTemplate jdbc,
+      GuidedContracts contracts,
+      org.springframework.beans.factory.ObjectProvider<ObservedRevisionVerifier> verifier) {
+    var evidence = new GuidedPublicationEvidenceRepository(jdbc, contracts);
+    evidence.installRevisionVerifier(id -> verifier.getObject().verify(id));
+    return evidence;
   }
 
   @Bean
@@ -59,9 +54,10 @@ public class GuidedPublicationConfiguration {
   ObservedValidationClient observedValidationClient(
       StudioRunnerProperties runner,
       GuidedContracts contracts,
-      GuidedPublicationProperties properties) {
+      GuidedPublicationProperties properties,
+      StudioRunnerTls tls) {
     HttpClient client =
-        HttpClient.newBuilder()
+        tls.configure(HttpClient.newBuilder())
             .followRedirects(HttpClient.Redirect.NEVER)
             .connectTimeout(
                 runner.connectTimeout() == null ? Duration.ofSeconds(2) : runner.connectTimeout())
@@ -106,16 +102,6 @@ public class GuidedPublicationConfiguration {
   }
 
   @Bean
-  ObservedRevisionVerifier observedRevisionVerifier(
-      JdbcTemplate jdbc,
-      GuidedContracts contracts,
-      GuidedPublicationRepository publications,
-      ObservedReplayPins pins,
-      ObservedReplayProperties properties) {
-    return new ObservedRevisionVerifier(jdbc, contracts, publications, pins, properties);
-  }
-
-  @Bean
   GuidedPublicationResultProjector publicationResultProjector(
       GuidedPublicationBaseRepository bases,
       GuidedPublicationRepository publications,
@@ -124,9 +110,18 @@ public class GuidedPublicationConfiguration {
       GuidedPublicationAuthorization authorization,
       GuidedContracts contracts,
       com.citi.put.checks.studio.readiness.ExecutionReadinessService readiness,
-      ObservedReplayProperties replay) {
+      ObservedReplayProperties replay,
+      GuidedPublicPresentationProjector presentation) {
     return new GuidedPublicationResultProjector(
-        bases, publications, sessions, guided, authorization, contracts, readiness, replay);
+        bases,
+        publications,
+        sessions,
+        guided,
+        authorization,
+        contracts,
+        readiness,
+        replay,
+        presentation);
   }
 
   @Bean

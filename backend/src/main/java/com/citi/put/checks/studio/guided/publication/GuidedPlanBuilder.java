@@ -55,7 +55,42 @@ public final class GuidedPlanBuilder {
         .putNull("providerReturnedModelVersion");
   }
 
+  private static final String VALIDATION_BASIS =
+      "v3/replay-validation#/definitions/ValidationBasis";
+
   public ObjectNode basis(
+      PublicationContracts.Base original,
+      PublicationContracts.CurrentSource current,
+      PublicationContracts.Evidence evidence,
+      JsonNode session,
+      JsonNode learningProvenance) {
+    ObjectNode result = derive(original, current, evidence, session, learningProvenance);
+    contracts.validate(VALIDATION_BASIS, result);
+    return result;
+  }
+
+  /**
+   * The same derivation as {@link #basis}, skipping only the repeated pure schema check. {@code
+   * validated} must be a document this process already passed through {@code basis()} or {@code
+   * plan()}; never wire input. Validity is a pure function of the document, so an equal document
+   * has the same verdict. Unequal or absent ⇒ validated here, with today's exact error
+   * (STUDIO-OBS-015 ruling E-2).
+   */
+  public ObjectNode basisMatching(
+      PublicationContracts.Base original,
+      PublicationContracts.CurrentSource current,
+      PublicationContracts.Evidence evidence,
+      JsonNode session,
+      JsonNode learningProvenance,
+      JsonNode validated) {
+    ObjectNode result = derive(original, current, evidence, session, learningProvenance);
+    if (validated == null || !result.equals(validated)) {
+      contracts.validate(VALIDATION_BASIS, result);
+    }
+    return result;
+  }
+
+  private ObjectNode derive(
       PublicationContracts.Base original,
       PublicationContracts.CurrentSource current,
       PublicationContracts.Evidence evidence,
@@ -94,6 +129,9 @@ public final class GuidedPlanBuilder {
     result.set("translationHash", raw.path("translationHash"));
     result.set("translationPlan", plan.deepCopy());
     result.set("sourceSelections", raw.path("sourceSelections").deepCopy());
+    result.set("materializationEvidence", raw.path("materializationEvidence").deepCopy());
+    result.set("incrementalEvidence", raw.path("incrementalEvidence").deepCopy());
+    result.set("snapshotEvidence", raw.path("snapshotEvidence").deepCopy());
     proposals.sourceSelections(session, plan, raw.path("sourceSelections"));
     ArrayNode steps = result.putArray("sourceSteps");
     ArrayNode orderedSource = contracts.object().putArray("source");
@@ -116,11 +154,45 @@ public final class GuidedPlanBuilder {
         "EVIDENCE_MISMATCH",
         422);
     JsonNode materialization = raw.path("materialization");
+    JsonNode materializationEvidence = raw.path("materializationEvidence");
+    ObjectNode latestContext =
+        GuidedMaterializationEvidence.versionContext(
+            contracts, materializationEvidence, materializationEvidence.path("versions").size());
+    require(
+        materialization.path("inputs").equals(latestContext.path("inputs")),
+        "EVIDENCE_MISMATCH",
+        422);
     result.set("authoredInputsHash", materialization.path("authoredInputsHash"));
     ArrayNode inputs = result.putArray("inputs"),
         configs = result.putArray("configurationReferences");
     var inputIds = new HashSet<String>();
+    var usedInputs = new HashSet<String>();
+    for (JsonNode ledger : raw.path("actions")) {
+      if (!ledger.path("state").asText().equals("SUCCEEDED")) {
+        continue;
+      }
+      JsonNode joined =
+          unique(
+              raw.path("admissionAssociations"),
+              "admissionId",
+              text(ledger.path("admission"), "admissionId"));
+      JsonNode proposal =
+          unique(raw.path("preparations"), "preparationId", text(joined, "preparationId"))
+              .path("proposal");
+      JsonNode operation = proposal.path("operation");
+      if (operation.has("destinationInputId")) {
+        usedInputs.add(text(operation, "destinationInputId"));
+      }
+      for (String slot : List.of("value", "expected")) {
+        if (operation.path(slot).has("sourceInputId")) {
+          usedInputs.add(text(operation.path(slot), "sourceInputId"));
+        }
+      }
+    }
     for (JsonNode input : materialization.path("inputs")) {
+      if (!usedInputs.contains(text(input, "inputId"))) {
+        continue;
+      }
       require(
           !input.has("value") && inputIds.add(text(input, "inputId")), "REFERENCE_MISMATCH", 422);
       ObjectNode safe = inputs.addObject();
@@ -129,7 +201,7 @@ public final class GuidedPlanBuilder {
       }
       safe.set("stepId", input.path("sourceStepId"));
       require(order.containsKey(text(safe, "stepId")), "REFERENCE_MISMATCH", 422);
-      contracts.validate("v2/source-reference", input.path("provenance"));
+      contracts.validate("v3/source-reference", input.path("provenance"));
       if (input.path("provenance").path("referenceKind").asText().equals("configuration")) {
         JsonNode mapped =
             unique(
@@ -151,9 +223,51 @@ public final class GuidedPlanBuilder {
     context.putObject("authoredInputs").set("inputs", materialization.path("inputs"));
     Map<String, JsonNode> observations = index(raw.path("observations"), "observationHash");
     Map<String, JsonNode> preparations = index(raw.path("preparations"), "preparationId");
-    Map<String, JsonNode> associations = index(raw.path("obligationAssociations"), "obligationId");
-    Map<String, JsonNode> admissions = index(raw.path("admissionAssociations"), "admissionId");
-    List<JsonNode> actions = list(raw.path("actions"));
+    Map<String, JsonNode> allAssociations =
+        index(raw.path("obligationAssociations"), "obligationId");
+    Map<String, JsonNode> allAdmissions = index(raw.path("admissionAssociations"), "admissionId");
+    List<JsonNode> actions = new ArrayList<>();
+    Map<String, JsonNode> associations = new LinkedHashMap<>(), admissions = new LinkedHashMap<>();
+    ArrayNode excluded =
+        result.path("incrementalEvidence").isObject()
+            ? (ArrayNode) result.path("incrementalEvidence").path("excludedAttempts")
+            : contracts.object().putArray("items");
+    require(excluded.isEmpty(), "EVIDENCE_MISMATCH", 422);
+    for (JsonNode ledger : raw.path("actions")) {
+      contracts.validate("v3/ledger", ledger);
+      String admissionId = text(ledger.path("admission"), "admissionId");
+      JsonNode joined = allAdmissions.get(admissionId);
+      require(joined != null, "EVIDENCE_MISMATCH", 422);
+      JsonNode association = allAssociations.get(text(joined, "obligationId"));
+      require(association != null, "EVIDENCE_MISMATCH", 422);
+      if (ledger.path("state").asText().equals("SUCCEEDED")) {
+        actions.add(ledger);
+        admissions.put(admissionId, joined);
+        associations.put(text(joined, "obligationId"), association);
+      } else {
+        require(
+            excluded.isEmpty() && result.path("incrementalEvidence").isObject(),
+            "EVIDENCE_MISMATCH",
+            422);
+        JsonNode receipt = result.path("incrementalEvidence").path("driftReceipt");
+        JsonNode preparation = preparations.get(text(joined, "preparationId"));
+        require(preparation != null, "EVIDENCE_MISMATCH", 422);
+        verifyExcluded(
+            session, result.path("incrementalEvidence"), ledger, association, preparation, receipt);
+        ObjectNode fact = excluded.addObject();
+        fact.putObject("action")
+            .put("obligationId", text(joined, "obligationId"))
+            .put("preparationId", text(joined, "preparationId"))
+            .set("ledger", ledger.deepCopy());
+        fact.set("preparation", preparation.deepCopy());
+        ObjectNode excludedAssociation =
+            fact.putObject("obligationAssociation")
+                .put("obligationId", text(joined, "obligationId"))
+                .put("admissionId", admissionId)
+                .put("proposalHash", text(joined, "proposalHash"));
+        excludedAssociation.set("coordinate", ledger.path("coordinate"));
+      }
+    }
     actions.sort(
         Comparator.comparingInt((JsonNode a) -> position(order, a.path("coordinate")))
             .thenComparingInt(a -> a.path("coordinate").path("ordinal").asInt()));
@@ -175,7 +289,7 @@ public final class GuidedPlanBuilder {
     var seenObligations = new HashSet<String>();
     Map<String, Integer> ordinal = new HashMap<>();
     for (JsonNode ledger : actions) {
-      contracts.validate("v2/ledger", ledger);
+      contracts.validate("v3/ledger", ledger);
       String admissionId = text(ledger.path("admission"), "admissionId");
       String stepId = text(ledger.path("coordinate"), "stepId");
       int expected = ordinal.getOrDefault(stepId, 0);
@@ -202,6 +316,26 @@ public final class GuidedPlanBuilder {
       JsonNode proposal = prepared.path("proposal"),
           proof = prepared.path("proof"),
           execution = prepared.path("executionEvidence");
+      ObjectNode actionMaterialization =
+          GuidedMaterializationEvidence.versionContext(
+              contracts,
+              result.path("materializationEvidence"),
+              ledger.path("contextRevision").asInt());
+      JsonNode header =
+          result
+              .path("materializationEvidence")
+              .path("versions")
+              .get(ledger.path("contextRevision").asInt() - 1);
+      require(
+          prepared.path("materializationRevision").isIntegralNumber()
+              && prepared.path("materializationRevision").asInt()
+                  >= header.path("birthMaterializationRevision").asInt()
+              && prepared.path("materializationRevision").asInt()
+                  <= materialization.path("materializationRevision").asInt(),
+          "EVIDENCE_MISMATCH",
+          422);
+      ObjectNode actionContext = contracts.object();
+      actionContext.putObject("authoredInputs").set("inputs", actionMaterialization.path("inputs"));
       String digest = GuidedContracts.hash(proposal);
       require(
           proposal.equals(association.path("proposal"))
@@ -218,7 +352,7 @@ public final class GuidedPlanBuilder {
               && proof.path("evidenceHash").equals(ledger.path("evidenceHash")),
           "EVIDENCE_MISMATCH",
           422);
-      contracts.validate("v2/bridge#/definitions/preparation", proof);
+      contracts.validate("v3/bridge#/definitions/preparation", proof);
       ObjectNode policyDecision = contracts.object();
       policyDecision.set("scopeHash", session.path("scopeHash"));
       policyDecision.set("preparation", proof);
@@ -237,16 +371,18 @@ public final class GuidedPlanBuilder {
               && proof.path("ownerFence").equals(ledger.path("ownerFence"))
               && proof.path("workerId").equals(session.path("owner").path("workerId"))
               && proof.path("scopeHash").equals(session.path("scopeHash"))
-              && proof.path("contextId").equals(materialization.path("contextId"))
-              && proof.path("contextRevision").equals(materialization.path("contextRevision"))
+              && proof.path("contextId").equals(actionMaterialization.path("contextId"))
+              && proof.path("contextRevision").equals(actionMaterialization.path("contextRevision"))
               && ledger.path("contextRevision").equals(proof.path("contextRevision"))
               && ledger
                   .path("authoredInputsHash")
-                  .equals(materialization.path("authoredInputsHash"))
-              && proof.path("authoredInputsHash").equals(materialization.path("authoredInputsHash"))
+                  .equals(actionMaterialization.path("authoredInputsHash"))
+              && proof
+                  .path("authoredInputsHash")
+                  .equals(actionMaterialization.path("authoredInputsHash"))
               && proposal
                   .path("authoredInputsHash")
-                  .equals(materialization.path("authoredInputsHash"))
+                  .equals(actionMaterialization.path("authoredInputsHash"))
               && ledger.path("coordinate").equals(proposal.path("coordinate"))
               && ledger.path("documentId").equals(proposal.path("target").path("documentId"))
               && ledger.path("generation").equals(proposal.path("generation")),
@@ -259,8 +395,13 @@ public final class GuidedPlanBuilder {
       }
       ObjectNode effective =
           effectiveObservedObligation(
-              session, plan, materialization, prepared, observations, obligation);
-      proposals.action(session, progress, plan, effective, proposal, context);
+              session, plan, actionMaterialization, prepared, observations, obligation);
+      if (proposal.path("target").path("kind").asText().equals("passwordControl")) {
+        JsonNode observed = observations.get(text(prepared, "observationHash"));
+        require(observed != null, "EVIDENCE_MISMATCH", 422);
+        progress.set("observation", observed.path("observation"));
+      }
+      proposals.action(session, progress, plan, effective, proposal, actionContext);
       if (prepared.has("observedChoice")) {
         String questionObservation =
             prepared
@@ -307,7 +448,7 @@ public final class GuidedPlanBuilder {
                 && execution.path("observationHash").asText().equals(hash),
             "EVIDENCE_MISMATCH",
             422);
-        contracts.validate("v2/observation", observed.path("observation"));
+        contracts.validate("v3/observation", observed.path("observation"));
         JsonNode target = proposal.path("target"), obs = observed.path("observation");
         for (String key : List.of("documentId", "generation")) {
           require(target.path(key).equals(obs.path(key)), "EVIDENCE_MISMATCH", 422);
@@ -317,7 +458,7 @@ public final class GuidedPlanBuilder {
                 && obs.path("origin").equals(execution.path("origin")),
             "EVIDENCE_MISMATCH",
             422);
-        if (!target.path("kind").asText().equals("page")) {
+        if (!java.util.Set.of("page", "passwordControl").contains(target.path("kind").asText())) {
           JsonNode node = unique(obs.path("nodes"), "nodeId", text(target, "nodeId"));
           require(
               list(node.path("locatorHints")).contains(target.path("locator")),
@@ -360,6 +501,37 @@ public final class GuidedPlanBuilder {
         observedFacts.add(observations.get(hash).deepCopy());
       }
     }
+    for (JsonNode request : result.path("incrementalEvidence").path("prefixRequests")) {
+      boolean found = false;
+      for (JsonNode observed : raw.path("observations")) {
+        JsonNode snapshot = observed.path("observation");
+        ObjectNode execution =
+            contracts
+                .object()
+                .put("kind", "observedDocument")
+                .put("sessionId", sessionId)
+                .put("contextId", request.path("contextId").asText());
+        for (String field : List.of("documentId", "generation", "origin")) {
+          execution.set(field, snapshot.path(field));
+        }
+        execution.set("observationHash", observed.path("observationHash"));
+        if (GuidedContracts.hash(execution).equals(request.path("evidenceHash").asText())) {
+          found = true;
+          if (seenObservations.add(observed.path("observationHash").asText())) {
+            observedFacts.add(observed.deepCopy());
+          }
+        }
+      }
+      if (!found) {
+        require(
+            request
+                .path("evidenceHash")
+                .asText()
+                .equals(GuidedContracts.hash(raw.path("bootstrap").path("initialEvidence"))),
+            "EVIDENCE_MISMATCH",
+            422);
+      }
+    }
     require(ordinal.keySet().equals(order.keySet()), "EVIDENCE_MISMATCH", 422);
     require(seenObservations.size() == observations.size(), "EVIDENCE_MISMATCH", 422);
     require(
@@ -373,9 +545,95 @@ public final class GuidedPlanBuilder {
     for (String key : List.of("allocations", "producers", "consumerEdges")) {
       result.set(key, raw.path(key).deepCopy());
     }
+    // ARCH015-02: the publication summary commits complete current cumulative raw intent.
+    // bootstrap() independently checked the original issued context/ACK; those captured bytes
+    // remain unchanged when suffix allocation later extends metadata.
+    ((ObjectNode) result.path("bootstrap"))
+        .put("allocationHash", GuidedContracts.hash(result.path("allocations")));
     graph(result, order);
     PublicationContracts.bounded(result, PublicationContracts.MAX_BASIS_BYTES);
     return result;
+  }
+
+  private void verifyExcluded(
+      JsonNode session,
+      JsonNode incremental,
+      JsonNode ledger,
+      JsonNode association,
+      JsonNode prepared,
+      JsonNode receipt) {
+    contracts.validate("v3/bridge#/definitions/DriftReceipt", receipt);
+    contracts.validate("v3/replay-validation#/definitions/PreparationFact", prepared);
+    ObjectNode preimage = receipt.deepCopy();
+    preimage.remove("receiptHash");
+    require(
+        receipt.path("phase").asText().equals("ADMITTED_PRE_INVOCATION")
+            && !receipt.path("nativeInvocationStarted").asBoolean(true)
+            && receipt.path("attemptOrdinal").asInt(-1) == 0
+            && GuidedContracts.hash(preimage).equals(receipt.path("receiptHash").asText())
+            && receipt
+                .path("receiptHash")
+                .equals(incremental.path("switch").path("driftReceiptHash"))
+            && ledger.path("state").asText().equals("FAILED")
+            && ledger.path("outcomeCode").asText().equals("TARGET_CHANGED")
+            && ledger.path("attemptOrdinal").asInt(-1) == 0
+            && ledger.path("dispatchCount").asInt() == 1
+            && receipt.path("admissionId").equals(ledger.path("admission").path("admissionId"))
+            && receipt.path("preparationId").equals(ledger.path("preparationId"))
+            && receipt.path("preparationId").equals(prepared.path("preparationId"))
+            && receipt.path("coordinate").equals(ledger.path("coordinate"))
+            && receipt.path("operationHash").equals(ledger.path("operationHash")),
+        "EVIDENCE_MISMATCH",
+        422);
+    JsonNode request = null;
+    for (JsonNode candidate : incremental.path("prefixRequests")) {
+      if (GuidedContracts.hash(candidate).equals(receipt.path("requestDigest").asText())) {
+        require(request == null, "EVIDENCE_MISMATCH", 422);
+        request = candidate;
+      }
+    }
+    require(request != null, "EVIDENCE_MISMATCH", 422);
+    for (String field :
+        List.of(
+            "sessionId",
+            "workerId",
+            "ownerFence",
+            "scopeHash",
+            "contextId",
+            "contextRevision",
+            "authoredInputsHash",
+            "sourceRevision",
+            "configurationRevision",
+            "prefixProgramHash",
+            "coordinate",
+            "evidenceHash")) {
+      require(receipt.path(field).equals(request.path(field)), "EVIDENCE_MISMATCH", 422);
+    }
+    for (String field :
+        List.of(
+            "sessionId",
+            "scopeHash",
+            "contextRevision",
+            "authoredInputsHash",
+            "evidenceHash",
+            "ownerFence")) {
+      require(
+          receipt.path(field).equals(ledger.path(field))
+              && receipt.path(field).equals(prepared.path("proof").path(field)),
+          "EVIDENCE_MISMATCH",
+          422);
+    }
+    require(
+        receipt.path("workerId").equals(session.path("owner").path("workerId"))
+            && receipt.path("ownerFence").equals(session.path("owner").path("fence"))
+            && prepared.path("proposal").equals(association.path("proposal"))
+            && GuidedContracts.hash(prepared.path("proposal"))
+                .equals(ledger.path("requestDigest").asText())
+            && ledger.path("requestDigest").equals(prepared.path("proof").path("requestDigest"))
+            && ledger.path("requestDigest").equals(association.path("proposalDigest"))
+            && ledger.path("admission").path("admissionId").equals(association.path("admissionId")),
+        "EVIDENCE_MISMATCH",
+        422);
   }
 
   /**
@@ -394,7 +652,7 @@ public final class GuidedPlanBuilder {
     }
     JsonNode witness = prepared.path("observedChoice");
     PublicationContracts.bounded(witness, 262144);
-    contracts.validate("v2/replay-validation#/definitions/ObservedChoiceWitness1", witness);
+    contracts.validate("v3/replay-validation#/definitions/ObservedChoiceWitness1", witness);
     JsonNode receipt = witness.path("receipt"),
         identity = witness.path("context"),
         capture = identity.path("questionCapture"),
@@ -472,7 +730,7 @@ public final class GuidedPlanBuilder {
             && attempt.path("responseKind").equals(attempt.path("kind"))
             && attempt.path("responseRequestId").equals(attempt.path("requestId"))
             && attempt.path("responseStatus").asText().equals("CLARIFICATION")
-            && attempt.path("responseSchemaVersion").asInt() == 2
+            && attempt.path("responseSchemaVersion").asInt() == 3
             && attempt.path("scope").equals(session.path("scope"))
             && attempt.path("scopeHash").equals(session.path("scopeHash"))
             && attempt.path("owner").path("workerId").equals(capture.path("workerId"))
@@ -526,7 +784,7 @@ public final class GuidedPlanBuilder {
     JsonNode oldEntry = observations.get(capture.path("observationHash").asText());
     require(oldEntry != null, "EVIDENCE_MISMATCH", 422);
     JsonNode oldObservation = oldEntry.path("observation");
-    contracts.validate("v2/observation", oldObservation);
+    contracts.validate("v3/observation", oldObservation);
     require(
         GuidedContracts.hash(oldObservation).equals(capture.path("observationHash").asText())
             && oldObservation.path("scopeHash").equals(session.path("scopeHash"))
@@ -632,7 +890,7 @@ public final class GuidedPlanBuilder {
     for (String field : receiptFields) {
       require(receipt.hasNonNull(field), "EVIDENCE_MISMATCH", 422);
     }
-    contracts.validate("v2/execution-evidence", evidence);
+    contracts.validate("v3/execution-evidence", evidence);
     require(
         receipt.path("contextId").equals(context.path("contextId"))
             && receipt.path("contextRevision").equals(context.path("contextRevision"))
@@ -678,6 +936,16 @@ public final class GuidedPlanBuilder {
   }
 
   private void graph(ObjectNode basis, Map<String, Integer> order) {
+    GuidedEffectiveGraph.Projection projection = new GuidedEffectiveGraph(contracts).project(basis);
+    ObjectNode effective = basis.deepCopy();
+    effective.set("allocations", projection.allocations());
+    effective.set("consumerEdges", projection.consumerEdges());
+    graphExact(effective, order);
+    basis.set("bindings", effective.path("bindings"));
+    basis.set("transfers", effective.path("transfers"));
+  }
+
+  private void graphExact(ObjectNode basis, Map<String, Integer> order) {
     Map<String, JsonNode> allocations = index(basis.path("allocations"), "bindingId");
     Map<String, JsonNode> producers = index(basis.path("producers"), "bindingId");
     require(
@@ -692,7 +960,7 @@ public final class GuidedPlanBuilder {
             .thenComparingInt(p -> p.path("coordinate").path("ordinal").asInt())
             .thenComparing(p -> text(p, "bindingId")));
     for (JsonNode producer : ordered) {
-      contracts.validate("v2/producer", producer);
+      contracts.validate("v3/producer", producer);
       String id = text(producer, "bindingId");
       JsonNode allocation = allocations.get(id);
       JsonNode need = unique(basis.path("translationPlan").path("needs"), "bindingId", id);
@@ -709,7 +977,7 @@ public final class GuidedPlanBuilder {
           422);
       JsonNode producerAction = actionByAdmission(basis, text(producer, "producerAdmissionId"));
       JsonNode availability = producer.path("availability");
-      contracts.validate("v2/availability", availability);
+      contracts.validate("v3/availability", availability);
       JsonNode producerPreparation =
           unique(
               basis.path("preparations"), "preparationId", text(producerAction, "preparationId"));
@@ -751,7 +1019,7 @@ public final class GuidedPlanBuilder {
       ObjectNode binding =
           bindings
               .addObject()
-              .put("schemaVersion", 2)
+              .put("schemaVersion", 3)
               .put("bindingId", id)
               .put("valueType", "string")
               .put("transferPolicy", "sameOrigin")
@@ -775,7 +1043,7 @@ public final class GuidedPlanBuilder {
                       .thenComparing(e -> text(e, "argumentSlot")))
               .toList();
       for (JsonNode edge : edges) {
-        contracts.validate("v2/consumer-edge", edge);
+        contracts.validate("v3/consumer-edge", edge);
         require(
             edge.path("producerAdmissionId").equals(producer.path("producerAdmissionId"))
                 && edge.path("destinationOrigin").equals(producer.path("origin")),
@@ -819,7 +1087,7 @@ public final class GuidedPlanBuilder {
             "REFERENCE_MISMATCH",
             422);
       }
-      contracts.validate("v2/binding", binding);
+      contracts.validate("v3/binding", binding);
     }
     require(
         transfers.size() == basis.path("consumerEdges").size() && transfers.size() <= 200,
@@ -828,10 +1096,33 @@ public final class GuidedPlanBuilder {
   }
 
   public ObjectNode plan(JsonNode basis, JsonNode versions) {
+    PublicationContracts.bounded(basis, PublicationContracts.MAX_BASIS_BYTES);
+    contracts.validate("v3/replay-validation#/definitions/ValidationBasis", basis);
+    new GuidedBasisValidator(contracts).validate(basis);
+    var order = new LinkedHashMap<String, Integer>();
+    for (JsonNode step : basis.path("sourceSteps")) {
+      require(
+          step.path("ordinal").asInt(-1) == order.size()
+              && order.putIfAbsent(text(step, "stepId"), order.size()) == null,
+          "EVIDENCE_MISMATCH",
+          422);
+    }
+    require(
+        GuidedContracts.hash(basis.path("allocations"))
+            .equals(basis.path("bootstrap").path("allocationHash").asText()),
+        "EVIDENCE_MISMATCH",
+        422);
+    ObjectNode derived = basis.deepCopy();
+    graph(derived, order);
+    require(
+        derived.path("bindings").equals(basis.path("bindings"))
+            && derived.path("transfers").equals(basis.path("transfers")),
+        "EVIDENCE_MISMATCH",
+        422);
     ObjectNode plan =
         contracts
             .object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put(
                 "planId",
                 "plan-"
@@ -861,7 +1152,8 @@ public final class GuidedPlanBuilder {
       action.set("operationHash", ledger.path("operationHash"));
     }
     plan.set("bindings", basis.path("bindings"));
-    contracts.validate("v2/learned-plan", plan);
+    new GuidedSnapshotDeriver(contracts).apply(basis, plan);
+    contracts.validate("v3/learned-plan", plan);
     return plan;
   }
 

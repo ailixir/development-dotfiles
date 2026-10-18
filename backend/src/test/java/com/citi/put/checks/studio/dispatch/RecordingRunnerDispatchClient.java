@@ -24,9 +24,18 @@ public class RecordingRunnerDispatchClient implements RunnerDispatchClient {
       new AtomicReference<>(DispatchOutcome.accepted());
   private volatile CountDownLatch blockUntil;
   private volatile CountDownLatch sendStarted;
+  private volatile java.util.function.Consumer<RunJob> onSend =
+      job -> {
+        // No observer effect until a test installs its callback.
+      };
+
+  public void onSend(java.util.function.Consumer<RunJob> observer) {
+    this.onSend = observer;
+  }
 
   @Override
   public DispatchOutcome send(RunJob job) {
+    onSend.accept(job);
     sent.add(job);
     if (sendStarted != null) {
       sendStarted.countDown();
@@ -84,6 +93,10 @@ public class RecordingRunnerDispatchClient implements RunnerDispatchClient {
 
   public void reset() {
     sent.clear();
+    onSend =
+        job -> {
+          // No observer effect until a test installs its callback.
+        };
     cancelled.clear();
     unblock();
     nextOutcome.set(DispatchOutcome.accepted());

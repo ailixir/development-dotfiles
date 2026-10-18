@@ -3,6 +3,7 @@ package com.citi.put.checks.studio.authoring;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.citi.put.checks.studio.guided.publication.GuidedPublicationMigrationTest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -13,10 +14,15 @@ import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-/** V21 migration coverage against a real V17 database containing legacy rows and history. */
+/**
+ * Authoring-capture migration coverage (the former V21, now part of the STUDIO-OBS-012A /
+ * ADR-SC-005 D-B {@code V12__tests_revisions}) against a real, populated, untouched core V11
+ * database, upgraded to the current head.
+ */
 @Testcontainers(disabledWithoutDocker = true)
 class StudioAuthoringMigrationIT {
 
@@ -31,7 +37,7 @@ class StudioAuthoringMigrationIT {
   @BeforeAll
   static void migrate() throws SQLException {
     POSTGRES.start();
-    flyway("17").migrate();
+    flyway("11").migrate();
     testId = UUID.randomUUID();
     execute(
         "INSERT INTO users (id,sso_id,name,email,created_at,is_active) VALUES"
@@ -44,10 +50,10 @@ class StudioAuthoringMigrationIT {
         "INSERT INTO ui_tests (id,name,csi_id,environment,browser,steps,variables,created_by,"
             + "created_at,updated_at) VALUES ('"
             + testId
-            + "','Legacy','61818','Production','chromium',"
+            + "','Legacy','61818','Production','chrome',"
             + "'[\"legacy\"]'::jsonb,'[]'::jsonb,"
             + "'legacy-v18@citi.com',NOW(),NOW())");
-    flyway("21").migrate();
+    flyway("latest").migrate();
   }
 
   @AfterAll
@@ -58,16 +64,20 @@ class StudioAuthoringMigrationIT {
   @Test
   void legacyRowsRemainLegacyAndNoHistoryIsFabricated() throws SQLException {
     assertThat(scalar("SELECT authoring::text FROM ui_tests WHERE id='" + testId + "'")).isNull();
-    assertThat(scalarInt("SELECT count(*) FROM ui_test_revisions")).isZero();
+    assertThat(scalarInt("SELECT count(*) FROM ui_test_revisions WHERE test_id='" + testId + "'"))
+        .isZero();
   }
 
   @Test
-  void candidateInsertCapturesTheExactV2InputsAndTheyAreWriteOnce() throws SQLException {
+  void publicationCapturesTheExactV2InputsAndTheyAreWriteOnce() throws SQLException {
     String authoring =
         "{\"authoringSchemaVersion\":2,\"globalContext\":{\"entries\":[],"
             + "\"evidenceReferences\":[]},\"steps\":[{\"id\":\""
             + UUID.randomUUID()
-            + "\",\"text\":\"雪\\n  \\\"q\\\"\",\"context\":{\"entries\":[],"
+            // The observed fixture needs an authored URL in its first step; the exact Unicode,
+            // newline and quote bytes under test follow it.
+            + "\",\"text\":\"Open https://orders.example.test/start 雪\\n  \\\"q\\\"\","
+            + "\"context\":{\"entries\":[],"
             + "\"evidenceReferences\":[]}}]}";
     execute(
         "UPDATE ui_tests SET authoring='"
@@ -75,12 +85,26 @@ class StudioAuthoringMigrationIT {
             + "'::jsonb, authoring_revision_inputs='{}'::jsonb WHERE id='"
             + testId
             + "'");
-    UUID revisionId = UUID.randomUUID();
-    execute(insertRevision(revisionId));
+    // The only revision writer is the observed publication (production writers, every guard).
+    var source =
+        new DriverManagerDataSource(
+            POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword());
+    var prepared =
+        GuidedPublicationMigrationTest.prepareObserved(
+            source, "authoring-capture", testId, "61818", "Production", "legacy-v18@citi.com");
+    UUID revisionId = GuidedPublicationMigrationTest.publishObserved(source, prepared).revisionId();
 
     assertThat(
             scalar("SELECT authoring::text FROM ui_test_revisions WHERE id='" + revisionId + "'"))
         .isEqualTo(scalar("SELECT authoring::text FROM ui_tests WHERE id='" + testId + "'"));
+    assertThat(
+            scalar(
+                "SELECT authoring_revision_inputs::text FROM ui_test_revisions WHERE id='"
+                    + revisionId
+                    + "'"))
+        .isEqualTo(
+            scalar(
+                "SELECT authoring_revision_inputs::text FROM ui_tests WHERE id='" + testId + "'"));
     assertThatThrownBy(
             () ->
                 execute(
@@ -112,17 +136,6 @@ class StudioAuthoringMigrationIT {
         .locations("classpath:db/migration")
         .target(target)
         .load();
-  }
-
-  private static String insertRevision(UUID revisionId) {
-    return "INSERT INTO ui_test_revisions (id,test_id,csi_id,source_revision,"
-        + "configuration_revision,source,source_hash,artifact,artifact_hash,"
-        + "artifact_schema_version,configuration,\"references\",provenance,created_by) VALUES ('"
-        + revisionId
-        + "','"
-        + testId
-        + "','61818',1,1,'[]'::jsonb,'source','{}'::jsonb,'artifact',1,'{}'::jsonb,"
-        + "'{}'::jsonb,'{}'::jsonb,'legacy-v18@citi.com')";
   }
 
   private static void execute(String sql) throws SQLException {

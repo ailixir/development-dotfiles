@@ -88,10 +88,14 @@ are invented by this persistence story.
 
 ## OBS-004 common observed-2 bridge
 
-The additive v2 implementation uses the schemas in `contracts/v2/` and the separate
-`openapi-v2.yaml`. Public start selects schemaVersion2 plus the exact observed-2 tuple. Internal
-v2 callbacks use the same verified mTLS/issuer identity filter with owning-worker subject/fence
-checks. The v1 files and one-shot runner remain independent. OBS-006 implements exact exercised-plan
+Since OBS-012A there is one contract generation, `contracts/v3/`, and one public document,
+`docs/specs/studio/openapi.yaml`: the seven public routes are served under
+`/api/v1/studio/guided-sessions` and every body is `schemaVersion` 3 with `versions` `{contract:3}`.
+The internal bridge has one mount, `/internal/v2/studio/guided-sessions/{id}`, behind the verified
+mTLS/issuer identity filter with owning-worker subject/fence checks. There is no v1/v2 contract,
+route, `versions` tuple or service branch; bare schema names resolve to `contracts/v3`. Guided
+routes keep their own durable digest-checked idempotency and are excluded from the generic
+`IdempotencyFilter` response cache. OBS-006 implements exact exercised-plan
 lowering and scoped atomic publication through fresh BFF/Core authorization, with matching publication
 and replay flags and trusted profile/schema/build catalogs. Later explicit Runs use the frozen plan
 through the ordinary recorded pipeline without model calls. The production account-provider port
@@ -175,9 +179,9 @@ A legitimate unrelated observation supersedes an unfinished intent without rolli
 The controlled two-step verifier in the joined test only recognizes its fixed navigation/read
 receipts. It does not interpret English or generate questions. Production semantic completeness, the observed-v2 question schema/producer and source-to-model
 policy remain OBS-005 ports. A separate explicitly trusted transaction fixture installs a question;
-the existing v2 answer DTO then performs the real answer transition before authenticated refresh.
-Historical selection identities remain historical and require fresh target correspondence. Legacy
-questions/answers cannot cross into a v2 session; supported v1 behavior remains unchanged.
+the existing v3 answer DTO then performs the real answer transition before authenticated refresh.
+Historical selection identities remain historical and require fresh target correspondence. A
+non-v3 question or answer is a closed-contract refusal (`INVALID_CONTRACT`).
 
 ### Raw guided wire boundary after SEC-002 / REL-002
 
@@ -188,8 +192,8 @@ segments use the same strict parser. JWT headers/claims are closed and all numer
 canonical safe nonnegative integers under the existing short lifetime. Error responses remain
 fixed data-free codes. Persistence text parsing also rejects duplicates/trailing content.
 
-All v2 timestamp schemas enforce the explicit uppercase UTC Gregorian profile with optional1–9
-fractional digits and absolute string end. V1 schema bytes/format semantics are preserved. Shared
+All v3 timestamp schemas enforce the explicit uppercase UTC Gregorian profile with optional1–9
+fractional digits and absolute string end. Shared
 vectors cover Java, Node and Ajv, including malformed raw HTTPS bodies/replies and invalid authority
 timestamps. Undefined schema pointers fail closed instead of compiling a permissive missing schema.
 
@@ -198,9 +202,9 @@ timestamps. Undefined schema pointers fail closed instead of compiling a permiss
 
 `GuidedProductionSessionAccess` now implements current source/revision checks and `StepVerifier` on the same access object. It locks current `ui_tests` through `StudioRepository.findByIdForUpdate`; immutable source/configuration manifests, planning revisions, one-send attempts, obligation associations and question meanings live in additive V32. OBS-006 joins successful original evidence into a deterministic replay artifact and immutable publication receipt under the original scoped Run and fresh Core authority; subsequent explicit Runs obtain fresh grants and recapture runtime values without either model gateway. `GuidedProductionSessionAccess.AccountAccess` remains the fail-closed OBS-007 account-provider handoff, so the implemented publication/replay mechanism does not imply production account connectivity or first guided-run recording.
 
-Enable the production composition with `studio.guided-authoring.translation.enabled=true`, approved `allow-authored-nonsecret=true`, explicit `applications`/`environments`, existing runner origin/controller-token configuration and HTTPS `translation.controller-origin`. The actual compile provider settings select the concrete guided gateway; there is no recorded-fixture production fallback. `translation.verify-steps` defaults false; enabling it adds a budgeted semantic opinion without bypassing deterministic completion. Default input/output ceilings remain unchanged. Missing enabled dependencies fail configuration rather than installing an unavailable translation implementation.
+Enable the production composition with `studio.guided-authoring.translation.enabled=true`, approved `allow-authored-nonsecret=true`, explicit `applications`/`environments`, existing runner origin/controller-token configuration and HTTPS `translation.controller-origin`. The `studio.gateway` provider settings select the concrete guided gateway; there is no recorded-fixture production fallback. `translation.verify-steps` defaults false; enabling it adds a budgeted semantic opinion without bypassing deterministic completion. Default input/output ceilings remain unchanged. Missing enabled dependencies fail configuration rather than installing an unavailable translation implementation.
 
-Planning routes under `/internal/v2/studio/guided-sessions/{id}` require the existing controller JWT/mTLS, fence and idempotency headers, strict raw JSON parsing and immutable expected revisions. `/plans` prepares source/materialization, `/proposals` advances remaining obligations, `/dependency-admissions` refines cumulative needs without replay, and `/planning-context` exposes only the safe model projection. The coordinator polls durable continuation and uses its mounted controller identity; workers still acquire/renew with their own credentials. Source and observed questions share the existing public v2 answer DTO and persist semantic choice atomically; resume uses real bootstrap or `/observe` as appropriate.
+Planning routes under `/internal/v2/studio/guided-sessions/{id}` require the existing controller JWT/mTLS, fence and idempotency headers, strict raw JSON parsing and immutable expected revisions. `/plans` prepares source/materialization, `/proposals` advances remaining obligations, `/dependency-admissions` refines cumulative needs without replay, and `/planning-context` exposes only the safe model projection. The coordinator polls durable continuation and uses its mounted controller identity; workers still acquire/renew with their own credentials. Source and observed questions share the existing public v3 answer DTO and persist semantic choice atomically; resume uses real bootstrap or `/observe` as appropriate.
 
 The model proposes only a remaining obligation plus typed target/operation. Original attempt identities are checked before the backend builds full OBS-004 authority; late/stale answers cannot be restamped. Failures retain reservations, and current-authority late-usage reconciliation can stop an over-budget run without reviving terminal state. Deliberately authored nonsecret checklist literals may reach the model under INPUT-POLICY-01 A; resolved saved values, credentials and page captures remain excluded from prompts, repairs and diagnostics. No arbitrary-English correctness or universal secret-detection guarantee is implied.
 

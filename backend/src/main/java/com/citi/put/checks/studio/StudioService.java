@@ -5,12 +5,7 @@ import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
-import com.citi.put.checks.studio.authoring.LegacyAuthoringPersistenceAdapter;
-import com.citi.put.checks.studio.compile.CompilePipeline;
-import com.citi.put.checks.studio.compile.CompileRequest;
-import com.citi.put.checks.studio.compile.CompileState;
-import com.citi.put.checks.studio.compile.CompileStateService;
-import com.citi.put.checks.studio.compile.ConfigurationChangeClassifier;
+import com.citi.put.checks.studio.authoring.ConfigurationChangeClassifier;
 import com.citi.put.checks.studio.dispatch.StudioAcceptanceService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.AuthoringEvidenceReference;
@@ -18,20 +13,19 @@ import com.citi.put.checks.studio.dto.AuthoringRevisionInputs;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.dto.AuthoringV2Response;
-import com.citi.put.checks.studio.dto.CompileAcceptedDto;
-import com.citi.put.checks.studio.dto.ConfirmCompileRequestDto;
+import com.citi.put.checks.studio.dto.CanonicalStudioCodec;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.ExecutionStatus;
-import com.citi.put.checks.studio.dto.LegacyAuthoringRequest;
-import com.citi.put.checks.studio.dto.LegacyStudioAdapter;
 import com.citi.put.checks.studio.dto.StepAuthoringContext;
-import com.citi.put.checks.studio.dto.StudioAuthoring;
 import com.citi.put.checks.studio.dto.StudioVariable;
 import com.citi.put.checks.studio.dto.UITestDto;
 import com.citi.put.checks.studio.dto.UITestRequest;
 import com.citi.put.checks.studio.entity.UITest;
 import com.citi.put.checks.studio.entity.UITestExecution;
 import com.citi.put.checks.studio.entity.UITestRevision;
+import com.citi.put.checks.studio.readiness.ExecutionReadinessService;
+import com.citi.put.checks.studio.readiness.ReadinessVerdict;
+import com.citi.put.checks.studio.readiness.StudioReadiness;
 import com.citi.put.checks.users.UserProvisioningService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,7 +53,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class StudioService {
 
-  private static final ObjectMapper AUTHORING_MAPPER = new ObjectMapper().findAndRegisterModules();
+  private static final ObjectMapper AUTHORING_MAPPER =
+      new ObjectMapper()
+          .findAndRegisterModules()
+          .disable(com.fasterxml.jackson.databind.SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
   private final StudioRepository studioRepository;
   private final UITestExecutionRepository executionRepository;
@@ -69,13 +66,12 @@ public class StudioService {
   private final CsiOwnershipEvaluator csiOwnershipEvaluator;
   private final ExecutionSnapshotMapper snapshotMapper;
   private final StudioAcceptanceService acceptanceService;
-  private final CompilePipeline compilePipeline;
-  private final CompileStateService compileStateService;
+  private final ExecutionReadinessService readiness;
   private final UserProvisioningService userProvisioningService;
   private final StudioDispatchLedgerStatements ledgerStatements;
 
   @org.springframework.beans.factory.annotation.Autowired(required = false)
-  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorizer observedReplay;
 
   /**
    * Used for one thing: to refresh the draft the authorized save has just locked (ADR-002 §27.2,
@@ -108,8 +104,7 @@ public class StudioService {
       CsiOwnershipEvaluator csiOwnershipEvaluator,
       ExecutionSnapshotMapper snapshotMapper,
       StudioAcceptanceService acceptanceService,
-      CompilePipeline compilePipeline,
-      CompileStateService compileStateService,
+      ExecutionReadinessService readiness,
       UserProvisioningService userProvisioningService,
       StudioDispatchLedgerStatements ledgerStatements) {
     this.studioRepository = studioRepository;
@@ -120,8 +115,7 @@ public class StudioService {
     this.csiOwnershipEvaluator = csiOwnershipEvaluator;
     this.snapshotMapper = snapshotMapper;
     this.acceptanceService = acceptanceService;
-    this.compilePipeline = compilePipeline;
-    this.compileStateService = compileStateService;
+    this.readiness = readiness;
     this.userProvisioningService = userProvisioningService;
     this.ledgerStatements = ledgerStatements;
   }
@@ -149,20 +143,17 @@ public class StudioService {
   }
 
   /**
-   * Owners and explicitly authorized administrators may create, save, delete, compile and confirm
-   * (§9.1; ADR-002 §27.2). Architecture §9.1 draws no line between those five, so this is the one
-   * place {@code canWrite} is asked for any of them.
+   * Owners and explicitly authorized administrators may create, save and delete (§9.1; ADR-002
+   * §27.2). Architecture §9.1 draws no line between those, so this is the one place {@code
+   * canWrite} is asked for any of them.
    *
    * <p>A {@code null} CSI is refused rather than treated as unrestricted. That is the answer for a
    * quarantined row whose {@code csi_id} is {@code NULL} — the other half of V12's CHECK — because
    * no principal can be authorized against a CSI that is not there. ADR-002 §14.4 states the
    * consequence: such a row is recoverable by administrator action, not by a status code.
    *
-   * <p>Which CSI is passed in is the caller's decision, and it differs on purpose. Compile and
-   * confirm read it <em>through</em> a withheld draft ({@link
-   * StudioRepository#findCsiIdIncludingWithheld}), because they must answer {@code 409} for one.
-   * Save and delete read it through the visibility restriction, because a withheld draft is hidden
-   * from them, not in conflict (ADR-002 §14.5, §27.2).
+   * <p>Save and delete read the CSI through the visibility restriction, because a withheld draft is
+   * hidden from them, not in conflict (ADR-002 §14.5, §27.2).
    */
   private void requireWrite(Authentication auth, String csiId) {
     if (csiId == null || !csiOwnershipEvaluator.canWrite(auth, csiId)) {
@@ -175,11 +166,8 @@ public class StudioService {
    * filter was supplied (AC-14, Architecture §9.1). The scope is part of the query, so it is
    * applied before paging and page counts never describe rows the caller cannot see.
    *
-   * <p>The one field this projection omits is {@code compileDiagnostics}, which is always {@code
-   * null} here and is read from {@code GET /tests/{id}} (ADR-002 §16.5). The document is capped per
-   * draft, so a page of drafts in {@code NEEDS_REVISION} would be a multi-megabyte response
-   * carrying per-step reasons no list renders. {@code compileStatus} and the bounded {@code
-   * compileError} stay, so nothing a caller needs in order to know that reasons exist is hidden.
+   * <p>{@code readiness} is derived per draft from its learned revision and its guided sessions, so
+   * it is read from {@code GET /tests/{id}} and is {@code null} on this projection.
    *
    * <p>Search, filters and sort (Story 10.46) are validated by {@link StudioListQuery} and applied
    * in the same statement as the scope; the draft id always breaks ties, so equal keys page
@@ -194,7 +182,10 @@ public class StudioService {
     }
     return studioRepository
         .findPage(query, readable.orElse(null), pageable)
-        .map(UITestDto::forList);
+        .map(
+            test ->
+                UITestDto.forList(
+                    test, readiness == null ? null : readiness.readiness(test.getId())));
   }
 
   /**
@@ -205,36 +196,15 @@ public class StudioService {
    * (ADR-002 §27.2). The registered-CSI check runs first: its {@code 400} is the same whoever asks,
    * so it discloses nothing, and the write check follows before any side effect.
    */
-  @Transactional
-  public UITestDto createTest(UITestRequest request, Authentication auth) {
-    return createTest(request, null, auth);
-  }
-
-  /** Creates a draft with its v2 authoring identity present before any compile can be enqueued. */
+  /** Creates a draft with its v2 authoring identity present from the first write. */
   @Transactional
   public UITestDto createTest(
       UITestRequest request, AuthoringV2Request authoring, Authentication auth) {
-    return createTest(request, authoring, auth, true, StudioService::noInitializer);
-  }
-
-  /** Saves versioned drafts without implicitly issuing a model call. */
-  @Transactional
-  public UITestDto createTest(UITestRequest request, Authentication auth, boolean enqueueCompile) {
-    return createTest(request, null, auth, enqueueCompile, StudioService::noInitializer);
+    return createTest(request, authoring, auth, StudioService::noInitializer);
   }
 
   /** No-op initializer for drafts without versioned metadata. */
   private static void noInitializer(UITest test) {}
-
-  /** Initializes versioned metadata before the entity's first INSERT. */
-  @Transactional
-  public UITestDto createTest(
-      UITestRequest request,
-      Authentication auth,
-      boolean enqueueCompile,
-      java.util.function.Consumer<UITest> initialize) {
-    return createTest(request, null, auth, enqueueCompile, initialize);
-  }
 
   /**
    * The one implementation behind every {@code createTest} overload above. The authorization order
@@ -244,7 +214,6 @@ public class StudioService {
       UITestRequest request,
       AuthoringV2Request authoring,
       Authentication auth,
-      boolean enqueueCompile,
       java.util.function.Consumer<UITest> initialize) {
     UserIdentity identity = extractIdentity(auth);
     if (request.csiId() == null || request.csiId().isBlank()) {
@@ -252,9 +221,7 @@ public class StudioService {
     }
     requireRegisteredCsi(request.csiId());
     requireWrite(auth, request.csiId());
-    if (authoring != null) {
-      validateAuthoring(authoring, request.csiId());
-    }
+    validateAuthoring(authoring, request.csiId());
     // The draft records its author, and `created_by` REFERENCES users(email) (V1). The mirror row
     // that satisfies it is written by story 1.6's asynchronous listener, which is racing this very
     // request: an author whose mirror has not landed yet is a foreign key violation and a 500 on
@@ -266,9 +233,8 @@ public class StudioService {
             request.name(),
             request.description(),
             request.csiId(),
-            LegacyStudioAdapter.stepsToJson(
-                authoring == null ? request.steps() : stepTexts(authoring)),
-            LegacyStudioAdapter.variablesToJson(request.variables()),
+            CanonicalStudioCodec.stepsToJson(stepTexts(authoring)),
+            CanonicalStudioCodec.variablesToJson(request.variables()),
             request.configuration().browser(),
             request.configuration().viewport().width(),
             request.configuration().viewport().height(),
@@ -276,16 +242,10 @@ public class StudioService {
             identity.email());
     test.setTimeoutSeconds(request.configuration().timeoutSeconds());
     test.setWaitStrategy(request.configuration().waitStrategy());
-    if (authoring != null) {
-      storeAuthoring(test, authoring);
-    }
+    storeAuthoring(test, authoring);
     initialize.accept(test);
     test = studioRepository.save(test);
-    // Saving does not compile. A new draft is STALE until the author presses Run, which compiles
-    // the saved revision and then executes it; spending a gateway call on every save charged the
-    // author for work they had not asked for, and left a failed compile with no way to retry it.
-    // `enqueueCompile` is retained on the overloads for API compatibility and is deliberately
-    // ignored: no save path issues a model call.
+    // Saving never issues a model call. A new draft is UNLEARNED until the author presses Run.
     return project(test);
   }
 
@@ -311,33 +271,64 @@ public class StudioService {
   }
 
   /** Metadata and authoring projected under one transaction/row lock, never two HTTP reads. */
-  public record AuthoringDraft(UITestDto test, AuthoringV2Response authoring) {}
+  public record AuthoringDraft(
+      UITestDto test, AuthoringV2Response authoring, String readinessReason) {
+    public AuthoringDraft(UITestDto test, AuthoringV2Response authoring) {
+      this(test, authoring, null);
+    }
+  }
 
   @Transactional
   public AuthoringDraft createAuthoringDraft(
       UITestRequest metadata, AuthoringV2Request authoring, Authentication auth) {
-    requireWrite(auth, metadata.csiId());
+    CanonicalStudioCodec.validateForWrite(metadata);
+    CanonicalStudioCodec.variablesToJson(metadata.variables());
+    // The registered-CSI check and then the write check run inside createTest, in that order
+    // (ADR-002 s27.2): an unregistered CSI is a 400 whoever asks, so it is not preceded by a 403.
     UITestDto created = createTest(metadata, authoring, auth);
     return readAuthoringDraft(created.id(), auth);
   }
 
-  /** GET does not adapt legacy rows or mint IDs; the first explicit v2 save promotes them. */
+  /**
+   * Reads the sole canonical authoring generation without modifying identity.
+   *
+   * <p>The order is ADR-002 §27.2's (STUDIO-OBS-009 AC-9 TF-3, T0 ruling A8 option (ii)), the one
+   * {@link #lockForAuthoringWrite} uses with {@code requireRead} in place of {@code requireWrite}:
+   * a visible read, {@code requireRead}, only then the locked read, a flush and refresh of the
+   * locked copy, and {@code requireRead} again. A caller who may not read the draft is refused
+   * {@code 403} before it can lock the row; unknown, withheld and unreadable ids all answer the
+   * same way. The lock itself stays: the projection reads the draft and its readiness together, and
+   * a concurrent save must not interleave.
+   */
   @Transactional
   public AuthoringDraft readAuthoringDraft(UUID id, Authentication auth) {
+    UITest visible = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
+    requireRead(auth, visible.getCsiId());
     UITest test =
         studioRepository.findByIdForUpdate(id).orElseThrow(StudioAccessDeniedException::new);
+    if (entityManager != null) {
+      // The locking query returns the instance this transaction already manages, unrefreshed.
+      // Flush first so the refresh cannot discard the caller's own pending writes.
+      entityManager.flush();
+      entityManager.refresh(test);
+    }
     requireRead(auth, test.getCsiId());
     if (test.getAuthoring() == null) {
-      throw new StudioConflictException(
-          "LEGACY_AUTHORING", "Load the v1 draft and save v2 before reading v2");
+      throw new IllegalStateException("Missing canonical authoring for test " + id);
     }
-    return new AuthoringDraft(project(test), authoringResponse(test));
+    return authoringDraft(test);
   }
 
   /** One CAS, one transaction, and at most one increment per revision dimension per save. */
   @Transactional
   public AuthoringDraft updateAuthoringDraft(
       UUID id, UITestRequest metadata, AuthoringV2Request authoring, Authentication auth) {
+    CanonicalStudioCodec.validateForWrite(metadata);
+    CanonicalStudioCodec.variablesToJson(metadata.variables());
+    if (metadata.sourceRevision() == null || metadata.configurationRevision() == null) {
+      throw new IllegalArgumentException(
+          "sourceRevision and configurationRevision are required on update");
+    }
     UITest test =
         lockForAuthoringWrite(
             id, metadata.sourceRevision(), metadata.configurationRevision(), auth);
@@ -347,64 +338,38 @@ public class StudioService {
       throw new StudioConflictException("CSI_IMMUTABLE", "A draft cannot move to another CSI");
     }
     validateAuthoring(authoring, test.getCsiId());
-    // Reuse metadata classification without replacing v2 identities or enqueueing an intermediate
-    // compile.
+    // Reuse metadata classification without replacing v2 identities.
     UITestRequest metadataOnly =
         new UITestRequest(
             metadata.name(),
             metadata.description(),
             metadata.csiId(),
             metadata.environment(),
-            LegacyStudioAdapter.parseSteps(test.getSteps()),
+            CanonicalStudioCodec.parseSteps(test.getSteps()),
             metadata.variables(),
             metadata.configuration(),
             sourceRevision,
             configurationRevision);
-    updateTest(id, metadataOnly, null);
-    persistAuthoring(test, authoring, test.getAuthoring() == null);
+    updateMetadata(test, metadataOnly);
+    persistAuthoring(test, authoring);
     test.setSourceRevision(Math.min(test.getSourceRevision(), sourceRevision + 1));
     test.setConfigurationRevision(
         Math.min(test.getConfigurationRevision(), configurationRevision + 1));
-    return new AuthoringDraft(project(test), authoringResponse(test));
+    return authoringDraft(test);
   }
 
   /**
-   * Reads persisted authoring without adapting it. A legacy row remains a list of exact strings and
-   * acquires no step IDs merely because it was read.
+   * Returns the sole persisted authoring representation after CSI authorization. A plain read: the
+   * draft is read without a lock and {@code requireRead} runs before anything else, so a caller who
+   * may not read it never takes a row lock (ADR-002 s27.2).
    */
-  public StudioAuthoring findAuthoringById(UUID id, Authentication auth) {
-    UITest test = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
-    requireRead(auth, test.getCsiId());
-    if (test.getAuthoring() == null) {
-      return new LegacyAuthoringRequest(LegacyStudioAdapter.parseSteps(test.getSteps()));
-    }
-    return readAuthoring(test.getAuthoring());
-  }
-
-  /** Returns the v2 response including the persisted execution-affecting identity. */
   public AuthoringV2Response findAuthoringV2ById(UUID id, Authentication auth) {
     UITest test = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
     requireRead(auth, test.getCsiId());
     if (test.getAuthoring() == null) {
-      throw new StudioConflictException(
-          "LEGACY_AUTHORING", "UI Test " + id + " has not been promoted to authoring v2");
+      throw new IllegalStateException("Missing canonical authoring for test " + id);
     }
     return authoringResponse(test);
-  }
-
-  /**
-   * Performs the explicit first v2 write for a legacy row. IDs are deterministic, but become part
-   * of the public identity only if this transaction commits.
-   */
-  @Transactional
-  public AuthoringV2Response adaptLegacyAuthoring(
-      UUID id, long sourceRevision, long configurationRevision, Authentication auth) {
-    UITest test = lockForAuthoringWrite(id, sourceRevision, configurationRevision, auth);
-    AuthoringV2Request authoring =
-        test.getAuthoring() == null
-            ? LegacyAuthoringPersistenceAdapter.adapt(test.getId(), test.getSteps())
-            : readAuthoring(test.getAuthoring());
-    return persistAuthoring(test, authoring, test.getAuthoring() == null);
   }
 
   /** Atomically saves v2 authoring under the same two-token CAS as ordinary Studio updates. */
@@ -417,7 +382,7 @@ public class StudioService {
       Authentication auth) {
     UITest test = lockForAuthoringWrite(id, sourceRevision, configurationRevision, auth);
     validateAuthoring(authoring, test.getCsiId());
-    AuthoringV2Response response = persistAuthoring(test, authoring, test.getAuthoring() == null);
+    AuthoringV2Response response = persistAuthoring(test, authoring);
     return response;
   }
 
@@ -432,137 +397,18 @@ public class StudioService {
     return saveAuthoring(id, authoring, sourceRevision, configurationRevision, auth);
   }
 
-  /**
-   * Updates a draft under optimistic concurrency (Architecture §4.2).
-   *
-   * <p>The row is locked for the transaction, so two concurrent saves carrying the same revisions
-   * are serialized and exactly one of them wins; the loser sees the already-incremented revisions
-   * and is rejected with {@code 409 STALE_REVISION} without changing a single field.
-   *
-   * <p>A step-text change advances {@code sourceRevision}; an execution-affecting configuration
-   * change advances {@code configurationRevision}; name/description advance neither. Any increment
-   * invalidates the current candidate and returns the draft to {@code STALE}, while the confirmed
-   * revision is retained for history.
-   *
-   * <p>The CSI is never written here: a different value is a {@code 409 CSI_IMMUTABLE}.
-   */
-  @Transactional
-  public UITestDto updateTest(UUID id, UITestRequest request) {
-    return updateTest(id, request, null);
-  }
-
-  /**
-   * The same save, with the identity to attribute an enqueued compile to (AC-2).
-   *
-   * <p>The two-argument form above is the internal one and enqueues nothing: there is no principal
-   * to attribute a gateway call and an audit line to, and inventing one would put a compile in
-   * another user's name. It is not a gap — the save itself has already returned the draft to {@code
-   * STALE} and cleared its candidate, which is exactly the state the author's next explicit
-   * recompile clears.
-   *
-   * <p>A compile is enqueued only when the save actually moved a revision. A name- or
-   * description-only edit moves neither, leaves the confirmed revision confirmable (§4.2) and
-   * therefore has nothing to compile; enqueueing there would drive a confirmed draft to {@code
-   * COMPILING} and spend a gateway call to rediscover the artifact it already holds.
-   *
-   * <p><b>With a caller, the order of refusal is ADR-002 §27.2's</b>: (1) the required revisions,
-   * which do not depend on the stored row; (2) the draft read through the visibility restriction —
-   * absent, soft-deleted and quarantined are all {@code 403}; (3) {@code canWrite} on that draft's
-   * CSI; (4) the locked read, where a draft that disappeared since step 2 is also {@code 403}; (5)
-   * only then {@code 409 STALE_REVISION} and {@code 409 CSI_IMMUTABLE}. The read is never {@link
-   * StudioRepository#findCsiIdIncludingWithheld}: an owner of a withheld draft who passed
-   * authorization would otherwise see it through the status code (ADR-002 §14.5).
-   *
-   * <p>Without a caller — the internal overload above — steps 2 and 3 do not run and an absent
-   * draft is still {@code IllegalArgumentException("UI Test not found: …")}, exactly as before.
-   *
-   * @param id the draft to save
-   * @param request the new draft state
-   * @param auth the caller, or {@code null} on the internal path
-   * @return the saved draft
-   * @throws StudioAccessDeniedException the caller may not write this draft, or it is not visible
-   */
-  @Transactional
-  public UITestDto updateTest(UUID id, UITestRequest request, Authentication auth) {
-    return updateTest(id, request, auth, true, false);
-  }
-
-  /** Versioned authoring holds the same row lock and supplies structured metadata atomically. */
-  @Transactional
-  public UITestDto updateTest(
-      UUID id,
-      UITestRequest request,
-      Authentication auth,
-      boolean enqueueCompile,
-      boolean preserveAuthoring) {
-    if (request.sourceRevision() == null || request.configurationRevision() == null) {
-      throw new IllegalArgumentException(
-          "sourceRevision and configurationRevision are required on update");
-    }
-    if (auth != null) {
-      UITest visible = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
-      requireWrite(auth, visible.getCsiId());
-    }
-    UITest test =
-        studioRepository
-            .findByIdForUpdate(id)
-            .orElseThrow(
-                () ->
-                    auth != null
-                        ? new StudioAccessDeniedException()
-                        : new IllegalArgumentException("UI Test not found: " + id));
-    if (auth != null) {
-      // The visible read above put this draft in the persistence context, and Hibernate hands a
-      // managed entity back to the locking query unrefreshed: without this, a save that committed
-      // between the two reads is invisible to the revision check and gets overwritten. The row lock
-      // is held, so the refresh reads its latest committed state. It keeps the instance managed:
-      // a caller that already holds this draft in its own transaction keeps writing through it
-      // (story 10.30 QA finding DETACH-1). The flush is what keeps that caller's writes made
-      // *before* this call: a refresh reads the row and discards whatever is still pending against
-      // it. Under Hibernate's default AUTO flush mode the locking query above happens to have
-      // flushed them already, but under FlushModeType.COMMIT or Hibernate's MANUAL nothing has, and
-      // they would be dropped with no error and a successful save (QA finding REFRESH-FLUSH-1).
-      // Flushing here, after the locking read, writes them while this transaction holds the row.
-      entityManager.flush();
-      entityManager.refresh(test);
-    }
-
-    if (request.sourceRevision() != test.getSourceRevision()
-        || request.configurationRevision() != test.getConfigurationRevision()) {
-      throw new StudioConflictException(
-          "STALE_REVISION",
-          "Test "
-              + id
-              + " is at sourceRevision "
-              + test.getSourceRevision()
-              + "/configurationRevision "
-              + test.getConfigurationRevision()
-              + "; reload before saving");
-    }
-
-    if (request.csiId() != null && !request.csiId().equals(test.getCsiId())) {
-      throw new StudioConflictException(
-          "CSI_IMMUTABLE",
-          "Test " + id + " belongs to CSI " + test.getCsiId() + " and cannot be moved");
-    }
-
-    AuthoringV2Request persistedAuthoring =
-        test.getAuthoring() == null ? null : readAuthoring(test.getAuthoring());
-    if (persistedAuthoring != null && !stepTexts(persistedAuthoring).equals(request.steps())) {
-      throw new StudioValidationException(
-          "AUTHORING_V2_REQUIRED",
-          "This draft uses stable v2 step identities; edit steps through the v2 authoring save"
-              + " operation and reload both revision tokens before retrying");
-    }
-
+  /** Private metadata engine; the enclosing authoring transaction already owns the row. */
+  private void updateMetadata(UITest test, UITestRequest request) {
+    UUID id = test.getId();
+    AuthoringV2Request persistedAuthoring = readAuthoring(test.getAuthoring());
     ConfigurationChangeClassifier.Classification change = changeClassifier.classify(test, request);
 
     test.setName(request.name());
     test.setDescription(request.description());
     test.setSteps(
-        LegacyStudioAdapter.stepsToJson(
+        CanonicalStudioCodec.stepsToJson(
             persistedAuthoring == null ? request.steps() : stepTexts(persistedAuthoring)));
-    test.setVariables(LegacyStudioAdapter.variablesToJson(request.variables()));
+    test.setVariables(CanonicalStudioCodec.variablesToJson(request.variables()));
     test.setBrowser(request.configuration().browser());
     test.setViewportWidth(request.configuration().viewport().width());
     test.setViewportHeight(request.configuration().viewport().height());
@@ -574,144 +420,33 @@ public class StudioService {
       storeAuthoring(test, persistedAuthoring);
     }
 
-    boolean invalidateAuthoring =
-        !preserveAuthoring && change.anyChanged() && test.getAuthoringSnapshot() != null;
-    if (invalidateAuthoring) {
-      test.setAuthoringSnapshot(null);
-      test.setAuthoringHash(null);
-      test.setScopeReviewedBy(null);
-      test.setScopeReviewedAt(null);
-    }
-    if (change.sourceChanged() || invalidateAuthoring) {
-      test.setSourceRevision(test.getSourceRevision() + 1);
+    if (change.sourceChanged()) {
+      test.setSourceRevision(Math.addExact(test.getSourceRevision(), 1));
     }
     if (change.configurationChanged()) {
-      test.setConfigurationRevision(test.getConfigurationRevision() + 1);
+      test.setConfigurationRevision(Math.addExact(test.getConfigurationRevision(), 1));
     }
     if (change.anyChanged()) {
-      invalidateSchedule(id, "COMPILE_REQUIRED");
-      // Confirmed revision is kept for history; the draft is simply not runnable until a new
-      // candidate is confirmed (readiness enforcement belongs to 10.8).
-      test.setCompileStatus(CompileState.STALE);
-      test.setCurrentCandidateRevisionId(null);
-      test.setCompileDiagnostics(null);
-      test.setCompileError(null);
+      // The learned revision is kept for history; the draft is not runnable until a guided run
+      // publishes a new one (readiness enforces it).
+      invalidateSchedule(id, ReadinessVerdict.LEARN_REQUIRED);
     }
     test.setUpdatedAt(Instant.now());
-    return project(test);
   }
 
   /**
-   * Enqueues a compile of the current source and returns its persisted identity (AC-1, §8.3).
+   * The single-draft projection: the draft row, its learned revision and its readiness.
    *
-   * <p>The order of refusal is the contract's, and ADR-002 §14.4 fixes it: <b>authorization, then
-   * the lifecycle guard, then authoring bounds and the credential screen, then {@code
-   * beginCompile}</b>. Authorization runs first so that a caller who may not act on the draft's CSI
-   * never learns from a status code whether the draft exists — which is possible here only because
-   * the CSI is read through the visibility restriction, the same read that makes a {@code 409}
-   * possible at all.
-   *
-   * <p>Everything after authorization belongs to {@code CompilePipeline}: a withheld draft is
-   * refused {@code 409} with its own code ({@code TEST_DELETED} or {@code TEST_QUARANTINED}) by
-   * 10.4's guard, an over-bound or credential-carrying draft is refused {@code 400} with no compile
-   * state moved, and only then is a request identity persisted.
-   *
-   * <p>{@code NOT_SUPPORTED} because this class is {@code readOnly = true} by default: {@code
-   * beginCompile} writes, and without it that write would join a read-only transaction and fail.
-   *
-   * @param testId the draft to compile
-   * @param auth the caller
-   * @return the persisted compile request identity and the revisions it was begun for
-   * @throws StudioAccessDeniedException the caller may not compile this draft, or it does not exist
-   * @throws StudioConflictException the draft is deleted or quarantined ({@code 409})
-   * @throws StudioValidationException over an authoring bound, or an inline credential ({@code
-   *     400}), with no compile state moved
-   */
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public CompileAcceptedDto compileTest(UUID testId, Authentication auth) {
-    requireWrite(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
-    CompileRequest request = compilePipeline.compile(testId, principalOf(auth));
-    return new CompileAcceptedDto(
-        request.requestId(),
-        CompileState.COMPILING.name(),
-        request.sourceRevision(),
-        request.configurationRevision());
-  }
-
-  /**
-   * Confirms exactly the candidate the author reviewed (AC-1, §4.2, §8.3).
-   *
-   * <p>The order of refusal is ADR-002 §14.4's: <b>identity, then CSI authorization, then the
-   * lifecycle guard, then the confirmation transaction</b>. Authorization runs before the lifecycle
-   * read so that a caller who may not act on the draft's CSI never learns from a status code
-   * whether the draft exists — possible here only because the CSI is read through the visibility
-   * restriction, the same read that makes a {@code 409} possible at all.
-   *
-   * <p>The one documented exception is bean validation: a malformed body is rejected {@code 400}
-   * during argument resolution, before this method runs. That discloses nothing — a malformed body
-   * answers identically for an id that never existed.
-   *
-   * <p><b>This method holds no comparison.</b> All four exactness terms travel into {@link
-   * CompileStateService#confirm}'s two conditional statements and are decided by the database
-   * against the committed row. There is no second confirmation path, no read-then-write, and
-   * nothing here loosens the guard 10.4 wrote: a mismatch on any term is {@code 409
-   * STALE_CANDIDATE} and the whole transaction rolls back.
-   *
-   * <p>{@code NOT_SUPPORTED} because this class is {@code readOnly = true} by default: {@code
-   * confirm} writes, and without it that write would join a read-only transaction and fail. The
-   * draft is re-read afterwards, so the {@code 200} body is the committed state rather than the
-   * state the caller hoped for.
-   *
-   * @param testId the draft whose candidate is being confirmed
-   * @param request the frozen four-field body
-   * @param auth the caller
-   * @return the committed draft, now {@code READY}
-   * @throws StudioAccessDeniedException the caller may not confirm this draft, or it does not exist
-   * @throws StudioConflictException the draft is deleted or quarantined, or the body does not match
-   *     the current unconfirmed candidate exactly ({@code 409})
-   */
-  @Transactional(propagation = Propagation.NOT_SUPPORTED)
-  public UITestDto confirmCompile(
-      UUID testId, ConfirmCompileRequestDto request, Authentication auth) {
-    requireWrite(auth, studioRepository.findCsiIdIncludingWithheld(testId).orElse(null));
-    compileStateService.confirm(
-        testId,
-        request.revisionId(),
-        request.artifactHash(),
-        request.sourceRevision(),
-        request.configurationRevision(),
-        principalOf(auth));
-    return findTestById(testId);
-  }
-
-  /**
-   * The single-draft projection, with the candidate revision ADR-002 §21 put on the body.
-   *
-   * <p>The revision is looked up by the id the draft row itself carries, scoped to that draft, and
-   * read beside it rather than on a second request from the client. That is §21.3's ruling: {@code
-   * ConfirmCompileRequest} is a conditional transaction over four fields, and a client assembling
-   * them from two reads could pair a hash from the second with a revision id from the first while a
-   * recompile landed in between — an internally inconsistent body that {@code STALE_CANDIDATE} was
-   * never designed to name.
-   *
-   * <p>The pair is stable for a second reason that is worth stating because it is what makes this
-   * safe on the one path that has no surrounding transaction ({@code confirmCompile}): revisions
-   * are <b>immutable</b>. {@code trg_ui_test_revisions_write_once} rejects any UPDATE other than
-   * confirmation bookkeeping, so once the draft names a candidate, that candidate's artifact and
-   * hash cannot change underneath the read. What can change is <em>which</em> revision the draft
-   * names, and that is read first.
-   *
-   * <p>A draft with no candidate costs no query at all — the absence is read from the draft row.
+   * <p>Revisions are <b>immutable</b>, so once the draft names one, that revision's artifact and
+   * hash cannot change underneath the read. Readiness is derived by the same predicate the execute
+   * path consults, after pending writes of this transaction are flushed, so a save's own response
+   * already reports the readiness of the state it wrote. {@code NEEDS_RELEARN} is not produced yet
+   * (STUDIO-OBS-015), so {@code firstChangedStepId} is always {@code null}.
    *
    * @param test the draft row
-   * @return the full representation, with the candidate's artifact and hash or nulls
+   * @return the full representation
    */
   private UITestDto project(UITest test) {
-    UUID candidateId = test.getCurrentCandidateRevisionId();
-    UITestRevision candidate =
-        candidateId == null
-            ? null
-            : revisionRepository.findByIdAndTestId(candidateId, test.getId()).orElse(null);
     UUID confirmedId = test.getConfirmedRevisionId();
     UITestRevision confirmed =
         confirmedId == null
@@ -723,14 +458,49 @@ public class StudioService {
                     revision ->
                         revision.getConfirmedAt() != null && revision.getConfirmedBy() != null)
                 .orElse(null);
-    return UITestDto.from(test, candidate, confirmed);
+    StudioReadiness state = readinessOf(test);
+    UUID boundary = null;
+    if (state == StudioReadiness.NEEDS_RELEARN) {
+      String id = readiness.change(test.getId()).firstChangedStepId();
+      boundary = id == null ? null : UUID.fromString(id);
+    }
+    return UITestDto.from(test, confirmed, state, boundary);
+  }
+
+  private AuthoringDraft authoringDraft(UITest test) {
+    UITestDto projected = project(test);
+    String reason = null;
+    if (readiness != null && projected.readiness() == StudioReadiness.NEEDS_RELEARN) {
+      reason = readiness.change(test.getId()).reason();
+    }
+    return new AuthoringDraft(projected, authoringResponse(test), reason);
+  }
+
+  private StudioReadiness readinessOf(UITest test) {
+    if (readiness == null) {
+      return null;
+    }
+    if (entityManager != null) {
+      // Readiness reads through JDBC; the save this projection reports must be visible to it.
+      entityManager.flush();
+    }
+    return readiness.readiness(test.getId());
   }
 
   private UITest lockForAuthoringWrite(
       UUID id, long sourceRevision, long configurationRevision, Authentication auth) {
+    UITest visible = studioRepository.findById(id).orElseThrow(StudioAccessDeniedException::new);
+    requireWrite(auth, visible.getCsiId());
     UITest test =
         studioRepository.findByIdForUpdate(id).orElseThrow(StudioAccessDeniedException::new);
+    if (entityManager != null) {
+      entityManager.flush();
+      entityManager.refresh(test);
+    }
     requireWrite(auth, test.getCsiId());
+    if (test.getAuthoring() == null) {
+      throw new IllegalStateException("Missing canonical authoring for test " + id);
+    }
     if (sourceRevision != test.getSourceRevision()
         || configurationRevision != test.getConfigurationRevision()) {
       throw new StudioConflictException(
@@ -746,32 +516,25 @@ public class StudioService {
     return test;
   }
 
-  private AuthoringV2Response persistAuthoring(
-      UITest test, AuthoringV2Request requested, boolean legacyPromotion) {
+  private AuthoringV2Response persistAuthoring(UITest test, AuthoringV2Request requested) {
     validateAuthoring(requested, test.getCsiId());
-    AuthoringV2Request previous = legacyPromotion ? null : readAuthoring(test.getAuthoring());
+    if (test.getAuthoring() == null) {
+      throw new IllegalStateException("Missing canonical authoring for test " + test.getId());
+    }
+    AuthoringV2Request previous = readAuthoring(test.getAuthoring());
+    boolean sourceChanged = !stepIdentity(previous).equals(stepIdentity(requested));
+    boolean configurationChanged = !contextIdentity(previous).equals(contextIdentity(requested));
 
-    boolean sourceChanged =
-        previous == null
-            ? !LegacyStudioAdapter.parseSteps(test.getSteps()).equals(stepTexts(requested))
-            : !stepIdentity(previous).equals(stepIdentity(requested));
-    boolean configurationChanged =
-        legacyPromotion || !contextIdentity(previous).equals(contextIdentity(requested));
-
-    test.setSteps(LegacyStudioAdapter.stepsToJson(stepTexts(requested)));
+    test.setSteps(CanonicalStudioCodec.stepsToJson(stepTexts(requested)));
     storeAuthoring(test, requested);
     if (sourceChanged) {
-      test.setSourceRevision(test.getSourceRevision() + 1);
+      test.setSourceRevision(Math.addExact(test.getSourceRevision(), 1));
     }
     if (configurationChanged) {
-      test.setConfigurationRevision(test.getConfigurationRevision() + 1);
+      test.setConfigurationRevision(Math.addExact(test.getConfigurationRevision(), 1));
     }
     if (sourceChanged || configurationChanged) {
-      invalidateSchedule(test.getId(), "COMPILE_REQUIRED");
-      test.setCompileStatus(CompileState.STALE);
-      test.setCurrentCandidateRevisionId(null);
-      test.setCompileDiagnostics(null);
-      test.setCompileError(null);
+      invalidateSchedule(test.getId(), ReadinessVerdict.LEARN_REQUIRED);
     }
     test.setUpdatedAt(Instant.now());
     return authoringResponse(test);
@@ -814,9 +577,10 @@ public class StudioService {
         throw new StudioValidationException(
             "DUPLICATE_STEP_ID", "step id " + step.id() + " occurs more than once");
       }
-      if (step.text() == null || step.text().length() > 500) {
+      if (step.text() == null || step.text().length() > AuthoringStep.MAX_TEXT_CHARS) {
         throw new StudioValidationException(
-            "INVALID_AUTHORING", "step text is required and limited to 500 characters");
+            "INVALID_AUTHORING",
+            "step text is required and limited to " + AuthoringStep.MAX_TEXT_CHARS + " characters");
       }
     }
     Map<UUID, AuthoringEvidenceReference> evidenceById = new HashMap<>();
@@ -876,7 +640,7 @@ public class StudioService {
 
   private static AuthoringRevisionInputs revisionInputs(UITest test, AuthoringV2Request authoring) {
     Map<String, String> plainValues = new HashMap<>();
-    for (StudioVariable variable : LegacyStudioAdapter.parseVariables(test.getVariables())) {
+    for (StudioVariable variable : CanonicalStudioCodec.parseVariables(test.getVariables())) {
       if (StudioVariable.KIND_PLAIN.equals(variable.kind())) {
         plainValues.put(variable.name(), variable.value());
       }
@@ -991,7 +755,7 @@ public class StudioService {
           test.getConfirmedRevisionId() == null
               ? null
               : revisionRepository.findById(test.getConfirmedRevisionId()).orElse(null);
-      if (current != null && current.getArtifactSchemaVersion() == 2) {
+      if (current != null && current.getArtifactSchemaVersion() >= 2) {
         if (observedReplay == null) {
           throw new StudioConflictException(
               "RUNTIME_INCOMPATIBLE", "Observed replay is unavailable");
@@ -1049,7 +813,7 @@ public class StudioService {
     if (ledgerStatements.requestCancel(executionId, principal, Instant.now()).isEmpty()) {
       // Zero rows is the verdict; this only names it. A row whose outcome is known — terminal, or
       // FINALIZING its evidence — is EXECUTION_TERMINAL even when a cancel is what ended it.
-      String status = LegacyStudioAdapter.normalizeStatus(execution.getStatus());
+      String status = execution.getStatus();
       boolean outcomeKnown =
           ExecutionStatus.isTerminal(status)
               || ledgerStatements
@@ -1174,7 +938,7 @@ public class StudioService {
         executionRepository
             .findByExecutionId(executionId)
             .orElseThrow(() -> new IllegalArgumentException("Execution not found: " + executionId));
-    String status = LegacyStudioAdapter.normalizeStatus(execution.getStatus());
+    String status = execution.getStatus();
     if (!ExecutionStatus.isTerminal(status)) {
       return false;
     }

@@ -15,7 +15,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Forward-only V25 (studio-vault-secrets, AC-V1-1): the plaintext {@code secrets} table and its
+ * {@code V18__drop_plaintext_secrets} (studio-vault-secrets, AC-V1-1; the former V25, re-numbered
+ * by the STUDIO-OBS-012A / ADR-SC-005 D-B re-baseline): the plaintext {@code secrets} table and its
  * indexes are gone, rows included. Vault is the only secret store.
  */
 @Testcontainers(disabledWithoutDocker = true)
@@ -23,21 +24,21 @@ class PlaintextSecretsDropMigrationIT {
 
   private static final PostgreSQLContainer<?> POSTGRES =
       new PostgreSQLContainer<>("postgres:15-alpine")
-          .withDatabaseName("checks_v25")
+          .withDatabaseName("checks_v18")
           .withUsername("test")
           .withPassword("test");
 
   @BeforeAll
   static void migrate() throws SQLException {
     POSTGRES.start();
-    flyway("24").migrate();
-    // A V24-era plaintext row: the drop must not depend on the table being empty.
+    flyway("17").migrate();
+    // A plaintext row written before V18: the drop must not depend on the table being empty.
     execute(
         "INSERT INTO secrets (reference_id,label,scope,owner,last_four,encrypted_value) VALUES"
-            + " ('vault/checks/project/v25','V25','project','v25@citi.com','v25x',"
+            + " ('vault/checks/project/v18','V18','project','v18@citi.com','v18x',"
             + "'plaintext-canary'::bytea)");
     assertThat(scalarText("SELECT to_regclass('public.secrets')::text")).isEqualTo("secrets");
-    flyway("25").migrate();
+    flyway("18").migrate();
   }
 
   @AfterAll

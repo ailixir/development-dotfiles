@@ -14,6 +14,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 class GuidedTranslationConcurrencyTest {
+  private static final String OBLIGATION = "00000000-0000-4000-8000-000000000101";
+  private static final String REPLACEMENT = "00000000-0000-4000-8000-000000000102";
+
   @Test
   void independentConnectionsSerializeAttemptAndSingleSendWinner() throws Exception {
     try (var db = new GuidedTranslationMigrationTest.Database();
@@ -143,7 +146,7 @@ class GuidedTranslationConcurrencyTest {
                     10,
                     "next",
                     Instant.now().plusSeconds(90));
-            db.store.acceptPlan("s", 0, plan("o"));
+            db.store.acceptPlan("s", 0, plan(OBLIGATION));
             assertThat(db.store.currentAttempt(doc, next.attemptId(), "next", 0, Instant.now()))
                 .isFalse();
           });
@@ -160,9 +163,9 @@ class GuidedTranslationConcurrencyTest {
       db.tx.executeWithoutResult(
           s -> {
             db.sessions.lock("s");
-            db.store.acceptPlan("s", 0, plan("o"));
-            var first = db.store.reserveObligation(doc, "o", proposal);
-            assertThat(db.store.reserveObligation(doc, "o", proposal)).isEqualTo(first);
+            db.store.acceptPlan("s", 0, plan(OBLIGATION));
+            var first = db.store.reserveObligation(doc, OBLIGATION, proposal);
+            assertThat(db.store.reserveObligation(doc, OBLIGATION, proposal)).isEqualTo(first);
           });
       var changed = proposal.deepCopy().put("different", true);
       assertThatThrownBy(
@@ -170,7 +173,7 @@ class GuidedTranslationConcurrencyTest {
                   db.tx.executeWithoutResult(
                       s -> {
                         db.sessions.lock("s");
-                        db.store.reserveObligation(doc, "o", changed);
+                        db.store.reserveObligation(doc, OBLIGATION, changed);
                       }))
           .hasMessageContaining("IDEMPOTENCY_CONFLICT");
       assertThatThrownBy(
@@ -178,7 +181,7 @@ class GuidedTranslationConcurrencyTest {
                   db.tx.executeWithoutResult(
                       s -> {
                         db.sessions.lock("s");
-                        db.store.acceptPlan("s", 1, plan("replacement"));
+                        db.store.acceptPlan("s", 1, plan(REPLACEMENT));
                       }))
           .hasMessageContaining("IDEMPOTENCY_CONFLICT");
       assertThatThrownBy(() -> db.jdbc.update("DELETE FROM studio_guided_obligation_admissions"))

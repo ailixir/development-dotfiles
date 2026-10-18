@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +18,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.yaml.snakeyaml.Yaml;
@@ -30,9 +32,12 @@ import org.yaml.snakeyaml.Yaml;
  * INT-4"</i>. So all three of this test's inputs are read from the artefact that holds them:
  *
  * <ul>
- *   <li>the SQL — parsed out of {@code V20__studio_execution_cancel.sql}'s {@code CHECK … IN (…)},
- *       the migration that last defines the constraint (Studio v1 WP4 replaced V17's list with a
- *       superset; V17 stays as history and is read by {@code ErrorCodeConstraintMigrationIT});
+ *   <li>the SQL — parsed out of {@code V13__executions_ledger.sql}'s {@code CHECK … IN (…)}, the
+ *       one migration that defines the constraint since the STUDIO-OBS-012A re-baseline (ADR-SC-005
+ *       D-B folded the V17/V20/V34 history into it). V13 is an area migration holding many other
+ *       statements, so the reader selects the constraint's own unit — its introducing comment, the
+ *       {@code NOT VALID} add and the {@code VALIDATE} — and separately proves that no other
+ *       executable statement in the migration set names the constraint;
  *   <li>the API's own vocabulary — {@link ExecutionErrorCode#values()}, which exists so a
  *       disjointness test <i>"reads this enumeration rather than a hardcoded copy of it that
  *       drifts"</i>;
@@ -49,8 +54,16 @@ import org.yaml.snakeyaml.Yaml;
 class ErrorCodeVocabularyTest {
 
   private static final Path CONTRACT = Path.of("..", "docs", "specs", "studio", "openapi.yaml");
-  private static final Path MIGRATION =
-      Path.of("src", "main", "resources", "db", "migration", "V20__studio_execution_cancel.sql");
+  private static final Path MIGRATION_DIR = Path.of("src", "main", "resources", "db", "migration");
+  private static final Path MIGRATION = MIGRATION_DIR.resolve("V13__executions_ledger.sql");
+  private static final String CONSTRAINT = "ck_ui_test_executions_error_code";
+
+  /** The executable ADD, anchored at column 0 so a quoted copy inside a comment never matches. */
+  private static final String ADD_STATEMENT =
+      "ALTER TABLE ui_test_executions ADD CONSTRAINT " + CONSTRAINT;
+
+  private static final String VALIDATE_STATEMENT =
+      "ALTER TABLE ui_test_executions VALIDATE CONSTRAINT " + CONSTRAINT + ";";
 
   /** The statement under test: the {@code CHECK} clause, not the comment that explains it. */
   private static final Pattern CHECK_CLAUSE =
@@ -138,6 +151,15 @@ class ErrorCodeVocabularyTest {
     // Exactly one of each: a second VALIDATE, or a second ADD, is a migration nobody reasons about.
     assertThat(upper.split("NOT VALID", -1)).hasSize(2);
     assertThat(upper.split("VALIDATE CONSTRAINT", -1)).hasSize(2);
+
+    // V13 is an area migration. The unit above is only meaningful if nothing else in the migration
+    // set — in V13 or any other file — drops, re-adds or re-validates this constraint.
+    for (Path file : migrationFiles()) {
+      long mentions = executableSql(read(file)).split(CONSTRAINT, -1).length - 1L;
+      assertThat(mentions)
+          .as("executable statements naming %s in %s", CONSTRAINT, file.getFileName())
+          .isEqualTo(file.equals(MIGRATION) ? 2L : 0L);
+    }
   }
 
   /**
@@ -228,8 +250,12 @@ class ErrorCodeVocabularyTest {
    * this migration's list does, and the day one does, this still reads the statement.
    */
   private static String executableSql() {
+    return executableSql(migrationText());
+  }
+
+  private static String executableSql(String text) {
     StringBuilder stripped = new StringBuilder();
-    for (String line : migrationText().split("\n", -1)) {
+    for (String line : text.split("\n", -1)) {
       boolean quoted = false;
       int cut = -1;
       for (int index = 0; index < line.length(); index++) {
@@ -252,9 +278,70 @@ class ErrorCodeVocabularyTest {
     return stripped.toString();
   }
 
+  /**
+   * The constraint's unit in the area migration: the contiguous comment block that introduces it,
+   * the {@code NOT VALID} add, and the {@code VALIDATE} that follows it.
+   */
   private static String migrationText() {
+    String[] lines = read(MIGRATION).split("\n", -1);
+    int add = -1;
+    for (int index = 0; index < lines.length; index++) {
+      if (lines[index].startsWith(ADD_STATEMENT)) {
+        assertThat(add)
+            .as("exactly one executable ADD of %s in %s", CONSTRAINT, MIGRATION)
+            .isEqualTo(-1);
+        add = index;
+      }
+    }
+    assertThat(add)
+        .as("the ADD of %s could not be located in %s", CONSTRAINT, MIGRATION)
+        .isNotNegative();
+    int start = add;
+    while (start > 0 && lines[start - 1].startsWith("--")) {
+      start--;
+    }
+    int end = -1;
+    for (int index = add; index < lines.length && end < 0; index++) {
+      if (lines[index].equals(VALIDATE_STATEMENT)) {
+        end = index;
+      }
+    }
+    assertThat(end).as("the VALIDATE after the ADD in %s", MIGRATION).isNotNegative();
+    return String.join("\n", Arrays.copyOfRange(lines, start, end + 1)) + "\n";
+  }
+
+  /**
+   * The two executable statements of the unit, in file order — the ADD ... NOT VALID and the
+   * VALIDATE. ErrorCodeConstraintMigrationIT re-applies exactly these to populated partitions.
+   */
+  static List<String> constraintStatements() {
+    List<String> statements = new ArrayList<>();
+    for (String statement : executableSql().split(";", -1)) {
+      if (!statement.isBlank()) {
+        statements.add(statement.trim());
+      }
+    }
+    assertThat(statements).hasSize(2);
+    assertThat(statements.get(0)).startsWith(ADD_STATEMENT).endsWith("NOT VALID");
+    assertThat(statements.get(1) + ";").isEqualTo(VALIDATE_STATEMENT);
+    return statements;
+  }
+
+  private static List<Path> migrationFiles() {
+    try (Stream<Path> files = Files.list(MIGRATION_DIR)) {
+      List<Path> sql = files.filter(file -> file.toString().endsWith(".sql")).sorted().toList();
+      assertThat(sql)
+          .as("the migration set is non-empty and holds %s", MIGRATION)
+          .contains(MIGRATION);
+      return sql;
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+  }
+
+  private static String read(Path file) {
     try {
-      return Files.readString(MIGRATION, StandardCharsets.UTF_8);
+      return Files.readString(file, StandardCharsets.UTF_8);
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }

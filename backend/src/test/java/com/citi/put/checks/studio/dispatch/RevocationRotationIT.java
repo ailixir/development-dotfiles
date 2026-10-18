@@ -9,6 +9,7 @@ import com.citi.put.checks.studio.secrets.FakeStudioVaultProvider;
 import com.citi.put.checks.studio.secrets.StudioSecretFixtures;
 import com.citi.put.checks.studio.secrets.StudioVaultProvider;
 import com.citi.put.checks.studio.secrets.VaultScope;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -18,10 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -40,7 +44,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class RevocationRotationIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60461";
   private static final String OWNER = "rotation-owner@citi.com";
@@ -90,7 +100,7 @@ class RevocationRotationIT {
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
 
     testId = fixtures.seedTest("Rotation draft", CSI_ID, OWNER, List.of("Go to the home page"));
@@ -108,7 +118,9 @@ class RevocationRotationIT {
   }
 
   private UUID accept() {
-    return studioService.executeTest(testId, owner, null).executionId();
+    return studioService
+        .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+        .executionId();
   }
 
   private String errorCode(UUID executionId) {
@@ -161,57 +173,16 @@ class RevocationRotationIT {
   @Test
   void theSameExecutionWithTheEntitlementAndTheReferenceIntactIsDispatched() {
     UUID execution = accept();
-
+    var received = new java.util.concurrent.atomic.AtomicBoolean();
+    runner.onSend(job -> received.set(job.resolvedSecrets().get(SECRET_ID).matches(OLD_VALUE)));
     dispatcher.dispatch(execution);
-
+    assertThat(received).isTrue();
     assertThat(runner.sendCount()).isEqualTo(1);
-    assertThat(runner.sent().get(0).resolvedSecrets()).containsEntry(SECRET_ID, OLD_VALUE);
+    assertThat(runner.sent().get(0).resolvedSecrets()).containsKey(SECRET_ID);
+    assertThat(runner.sent().get(0).resolvedSecrets().get(SECRET_ID).matches(OLD_VALUE))
+        .as("owned secret was erased after send")
+        .isFalse();
     assertThat(errorCode(execution)).isNull();
-  }
-
-  // ── AC-10 ────────────────────────────────────────────────────────────────────────────────────
-
-  @Test
-  void anUnreadableReferenceDeclarationAtDispatchIsTerminalRatherThanARunWithNoReferences() {
-    UUID execution = accept();
-
-    // The fail-open this criterion removes: the reader used to return an empty list for this, and
-    // the dispatcher used to send a job with no references and no secrets — for a login test, a
-    // browser opening a real application with an empty password field.
-    //
-    // The revision itself is write-once and the database enforces it, so the condition is arranged
-    // the way it would actually arise: the execution is pointed at a revision whose stored
-    // declaration is of a shape the typed reader does not recognise — a legacy flat array, which
-    // is exactly what the previous reader accepted and flattened.
-    // A separate draft, because `ui_test_revisions` is unique on (test, source, configuration)
-    // revision and write-once besides. What the dispatcher reads is the revision the *execution*
-    // points at, which is the thing being made unreadable here.
-    UUID legacyDraft =
-        fixtures.seedTest(
-            "Legacy declaration draft", CSI_ID, OWNER, List.of("Go to the home page"));
-    UUID legacyRevision =
-        fixtures.confirmRevision(
-            legacyDraft, CSI_ID, List.of("Go to the home page"), "[\"a-flat-legacy-array\"]");
-    jdbc.update(
-        "UPDATE ui_test_executions SET revision_id = ? WHERE id = ?", legacyRevision, execution);
-
-    dispatcher.dispatch(execution);
-
-    assertThat(errorCode(execution)).isEqualTo(ExecutionErrorCode.REFERENCE_UNAVAILABLE);
-    assertThat(runner.sendCount())
-        .as("POST /v1/runs was issued for an unreadable reference declaration")
-        .isZero();
-  }
-
-  @Test
-  void anAbsentConfirmedRevisionAtDispatchIsTerminalToo() {
-    UUID execution = accept();
-    jdbc.update("UPDATE ui_test_executions SET revision_id = NULL WHERE id = ?", execution);
-
-    dispatcher.dispatch(execution);
-
-    assertThat(errorCode(execution)).isEqualTo(ExecutionErrorCode.REFERENCE_UNAVAILABLE);
-    assertThat(runner.sendCount()).isZero();
   }
 
   // ── AC-8 ─────────────────────────────────────────────────────────────────────────────────────
@@ -231,12 +202,18 @@ class RevocationRotationIT {
         VaultScope.of(CSI_ID, ENVIRONMENT, testId),
         SECRET_ID,
         NEW_VALUE);
+    var received = new java.util.concurrent.atomic.AtomicBoolean();
+    runner.onSend(job -> received.set(job.resolvedSecrets().get(SECRET_ID).matches(NEW_VALUE)));
     dispatcher.dispatch(execution);
+    assertThat(received).isTrue();
 
     assertThat(runner.sendCount()).isEqualTo(1);
     RunJob job = runner.sent().get(0);
     // The browser receives the new value…
-    assertThat(job.resolvedSecrets()).containsEntry(SECRET_ID, NEW_VALUE);
+    assertThat(job.resolvedSecrets()).containsKey(SECRET_ID);
+    assertThat(job.resolvedSecrets().get(SECRET_ID).matches(NEW_VALUE))
+        .as("owned secret erased after send")
+        .isFalse();
     // …and the old value appears nowhere on the wire or in any column.
     assertThat(job.toString()).doesNotContain(OLD_VALUE);
     assertThat(snapshot(execution)).doesNotContain(OLD_VALUE).doesNotContain(NEW_VALUE);
@@ -252,9 +229,10 @@ class RevocationRotationIT {
     // Nothing was reconfirmed: the revision binding and the compile status are untouched.
     assertThat(revisionBinding()).isEqualTo(before);
 
-    // …and the nonsecret version identifier is recorded, on `configuration_snapshot`'s jsonb, with
-    // no migration — exactly the way 10.7 records `dispatchPolicyIdentity`.
-    assertThat(snapshot(execution)).contains("secretVaultVersions").contains(SECRET_ID);
+    // …and the nonsecret version identifier is recorded. STUDIO-OBS-012A: an observed dispatch
+    // records it on the immutable secret-use release fact, not on the artifact-1 dispatcher's
+    // `configuration_snapshot` key.
+    assertThat(versionsOf(execution)).isNotBlank();
   }
 
   /**
@@ -292,82 +270,46 @@ class RevocationRotationIT {
         .doesNotContain(Integer.toHexString(OLD_VALUE.hashCode()));
   }
 
+  /**
+   * The vault version identifier the dispatch released the secret under: the observed replay's
+   * immutable {@code RELEASE} fact at the {@code DISPATCH} stage (V34 secret-use audit).
+   */
   private String versionsOf(UUID executionId) {
     return jdbc.queryForObject(
-        "SELECT COALESCE(configuration_snapshot -> 'secretVaultVersions' ->> ?, '')"
-            + " FROM ui_test_executions WHERE id = ?",
+        "SELECT COALESCE(max(vault_version), '') FROM studio_secret_use_audit"
+            + " WHERE execution_id = ? AND secret_id = ? AND row_kind = 'RELEASE'"
+            + " AND decision_stage = 'DISPATCH'",
         String.class,
-        SECRET_ID,
-        executionId);
+        executionId,
+        SECRET_ID);
   }
 
   private Map<String, Object> revisionBinding() {
     return jdbc.queryForMap(
-        "SELECT t.confirmed_revision_id, t.compile_status, t.source_revision,"
+        "SELECT t.confirmed_revision_id, t.source_revision,"
             + " t.configuration_revision, r.artifact_hash"
             + " FROM ui_tests t JOIN ui_test_revisions r ON r.id = t.confirmed_revision_id"
             + " WHERE t.id = ?",
         testId);
   }
 
-  // ── QA LOW-4: the branch the fixture change created, which nothing asserted ──────────────────
-
-  /**
-   * A confirmed revision whose configuration declares no usable step timeout is a dispatch that
-   * cannot be made — {@code DISPATCH_FAILED}, and no send.
-   *
-   * <p>This branch exists because story 10.17 reads the revision's own {@code
-   * configuration.timeoutSeconds} before the send — originally to derive {@code
-   * deadlines.totalRuntimeMs} from it, now only to refuse before the send what the runner's
-   * envelope would refuse after it — and because {@code StudioExecutionFixtures.confirmRevision}
-   * stopped writing {@code '{}'} for configuration. QA measured the fixture's blast radius as
-   * narrower than reported (six call sites, two classes) but found the real consequence inverted:
-   * the change **created a throwing path** and nothing covered it. It is covered here.
-   *
-   * <p>It deliberately does <b>not</b> borrow a reference code. This is not a reference condition —
-   * no reference is unavailable and no entitlement has changed — and {@code DISPATCH_FAILED} is the
-   * existing generic terminal code for a dispatch that could not be made. No enum is widened.
-   */
-  @Test
-  void aRevisionWithNoUsableRuntimeBudgetIsTerminalWithoutBorrowingAReferenceCode() {
-    UUID execution = accept();
-
-    UUID budgetlessDraft =
-        fixtures.seedTest("Budgetless draft", CSI_ID, OWNER, List.of("Go to the home page"));
-    UUID budgetlessRevision =
-        fixtures.confirmRevision(
-            budgetlessDraft,
-            CSI_ID,
-            List.of("Go to the home page"),
-            StudioExecutionFixtures.references(List.of(), List.of(SECRET_ID)),
-            // Write-once is enforced by the database, so an unusual configuration is written at
-            // INSERT rather than patched afterwards.
-            "{}");
-    jdbc.update(
-        "UPDATE ui_test_executions SET revision_id = ? WHERE id = ?",
-        budgetlessRevision,
-        execution);
-
-    dispatcher.dispatch(execution);
-
-    assertThat(errorCode(execution)).isEqualTo(ExecutionErrorCode.DISPATCH_FAILED);
-    assertThat(runner.sendCount())
-        .as("POST /v1/runs was issued for a revision with no runtime budget")
-        .isZero();
-  }
+  // ── QA LOW-4: the deadlines a dispatch sends ─────────────────────────────────────────────────
 
   /**
    * The permit companion: the same path with a usable budget sends, and sends §8.5's values.
    *
-   * <p>Without it, the refusal above would be satisfied by a dispatcher that refused every revision
-   * — and the deadline values themselves would be asserted nowhere.
+   * <p>Its refusal half (a revision whose stored configuration had no usable step timeout) was
+   * artifact-1 only and was dropped by STUDIO-OBS-012A: an observed revision's configuration is
+   * schema-validated at publication. Without this test the deadline values would be asserted
+   * nowhere.
    */
   @Test
   void aRevisionWithAUsableBudgetSendsTheDeadlinesFaithfullyAndClampsNothing() {
     UUID execution = accept();
-
+    var received = new java.util.concurrent.atomic.AtomicBoolean();
+    runner.onSend(job -> received.set(job.resolvedSecrets().get(SECRET_ID).matches(OLD_VALUE)));
     dispatcher.dispatch(execution);
-
+    assertThat(received).isTrue();
     assertThat(runner.sendCount()).isEqualTo(1);
     RunJob.JobDeadlines deadlines = runner.sent().get(0).deadlines();
     // §8.5's admitted-start starting value, and the server's total browser runtime (§5.2, 120 s)

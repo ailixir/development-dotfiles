@@ -9,11 +9,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
- * Read access to immutable compiled revisions.
+ * Read access to immutable revisions.
  *
- * <p>Revisions are never updated or deleted through this repository: every mutation goes through
- * {@code CompileStateService}'s conditional statements, and the database trigger installed in V12
- * rejects anything else. Revisions of a soft-deleted test stay readable (AC-14).
+ * <p>Revisions are never updated or deleted through this repository: they are written by the guided
+ * publication's conditional statements, and the database trigger installed in V12 rejects anything
+ * else. Revisions of a soft-deleted test stay readable (AC-14).
  */
 public interface UITestRevisionRepository extends JpaRepository<UITestRevision, UUID> {
 

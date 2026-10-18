@@ -7,6 +7,7 @@ import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.VideoEvidence;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.networknt.schema.JsonSchema;
@@ -38,6 +39,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -47,9 +50,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-@Import(TestEvidenceStores.class)
+@Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
 @Testcontainers(disabledWithoutDocker = true)
 class ExecutionVideoEvidenceIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60472";
   private static final String OWNER = "video-evidence-owner@citi.com";
@@ -104,7 +112,12 @@ class ExecutionVideoEvidenceIT {
 
   private UUID newExecution() {
     return studioService
-        .executeTest(testId, StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"), null)
+        .executeTest(
+            testId,
+            StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner"),
+            null,
+            ObservedPublicationFixture.request(
+                StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner")))
         .executionId();
   }
 
@@ -332,11 +345,12 @@ class ExecutionVideoEvidenceIT {
   /** The code the frozen document's {@code expired} example carries, read at test time. */
   private static String expiredCodeFromContract() throws IOException {
     ContractDocument document = ContractDocument.load();
+    // E-1: read through a $ref when the route declares one (C2a); the value is unchanged.
     Object value =
         ContractDocument.at(
-            document.getOperation(ContractDocument.VIDEO_PATH),
-            "responses",
-            "410",
+            document.deref(
+                ContractDocument.at(
+                    document.getOperation(ContractDocument.VIDEO_PATH), "responses", "410")),
             "content",
             "application/json",
             "examples",

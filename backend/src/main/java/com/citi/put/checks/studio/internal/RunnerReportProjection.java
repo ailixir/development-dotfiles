@@ -3,9 +3,11 @@ package com.citi.put.checks.studio.internal;
 import com.citi.put.checks.studio.StudioValidationException;
 import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.dto.ExecutionLogEntry;
+import com.citi.put.checks.studio.dto.ReplayFailure;
 import com.citi.put.checks.studio.dto.RuntimeVersions;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.dto.VideoEvidence;
+import com.citi.put.checks.studio.internal.dto.RunOutcome;
 import com.citi.put.checks.studio.internal.dto.RunnerEvidence;
 import com.citi.put.checks.studio.internal.dto.RunnerLogEntry;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
@@ -78,58 +80,105 @@ public final class RunnerReportProjection {
           RunnerEvidence.FAILED,
           RunnerEvidence.UNAVAILABLE);
 
+  /**
+   * Which clause of the observed pre-Ready terminal rule a report failed (012A ruling R8.2).
+   *
+   * <p>A server-side category, never derived from report text. It exists so the refusal can be
+   * logged without logging the report: the HTTP answer stays the same data-free {@code
+   * INVALID_REPORT}. Clauses are checked in this order and the first that fails is named.
+   */
+  public enum ObservedPreReadyClause {
+    KIND,
+    ORIGIN,
+    RESULT,
+    OUTER_CODE,
+    REASON,
+    COORDINATES,
+    LOG_READING
+  }
+
+  /** The observed-authoring contract generation that prefixes the public {@code validator}. */
+  private static final String OBSERVED_CONTRACT_GENERATION = "3";
+
+  /** The runner protocol's replay login code and its run-fault carrier, compared exactly. */
+  private static final String REPLAY_LOGIN_REQUIRED = "LOGIN_REQUIRED";
+
+  private static final String REPLAY_RUN_ERROR = "RUN_ERROR";
+
+  private static final Set<String> OBSERVED_PRE_READY_REASONS =
+      Set.of(
+          "INVALID_CONTRACT",
+          "PROFILE_MISMATCH",
+          "POLICY_REFUSED",
+          "AUTHORIZATION_EXPIRED",
+          "REFERENCE_MISMATCH",
+          "PASSWORD_CONTROL_READ_REFUSED",
+          "TARGET_DRIFT",
+          "TIMEOUT",
+          "CANCELLED",
+          "INTERNAL_ERROR");
+
   /** Validate the original coordinates before projection can deduplicate or synthesize entries. */
   static void requireObservedPreReadyFailure(RunnerReport report, int sourceCount) {
-    Set<String> reasons =
-        Set.of(
-            "INVALID_CONTRACT",
-            "PROFILE_MISMATCH",
-            "POLICY_REFUSED",
-            "AUTHORIZATION_EXPIRED",
-            "ACCOUNT_UNAVAILABLE",
-            "ACCOUNT_UNKNOWN",
-            "TARGET_DRIFT",
-            "TIMEOUT",
-            "CANCELLED",
-            "INTERNAL_ERROR");
-    boolean valid =
-        RunnerReport.FINAL.equals(report.kind())
-            && report.browserStartedAt() == null
-            && report.outcome() != null
-            && "ERROR".equals(report.outcome().result())
-            && "RUN_ERROR".equals(report.outcome().errorCode())
-            && report.outcome().errorMessage() != null
-            && reasons.contains(report.outcome().errorMessage())
-            && sourceCount >= 1
-            && sourceCount <= 100
-            && report.steps() != null
-            && report.steps().size() == sourceCount;
-    if (valid) {
-      Set<Integer> coordinates = new java.util.HashSet<>();
-      for (RunnerStepState step : report.steps()) {
-        if (step == null
-            || step.stepIndex() == null
-            || step.stepIndex() < 0
-            || step.stepIndex() >= sourceCount
-            || !coordinates.add(step.stepIndex())
-            || !StepResult.SKIPPED.equals(step.status())
-            || step.failure() != null
-            || step.startedAtMs() != null
-            || step.finishedAtMs() != null
-            || step.durationMs() != null) {
-          valid = false;
-          break;
-        }
+    if (observedPreReadyRefusal(report, sourceCount) != null) {
+      throw observedPreReadyRefused();
+    }
+  }
+
+  /**
+   * The first failed clause of the observed pre-Ready terminal rule, or {@code null} when the
+   * report satisfies all of them. Accepts exactly the reports {@link
+   * #requireObservedPreReadyFailure} accepts.
+   */
+  static ObservedPreReadyClause observedPreReadyRefusal(RunnerReport report, int sourceCount) {
+    if (!RunnerReport.FINAL.equals(report.kind())) {
+      return ObservedPreReadyClause.KIND;
+    }
+    if (report.browserStartedAt() != null) {
+      return ObservedPreReadyClause.ORIGIN;
+    }
+    if (report.outcome() == null || !"ERROR".equals(report.outcome().result())) {
+      return ObservedPreReadyClause.RESULT;
+    }
+    if (!"RUN_ERROR".equals(report.outcome().errorCode())) {
+      return ObservedPreReadyClause.OUTER_CODE;
+    }
+    if (report.outcome().errorMessage() == null
+        || !OBSERVED_PRE_READY_REASONS.contains(report.outcome().errorMessage())) {
+      return ObservedPreReadyClause.REASON;
+    }
+    if (sourceCount < 1
+        || sourceCount > 100
+        || report.steps() == null
+        || report.steps().size() != sourceCount) {
+      return ObservedPreReadyClause.COORDINATES;
+    }
+    Set<Integer> coordinates = new java.util.HashSet<>();
+    for (RunnerStepState step : report.steps()) {
+      if (step == null
+          || step.stepIndex() == null
+          || step.stepIndex() < 0
+          || step.stepIndex() >= sourceCount
+          || !coordinates.add(step.stepIndex())
+          || !StepResult.SKIPPED.equals(step.status())
+          || step.failure() != null
+          || step.startedAtMs() != null
+          || step.finishedAtMs() != null
+          || step.durationMs() != null) {
+        return ObservedPreReadyClause.COORDINATES;
       }
     }
     if (report.logs() != null
         && report.logs().stream().anyMatch(log -> log == null || log.atMs() != null)) {
-      valid = false;
+      return ObservedPreReadyClause.LOG_READING;
     }
-    if (!valid) {
-      throw InternalCallbackException.badRequest(
-          InternalCallbackCodes.INVALID_REPORT, "Invalid observed pre-Ready terminal report");
-    }
+    return null;
+  }
+
+  /** The one refusal for every failed clause: data-free, identical to the pre-R8 answer. */
+  static InternalCallbackException observedPreReadyRefused() {
+    return InternalCallbackException.badRequest(
+        InternalCallbackCodes.INVALID_REPORT, "Invalid observed pre-Ready terminal report");
   }
 
   private RunnerReportProjection() {}
@@ -150,7 +199,8 @@ public final class RunnerReportProjection {
       String videoError,
       Boolean videoPartial,
       Instant videoExpiresAt,
-      String manifestKey) {}
+      String manifestKey,
+      ReplayFailure replayFailure) {}
 
   /**
    * Projects one report.
@@ -179,10 +229,45 @@ public final class RunnerReportProjection {
       Duration evidenceRetention,
       Instant now,
       boolean cancelRequested) {
+    return project(report, original, evidenceRetention, now, cancelRequested, false);
+  }
+
+  public static Projected project(
+      RunnerReport report,
+      List<StepResult> original,
+      Duration evidenceRetention,
+      Instant now,
+      boolean cancelRequested,
+      boolean revoked) {
+    return project(report, original, List.of(), evidenceRetention, now, cancelRequested, revoked);
+  }
+
+  /**
+   * Projects one report and derives the replay cause (STUDIO-OBS-008 T0 ruling A1).
+   *
+   * @param revisionStepIds the confirmed revision's ordered authoring step IDs, one per original
+   *     step, taken from the replay artifact the caller has already parsed. Empty for a row with no
+   *     observed revision (legacy, pre-Ready) or whenever the list does not line up with {@code
+   *     original}; an empty list never names a cause
+   */
+  public static Projected project(
+      RunnerReport report,
+      List<StepResult> original,
+      List<String> revisionStepIds,
+      Duration evidenceRetention,
+      Instant now,
+      boolean cancelRequested,
+      boolean revoked) {
     validate(report);
 
-    String terminalErrorCode = terminalErrorCode(report, cancelRequested);
+    String terminalErrorCode =
+        report.outcome() == null
+            ? null
+            : RunnerOutcomeCodes.errorCodeFor(
+                report.outcome().result(), report.outcome().errorCode(), cancelRequested, revoked);
     List<StepResult> stepResults = projectSteps(report, original, terminalErrorCode);
+    ReplayFailure replayFailure =
+        replayFailure(report, terminalErrorCode, original.size(), revisionStepIds);
     List<ExecutionLogEntry> logs = projectLogs(report, original.size());
     RuntimeVersions runtime = projectRuntime(report.runtimeVersions());
 
@@ -238,7 +323,96 @@ public final class RunnerReportProjection {
         videoError,
         videoPartial,
         videoExpiresAt,
-        manifestKey);
+        manifestKey,
+        replayFailure);
+  }
+
+  /**
+   * The one named cause of a replay that stopped at a learned step, or null (T0 ruling A1.2).
+   *
+   * <p>Only a FINAL report whose API-assigned {@code error_code} is null can name one: a cancel, a
+   * revocation or a parent timeout wins. The comparison is exact equality against the runner
+   * protocol's closed codes, never a reading of text, so a redactor that altered a reason yields
+   * "no cause named", which is fail-closed. Nothing from the report beyond the step coordinates and
+   * the {@code loginStepsPresent} boolean is copied.
+   *
+   * <p>A login report naming a step the revision does not have, or a step that did not report
+   * {@code FAIL}, is a divergence and refused like any other coordinate the revision lacks. Every
+   * other shape, drift included, gives null and never a refusal.
+   */
+  private static ReplayFailure replayFailure(
+      RunnerReport report, String terminalErrorCode, int stepCount, List<String> revisionStepIds) {
+    RunOutcome outcome = report.outcome();
+    if (!RunnerReport.FINAL.equals(report.kind())
+        || outcome == null
+        || terminalErrorCode != null
+        || revisionStepIds == null
+        || revisionStepIds.isEmpty()
+        || revisionStepIds.size() != stepCount) {
+      return null;
+    }
+    if (RunOutcome.FAILED.equals(outcome.result())
+        && REPLAY_LOGIN_REQUIRED.equals(outcome.errorCode())
+        && outcome.detail() != null) {
+      int index = revisionStepIds.indexOf(outcome.detail().stepId());
+      if (index < 0 || !reportedFail(report, index)) {
+        throw new StudioValidationException(
+            "INVALID_REPORT", "A login failure names a step the confirmed revision did not fail");
+      }
+      return ReplayFailure.loginRequired(
+          outcome.detail().stepId(), index, outcome.detail().loginStepsPresent());
+    }
+    if (RunOutcome.ERROR.equals(outcome.result())
+        && REPLAY_RUN_ERROR.equals(outcome.errorCode())
+        && ReplayFailure.TARGET_DRIFT.equals(outcome.errorMessage())) {
+      RunnerStepState failed = null;
+      for (RunnerStepState step : steps(report)) {
+        if (StepResult.FAIL.equals(step.status())) {
+          if (failed != null) {
+            return null;
+          }
+          failed = step;
+        }
+      }
+      if (failed == null
+          || !ReplayFailure.TARGET_DRIFT.equals(failed.failure())
+          || failed.stepIndex() >= revisionStepIds.size()) {
+        return null;
+      }
+      String stepId = revisionStepIds.get(failed.stepIndex());
+      if (stepId == null || stepId.isEmpty() || stepId.length() > 256) {
+        return null;
+      }
+      return ReplayFailure.targetDrift(stepId, failed.stepIndex());
+    }
+    return null;
+  }
+
+  /**
+   * True when the report has one of the two shapes that can name a replay cause. A cheap pre-check
+   * for a caller that must load the revision before projecting; {@link #project} still decides.
+   */
+  static boolean mayNameReplayFailure(RunnerReport report) {
+    RunOutcome outcome = report.outcome();
+    if (!RunnerReport.FINAL.equals(report.kind()) || outcome == null) {
+      return false;
+    }
+    return (RunOutcome.FAILED.equals(outcome.result())
+            && REPLAY_LOGIN_REQUIRED.equals(outcome.errorCode())
+            && outcome.detail() != null)
+        || (RunOutcome.ERROR.equals(outcome.result())
+            && REPLAY_RUN_ERROR.equals(outcome.errorCode())
+            && ReplayFailure.TARGET_DRIFT.equals(outcome.errorMessage()));
+  }
+
+  /** True when the report carries step {@code index} with status {@code FAIL}. */
+  private static boolean reportedFail(RunnerReport report, int index) {
+    for (RunnerStepState step : steps(report)) {
+      if (step.stepIndex() == index && StepResult.FAIL.equals(step.status())) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
@@ -445,17 +619,32 @@ public final class RunnerReportProjection {
     return List.copyOf(projected);
   }
 
-  /** {@code runtimeVersions} (open) onto the §4.6 subset the execution keeps. */
+  /**
+   * {@code runtimeVersions} (open) onto the §4.6 subset the execution keeps.
+   *
+   * <p>STUDIO-OBS-009 AC-1 P2 b (T0 ruling A7): the five public names stay and their meanings point
+   * at the observed identities the runner stamps. The artifact-1 keys ({@code chromiumBuild},
+   * {@code validator}/{@code validatorSchema}, {@code executor}) are gone from the runner and are
+   * never read as a fallback: a missing observed key leaves its field {@code null}.
+   *
+   * <ul>
+   *   <li>{@code chromium} is {@code observedChromiumBuild};
+   *   <li>{@code validator} is the contract generation, {@code 3}, then {@code ':'}, then {@code
+   *       observedSchemaBundleHash};
+   *   <li>{@code executor} is {@code observedBrowserLauncherSha256};
+   *   <li>{@code playwright} and {@code image} are unchanged.
+   * </ul>
+   */
   private static RuntimeVersions projectRuntime(Map<String, Object> reported) {
     if (reported == null || reported.isEmpty()) {
       return RuntimeVersions.unknown();
     }
+    String schemaBundleHash = text(reported, "observedSchemaBundleHash");
     return new RuntimeVersions(
         text(reported, "playwright"),
-        // ADR-001 names the runner's key `chromiumBuild`; the public field stays `chromium`.
-        text(reported, "chromiumBuild"),
-        text(reported, "validator", "validatorSchema"),
-        text(reported, "executor"),
+        text(reported, "observedChromiumBuild"),
+        schemaBundleHash == null ? null : OBSERVED_CONTRACT_GENERATION + ":" + schemaBundleHash,
+        text(reported, "observedBrowserLauncherSha256"),
         text(reported, "image"));
   }
 

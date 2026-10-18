@@ -1,7 +1,7 @@
 package com.citi.put.checks.studio.guided.translation;
 
 import com.citi.put.checks.studio.StudioRepository;
-import com.citi.put.checks.studio.compile.CredentialPatternScreen;
+import com.citi.put.checks.studio.dispatch.StudioRunnerTls;
 import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.citi.put.checks.studio.guided.session.GuidedSessionRepository;
@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @Configuration
@@ -38,8 +39,9 @@ public class GuidedTranslationConfiguration {
   GuidedSourceClassifier guidedSourceClassifier(
       GuidedContracts contracts,
       GuidedTranslationProperties properties,
-      CredentialPatternScreen screen) {
-    return new GuidedSourceClassifier(contracts, properties, screen);
+      CredentialPatternScreen screen,
+      GuidedPromptAssembler prompts) {
+    return new GuidedSourceClassifier(contracts, properties, screen, prompts);
   }
 
   @Bean
@@ -64,7 +66,7 @@ public class GuidedTranslationConfiguration {
 
   @Bean
   GuidedPromptAssembler guidedPromptAssembler(GuidedContracts contracts) {
-    return new GuidedPromptAssembler(contracts);
+    return GuidedPromptAssembler.createForProductionFactory(contracts);
   }
 
   @Bean
@@ -73,7 +75,10 @@ public class GuidedTranslationConfiguration {
   }
 
   @Bean
-  @ConditionalOnProperty(name = "studio.guided-authoring.translation.enabled", havingValue = "true")
+  @ConditionalOnProperty(
+      name = "studio.guided-authoring.translation.enabled",
+      havingValue = "true",
+      matchIfMissing = true)
   GuidedTranslationService guidedTranslationService(
       GuidedSessionService sessions,
       GuidedSessionRepository repository,
@@ -89,7 +94,7 @@ public class GuidedTranslationConfiguration {
       GuidedTranslationProperties properties,
       JdbcTemplate jdbc) {
     var service =
-        new GuidedTranslationService(
+        GuidedTranslationService.fromPureAssemblerFactory(
             sessions,
             repository,
             store,
@@ -107,19 +112,32 @@ public class GuidedTranslationConfiguration {
     return service;
   }
 
+  /**
+   * The durable continuation timer. A class-level {@code @Profile} on the coordinator would be
+   * ignored (it is a bean method, not a scanned component), so the gate sits here: scheduler role
+   * only, the same expression as {@code SchedulingCoordinator} (STUDIO-OBS-009 AC-5, ruling A5). It
+   * reaches the API over HTTP ({@code controller-origin}), so it does not need to share a pod with
+   * it.
+   */
   @Bean
-  @ConditionalOnProperty(name = "studio.guided-authoring.translation.enabled", havingValue = "true")
+  @Profile("!api | worker")
+  @ConditionalOnProperty(
+      name = "studio.guided-authoring.translation.enabled",
+      havingValue = "true",
+      matchIfMissing = true)
   GuidedTranslationCoordinator guidedTranslationCoordinator(
       GuidedTranslationStore store,
       GuidedSessionRepository sessions,
       GuidedContracts contracts,
-      @Value("${studio.guided-authoring.translation.controller-origin}") String origin,
+      @Value(
+              "${studio.guided-authoring.translation.controller-origin:https://unconfigured.invalid}")
+          String origin,
       @Value(
               "${studio.guided-authoring.translation.controller-token-file:${stu"
-                  + "dio.guided-authoring.controller-token-file}}")
-          String token)
-      throws java.security.NoSuchAlgorithmException {
+                  + "dio.guided-authoring.controller-token-file:}}")
+          String token,
+      StudioRunnerTls tls) {
     return new GuidedTranslationCoordinator(
-        store, sessions, contracts, java.net.URI.create(origin), java.nio.file.Path.of(token));
+        store, sessions, contracts, java.net.URI.create(origin), java.nio.file.Path.of(token), tls);
   }
 }

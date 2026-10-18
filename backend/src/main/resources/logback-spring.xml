@@ -36,9 +36,40 @@
         </encoder>
     </appender>
 
+    <!-- STUDIO-OBS-014 AC-10 (ruling AR-2 e): the per-action Studio audit stream for SIEM. IDs and
+         closed codes only, all as structured arguments; no MDC (unrelated context never leaks into
+         SIEM) and no free-text message. SIEM forwarding selects on stream=studio-audit (OBS-009). -->
+    <appender name="AUDIT_JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <timestamp>
+                    <fieldName>timestamp</fieldName>
+                </timestamp>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <arguments/>
+                <pattern>
+                    <pattern>
+                        {
+                            "service": "${SERVICE_NAME}",
+                            "stream": "studio-audit"
+                        }
+                    </pattern>
+                </pattern>
+            </providers>
+        </encoder>
+    </appender>
+
     <root level="INFO">
         <appender-ref ref="JSON_CONSOLE"/>
     </root>
 
     <logger name="com.citi.put.checks" level="INFO"/>
+
+    <!-- INFO is pinned so lowering com.citi.put.checks cannot silence the audit; additivity=false
+         keeps it out of JSON_CONSOLE (no double emission). -->
+    <logger name="com.citi.put.checks.audit.studio" level="INFO" additivity="false">
+        <appender-ref ref="AUDIT_JSON"/>
+    </logger>
 </configuration>

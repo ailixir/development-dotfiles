@@ -9,13 +9,13 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 /** Immutable per-session ceilings bind to the approved flat kebab-case configuration keys. */
 @ConfigurationProperties("studio.guided-authoring")
 public record GuidedSessionProperties(
-    boolean enabled,
+    @DefaultValue("true") boolean enabled,
     @DefaultValue("600") int maxSessionSeconds,
     @DefaultValue("200") int maxActions,
     @DefaultValue("400") int maxObservations,
     @DefaultValue("100") int maxModelProposals,
-    @DefaultValue("128000") int maxModelInputTokensTotal,
-    @DefaultValue("32000") int maxModelOutputTokensTotal,
+    @DefaultValue("786432") int maxModelInputTokensTotal,
+    @DefaultValue("98304") int maxModelOutputTokensTotal,
     @DefaultValue("32768") int maxObservationBytes,
     @DefaultValue("500") int maxObservationNodes,
     @DefaultValue("8") int maxObservationDepth,
@@ -36,8 +36,8 @@ public record GuidedSessionProperties(
         limits.getOrDefault("maxActions", 200),
         limits.getOrDefault("maxObservations", 400),
         limits.getOrDefault("maxModelProposals", 100),
-        limits.getOrDefault("maxModelInputTokensTotal", 128000),
-        limits.getOrDefault("maxModelOutputTokensTotal", 32000),
+        limits.getOrDefault("maxModelInputTokensTotal", 786432),
+        limits.getOrDefault("maxModelOutputTokensTotal", 98304),
         limits.getOrDefault("maxObservationBytes", 32768),
         limits.getOrDefault("maxObservationNodes", 500),
         limits.getOrDefault("maxObservationDepth", 8),

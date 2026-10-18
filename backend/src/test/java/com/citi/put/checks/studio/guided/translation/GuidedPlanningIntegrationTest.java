@@ -8,17 +8,17 @@ import com.citi.put.checks.security.CsiOwnershipEvaluator;
 import com.citi.put.checks.security.UserIdentity;
 import com.citi.put.checks.studio.StudioRepository;
 import com.citi.put.checks.studio.authoring.AuthoringRevisionIdentity;
-import com.citi.put.checks.studio.compile.CredentialPatternScreen;
-import com.citi.put.checks.studio.compile.gateway.GenAiGatewayTransport;
-import com.citi.put.checks.studio.compile.gateway.StudioGatewayProperties;
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
+import com.citi.put.checks.studio.gateway.GenAiGatewayTransport;
+import com.citi.put.checks.studio.gateway.StudioGatewayProperties;
 import com.citi.put.checks.studio.guided.bridge.GuidedAssignmentStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedBindingStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedDispatchService;
 import com.citi.put.checks.studio.guided.bridge.GuidedMaterializationService;
 import com.citi.put.checks.studio.guided.bridge.GuidedPreparationStore;
 import com.citi.put.checks.studio.guided.bridge.GuidedRunnerClient;
+import com.citi.put.checks.studio.guided.translation.CredentialPatternScreen;
 import com.citi.put.checks.studio.guided.translation.GenAiGuidedLlmGatewayClient;
 import com.citi.put.checks.studio.guided.translation.GuidedClarificationContextStore;
 import com.citi.put.checks.studio.guided.translation.GuidedDependencyPlanner;
@@ -35,12 +35,14 @@ import com.citi.put.checks.studio.guided.translation.GuidedStepVerifier;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationProperties;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationService;
 import com.citi.put.checks.studio.guided.translation.GuidedTranslationStore;
+import com.citi.put.checks.studio.support.RunnerProcessHarness;
+import com.citi.put.checks.studio.support.RunnerTestTls;
+import com.citi.put.checks.studio.support.RunnerTestTls.Identity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -50,11 +52,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
-import java.security.KeyStore;
 import java.security.MessageDigest;
-import java.security.SecureRandom;
 import java.security.Signature;
-import java.security.cert.X509Certificate;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
@@ -68,9 +67,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
-import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManagerFactory;
 import javax.sql.DataSource;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.AfterAll;
@@ -111,6 +108,10 @@ import org.testcontainers.containers.PostgreSQLContainer;
     })
 class GuidedPlanningIntegrationTest {
   static final GuidedContracts C = new GuidedContracts();
+
+  /** Whole per-session model ceilings the shared CSI's day holds in this class. */
+  static final int DAILY_SESSION_CEILINGS = 10_000;
+
   static final String ONE = UUID.randomUUID().toString(),
       TWO = UUID.randomUUID().toString(),
       THREE = UUID.randomUUID().toString();
@@ -124,6 +125,9 @@ class GuidedPlanningIntegrationTest {
   static volatile boolean askField;
   static volatile boolean askSource;
   static volatile String hostileMutation;
+  static volatile String guardTarget;
+  static volatile boolean askSavedSource;
+  static volatile boolean missingGuardTarget;
   static volatile boolean sourceChoiceSubstitution;
   static volatile boolean futureSourceQuestion;
   static volatile boolean redefineSourceQuestion;
@@ -134,10 +138,21 @@ class GuidedPlanningIntegrationTest {
   static volatile boolean corruptFirstReply;
   static volatile boolean refuseSource;
   static volatile boolean omitUsage;
-  static volatile boolean reportedThoughtOverage;
+
+  /** Thought tokens the provider stub reports on top of its 100 visible ones; 0 reports none. */
+  static volatile int reportedThoughtTokens;
+
   static final java.util.concurrent.atomic.AtomicReference<Runnable> BEFORE_RESPONSE =
       new java.util.concurrent.atomic.AtomicReference<>();
   static volatile boolean forceComplete;
+
+  /**
+   * STUDIO-OBS-014 TEST-001: null keeps today's Submit (a button outside any form). "button" or
+   * "input" places the Submit control inside a labelled form (exported with a formId) as a {@code
+   * <button>} or an {@code <input type=submit>}, so the side-effect stance applies.
+   */
+  static volatile String formSubmit;
+
   static final List<String> PROVIDER_KINDS = new CopyOnWriteArrayList<>();
   static final String SAVED = "PRIVATE-SAVED-" + UUID.randomUUID();
   static final String AUTHORED = "London";
@@ -188,10 +203,10 @@ class GuidedPlanningIntegrationTest {
                 .putObject("usageMetadata")
                 .put("promptTokenCount", 100)
                 .put("candidatesTokenCount", 100);
-            if (reportedThoughtOverage) {
+            if (reportedThoughtTokens > 0) {
               envelope
                   .withObject("/usageMetadata")
-                  .put("thoughtsTokenCount", 40000)
+                  .put("thoughtsTokenCount", reportedThoughtTokens)
                   .put("toolUsePromptTokenCount", 25)
                   .put("cachedContentTokenCount", 80);
             }
@@ -219,11 +234,9 @@ class GuidedPlanningIntegrationTest {
                         : "<output aria-label=\"" + HOSTILE + "\">Instruction</output>")
                     + "<label>Destination<textarea></textarea></label><label>Backup"
                     + " destination<textarea></textarea></label><output aria-label='Confirmation'"
-                    + " hidden>Submitted</output><button"
-                    + " onclick=\"document.querySelector('[aria-label=Confirmation]').hidden="
-                    + "false;fetch('/translation-submit',{method:'POST',body:JSON.stringify({"
-                    + "destination:document.querySelectorAll('textarea')[0].value,"
-                    + "backup:document.querySelectorAll('textarea')[1].value})})\">Submit</button></main>";
+                    + " hidden>Submitted</output>"
+                    + submitControl()
+                    + "</main>";
             byte[] body = html.getBytes(StandardCharsets.UTF_8);
             exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
             exchange.sendResponseHeaders(200, body.length);
@@ -242,6 +255,46 @@ class GuidedPlanningIntegrationTest {
     } catch (Exception error) {
       throw new ExceptionInInitializerError(error);
     }
+  }
+
+  private static String submitControl() {
+    String effect =
+        "document.querySelector('[aria-label=Confirmation]').hidden="
+            + "false;fetch('/translation-submit',{method:'POST',body:JSON.stringify({"
+            + "destination:document.querySelectorAll('textarea')[0].value,"
+            + "backup:document.querySelectorAll('textarea')[1].value})})";
+    String control = formSubmit;
+    if (control == null) {
+      return "<button onclick=\""
+          + effect
+          + "\">"
+          + (guardTarget == null ? "Submit" : guardTarget)
+          + "</button>";
+    }
+    // AR-SEC001-FM I-1/I-2: the OBS-007 login shape (a form with no accessible name, so the
+    // collector exports no form node and every control has formId null), and a submit button
+    // associated through the form= attribute from outside its form.
+    if (control.equals("form-attribute")) {
+      return "<form id='order' onsubmit=\"event.preventDefault();"
+          + effect
+          + "\"></form><button form='order'>Submit</button>";
+    }
+    if (control.startsWith("unlabelled-")) {
+      return "<form onsubmit=\"event.preventDefault();"
+          + effect
+          + "\">"
+          + (control.equals("unlabelled-input")
+              ? "<input type='submit' value='Submit'>"
+              : "<button>Submit</button>")
+          + "</form>";
+    }
+    return "<form aria-label='Order form' onsubmit=\"event.preventDefault();"
+        + effect
+        + "\">"
+        + (control.equals("input")
+            ? "<input type='submit' value='Submit'>"
+            : "<button>Submit</button>")
+        + "</form>";
   }
 
   @DynamicPropertySource
@@ -315,6 +368,24 @@ class GuidedPlanningIntegrationTest {
       return new GuidedStepVerifier(store);
     }
 
+    private com.citi.put.checks.studio.guided.publication.ObservedReplayPins fixturePins() {
+      var policy =
+          C.object()
+              .put("version", 1)
+              .put("policyId", "fixture-policy")
+              .put("policyVersion", "1")
+              .put("applicationId", "orders")
+              .put("environment", "fixture")
+              .put("entryPolicyId", "blank");
+      policy.putArray("allowedOrigins").add(Environment.ORIGIN);
+      policy.putArray("rules");
+      policy.putNull("applicationPolicy");
+      return new com.citi.put.checks.studio.guided.publication.ObservedReplayPins(
+          C,
+          new com.citi.put.checks.studio.guided.publication.ObservedReplayProperties(
+              true, 30000, 1048576, 4194304, 2097152, "[]", "[" + policy + "]", 1280, 720));
+    }
+
     @Bean
     GuidedProductionSessionAccess access(
         GuidedSourceSnapshotRepository snapshots,
@@ -329,41 +400,11 @@ class GuidedPlanningIntegrationTest {
           store,
           verifier,
           new CsiOwnershipEvaluator(),
-          new GuidedProductionSessionAccess.AccountAccess() {
-            @Override
-            public GuidedSessionAccess.Snapshot resolve(
-                org.springframework.security.core.Authentication user, JsonNode request) {
-              ObjectNode scope =
-                  C.object()
-                      .put("principalId", "user-1")
-                      .put("csiId", "CSI-123")
-                      .put("environmentId", "fixture")
-                      .put("applicationId", "orders")
-                      .put("accountRef", "account-1")
-                      .put("sourceRevision", "1")
-                      .put("configurationRevision", "1")
-                      .put("modelDataPolicyId", "approved-authored-A")
-                      .putNull("valueTransferPolicyId");
-              scope.putArray("approvedOrigins").add(Environment.ORIGIN);
-              scope
-                  .putArray("capabilities")
-                  .add("observe")
-                  .add("navigate")
-                  .add("read")
-                  .add("fill")
-                  .add("click")
-                  .add("assert");
-              return new GuidedSessionAccess.Snapshot(
-                  scope,
-                  C.object().putArray("steps"),
-                  C.object()
-                      .put("mode", "configuredAccount")
-                      .put("connectionId", "controlled-account-only"));
-            }
-
-            @Override
-            public void checkCurrent(JsonNode session) {}
-          });
+          fixturePins(),
+          new com.citi.put.checks.studio.secrets.VaultStudioReferenceResolver(
+              new com.citi.put.checks.studio.secrets.FakeStudioVaultProvider(java.util.Map.of()),
+              (principal, csi, env, secret) -> true),
+          (principal, csi, env, secret) -> true);
     }
 
     @Bean
@@ -379,26 +420,47 @@ class GuidedPlanningIntegrationTest {
         GuidedMaterializationService materialization,
         GuidedTranslationStore store,
         GuidedClarificationContextStore questions) {
+      var sessionLimits = new GuidedSessionProperties(true, Map.of());
       var service =
-          new GuidedSessionService(
-              repository,
-              C,
-              access,
-              new GuidedSessionProperties(true, Map.of()),
-              Clock.systemUTC());
+          new GuidedSessionService(repository, C, access, sessionLimits, Clock.systemUTC());
       service.installBridge(
           materialization,
           new GuidedPreparationStore(jdbc, C),
           new GuidedBindingStore(jdbc, C, materialization),
           new GuidedAssignmentStore(jdbc, C));
       service.installTranslation(store, questions);
+      service.installEvidence(
+          new com.citi.put.checks.studio.guided.evidence.RecordedGuidedEvidenceProjection(
+              new com.citi.put.checks.studio.guided.evidence.GuidedSessionEvidenceRepository(jdbc),
+              new com.citi.put.checks.studio.guided.evidence.GuidedRecordingProperties(null),
+              false,
+              C));
+      // STUDIO-OBS-008 P2/P3: this test reads /result, so it wires the real presentation projector.
+      service.installPresentation(new GuidedPublicPresentationProjector(jdbc, C));
+      // STUDIO-OBS-014 S3: every start needs an approved governed policy for its scope.
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.installGovernance(
+          service,
+          jdbc,
+          "CSI-123",
+          "orders",
+          java.util.List.of("fixture"),
+          java.util.List.of(Environment.ORIGIN),
+          null,
+          // Every test here shares CSI-123 and reserves a full per-session ceiling per model
+          // call, so the production day (about 6 full ceilings) runs out part-way through the
+          // class. Nothing here asserts the daily budget (GuidedCsiBudgetIT does, at the
+          // production defaults): the day is sized in whole session ceilings instead.
+          new GuidedCsiBudgetProperties(
+              1000,
+              (long) sessionLimits.maxModelInputTokensTotal() * DAILY_SESSION_CEILINGS,
+              (long) sessionLimits.maxModelOutputTokensTotal() * DAILY_SESSION_CEILINGS));
       return service;
     }
 
     @Bean
     GuidedRunnerClient runner() {
       return new GuidedRunnerClient(
-          URI.create("https://localhost:" + Environment.RUNNER_PORT),
+          URI.create("https://127.0.0.1:" + Environment.RUNNER_PORT),
           Environment.TLS,
           () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
           C);
@@ -427,10 +489,9 @@ class GuidedPlanningIntegrationTest {
               1,
               131072,
               65536,
-              true,
-              0,
-              new StudioGatewayProperties.TransportRetry(0, Duration.ofMillis(1), 1, 0),
-              "classpath:studio/artifact.schema.json");
+              StudioGatewayProperties.DEFAULT_MAX_OUTPUT_TOKENS,
+              StudioGatewayProperties.ThinkingLevel.LOW,
+              StudioGatewayProperties.ProviderFeatures.ALL);
       return new GenAiGatewayTransport(props);
     }
 
@@ -474,7 +535,7 @@ class GuidedPlanningIntegrationTest {
     org.springframework.security.web.SecurityFilterChain publicFixtureIdentity(
         org.springframework.security.config.annotation.web.builders.HttpSecurity http)
         throws Exception {
-      http.securityMatcher("/api/v3/studio/guided-sessions/**")
+      http.securityMatcher("/api/v1/studio/guided-sessions/**")
           .csrf(c -> c.disable())
           .authorizeHttpRequests(c -> c.anyRequest().authenticated())
           .addFilterBefore(
@@ -507,14 +568,34 @@ class GuidedPlanningIntegrationTest {
   @Autowired GuidedTranslationService translation;
   @Autowired GuidedClarificationContextStore questions;
   @Autowired GuidedDispatchService dispatch;
+  @Autowired GuidedMaterializationService materialization;
   @Autowired GuidedLlmGatewayClient gateway;
   @Autowired GuidedSourceInputResolver inputs;
   @Autowired GuidedTranslationProperties properties;
   Environment fixture;
   UUID testId;
 
+  /** AC-4 tally (po-qa014-rulings a1): the tests of this class that plant a guard refusal. */
+  static final java.util.Set<String> PLANTED_GUARD_REFUSALS =
+      java.util.Set.of(
+          "governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied",
+          "governedDenyRefusesAnUnlabelledOrFormAttributeSubmit",
+          "hostileCurrentPageCannotSubstituteAnotherPermittedEffect",
+          "aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch",
+          "aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch",
+          "anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence",
+          "anAuthoredDeleteStillFailsTheGovernedDenyStance");
+
+  private String tallyTest;
+  private java.util.Set<String> tallyBefore;
+  private ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>
+      tallyAudit;
+
   @BeforeEach
   void setup(org.junit.jupiter.api.TestInfo testInfo) throws Exception {
+    tallyTest = testInfo.getTestMethod().orElseThrow().getName();
+    tallyBefore = com.citi.put.checks.studio.support.GuardDecisionTally.sessions(jdbc);
+    tallyAudit = attachAuditCapture();
     fixture = new Environment();
     fixture.jdbc = jdbc;
     fixture.backendPort = port;
@@ -522,6 +603,7 @@ class GuidedPlanningIntegrationTest {
     PROVIDER_BYTES.clear();
     PROVIDER_KINDS.clear();
     forceComplete = false;
+    formSubmit = null;
     SUBMITS.set(0);
     REPEATED_SELECTIONS.set(0);
     submitted = null;
@@ -530,6 +612,9 @@ class GuidedPlanningIntegrationTest {
     askField = true;
     askSource = false;
     hostileMutation = null;
+    guardTarget = null;
+    askSavedSource = false;
+    missingGuardTarget = false;
     sourceChoiceSubstitution = false;
     futureSourceQuestion = false;
     redefineSourceQuestion = false;
@@ -537,7 +622,7 @@ class GuidedPlanningIntegrationTest {
     corruptFirstReply = false;
     refuseSource = false;
     omitUsage = false;
-    reportedThoughtOverage = false;
+    reportedThoughtTokens = 0;
     BEFORE_RESPONSE.set(null);
     jdbc.update(
         "INSERT INTO users(id,sso_id,name,email,created_at) VALUES (?,'guided-fixture','Guided"
@@ -560,7 +645,8 @@ class GuidedPlanningIntegrationTest {
     jdbc.update(
         "INSERT INTO ui_tests(id, name, csi_id, environment, browser, steps, variables, authoring,"
             + " authoring_revision_inputs, created_by, created_at, updated_at) VALUES (?, 'Guided"
-            + " production','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'user-1',now(),now())",
+            + (" production','CSI-123','fixture','chromium',?::jsonb,?::jsonb,?::jsonb,?::jsonb,'user"
+                + "-1',now(),now())"),
         testId,
         mapper.writeValueAsString(TEXT),
         "[{\"name\":\"saved\",\"kind\":\"plain\",\"value\":\"" + SAVED + "\"}]",
@@ -570,11 +656,100 @@ class GuidedPlanningIntegrationTest {
 
   @AfterEach
   void stop() throws Exception {
-    fixture.closeWorker();
+    Throwable failure = null;
+    try {
+      com.citi.put.checks.studio.support.GuardDecisionTally.record(
+          GuidedPlanningIntegrationTest.class,
+          tallyTest,
+          jdbc,
+          tallyBefore,
+          List.copyOf(tallyAudit.list),
+          PLANTED_GUARD_REFUSALS);
+    } catch (Throwable tally) {
+      failure = tally;
+    } finally {
+      detachAuditCapture(tallyAudit);
+    }
+    Environment.releaseClaimResponse.countDown();
+    Environment.releaseRefreshCallback.countDown();
+    try {
+      if (testId != null) {
+        for (String id :
+            jdbc.queryForList(
+                "SELECT session_id FROM studio_guided_sessions WHERE test_id=?",
+                String.class,
+                testId.toString())) {
+          try {
+            sessions.cancel(
+                fixture.user,
+                id,
+                "fixture-close-" + UUID.randomUUID(),
+                C.object().put("schemaVersion", 3).put("reason", "userRequested"));
+            Environment.await(
+                () ->
+                    repository.transaction(
+                        () -> {
+                          var owner = repository.lock(id);
+                          boolean terminal =
+                              java.util.Set.of(
+                                      "SUCCEEDED",
+                                      "PUBLICATION_CONFLICT",
+                                      "FAILED",
+                                      "UNKNOWN_OUTCOME",
+                                      "CANCELLED",
+                                      "EXPIRED")
+                                  .contains(owner.document().path("state").asText());
+                          List<Boolean> resources =
+                              jdbc.queryForList(
+                                  "SELECT live FROM studio_guided_materializations WHERE"
+                                      + " session_id=? UNION ALL SELECT live FROM"
+                                      + " studio_guided_assignments WHERE session_id=?",
+                                  Boolean.class,
+                                  id,
+                                  id);
+                          return terminal
+                              && resources.stream().allMatch(Boolean.FALSE::equals)
+                              && (owner
+                                      .progress()
+                                      .path("teardownStatus")
+                                      .asText()
+                                      .equals("CONFIRMED")
+                                  || resources.isEmpty()
+                                      && !owner.progress().has("teardownStatus"));
+                        }),
+                10000);
+          } catch (Throwable cleanup) {
+            if (failure == null) {
+              failure = cleanup;
+            } else {
+              failure.addSuppressed(cleanup);
+            }
+          }
+        }
+      }
+    } catch (Throwable cleanup) {
+      if (failure == null) {
+        failure = cleanup;
+      } else {
+        failure.addSuppressed(cleanup);
+      }
+    }
+    try {
+      fixture.closeWorker();
+    } catch (Throwable cleanup) {
+      if (failure == null) {
+        failure = cleanup;
+      } else {
+        failure.addSuppressed(cleanup);
+      }
+    }
+    Environment.rethrowCleanupFailure(failure);
   }
 
   @AfterAll
-  static void closeProvider() {
+  static void closeProvider() throws Exception {
+    com.citi.put.checks.studio.support.GuardDecisionTally.write(
+        GuidedPlanningIntegrationTest.class);
     PROVIDER.stop(0);
     Environment.APPLICATION.stop(0);
     Environment.DATABASE.stop();
@@ -602,10 +777,17 @@ class GuidedPlanningIntegrationTest {
           }
         }
         assertThat(selectedChoice).isNotNull();
+        // STUDIO-OBS-014 AC-7: an observed-phase choice is page-derived and says so, with the
+        // node's role and region from the sanitized observation.
+        for (JsonNode choice : question.path("choices")) {
+          assertThat(choice.path("labelSource").asText()).isEqualTo("PAGE");
+          assertThat(choice.path("role").asText()).isNotBlank();
+          assertThat(choice.has("region")).isTrue();
+        }
         publicPost(
             "/" + id + "/clarify",
             C.object()
-                .put("schemaVersion", 2)
+                .put("schemaVersion", 3)
                 .put("clarificationId", question.path("clarificationId").asText())
                 .put("generation", question.path("generation").asInt())
                 .put("choiceId", selectedChoice.path("choiceId").asText()));
@@ -628,40 +810,42 @@ class GuidedPlanningIntegrationTest {
         resumed.installDatabase(jdbc);
         resumed.advance(fixture.controller, id, 1, UUID.randomUUID().toString(), command(id));
         answered = true;
-      } else if (SUBMITS.get() == 1 && !restarted) {
-        // Reconstruct coordinator service from durable state after discarding the previous HTTP
-        // result.
-        repeatSubmit = true;
-        var fresh =
-            new GuidedTranslationService(
-                sessions,
-                repository,
-                store,
-                questions,
-                dispatch,
-                gateway,
-                C,
-                new GuidedPromptAssembler(C),
-                inputs,
-                new GuidedProposalValidator(C),
-                new GuidedDependencyPlanner(sessions),
-                properties,
-                Clock.systemUTC());
-        fresh.installDatabase(jdbc);
-        try {
-          fresh.advance(fixture.controller, id, 1, UUID.randomUUID().toString(), command(id));
-        } catch (RuntimeException failure) {
-          throw new AssertionError(
-              "Restart counters="
-                  + repository.transaction(
-                      () -> repository.lock(id).document().path("counters").toString())
-                  + " providerBodyBytes="
-                  + PROVIDER_BYTES.stream().map(String::length).toList(),
-              failure);
-        }
-        restarted = true;
       } else {
-        invoke(id, "proposals");
+        if (SUBMITS.get() == 1 && !restarted) {
+          // Reconstruct coordinator service from durable state after discarding the previous HTTP
+          // result.
+          repeatSubmit = true;
+          var fresh =
+              new GuidedTranslationService(
+                  sessions,
+                  repository,
+                  store,
+                  questions,
+                  dispatch,
+                  gateway,
+                  C,
+                  new GuidedPromptAssembler(C),
+                  inputs,
+                  new GuidedProposalValidator(C),
+                  new GuidedDependencyPlanner(sessions),
+                  properties,
+                  Clock.systemUTC());
+          fresh.installDatabase(jdbc);
+          try {
+            fresh.advance(fixture.controller, id, 1, UUID.randomUUID().toString(), command(id));
+          } catch (RuntimeException failure) {
+            throw new AssertionError(
+                "Restart counters="
+                    + repository.transaction(
+                        () -> repository.lock(id).document().path("counters").toString())
+                    + " providerBodyBytes="
+                    + PROVIDER_BYTES.stream().map(String::length).toList(),
+                failure);
+          }
+          restarted = true;
+        } else {
+          invoke(id, "proposals");
+        }
       }
     }
     assertThat(repository.transaction(() -> repository.lock(id).document().path("state").asText()))
@@ -676,7 +860,7 @@ class GuidedPlanningIntegrationTest {
                         .path("counters")
                         .path("modelInputTokens")
                         .asLong()))
-        .isLessThanOrEqualTo(128000);
+        .isLessThanOrEqualTo(inputCeiling(id));
     assertThat(answered).isTrue();
     assertThat(restarted).isTrue();
     assertThat(SUBMITS.get()).isEqualTo(1);
@@ -724,9 +908,37 @@ class GuidedPlanningIntegrationTest {
         "schemaPins",
         repository.transaction(
             () -> store.state(id).path("manifest").path("schemaPins").deepCopy()));
-    metrics.put("workerSnapshot", Environment.WORKER_SNAPSHOT.toString());
+    metrics.put("workerSnapshot", Environment.DIST.toString());
     java.nio.file.Files.writeString(
         java.nio.file.Path.of("/tmp/studio-obs005-joined-metrics.json"), metrics.toPrettyString());
+  }
+
+  @Test
+  void aDeclaredConfigurationSourceEmitsSavedInputWithoutItsPrivateValue() throws Exception {
+    rewriteAuthoredStep(TWO, TEXT.get(1) + " Alternatively use <var saved>.");
+    askSavedSource = true;
+    String id = startSession();
+    invoke(id, "plans");
+    assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
+    assertThat(sessionState(id)).isEqualTo("AWAITING_CLARIFICATION");
+    JsonNode question = publicGet("/" + id + "/clarification");
+    assertThat(question.path("phase").asText()).isEqualTo("source");
+    assertThat(question.path("choices")).hasSize(2);
+    assertThat(question.path("choices").get(0).path("labelSource").asText())
+        .isEqualTo("SAVED_INPUT");
+    assertThat(question.path("choices").get(0).path("safeLabel").asText())
+        .isEqualTo("Saved input choice 1");
+    assertThat(question.path("choices").get(1).path("labelSource").asText()).isEqualTo("AUTHORED");
+    assertThat(question.toString())
+        .doesNotContain(SAVED, "untrusted provider label", "configurationValues");
+    assertThat(String.join("\n", PROVIDER_BYTES)).doesNotContain(SAVED);
+    assertThat(
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_materializations WHERE session_id=?",
+                Integer.class,
+                id))
+        .isZero();
+    assertThat(SUBMITS.get()).isZero();
   }
 
   @org.junit.jupiter.params.ParameterizedTest
@@ -748,7 +960,7 @@ class GuidedPlanningIntegrationTest {
         .isZero();
     ObjectNode answer =
         C.object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("clarificationId", question.path("clarificationId").asText())
             .put("generation", 0)
             .put("choiceId", sourceChoice(question, choice));
@@ -912,6 +1124,358 @@ class GuidedPlanningIntegrationTest {
   }
 
   @Test
+  void aSchemaValidUngroundedClickIsRejectedBeforeAdmissionOrDispatch() throws Exception {
+    guardTarget = "Archive";
+    assertGuardRefusal("UNGROUNDED_TARGET");
+  }
+
+  @Test
+  void aSchemaValidDeleteAccountForOpenReportsIsRejectedBeforeAdmissionOrDispatch()
+      throws Exception {
+    guardTarget = "Delete account";
+    rewriteAuthoredStep(THREE, "Open reports then check Confirmation appears.");
+    assertGuardRefusal("DESTRUCTIVE_VERB");
+  }
+
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"Save", "Delete"})
+  void anAuthoredSaveOrDestructiveClickUnderAllowRunsExactlyOnce(String label) throws Exception {
+    guardTarget = label;
+    askField = false;
+    rewriteAuthoredStep(THREE, "Click " + label + " then check Confirmation appears.");
+    governedStance("ALLOW");
+    String id = startSession();
+    invoke(id, "plans");
+    for (int n = 0; n < 24 && !sessionState(id).equals("FINALIZING"); n++) {
+      invoke(id, "proposals");
+    }
+    assertThat(sessionState(id)).isEqualTo("FINALIZING");
+    assertThat(SUBMITS.get()).isEqualTo(1);
+    assertThat(submitStepAdmissions(id)).isEqualTo(2); // click and existing visible assertion
+  }
+
+  @Test
+  void anAbsentDestructiveTargetFailsUngroundedBeforeDestructivePrecedence() throws Exception {
+    guardTarget = "Delete account";
+    missingGuardTarget = true;
+    rewriteAuthoredStep(THREE, "Open reports then check Confirmation appears.");
+    assertGuardRefusal("UNGROUNDED_TARGET");
+  }
+
+  @Test
+  void anAuthoredDeleteStillFailsTheGovernedDenyStance() throws Exception {
+    guardTarget = "Delete";
+    rewriteAuthoredStep(THREE, "Click Delete then check Confirmation appears.");
+    assertGuardRefusal("SIDE_EFFECT_DENIED", "DENY");
+  }
+
+  private void assertGuardRefusal(String reason) throws Exception {
+    assertGuardRefusal(reason, "ALLOW");
+  }
+
+  private void assertGuardRefusal(String reason, String stance) throws Exception {
+    askField = false;
+    governedStance(stance);
+    var audit = attachAuditCapture();
+    try {
+      String id = startSession();
+      invoke(id, "plans");
+      HttpResponse<String> refused = null;
+      int preparationsBeforeRefusal = -1;
+      for (int n = 0; n < 24 && refused == null; n++) {
+        preparationsBeforeRefusal =
+            jdbc.queryForObject(
+                "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+                Integer.class,
+                id);
+        var response = invokeRaw(id, "proposals");
+        if (response.statusCode() != 202) {
+          refused = response;
+        }
+      }
+      assertThat(refused).isNotNull();
+      assertThat(refused.statusCode()).as(refused.body()).isEqualTo(422);
+      assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo("POLICY_DENIED");
+      assertThat(sessionState(id)).isEqualTo("FAILED");
+      assertThat(publicGet("/" + id + "/result").path("errorCode").asText())
+          .isEqualTo("POLICY_DENIED");
+      assertThat(
+              repository.transaction(
+                  () -> repository.lock(id).progress().path("errorCode").asText()))
+          .isEqualTo("POLICY_DENIED");
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_model_attempts WHERE session_id=? AND"
+                      + " status='REJECTED'",
+                  Integer.class,
+                  id))
+          .isPositive();
+      for (String table : List.of("studio_guided_actions", "studio_guided_obligation_admissions")) {
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM "
+                        + table
+                        + " WHERE session_id=? AND "
+                        + (table.equals("studio_guided_actions")
+                            ? "step_id=?"
+                            : "proposal->'coordinate'->>'stepId'=?"),
+                    Integer.class,
+                    id,
+                    THREE))
+            .as("no third-step row in %s", table)
+            .isZero();
+      }
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT count(*) FROM studio_guided_preparations WHERE session_id=?",
+                  Integer.class,
+                  id))
+          .as("the refused guard call performed no preparation")
+          .isEqualTo(preparationsBeforeRefusal);
+      assertThat(SUBMITS.get()).as("no native click effect").isZero();
+      assertThat(audit.list)
+          .anyMatch(
+              event ->
+                  event.getFormattedMessage().equals("GUIDED_ACTION_REFUSED")
+                      && java.util.Arrays.stream(event.getArgumentArray())
+                          .anyMatch(
+                              argument -> argument.toString().equals("reasonCode=" + reason)));
+    } finally {
+      detachAuditCapture(audit);
+      governedStance("ALLOW");
+    }
+  }
+
+  private void rewriteAuthoredStep(String stepId, String text) throws Exception {
+    var current =
+        new ObjectMapper()
+            .findAndRegisterModules()
+            .readValue(
+                jdbc.queryForObject(
+                    "SELECT authoring::text FROM ui_tests WHERE id=?", String.class, testId),
+                AuthoringV2Request.class);
+    var changed =
+        new AuthoringV2Request(
+            2,
+            current.globalContext(),
+            current.steps().stream()
+                .map(
+                    step ->
+                        step.id().toString().equals(stepId)
+                            ? new AuthoringStep(step.id(), text, step.context())
+                            : step)
+                .toList());
+    var mapper = new ObjectMapper().findAndRegisterModules();
+    assertThat(
+            jdbc.update(
+                "UPDATE ui_tests SET authoring=?::jsonb,steps=?::jsonb,"
+                    + " authoring_revision_inputs=?::jsonb WHERE id=?",
+                mapper.writeValueAsString(changed),
+                mapper.writeValueAsString(
+                    changed.steps().stream().map(AuthoringStep::text).toList()),
+                mapper.writeValueAsString(AuthoringRevisionIdentity.create(changed, Map.of())),
+                testId))
+        .isEqualTo(1);
+  }
+
+  /**
+   * STUDIO-OBS-014 AC-6 / AC-4 at session level (QA TEST-001, SEC-001): under an approved governed
+   * DENY stance the form-submit click, as a {@code <button>} or an {@code <input type=submit>}, is
+   * refused before anything is admitted or dispatched, the session ends FAILED with errorCode
+   * POLICY_DENIED, and the refusal is audited GUIDED_ACTION_REFUSED / SIDE_EFFECT_DENIED.
+   */
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(strings = {"button", "input"})
+  void governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied(String control)
+      throws Exception {
+    formSubmit = control;
+    askField = false;
+    var audit = attachAuditCapture();
+    try {
+      governedStance("DENY");
+      String id = startSession();
+      invoke(id, "plans");
+      HttpResponse<String> refused = null;
+      for (int n = 0; n < 16 && refused == null; n++) {
+        String state = sessionState(id);
+        if (state.equals("FINALIZING") || TERMINAL_STATES.contains(state)) {
+          break;
+        }
+        assertThat(state).isNotEqualTo("AWAITING_CLARIFICATION");
+        var response = invokeRaw(id, "proposals");
+        if (response.statusCode() != 202) {
+          refused = response;
+        }
+      }
+      assertThat(refused).as("the form-submit proposal was refused").isNotNull();
+      assertThat(refused.statusCode()).as(refused.body()).isEqualTo(422);
+      assertThat(C.parse(refused.body()).path("code").asText()).isEqualTo("POLICY_DENIED");
+      assertThat(sessionState(id)).isEqualTo("FAILED");
+      assertThat(
+              repository.transaction(
+                  () -> repository.lock(id).progress().path("errorCode").asText()))
+          .isEqualTo("POLICY_DENIED");
+      assertThat(SUBMITS.get()).as("nothing dispatched").isZero();
+      assertThat(submitStepAdmissions(id)).as("nothing admitted for the Submit step").isZero();
+      assertThat(audit.list)
+          .anyMatch(
+              event ->
+                  event.getFormattedMessage().equals("GUIDED_ACTION_REFUSED")
+                      && java.util.Arrays.stream(event.getArgumentArray())
+                          .anyMatch(
+                              argument ->
+                                  argument.toString().equals("reasonCode=SIDE_EFFECT_DENIED")));
+    } finally {
+      detachAuditCapture(audit);
+      governedStance("ALLOW");
+    }
+  }
+
+  /**
+   * STUDIO-OBS-014 AC-6 at session level (QA TEST-001), under the production default stance
+   * CLARIFY_FIRST: exactly one SIDE_EFFECT_CONFIRMATION / CONFIRM_ACTION question with one AUTHORED
+   * choice (the authored step text) is raised before the first side-effecting dispatch; confirming
+   * continues to the real submit, and no second question is asked.
+   */
+  @Test
+  void governedClarifyFirstAsksOnceBeforeTheFormSubmitAndConfirmingContinues() throws Exception {
+    clarifyFirstAsksOnceThenContinues("input");
+  }
+
+  /**
+   * AR-SEC001-FM I-1: under governed DENY, the submit of an unlabelled form (as {@code <button>} or
+   * {@code <input type=submit>}, the OBS-007 login shape) and a submit button associated through
+   * {@code form=} are refused exactly like the labelled form's (same oracle).
+   */
+  @org.junit.jupiter.params.ParameterizedTest
+  @org.junit.jupiter.params.provider.ValueSource(
+      strings = {"unlabelled-button", "unlabelled-input", "form-attribute"})
+  void governedDenyRefusesAnUnlabelledOrFormAttributeSubmit(String control) throws Exception {
+    governedDenyRefusesTheFormSubmitBeforeAnyDispatchAndFailsPolicyDenied(control);
+  }
+
+  /**
+   * AR-SEC001-FM I-2: under governed CLARIFY_FIRST, the unlabelled form's submit raises exactly one
+   * confirmation before any dispatch; confirming continues to one real submit (same oracle).
+   */
+  @Test
+  void governedClarifyFirstAsksOnceBeforeAnUnlabelledFormSubmit() throws Exception {
+    clarifyFirstAsksOnceThenContinues("unlabelled-input");
+  }
+
+  private void clarifyFirstAsksOnceThenContinues(String control) throws Exception {
+    formSubmit = control;
+    askField = false;
+    try {
+      governedStance("CLARIFY_FIRST");
+      String id = startSession();
+      invoke(id, "plans");
+      int confirmations = 0;
+      for (int n = 0; n < 24; n++) {
+        String state = sessionState(id);
+        if (state.equals("FINALIZING") || TERMINAL_STATES.contains(state)) {
+          break;
+        }
+        if (state.equals("AWAITING_CLARIFICATION")) {
+          confirmations++;
+          assertThat(SUBMITS.get()).as("asked before the first side-effecting dispatch").isZero();
+          assertThat(submitStepAdmissions(id)).isZero();
+          JsonNode question = publicGet("/" + id + "/clarification");
+          assertThat(question.path("reason").asText()).isEqualTo("SIDE_EFFECT_CONFIRMATION");
+          assertThat(question.path("promptCode").asText()).isEqualTo("CONFIRM_ACTION");
+          assertThat(question.path("choices")).hasSize(1);
+          JsonNode choice = question.path("choices").get(0);
+          assertThat(choice.path("labelSource").asText()).isEqualTo("AUTHORED");
+          assertThat(choice.path("safeLabel").asText()).isEqualTo(TEXT.get(2));
+          publicPost(
+              "/" + id + "/clarify",
+              C.object()
+                  .put("schemaVersion", 3)
+                  .put("clarificationId", question.path("clarificationId").asText())
+                  .put("generation", question.path("generation").asInt())
+                  .put("choiceId", choice.path("choiceId").asText()));
+          continue;
+        }
+        invoke(id, "proposals");
+      }
+      assertThat(sessionState(id)).isEqualTo("FINALIZING");
+      assertThat(confirmations).as("one confirmation per session").isEqualTo(1);
+      assertThat(SUBMITS.get()).as("the confirmed submit ran once").isEqualTo(1);
+      assertThat(
+              repository.transaction(
+                  () ->
+                      repository
+                          .lock(id)
+                          .progress()
+                          .path("sideEffectConfirmation")
+                          .path("status")
+                          .asText()))
+          .isEqualTo("CONFIRMED");
+    } finally {
+      governedStance("ALLOW");
+    }
+  }
+
+  private static final java.util.Set<String> TERMINAL_STATES =
+      java.util.Set.of(
+          "SUCCEEDED", "PUBLICATION_CONFLICT", "FAILED", "UNKNOWN_OUTCOME", "CANCELLED", "EXPIRED");
+
+  private String sessionState(String id) {
+    return repository.transaction(() -> repository.lock(id).document().path("state").asText());
+  }
+
+  private int submitStepAdmissions(String id) {
+    return jdbc.queryForObject(
+        "SELECT count(*) FROM studio_guided_actions WHERE session_id=? AND step_id=?",
+        Integer.class,
+        id,
+        THREE);
+  }
+
+  /**
+   * Approves the class's governed policy with {@code stance}, keeping the active version's
+   * application policy (the per-test read grant the worker start seeded); sessions freeze it at
+   * start.
+   */
+  private void governedStance(String stance) {
+    var policyJdbc = Environment.policyJdbc();
+    JsonNode active =
+        new com.citi.put.checks.studio.guided.policy.ObservationPolicyRepository(policyJdbc, C)
+            .active("CSI-123", "orders", "fixture")
+            .orElseThrow()
+            .document()
+            .path("applicationPolicy");
+    com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
+        policyJdbc,
+        "CSI-123",
+        "orders",
+        "fixture",
+        List.of(Environment.ORIGIN),
+        active.deepCopy(),
+        stance);
+  }
+
+  private static ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>
+      attachAuditCapture() {
+    var appender =
+        new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
+    appender.start();
+    ((ch.qos.logback.classic.Logger)
+            org.slf4j.LoggerFactory.getLogger(
+                com.citi.put.checks.studio.guided.audit.StudioActionAudit.CATEGORY))
+        .addAppender(appender);
+    return appender;
+  }
+
+  private static void detachAuditCapture(
+      ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> appender) {
+    ((ch.qos.logback.classic.Logger)
+            org.slf4j.LoggerFactory.getLogger(
+                com.citi.put.checks.studio.guided.audit.StudioActionAudit.CATEGORY))
+        .detachAppender(appender);
+  }
+
+  @Test
   void lateKnownOverageStopsActiveSessionBeforeAnotherProviderSend() throws Exception {
     omitUsage = true;
     String id = startSession();
@@ -921,10 +1485,12 @@ class GuidedPlanningIntegrationTest {
             "SELECT attempt_id FROM studio_guided_model_attempts WHERE session_id=?",
             String.class,
             id);
+    // Late usage overshoots the session's frozen input ceiling by 72,000 (200,000 at 128,000).
+    int overage = inputCeiling(id) + 72_000;
     repository.transaction(
         () -> {
           repository.lock(id);
-          store.recordLateUsage(id, attempt, 200000, 100);
+          store.recordLateUsage(id, attempt, overage, 100);
           return null;
         });
     JsonNode result = invoke(id, "proposals", 429);
@@ -941,7 +1507,7 @@ class GuidedPlanningIntegrationTest {
                         .path("counters")
                         .path("modelInputTokens")
                         .asLong()))
-        .isEqualTo(200000);
+        .isEqualTo(overage);
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM studio_guided_actions WHERE session_id=?", Integer.class, id))
@@ -967,7 +1533,7 @@ class GuidedPlanningIntegrationTest {
     publicPost(
         "/" + id + "/clarify",
         C.object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("clarificationId", question.path("clarificationId").asText())
             .put("generation", 0)
             .put("choiceId", sourceChoice(question, 1)));
@@ -1000,13 +1566,17 @@ class GuidedPlanningIntegrationTest {
     for (JsonNode candidate : question.path("choices")) {
       if (candidate.path("safeLabel").asText().equals("Use authored text: London")) {
         choice = candidate.path("choiceId").asText();
+        // STUDIO-OBS-014 AC-7: an authored-text choice is AUTHORED and carries no page fields.
+        assertThat(candidate.path("labelSource").asText()).isEqualTo("AUTHORED");
+        assertThat(candidate.has("role")).isFalse();
+        assertThat(candidate.has("region")).isFalse();
       }
     }
     assertThat(choice).isNotNull();
     publicPost(
         "/" + id + "/clarify",
         C.object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("clarificationId", question.path("clarificationId").asText())
             .put("generation", 0)
             .put("choiceId", choice));
@@ -1124,54 +1694,58 @@ class GuidedPlanningIntegrationTest {
               org.mockito.ArgumentMatchers.anyLong(),
               org.mockito.ArgumentMatchers.anyString(),
               org.mockito.ArgumentMatchers.any());
-    } else if (point.equals("materialized") || point.equals("prior-bootstrap")) {
-      org.mockito.Mockito.doAnswer(
-              invocation -> {
-                Object value = invocation.callRealMethod();
-                if (point.equals("prior-bootstrap")) {
-                  dispatch.pushContext(fixture.controller, id, 1);
-                }
-                throw new AssertionError("process-stop");
-              })
-          .when(service)
-          .materialize(
-              org.mockito.ArgumentMatchers.any(),
-              org.mockito.ArgumentMatchers.eq(id),
-              org.mockito.ArgumentMatchers.anyLong(),
-              org.mockito.ArgumentMatchers.anyString(),
-              org.mockito.ArgumentMatchers.any());
-    } else if (point.equals("allocation")) {
-      org.mockito.Mockito.doAnswer(
-              invocation -> {
-                invocation.callRealMethod();
-                throw new AssertionError("process-stop");
-              })
-          .when(service)
-          .allocateBinding(
-              org.mockito.ArgumentMatchers.any(),
-              org.mockito.ArgumentMatchers.eq(id),
-              org.mockito.ArgumentMatchers.anyLong(),
-              org.mockito.ArgumentMatchers.anyString(),
-              org.mockito.ArgumentMatchers.any());
     } else {
-      org.mockito.Mockito.doAnswer(
-              invocation -> {
-                if (point.equals("lost-context-response")) {
-                  invocation.callRealMethod();
-                }
-                repository.transaction(
-                    () -> {
-                      repository.lock(id);
-                      store.continuation(id, "NEXT");
-                      return null;
-                    });
-                throw new AssertionError("process-stop");
-              })
-          .when(bridge)
-          .pushContext(
-              org.mockito.ArgumentMatchers.any(),
-              org.mockito.ArgumentMatchers.eq(id),
-              org.mockito.ArgumentMatchers.anyLong());
+      if (point.equals("materialized") || point.equals("prior-bootstrap")) {
+        org.mockito.Mockito.doAnswer(
+                invocation -> {
+                  Object value = invocation.callRealMethod();
+                  if (point.equals("prior-bootstrap")) {
+                    dispatch.pushContext(fixture.controller, id, 1);
+                  }
+                  throw new AssertionError("process-stop");
+                })
+            .when(service)
+            .materialize(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.eq(id),
+                org.mockito.ArgumentMatchers.anyLong(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any());
+      } else {
+        if (point.equals("allocation")) {
+          org.mockito.Mockito.doAnswer(
+                  invocation -> {
+                    invocation.callRealMethod();
+                    throw new AssertionError("process-stop");
+                  })
+              .when(service)
+              .allocateBinding(
+                  org.mockito.ArgumentMatchers.any(),
+                  org.mockito.ArgumentMatchers.eq(id),
+                  org.mockito.ArgumentMatchers.anyLong(),
+                  org.mockito.ArgumentMatchers.anyString(),
+                  org.mockito.ArgumentMatchers.any());
+        } else {
+          org.mockito.Mockito.doAnswer(
+                  invocation -> {
+                    if (point.equals("lost-context-response")) {
+                      invocation.callRealMethod();
+                    }
+                    repository.transaction(
+                        () -> {
+                          repository.lock(id);
+                          store.continuation(id, "NEXT");
+                          return null;
+                        });
+                    throw new AssertionError("process-stop");
+                  })
+              .when(bridge)
+              .pushContext(
+                  org.mockito.ArgumentMatchers.any(),
+                  org.mockito.ArgumentMatchers.eq(id),
+                  org.mockito.ArgumentMatchers.anyLong());
+        }
+      }
     }
     var interrupted =
         new GuidedTranslationService(
@@ -1524,6 +2098,390 @@ class GuidedPlanningIntegrationTest {
   }
 
   @Test
+  void aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch()
+      throws Exception {
+    assertThat(fixture.worker.isAlive()).isTrue();
+    JsonNode initialCounter = C.parse(Files.readString(fixture.livePolicyCounter));
+    assertThat(initialCounter.path("registered").asBoolean()).isTrue();
+    assertThat(initialCounter.path("launches").asInt()).isZero();
+    assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
+    String id = startSession();
+    String frozenBefore =
+        jdbc.queryForObject(
+            "SELECT to_jsonb(p)::text FROM studio_guided_session_policies p WHERE session_id=?",
+            String.class,
+            id);
+    String frozenHash =
+        jdbc.queryForObject(
+            "SELECT observation_policy_hash FROM studio_guided_session_policies WHERE session_id=?",
+            String.class,
+            id);
+    JsonNode approvedPolicy =
+        repository.transaction(() -> store.frozenPolicy(id).path("applicationPolicy").deepCopy());
+    assertThat(GuidedContracts.hash(approvedPolicy)).isEqualTo(frozenHash);
+    long fence =
+        dispatch
+            .assign(fixture.controller, id, "translation-assignment", properties.workerId())
+            .path("ownerFence")
+            .asLong();
+    JsonNode assigned = repository.transaction(() -> repository.lock(id).document().deepCopy());
+    String assignmentBefore =
+        jdbc.queryForObject(
+            "SELECT (to_jsonb(a)-'live')::text FROM studio_guided_assignments a WHERE session_id=?",
+            String.class,
+            id);
+    String sourceBefore =
+        jdbc.queryForObject(
+            "SELECT to_jsonb(m)::text FROM studio_guided_source_manifests m WHERE session_id=?",
+            String.class,
+            id);
+    var realClient =
+        new GuidedRunnerClient(
+            URI.create("https://127.0.0.1:" + Environment.RUNNER_PORT),
+            Environment.TLS,
+            () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
+            C);
+    var measuredClient = org.mockito.Mockito.spy(realClient);
+    var original = new AtomicReference<JsonNode>();
+    var forged = new AtomicReference<JsonNode>();
+    var materialBefore = new AtomicReference<String>();
+    var contextCalls = new AtomicInteger();
+    org.mockito.Mockito.doAnswer(
+            invocation -> {
+              JsonNode genuine = invocation.getArgument(1);
+              original.set(genuine.deepCopy());
+              assertThat(genuine.path("applicationPolicy")).isEqualTo(approvedPolicy);
+              assertThat(genuine.path("policyHash").asText()).isEqualTo(frozenHash);
+              ObjectNode changed = genuine.deepCopy();
+              changed.put(
+                  "policyHash",
+                  frozenHash.equals("0".repeat(64)) ? "1".repeat(64) : "0".repeat(64));
+              C.validate("v3/runner-context", changed);
+              assertThat(changed.path("policyHash")).isNotEqualTo(genuine.path("policyHash"));
+              ObjectNode unchanged = changed.deepCopy();
+              unchanged.set("policyHash", genuine.path("policyHash"));
+              assertThat(unchanged).isEqualTo(genuine);
+              forged.set(changed.deepCopy());
+              materialBefore.set(
+                  jdbc.queryForObject(
+                      "SELECT (to_jsonb(m)-'live')::text FROM studio_guided_materializations m WHERE session_id=?",
+                      String.class,
+                      id));
+              contextCalls.incrementAndGet();
+              return realClient.send("context", changed);
+            })
+        .when(measuredClient)
+        .send(
+            org.mockito.ArgumentMatchers.eq("context"),
+            org.mockito.ArgumentMatchers.any(JsonNode.class));
+    var bridge = new GuidedDispatchService(sessions, materialization, measuredClient);
+    var continuation = translationWithBridge(bridge);
+    var log = new ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent>();
+    log.start();
+    var logger =
+        (ch.qos.logback.classic.Logger) org.slf4j.LoggerFactory.getLogger(GuidedRunnerClient.class);
+    logger.addAppender(log);
+    try {
+      var refusal =
+          org.assertj.core.api.Assertions.catchThrowableOfType(
+              () ->
+                  continuation.plan(
+                      fixture.controller, id, fence, "actual-forged-policy", command(id)),
+              GuidedSessionException.class);
+      assertThat(refusal).isNotNull();
+      assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
+      assertThat(refusal.status()).isEqualTo(409);
+      assertThat(refusal.retryable()).isFalse();
+      assertThat(refusal.messageCode()).isEqualTo(GuidedRunnerClient.CONTEXT_REFUSED);
+      assertThat(contextCalls.get()).isEqualTo(1);
+      assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
+      assertThat(log.list)
+          .anyMatch(
+              event ->
+                  event
+                      .getFormattedMessage()
+                      .equals(
+                          "Guided runner refused the context for session "
+                              + id
+                              + " (contextHash "
+                              + GuidedContracts.hash(forged.get())
+                              + "): IDENTITY_MISMATCH"));
+      Environment.await(
+          () ->
+              repository.transaction(
+                  () ->
+                      repository
+                          .lock(id)
+                          .progress()
+                          .path("teardownStatus")
+                          .asText()
+                          .equals("CONFIRMED")),
+          10000);
+      JsonNode failed = repository.transaction(() -> repository.lock(id).document().deepCopy());
+      JsonNode progress = repository.transaction(() -> repository.lock(id).progress().deepCopy());
+      assertThat(failed.path("state").asText()).isEqualTo("FAILED");
+      assertThat(progress.path("errorCode").asText()).isEqualTo("RUNTIME_INCOMPATIBLE");
+      assertThat(progress.path("translationBootstrap").path("deliveries")).hasSize(1);
+      assertThat(
+              progress
+                  .path("translationBootstrap")
+                  .path("deliveries")
+                  .get(0)
+                  .path("outcome")
+                  .asText())
+          .isEqualTo("REFUSED");
+      assertThat(failed.path("counters").path("observations").asInt()).isZero();
+      assertThat(progress.path("observation").isMissingNode()).isTrue();
+      for (String field :
+          List.of("scope", "scopeHash", "versions", "limits", "sourceSteps", "runAuthorization")) {
+        assertThat(failed.path(field))
+            .as("unchanged session %s", field)
+            .isEqualTo(assigned.path(field));
+      }
+      assertThat(failed.path("owner").path("fence").asLong()).isEqualTo(fence);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT to_jsonb(p)::text FROM studio_guided_session_policies p WHERE session_id=?",
+                  String.class,
+                  id))
+          .isEqualTo(frozenBefore);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT (to_jsonb(m)-'live')::text FROM studio_guided_materializations m WHERE session_id=?",
+                  String.class,
+                  id))
+          .isEqualTo(materialBefore.get());
+      assertThat(original.get().path("policyHash").asText()).isEqualTo(frozenHash);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT (to_jsonb(a)-'live')::text FROM studio_guided_assignments a WHERE session_id=?",
+                  String.class,
+                  id))
+          .isEqualTo(assignmentBefore);
+      assertThat(
+              jdbc.queryForObject(
+                  "SELECT to_jsonb(m)::text FROM studio_guided_source_manifests m WHERE session_id=?",
+                  String.class,
+                  id))
+          .isEqualTo(sourceBefore);
+      for (String table :
+          List.of(
+              "studio_guided_actions",
+              "studio_guided_preparations",
+              "studio_guided_obligation_admissions",
+              "studio_guided_publication_observations")) {
+        assertThat(
+                jdbc.queryForObject(
+                    "SELECT count(*) FROM " + table + " WHERE session_id=?", Integer.class, id))
+            .as("zero row in %s", table)
+            .isZero();
+      }
+      assertThat(NAVIGATION_DESTINATIONS).isEmpty();
+      assertThat(SUBMITS.get()).isZero();
+      JsonNode beforeAgain = C.parse(Files.readString(fixture.livePolicyCounter));
+      assertThat(beforeAgain.path("registered").asBoolean()).isTrue();
+      assertThat(beforeAgain.path("launches").asInt()).isZero();
+      assertThat(beforeAgain.path("rpcs").path("context").asInt()).isEqualTo(1);
+      assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
+      int allClientCalls =
+          org.mockito.Mockito.mockingDetails(measuredClient).getInvocations().size();
+      JsonNode again =
+          continuation.plan(fixture.controller, id, fence, "after-actual-forgery", command(id));
+      assertThat(again.path("state").asText()).isEqualTo("FAILED");
+      assertThat(C.parse(Files.readString(fixture.livePolicyCounter))).isEqualTo(beforeAgain);
+      assertThat(org.mockito.Mockito.mockingDetails(measuredClient).getInvocations())
+          .hasSize(allClientCalls);
+      assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
+      assertThat(repository.transaction(() -> repository.lock(id).document().deepCopy()).toString())
+          .isEqualTo(failed.toString());
+      assertThat(repository.transaction(() -> repository.lock(id).progress().deepCopy()).toString())
+          .isEqualTo(progress.toString());
+      assertThat(fixture.worker.descendants().filter(ProcessHandle::isAlive).count()).isZero();
+      var proof =
+          C.object()
+              .put("sessionId", id)
+              .put("workerPid", fixture.worker.pid())
+              .put("originalPolicyHash", frozenHash)
+              .put("forgedPolicyHash", forged.get().path("policyHash").asText())
+              .put("runnerCode", "IDENTITY_MISMATCH")
+              .put("state", "FAILED")
+              .put("errorCode", "RUNTIME_INCOMPATIBLE")
+              .put("contextCalls", contextCalls.get())
+              .put("observations", 0)
+              .put("ownedBrowserChildren", 0)
+              .put("secondContinuationRpcDelta", 0)
+              .put(
+                  "wrapperHash",
+                  GuidedContracts.hash(
+                      C.object().put("script", Files.readString(fixture.livePolicyWrapper))));
+      proof.set("actualWorkerMeasurements", beforeAgain);
+      Path destination = Path.of("build", "strict-live-policy-proof.json");
+      Files.createDirectories(destination.getParent());
+      Files.writeString(destination, proof.toPrettyString());
+    } finally {
+      logger.detachAppender(log);
+      log.stop();
+    }
+  }
+
+  /**
+   * ar-2-r14-stops ruling 2 tests[1] (STUDIO-OBS-014 AC-1 clarification h2): the runner definitely
+   * refuses the first bootstrap context with IDENTITY_MISMATCH. Exactly one context request is
+   * made, the session is FAILED with errorCode RUNTIME_INCOMPATIBLE, the caller gets 409
+   * retryable:false, and a second continuation makes zero runner (and zero model) requests and
+   * returns the terminal session. The real GuidedRunnerClient classifies the stub's reply.
+   */
+  @Test
+  void aDefiniteBootstrapContextRefusalIsTerminalOnFirstReceiptAndNeverRetried() throws Exception {
+    String id = startSession();
+    long fence =
+        dispatch
+            .assign(fixture.controller, id, "translation-assignment", properties.workerId())
+            .path("ownerFence")
+            .asLong();
+    try (var runner = new StubRunner("{\"code\":\"IDENTITY_MISMATCH\"}", false)) {
+      var continuation = translationWithBridge(runner.dispatch(sessions, materialization));
+      var refusal =
+          org.assertj.core.api.Assertions.catchThrowableOfType(
+              () ->
+                  continuation.plan(fixture.controller, id, fence, "refused-context", command(id)),
+              GuidedSessionException.class);
+      assertThat(refusal).isNotNull();
+      assertThat(refusal.getMessage()).isEqualTo("RUNTIME_INCOMPATIBLE");
+      assertThat(refusal.status()).isEqualTo(409);
+      assertThat(refusal.retryable()).isFalse();
+      assertThat(runner.operations).as("exactly one context request").containsExactly("context");
+      JsonNode failed = repository.transaction(() -> repository.lock(id).document().deepCopy());
+      assertThat(failed.path("state").asText()).isEqualTo("FAILED");
+      assertThat(
+              repository.transaction(
+                  () -> repository.lock(id).progress().path("errorCode").asText()))
+          .isEqualTo("RUNTIME_INCOMPATIBLE");
+      int modelCalls = PROVIDER_KINDS.size();
+      JsonNode again =
+          continuation.plan(fixture.controller, id, fence, "after-refusal", command(id));
+      assertThat(again.path("state").asText()).as("the terminal session").isEqualTo("FAILED");
+      assertThat(runner.operations).as("no runner request on continuation").hasSize(1);
+      assertThat(PROVIDER_KINDS).as("no model request on continuation").hasSize(modelCalls);
+      assertThat(NAVIGATION_DESTINATIONS).isEmpty();
+    }
+  }
+
+  /**
+   * ar-2-r14-stops ruling 2 tests[3] negative control (AC-1 clarification h3): a context request
+   * that times out is uncertain, not definite, so today's bounded retry is preserved: three real
+   * deliveries each time out (UNKNOWN_OUTCOME) and the next continuation exhausts with
+   * RUNTIME_INCOMPATIBLE. The stub never answers; the real client deadline (15 s) applies, so this
+   * case takes about 45 s.
+   */
+  @Test
+  void aTimedOutBootstrapContextStillRetriesAndExhaustsAfterThreeDeliveries() throws Exception {
+    String id = startSession();
+    long fence =
+        dispatch
+            .assign(fixture.controller, id, "translation-assignment", properties.workerId())
+            .path("ownerFence")
+            .asLong();
+    try (var runner = new StubRunner(null, true)) {
+      var continuation = translationWithBridge(runner.dispatch(sessions, materialization));
+      for (int attempt = 0; attempt < 3; attempt++) {
+        final int index = attempt;
+        org.assertj.core.api.Assertions.assertThatThrownBy(
+                () ->
+                    continuation.plan(
+                        fixture.controller, id, fence, "timed-out-" + index, command(id)))
+            .hasMessage("UNKNOWN_OUTCOME");
+      }
+      org.assertj.core.api.Assertions.assertThatThrownBy(
+              () -> continuation.plan(fixture.controller, id, fence, "exhausted", command(id)))
+          .hasMessage("RUNTIME_INCOMPATIBLE");
+      assertThat(runner.operations)
+          .as("three real deliveries")
+          .containsExactly("context", "context", "context");
+      assertThat(
+              repository.transaction(() -> repository.lock(id).document().path("state").asText()))
+          .isEqualTo("FAILED");
+      JsonNode deliveries =
+          repository.transaction(
+              () ->
+                  repository
+                      .lock(id)
+                      .progress()
+                      .path("translationBootstrap")
+                      .path("deliveries")
+                      .deepCopy());
+      assertThat(deliveries).hasSize(3);
+      for (JsonNode delivery : deliveries) {
+        assertThat(delivery.path("outcome").asText())
+            .as("never marked definite")
+            .isNotEqualTo("REFUSED");
+      }
+      assertThat(NAVIGATION_DESTINATIONS).isEmpty();
+    }
+  }
+
+  /**
+   * A stub guided runner over the fixture's TLS identity: records every operation, and either
+   * answers 409 with {@code reply} or never answers (until closed).
+   */
+  private static final class StubRunner implements AutoCloseable {
+    final List<String> operations = new CopyOnWriteArrayList<>();
+    private final com.sun.net.httpserver.HttpsServer server;
+    private final java.util.concurrent.CountDownLatch release =
+        new java.util.concurrent.CountDownLatch(1);
+    private final java.util.concurrent.ExecutorService executor =
+        java.util.concurrent.Executors.newCachedThreadPool();
+
+    StubRunner(String reply, boolean hang) throws Exception {
+      server = com.sun.net.httpserver.HttpsServer.create(new InetSocketAddress("localhost", 0), 0);
+      server.setHttpsConfigurator(
+          new com.sun.net.httpserver.HttpsConfigurator(Environment.RUNNER_SIDE));
+      server.setExecutor(executor);
+      server.createContext(
+          "/",
+          exchange -> {
+            exchange.getRequestBody().readAllBytes();
+            String path = exchange.getRequestURI().getPath();
+            operations.add(path.substring(path.lastIndexOf('/') + 1));
+            try {
+              if (hang) {
+                release.await(60, java.util.concurrent.TimeUnit.SECONDS);
+                return;
+              }
+              byte[] body = reply.getBytes(StandardCharsets.UTF_8);
+              exchange.getResponseHeaders().add("Content-Type", "application/json");
+              exchange.sendResponseHeaders(409, body.length);
+              exchange.getResponseBody().write(body);
+            } catch (InterruptedException interrupted) {
+              Thread.currentThread().interrupt();
+            } finally {
+              exchange.close();
+            }
+          });
+      server.start();
+    }
+
+    GuidedDispatchService dispatch(
+        GuidedSessionService sessions, GuidedMaterializationService materialization) {
+      return new GuidedDispatchService(
+          sessions,
+          materialization,
+          new GuidedRunnerClient(
+              URI.create("https://localhost:" + server.getAddress().getPort()),
+              Environment.TLS,
+              () -> Environment.token("backend-controller", "controller-1", "studio-guided-runner"),
+              C));
+    }
+
+    @Override
+    public void close() {
+      release.countDown();
+      server.stop(0);
+      executor.shutdownNow();
+    }
+  }
+
+  @Test
   void acknowledgedOlderSnapshotCannotMarkChangedAllocationsReady() throws Exception {
     String id = startSession();
     var bridge = org.mockito.Mockito.spy(dispatch);
@@ -1588,17 +2546,19 @@ class GuidedPlanningIntegrationTest {
   }
 
   private void scanOnce() throws Exception {
-    javax.net.ssl.SSLContext previous = javax.net.ssl.SSLContext.getDefault();
     Path token = Files.createTempFile("obs005-r1-controller", ".jwt");
     Files.writeString(
         token, Environment.token("backend-controller", "controller-1", "studio-guided-controller"));
     try {
-      javax.net.ssl.SSLContext.setDefault(Environment.TLS);
       new com.citi.put.checks.studio.guided.translation.GuidedTranslationCoordinator(
-              store, repository, C, URI.create("https://localhost:" + port), token)
+              store,
+              repository,
+              C,
+              URI.create("https://localhost:" + port),
+              token,
+              Environment.RUNNER_TLS.backendTls())
           .continueRuns();
     } finally {
-      javax.net.ssl.SSLContext.setDefault(previous);
       Files.deleteIfExists(token);
     }
   }
@@ -1669,37 +2629,39 @@ class GuidedPlanningIntegrationTest {
                         "sourceInputId",
                         request.path("context").path("inputs").get(0).path("inputId").asText()));
       }
-    } else if (kind.equals("fill")) {
-      if (hostileMutation.equals("value")) {
-        action
-            .withObject("/operation")
-            .set(
-                "value",
-                C.object()
-                    .put("kind", "authoredLiteral")
-                    .put(
-                        "sourceInputId",
-                        request.path("context").path("inputs").get(0).path("inputId").asText()));
-      } else {
-        String wanted = hostileMutation.equals("operation") ? "Submit" : "Backup destination";
-        for (JsonNode node : request.path("context").path("observation").path("nodes")) {
-          if (node.path("name").asText().equals(wanted)) {
-            var target = action.putObject("target").put("nodeId", node.path("nodeId").asText());
-            target
-                .putObject("locator")
-                .put("kind", "role")
-                .put("role", node.path("role").asText())
-                .put("name", wanted)
-                .put("exact", true);
+    } else {
+      if (kind.equals("fill")) {
+        if (hostileMutation.equals("value")) {
+          action
+              .withObject("/operation")
+              .set(
+                  "value",
+                  C.object()
+                      .put("kind", "authoredLiteral")
+                      .put(
+                          "sourceInputId",
+                          request.path("context").path("inputs").get(0).path("inputId").asText()));
+        } else {
+          String wanted = hostileMutation.equals("operation") ? "Submit" : "Backup destination";
+          for (JsonNode node : request.path("context").path("observation").path("nodes")) {
+            if (node.path("name").asText().equals(wanted)) {
+              var target = action.putObject("target").put("nodeId", node.path("nodeId").asText());
+              target
+                  .putObject("locator")
+                  .put("kind", "role")
+                  .put("role", node.path("role").asText())
+                  .put("name", wanted)
+                  .put("exact", true);
+            }
           }
-        }
-        if (hostileMutation.equals("operation")) {
-          action.putObject("operation").put("kind", "click");
+          if (hostileMutation.equals("operation")) {
+            action.putObject("operation").put("kind", "click");
+          }
         }
       }
     }
     // Every hostile replacement remains in the closed typed model language.
-    C.validate("v2/guided-model-response", response);
+    C.validate("v3/guided-model-response", response);
   }
 
   @org.junit.jupiter.params.ParameterizedTest
@@ -1708,12 +2670,14 @@ class GuidedPlanningIntegrationTest {
     String id = startSession();
     invoke(id, "plans");
     String attempt = unknownAttempt(id);
+    // Late usage overshoots the session's frozen input ceiling by 72,000 (200,000 at 128,000).
+    int overage = inputCeiling(id) + 72_000;
     Runnable receipt =
         () ->
             repository.transaction(
                 () -> {
                   repository.lock(id);
-                  store.recordLateUsage(id, attempt, 200000, 100);
+                  store.recordLateUsage(id, attempt, overage, 100);
                   return null;
                 });
     var instrumented = org.mockito.Mockito.spy(sessions);
@@ -1732,42 +2696,44 @@ class GuidedPlanningIntegrationTest {
               org.mockito.ArgumentMatchers.any(),
               org.mockito.ArgumentMatchers.eq(id),
               org.mockito.ArgumentMatchers.eq(1L));
-    } else if (boundary.equals("reservation")) {
-      org.mockito.Mockito.doAnswer(
-              invocation -> {
-                Object result = invocation.callRealMethod();
-                if (injected.compareAndSet(false, true)) {
-                  afterCommitReceipt(receipt);
-                }
-                return result;
-              })
-          .when(instrumented)
-          .reserveModel(
-              org.mockito.ArgumentMatchers.any(),
-              org.mockito.ArgumentMatchers.eq(id),
-              org.mockito.ArgumentMatchers.eq(1L),
-              org.mockito.ArgumentMatchers.anyString(),
-              org.mockito.ArgumentMatchers.anyInt(),
-              org.mockito.ArgumentMatchers.anyInt());
     } else {
-      corruptFirstReply = true;
-      org.mockito.Mockito.doAnswer(
-              invocation -> {
-                Object result = invocation.callRealMethod();
-                if (injected.compareAndSet(false, true)) {
-                  afterCommitReceipt(receipt);
-                }
-                return result;
-              })
-          .when(instrumented)
-          .settleModel(
-              org.mockito.ArgumentMatchers.any(),
-              org.mockito.ArgumentMatchers.eq(id),
-              org.mockito.ArgumentMatchers.eq(1L),
-              org.mockito.ArgumentMatchers.anyString(),
-              org.mockito.ArgumentMatchers.anyString(),
-              org.mockito.ArgumentMatchers.any(),
-              org.mockito.ArgumentMatchers.any());
+      if (boundary.equals("reservation")) {
+        org.mockito.Mockito.doAnswer(
+                invocation -> {
+                  Object result = invocation.callRealMethod();
+                  if (injected.compareAndSet(false, true)) {
+                    afterCommitReceipt(receipt);
+                  }
+                  return result;
+                })
+            .when(instrumented)
+            .reserveModel(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.eq(id),
+                org.mockito.ArgumentMatchers.eq(1L),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyInt(),
+                org.mockito.ArgumentMatchers.anyInt());
+      } else {
+        corruptFirstReply = true;
+        org.mockito.Mockito.doAnswer(
+                invocation -> {
+                  Object result = invocation.callRealMethod();
+                  if (injected.compareAndSet(false, true)) {
+                    afterCommitReceipt(receipt);
+                  }
+                  return result;
+                })
+            .when(instrumented)
+            .settleModel(
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.eq(id),
+                org.mockito.ArgumentMatchers.eq(1L),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.any(),
+                org.mockito.ArgumentMatchers.any());
+      }
     }
     int before = PROVIDER_BYTES.size();
     org.assertj.core.api.Assertions.assertThatThrownBy(
@@ -1780,7 +2746,7 @@ class GuidedPlanningIntegrationTest {
     JsonNode stopped = repository.transaction(() -> repository.lock(id).document().deepCopy());
     assertThat(stopped.path("state").asText()).isEqualTo("FAILED");
     long charged = stopped.path("counters").path("modelInputTokens").asLong();
-    assertThat(charged).isGreaterThan(200000);
+    assertThat(charged).isGreaterThan(overage);
     assertThat(sessions.reconcileLateModelUsage(fixture.controller, id, 1)).isFalse();
     assertThat(sessions.reconcileLateModelUsage(fixture.controller, id, 1)).isFalse();
     assertThat(
@@ -1815,10 +2781,16 @@ class GuidedPlanningIntegrationTest {
     }
     JsonNode beforeCounters =
         repository.transaction(() -> repository.lock(id).document().path("counters").deepCopy());
+    // Input lands 1,000 under the session's frozen input ceiling (127,000 at 128,000).
     long inputDelta =
-        capacity.equals("input") ? 127000 - beforeCounters.path("modelInputTokens").asLong() : 50;
+        capacity.equals("input")
+            ? inputCeiling(id) - 1_000 - beforeCounters.path("modelInputTokens").asLong()
+            : 50;
+    // Output lands 1,000 under the session's frozen output ceiling (31,000 at 32,000).
     long outputDelta =
-        capacity.equals("output") ? 31000 - beforeCounters.path("modelOutputTokens").asLong() : 0;
+        capacity.equals("output")
+            ? outputCeiling(id) - 1_000 - beforeCounters.path("modelOutputTokens").asLong()
+            : 0;
     var instrumented = org.mockito.Mockito.spy(sessions);
     org.mockito.Mockito.doAnswer(
             invocation -> {
@@ -1877,7 +2849,7 @@ class GuidedPlanningIntegrationTest {
         fixture.user,
         id,
         "cancel-before-usage",
-        C.object().put("schemaVersion", 2).put("reason", "userRequested"));
+        C.object().put("schemaVersion", 3).put("reason", "userRequested"));
     repository.transaction(
         () -> {
           repository.lock(id);
@@ -1959,6 +2931,24 @@ class GuidedPlanningIntegrationTest {
     assertThat(PROVIDER_KINDS).containsExactly("SOURCE_PLAN");
   }
 
+  /** The immutable per-session output ceiling frozen into the session's limits at start. */
+  private int outputCeiling(String id) {
+    JsonNode ceiling =
+        repository.transaction(
+            () -> repository.lock(id).document().path("limits").path("maxModelOutputTokensTotal"));
+    assertThat(ceiling.isIntegralNumber()).isTrue();
+    return ceiling.intValue();
+  }
+
+  /** The immutable per-session input ceiling frozen into the session's limits at start. */
+  private int inputCeiling(String id) {
+    JsonNode ceiling =
+        repository.transaction(
+            () -> repository.lock(id).document().path("limits").path("maxModelInputTokensTotal"));
+    assertThat(ceiling.isIntegralNumber()).isTrue();
+    return ceiling.intValue();
+  }
+
   private String unknownAttempt(String id) {
     return repository.transaction(
         () -> {
@@ -2028,8 +3018,11 @@ class GuidedPlanningIntegrationTest {
   @Test
   void reportedThoughtOutputOverageStopsBeforeMaterializationDespiteSmallVisibleOutput()
       throws Exception {
-    reportedThoughtOverage = true;
     String id = startSession();
+    // 100 visible tokens plus the thoughts: the reported total passes the session's frozen output
+    // ceiling by 8,100 (40,100 at the former 32,000 ceiling), however the ceiling is sized.
+    int reportedOutput = outputCeiling(id) + 8_100;
+    reportedThoughtTokens = reportedOutput - 100;
     invoke(id, "plans", 409);
     assertThat(PROVIDER_BYTES).hasSize(1);
     assertThat(repository.transaction(() -> repository.lock(id).document().path("state").asText()))
@@ -2043,7 +3036,7 @@ class GuidedPlanningIntegrationTest {
                         .path("counters")
                         .path("modelOutputTokens")
                         .asInt()))
-        .isEqualTo(40100);
+        .isEqualTo(reportedOutput);
     assertThat(
             jdbc.queryForObject(
                 "SELECT count(*) FROM studio_guided_actions WHERE session_id=?", Integer.class, id))
@@ -2058,7 +3051,8 @@ class GuidedPlanningIntegrationTest {
 
   @Test
   void thoughtAndToolUsageOnStaleReplyRemainInImmutableLateAudit() throws Exception {
-    reportedThoughtOverage = true;
+    // Retention of thought and tool usage on a stale reply: independent of the session ceiling.
+    reportedThoughtTokens = 40_000;
     String id = startSession();
     BEFORE_RESPONSE.set(
         () ->
@@ -2094,19 +3088,18 @@ class GuidedPlanningIntegrationTest {
   private String startSession() throws Exception {
     ObjectNode start =
         C.object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("testId", testId.toString())
             .put("sourceRevision", "1")
             .put("configurationRevision", "1")
             .put("environmentId", "fixture")
-            .put("applicationId", "orders")
-            .put("accountRef", "account-1");
+            .put("applicationId", "orders");
     start.set(
         "versions",
         C.parse(
                 java.nio.file.Files.readString(
                     java.nio.file.Path.of(
-                        "../docs/specs/studio-observed-authoring/contracts/v2/fixtures.json")))
+                        "../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")))
             .path("documents")
             .path("versions"));
     return publicPost("", start).path("sessionId").asText();
@@ -2117,7 +3110,7 @@ class GuidedPlanningIntegrationTest {
         () -> {
           var session = repository.lock(id);
           return C.object()
-              .put("schemaVersion", 2)
+              .put("schemaVersion", 3)
               .put("sessionId", id)
               .put("expectedSourceRevision", "1")
               .put("expectedConfigurationRevision", "1")
@@ -2130,6 +3123,19 @@ class GuidedPlanningIntegrationTest {
   }
 
   private JsonNode invoke(String id, String route, int expected) throws Exception {
+    var response = invokeRaw(id, route);
+    assertThat(response.statusCode())
+        .as(
+            "%s counters=%s providerCalls=%s",
+            response.body(),
+            repository.transaction(
+                () -> repository.lock(id).document().path("counters").toString()),
+            PROVIDER_BYTES.size())
+        .isEqualTo(expected);
+    return C.parse(response.body());
+  }
+
+  private HttpResponse<String> invokeRaw(String id, String route) throws Exception {
     long fence =
         repository.transaction(
             () -> repository.lock(id).document().path("owner").path("fence").asLong());
@@ -2152,20 +3158,10 @@ class GuidedPlanningIntegrationTest {
             .header("Content-Type", "application/json")
             .POST(HttpRequest.BodyPublishers.ofString(command(id).toString()))
             .build();
-    var response =
-        HttpClient.newBuilder()
-            .sslContext(Environment.TLS)
-            .build()
-            .send(request, HttpResponse.BodyHandlers.ofString());
-    assertThat(response.statusCode())
-        .as(
-            "%s counters=%s providerCalls=%s",
-            response.body(),
-            repository.transaction(
-                () -> repository.lock(id).document().path("counters").toString()),
-            PROVIDER_BYTES.size())
-        .isEqualTo(expected);
-    return C.parse(response.body());
+    return HttpClient.newBuilder()
+        .sslContext(Environment.RUNNER_SIDE)
+        .build()
+        .send(request, HttpResponse.BodyHandlers.ofString());
   }
 
   private JsonNode publicPost(String suffix, JsonNode body) throws Exception {
@@ -2179,7 +3175,7 @@ class GuidedPlanningIntegrationTest {
   private JsonNode publicRequest(String suffix, JsonNode body) throws Exception {
     var builder =
         HttpRequest.newBuilder(
-                URI.create("https://localhost:" + port + "/api/v3/studio/guided-sessions" + suffix))
+                URI.create("https://localhost:" + port + "/api/v1/studio/guided-sessions" + suffix))
             .header("X-Fixture-User", "controlled-user")
             .header("Idempotency-Key", UUID.randomUUID().toString())
             .header("Content-Type", "application/json");
@@ -2190,7 +3186,7 @@ class GuidedPlanningIntegrationTest {
     }
     var response =
         HttpClient.newBuilder()
-            .sslContext(Environment.TLS)
+            .sslContext(Environment.RUNNER_SIDE)
             .build()
             .send(builder.build(), HttpResponse.BodyHandlers.ofString());
     assertThat(response.statusCode()).as(response.body()).isBetween(200, 202);
@@ -2203,13 +3199,64 @@ class GuidedPlanningIntegrationTest {
     JsonNode context = request.path("context");
     ObjectNode response =
         C.object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("kind", kind)
             .put("requestId", request.path("requestId").asText());
     if (kind.equals("SOURCE_PLAN") && refuseSource) {
       return response.put("status", "UNSUPPORTED").put("reasonCode", "UNSUPPORTED_CAPABILITY");
     }
     if (kind.equals("SOURCE_PLAN")) {
+      if (askSavedSource) {
+        askSavedSource = false;
+        var choices =
+            response.putObject("question").put("reason", "AMBIGUOUS_BINDING").putArray("choices");
+        ObjectNode savedReference = null;
+        for (JsonNode reference : context.path("configurationReferences")) {
+          if (reference.path("stepId").asText().equals(TWO)
+              && reference.path("intendedSlot").asText().equals("fill.value")) {
+            savedReference = reference.deepCopy();
+            savedReference.put("referenceKind", "configuration").put("configurationRevision", "1");
+            // The classifier's manifest names plain inputs for bookkeeping. The closed public
+            // configuration-reference shape permits referenceName only for secretRef choices.
+            if (!savedReference.path("kind").asText().equals("secretRef")) {
+              savedReference.remove("referenceName");
+            }
+          }
+        }
+        if (savedReference == null) {
+          throw new IllegalStateException("Declared saved reference missing");
+        }
+        var authored =
+            C.object()
+                .put("referenceKind", "sourceSpan")
+                .put("sourceRevision", "1")
+                .put("stepId", TWO)
+                .put("startUtf16", TEXT.get(1).indexOf("London"))
+                .put("endUtf16", TEXT.get(1).indexOf("London") + "London".length())
+                .put("kind", "nonsecretText")
+                .put("intendedSlot", "fill.value");
+        for (JsonNode reference : List.of(savedReference, authored)) {
+          choices
+              .addObject()
+              .put("choiceId", UUID.randomUUID().toString())
+              .put("safeLabel", "untrusted provider label")
+              .set(
+                  "meaning",
+                  C.object()
+                      .setAll(
+                          Map.of(
+                              "reference",
+                              reference,
+                              "need",
+                              C.object()
+                                  .put("stepId", TWO)
+                                  .put("occurrence", 0)
+                                  .put("operationKind", "fill")
+                                  .put("argumentSlot", "fill.value"))));
+        }
+        C.validate("v3/guided-model-response", response);
+        return response;
+      }
       if (askSource) {
         askSource = false;
         var choices =
@@ -2284,7 +3331,8 @@ class GuidedPlanningIntegrationTest {
       obligations.add(obligation(ONE, 0, "navigate", "page", 0, null));
       obligations.add(obligation(ONE, 1, "read", "Order reference", null, "order"));
       obligations.add(obligation(TWO, 0, "fill", "Destination", null, "order"));
-      obligations.add(obligation(THREE, 0, "click", "Submit", null, null));
+      obligations.add(
+          obligation(THREE, 0, "click", guardTarget == null ? "Submit" : guardTarget, null, null));
       obligations.add(
           obligation(THREE, 1, "assert", "Confirmation", null, null).put("predicate", "visible"));
       response
@@ -2329,7 +3377,7 @@ class GuidedPlanningIntegrationTest {
     JsonNode evidence = context.path("executionEvidence");
     ObjectNode action =
         C.object()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("sessionId", context.path("sessionId").asText())
             .put("scopeHash", context.path("scopeHash").asText())
             .put("generation", evidence.path("generation").asInt())
@@ -2437,6 +3485,9 @@ class GuidedPlanningIntegrationTest {
             "authoredInputsHash",
             "contextRevision"));
     target.remove(java.util.List.of("documentId", "generation"));
+    if (op.equals("click") && missingGuardTarget) {
+      target.put("nodeId", "node-1-999999");
+    }
     if (op.equals("click")) {
       lastSubmit = response.deepCopy();
     }
@@ -2469,12 +3520,26 @@ class GuidedPlanningIntegrationTest {
   static class Environment {
     static final GuidedContracts CONTRACTS = new GuidedContracts();
     static final PostgreSQLContainer<?> DATABASE = new PostgreSQLContainer<>("postgres:15-alpine");
+
+    /** A direct handle for test-side governed-policy seeding (no Spring context needed). */
+    static JdbcTemplate policyJdbc() {
+      return new JdbcTemplate(
+          new DriverManagerDataSource(
+              DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword()));
+    }
+
     static final Path TEMP;
-    static final Path WORKER_SNAPSHOT;
+    static final Path DIST;
+    static final RunnerTestTls RUNNER_TLS;
+
+    /** The backend's identity toward the runner: also the guided runner client's context. */
     static final SSLContext TLS;
+
+    /** What the runner (a double standing in for it, or a client of the backend) presents. */
+    static final SSLContext RUNNER_SIDE;
+
     static final KeyPair ISSUER;
     static final int RUNNER_PORT;
-    static final String FINGERPRINT;
     static final HttpServer APPLICATION;
     static final AtomicInteger NAVIGATIONS = new AtomicInteger(), CONNECTIONS = new AtomicInteger();
     static final AtomicReference<String> RECEIPT = new AtomicReference<>();
@@ -2509,26 +3574,15 @@ class GuidedPlanningIntegrationTest {
     static {
       try {
         TEMP = Files.createTempDirectory("guided-translation-");
-        WORKER_SNAPSHOT = TEMP.resolve("worker-dist");
-        Path sourceBuild = Path.of("../studio-runner/dist").toAbsolutePath().normalize();
-        try (var files = Files.walk(sourceBuild)) {
-          for (Path source : files.toList()) {
-            Path target = WORKER_SNAPSHOT.resolve(sourceBuild.relativize(source).toString());
-            if (Files.isDirectory(source)) {
-              Files.createDirectories(target);
-            } else {
-              Files.copy(source, target);
-            }
-          }
-        }
-        Files.writeString(TEMP.resolve("package.json"), "{\"type\":\"module\"}");
-        Files.createSymbolicLink(
-            TEMP.resolve("node_modules"), Path.of("../studio-runner/node_modules").toRealPath());
-        ObjectNode workerEvidence = CONTRACTS.object().put("snapshot", WORKER_SNAPSHOT.toString());
+        // STUDIO-OBS-009 AC-12 i: no private copy of dist. The harness spawns the real folded entry
+        // point and records the digest of what it spawned; the sole rebuild is the F-merge's.
+        DIST = RunnerProcessHarness.defaultDistDirectory().toAbsolutePath().normalize();
+        ObjectNode workerEvidence = CONTRACTS.object().put("snapshot", DIST.toString());
+        workerEvidence.put("distDigest", RunnerProcessHarness.distDigestOf(DIST));
         ObjectNode hashes = workerEvidence.putObject("sha256");
         for (String relative :
             List.of(
-                "run/guidedMain.js",
+                "main.js",
                 "run/browser.js",
                 "guided/runtime.js",
                 "guided/transport.js",
@@ -2538,69 +3592,25 @@ class GuidedPlanningIntegrationTest {
               HexFormat.of()
                   .formatHex(
                       MessageDigest.getInstance("SHA-256")
-                          .digest(Files.readAllBytes(WORKER_SNAPSHOT.resolve(relative)))));
+                          .digest(Files.readAllBytes(DIST.resolve(relative)))));
         }
+        hashes.put(
+            "scripts/browser-provenance.mjs",
+            HexFormat.of()
+                .formatHex(
+                    MessageDigest.getInstance("SHA-256")
+                        .digest(
+                            Files.readAllBytes(
+                                Path.of("../studio-runner/scripts/browser-provenance.mjs")))));
         Files.writeString(
             Path.of("/tmp/studio-obs005-tested-worker.json"), workerEvidence.toString());
-        command(
-            "openssl",
-            "req",
-            "-x509",
-            "-newkey",
-            "rsa:2048",
-            "-nodes",
-            "-keyout",
-            TEMP.resolve("tls.key").toString(),
-            "-out",
-            TEMP.resolve("tls.crt").toString(),
-            "-days",
-            "2",
-            "-subj",
-            "/CN=localhost",
-            "-addext",
-            "subjectAltName=DNS:localhost,IP:127.0.0.1");
-        command(
-            "openssl",
-            "pkcs12",
-            "-export",
-            "-inkey",
-            TEMP.resolve("tls.key").toString(),
-            "-in",
-            TEMP.resolve("tls.crt").toString(),
-            "-out",
-            TEMP.resolve("tls.p12").toString(),
-            "-passout",
-            "pass:fixture");
-        command(
-            "keytool",
-            "-importcert",
-            "-noprompt",
-            "-alias",
-            "fixture",
-            "-file",
-            TEMP.resolve("tls.crt").toString(),
-            "-keystore",
-            TEMP.resolve("trust.p12").toString(),
-            "-storetype",
-            "PKCS12",
-            "-storepass",
-            "fixture");
-        KeyStore keyStore = KeyStore.getInstance("PKCS12");
-        try (var input = Files.newInputStream(TEMP.resolve("tls.p12"))) {
-          keyStore.load(input, "fixture".toCharArray());
-        }
-        var keys = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
-        keys.init(keyStore, "fixture".toCharArray());
-        var trust = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
-        trust.init(keyStore);
-        TLS = SSLContext.getInstance("TLS");
-        TLS.init(keys.getKeyManagers(), trust.getTrustManagers(), new SecureRandom());
-        X509Certificate certificate =
-            (X509Certificate) keyStore.getCertificate(keyStore.aliases().nextElement());
-        FINGERPRINT =
-            HexFormat.ofDelimiter(":")
-                .withUpperCase()
-                .formatHex(MessageDigest.getInstance("SHA-256").digest(certificate.getEncoded()));
+        // One test CA (lane D3.0): the runner and the backend certificates chain to it, the runner
+        // pins the backend certificate, and the backend trusts only the CA.
+        RUNNER_TLS = RunnerTestTls.shared();
+        TLS = RUNNER_TLS.backendTls().sslContext();
+        RUNNER_SIDE =
+            RUNNER_TLS.serverContext(
+                Identity.RUNNER, RUNNER_TLS.trustStore(), RUNNER_TLS.trustStorePasswordFile());
         var generator = KeyPairGenerator.getInstance("RSA");
         generator.initialize(2048);
         ISSUER = generator.generateKeyPair();
@@ -2610,22 +3620,17 @@ class GuidedPlanningIntegrationTest {
                 + Base64.getMimeEncoder(64, new byte[] {10})
                     .encodeToString(ISSUER.getPublic().getEncoded())
                 + "\n-----END PUBLIC KEY-----\n");
-        try (var socket = new java.net.ServerSocket(0)) {
-          RUNNER_PORT = socket.getLocalPort();
-        }
+        // AC-12 h: an exclusive bind on both loopback families, outside the database range.
+        RUNNER_PORT = RunnerProcessHarness.exclusivelyFreePort();
         APPLICATION = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         ORIGIN = "http://127.0.0.1:" + APPLICATION.getAddress().getPort();
         APPLICATION.start();
         DATABASE.start();
+        // STUDIO-OBS-012A / ADR-SC-005 D-B: the re-baselined schema head (core V1–V11 + V12–V18).
         Flyway.configure()
             .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
             .locations("classpath:db/migration")
-            .target("30")
-            .load()
-            .migrate();
-        Flyway.configure()
-            .dataSource(DATABASE.getJdbcUrl(), DATABASE.getUsername(), DATABASE.getPassword())
-            .locations("classpath:db/migration")
+            .target("22") // STUDIO-OBS-014 S3: governance tables (V19) at head
             .load()
             .migrate();
       } catch (Exception failure) {
@@ -2634,13 +3639,8 @@ class GuidedPlanningIntegrationTest {
     }
 
     static void properties(DynamicPropertyRegistry registry) {
-      registry.add("server.ssl.enabled", () -> true);
-      registry.add("server.ssl.key-store", () -> TEMP.resolve("tls.p12").toString());
-      registry.add("server.ssl.key-store-password", () -> "fixture");
-      registry.add("server.ssl.key-store-type", () -> "PKCS12");
-      registry.add("server.ssl.trust-store", () -> TEMP.resolve("trust.p12").toString());
-      registry.add("server.ssl.trust-store-password", () -> "fixture");
-      registry.add("server.ssl.client-auth", () -> "need");
+      RunnerProcessHarness.backendServerSslProperties(RUNNER_TLS)
+          .forEach((name, value) -> registry.add(name, () -> value));
       registry.add(
           "studio.guided-authoring.service-public-key",
           () -> Base64.getEncoder().encodeToString(ISSUER.getPublic().getEncoded()));
@@ -2662,7 +3662,9 @@ class GuidedPlanningIntegrationTest {
                 List.of(),
                 List.of(new CsiOwnershipEntry("CSI-123", "owner"))));
     Process worker;
-    Path workerLog;
+    RunnerProcessHarness workerHarness;
+    Path livePolicyCounter;
+    Path livePolicyWrapper;
 
     void startWorker(org.junit.jupiter.api.TestInfo testInfo) throws Exception {
       String testName = testInfo.getTestMethod().orElseThrow().getName();
@@ -2691,11 +3693,7 @@ class GuidedPlanningIntegrationTest {
               .getName()
               .equals("freshObservationConnectsTwoAuthoredStepsWithoutReplayingProducer");
       genericRead = genericRead || multiStep;
-      jdbc.execute(
-          "TRUNCATE studio_guided_consumer_edges,studio_guided_producers,studio_guided"
-              + "_allocations,studio_guided_preparations,studio_guided_materializations,stud"
-              + "io_guided_evidence,studio_guided_commands,studio_guided_actions,studio_guid"
-              + "ed_sessions CASCADE");
+      // Fresh test/session namespaces retain immutable prior audit and owner history.
       HOLD_NEXT_REFRESH.set(false);
       refreshCallbackHeld = new CountDownLatch(1);
       releaseRefreshCallback = new CountDownLatch(1);
@@ -2715,44 +3713,15 @@ class GuidedPlanningIntegrationTest {
       Files.writeString(
           TEMP.resolve("worker.jwt"),
           token("owning-worker", "worker-1", "studio-guided-controller"));
-      ObjectNode config =
-          CONTRACTS
-              .object()
-              .put("workerId", "worker-1")
-              .put("host", "127.0.0.1")
-              .put("port", RUNNER_PORT)
-              .put("journalDirectory", Files.createTempDirectory(TEMP, "journal-").toString())
-              .put("tlsKeyFile", TEMP.resolve("tls.key").toString())
-              .put("tlsCertFile", TEMP.resolve("tls.crt").toString())
-              .put("tlsCaFile", TEMP.resolve("tls.crt").toString())
-              .put("controllerIssuer", "fixture-issuer")
-              .put("controllerSubject", "controller-1")
-              .put("controllerPublicKeyFile", TEMP.resolve("issuer.pub").toString())
-              .put("controllerCertificateFingerprint256", FINGERPRINT)
-              .put("callbackBaseUrl", "https://localhost:" + backendPort)
-              .put("callbackTokenFile", TEMP.resolve("worker.jwt").toString());
-      config
-          .putArray("rules")
-          .add(
-              CONTRACTS
-                  .object()
-                  .put("testId", "source")
-                  .put("name", "Order number")
-                  .put("policyRuleId", "order-policy")
-                  .put("classification", "permittedBusinessData"))
-          .add(
-              CONTRACTS
-                  .object()
-                  .put("testId", "destination")
-                  .put("name", "Destination")
-                  .put("accessibleName", "Destination")
-                  .put("policyRuleId", "destination-policy")
-                  .put("classification", "nonsecretApproved"));
+      Path journal = Files.createTempDirectory(TEMP, "journal-");
+      // STUDIO-OBS-014 S3 (RK-2, ar-mounted-rules): the worker mounts neither `rules` nor
+      // `applicationPolicy`. The same per-test application policy is the governed, approved
+      // policy of the learning scope; each session freezes the version active at its start.
+      ObjectNode policy = null;
       if (genericRead) {
-        config.putArray("rules");
-        ObjectNode policy =
-            config
-                .putObject("applicationPolicy")
+        policy =
+            CONTRACTS
+                .object()
                 .put("policyRuleId", "structural-policy")
                 .put("allowStructuralDiscovery", true);
         ObjectNode grant =
@@ -2773,50 +3742,123 @@ class GuidedPlanningIntegrationTest {
         policy.putArray("readGrants").add(grant);
       }
       if (belowFold || privacyEcho || nativeToggle) {
-        config
-            .putObject("applicationPolicy")
-            .put("policyRuleId", "structural-policy")
-            .put("allowStructuralDiscovery", true);
+        policy = null;
       }
-      Path mounted = TEMP.resolve("worker.json");
-      Files.writeString(mounted, config.toString());
-      workerLog = Files.createTempFile(TEMP, "worker-", ".log");
-      var process =
-          new ProcessBuilder("node", WORKER_SNAPSHOT.resolve("run/guidedMain.js").toString());
-      process.environment().put("STUDIO_GUIDED_CONFIG_FILE", mounted.toString());
-      process.redirectErrorStream(true).redirectOutput(workerLog.toFile());
-      worker = process.start();
-      await(
-          () -> {
-            try (var socket = new Socket()) {
-              socket.connect(new InetSocketAddress("127.0.0.1", RUNNER_PORT), 100);
-              return true;
-            } catch (Exception ignored) {
-              return false;
-            }
-          },
-          10000);
+      com.citi.put.checks.studio.support.ObservedPublicationFixture.ensurePolicy(
+          Environment.policyJdbc(),
+          "CSI-123",
+          "orders",
+          "fixture",
+          java.util.List.of(ORIGIN),
+          policy,
+          "ALLOW");
+      // STUDIO-OBS-009 AC-3 / AC-12 h: the one folded entry point over TLS, spawned and reaped by
+      // the harness. STUDIO-OBS-013/014 S3: a per-class object store, never a shared default
+      // directory.
+      var spawn =
+          RunnerProcessHarness.builder(RUNNER_TLS)
+              .port(RUNNER_PORT)
+              .workDirectory(Files.createTempDirectory(TEMP, "runner-"))
+              .callbackBaseUrl("https://localhost:" + backendPort)
+              .env(RunnerProcessHarness.KEY_OBJECT_STORE_DIR, TEMP.resolve("objects").toString())
+              .guided(
+                  new RunnerProcessHarness.Guided(
+                      "worker-1",
+                      journal,
+                      "fixture-issuer",
+                      "controller-1",
+                      TEMP.resolve("issuer.pub"),
+                      "https://localhost:" + backendPort,
+                      TEMP.resolve("worker.jwt")));
+      boolean measured =
+          testName.equals(
+              "aForgedFrozenPolicyHashFromTheRealBackendIsRejectedByTheRealWorkerBeforeBrowserLaunch");
+      if (measured) {
+        livePolicyCounter = TEMP.resolve("live-policy-counter-" + UUID.randomUUID() + ".json");
+        String playwright =
+            Path.of("../studio-runner/node_modules/playwright/index.mjs")
+                .toAbsolutePath()
+                .normalize()
+                .toUri()
+                .toString();
+        String counter = new ObjectMapper().writeValueAsString(livePolicyCounter.toString());
+        // Measurement only: exact production module, original Playwright call-through, and actual
+        // HTTPS request events. No body, token, config, result or browser replacement is observed.
+        // The harness appends the standard main() call after this prelude.
+        String prelude =
+            "import {chromium} from '"
+                + playwright
+                + "';"
+                + "import fs from 'node:fs';import https from 'node:https';"
+                + "import {syncBuiltinESMExports} from 'node:module';const file="
+                + counter
+                + ";"
+                + "const original=chromium.launchPersistentContext;"
+                + "const state={registered:typeof original==='function',launches:0,rpcs:{}};"
+                + "const save=()=>fs.writeFileSync(file,JSON.stringify(state),{mode:0o600});save();"
+                + "chromium.launchPersistentContext=function(...args){state.launches++;save();"
+                + "return Reflect.apply(original,this,args);};"
+                + "const serverFactory=https.createServer;https.createServer=function(...args){"
+                + "const server=Reflect.apply(serverFactory,this,args);server.prependListener('request',req=>{"
+                + "const route=(req.url||'').split('/').at(-1);state.rpcs[route]=(state.rpcs[route]||0)+1;save();});"
+                + "return server;};syncBuiltinESMExports();";
+        spawn.preload(prelude);
+      }
+      workerHarness = spawn.start();
+      worker = workerHarness.process();
+      if (measured) {
+        livePolicyWrapper = workerHarness.workDirectory().resolve("entry.mjs");
+      }
+      workerHarness.awaitReady(Duration.ofSeconds(60));
     }
 
     void closeWorker() throws Exception {
       releaseClaimResponse.countDown();
       releaseRefreshCallback.countDown();
-      if (worker != null) {
-        worker.destroy();
-        if (!worker.waitFor(5, TimeUnit.SECONDS)) {
-          worker.destroyForcibly();
+      Throwable failure = null;
+      var harness = workerHarness;
+      workerHarness = null;
+      RunnerProcessHarness.TeardownReport report = null;
+      try {
+        if (harness != null) {
+          // AC-11 k / I-T1: stop the runner and everything it left.
+          report = harness.teardown();
+        }
+      } catch (Throwable cleanup) {
+        failure = cleanup;
+      }
+      try {
+        if (harness != null) {
+          assertThat(Files.readString(harness.logFile()))
+              .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
+          // Exit 0 inside the guided grace and no survivor (ruling W1.5 part 1, I-T1).
+          report.assertNoSurvivors();
+          report.assertCleanExit();
+        }
+      } catch (Throwable privacy) {
+        if (failure == null) {
+          failure = privacy;
+        } else {
+          failure.addSuppressed(privacy);
         }
       }
-      assertThat(Files.readString(workerLog))
-          .doesNotContain(CAPTURE, PASSWORD_ECHO, ORDINARY_ECHO.strip());
+      rethrowCleanupFailure(failure);
+    }
+
+    private static void rethrowCleanupFailure(Throwable failure) throws Exception {
+      if (failure instanceof Exception exception) {
+        throw exception;
+      }
+      if (failure instanceof Error error) {
+        throw error;
+      }
+      if (failure != null) {
+        throw new IllegalStateException("Fixture cleanup failed", failure);
+      }
     }
 
     static ObjectNode versions() {
-      return (ObjectNode)
-          CONTRACTS.parse(
-              "{\"contract\":2,\"learnedPlan\":2,\"observation\":2,\"guidedPolicy\":2,\"re"
-                  + "ferencePolicy\":3,\"lowering\":1,\"artifact\":2,\"language\":\"observed-2\""
-                  + ",\"executor\":\"observed-2\"}");
+      return (ObjectNode) CONTRACTS.parse("{\"contract\":3}");
     }
 
     static String token(String role, String subject, String audience) {
@@ -2852,15 +3894,6 @@ class GuidedPlanningIntegrationTest {
       } catch (Exception failure) {
         throw new IllegalStateException(failure);
       }
-    }
-
-    static void command(String... arguments) throws Exception {
-      var process =
-          new ProcessBuilder(arguments)
-              .redirectErrorStream(true)
-              .redirectOutput(ProcessBuilder.Redirect.DISCARD)
-              .start();
-      assertThat(process.waitFor()).isZero();
     }
 
     static void await(java.util.function.BooleanSupplier condition, long timeout) throws Exception {

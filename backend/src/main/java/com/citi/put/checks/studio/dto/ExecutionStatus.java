@@ -17,11 +17,6 @@ public final class ExecutionStatus {
   public static final String FAILED = "FAILED";
   public static final String ERROR = "ERROR";
 
-  /** Legacy statuses that predate the canonical vocabulary. */
-  public static final String LEGACY_COMPLETED = "COMPLETED";
-
-  public static final String LEGACY_TIMEOUT = "TIMEOUT";
-
   private static final Set<String> CANONICAL = Set.of(PENDING, RUNNING, PASSED, FAILED, ERROR);
 
   private static final Set<String> TERMINAL = Set.of(PASSED, FAILED, ERROR);

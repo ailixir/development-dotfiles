@@ -180,12 +180,12 @@ class GuidedPublicationAuthorizationIT {
                   java.nio.file.Path.of(
                       "../studio-runner/fixtures/observed-reference/" + name + ".json")));
       var artifact = fixture.path("artifact");
-      contracts.validate("v2/replay-artifact", artifact);
+      contracts.validate("v3/replay-artifact", artifact);
       var mutated = (com.fasterxml.jackson.databind.node.ObjectNode) artifact.deepCopy();
       ((com.fasterxml.jackson.databind.node.ObjectNode)
               mutated.path("steps").get(0).path("operations").get(0))
           .put("source", "unsolicited-code");
-      assertThatThrownBy(() -> contracts.validate("v2/replay-artifact", mutated))
+      assertThatThrownBy(() -> contracts.validate("v3/replay-artifact", mutated))
           .isInstanceOf(GuidedSessionException.class)
           .hasMessage("INVALID_CONTRACT");
     }

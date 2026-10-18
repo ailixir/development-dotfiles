@@ -1,18 +1,22 @@
 package com.citi.put.checks.studio.sse;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.StudioExecutionFixtures;
 import com.citi.put.checks.studio.StudioService;
 import com.citi.put.checks.studio.dispatch.StudioDispatchLedgerStatements;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.dto.ReplayFailure;
+import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.internal.AdmissionCasService;
 import com.citi.put.checks.studio.internal.ProgressReportService;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import com.citi.put.checks.studio.internal.dto.RunOutcome;
 import com.citi.put.checks.studio.internal.dto.RunnerEvidence;
 import com.citi.put.checks.studio.internal.dto.RunnerLogEntry;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
+import com.citi.put.checks.studio.internal.dto.RunnerStepState;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.net.http.HttpResponse;
 import java.time.Duration;
@@ -29,6 +33,8 @@ import org.springframework.boot.test.system.CapturedOutput;
 import org.springframework.boot.test.system.OutputCaptureExtension;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -36,6 +42,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -64,7 +72,13 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
 @ExtendWith(OutputCaptureExtension.class)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class SseStreamingIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60471";
   private static final String OWNER = "sse-owner@citi.com";
@@ -79,6 +93,10 @@ class SseStreamingIT {
   @Autowired private JdbcTemplate jdbc;
   @Autowired private StudioService studioService;
   @Autowired private AdmissionCasService admissionService;
+
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
   @Autowired private ProgressReportService progressService;
   @Autowired private StudioDispatchLedgerStatements statements;
   @Autowired private WatchedExecutionRegistry registry;
@@ -99,14 +117,19 @@ class SseStreamingIT {
     fixtures.seedUser(READER);
     fixtures.seedUser(STRANGER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     testId =
         fixtures
             .seedRunnableTest("SSE draft", CSI_ID, OWNER, List.of("Go to the home page"))
             .testId();
-    executionId = studioService.executeTest(testId, owner, null).executionId();
-    attemptId = UUID.randomUUID();
+    executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
+    // STUDIO-OBS-014 P1: dispatched under the attempt the observed Run authority issued and
+    // admitted through the observed admission, as the runner does (legacy claim() deleted).
+    attemptId = ObservedPublicationFixture.bindingAttempt(observedReplay, executionId);
     UUID attempt = attemptId;
     transactions.executeWithoutResult(
         status -> {
@@ -115,8 +138,8 @@ class SseStreamingIT {
           statements.beginDispatch(executionId, "sse-dispatcher", attempt);
         });
     admissionId = UUID.randomUUID();
-    admissionService.claim(
-        executionId, new AdmissionRequest(executionId, attemptId, RUNNER, admissionId, Map.of()));
+    ObservedPublicationFixture.admitObserved(
+        observedReplay, admissionService, executionId, RUNNER, admissionId);
   }
 
   @org.junit.jupiter.api.AfterEach
@@ -319,6 +342,49 @@ class SseStreamingIT {
     }
   }
 
+  /**
+   * STUDIO-OBS-008 T0 ruling A1.5 case 10, the SSE half: a replay cause persisted by the FINAL
+   * statement is carried by the streamed frame exactly as {@code GET /executions/{id}} carries it,
+   * and the later evidence-settling FINAL does not rewrite it.
+   */
+  @Test
+  void aReplayCauseIsInTheStreamedFrameIdenticallyToTheGetSnapshotAndIsNeverRewritten()
+      throws Exception {
+    progressService.apply(executionId, started(1));
+    String stepId = revisionStepIds().get(0);
+    progressService.apply(executionId, driftTerminal(9, RunnerEvidence.PENDING));
+
+    try (SseTestClient client = new SseTestClient()) {
+      client.open(eventsUrl(), readerHeaders());
+      assertThat(client.awaitSnapshots(1, Duration.ofSeconds(10))).isTrue();
+      String streamed = client.snapshots().get(0).data();
+
+      ResponseEntity<String> get =
+          restTemplate.exchange(
+              "/api/v1/studio/executions/" + executionId,
+              HttpMethod.GET,
+              new HttpEntity<>(springHeaders(READER, CSI_ID + ":viewer")),
+              String.class);
+
+      assertThat(objectMapper.readTree(streamed)).isEqualTo(objectMapper.readTree(get.getBody()));
+      ExecutionSnapshotDto frame = objectMapper.readValue(streamed, ExecutionSnapshotDto.class);
+      assertThat(frame.status()).isEqualTo("ERROR");
+      assertThat(frame.replayFailure()).isEqualTo(ReplayFailure.targetDrift(stepId, 0));
+      assertThat(objectMapper.readTree(streamed).path("replayFailure").has("loginStepsPresent"))
+          .isFalse();
+
+      // Evidence settles with another FINAL; the cause was written once and stays.
+      progressService.apply(executionId, driftTerminal(10, RunnerEvidence.FAILED));
+      assertThat(client.awaitClosed(Duration.ofSeconds(10))).isTrue();
+      ExecutionSnapshotDto settled =
+          objectMapper.readValue(
+              client.snapshots().get(client.snapshots().size() - 1).data(),
+              ExecutionSnapshotDto.class);
+      assertThat(settled.streamComplete()).isTrue();
+      assertThat(settled.replayFailure()).isEqualTo(frame.replayFailure());
+    }
+  }
+
   @Test
   void closingACompletedStreamDoesNotReauthorizeTheInternalAsyncDispatch(CapturedOutput output)
       throws Exception {
@@ -422,13 +488,23 @@ class SseStreamingIT {
   @Test
   void revokedAccessMidStreamStopsDeliveryWithinTheRefreshIntervalAndClosesWithASignal()
       throws Exception {
+    // STUDIO-OBS-012A R2 precondition: an observed (bound) execution's CSI cannot move at all.
+    assertThatThrownBy(
+            () ->
+                jdbc.update(
+                    "UPDATE ui_test_executions SET csi_id = ? WHERE id = ?", "60472", executionId))
+        .isInstanceOf(DataAccessException.class)
+        .hasMessageContaining("observed execution binding invalid");
+    // The revocation is seated on an unbound, still-running history row: only such a row may have
+    // its own CSI changed under the final schema.
+    UUID unbound = fixtures.unboundExecution(testId, CSI_ID, OWNER, "Production", "PENDING");
     try (SseTestClient client = new SseTestClient()) {
-      client.open(eventsUrl(), readerHeaders());
+      client.open(eventsUrl(unbound), readerHeaders());
       assertThat(client.awaitSnapshots(1, Duration.ofSeconds(10))).isTrue();
 
       // The execution's CSI is changed out from under the captured identity, which is the one
       // revocation this story can model without the real CSI provider (ED-02).
-      jdbc.update("UPDATE ui_test_executions SET csi_id = ? WHERE id = ?", "60472", executionId);
+      jdbc.update("UPDATE ui_test_executions SET csi_id = ? WHERE id = ?", "60472", unbound);
 
       assertThat(client.awaitClosed(Duration.ofSeconds(10)))
           .as("delivery stops within the bounded refresh interval")
@@ -488,7 +564,11 @@ class SseStreamingIT {
   }
 
   private String eventsUrl() {
-    return "http://localhost:" + port + "/api/v1/studio/executions/" + executionId + "/events";
+    return eventsUrl(executionId);
+  }
+
+  private String eventsUrl(UUID execution) {
+    return "http://localhost:" + port + "/api/v1/studio/executions/" + execution + "/events";
   }
 
   private static Map<String, String> readerHeaders() {
@@ -540,7 +620,46 @@ class SseStreamingIT {
         Map.of(),
         null,
         null,
-        null);
+        null,
+        Map.of());
+  }
+
+  private List<String> revisionStepIds() throws Exception {
+    UUID revisionId =
+        jdbc.queryForObject(
+            "SELECT revision_id FROM ui_test_executions WHERE id = ?", UUID.class, executionId);
+    List<String> ids = new java.util.ArrayList<>();
+    objectMapper
+        .readTree(
+            jdbc.queryForObject(
+                "SELECT artifact::text FROM ui_test_revisions WHERE id = ?",
+                String.class,
+                revisionId))
+        .path("steps")
+        .forEach(step -> ids.add(step.path("stepId").asText()));
+    return ids;
+  }
+
+  /** A replay drift FINAL: {@code ERROR / RUN_ERROR / TARGET_DRIFT} with the one step failed. */
+  private RunnerReport driftTerminal(long sequence, String evidenceState) {
+    return new RunnerReport(
+        executionId,
+        attemptId,
+        admissionId,
+        RUNNER,
+        RunnerReport.FINAL,
+        sequence,
+        Instant.now(),
+        Instant.parse("2026-09-10T10:00:02Z"),
+        List.of(new RunnerStepState(0, StepResult.FAIL, 120.0, 900.0, 780.0, "TARGET_DRIFT")),
+        List.of(new RunnerLogEntry(0.0, "info", "browser started")),
+        false,
+        Map.of(),
+        new RunOutcome(RunOutcome.ERROR, "RUN_ERROR", "TARGET_DRIFT", null),
+        new RunnerEvidence(
+            "studio/video.webm", "studio/manifest.result.json", evidenceState, false),
+        null,
+        Map.of());
   }
 
   private RunnerReport terminal(long sequence, String result, String evidenceState) {
@@ -557,9 +676,10 @@ class SseStreamingIT {
         List.of(new RunnerLogEntry(0.0, "info", "browser started")),
         false,
         Map.of(),
-        new RunOutcome(result, null, null),
+        new RunOutcome(result, null, null, null),
         new RunnerEvidence(
             "studio/video.webm", "studio/manifest.result.json", evidenceState, false),
-        null);
+        null,
+        Map.of());
   }
 }

@@ -17,8 +17,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
- * Story 10.7 AC-2 — {@code V15} applied to a database that <em>already holds</em> dispatch ledger
- * and execution history rows.
+ * Story 10.7 AC-2 — the ledger state machine, now installed by {@code V13__executions_ledger}
+ * (STUDIO-OBS-012A / ADR-SC-005 D-B re-baseline), applied to an untouched core V11 database that
+ * <em>already holds</em> execution history rows.
  *
  * <p>Seeding first and migrating second is not decoration. A wave-1 migration passed CI on an empty
  * schema and would have aborted with SQLSTATE 23514 on any real database, because its data rewrite
@@ -27,10 +28,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  * every CHECK passes, so an empty-schema test proves nothing about whether the constraint can be
  * adopted.
  *
- * <p>What the rows below establish is the claim {@code V15}'s own comment makes: the only values
- * any writer has ever produced are {@code QUEUED} (the column default and the entity constructor)
- * and {@code DONE} ({@code V14}'s partition-locator backfill), and both are inside the enumerated
- * set.
+ * <p>In the re-baseline the ledger table is created empty by V13, so the only rows that can exist
+ * when its state CHECK is added are V13's own partition-locator backfill ({@code DONE}) for the
+ * core history seeded below. What the rows establish is the claim the migration's comment makes:
+ * the backfill's {@code DONE} and the writers' {@code QUEUED} (the column default and the entity
+ * constructor) and admitted identities are all inside the enumerated set, and the backfilled rows
+ * are not rewritten by any later migration.
  */
 @Testcontainers(disabledWithoutDocker = true)
 class LedgerStateMachineMigrationIT {
@@ -47,13 +50,15 @@ class LedgerStateMachineMigrationIT {
   private static UUID queuedExecutionId;
   private static UUID doneExecutionId;
   private static UUID dispatchingExecutionId;
+  private static UUID testId;
 
   @BeforeAll
   static void migrateInTwoStages() throws SQLException {
     POSTGRES.start();
-    flywayTo("14");
-    seedLedgerRows();
-    flywayTo("15");
+    flywayTo("11");
+    seedCoreHistory();
+    flywayTo("18");
+    seedWriterLedgerRows();
   }
 
   @AfterAll
@@ -70,10 +75,10 @@ class LedgerStateMachineMigrationIT {
         .migrate();
   }
 
-  /** History and ledger rows in every state a pre-10.7 writer could actually have produced. */
-  private static void seedLedgerRows() throws SQLException {
+  /** Core V11 history with a registered CSI: V13 gives it a DONE partition locator. */
+  private static void seedCoreHistory() throws SQLException {
     UUID userId = UUID.randomUUID();
-    UUID testId = UUID.randomUUID();
+    testId = UUID.randomUUID();
     queuedExecutionId = UUID.randomUUID();
     doneExecutionId = UUID.randomUUID();
     dispatchingExecutionId = UUID.randomUUID();
@@ -96,12 +101,22 @@ class LedgerStateMachineMigrationIT {
             + testId
             + "', 'V15 draft', '"
             + CSI_ID
-            + "', 'Production', 'chromium',"
+            + "', 'Production', 'chrome',"
             + " '[\"Go to the home page\"]'::jsonb, '[]'::jsonb, 30, 'networkidle',"
             + " 'v15@citi.com', NOW(), NOW())");
 
-    for (UUID executionId :
-        new UUID[] {queuedExecutionId, doneExecutionId, dispatchingExecutionId}) {
+    execute(
+        "INSERT INTO ui_test_executions (id, ui_test_id, status, started_at, ended_at,"
+            + " duration_ms, created_at) VALUES ('"
+            + doneExecutionId
+            + "', '"
+            + testId
+            + "', 'PASSED', NOW(), NOW() + INTERVAL '4 seconds', 4000, NOW())");
+  }
+
+  /** Ledger rows in the states the surviving writers produce, written on the migrated head. */
+  private static void seedWriterLedgerRows() throws SQLException {
+    for (UUID executionId : new UUID[] {queuedExecutionId, dispatchingExecutionId}) {
       execute(
           "INSERT INTO ui_test_executions (id, ui_test_id, status, started_at, created_at, csi_id)"
               + " VALUES ('"
@@ -122,15 +137,6 @@ class LedgerStateMachineMigrationIT {
             + "', '"
             + CSI_ID
             + "', 'QUEUED')");
-    execute(
-        "INSERT INTO studio_dispatch_ledger (execution_id, execution_accepted_at, test_id, csi_id,"
-            + " state) VALUES ('"
-            + doneExecutionId
-            + "', NOW(), '"
-            + testId
-            + "', '"
-            + CSI_ID
-            + "', 'DONE')");
     // A complete admission identity on an in-flight row: the constraint must accept it.
     execute(
         "INSERT INTO studio_dispatch_ledger (execution_id, execution_accepted_at, test_id, csi_id,"
@@ -148,11 +154,13 @@ class LedgerStateMachineMigrationIT {
   }
 
   @Test
-  void v15AppliesToADatabaseHoldingLedgerAndHistoryRows() throws SQLException {
-    assertThat(scalarInt("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '15'"))
+  void v13AppliesToADatabaseHoldingExecutionHistoryRows() throws SQLException {
+    assertThat(scalarInt("SELECT COUNT(*) FROM flyway_schema_history WHERE version = '13'"))
         .isEqualTo(1);
-    assertThat(scalarBoolean("SELECT success FROM flyway_schema_history WHERE version = '15'"))
+    assertThat(scalarBoolean("SELECT success FROM flyway_schema_history WHERE version = '13'"))
         .isTrue();
+    assertThat(scalarInt("SELECT COUNT(*) FROM flyway_schema_history WHERE success = false"))
+        .isZero();
     assertThat(scalarInt("SELECT COUNT(*) FROM studio_dispatch_ledger")).isEqualTo(3);
   }
 

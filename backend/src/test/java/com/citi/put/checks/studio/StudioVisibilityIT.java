@@ -2,13 +2,12 @@ package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.citi.put.checks.studio.compile.CandidateRevision;
-import com.citi.put.checks.studio.compile.CompileRequest;
-import com.citi.put.checks.studio.compile.CompileStateService;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,7 +39,6 @@ class StudioVisibilityIT {
   @Autowired TestRestTemplate restTemplate;
   @Autowired ObjectMapper objectMapper;
   @Autowired JdbcTemplate jdbc;
-  @Autowired CompileStateService compileStateService;
   @Autowired UITestRevisionRepository revisionRepository;
 
   private UUID visibleTestId;
@@ -98,26 +96,9 @@ class StudioVisibilityIT {
     assertThat(objectMapper.readTree(unfiltered.getBody()).path("data").isArray()).isTrue();
   }
 
+  /** Publishes the visible draft as an observed revision (ADR-SC-005: the only family). */
   private UUID publishCandidate() {
-    CompileRequest request = compileStateService.beginCompile(visibleTestId);
-    compileStateService.publishCandidate(
-        visibleTestId,
-        request,
-        new CandidateRevision(
-            request.configurationRevision(),
-            "{\"version\":1,\"steps\":[]}",
-            "source-hash",
-            "{\"version\":1,\"steps\":[]}",
-            "artifact-hash",
-            1,
-            "{\"browser\":\"chromium\"}",
-            "[]",
-            "{\"model\":\"stub-model@1\"}",
-            OWNER));
-    return jdbc.queryForObject(
-        "SELECT current_candidate_revision_id FROM ui_tests WHERE id = ?",
-        UUID.class,
-        visibleTestId);
+    return new ObservedPublicationFixture(jdbc).publish(visibleTestId, List.of(), List.of());
   }
 
   private ResponseEntity<String> get(String path) {
@@ -150,6 +131,9 @@ class StudioVisibilityIT {
         OWNER,
         Timestamp.from(Instant.now()),
         Timestamp.from(Instant.now()));
+    // Production has no implicit identity creation: a row without authoring is not a readable
+    // draft.
+    com.citi.put.checks.studio.support.CanonicalAuthoringFixture.seed(jdbc, id);
     return id;
   }
 

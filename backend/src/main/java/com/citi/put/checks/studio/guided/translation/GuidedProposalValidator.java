@@ -20,15 +20,36 @@ public final class GuidedProposalValidator {
   }
 
   public ObjectNode admitPlan(JsonNode session, JsonNode response) {
+    return admitPlan(session, response, null);
+  }
+
+  public ObjectNode admitPlan(JsonNode session, JsonNode response, JsonNode learningWindow) {
     ObjectNode plan = contracts.object();
     for (String field : java.util.List.of("sourceReferences", "obligations", "needs")) {
       plan.set(field, response.path(field).deepCopy());
     }
-    contracts.validate("v2/source-selection", plan);
+    contracts.validate("v3/source-selection", plan);
     Set<String> steps = new HashSet<>();
-    session.path("sourceSteps").forEach(step -> steps.add(step.path("stepId").asText()));
+    if (learningWindow == null) {
+      session.path("sourceSteps").forEach(step -> steps.add(step.path("stepId").asText()));
+    } else {
+      learningWindow.path("learnableStepIds").forEach(step -> steps.add(step.asText()));
+    }
     Set<String> occurrences = new HashSet<>();
     Map<String, Integer> counts = new HashMap<>();
+    if (learningWindow != null) {
+      for (JsonNode coordinate : learningWindow.path("completedCoordinates")) {
+        if (steps.contains(coordinate.path("stepId").asText())) {
+          counts.merge(coordinate.path("stepId").asText(), 1, Math::addExact);
+        }
+      }
+    }
+    for (JsonNode need : plan.path("needs")) {
+      require(
+          need.path("consumers").isArray() && !need.path("consumers").isEmpty(),
+          "MISSING_SOURCE",
+          409);
+    }
     for (JsonNode item : plan.path("obligations")) {
       ObjectNode obligation = (ObjectNode) item;
       String step = item.path("stepId").asText(), kind = item.path("operationKind").asText();
@@ -89,7 +110,7 @@ public final class GuidedProposalValidator {
   }
 
   public void sourceMeaning(JsonNode session, JsonNode meaning) {
-    contracts.validate("v2/source-selection#/definitions/sourceQuestionMeaning", meaning);
+    contracts.validate("v3/source-selection#/definitions/sourceQuestionMeaning", meaning);
     JsonNode need = meaning.path("need"), reference = meaning.path("reference");
     boolean step = false, capability = false;
     for (JsonNode item : session.path("sourceSteps")) {
@@ -264,7 +285,7 @@ public final class GuidedProposalValidator {
         !selectedTarget.has("documentId") && !selectedTarget.has("generation"),
         "INVALID_CONTRACT",
         422);
-    ObjectNode proposal = contracts.object().put("schemaVersion", 2);
+    ObjectNode proposal = contracts.object().put("schemaVersion", 3);
     proposal.set("sessionId", session.path("sessionId"));
     proposal.set("scopeHash", session.path("scopeHash"));
     proposal
@@ -283,7 +304,7 @@ public final class GuidedProposalValidator {
     target.set("generation", progress.path("generation"));
     proposal.set("target", target);
     proposal.set("operation", selection.path("operation"));
-    contracts.validate("v2/action", proposal);
+    contracts.validate("v3/action", proposal);
     return proposal;
   }
 
@@ -294,7 +315,7 @@ public final class GuidedProposalValidator {
       JsonNode obligation,
       JsonNode proposal,
       JsonNode context) {
-    contracts.validate("v2/action", proposal);
+    contracts.validate("v3/action", proposal);
     require(
         proposal.path("sessionId").equals(session.path("sessionId"))
             && proposal.path("scopeHash").equals(session.path("scopeHash"))
@@ -310,7 +331,7 @@ public final class GuidedProposalValidator {
         "STALE_GENERATION",
         409);
     JsonNode target = proposal.path("target");
-    if (!target.path("kind").asText().equals("page")) {
+    if (!java.util.Set.of("page", "passwordControl").contains(target.path("kind").asText())) {
       JsonNode locator = target.path("locator");
       String name =
           locator.path(locator.path("kind").asText().equals("role") ? "name" : "value").asText();
@@ -333,10 +354,36 @@ public final class GuidedProposalValidator {
           !inputId.isBlank()
               && (kind.equals("navigate")
                   ? operation.path("destinationInputId").asText().equals(inputId)
-                  : value.path("kind").asText().equals("authoredLiteral")
+                  : value
+                          .path("kind")
+                          .asText()
+                          .equals(
+                              reference.path("kind").asText().equals("secretRef")
+                                  ? "secretRef"
+                                  : "authoredLiteral")
                       && value.path("sourceInputId").asText().equals(inputId)),
           "INVALID_CONTRACT",
           422);
+    }
+    if (value.path("kind").asText().equals("secretRef")) {
+      require(
+          kind.equals("fill") && target.path("kind").asText().equals("passwordControl"),
+          "POLICY_DENIED",
+          422);
+      JsonNode input =
+          com.citi.put.checks.studio.guided.publication.GuidedPlanBuilder.unique(
+              context.path("authoredInputs").path("inputs"),
+              "inputId",
+              value.path("sourceInputId").asText());
+      require(
+          input.path("kind").asText().equals("secretRef")
+              && input.path("sourceStepId").equals(proposal.path("coordinate").path("stepId"))
+              && input.path("intendedSlot").asText().equals("fill.value"),
+          "REFERENCE_MISMATCH",
+          422);
+      refusePasswordFieldCount(progress);
+    } else {
+      require(!target.path("kind").asText().equals("passwordControl"), "POLICY_DENIED", 422);
     }
     if (!obligation.path("needId").isNull()) {
       String binding = "";
@@ -360,6 +407,14 @@ public final class GuidedProposalValidator {
           "INVALID_CONTRACT",
           422);
     }
+  }
+
+  /** A scoped secret fill is allowed only when the observation saw exactly one password control. */
+  private static void refusePasswordFieldCount(JsonNode progress) {
+    require(
+        progress.path("observation").path("coverage").path("passwordControls").asInt(-1) == 1,
+        "POLICY_DENIED",
+        422);
   }
 
   private static String slot(String kind) {

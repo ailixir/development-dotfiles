@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 /** Trusted deployment catalog/policy JSON is configuration, never an artifact-supplied grant. */
 @ConfigurationProperties("studio.observed-replay")
 public record ObservedReplayProperties(
-    boolean enabled,
+    @DefaultValue("true") boolean enabled,
     @DefaultValue("30000") long authorizationTtlMs,
     @DefaultValue("1048576") int maxArtifactBytes,
     @DefaultValue("4194304") int maxJobBytes,

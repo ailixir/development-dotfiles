@@ -1,11 +1,14 @@
 package com.citi.put.checks.studio;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
+import com.citi.put.checks.studio.dto.ReplayFailure;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.dto.VideoEvidence;
 import com.citi.put.checks.studio.entity.UITestExecution;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.Clock;
@@ -59,20 +62,6 @@ class ExecutionSnapshotMapperTest {
   }
 
   @Test
-  void legacyStatusesAreReadThroughTheCanonicalVocabulary() {
-    UITestExecution completed = accepted();
-    completed.setStatus("COMPLETED");
-    assertThat(mapper.toSnapshot(completed).status()).isEqualTo("PASSED");
-    assertThat(mapper.toSnapshot(completed).errorCode()).isNull();
-
-    UITestExecution timedOut = accepted();
-    timedOut.setStatus("TIMEOUT");
-    ExecutionSnapshotDto snapshot = mapper.toSnapshot(timedOut);
-    assertThat(snapshot.status()).isEqualTo("ERROR");
-    assertThat(snapshot.errorCode()).isEqualTo("TIMEOUT");
-  }
-
-  @Test
   void aLegacyRowExposesNullRevisionAndUnknownRuntime() {
     UITestExecution legacy = accepted();
     legacy.setStatus("PASSED");
@@ -82,6 +71,7 @@ class ExecutionSnapshotMapperTest {
     ExecutionSnapshotDto snapshot = mapper.toSnapshot(legacy);
 
     assertThat(snapshot.revisionId()).isNull();
+    assertThat(snapshot.replayFailure()).as("historical rows never stored a cause").isNull();
     assertThat(snapshot.runtime().playwright()).isNull();
     assertThat(snapshot.runtime().chromium()).isNull();
     // A finished run with no recorded evidence state has no usable recording, not a pending one.
@@ -201,6 +191,74 @@ class ExecutionSnapshotMapperTest {
     assertThat(snapshot.logsTruncated()).isTrue();
     assertThat(snapshot.runtime().playwright()).isEqualTo("1.47.2");
     assertThat(snapshot.revision()).isEqualTo(12L);
+  }
+
+  // ── STUDIO-OBS-008 T0 ruling A1: replayFailure ───────────────────────────
+
+  @Test
+  void aPersistedLoginCauseIsMappedWithItsLoginFlag() throws Exception {
+    UITestExecution execution = failedRun();
+    execution.setReplayFailure("LOGIN_REQUIRED", "step-b", 1, false);
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.replayFailure()).isEqualTo(ReplayFailure.loginRequired("step-b", 1, false));
+    JsonNode json = objectMapper.readTree(objectMapper.writeValueAsString(snapshot));
+    assertThat(json.path("replayFailure").path("loginStepsPresent").isBoolean()).isTrue();
+    assertThat(json.path("replayFailure").path("loginStepsPresent").asBoolean()).isFalse();
+  }
+
+  @Test
+  void aPersistedDriftCauseOmitsTheLoginFlagOnTheWire() throws Exception {
+    UITestExecution execution = failedRun();
+    execution.setStatus("ERROR");
+    execution.setReplayFailure("TARGET_DRIFT", "step-c", 2, null);
+
+    ExecutionSnapshotDto snapshot = mapper.toSnapshot(execution);
+
+    assertThat(snapshot.status()).isEqualTo("ERROR");
+    assertThat(snapshot.errorCode()).isNull();
+    assertThat(snapshot.replayFailure()).isEqualTo(ReplayFailure.targetDrift("step-c", 2));
+    JsonNode cause =
+        objectMapper.readTree(objectMapper.writeValueAsString(snapshot)).path("replayFailure");
+    assertThat(cause.has("loginStepsPresent")).isFalse();
+    assertThat(cause.path("code").asText()).isEqualTo("TARGET_DRIFT");
+    assertThat(cause.path("stepId").asText()).isEqualTo("step-c");
+    assertThat(cause.path("stepIndex").asInt()).isEqualTo(2);
+  }
+
+  @Test
+  void aRowWithNoCauseHasNullAndTheLabelledCopyKeepsTheCause() {
+    assertThat(mapper.toSnapshot(failedRun()).replayFailure()).isNull();
+
+    UITestExecution execution = failedRun();
+    execution.setReplayFailure("LOGIN_REQUIRED", "step-a", 0, true);
+    ExecutionSnapshotDto labelled = mapper.toSnapshot(execution).withTestName("Checkout");
+
+    // GET, list and SSE share the mapper; the list route labels the same snapshot.
+    assertThat(labelled.testName()).isEqualTo("Checkout");
+    assertThat(labelled.replayFailure()).isEqualTo(ReplayFailure.loginRequired("step-a", 0, true));
+  }
+
+  @Test
+  void aCauseWithoutItsCoordinatesIsRefusedRatherThanPublished() {
+    UITestExecution noCoordinates = failedRun();
+    noCoordinates.setReplayFailure("TARGET_DRIFT", null, null, null);
+    assertThatThrownBy(() -> mapper.toSnapshot(noCoordinates))
+        .isInstanceOf(IllegalStateException.class);
+
+    UITestExecution mixed = failedRun();
+    mixed.setReplayFailure("TARGET_DRIFT", "step-a", 0, true);
+    assertThatThrownBy(() -> mapper.toSnapshot(mixed)).isInstanceOf(IllegalStateException.class);
+  }
+
+  private UITestExecution failedRun() {
+    UITestExecution execution = accepted();
+    execution.setStatus("FAILED");
+    execution.setBrowserStartedAt(NOW.minusSeconds(55));
+    execution.setEndedAt(NOW.minusSeconds(20));
+    execution.setDurationMs(35_000);
+    return execution;
   }
 
   private UITestExecution accepted() {

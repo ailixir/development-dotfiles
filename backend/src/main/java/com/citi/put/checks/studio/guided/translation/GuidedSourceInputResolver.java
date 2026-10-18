@@ -40,12 +40,13 @@ public final class GuidedSourceInputResolver {
               configs.put(
                   entry.getKey(),
                   new GuidedSourceReferenceValidator.ConfigurationValue(
-                      value.path("value").asText(),
+                      value.has("value") ? value.path("value").asText() : null,
                       value.path("stepId").asText(),
                       value.path("kind").asText(),
                       value.path("intendedSlot").asText(),
                       session.path("scopeHash").asText(),
-                      true));
+                      !value.path("kind").asText().equals("secretRef"),
+                      value.path("referenceName").asText()));
             });
     return new GuidedSourceReferenceValidator.Sources(
         manifest.path("sourceRevision").asText(),

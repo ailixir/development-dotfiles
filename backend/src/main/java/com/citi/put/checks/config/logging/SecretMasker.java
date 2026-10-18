@@ -12,7 +12,15 @@ public final class SecretMasker {
           Pattern.compile("(?i)(\"token\"\\s*:\\s*\")([^\"]*)(\")"),
           Pattern.compile("(?i)(\"api[_-]?key\"\\s*:\\s*\")([^\"]*)(\")"),
           Pattern.compile("(?i)(\"authorization\"\\s*:\\s*\")([^\"]*)(\")"),
-          Pattern.compile("([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})"));
+          // Linear-time form of ([A-Za-z0-9._%+-]+)@([A-Za-z0-9.-]+\.[A-Za-z]{2,}) with identical
+          // matches. The original retried every start inside a long local-part run, which is
+          // quadratic (64,000 chars took about 18 s). A local part always runs to the end of
+          // its run, so every start inside a run gives the same result. Only the start of a run
+          // is tried (lookbehind), plus the position where the previous match ended (\G): in
+          // "x@a.bc1@e.fg" the second address starts mid-run, right after the first match.
+          // The possessive ++ is safe because '@' is outside the local-part class.
+          Pattern.compile(
+              "(?:\\G|(?<![A-Za-z0-9._%+-]))([A-Za-z0-9._%+-]++)@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})"));
 
   private SecretMasker() {}
 

@@ -15,11 +15,11 @@ import com.citi.put.checks.studio.evidence.TestEvidenceStores;
 import com.citi.put.checks.studio.internal.AdmissionCasService;
 import com.citi.put.checks.studio.internal.InternalCallbackException;
 import com.citi.put.checks.studio.internal.ProgressReportService;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import com.citi.put.checks.studio.internal.dto.RunOutcome;
 import com.citi.put.checks.studio.internal.dto.RunnerEvidence;
 import com.citi.put.checks.studio.internal.dto.RunnerLogEntry;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -40,6 +40,8 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -57,9 +59,18 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-@Import({RecoveryIT.FakeRunner.class, TestEvidenceStores.class})
+@Import({
+  RecoveryIT.FakeRunner.class,
+  TestEvidenceStores.class,
+  ObservedPublicationFixture.FreshAuthority.class
+})
 @Testcontainers(disabledWithoutDocker = true)
 class RecoveryIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60461";
   private static final String OWNER = "recovery-owner@citi.com";
@@ -82,6 +93,10 @@ class RecoveryIT {
   @Autowired private FinalizationReconciler reconciler;
   @Autowired private FakeResultManifestStore manifests;
   @Autowired private AdmissionCasService admissionService;
+
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
   @Autowired private ProgressReportService progressService;
   @Autowired private StudioDispatchLedgerStatements statements;
   @Autowired private RecordingRunnerDispatchClient runner;
@@ -100,13 +115,16 @@ class RecoveryIT {
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     testId =
         fixtures
             .seedRunnableTest("Recovery draft", CSI_ID, OWNER, List.of("Go to the home page"))
             .testId();
-    executionId = studioService.executeTest(testId, owner, null).executionId();
+    executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
   }
 
   // ── AC-28a: the four restart points, and the fifth ambiguous case ────────
@@ -212,7 +230,10 @@ class RecoveryIT {
 
     // The statement decides against the row it locks, so a START_TIMEOUT close that raced the
     // cancel still records CANCELLED; the kill switch's and the dispatcher's close keep their code.
-    UUID other = studioService.executeTest(testId, owner, null).executionId();
+    UUID other =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     UUID otherAttempt = dispatchOnce(other);
     admit(other, otherAttempt, UUID.randomUUID());
     studioService.cancelExecution(other, owner);
@@ -306,7 +327,24 @@ class RecoveryIT {
   void theDispatchCounterCanReachTwoAndTheReconciledLedgerStateIsWhatStopsIt() throws Exception {
     UUID attemptId = dispatchOnce();
     UUID admissionId = UUID.randomUUID();
-    admit(attemptId, admissionId);
+    // STUDIO-OBS-014 P1: admitted at the statement level, exactly what the deleted legacy claim()
+    // did (the AR-3 b precedent for AdmissionCasIT.observedSqlCannotBorrow...). The observed
+    // admission would also write the immutable observed_admission_receipt, a second guard that
+    // the "neutralise one term" control below cannot clear (V15 receipt trigger), so the control
+    // would no longer isolate the reconciled ledger state this test is about.
+    Instant now = Instant.now();
+    Integer admitted =
+        transactions.execute(
+            status ->
+                statements.admit(
+                    executionId,
+                    attemptId,
+                    admissionId,
+                    RUNNER,
+                    now.plusSeconds(60),
+                    now.plusSeconds(600),
+                    now));
+    assertThat(admitted).isEqualTo(1);
     progressService.apply(executionId, started(attemptId, admissionId, 1));
     manifests.put(derivedManifestKey(attemptId), runnerProducedManifest(executionId, attemptId));
     expire("run_deadline_at");
@@ -372,7 +410,10 @@ class RecoveryIT {
 
     // And the matching body at the same key is applied, so the refusal above is the identity check
     // and not a store that never answered.
-    UUID other = studioService.executeTest(testId, owner, null).executionId();
+    UUID other =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     UUID otherAttempt = dispatchOnce(other);
     UUID otherAdmission = UUID.randomUUID();
     admit(other, otherAttempt, otherAdmission);
@@ -508,7 +549,10 @@ class RecoveryIT {
     assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.DISPATCH_FAILED);
 
     // An attempt issued, outcome ambiguous -> DISPATCH_UNKNOWN.
-    UUID second = studioService.executeTest(testId, owner, null).executionId();
+    UUID second =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     UUID attemptId = UUID.randomUUID();
     transactions.executeWithoutResult(
         status -> {
@@ -619,7 +663,10 @@ class RecoveryIT {
         .isEqualTo(historyAfterReaper);
 
     // Order two: a report finalizes first, then the reaper runs.
-    UUID second = studioService.executeTest(testId, owner, null).executionId();
+    UUID second =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     UUID secondAttempt = dispatchOnce(second);
     UUID secondAdmission = UUID.randomUUID();
     admit(second, secondAttempt, secondAdmission);
@@ -691,7 +738,10 @@ class RecoveryIT {
     assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.STALE);
 
     // Order two: the report holds its transaction open across the reaper's attempt.
-    UUID second = studioService.executeTest(testId, owner, null).executionId();
+    UUID second =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     UUID secondAttempt = dispatchOnce(second);
     UUID secondAdmission = UUID.randomUUID();
     admit(second, secondAttempt, secondAdmission);
@@ -811,7 +861,10 @@ class RecoveryIT {
         .isEqualTo(beforeReaper + 1);
 
     // And the evidence path, which a progress-shaped implementation would miss.
-    UUID second = studioService.executeTest(testId, owner, null).executionId();
+    UUID second =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     UUID secondAttempt = dispatchOnce(second);
     UUID secondAdmission = UUID.randomUUID();
     admit(second, secondAttempt, secondAdmission);
@@ -848,7 +901,10 @@ class RecoveryIT {
     assertThat(snapshot().status()).isEqualTo("PASSED");
 
     // After finalization: a manifest arriving now changes nothing.
-    UUID second = studioService.executeTest(testId, owner, null).executionId();
+    UUID second =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
     UUID secondAttempt = dispatchOnce(second);
     UUID secondAdmission = UUID.randomUUID();
     admit(second, secondAttempt, secondAdmission);
@@ -923,9 +979,16 @@ class RecoveryIT {
     admit(executionId, attemptId, admissionId);
   }
 
+  /**
+   * Admits the way the runner does for an observed run (STUDIO-OBS-014 P1: re-pointed from the
+   * deleted legacy {@code AdmissionCasService.claim}). The attempt is the one the observed Run
+   * authority issued and the dispatcher began.
+   */
   private void admit(UUID execution, UUID attemptId, UUID admissionId) {
-    admissionService.claim(
-        execution, new AdmissionRequest(execution, attemptId, RUNNER, admissionId, Map.of()));
+    assertThat(ObservedPublicationFixture.bindingAttempt(observedReplay, execution))
+        .isEqualTo(attemptId);
+    ObservedPublicationFixture.admitObserved(
+        observedReplay, admissionService, execution, RUNNER, admissionId);
   }
 
   private void expire(String column) {
@@ -1041,7 +1104,8 @@ class RecoveryIT {
         Map.of(),
         null,
         null,
-        null);
+        null,
+        Map.of());
   }
 
   private RunnerReport progress(UUID attemptId, UUID admissionId, long sequence) {
@@ -1060,7 +1124,8 @@ class RecoveryIT {
         Map.of(),
         null,
         null,
-        null);
+        null,
+        Map.of());
   }
 
   private RunnerReport terminal(
@@ -1088,10 +1153,11 @@ class RecoveryIT {
         List.of(new RunnerLogEntry(0.0, "info", "browser started")),
         false,
         Map.of(),
-        new RunOutcome(result, null, null),
+        new RunOutcome(result, null, null, null),
         new RunnerEvidence(
             "studio/video.webm", "studio/manifest.result.json", evidenceState, false),
-        null);
+        null,
+        Map.of());
   }
 
   private Map<String, Object> ledger() {

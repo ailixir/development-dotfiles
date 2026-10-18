@@ -8,7 +8,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 /** Configuration may tighten publication limits; it cannot enlarge the approved contract. */
 @ConfigurationProperties("studio.guided.publication")
 public record GuidedPublicationProperties(
-    boolean enabled,
+    @DefaultValue("true") boolean enabled,
     @DefaultValue("3") int maxValidationAttempts,
     @DefaultValue("15000") long validationTimeoutMs,
     @DefaultValue("5000") long authorizationTtlMs,

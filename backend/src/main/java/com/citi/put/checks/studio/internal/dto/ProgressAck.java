@@ -16,6 +16,7 @@ import java.util.UUID;
  * @param cancelRequested true when a cancel is recorded for the execution (Studio v1 WP4, ADR-002
  *     §29). The runner that owns the run reads it here, whichever pod it is, so a cancel never
  *     depends on the relayed {@code DELETE} reaching the right pod
+ * @param revoked true once a released secret's authorization is revoked
  */
 @JsonIgnoreProperties(ignoreUnknown = false)
 public record ProgressAck(
@@ -23,4 +24,5 @@ public record ProgressAck(
     long runnerSequence,
     boolean applied,
     long revision,
-    boolean cancelRequested) {}
+    boolean cancelRequested,
+    boolean revoked) {}

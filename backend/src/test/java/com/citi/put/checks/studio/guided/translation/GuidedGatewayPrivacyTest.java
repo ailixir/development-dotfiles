@@ -11,16 +11,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
-import com.citi.put.checks.studio.compile.CompileBudget;
-import com.citi.put.checks.studio.compile.CredentialPatternScreen;
-import com.citi.put.checks.studio.compile.gateway.CompileRequest;
-import com.citi.put.checks.studio.compile.gateway.GatewayAuditLogger;
-import com.citi.put.checks.studio.compile.gateway.GatewayOutcome;
-import com.citi.put.checks.studio.compile.gateway.GatewayResponseParser;
-import com.citi.put.checks.studio.compile.gateway.GenAiGatewayTransport;
-import com.citi.put.checks.studio.compile.gateway.GenAiLlmGatewayClient;
-import com.citi.put.checks.studio.compile.gateway.StudioGatewayConfig;
-import com.citi.put.checks.studio.compile.gateway.StudioGatewayProperties;
+import com.citi.put.checks.studio.gateway.GenAiGatewayTransport;
+import com.citi.put.checks.studio.gateway.StudioGatewayConfig;
+import com.citi.put.checks.studio.gateway.StudioGatewayProperties;
 import com.citi.put.checks.studio.guided.session.GuidedContracts;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,7 +24,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.AfterEach;
@@ -41,7 +33,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.io.ClassPathResource;
 
 /** Actual SDK HTTP request/response boundaries; no mock gateway can satisfy these assertions. */
 class GuidedGatewayPrivacyTest {
@@ -74,7 +65,7 @@ class GuidedGatewayPrivacyTest {
 
   static ObjectNode projection() {
     ObjectNode node = JSON.createObjectNode();
-    node.put("schemaVersion", 2)
+    node.put("schemaVersion", 3)
         .put("sessionId", "synthetic-session")
         .put("scopeHash", "a".repeat(64))
         .put("sourceRevision", "1")
@@ -154,7 +145,7 @@ class GuidedGatewayPrivacyTest {
         .addObject()
         .put("name", "PASSWORD")
         .put("kind", "secretRef")
-        .put("value", FORBIDDEN.get(2));
+        .put("secretId", "PASSWORD");
     current.putObject("account").put("token", FORBIDDEN.get(1));
     ObjectNode scope =
         JSON.createObjectNode()
@@ -185,6 +176,9 @@ class GuidedGatewayPrivacyTest {
     session.set("scope", scope);
     session.set("sourceSteps", manifest.path("sourceSteps"));
     session.put("accountToken", FORBIDDEN.get(1));
+    // A v3 secretRef declaration carries only its secretId (the codec refuses a value), so the
+    // secret canary is planted in the session's private inputs rather than the declaration.
+    session.put("secretValue", FORBIDDEN.get(2));
     var state = JSON.createObjectNode();
     state.set("manifest", manifest);
     var progress =
@@ -220,7 +214,7 @@ class GuidedGatewayPrivacyTest {
   static ObjectNode answer(GuidedModelRequest request) {
     ObjectNode answer =
         JSON.createObjectNode()
-            .put("schemaVersion", 2)
+            .put("schemaVersion", 3)
             .put("kind", request.kind().name())
             .put("requestId", request.requestId());
     switch (request.kind()) {
@@ -273,10 +267,9 @@ class GuidedGatewayPrivacyTest {
         1,
         inputBytes,
         outputBytes,
-        true,
-        0,
-        new StudioGatewayProperties.TransportRetry(2, Duration.ofMillis(1), 1, 0),
-        "classpath:studio/artifact.schema.json");
+        StudioGatewayProperties.DEFAULT_MAX_OUTPUT_TOKENS,
+        StudioGatewayProperties.ThinkingLevel.LOW,
+        StudioGatewayProperties.ProviderFeatures.ALL);
   }
 
   private GenAiGuidedLlmGatewayClient client(GenAiGatewayTransport transport) {
@@ -362,10 +355,6 @@ class GuidedGatewayPrivacyTest {
             base.maxInputBytes(),
             base.maxOutputBytes(),
             base.maxOutputTokens(),
-            base.structuredOutput(),
-            base.temperature(),
-            base.retry(),
-            base.artifactSchema(),
             base.thinkingLevel(),
             new StudioGatewayProperties.ProviderFeatures(false, false));
     var request = classifiedRequest(GuidedModelRequest.Kind.VERIFY_STEP, 1);
@@ -541,68 +530,6 @@ class GuidedGatewayPrivacyTest {
   }
 
   @Test
-  void legacyCompileAndGuidedUseOneCapacityPool() throws Exception {
-    var properties = properties(server.baseUrl(), 65536, 65536);
-    var guidedRequest = request(GuidedModelRequest.Kind.VERIFY_STEP, projection(), 1);
-    server.stubFor(
-        post(urlPathMatching(".*generateContent"))
-            .willReturn(okJson(provider(answer(guidedRequest).toString())).withFixedDelay(10000)));
-    try (var transport = new GenAiGatewayTransport(properties);
-        var compiler =
-            new GenAiLlmGatewayClient(
-                properties,
-                new GatewayResponseParser(new ClassPathResource("studio/artifact.schema.json")),
-                new GatewayAuditLogger(),
-                transport)) {
-      CompileRequest compileRequest =
-          new CompileRequest(
-              UUID.randomUUID(),
-              "CSI-test",
-              "test-user",
-              "compile-request",
-              1,
-              List.of("0: Open example"),
-              "Syntax",
-              "syntax-test",
-              "Contract",
-              "prompt-test");
-      var pendingBudget = budget(Duration.ofSeconds(20));
-      var guided =
-          CompletableFuture.supplyAsync(
-              () -> client(transport).propose(guidedRequest, pendingBudget));
-      awaitSend();
-      assertThat(compiler.propose(compileRequest).outcome()).isEqualTo(GatewayOutcome.BUSY);
-      pendingBudget.cancel();
-      assertThat(guided.get(2, TimeUnit.SECONDS).code())
-          .isEqualTo(GuidedModelResponse.Code.TIMEOUT);
-      server.resetAll();
-      String proposal =
-          "{\"version\":1,\"kind\":\"FULL\",\"steps\":[{\"stepId\":\""
-              + compileRequest.writableStepIds().getFirst()
-              + "\",\"status\":\"GENERATED\",\"code\":\"await"
-              + " page.goto('https://example.invalid');\"}]}";
-      server.stubFor(
-          post(urlPathMatching(".*generateContent")).willReturn(okJson(provider(proposal))));
-      assertThat(compiler.propose(compileRequest, new CompileBudget(Duration.ofSeconds(5))).isOk())
-          .isTrue();
-      server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
-      server.resetAll();
-      server.stubFor(
-          post(urlPathMatching(".*generateContent"))
-              .willReturn(okJson(provider(proposal)).withFixedDelay(10000)));
-      var compileBudget = new CompileBudget(Duration.ofSeconds(20));
-      var compiling =
-          CompletableFuture.supplyAsync(() -> compiler.propose(compileRequest, compileBudget));
-      awaitSend();
-      assertThat(client(transport).propose(guidedRequest, budget(Duration.ofSeconds(2))).code())
-          .isEqualTo(GuidedModelResponse.Code.BUSY);
-      compileBudget.cancel();
-      assertThat(compiling.get(2, TimeUnit.SECONDS).outcome()).isEqualTo(GatewayOutcome.TIMEOUT);
-      server.verify(1, postRequestedFor(urlPathMatching(".*generateContent")));
-    }
-  }
-
-  @Test
   void disabledProviderDoesNotPretendToReturnFixturePlan() {
     var disabled = new StudioGatewayConfig().disabledGuidedLlmGatewayClient();
     assertThat(
@@ -648,10 +575,9 @@ class GuidedGatewayPrivacyTest {
             base.maxConcurrency(),
             base.maxInputBytes(),
             base.maxOutputBytes(),
-            base.structuredOutput(),
-            base.temperature(),
-            base.retry(),
-            base.artifactSchema());
+            base.maxOutputTokens(),
+            base.thinkingLevel(),
+            base.providerFeatures());
     String tokenResponse =
         "{\"access_token\":\"synthetic-service-token\",\"expires_in\":3600,\"token_type\":\"Bearer\"}";
     server.stubFor(

@@ -56,8 +56,13 @@ public final class ObservedValidationClient {
         "RUNTIME_INCOMPATIBLE",
         409);
     require(endpoint != null, "RUNTIME_INCOMPATIBLE", 409);
-    contracts.validate("v2/replay-validation", request);
-    byte[] payload = GuidedContracts.canonical(request).getBytes(StandardCharsets.UTF_8);
+    String representation = contracts.validateAndCanonical("v3/replay-validation", request);
+    if (representation == null) {
+      // Unsupported dependency stubs retain the original strict validation/encoding path.
+      contracts.validate("v3/replay-validation", request);
+      representation = GuidedContracts.canonical(request);
+    }
+    byte[] payload = representation.getBytes(StandardCharsets.UTF_8);
     require(payload.length <= properties.maxValidationBytes(), "BUDGET_EXCEEDED", 413);
     String credential = token.get();
     require(credential != null && !credential.isBlank(), "UNAUTHENTICATED", 401);
@@ -108,7 +113,7 @@ public final class ObservedValidationClient {
         }
         require(response.statusCode() == 200, "UNKNOWN_OUTCOME", 409);
         JsonNode verdict = contracts.parseWire(bytes);
-        contracts.validate("v2/replay-validation#/definitions/ValidationVerdict", verdict);
+        contracts.validate("v3/replay-validation#/definitions/ValidationVerdict", verdict);
         for (String field :
             java.util.List.of("attemptId", "claimId", "snapshotHash", "basisHash")) {
           require(verdict.path(field).equals(request.path(field)), "EVIDENCE_MISMATCH", 422);

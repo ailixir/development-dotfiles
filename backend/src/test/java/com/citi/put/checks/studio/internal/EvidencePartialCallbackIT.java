@@ -9,14 +9,13 @@ import com.citi.put.checks.studio.dto.ExecutionErrorCode;
 import com.citi.put.checks.studio.dto.ExecutionSnapshotDto;
 import com.citi.put.checks.studio.dto.StepResult;
 import com.citi.put.checks.studio.evidence.TestEvidenceStores;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Instant;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +26,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
@@ -53,9 +54,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = "studio.execution.callback.service-token=partial-callback-token")
 @ActiveProfiles("test")
-@Import(TestEvidenceStores.class)
+@Import({TestEvidenceStores.class, ObservedPublicationFixture.FreshAuthority.class})
 @Testcontainers(disabledWithoutDocker = true)
 class EvidencePartialCallbackIT {
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   private static final String CSI_ID = "60461";
   private static final String OWNER = "partial-owner@citi.com";
@@ -64,6 +70,10 @@ class EvidencePartialCallbackIT {
 
   @Autowired private StudioService studioService;
   @Autowired private AdmissionCasService admissionService;
+
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
   @Autowired private StudioDispatchLedgerStatements statements;
   @Autowired private TransactionTemplate transactions;
   @Autowired private JdbcTemplate jdbc;
@@ -83,7 +93,7 @@ class EvidencePartialCallbackIT {
     fixtures = new StudioExecutionFixtures(jdbc);
     fixtures.seedUser(OWNER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     provision();
   }
@@ -105,8 +115,13 @@ class EvidencePartialCallbackIT {
                 OWNER,
                 List.of("Go to the home page", "Check the URL"))
             .testId();
-    executionId = studioService.executeTest(testId, owner, null).executionId();
-    UUID attempt = UUID.randomUUID();
+    executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
+    // STUDIO-OBS-014 P1: dispatched under the attempt the observed Run authority issued and
+    // admitted through the observed admission, as the runner does (legacy claim() deleted).
+    UUID attempt = ObservedPublicationFixture.bindingAttempt(observedReplay, executionId);
     UUID execution = executionId;
     transactions.executeWithoutResult(
         status -> {
@@ -116,8 +131,8 @@ class EvidencePartialCallbackIT {
         });
     attemptId = attempt;
     admissionId = UUID.randomUUID();
-    admissionService.claim(
-        executionId, new AdmissionRequest(executionId, attemptId, RUNNER, admissionId, Map.of()));
+    ObservedPublicationFixture.admitObserved(
+        observedReplay, admissionService, executionId, RUNNER, admissionId);
   }
 
   /**

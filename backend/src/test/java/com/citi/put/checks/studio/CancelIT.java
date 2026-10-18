@@ -15,12 +15,12 @@ import com.citi.put.checks.studio.internal.AdmissionCasService;
 import com.citi.put.checks.studio.internal.InternalCallbackCodes;
 import com.citi.put.checks.studio.internal.InternalCallbackException;
 import com.citi.put.checks.studio.internal.ProgressReportService;
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
 import com.citi.put.checks.studio.internal.dto.RunOutcome;
 import com.citi.put.checks.studio.internal.dto.RunnerEvidence;
 import com.citi.put.checks.studio.internal.dto.RunnerLogEntry;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
 import com.citi.put.checks.studio.recovery.RunningReaper;
+import com.citi.put.checks.studio.support.ObservedPublicationFixture;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
@@ -35,6 +35,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -43,6 +44,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
@@ -58,6 +61,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     properties = "studio.execution.callback.service-token=" + CancelIT.SERVICE_TOKEN)
 @ActiveProfiles("test")
 @Testcontainers(disabledWithoutDocker = true)
+@Import(ObservedPublicationFixture.FreshAuthority.class)
 class CancelIT {
 
   private static final String CSI_ID = "60481";
@@ -65,6 +69,11 @@ class CancelIT {
   private static final String VIEWER = "cancel-viewer@citi.com";
   private static final String RUNNER = "studio-runner-0";
   static final String SERVICE_TOKEN = "cancel-it-service-identity";
+
+  @DynamicPropertySource
+  static void observedReplay(DynamicPropertyRegistry registry) {
+    ObservedPublicationFixture.register(registry);
+  }
 
   @TestConfiguration
   static class FakeRunner {
@@ -88,6 +97,9 @@ class CancelIT {
   @Autowired private ObjectMapper objectMapper;
   @Autowired private JdbcTemplate jdbc;
 
+  @Autowired
+  private com.citi.put.checks.studio.guided.publication.ObservedReplayAuthorization observedReplay;
+
   private Authentication owner;
   private UUID executionId;
 
@@ -98,13 +110,16 @@ class CancelIT {
     fixtures.seedUser(OWNER);
     fixtures.seedUser(VIEWER);
     fixtures.seedCsi(CSI_ID, OWNER);
-    jdbc.update("DELETE FROM studio_dispatch_ledger WHERE csi_id = ?", CSI_ID);
+    ObservedPublicationFixture.clearLedger(jdbc, CSI_ID);
     owner = StudioExecutionFixtures.identity(OWNER, CSI_ID, "owner");
     UUID testId =
         fixtures
             .seedRunnableTest("Cancel draft", CSI_ID, OWNER, List.of("Go to the home page"))
             .testId();
-    executionId = studioService.executeTest(testId, owner, null).executionId();
+    executionId =
+        studioService
+            .executeTest(testId, owner, null, ObservedPublicationFixture.request(owner))
+            .executionId();
   }
 
   // ── queued: closed at once, the runner never called ─────────────────────
@@ -227,6 +242,14 @@ class CancelIT {
 
   // ── the race: cancel between dispatch and admission ─────────────────────
 
+  /**
+   * STUDIO-OBS-014 P1 (AR-3, S-7): re-pointed from the deleted legacy admission to the observed
+   * admission. Recorded oracle change: the legacy CAS refused with {@code 409 EXECUTION_SETTLED}
+   * and closed the row itself; the observed path refuses earlier, in {@code
+   * ObservedReplayAuthorization.check}, with {@code 409 CANCELLED} and writes nothing. The
+   * execution still ends {@code ERROR / CANCELLED}: the running reaper closes a cancelled row that
+   * is still {@code DISPATCHING} once the cancel margin has passed ({@code findUnfinishedCancels}).
+   */
   @Test
   void aCancelBetweenTheSendAndTheAdmissionIsRefusedAdmissionAndEndsCancelled() {
     UUID attemptId = dispatchOnce();
@@ -235,15 +258,27 @@ class CancelIT {
     studioService.cancelExecution(executionId, owner);
 
     assertThatThrownBy(() -> admit(attemptId, UUID.randomUUID()))
-        .isInstanceOf(InternalCallbackException.class)
-        .extracting(e -> ((InternalCallbackException) e).getCode())
-        .isEqualTo(InternalCallbackCodes.EXECUTION_SETTLED);
+        .isInstanceOf(com.citi.put.checks.studio.guided.session.GuidedSessionException.class)
+        .satisfies(
+            refusal -> {
+              var observed =
+                  (com.citi.put.checks.studio.guided.session.GuidedSessionException) refusal;
+              assertThat(observed.getMessage()).isEqualTo("CANCELLED");
+              assertThat(observed.status()).isEqualTo(409);
+            });
 
     assertThat(ledger().get("admission_id")).as("no admission, so no browser").isNull();
+    assertThat(ledger().get("state")).as("the refusal wrote nothing").isEqualTo("DISPATCHING");
+    assertThat(snapshot().status()).isEqualTo("PENDING");
+
+    backdateCancel(runningReaper.cancelMargin().plusSeconds(1).toSeconds());
+    runningReaper.reapOnce();
+
+    assertThat(ledger().get("admission_id")).isNull();
     assertThat(ledger().get("state")).isEqualTo("DONE");
     assertThat(snapshot().status()).isEqualTo("ERROR");
     assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.CANCELLED);
-    // The dispatcher's own refusal handling, which closes DISPATCH_FAILED, finds the row settled.
+    // The dispatcher finds the row settled and has nothing to relay.
     dispatcher.dispatchOnce();
     assertThat(runner.cancelsFor(executionId)).as("nothing held it, nothing to relay").isZero();
     assertThat(snapshot().errorCode()).isEqualTo(ExecutionErrorCode.CANCELLED);
@@ -432,7 +467,12 @@ class CancelIT {
   void aFinalWithoutAStartIsStillRefusedWhenNobodyCancelled() {
     UUID attemptId = dispatchOnce();
     UUID admissionId = UUID.randomUUID();
-    admit(attemptId, admissionId);
+    // An observed run is admitted through its observed admission, as the runner does; a FINAL
+    // before Ready is then judged by the observed pre-Ready rule, which refuses a CANCELLED
+    // outcome nobody asked for before any ledger transition (STUDIO-OBS-012A: the ordinary
+    // family's TRANSITION_REJECTED is unreachable for the only family that can run).
+    ObservedPublicationFixture.admitObserved(
+        observedReplay, admissionService, executionId, RUNNER, admissionId);
 
     assertThatThrownBy(
             () ->
@@ -442,7 +482,7 @@ class CancelIT {
                         attemptId, admissionId, 1, RunOutcome.ERROR, ExecutionErrorCode.CANCELLED)))
         .isInstanceOf(InternalCallbackException.class)
         .extracting(e -> ((InternalCallbackException) e).getCode())
-        .isEqualTo(InternalCallbackCodes.TRANSITION_REJECTED);
+        .isEqualTo(InternalCallbackCodes.INVALID_REPORT);
     assertThat(ledger().get("state")).isEqualTo("ADMITTED");
     assertThat(snapshot().status()).isEqualTo("PENDING");
   }
@@ -479,9 +519,16 @@ class CancelIT {
     return UUID.fromString(ledger().get("attempt_id").toString());
   }
 
+  /**
+   * Admits the way the runner does for an observed run (STUDIO-OBS-014 P1: re-pointed from the
+   * deleted legacy {@code AdmissionCasService.claim}). The attempt is the one the observed Run
+   * authority issued and the dispatcher began.
+   */
   private void admit(UUID attemptId, UUID admissionId) {
-    admissionService.claim(
-        executionId, new AdmissionRequest(executionId, attemptId, RUNNER, admissionId, Map.of()));
+    assertThat(ObservedPublicationFixture.bindingAttempt(observedReplay, executionId))
+        .isEqualTo(attemptId);
+    ObservedPublicationFixture.admitObserved(
+        observedReplay, admissionService, executionId, RUNNER, admissionId);
   }
 
   private void backdateCancel(long seconds) {
@@ -507,7 +554,8 @@ class CancelIT {
         Map.of(),
         null,
         null,
-        null);
+        null,
+        Map.of());
   }
 
   private RunnerReport finalReport(
@@ -525,10 +573,11 @@ class CancelIT {
         List.of(new RunnerLogEntry(0.0, "info", "browser started")),
         false,
         Map.of(),
-        new RunOutcome(result, errorCode, null),
+        new RunOutcome(result, errorCode, null, null),
         new RunnerEvidence(
             "studio/video.webm", "studio/manifest.result.json", RunnerEvidence.FAILED, false),
-        null);
+        null,
+        Map.of());
   }
 
   private Map<String, Object> ledger() {

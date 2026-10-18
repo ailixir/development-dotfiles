@@ -225,6 +225,12 @@ public class ChecksExceptionHandler {
    */
   @ExceptionHandler(InternalCallbackException.class)
   public ResponseEntity<Map<String, String>> handleInternalCallback(InternalCallbackException ex) {
+    // Status and the fixed InternalCallbackCodes constant only: several messages interpolate
+    // runner-supplied strings, so the message is never logged (012A ruling R8.2).
+    LOGGER.warn(
+        "Studio internal callback refused: status={} code={}",
+        ex.getStatus().value(),
+        ex.getCode());
     return ResponseEntity.status(ex.getStatus())
         .body(Map.of("error", ex.getCode(), "message", ex.getMessage()));
   }

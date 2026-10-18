@@ -19,8 +19,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 
 class GuidedTranslationMigrationTest {
   static final GuidedContracts C = new GuidedContracts();
+  static final String OBLIGATION = "00000000-0000-4000-8000-000000000001";
 
-  /** Each fixture uses a real independent database, including a V31 upgrade with existing rows. */
+  /**
+   * Each fixture uses a real independent database, including a V14→V18 upgrade with existing rows.
+   */
   static final class Database implements AutoCloseable {
     final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
     final DataSource source;
@@ -37,10 +40,12 @@ class GuidedTranslationMigrationTest {
               postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword());
       jdbc = new JdbcTemplate(source);
       tx = new TransactionTemplate(new DataSourceTransactionManager(source));
+      // V14 is the guided-session area of the STUDIO-OBS-012A re-baseline (the former V30–V32);
+      // rows are seeded there and V15–V18 then apply over a populated guided schema.
       Flyway.configure()
           .dataSource(source)
           .locations("classpath:db/migration")
-          .target("31")
+          .target("14")
           .load()
           .migrate();
       sessions = new GuidedSessionRepository(jdbc, tx, C);
@@ -89,6 +94,68 @@ class GuidedTranslationMigrationTest {
           });
     }
 
+    void prepareAction(ObjectNode doc, ObjectNode proposal) {
+      String id = doc.path("sessionId").asText(), scope = doc.path("scopeHash").asText();
+      ObjectNode inputs =
+          C.object()
+              .put("schemaVersion", 3)
+              .put("sessionId", id)
+              .put("scopeHash", scope)
+              .put("sourceRevision", "1")
+              .put("configurationRevision", "1");
+      inputs.putArray("inputs");
+      String hash = GuidedContracts.hash(inputs);
+      proposal.put("contextRevision", 1).put("authoredInputsHash", hash);
+      String digest = GuidedContracts.hash(proposal);
+      ObjectNode proof =
+          C.object()
+              .put("sessionId", id)
+              .put("preparationId", "translation-preparation")
+              .put("contextId", "translation-context")
+              .put("ownerFence", 1)
+              .put("contextRevision", 1)
+              .put("authoredInputsHash", hash)
+              .put("requestDigest", digest);
+      ObjectNode intent =
+          C.object()
+              .put("sessionId", id)
+              .put("assignmentId", "translation-assignment")
+              .put("workerId", "worker")
+              .put("scopeHash", scope)
+              .put("expectedFence", 0);
+      tx.executeWithoutResult(
+          status -> {
+            sessions.lock(id);
+            jdbc.update(
+                "INSERT INTO"
+                    + " studio_guided_assignments(session_id,assignment_id,scope_hash,worker_id,expected_fence,"
+                    + "intent) VALUES (?,?,?,'worker',0,?::jsonb)",
+                id,
+                "translation-assignment",
+                scope,
+                intent.toString());
+            jdbc.update(
+                "INSERT INTO"
+                    + " studio_guided_materializations(session_id,scope_hash,context_id,context_revision,"
+                    + "materialization_revision,worker_id,owner_fence,source_revision,configuration_revision,"
+                    + "authored_inputs_hash,authored_inputs) VALUES"
+                    + " (?,?,'translation-context',1,1,'worker',1,'1','1',?,?::jsonb)",
+                id,
+                scope,
+                hash,
+                inputs.toString());
+            jdbc.update(
+                "INSERT INTO"
+                    + " studio_guided_preparations(session_id,preparation_id,context_id,owner_fence,request_digest,"
+                    + "proof,expires_at) VALUES"
+                    + " (?,'translation-preparation','translation-context',1,?,?::jsonb,clock_timestamp("
+                    + ")+interval '1 hour')",
+                id,
+                digest,
+                proof.toString());
+          });
+    }
+
     @Override
     public void close() {
       postgres.stop();
@@ -97,13 +164,17 @@ class GuidedTranslationMigrationTest {
 
   static ObjectNode plan(String obligation) {
     ObjectNode plan = C.object();
+    plan.putArray("sourceReferences");
     plan.putArray("obligations")
         .addObject()
         .put("obligationId", obligation)
         .put("stepId", "step")
         .put("occurrence", 0)
         .put("operationKind", "click")
-        .put("targetIntent", "Submit");
+        .put("targetIntent", "Submit")
+        .putNull("referenceIndex")
+        .putNull("needId")
+        .putNull("predicate");
     plan.putArray("needs");
     return plan;
   }
@@ -121,7 +192,7 @@ class GuidedTranslationMigrationTest {
       db.tx.executeWithoutResult(
           s -> {
             db.sessions.lock("s");
-            db.store.acceptPlan("s", 0, plan("o"));
+            db.store.acceptPlan("s", 0, plan(OBLIGATION));
           });
       assertThatThrownBy(
               () ->
@@ -355,18 +426,24 @@ class GuidedTranslationMigrationTest {
       db.init(doc);
       var proposal = C.object().put("sessionId", "s");
       proposal.putObject("coordinate").put("stepId", "step").put("ordinal", 0);
+      db.prepareAction(doc, proposal);
       var association =
           db.tx.execute(
               s -> {
                 db.sessions.lock("s");
-                db.store.acceptPlan("s", 0, plan("o"));
-                return db.store.reserveObligation(doc, "o", proposal);
+                db.store.acceptPlan("s", 0, plan(OBLIGATION));
+                return db.store.reserveObligation(doc, OBLIGATION, proposal);
               });
       var action =
           C.object()
               .put("sessionId", "s")
               .put("requestDigest", GuidedContracts.hash(proposal))
               .put("dispatchCount", 0)
+              .put("attemptOrdinal", 0)
+              .put("ownerFence", 1)
+              .put("contextRevision", 1)
+              .put("preparationId", "translation-preparation")
+              .put("authoredInputsHash", proposal.path("authoredInputsHash").asText())
               .put("state", "ADMITTED");
       action.putObject("admission").put("admissionId", "admission");
       action.set("coordinate", proposal.path("coordinate"));
@@ -392,7 +469,7 @@ class GuidedTranslationMigrationTest {
       db.tx.executeWithoutResult(
           s -> {
             db.sessions.lock("s");
-            assertThat(db.store.obligation("s", "o").path("admissionId").isNull()).isTrue();
+            assertThat(db.store.obligation("s", OBLIGATION).path("admissionId").isNull()).isTrue();
             db.jdbc.update(
                 "INSERT INTO"
                     + " studio_guided_actions(admission_id,session_id,step_id,ordinal,document,proposal)"
@@ -408,7 +485,8 @@ class GuidedTranslationMigrationTest {
                       "UPDATE studio_guided_obligation_admissions SET admission_id=NULL WHERE"
                           + " session_id='s'"))
           .hasMessageContaining("single assignment");
-      assertThat(db.tx.execute(s -> db.store.obligation("s", "o")).path("admissionId").asText())
+      assertThat(
+              db.tx.execute(s -> db.store.obligation("s", OBLIGATION)).path("admissionId").asText())
           .isEqualTo("admission");
     }
   }

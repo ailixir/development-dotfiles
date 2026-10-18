@@ -1,26 +1,26 @@
 # Studio dispatch
 
-Stories 10.7 and 10.17. Turns an accepted execution into exactly one `POST /v1/runs`, or into a
-terminal error, and never into two of either.
+Stories 10.7 and 10.17; ADR-SC-005. Turns an accepted execution into exactly one `POST /v2/runs`,
+or into a terminal error, and never into two of either. There is one execution family: every
+accepted execution carries an observed replay binding, and a row without one is closed
+`DISPATCH_FAILED` without a send.
 
 ```
 accept (10.7)
-  │  readiness + quotas
-  │  preflight                    typed {variables, secrets} from the CONFIRMED revision
+  │  readiness (observed revision only) + quotas
+  │  preflight                    typed {variables, secrets} from the LEARNED revision
   │    ├─ vault: does this reference exist for this CSI and environment?
   │    └─ secret use: may THIS principal use THIS secret?   ← a separate decision (§9.2)
-  └─ PENDING row + ledger row
+  └─ PENDING row + ledger row + observed binding
 
-dispatch (10.7 ordering, 10.17 contents)
+dispatch (10.7 ordering)
   │  claim                        one conditional UPDATE; two dispatchers → exactly one 1
-  │  recheck                      draft alive, CSI registered, principal present
-  │  read declaration             unreadable → REFERENCE_UNAVAILABLE, no send
+  │  refresh                      observed replay authorization re-checked for this attempt
   │  resolve                      values, here and nowhere else
   │    ├─ entitlement withdrawn → AUTHORIZATION_REVOKED, no send
   │    └─ reference vanished    → REFERENCE_UNAVAILABLE, no send
-  │  record policy + versions     configuration_snapshot jsonb, no migration
-  │  beginDispatch (commits)      fresh attempt_id, never reused
-  └─ send                         the fourteen-field RunJob, then close() erases everything
+  │  beginObservedDispatch        fresh attempt, committed before the send
+  └─ send                         the observed job, then close() erases everything
 ```
 
 ## What a resolved value may touch
@@ -31,7 +31,7 @@ Since story 10.17 a resolved variable or secret value exists in this process for
 | May touch | Why |
 |---|---|
 | `StudioReferenceResolver.Resolved`'s `char[]`s | The only holder. Erased by `close()` on every exit path, including the two terminal-refusal paths and the four ambiguous ones |
-| The serialized `POST /v1/runs` body | §9.2: the runner *"may receive per-run values"*, and holding no vault credential is precisely why the worker must hand them over |
+| The serialized `POST /v2/runs` body | §9.2: the runner *"may receive per-run values"*, and holding no vault credential is precisely why the worker must hand them over |
 
 Everything else is a defect, and each of these is asserted rather than assumed (AC-12,
 `JobBodyLeakTest`): **no** log line at any level, **no** exception message or cause chain, **no**

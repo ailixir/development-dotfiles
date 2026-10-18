@@ -84,7 +84,7 @@ public class ExecutionVideoException extends RuntimeException {
    * which would be a statement about the run that the API has not observed.
    *
    * <p>The message names nothing about the store — not the bucket, not the endpoint, not the key.
-   * The cause's message carries all three and is logged, never sent.
+   * The cause's message may carry all three and is neither logged at INFO+ nor sent.
    */
   public static ExecutionVideoException storeUnavailable() {
     return new ExecutionVideoException(

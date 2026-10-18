@@ -105,9 +105,10 @@ class EvidenceRetentionTest {
             List.of(),
             false,
             Map.of(),
-            new RunOutcome(RunOutcome.PASSED, null, null),
+            new RunOutcome(RunOutcome.PASSED, null, null, null),
             new RunnerEvidence("studio/v.webm", "studio/m.result.json", evidenceState, false),
-            null);
+            null,
+            Map.of());
     return RunnerReportProjection.project(report, List.of(), retention, now);
   }
 }

@@ -139,7 +139,7 @@ class GuidedSourceReferenceValidatorTest {
         contracts.parse(
             java.nio.file.Files.readString(
                 java.nio.file.Path.of(
-                    "../docs/specs/studio-observed-authoring/contracts/v2/fixtures.json")));
+                    "../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json")));
     for (var vector : fixtures.path("hashVectors")) {
       assertThat(GuidedContracts.canonical(vector.path("value")))
           .isEqualTo(vector.path("canonical").asText());
@@ -149,21 +149,21 @@ class GuidedSourceReferenceValidatorTest {
     var documents = fixtures.path("documents");
     for (var entry :
         Map.of(
-                "v2/learned-plan",
+                "v3/learned-plan",
                 "plan",
-                "v2/binding",
+                "v3/binding",
                 "binding",
-                "v2/bridge#/definitions/prepare",
+                "v3/bridge#/definitions/prepare",
                 "prepare",
-                "v2/bridge#/definitions/dispatch",
+                "v3/bridge#/definitions/dispatch",
                 "dispatch",
-                "v2/runner-context",
+                "v3/runner-context",
                 "context")
             .entrySet()) {
       contracts.validate(entry.getKey(), documents.path(entry.getValue()));
     }
     ObjectNode fake = documents.path("action").deepCopy();
     fake.withObject("/executionEvidence").put("origin", "https://orders.example.test");
-    assertThatThrownBy(() -> contracts.validate("v2/action", fake)).hasMessage("INVALID_CONTRACT");
+    assertThatThrownBy(() -> contracts.validate("v3/action", fake)).hasMessage("INVALID_CONTRACT");
   }
 }

@@ -5,13 +5,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.citi.put.checks.studio.dto.AuthoringStep;
 import com.citi.put.checks.studio.dto.AuthoringV2Request;
-import com.citi.put.checks.studio.dto.LegacyAuthoringRequest;
 import com.citi.put.checks.studio.dto.LiteralInput;
 import com.citi.put.checks.studio.dto.ResolvedInput;
 import com.citi.put.checks.studio.dto.ResolvedLiteralInput;
 import com.citi.put.checks.studio.dto.ResolvedReferenceInput;
 import com.citi.put.checks.studio.dto.SecretReference;
-import com.citi.put.checks.studio.dto.StudioAuthoring;
 import com.citi.put.checks.studio.dto.StudioAuthoringValidation;
 import com.citi.put.checks.studio.dto.StudioAuthoringValidation.Category;
 import com.citi.put.checks.studio.dto.StudioAuthoringValidation.InvalidAuthoringException;
@@ -59,24 +57,14 @@ class StudioContextContractTest {
   void everyValidSharedFixtureDeserializesAndRetainsIdentityAndExactValues() throws IOException {
     JsonNode cases = fixture("context-authoring-valid.json").path("cases");
 
-    for (JsonNode fixtureCase : cases) {
-      if (fixtureCase.has("legacy")) {
-        LegacyAuthoringRequest legacy =
-            (LegacyAuthoringRequest)
-                StudioAuthoringValidation.read(MAPPER, validator, fixtureCase.path("legacy"));
-        assertThat(legacy.steps())
-            .as(fixtureCase.path("name").textValue())
-            .containsExactly("  Open Café ☕  ", "Type \"A\\B\"\nnext line");
-        AuthoringV2Request adapted =
-            (AuthoringV2Request)
-                StudioAuthoringValidation.read(MAPPER, validator, fixtureCase.path("expected"));
-        assertThat(adapted.steps().stream().map(AuthoringStep::text))
-            .containsExactlyElementsOf(legacy.steps());
-        assertThat(adapted.steps().stream().map(AuthoringStep::id)).doesNotHaveDuplicates();
-        continue;
-      }
+    // The v1 string-step body that was the shared case legacy-empty-context stays a refusal check.
+    assertThatThrownBy(() -> StudioAuthoringValidation.read(MAPPER, validator, legacyBody()))
+        .isInstanceOf(InvalidAuthoringException.class)
+        .extracting(error -> ((InvalidAuthoringException) error).categories())
+        .isEqualTo(List.of(Category.INVALID_AUTHORING));
 
-      StudioAuthoring decoded =
+    for (JsonNode fixtureCase : cases) {
+      AuthoringV2Request decoded =
           StudioAuthoringValidation.read(MAPPER, validator, fixtureCase.path("request"));
       assertThat(decoded).isInstanceOf(AuthoringV2Request.class);
       AuthoringV2Request request = (AuthoringV2Request) decoded;
@@ -161,7 +149,7 @@ class StudioContextContractTest {
 
   @Test
   void everyInvalidSharedFixtureIsRejectedWithItsStableCategory() throws IOException {
-    for (JsonNode fixtureCase : fixture("context-authoring-invalid.json").path("cases")) {
+    for (JsonNode fixtureCase : invalidCases()) {
       Set<Category> expected =
           textValues(fixtureCase.path("expectedCategories")).stream()
               .map(Category::valueOf)
@@ -231,6 +219,30 @@ class StudioContextContractTest {
             "/login|credentials-entered",
             "/home|authenticated-home",
             "/reports/protected|authenticated-protected");
+  }
+
+  /** The {@code legacy} member of the former shared case {@code legacy-empty-context}, verbatim. */
+  private static JsonNode legacyBody() {
+    var body = MAPPER.createObjectNode();
+    body.putArray("steps").add("  Open Caf\u00e9 \u2615  ").add("Type \"A\\B\"\nnext line");
+    return body;
+  }
+
+  /**
+   * The shared invalid cases plus {@code mixed-legacy-v2-steps}, a case of {@code
+   * context-authoring-invalid.json} until the single-path cleanup, kept inline and verbatim.
+   */
+  private static List<JsonNode> invalidCases() throws IOException {
+    List<JsonNode> cases = new ArrayList<>();
+    fixture("context-authoring-invalid.json").path("cases").forEach(cases::add);
+    var mixed = MAPPER.createObjectNode().put("name", "mixed-legacy-v2-steps");
+    var request = mixed.putObject("request").put("authoringSchemaVersion", 2);
+    var steps = request.putArray("steps");
+    steps.add("Legacy string");
+    steps.addObject().put("id", "00000000-0000-4000-8000-000000000062").put("text", "V2 object");
+    mixed.putArray("expectedCategories").add("MIXED_STEP_SHAPES");
+    cases.add(mixed);
+    return cases;
   }
 
   private static JsonNode fixture(String name) throws IOException {

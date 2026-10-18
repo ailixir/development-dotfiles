@@ -4,9 +4,12 @@ import static com.citi.put.checks.studio.guided.session.GuidedSessionException.r
 
 import com.citi.put.checks.security.BffAuthenticationToken;
 import com.citi.put.checks.security.CsiOwnershipEvaluator;
+import com.citi.put.checks.studio.dispatch.StudioReferenceResolver.SecretUseNotAuthorizedException;
+import com.citi.put.checks.studio.dispatch.StudioReferenceResolver.UnknownReferenceException;
 import com.citi.put.checks.studio.guided.bridge.GuidedSourceReferenceValidator;
 import com.citi.put.checks.studio.guided.session.GuidedSessionAccess;
 import com.citi.put.checks.studio.guided.session.GuidedSessionService;
+import com.citi.put.checks.studio.secrets.VaultProviderUnavailableException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.util.List;
@@ -16,19 +19,15 @@ import org.springframework.security.core.Authentication;
 /** Real source/revision/verification access, composed with only the later account handoff. */
 public final class GuidedProductionSessionAccess
     implements GuidedSessionAccess, GuidedSessionService.StepVerifier {
-  public interface AccountAccess {
-    Snapshot resolve(Authentication user, JsonNode request);
-
-    void checkCurrent(JsonNode session);
-  }
-
   private final GuidedSourceSnapshotRepository snapshots;
   private final GuidedSourceClassifier classifier;
   private final GuidedSourceInputResolver resolver;
   private final GuidedTranslationStore store;
   private final GuidedStepVerifier verifier;
   private final CsiOwnershipEvaluator ownership;
-  private final AccountAccess accounts;
+  private final com.citi.put.checks.studio.guided.publication.ObservedReplayPins pins;
+  private final com.citi.put.checks.studio.dispatch.StudioReferenceResolver references;
+  private final com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization secretUse;
 
   public GuidedProductionSessionAccess(
       GuidedSourceSnapshotRepository snapshots,
@@ -37,34 +36,105 @@ public final class GuidedProductionSessionAccess
       GuidedTranslationStore store,
       GuidedStepVerifier verifier,
       CsiOwnershipEvaluator ownership,
-      AccountAccess accounts) {
+      com.citi.put.checks.studio.guided.publication.ObservedReplayPins pins,
+      com.citi.put.checks.studio.dispatch.StudioReferenceResolver references,
+      com.citi.put.checks.studio.secrets.StudioSecretUseAuthorization secretUse) {
     this.snapshots = snapshots;
     this.classifier = classifier;
     this.resolver = resolver;
     this.store = store;
     this.verifier = verifier;
     this.ownership = ownership;
-    this.accounts = accounts;
+    this.pins = pins;
+    this.references = references;
+    this.secretUse = secretUse;
   }
 
   @Override
   public Snapshot resolve(Authentication user, JsonNode request) {
     require(
         user instanceof BffAuthenticationToken && user.isAuthenticated(), "UNAUTHENTICATED", 401);
-    ObjectNode current = snapshots.lockCurrent(UUID.fromString(request.path("testId").asText()));
+    ObjectNode current =
+        snapshots.lockCurrent(
+            UUID.fromString(request.path("testId").asText()),
+            csi -> require(ownership.canExecute(user, csi), "FORBIDDEN_SCOPE", 403));
     require(ownership.canExecute(user, current.path("csiId").asText()), "FORBIDDEN_SCOPE", 403);
-    Snapshot account = accounts.resolve(user, request);
-    JsonNode manifest = classifier.classify(current, account.scope());
+    ObjectNode scope = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.objectNode();
+    for (String key :
+        List.of("sourceRevision", "configurationRevision", "environmentId", "applicationId")) {
+      scope.set(key, request.path(key));
+    }
+    scope.set("csiId", current.path("csiId"));
+    scope.put("modelDataPolicyId", "INPUT-POLICY-01-A").putNull("valueTransferPolicyId");
+    scope.put("principalId", ((BffAuthenticationToken) user).getPrincipal().userId());
+    JsonNode policy = pins.policy(scope);
+    scope.set("approvedOrigins", policy.path("allowedOrigins"));
+    scope
+        .putArray("capabilities")
+        .add("observe")
+        .add("navigate")
+        .add("click")
+        .add("fill")
+        .add("press")
+        .add("check")
+        .add("uncheck")
+        .add("hover")
+        .add("selectOption")
+        .add("read")
+        .add("assert");
+    JsonNode manifest = classifier.classify(current, scope);
+    var ids = new java.util.LinkedHashSet<String>();
+    for (JsonNode reference : manifest.path("configurationReferences")) {
+      if (reference.path("kind").asText().equals("secretRef")) {
+        ids.add(reference.path("referenceName").asText());
+      }
+    }
+    try {
+      references.preflight(
+          scope.path("csiId").asText(),
+          scope.path("environmentId").asText(),
+          UUID.fromString(current.path("testId").asText()),
+          scope.path("principalId").asText(),
+          new com.citi.put.checks.studio.dispatch.ReferenceDeclarations(
+              List.of(), List.copyOf(ids)));
+    } catch (SecretUseNotAuthorizedException failure) {
+      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+          "SECRET_USE_NOT_AUTHORIZED", 403);
+    } catch (UnknownReferenceException failure) {
+      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+          "SECRET_UNAVAILABLE", 404);
+    } catch (VaultProviderUnavailableException failure) {
+      throw new com.citi.put.checks.studio.guided.session.GuidedSessionException(
+          "VAULT_UNAVAILABLE", 503);
+    }
     var steps = com.fasterxml.jackson.databind.node.JsonNodeFactory.instance.arrayNode();
     for (JsonNode step : manifest.path("sourceSteps")) {
       steps.addObject().put("stepId", step.path("stepId").asText()).put("requiresAssertion", false);
     }
-    return new Snapshot(account.scope(), steps, account.authConnection());
+    return new Snapshot(scope, steps);
   }
 
   @Override
   public void checkCurrent(JsonNode session) {
-    accounts.checkCurrent(session);
+    JsonNode scope = session.path("scope");
+    classifier.requireCurrentPolicy(scope);
+    if (store.exists(session.path("sessionId").asText())) {
+      for (JsonNode reference :
+          store
+              .currentManifest(session.path("sessionId").asText())
+              .path("configurationReferences")) {
+        if (reference.path("kind").asText().equals("secretRef")) {
+          require(
+              secretUse.mayUse(
+                  scope.path("principalId").asText(),
+                  scope.path("csiId").asText(),
+                  scope.path("environmentId").asText(),
+                  reference.path("referenceName").asText()),
+              "SECRET_USE_REVOKED",
+              409);
+        }
+      }
+    }
   }
 
   @Override

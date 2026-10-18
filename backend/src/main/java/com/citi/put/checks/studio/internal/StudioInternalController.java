@@ -1,7 +1,5 @@
 package com.citi.put.checks.studio.internal;
 
-import com.citi.put.checks.studio.internal.dto.AdmissionRequest;
-import com.citi.put.checks.studio.internal.dto.AdmissionResponse;
 import com.citi.put.checks.studio.internal.dto.ExecutionControl;
 import com.citi.put.checks.studio.internal.dto.ProgressAck;
 import com.citi.put.checks.studio.internal.dto.RunnerReport;
@@ -82,14 +80,6 @@ public class StudioInternalController {
       return ResponseEntity.status(refusal.status())
           .body(java.util.Map.of("code", refusal.getMessage()));
     }
-  }
-
-  /** CAS exclusive ownership of an attempt. No browser starts without a {@code 200} here. */
-  @PostMapping("/{id}/admission")
-  public ResponseEntity<AdmissionResponse> claimAdmission(
-      @PathVariable UUID id, @RequestBody byte[] body) {
-    return ResponseEntity.ok(
-        admissionService.claim(id, bodyReader.read(body, AdmissionRequest.class)));
   }
 
   /**

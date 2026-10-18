@@ -14,9 +14,7 @@ import com.citi.put.checks.studio.dto.AuthoringV2Request;
 import com.citi.put.checks.studio.dto.AuthoringV2Response;
 import com.citi.put.checks.studio.dto.ContextText;
 import com.citi.put.checks.studio.dto.GlobalAuthoringContext;
-import com.citi.put.checks.studio.dto.LegacyAuthoringRequest;
 import com.citi.put.checks.studio.dto.StepAuthoringContext;
-import com.citi.put.checks.studio.dto.StudioAuthoring;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
@@ -51,39 +49,15 @@ class StudioAuthoringPersistenceIT {
     seedUser();
     seedCsi(CSI);
     seedCsi(OTHER_CSI);
-    testId = seedLegacy(List.of("  open \\\"雪\\\"\nnext  ", ""));
+    testId = seedCanonical(List.of("  open \\\"雪\\\"\nnext  ", "Continue"));
+    com.citi.put.checks.studio.support.CanonicalAuthoringFixture.seed(jdbc, testId);
+    jdbc.update("UPDATE ui_tests SET configuration_revision=2 WHERE id=?", testId);
     owner = identity(CSI);
   }
 
   @Test
-  void readsRemainLegacyUntilTheFirstDurableV2Write() {
-    StudioAuthoring before = studioService.findAuthoringById(testId, owner);
-    assertThat(before).isInstanceOf(LegacyAuthoringRequest.class);
-    assertThat(((LegacyAuthoringRequest) before).steps())
-        .containsExactly("  open \\\"雪\\\"\nnext  ", "");
-    assertThat(
-            jdbc.queryForObject(
-                "SELECT authoring IS NULL FROM ui_tests WHERE id=?", Boolean.class, testId))
-        .isTrue();
-
-    AuthoringV2Response promoted = studioService.adaptLegacyAuthoring(testId, 1, 1, owner);
-    List<UUID> firstIds = promoted.steps().stream().map(AuthoringStep::id).toList();
-
-    AuthoringV2Request firstRead =
-        (AuthoringV2Request) studioService.findAuthoringById(testId, owner);
-    AuthoringV2Request secondRead =
-        (AuthoringV2Request) studioService.findAuthoringById(testId, owner);
-    assertThat(firstRead.steps().stream().map(AuthoringStep::id))
-        .containsExactlyElementsOf(firstIds);
-    assertThat(secondRead.steps().stream().map(AuthoringStep::id))
-        .containsExactlyElementsOf(firstIds);
-    assertThat(firstRead.steps().stream().map(AuthoringStep::text))
-        .containsExactly("  open \\\"雪\\\"\nnext  ", "");
-  }
-
-  @Test
   void addEditReorderCopyAndDeleteKeepIdentityAttachedToContext() {
-    AuthoringV2Response promoted = studioService.adaptLegacyAuthoring(testId, 1, 1, owner);
+    AuthoringV2Response promoted = studioService.findAuthoringV2ById(testId, owner);
     AuthoringStep first = promoted.steps().get(0);
     AuthoringStep second = promoted.steps().get(1);
     AuthoringStep edited =
@@ -116,20 +90,22 @@ class StudioAuthoringPersistenceIT {
   @Test
   void anotherCsiCannotReadOrWriteTheAuthoringDocument() {
     Authentication outsider = identity(OTHER_CSI);
-    assertThatThrownBy(() -> studioService.findAuthoringById(testId, outsider))
+    assertThatThrownBy(() -> studioService.findAuthoringV2ById(testId, outsider))
         .isInstanceOf(StudioAccessDeniedException.class);
-    AuthoringV2Request adapted = LegacyAuthoringPersistenceAdapter.adapt(testId, storedSteps());
+    AuthoringV2Request adapted =
+        com.citi.put.checks.studio.support.CanonicalAuthoringFixture.authoring(
+            testId, com.citi.put.checks.studio.dto.CanonicalStudioCodec.parseSteps(storedSteps()));
     assertThatThrownBy(() -> studioService.saveAuthoring(testId, adapted, 1, 1, outsider))
         .isInstanceOf(StudioAccessDeniedException.class);
     assertThat(
             jdbc.queryForObject(
-                "SELECT authoring IS NULL FROM ui_tests WHERE id=?", Boolean.class, testId))
+                "SELECT authoring IS NOT NULL FROM ui_tests WHERE id=?", Boolean.class, testId))
         .isTrue();
   }
 
   @Test
   void stableIdsTextAndContextSurviveAnIndependentApplicationContextRestart() {
-    AuthoringV2Response promoted = studioService.adaptLegacyAuthoring(testId, 1, 1, owner);
+    AuthoringV2Response promoted = studioService.findAuthoringV2ById(testId, owner);
     AuthoringStep contextual =
         new AuthoringStep(
             promoted.steps().get(0).id(),
@@ -153,12 +129,12 @@ class StudioAuthoringPersistenceIT {
     }
   }
 
-  private UUID seedLegacy(List<String> steps) {
+  private UUID seedCanonical(List<String> steps) {
     UUID id = UUID.randomUUID();
     String json =
         "[\""
             + steps.get(0).replace("\\", "\\\\").replace("\"", "\\\"").replace("\n", "\\n")
-            + "\",\"\"]";
+            + "\",\"Continue\"]";
     jdbc.update(
         "INSERT INTO ui_tests (id,name,csi_id,environment,browser,steps,variables,created_by,"
             + "created_at,updated_at) VALUES (?, 'Authoring', ?, 'Production', 'chromium',"
