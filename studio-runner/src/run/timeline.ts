@@ -33,7 +33,7 @@
  * tier always runs at `0` (§26.3 item 5).
  */
 
-import type { Clock } from '../executor/adapters/StepReporter.js';
+import type { Clock } from '../executor/stepReporter.js';
 
 /**
  * The two time sources, injected so a test can drive the origin without sleeping — and so the
@@ -113,28 +113,5 @@ export function takeRunOrigin(
     calibrationOffsetMs,
     startedAtMs: monotonicZero - monotonicZero,
     clock: { now: () => source.monotonicNow() - monotonicZero },
-  };
-}
-
-/**
- * Takes an origin on the **process** clock — the exact defect AC-11 exists to close.
- *
- * Nothing on the production path can reach it: the production path calls {@link takeRunOrigin},
- * and `executeSteps` no longer has a `clock` default to fall back to (AC-11.1). It is exported,
- * and named for what it is, so the scale assertion can substitute it deliberately and watch the
- * bound go red — a guard nobody has seen fail is not a guard.
- *
- * @internal Falsification instrument. Never wire this into a run.
- */
-export function takeProcessOriginForFalsification(
-  source: OriginSource = systemOriginSource,
-): RunOrigin {
-  const browserStartedAt = source.wallNow();
-  return {
-    browserStartedAt,
-    monotonicZero: 0,
-    calibrationOffsetMs: 0,
-    startedAtMs: source.monotonicNow(),
-    clock: { now: () => source.monotonicNow() },
   };
 }

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": 1,
+  "caseId": "incremental-edit-step-4",
+  "kind": "EXPECTED_OUTCOME",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "note": "Run-record oracle for the STUDIO-OBS-015 case file (its \"expected\" and \"requiredOracles\" are consumed unchanged). Receipts are the guided-dataflow /receipt bodies in order: the base 10-step session submits the base value, the incremental session submits the fresh value under the stable binding. Finalize and the merged-revision replay model calls are counted in the run record.",
+  "class": "P",
+  "receipts": {
+    "phases": {
+      "base": {
+        "actions": [
+          {
+            "type": "receipt.post",
+            "fields": {
+              "body": "base-reference-value"
+            }
+          }
+        ]
+      },
+      "incremental": {
+        "actions": [
+          {
+            "type": "receipt.post",
+            "fields": {
+              "body": "fresh-current-session-reference"
+            }
+          }
+        ]
+      },
+      "finalize": {
+        "actions": []
+      }
+    },
+    "views": {
+      "required": [],
+      "allowed": []
+    }
+  },
+  "incremental": {
+    "prefixLearnedSteps": 0,
+    "prefixReusedSteps": 3,
+    "finalizeModelCalls": 0,
+    "relearnedFromStepNumber": 4,
+    "relearnedThroughStepNumber": 10
+  },
+  "outOfBand": [
+    "prefix SOURCE_PLAN/NEXT_ACTION backend reservations are zero (case file expected.prefixSourcePlanCalls/prefixNextActionCalls)",
+    "merged-revision replay model calls are zero",
+    "one continuous finalized video with prefix/suffix offsets"
+  ],
+  "outOfBandOwner": "backend ITs (GuidedPublicationReplayIT incremental lane) and the AC-7 operator read of backend counters; the public API does not expose them",
+  "session": {
+    "terminal": [
+      "SUCCEEDED"
+    ],
+    "published": true,
+    "clarifications": 0
+  }
+}

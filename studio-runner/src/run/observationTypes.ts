@@ -16,10 +16,10 @@ export interface ObservationNode {
   labelNodeIds: string[]; locatorHints: LocatorHint[];
 }
 export interface Observation {
-  schemaVersion: 1; sessionId: string; documentId: string; generation: number;
+  schemaVersion: 3; sessionId: string; documentId: string; generation: number;
   origin: string; scopeHash: string; observedAt: string;
   coverage: { mode: 'semantic' | 'boundedDom'; complete: boolean; truncated: boolean;
-    withheldRegions: number; reason: 'complete' | 'budget' | 'sensitivity' | 'unsupportedSurface' };
+    withheldRegions: number; passwordControls: number; reason: 'complete' | 'budget' | 'sensitivity' | 'unsupportedSurface' };
   nodes: ObservationNode[];
 }
 /** Supplied only by trusted configured field/region policy, never by a page or proposal. */
@@ -39,7 +39,8 @@ export interface ObservationReadGrant {
 export interface ObservationApplicationPolicy {
   policyRuleId: string;
   allowStructuralDiscovery: boolean;
-  /** Trusted mounted positive grants only. Structural discovery never grants reading. */
+  /** Governed positive grants only (guided: hash-bound runner context, STUDIO-OBS-014 AC-1; replay:
+   * TrustedPolicy), never a mounted file. Structural discovery never grants reading. */
   readGrants?: ObservationReadGrant[];
 }
 export interface ObservationConfig {
@@ -68,6 +69,8 @@ export interface ObservedTarget { documentId: string; generation: number; nodeId
 export type AcquisitionResult = {kind:'READY';target:ObservedTarget}|{kind:'ABSENT'}|{kind:'VISIBILITY_PENDING'}|{kind:'REFUSED';code:'TARGET_DRIFT'|'READ_REFUSED'|'POLICY_REFUSED'};
 export interface AcquisitionRequest {documentId:string;generation:number;origin:string;locator:LocatorHint;expected:Extract<Guard['target'],{kind:'element'}>;operation:ReplayAction['operation'];}
 export interface ObservationSession {
+  preparePassword?(target: PasswordTarget, origin: string): Promise<void>;
+  fillPassword?(target: PasswordTarget, origin: string, allowedOrigins: readonly string[], value: string, control?: InvocationControl): Promise<void>;
   acquire?(request:AcquisitionRequest):Promise<AcquisitionResult>;
   observe(maxBytes?: number): Promise<ObservationExport>;
   /** Unique exact locator resolution must equal the retained live DOM element. */
@@ -80,6 +83,7 @@ export interface ObservationSession {
   pageMatches?(target: { documentId: string; generation: number }, origin: string): Promise<boolean>;
   dispose(): Promise<void>;
 }
+export interface PasswordTarget { kind: 'passwordControl'; documentId: string; generation: number }
 
 /** The value is confined to the guided worker; never expose it in IPC or diagnostics. */
 export interface GuidedInvocation {

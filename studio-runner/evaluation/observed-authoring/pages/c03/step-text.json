@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C03-rf-wiki-search-var",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "94d4a789-db5b-46d0-8eef-34783dbd90a6",
+        "text": "Open <var wikiUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "c5295c1c-b0a1-4cce-8206-cd563938b1cd",
+        "text": "Fill Search Wikipedia with <var SEARCH_TERM>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "816fc145-c04d-4dba-8f22-315f9a1eb54d",
+        "text": "Press Enter in the Search Wikipedia field.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "ac1b34d7-6f13-4ad6-8957-9ca71872f2e3",
+        "text": "Check that the page address contains /wiki.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "wikiUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/wiki"
+    },
+    {
+      "name": "SEARCH_TERM",
+      "kind": "plain",
+      "value": "observability"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "caseId": "D1-login-secret-fixture",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "62078e24-7e92-46cd-808f-4c118e9cf819",
+        "text": "Open <var loginUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "ab06e94f-12cf-486c-8d3f-12d241963129",
+        "text": "Fill User with <var USERNAME>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "91dabe50-41b0-47f9-89a6-75ad8d8533ae",
+        "text": "Fill the password field with <secret LOGIN_PW>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "0bf77ff0-3f30-4073-86ce-aedaf8128320",
+        "text": "Click Sign in.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "6d7def7c-3fd0-4ae6-8ae8-25c97ef015c9",
+        "text": "Check that the heading says Home.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "6ea6ffa1-ce2c-4adf-8965-aef4189f58a4",
+        "text": "Click Reports.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "f82b8887-36ff-4a0e-843b-638d519dd98b",
+        "text": "Check that the heading says Reports.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "loginUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/login"
+    },
+    {
+      "name": "USERNAME",
+      "kind": "plain",
+      "value": "pilot-user"
+    },
+    {
+      "name": "LOGIN_PW",
+      "kind": "secretRef",
+      "secretId": "LOGIN_PW"
+    }
+  ]
+}

@@ -23,7 +23,7 @@ import type {
   StepFinishedEvent,
   StepReporter,
   StepStartedEvent,
-} from '../executor/adapters/StepReporter.js';
+} from '../executor/stepReporter.js';
 import type { ReportClient } from './reportClient.js';
 import type { EvidenceState, ReportBody, RunOutcome, RunSnapshot } from './snapshot.js';
 

@@ -98,9 +98,9 @@ export function createS3ObjectStore(options: S3ObjectStoreOptions): {
         let stream: ReadStream | undefined;
         try {
           const length = request.body.kind === 'file'
-            ? (await stat(request.body.path)).size : request.body.data.byteLength;
+            ? request.body.verifiedFile?.bytes??(await stat(request.body.path)).size : request.body.data.byteLength;
           const body = request.body.kind === 'file'
-            ? (stream = createReadStream(request.body.path)) : request.body.data;
+            ? (stream = request.body.verifiedFile?.open()??createReadStream(request.body.path)) : request.body.data;
           await client.send(new PutObjectCommand({
             Bucket: options.bucket,
             Key: request.key,

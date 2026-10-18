@@ -9,13 +9,6 @@ import {
   readChromiumBuild,
   writeRuntimeVersionsFile,
 } from '../scripts/write-runtime-versions.mjs';
-import {
-  ARTIFACT_VERSION,
-  EXECUTOR_VERSION,
-  SYNTAX_REFERENCE_VERSION,
-  VALIDATOR_PARSER,
-  VALIDATOR_SCHEMA_VERSION,
-} from '../src/versions.js';
 import { packageRoot } from './helpers/corpus.js';
 
 /**
@@ -27,13 +20,11 @@ import { packageRoot } from './helpers/corpus.js';
  * they are `null` off the image, and a mixed-version browser root is an error rather than a guess.
  */
 
-const versions = {
-  VALIDATOR_SCHEMA_VERSION,
-  SYNTAX_REFERENCE_VERSION,
-  EXECUTOR_VERSION,
-  ARTIFACT_VERSION,
-  VALIDATOR_PARSER,
-};
+/**
+ * STUDIO-OBS-009 AC-1 P2 a: the five artifact-1 stamps no longer exist anywhere, and nothing
+ * replaces them with a renamed value. The record names observed identities only.
+ */
+const RETIRED_KEYS = ['artifact', 'validatorSchema', 'validatorParser', 'syntaxReference', 'executor'];
 
 const directories: string[] = [];
 
@@ -50,40 +41,35 @@ afterAll(() => {
 });
 
 describe('runtime-versions generation', () => {
-  it('records every field AC-3 requires', () => {
+  it('records every field AC-3 requires and no artifact-1 stamp', () => {
     const recorded = buildRuntimeVersions({
       root: packageRoot,
-      versions,
       env: {},
       nodeVersion: 'v22.11.0',
     });
 
-    expect(Object.keys(recorded)).toEqual(
-      expect.arrayContaining([
-        'playwright',
-        'chromiumBuild',
-        'node',
-        'validatorSchema',
-        'executor',
-        'image',
-      ]),
-    );
+    // The exact key set of a plain Node build: observed identities are added by
+    // `writeRuntimeVersionsFile` when the packaged schemas exist, so they are absent here.
+    expect(Object.keys(recorded).sort()).toEqual([
+      'chromiumBuild',
+      'image',
+      'node',
+      'nodeEngineRange',
+      'nodeMajorPin',
+      'playwright',
+      'playwrightImageTag',
+      'playwrightLocked',
+    ]);
+    for (const retired of RETIRED_KEYS) expect(recorded).not.toHaveProperty(retired);
     expect(recorded.playwright).toMatch(/^\d+\.\d+\.\d+$/);
     expect(recorded.playwrightLocked).toBe(recorded.playwright);
     expect(recorded.playwrightImageTag).toBe(recorded.playwright);
     expect(recorded.node).toBe('v22.11.0');
-    expect(recorded.validatorSchema).toBe(VALIDATOR_SCHEMA_VERSION);
-    expect(recorded.syntaxReference).toBe(SYNTAX_REFERENCE_VERSION);
-    expect(recorded.executor).toBe(EXECUTOR_VERSION);
-    expect(recorded.validatorParser).toBe(
-      `${VALIDATOR_PARSER.name}@${VALIDATOR_PARSER.version}`,
-    );
   });
 
   it('leaves the image-derived fields null on a plain Node build', () => {
     const recorded = buildRuntimeVersions({
       root: packageRoot,
-      versions,
       env: {},
       nodeVersion: process.version,
     });
@@ -94,7 +80,6 @@ describe('runtime-versions generation', () => {
   it('reads chromiumBuild and image from the environment inside the image', () => {
     const recorded = buildRuntimeVersions({
       root: packageRoot,
-      versions,
       env: {
         PLAYWRIGHT_BROWSERS_PATH: makeBrowsersPath(['chromium-1200', 'ffmpeg-1011']),
         IMAGE_TAG: 'registry.citi.com/put/checks-studio-runner:0.1.0-abc1234',
@@ -117,7 +102,6 @@ describe('runtime-versions generation', () => {
   ])('records an %s IMAGE_TAG as null, not as an empty string', (_label, value) => {
     const recorded = buildRuntimeVersions({
       root: packageRoot,
-      versions,
       env: {
         PLAYWRIGHT_BROWSERS_PATH: makeBrowsersPath(['chromium-1200']),
         IMAGE_TAG: value,
@@ -150,7 +134,6 @@ describe('runtime-versions generation', () => {
 
     const target = writeRuntimeVersionsFile({
       root,
-      versions,
       env: { IMAGE_TAG: 'registry.citi.com/put/checks-studio-runner:0.1.0-abc1234' },
       nodeVersion: 'v22.11.0',
     });
@@ -160,21 +143,12 @@ describe('runtime-versions generation', () => {
     expect(written.node).toBe('v22.11.0');
     expect(written.image).toBe('registry.citi.com/put/checks-studio-runner:0.1.0-abc1234');
     expect(written.chromiumBuild).toBeNull();
-  });
-
-  it('refuses to record a parser version that does not match the typescript pin', () => {
-    expect(() =>
-      buildRuntimeVersions({
-        root: packageRoot,
-        versions: { ...versions, VALIDATOR_PARSER: { name: 'typescript', version: '5.0.0' } },
-        env: {},
-        nodeVersion: process.version,
-      }),
-    ).toThrow(/does not match the pinned typescript dependency/);
+    for (const retired of RETIRED_KEYS) expect(written).not.toHaveProperty(retired);
   });
 });
 
 // Observed startup authorizes a separate family using actual packaged schema/reference identities.
+import {readBrowserProvenance,fileSha256} from '../scripts/browser-provenance.mjs';
 import {loadObservedBuild} from '../src/compat/runtime-versions.js';
 import {OBSERVED_PROFILE,OBSERVED_SCHEMA_BUNDLE_HASH,hashObserved} from '../src/validator/observedReferencePolicy.js';
 it('refuses missing/tampered observed release catalogs independently of legacy runtime compatibility',()=>{
@@ -194,35 +168,48 @@ it('checks observed bundle/image/installed revision joins with a controlled star
   const env={STUDIO_RUNNER_OBSERVED_CATALOG_FILE:catalog,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:build.executableImageDigest,PLAYWRIGHT_BROWSERS_PATH:browserRoot};
   expect(()=>loadObservedBuild(env,runtime,ref)).toThrow('PROFILE_MISMATCH');
   mkdirSync(join(binary,'..'),{recursive:true});writeFileSync(binary,'controlled executable presence fixture; never executed');writeFileSync(join(directory,'INSTALLATION_COMPLETE'),'');
-  expect(loadObservedBuild(env,runtime,ref)).toEqual(build);
+  const launcher=join(root,'browser.js');writeFileSync(launcher,'controlled launcher fixture; never executed');const provenance={observedSchemaBundleHash:build.schemaBundleHash,observedReferenceBundleHash:build.referenceBundleHash,observedChromiumBuild:revision,observedBrowserProvenance:readBrowserProvenance(browserRoot,revision),observedBrowserLauncherSha256:fileSha256(launcher)};writeFileSync(runtime,JSON.stringify(provenance));expect(loadObservedBuild(env,runtime,ref,launcher)).toEqual(build);
+  for(const mutation of [{channel:'chrome'},{headless:false},{chromiumSandbox:false},{args:['--'+'no-'+'sandbox']},{executableRelativePath:'chrome-headless-shell'},{executableSha256:'0'.repeat(64)}]){writeFileSync(runtime,JSON.stringify({...provenance,observedBrowserProvenance:{...provenance.observedBrowserProvenance,...mutation}}));expect(()=>loadObservedBuild(env,runtime,ref,launcher)).toThrow('PROFILE_MISMATCH');}writeFileSync(runtime,JSON.stringify(provenance));writeFileSync(binary,'tampered binary');expect(()=>loadObservedBuild(env,runtime,ref,launcher)).toThrow('PROFILE_MISMATCH');writeFileSync(binary,'controlled executable presence fixture; never executed');
   expect(()=>loadObservedBuild({...env,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:'b'.repeat(64)},runtime,ref)).toThrow('PROFILE_MISMATCH');
   writeFileSync(ref,JSON.stringify({controlled:'tampered'}));expect(()=>loadObservedBuild(env,runtime,ref)).toThrow('PROFILE_MISMATCH');
 });
 
 import {checkPins} from '../scripts/check-pins.mjs';
-import publicationReferences from '../../docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json' with {type:'json'};
+import publicationReferencesJson from '../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with {type:'json'};
+import type {PublicationDocument,TestDocument} from './helpers/publicationFixture.js';
+// Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
+const publicationReferences=publicationReferencesJson as unknown as TestDocument<PublicationDocument>&{observedChoice:{description:string}};
 it('packages independently authored choice evidence without rewriting previous reference bytes',()=>{
   const workspace=mkdtempSync(join(tmpdir(),'observed-choice-package-'));directories.push(workspace);const root=join(workspace,'studio-runner');mkdirSync(root);
   for(const file of ['package.json','package-lock.json','Dockerfile','.nvmrc'])cpSync(join(packageRoot,file),join(root,file));
-  for(const dir of ['src/validator','dist/validator','fixtures/observed-reference'])mkdirSync(join(root,dir),{recursive:true});
+  for(const dir of ['src/validator','dist/validator','dist/run','fixtures/observed-reference'])mkdirSync(join(root,dir),{recursive:true});cpSync(join(packageRoot,'dist','run','browser.js'),join(root,'dist','run','browser.js'));writeFileSync(join(root,'fixtures/observed-reference/accepted-observed-choice.json'),JSON.stringify(publicationReferences.observedChoice));
   const source=join(packageRoot,'src','validator','observedSchemas.json');cpSync(source,join(root,'src','validator','observedSchemas.json'));cpSync(source,join(root,'dist','validator','observedSchemas.json'));
   const original=JSON.stringify({controlled:'untouched-é🧪'});writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),original);
-  const choiceDir=join(workspace,'docs','specs','studio-observed-authoring','contracts','v2');mkdirSync(choiceDir,{recursive:true});const choiceFile=join(choiceDir,'publication-fixtures.json');writeFileSync(choiceFile,JSON.stringify(publicationReferences));
-  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'});
+  const choiceDir=join(workspace,'docs','specs','studio-observed-authoring','contracts','v3');mkdirSync(choiceDir,{recursive:true});const choiceFile=join(choiceDir,'publication-fixtures.json');writeFileSync(choiceFile,JSON.stringify(publicationReferences));
+  writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'});
   expect(checkPins(root).ok).toBe(true);expect(readFileSync(join(root,'fixtures','observed-reference','fixture.json'),'utf8')).toBe(original);
   const packaged=JSON.parse(readFileSync(join(root,'dist','observed-reference.json'),'utf8')) as Record<string,unknown>;expect(packaged['accepted-observed-choice.json']).toEqual(publicationReferences.observedChoice);
   const stale=structuredClone(publicationReferences);stale.observedChoice.description+='changed';writeFileSync(choiceFile,JSON.stringify(stale));expect(checkPins(root).failures).toContain('Observed packaged reference bundle is stale.');
   writeFileSync(choiceFile,'{}');expect(checkPins(root).failures).toContain('Observed packaged support files are missing or invalid.');
-  expect(()=>writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'})).toThrow('Observed choice reference evidence is missing or invalid.');
+  expect(()=>writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'})).toThrow('Observed choice reference evidence is missing or invalid.');
+  // The Docker build has no monorepo docs mount. Its mandatory packaged bytes retain the
+  // same virtual key/content and independently hashed reference identity.
+  rmSync(join(workspace,'docs'),{recursive:true,force:true});writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'});
+  expect(JSON.parse(readFileSync(join(root,'dist','observed-reference.json'),'utf8')) as unknown).toEqual(packaged);
+  const runtime=JSON.parse(readFileSync(join(root,'dist','runtime-versions.json'),'utf8')) as {observedReferenceBundleHash:string};expect(runtime.observedReferenceBundleHash).toBe(hashObserved(packaged));expect(checkPins(root).ok).toBe(true);
+  rmSync(join(root,'fixtures','observed-reference','accepted-observed-choice.json'));expect(()=>writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'})).toThrow('Observed choice reference evidence is missing or invalid.');expect(checkPins(root).ok).toBe(false);
 });
 it('builds packaged observed bundles and refuses a stale schema/reference artifact independently',()=>{
   const root=mkdtempSync(join(tmpdir(),'observed-package-'));directories.push(root);
   for(const file of ['package.json','package-lock.json','Dockerfile','.nvmrc'])cpSync(join(packageRoot,file),join(root,file));
   mkdirSync(join(root,'src','validator'),{recursive:true});mkdirSync(join(root,'dist','validator'),{recursive:true});mkdirSync(join(root,'fixtures','observed-reference'),{recursive:true});
   const schemaFile=join(packageRoot,'src','validator','observedSchemas.json');cpSync(schemaFile,join(root,'src','validator','observedSchemas.json'));cpSync(schemaFile,join(root,'dist','validator','observedSchemas.json'));
-  writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'reference'}));
-  writeRuntimeVersionsFile({root,versions,env:{},nodeVersion:'v22.13.0'});
+  mkdirSync(join(root,'dist/run'),{recursive:true});cpSync(join(packageRoot,'dist','run','browser.js'),join(root,'dist','run','browser.js'));writeFileSync(join(root,'fixtures/observed-reference/accepted-observed-choice.json'),JSON.stringify(publicationReferences.observedChoice));writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'reference'}));
+  writeRuntimeVersionsFile({root,env:{},nodeVersion:'v24.20.0'});
   expect(checkPins(root).ok).toBe(true);
+  // The observed identities ride next to the Playwright copies; none of the retired stamps comes back (AC-1 P2 a).
+  const recordedKeys=Object.keys(JSON.parse(readFileSync(join(root,'dist','runtime-versions.json'),'utf8')) as object).sort();
+  expect(recordedKeys).toEqual(['chromiumBuild','image','node','nodeEngineRange','nodeMajorPin','observedBrowserLauncherSha256','observedBrowserProvenance','observedChromiumBuild','observedReferenceBundleHash','observedSchemaBundleHash','playwright','playwrightImageTag','playwrightLocked']);
   writeFileSync(join(root,'fixtures','observed-reference','fixture.json'),JSON.stringify({controlled:'mutated'}));expect(checkPins(root).failures).toContain('Observed packaged reference bundle is stale.');
   writeFileSync(join(root,'dist','validator','observedSchemas.json'),'{}');expect(checkPins(root).failures).toContain('Observed packaged schema bundle is stale.');
 });

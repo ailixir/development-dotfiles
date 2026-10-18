@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C08-intended-assertion-fail",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "9e45c673-0dbf-4e6d-86e7-bac181c8d5f4",
+        "text": "Open <var ordersUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "933f13b6-c59a-4117-8828-54848f400396",
+        "text": "Check that the page shows Order rejected.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "ordersUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/orders"
+    }
+  ]
+}

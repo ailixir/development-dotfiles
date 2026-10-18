@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C13-ambiguous-wiki-placeholder",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "fca53952-bb37-43ed-8a7d-bc37ab21bb94",
+        "text": "Open <var wikiUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "1c7919c1-1e14-4b9d-8db4-85fad0a398a1",
+        "text": "Type Alan Turing in the search box and press Enter.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "wikiUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/wikimain"
+    }
+  ]
+}

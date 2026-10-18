@@ -35,27 +35,27 @@
  * records its `clear()` and then does nothing, so the mutated order still uploads successfully and
  * the only thing that fails is the sequence. The real deletion is proven against a real filesystem
  * and a real Chromium in `test/fixtures-tier/deadline-cleanup.test.ts`.
+ *
+ * The runs are observed jobs on `POST /v2/runs`, executed by the harness's fake observed session
+ * (STUDIO-OBS-012A AC-3). The evidence keys are the ones the coordinator derives from the admitted
+ * binding; the AC-1 case that wrote to job-supplied keys was deleted with the artifact-1 job, which
+ * was the only body that could carry them.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { createChildOwnedAdapter } from '../../src/run/launcher.js';
-import { takeRunOrigin } from '../../src/run/timeline.js';
 import type { ObjectStoreClient } from '../../src/run/objectStore.js';
 import { createFakeObjectStore } from '../helpers/fakeObjectStore.js';
 import type { FakeObjectStoreOptions } from '../helpers/fakeObjectStore.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
 import type {
   BrowserLauncher,
-  BrowserSession,
   RunScratch,
   ScratchStore,
   SessionRecording,
-  SessionRunRequest,
-  SessionRunResult,
 } from '../../src/server/adapters.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
+import { createFakeBrowserLauncher, observedBody, observedEvidenceKeys, post } from '../helpers/runner.js';
 
 let harness: Harness | null = null;
 
@@ -64,9 +64,8 @@ afterEach(async () => {
   harness = null;
 });
 
-/** The job's server-derived keys, echoed by the runner and never invented (AC-1). */
-const VIDEO_KEY = String(validJob().videoKey);
-const MANIFEST_KEY = String(validJob().manifestKey);
+/** The evidence keys the coordinator derives from the admitted binding. */
+const { videoKey: VIDEO_KEY, manifestKey: MANIFEST_KEY } = observedEvidenceKeys();
 
 const RECORDING: SessionRecording = {
   path: '/scratch/run-1/video/page.webm',
@@ -76,46 +75,11 @@ const RECORDING: SessionRecording = {
   partial: true,
 };
 
-/** A session that records two passing steps and reports the recording it was given. */
+/** A session that passes every step and reports the recording it was given. */
 function launcherReporting(recording: SessionRecording = RECORDING): BrowserLauncher {
-  return {
-    launch(): Promise<BrowserSession> {
-      const origin = takeRunOrigin();
-      return Promise.resolve({
-        adapter: createChildOwnedAdapter(),
-        close: () => Promise.resolve(),
-        run: {
-          origin: {
-            browserStartedAt: origin.browserStartedAt,
-            startedAtMs: origin.startedAtMs,
-            clock: null,
-          },
-          kill: () => Promise.resolve({ orderedStopCompleted: true }),
-          execute(request: SessionRunRequest): Promise<SessionRunResult> {
-            for (const step of request.steps) {
-              const startedAtMs = origin.clock.now();
-              request.reporter.stepStarted({ stepIndex: step.stepIndex, startedAtMs });
-              request.reporter.stepFinished({
-                stepIndex: step.stepIndex,
-                status: 'PASS',
-                startedAtMs,
-                finishedAtMs: origin.clock.now(),
-                durationMs: 1,
-                failure: null,
-              });
-            }
-            return Promise.resolve({
-              ok: true,
-              failureKind: null,
-              failureMessage: null,
-              recording,
-              observedHosts: [],
-            });
-          },
-        },
-      });
-    },
-  };
+  const launcher = createFakeBrowserLauncher();
+  launcher.script = { recording };
+  return launcher;
 }
 
 /**
@@ -180,7 +144,7 @@ async function runObserving(
   });
   await harness.start();
 
-  const response = await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+  const response = await post(harness.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
   expect(response.status).toBe(202);
   await until(() => harness?.app.coordinator.inFlight === 0);
 
@@ -247,55 +211,6 @@ describe('AC-3 — upload, settle, manifest, then clear scratch, wipe and delive
     expect(final.evidence?.state).toBe('STORED');
     // AC-9: a successful upload does not make a truncated recording whole.
     expect(final.evidence?.partial).toBe(true);
-  });
-});
-
-// ── AC-1: the keys are the job's, echoed, and nothing derives one ────────────────────────────
-
-describe('AC-1 — the store is called with the job’s keys and with no key the runner computed', () => {
-  it('writes to keys deliberately unlike anything derivable from the run’s identity', async () => {
-    // A prefix, an extension and a shape the runner could not have computed from the execution,
-    // the attempt or the produced file's own name. If either object lands at a derived key, the
-    // API's recovery reads an object nobody wrote (§6.2, ADR-002 §15.6).
-    const odd = validJob({
-      videoKey: 'archive/2026/09/11/af3c-not-derivable-from-anything.mkv',
-      manifestKey: 'archive/2026/09/11/af3c-manifest.txt',
-    });
-    const journal: string[] = [];
-    const store = createFakeObjectStore({
-      journal,
-      resolveFile: () => Promise.resolve(new Uint8Array(24_576)),
-    });
-    harness = createHarness({
-      launcher: launcherReporting(),
-      scratch: journallingScratch(journal),
-      objectStore: store.client,
-    });
-    await harness.start();
-    expect((await post(harness.port, '/v1/runs', JSON.stringify(odd), SERVICE_TOKEN)).status).toBe(
-      202,
-    );
-    await until(() => harness?.app.coordinator.inFlight === 0);
-
-    expect(store.keys).toEqual([
-      'archive/2026/09/11/af3c-not-derivable-from-anything.mkv',
-      'archive/2026/09/11/af3c-manifest.txt',
-    ]);
-    // Not the shape `ManifestKeys` derives, and not the produced file's own name.
-    for (const key of store.keys) {
-      expect(key).not.toContain('studio/');
-      expect(key).not.toContain('.webm');
-      expect(key).not.toContain('.result.json');
-      expect(key).not.toContain('page.webm');
-    }
-    // And the manifest body carries the same two strings it was written under.
-    const bytes = store.objectAt('archive/2026/09/11/af3c-manifest.txt');
-    const body = JSON.parse(new TextDecoder().decode(bytes ?? new Uint8Array())) as {
-      videoKey: string;
-      manifestKey: string;
-    };
-    expect(body.videoKey).toBe('archive/2026/09/11/af3c-not-derivable-from-anything.mkv');
-    expect(body.manifestKey).toBe('archive/2026/09/11/af3c-manifest.txt');
   });
 });
 

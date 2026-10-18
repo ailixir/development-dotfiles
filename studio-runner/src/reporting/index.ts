@@ -1,28 +1,18 @@
 /**
- * Reporting surface (story 10.6): the admission CAS **client**, the progress/terminal report
- * client and the `StepReporter` implementation 10.2 left as a seam.
+ * Reporting surface (story 10.6): the observed admission CAS **client**, the progress/terminal
+ * report client and the `StepReporter` implementation.
  *
  * The compare-and-set, the dispatch ledger, persistence, de-duplication, snapshot revisions,
  * restart recovery and the reapers are all on the other side of these HTTP calls and belong to
  * story 10.7. Nothing here persists anything: the runner has no database (architecture §9.2).
  */
-export { createAdmissionClient, newAdmissionIdentity, ADMISSION_COUNTERS } from './admissionClient.js';
-export type {
-  AdmissionClient,
-  AdmissionClientOptions,
-  AdmissionIdentity,
-  AdmissionOutcome,
-  AdmissionRequestInput,
-  AmbiguityReason,
-} from './admissionClient.js';
+export { admitObserved, newAdmissionIdentity } from './admissionClient.js';
+export type { AdmissionClientOptions, AdmissionIdentity } from './admissionClient.js';
 
 export { createFetchHttpClient } from './httpClient.js';
 export type { HttpClient, HttpOutcome, HttpRequest } from './httpClient.js';
 
-export { validateEnvelope, knownValuesOf, ENVELOPE_CODES } from './envelope.js';
 export type {
-  EnvelopeProblem,
-  EnvelopeResult,
   JobConfiguration,
   JobDeadlines,
   JobEnvelope,

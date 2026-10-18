@@ -1,16 +1,14 @@
 import type { AdmissionReceipt, AdmissionRequest, BuildIdentity, ObservedJob, TrustedPolicy, ValidationVerdict } from '../executor/observedOperations.js';
 import { validateObservedJob, validateObservedRequest } from '../validator/observedReplay.js';
 import { demand, ObservedRefusal, validateObserved, validateTrustedPolicy } from '../validator/observedReferencePolicy.js';
-import { accountProvider } from '../run/observedAccount.js';
-import type { ObservedAccountRegistry } from '../run/observedAccount.js';
 import { admitObserved } from '../reporting/admissionClient.js';
 /**
- * `POST /v1/runs`: order of operations, admission and the run itself (AC-6..AC-10, AC-12..AC-21).
+ * `POST /v2/runs`: order of operations, admission and the run itself (AC-6..AC-10, AC-12..AC-21).
  *
  * ## The order, and why it is this order
  *
  * ```
- * validate envelope + artifact  →  reserve a capacity slot  →  admission CAS  →  202
+ * validate the closed observed job  →  reserve a capacity slot  →  observed admission  →  202
  * ```
  *
  * Nothing observable happens before the CAS returns success: **no browser, no child process, no
@@ -25,8 +23,7 @@ import { admitObserved } from '../reporting/admissionClient.js';
  * |---|---|---|---|
  * | Pool saturated | `429` + `Retry-After` | stays **true** | **no** — decided before the API is contacted |
  * | Draining | `503` | **false** | no |
- * | API refused (`409`/`401`/`403`) | `409` / `503` | true | one, and only one |
- * | API ambiguous (timeout, transport, 5xx, redirect) | `503` | true | one, and only one — **never resent** |
+ * | API refused or ambiguous (any non-`200`, timeout, transport, redirect, malformed receipt) | `503` | true | one, and only one — **never resent** |
  *
  * `429` is a *definite non-acceptance*: no slot held, no admission issued, no scratch, no browser,
  * nothing durable anywhere. It is decidable before the runner talks to the API at all, which is
@@ -40,12 +37,12 @@ import { admitObserved } from '../reporting/admissionClient.js';
  * ## Everything after `202`
  *
  * The run executes detached from the request. Scratch is created, the browser is launched,
- * `STARTED` is reported *after* the launch resolves, steps flow through the 10.2 `StepReporter`
+ * `STARTED` is reported *after* the launch resolves, steps flow through the `StepReporter`
  * seam, and the terminal report is delivered with byte-identical bounded retry. Every exit path —
  * success, failure, throw, drain, cancel — clears scratch, wipes the resolved values and releases
  * the slot.
  *
- * ## Cancel (`DELETE /v1/runs/{id}`, Studio v1 WP4)
+ * ## Cancel (`DELETE /v2/runs/{id}`, Studio v1 WP4)
  *
  * A cancel is the deadline's stop for a different reason: the parent orders the stop, the child
  * gets `browserStopTimeoutMs` (default 5 s) to close its context and finalize the recording, and
@@ -54,7 +51,7 @@ import { admitObserved } from '../reporting/admissionClient.js';
  *
  * | The run is | `DELETE` answers | What happens |
  * |---|---|---|
- * | admitted, browser not yet running | `202 CANCELLING` | no browser is launched, or the one just launched is stopped before any step |
+ * | admitted, browser not yet running | `202 CANCELLING` | no browser is launched, or the launch in progress is aborted before any step |
  * | running | `202 CANCELLING` | ordered stop, bounded grace, process tree |
  * | already stopping for a cancel | `202 CANCELLING` | nothing new is ordered |
  * | past its outcome (evidence, delivery) or recently finished | `409 RUN_FINISHED` | nothing |
@@ -67,21 +64,13 @@ import { admitObserved } from '../reporting/admissionClient.js';
  * `cancelRequested` on every progress acknowledgement. All three signals take the same path.
  */
 import { createRedactor } from '../executor/redaction.js';
-import type {
-  ExecutableStep,
-  StepFinishedEvent,
-  StepReporter,
-  ValueResolver,
-} from '../executor/index.js';
-import { executeSteps } from '../executor/index.js';
-import { RUNNER_VERSIONS, isCompatible } from '../compat/index.js';
-import type { ArtifactProvenance, RuntimeVersions } from '../compat/index.js';
+import type { StepReporter } from '../executor/stepReporter.js';
 import {
   ObservedPreReadyFailure,
   RUNNER_ERROR_CODES,
+  OBSERVED_RUNNER_ERROR_CODES,
   RUN_FAILURE_KINDS,
   errorCodeFor,
-  failureKindForRefusal,
   resultFor,
 } from '../run/errors.js';
 import type { RunFailureKind } from '../run/errors.js';
@@ -101,27 +90,22 @@ import type { EvidenceFileSystem, EvidenceUploadBounds } from '../run/evidenceUp
 import { buildResultManifest, serializeResultManifest } from '../run/manifest.js';
 import { RESULT_MANIFEST_CONTENT_TYPE } from '../run/manifest.js';
 import type { ObjectStoreClient } from '../run/objectStore.js';
-import { takeRunOrigin } from '../run/timeline.js';
-import type { OriginSource, RunOrigin } from '../run/timeline.js';
-import { validateArtifact } from '../validator/index.js';
-import type { Diagnostic } from '../validator/index.js';
-import type { AdmissionClient } from '../reporting/admissionClient.js';
 import { newAdmissionIdentity } from '../reporting/admissionClient.js';
-import type { HttpClient } from '../reporting/httpClient.js';
+import type { HttpClient, HttpOutcome } from '../reporting/httpClient.js';
 import type { JobEnvelope } from '../reporting/envelope.js';
-import { knownValuesOf, validateEnvelope } from '../reporting/envelope.js';
 import type { ReportBounds } from '../reporting/bounds.js';
-import { ackRequestsCancel, createReportClient } from '../reporting/reportClient.js';
+import { ackRequestsCancel, validSecretControl, createReportClient } from '../reporting/reportClient.js';
 import { createRunSnapshot } from '../reporting/snapshot.js';
+import {frozenSecretConsumers} from '../run/secretUse.js';
 import type { EvidenceState, RunOutcome, RunSnapshot } from '../reporting/snapshot.js';
 import { createRunReporter } from '../reporting/reportingStepReporter.js';
 import type {
   BrowserLauncher,
   BrowserSession,
+  SessionRecording,
   ScratchStore,
   SessionKillOutcome,
   SessionKillReason,
-  SessionOrigin,
   SessionRunResult,
 } from './adapters.js';
 import type { CapacityPool } from './capacity.js';
@@ -131,11 +115,9 @@ export interface RunDecision {
   readonly status: 202 | 400 | 409 | 429 | 503;
   readonly code: string;
   readonly retryAfterSeconds?: number;
-  /** Key names and codes only; never a job value (AC-20). */
-  readonly detail?: readonly { readonly code: string; readonly field: string }[];
 }
 
-/** The answer to `DELETE /v1/runs/{id}` (ADR-002 §29). */
+/** The answer to `DELETE /v2/runs/{id}` (ADR-002 §29). */
 export interface CancelDecision {
   readonly status: 202 | 404 | 409;
   readonly code: 'CANCELLING' | 'RUN_NOT_FOUND' | 'RUN_FINISHED';
@@ -155,68 +137,100 @@ export const FINISHED_RUNS_REMEMBERED = 256;
 export const CONTROL_POLL_INTERVAL_MS = 2_000;
 
 /**
+ * How far before a secret-bearing control window closes the runner acts on it. Timers only ever
+ * fire late, so a stop scheduled exactly at the window end lands after it; acting this much earlier
+ * keeps the stop inside the bound. It never extends a window.
+ */
+export const CONTROL_WINDOW_MARGIN_MS = 25;
+
+/**
  * What a step the cancel interrupted says about itself (Studio v1 decision D1).
  *
- * Fixed and value-free: it names no step text, no URL, no locator and no Playwright error. Measured
- * before D1 on a real Chromium, the interrupted step was reported `FAIL` with whatever Playwright
- * said when its context closed underneath it — `page.goto: net::ERR_ABORTED at <the URL>` for a
- * navigation, and `expected the locator to be visible within 120000ms` for an assertion. The first
- * echoes a page address into the report; the second is an assertion verdict the run never reached.
+ * Fixed and value-free: it names no step text, no URL, no locator and no Playwright error. It is
+ * written on the `FINAL` only for a step that started and was never reported finished because the
+ * child was killed before it could say anything about it (the cancel's grace ran out).
  */
 export const STOPPED_STEP_MESSAGE = 'The run was stopped before this step finished.';
 
 /**
- * The step reporter a cancel cannot turn into a verdict (Studio v1 decision D1, ADR-002 §29.2).
+ * The step reporter that remembers which steps started and have not finished (ADR-002 §29.2).
  *
- * Once the run is being stopped **for a cancel**, the step in flight fails for the stop's reason,
- * not its own: the child closes the context and the pending Playwright call rejects. So a `FAIL`
- * that arrives after the cancel's stop was ordered is reported `SKIPPED` with
- * {@link STOPPED_STEP_MESSAGE}, keeping the timings it has — it did start, and the recording covers
- * that start. Steps that never started are untouched: the executor already reports them `SKIPPED`
- * with null timings and no message, and a step nobody reported stays absent (the API fills it).
+ * `open()` lists them for the cancel's kill path, where the child was signalled before it reported
+ * the step it was in. Every event is forwarded unchanged: the observed child reports the step a
+ * stop interrupted itself, with its own closed error code, and that report is never rewritten here.
  *
- * `open()` lists the steps that started and never finished, for the path on which the child was
- * killed before it could say anything about the step (the grace ran out).
- *
- * Scoped to `cancel` on purpose: a deadline or a drain kill is a different condition with its own
- * rules (§18.1 has the API name a `TIMEOUT` step still `RUNNING`), and D1 does not decide those.
+ * Scoped to `cancel` by its caller: a deadline or a drain kill is a different condition with its
+ * own rules (§18.1 has the API name a `TIMEOUT` step still `RUNNING`).
  */
-function stopAwareReporter(
+function openStepTracker(
   reporter: StepReporter,
-  stoppedForCancel: () => boolean,
-): StepReporter & { open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] } {
+): StepReporter & {
+  open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[];
+  interrupted(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[];
+} {
   const open = new Map<number, number>();
+  // Steps the child itself ended for the stop's reason (`FAIL` / `CANCELLED`, its closed code). Remembered only so that
+  // a self-stop the API never recorded can say what the kill path says (R10c); the event itself is forwarded unchanged.
+  const stoppedByChild = new Map<number, number>();
   return {
     stepStarted(event): void {
       open.set(event.stepIndex, event.startedAtMs);
       reporter.stepStarted(event);
     },
-    stepFinished(event: StepFinishedEvent): void {
+    stepFinished(event): void {
+      const startedAtMs = open.get(event.stepIndex);
       open.delete(event.stepIndex);
-      reporter.stepFinished(
-        event.status === 'FAIL' && stoppedForCancel()
-          ? { ...event, status: 'SKIPPED', failure: STOPPED_STEP_MESSAGE }
-          : event,
-      );
+      if (event.status === 'FAIL' && event.failure === RUNNER_ERROR_CODES.CANCELLED && startedAtMs !== undefined) stoppedByChild.set(event.stepIndex, startedAtMs);
+      reporter.stepFinished(event);
     },
     open(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] {
       return [...open].map(([stepIndex, startedAtMs]) => ({ stepIndex, startedAtMs }));
     },
+    interrupted(): readonly { readonly stepIndex: number; readonly startedAtMs: number }[] {
+      return [...stoppedByChild].map(([stepIndex, startedAtMs]) => ({ stepIndex, startedAtMs }));
+    },
   };
+}
+
+/**
+ * Who asked for a stop. `control-window` is the secret-bearing fail-closed self-stop (the control
+ * read missed its window or was not a valid secret control body); every other source is backed by a
+ * fact the API recorded (012A ruling R8.1).
+ */
+type StopSource = 'delete' | 'progress-ack' | 'control' | 'control-window';
+
+/**
+ * Which branch of the secret-bearing control tick ended the run on its own (STUDIO-OBS-009 AC-11 i, R10-OBS-2).
+ *
+ * A closed label and two integers, nothing else: no value, no URL, no text. `latenessMs` is how long after its window
+ * opened the tick began; `durationMs` is how long the tick had been running when it decided.
+ */
+export type ControlWindowBranch = 'noRequestBudget' | 'noTimerBudget' | 'windowPassed' | 'invalidControlBody';
+interface ControlWindowAttribution {
+  readonly branch: ControlWindowBranch;
+  readonly latenessMs: number;
+  readonly durationMs: number;
 }
 
 /** One admitted run's cancel handle. Registered at admission, dropped when its outcome is known. */
 interface RunControl {
+  /** A stop was ordered, for any reason. The first stop wins; a second is never ordered. */
   cancelled: boolean;
+  /**
+   * The stop is backed by a fact the API recorded: the `DELETE` relay, or a progress or control
+   * acknowledgement carrying `cancelRequested` or `revoked` (012A ruling R8.1). Only this makes a
+   * pre-Ready stop the runner's `CANCELLED`; a control-window loss the runner decided alone is not
+   * a cancel anyone requested and is reported as a run fault with the launcher's fixed reason.
+   */
+  recorded: boolean;
   /** Present while a started session can be stopped; the same `endRun` the deadline uses. */
   end: ((reason: SessionKillReason) => void) | null;
 }
 
-export interface ObservedRunnerSupport { readonly build:BuildIdentity; readonly policies:readonly TrustedPolicy[]; readonly accounts:ObservedAccountRegistry; readonly validationEnabled:boolean; readonly replayEnabled:boolean; }
+export interface ObservedRunnerSupport { readonly build:BuildIdentity; readonly policies:readonly TrustedPolicy[]; readonly validationEnabled:boolean; readonly replayEnabled:boolean; }
 export interface RunCoordinatorOptions {
   readonly observed?: ObservedRunnerSupport;
   readonly pool: CapacityPool;
-  readonly admission: AdmissionClient;
   readonly launcher: BrowserLauncher;
   readonly scratch: ScratchStore;
   readonly http: HttpClient;
@@ -273,29 +287,17 @@ export interface RunCoordinatorOptions {
    * test that drives the runtime deadline exactly is not also driving the poll, and the reverse.
    */
   readonly controlTimers?: DeadlineTimers | undefined;
-  /**
-   * How the run origin is taken when the session does **not** run in its own process.
-   *
-   * A real session takes it in the child, at recording-context readiness, and hands back the
-   * readings (AC-10). An in-process session — 10.6's fakes — has no such moment to observe, so
-   * the coordinator takes the origin at the instant the launch resolves, which is that session's
-   * browser start. Injected so AC-11.3 can substitute a **process-origin** clock and watch the
-   * scale assertion go red; nothing on the production path substitutes anything.
-   */
-  readonly takeOrigin?: (() => RunOrigin) | undefined;
-  readonly originSource?: OriginSource | undefined;
 }
 
 export interface RunCoordinator {
   validateObserved?(body:unknown): ValidationVerdict;
-  submitObserved?(body:unknown): Promise<RunDecision>;
   /**
-   * The whole of `POST /v1/runs` after the body has been read and parsed.
+   * The whole of `POST /v2/runs` after the body has been read and parsed.
    *
    * Synchronous up to and including the slot acquire: there is no `await` between observing free
    * capacity and holding the slot, which is the falsifiable half of AC-10.
    */
-  submit(body: unknown): Promise<RunDecision>;
+  submitObserved?(body:unknown): Promise<RunDecision>;
   /** Resolves when every admitted run has delivered its terminal report or run out of time. */
   awaitInFlight(timeoutMs: number): Promise<boolean>;
   /**
@@ -306,59 +308,16 @@ export interface RunCoordinator {
    * a browser is exactly that. A run ended this way still delivers a terminal report, because the
    * kill makes its awaited result resolve rather than abandoning it.
    *
-   * Returns how many runs were actually ended. A run still inside `launcher.launch` has no session
-   * to stop and is not counted: it holds no browser the drain could orphan, and it is already
-   * bounded by `launchTimeoutMs`.
+   * Returns how many runs were actually ended. A run still inside `launcher.launch` is counted too:
+   * its launch is aborted on the same path, so no browser it was starting can outlive the drain.
    */
   terminateInFlight(): number;
   /**
-   * `DELETE /v1/runs/{id}` (Studio v1 WP4, ADR-002 §29). Synchronous: it records the request and
+   * `DELETE /v2/runs/{id}` (Studio v1 WP4, ADR-002 §29). Synchronous: it records the request and
    * orders the stop if a session exists; the run's own path delivers the `FINAL` report.
    */
   cancel(executionId: string): CancelDecision;
   readonly inFlight: number;
-}
-
-/** Diagnostics leaving the process are bounded and carry no artifact text (AC-5, AC-20). */
-function boundedCodes(diagnostics: readonly Diagnostic[]): readonly { code: string; field: string }[] {
-  return diagnostics
-    .slice(0, 10)
-    .map((diagnostic) => ({ code: diagnostic.code, field: 'artifact' }));
-}
-
-/**
- * Value resolver over the job's ephemeral values.
- *
- * `wipe` drops every reference on the way out. JavaScript cannot zero a string, so this is the
- * achievable and testable property: after the run, nothing in the process holds a path to the
- * values, and nothing ever wrote them to scratch or to a queued report body (AC-21).
- */
-interface WipeableResolver extends ValueResolver {
-  wipe(): void;
-}
-
-function createJobResolver(job: JobEnvelope): WipeableResolver {
-  const variables = new Map(Object.entries(job.resolvedVars));
-  const secrets = new Map(Object.entries(job.resolvedSecrets));
-  return {
-    variable(name: string): string {
-      const value = variables.get(name);
-      if (value === undefined) throw new Error(`Variable "${name}" was not resolved for this run.`);
-      return value;
-    },
-    secret(id: string): string {
-      const value = secrets.get(id);
-      if (value === undefined) throw new Error(`Secret "${id}" was not resolved for this run.`);
-      return value;
-    },
-    knownValues(): readonly string[] {
-      return [...variables.values(), ...secrets.values()];
-    },
-    wipe(): void {
-      variables.clear();
-      secrets.clear();
-    },
-  };
 }
 
 /**
@@ -377,12 +336,6 @@ class RunFailure extends Error {
   }
 }
 
-/** Launch failures the launcher classified; anything else is the generic launch code (AC-6a). */
-function launchFailureKind(error: unknown): RunFailureKind {
-  const kind = (error as { failureKind?: unknown }).failureKind;
-  return kind === 'sandbox-unavailable' ? 'sandbox-unavailable' : 'browser-launch';
-}
-
 /** Narrows the session's string back to a kind; anything unrecognised is a run fault. */
 function readFailureKind(value: string | null): RunFailureKind | null {
   if (value === null) return null;
@@ -391,50 +344,8 @@ function readFailureKind(value: string | null): RunFailureKind | null {
     : 'run-fault';
 }
 
-/**
- * The versions the image **recorded** when it was built (`runtime-versions.json`).
- *
- * This is the provenance side of the §4.6 comparison the runner can make without a database: the
- * job envelope is closed and carries no provenance, so what is checked here is that the runtime
- * this process is running has not drifted from the runtime the image recorded. A stale `dist/`, a
- * half-applied upgrade or a mixed image fails before a browser starts rather than reinterpreting
- * the same source under a different language policy (AC-2, §4.6).
- */
-function recordedProvenance(recorded: Readonly<Record<string, unknown>>): ArtifactProvenance {
-  const read = (field: string): string =>
-    typeof recorded[field] === 'string' ? recorded[field] : '';
-  return {
-    validatorSchema: read('validatorSchema'),
-    syntaxReference: read('syntaxReference'),
-    executor: read('executor'),
-    playwright: read('playwright'),
-  };
-}
-
-/**
- * What this build actually **is**, from the compiled-in constants.
- *
- * The Playwright pin is carried across from the record rather than re-derived, because it is the
- * one field the runner cannot observe from its own source: `npm run check:pins` compares the
- * declared, locked, image-tag and recorded copies and fails the build on any disagreement
- * (ADR-001 §4.2). Re-checking it here would either repeat that comparison with less information
- * or invent a second source of truth for it.
- */
-function runningVersions(provenance: ArtifactProvenance): RuntimeVersions {
-  return { ...RUNNER_VERSIONS, playwright: provenance.playwright };
-}
-
-/** Turns the run-scoped origin into the session shape the reporter and executor consume. */
-function asSessionOrigin(origin: RunOrigin): SessionOrigin {
-  return {
-    browserStartedAt: origin.browserStartedAt,
-    startedAtMs: origin.startedAtMs,
-    clock: origin.clock,
-  };
-}
-
 export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordinator {
-  const { pool, admission, launcher, scratch, logger } = options;
+  const { pool, launcher, scratch, logger } = options;
   const inFlight = new Set<Promise<void>>();
   /** One entry per run that has a killable session; removed when the run leaves (AC-15). */
   const terminators = new Set<(reason: SessionKillReason) => void>();
@@ -453,11 +364,19 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     }
   }
 
-  /** Records a cancel and orders the stop if a session exists. Idempotent; one path for all signals. */
-  function requestStop(executionId: string, control: RunControl, source: string): void {
+  /**
+   * Records a stop and orders it if a session exists. Idempotent; one path for all signals.
+   *
+   * `recorded` is noted before the idempotent return, so a recorded cancel arriving after the
+   * runner already stopped itself still upgrades the fact while the pre-Ready failure kind is open
+   * (012A ruling R8.1). It never orders a second stop.
+   */
+  function requestStop(executionId: string, control: RunControl, source: StopSource, attribution?: ControlWindowAttribution): void {
+    const recorded = source !== 'control-window';
+    if (recorded) control.recorded = true;
     if (control.cancelled) return;
     control.cancelled = true;
-    logger.info('run.cancel_requested', { executionId, source });
+    logger.info('run.cancel_requested', { executionId, source, recorded: control.recorded, ...(attribution ?? {}) });
     control.end?.('cancel');
   }
 
@@ -473,29 +392,55 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
    * §29). One request at a time: the next read is scheduled only after the previous one settled.
    * A failed read changes nothing and the next one tries again; the API's reaper is the backstop.
    */
-  function startControlPoll(executionId: string, control: RunControl): () => void {
+  function startControlPoll(executionId: string, control: RunControl, secretBearing: boolean): () => void {
     const timers = options.controlTimers ?? SYSTEM_DEADLINE_TIMERS;
     // An object, not a `let`: the flag is flipped by the returned closure while a read is awaited.
     const poll = { stopped: false };
     const isStopped = (): boolean => poll.stopped;
     let timer: unknown = null;
+    let nextPoll = options.now() + (secretBearing ? 1000 : CONTROL_POLL_INTERVAL_MS);
     const schedule = (): void => {
       if (isStopped()) return;
       timer = timers.set(() => {
         timer = null;
         void tick();
-      }, CONTROL_POLL_INTERVAL_MS);
+      }, secretBearing ? Math.max(0, nextPoll - options.now()) : CONTROL_POLL_INTERVAL_MS);
     };
     const tick = async (): Promise<void> => {
       if (isStopped() || control.cancelled) return;
-      const outcome = await options.http.send({
+      let deadlineTimer: unknown = null;
+      const tickStartedAt = options.now();
+      const windowStart = nextPoll;
+      // Integers only (R10-OBS-2): never a fraction, never negative, never a non-number.
+      const whole = (value: number): number => (Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0);
+      const selfStop = (branch: ControlWindowBranch): void => {
+        requestStop(executionId, control, 'control-window', { branch, latenessMs: whole(tickStartedAt - windowStart), durationMs: whole(options.now() - tickStartedAt) });
+      };
+      const windowEnd = secretBearing ? nextPoll + 1000 - CONTROL_WINDOW_MARGIN_MS : null;
+      const requestBudget = windowEnd === null ? options.reportTimeoutMs : Math.min(1000, windowEnd - options.now());
+      if (secretBearing && !(requestBudget > 0)) { selfStop('noRequestBudget'); return; }
+      const sent = options.http.send({
         url: controlUrl(executionId),
         method: 'GET',
         headers: { authorization: `Bearer ${options.callbackIdentityToken}` },
         body: '',
-        timeoutMs: options.reportTimeoutMs,
+        timeoutMs: requestBudget,
       });
+      const request = secretBearing ? sent.catch(() => ({kind: 'timeout' as const})) : sent;
+      const timerBudget = windowEnd === null ? null : Math.min(1000, windowEnd - options.now());
+      if (timerBudget !== null && !(timerBudget > 0)) { selfStop('noTimerBudget'); return; }
+      const outcome = await (timerBudget !== null ? Promise.race([request, new Promise<HttpOutcome>(resolve => { deadlineTimer = timers.set(() => { resolve({kind: 'timeout'}); }, timerBudget); })]) : request);
+      if (deadlineTimer !== null) timers.clear(deadlineTimer);
       if (isStopped()) return;
+      if (windowEnd !== null && options.now() >= windowEnd) {
+        // Too late to authorize anything, but a valid answer still says what the API recorded. A revocation or cancel it carries is a
+        // recorded fact (R10c, ruling A12: the R8 `recorded` upgrade covers revocation facts), so the run keeps outer CANCELLED.
+        if (outcome.kind === 'response' && outcome.status === 200 && validSecretControl(outcome.body, executionId) && ackRequestsCancel(outcome.body)) control.recorded = true;
+        selfStop('windowPassed');
+        return;
+      }
+      if (secretBearing && !(outcome.kind === 'response' && outcome.status === 200 && validSecretControl(outcome.body, executionId))) { selfStop('invalidControlBody'); return; }
+      nextPoll += secretBearing ? 1000 : CONTROL_POLL_INTERVAL_MS;
       if (outcome.kind === 'response' && outcome.status === 200 && ackRequestsCancel(outcome.body)) {
         requestStop(executionId, control, 'control');
         return;
@@ -519,11 +464,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
 
   async function execute(
     job: JobEnvelope,
-    steps: readonly ExecutableStep[],
     admissionId: string,
     admittedAtMs: number,
     control: RunControl,
-    observed?: {job:ObservedJob;admission:AdmissionReceipt;policy:TrustedPolicy},
+    observed: {job:ObservedJob;admission:AdmissionReceipt;policy:TrustedPolicy},
   ): Promise<void> {
     const identity = {
       executionId: job.executionId,
@@ -531,13 +475,12 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       admissionId,
       runnerInstanceId: options.runnerInstanceId,
     };
-    const resolver = createJobResolver(job);
     // Observed producers are closed/data-free before serialization; raw child output is discarded.
     // Scrubbing arbitrary input substrings here would corrupt protocol keys/statuses such as PASS.
-    const redactor = createRedactor(observed ? [] : knownValuesOf(job));
-    const reportRuntimeVersions = observed ? {...options.runtimeVersions,observedProfile:JSON.stringify(observed.job.binding.requiredProfile),observedBuild:JSON.stringify(observed.job.binding.requiredBuild)} : options.runtimeVersions;
+    const redactor = createRedactor([]);
+    const reportRuntimeVersions = {...options.runtimeVersions,observedProfile:JSON.stringify(observed.job.binding.requiredProfile),observedBuild:JSON.stringify(observed.job.binding.requiredBuild)};
     const snapshot = createRunSnapshot({
-      ...(observed ? {allowUnstartedSkippedSteps:true} : {}),
+      allowUnstartedSkippedSteps:true,observedSecretConsumers:frozenSecretConsumers(observed.job.artifact.inputRecipes,observed.job.artifact.steps),
       identity,
       bounds: options.bounds,
       runtimeVersions: reportRuntimeVersions,
@@ -570,7 +513,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
      * and a closure assignment is invisible to the type-checker's narrowing at the read below.
      */
     const stopped: { reason: SessionKillReason | null } = { reason: null };
-    const stepReporter = stopAwareReporter(reporter, () => !observed && stopped.reason === 'cancel');
+    const stepReporter = openStepTracker(reporter);
 
     /**
      * The child's stdout and stderr, redacted by **this run's** redactor (AC-8).
@@ -622,6 +565,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     let browserReadyAtMs: number | null = null;
     /** The recording the session left in scratch, or null. Read in the terminal path (AC-3). */
     let recordingPath: string | null = null;
+    let verifiedFile:SessionRecording['verifiedFile'];
     /** ISO instant of the browser start, for the manifest's timings (§5.3). */
     let browserStartedAtIso: string | null = null;
     let deadline: ReturnType<typeof createRuntimeDeadline> | null = null;
@@ -637,41 +581,17 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
 
     // The pull half of cancel starts with the run and ends, in the `finally` below, when its
     // outcome is known (ADR-002 §29).
-    const stopControlPoll = startControlPoll(job.executionId, control);
+    const stopControlPoll = startControlPoll(job.executionId, control, job.references.secrets.length > 0);
 
     try {
       // ── Before any browser process exists (AC-2). ───────────────────────────────────────────
       //
       // Revalidation is deliberately here rather than in the child: "no Chromium process is
       // created" is only true if the refusal happens before the spawn seam is touched, and the
-      // child cannot refuse a spawn that has already happened. It is also what keeps AC-3 easy —
-      // the artifact source never leaves this process at all.
-      if(observed){
-        const support=options.observed;demand(support?.replayEnabled,'PROFILE_MISMATCH');
-        // Grant freshness was established at admission; no renewal/regrant is made after it.
-        validateObservedJob(observed.job,support.build,observed.policy,Date.parse(observed.admission.admittedAt));
-      }else{
-      const revalidation = validateArtifact(
-        job.artifact,
-        job.source,
-        job.references,
-        { defaultTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima) },
-        job.referencePolicy,
-      );
-      if (!revalidation.ok) {
-        throw new RunFailure(
-          'artifact-revalidation',
-          'The confirmed artifact did not revalidate under this runtime\'s default-deny policy.',
-        );
-      }
-
-      const recorded = recordedProvenance(options.runtimeVersions);
-      const compatibility = isCompatible(recorded, runningVersions(recorded));
-      if (!compatibility.ok) {
-        throw new RunFailure('runtime-incompatible', compatibility.reason ?? 'Runtime incompatible.');
-      }
-
-      }
+      // child cannot refuse a spawn that has already happened.
+      const support=options.observed;demand(support?.replayEnabled,'PROFILE_MISMATCH');
+      // Grant freshness was established at admission; no renewal/regrant is made after it.
+      validateObservedJob(observed.job,support.build,observed.policy,Date.parse(observed.admission.admittedAt));
       // ── The start deadline is a refusal, not a race (AC-4, §5.2). ──────────────────────────
       const elapsedSinceAdmission = options.now() - admittedAtMs;
       if (elapsedSinceAdmission >= job.deadlines.admittedStartMs) {
@@ -688,7 +608,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       let session: BrowserSession;
       const launchAbort=new AbortController();
       const stopLaunch=():void=>{launchAbort.abort();};
-      if(observed){control.end=stopLaunch;terminators.add(stopLaunch);}
+      control.end=stopLaunch;terminators.add(stopLaunch);
       try {
         session = await launcher.launch({
           browser: job.configuration.browser,
@@ -698,26 +618,26 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
           stepTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima),
           scratchPath: runScratch.path,
           diagnostics,
-          ...(observed ? {observed,signal:launchAbort.signal} : {}),
+          observed,
+          signal: launchAbort.signal,
         });
       } catch (error) {
-        if(observed&&error instanceof ObservedPreReadyFailure){
-          recordingPath=error.recording.path;evidence={...evidenceKeys,state:error.recording.state,partial:error.recording.partial};
+        if(error instanceof ObservedPreReadyFailure){
+          recordingPath=error.recording.path;verifiedFile=error.recording.verifiedFile;evidence={...evidenceKeys,state:error.recording.state,partial:error.recording.partial};
           // ADMITTED ownership permits FINAL, but not PROGRESS before a real STARTED.
           // Record unexecuted coordinates locally; sendFinal delivers the cumulative snapshot.
           for(const step of observed.job.artifact.steps)snapshot.stepFinished({stepIndex:step.stepIndex,status:'SKIPPED',startedAtMs:null,finishedAtMs:null,durationMs:null,failure:null});
-          throw new RunFailure(control.cancelled?'cancelled':'run-fault',error.code);
+          // Outer CANCELLED only for a stop the API recorded; a self-stop is a run fault (R8.1).
+          throw new RunFailure(control.cancelled&&control.recorded?'cancelled':'run-fault',error.code);
         }
         throw new RunFailure(
-          launchFailureKind(error),
+          'browser-launch',
           error instanceof Error ? error.message : 'The browser did not start.',
         );
-      } finally {if(observed){terminators.delete(stopLaunch);if(control.end===stopLaunch)control.end=null;}}
+      } finally {terminators.delete(stopLaunch);if(control.end===stopLaunch)control.end=null;}
 
       // ── The origin: one instant, observed twice, at the browser start (AC-10, AC-11.2). ────
-      if(observed&&!session.run){await session.close();throw new RunFailure('run-fault','OBSERVED_CHILD_REQUIRED');}
-      const origin: SessionOrigin =
-        session.run?.origin ?? asSessionOrigin(options.takeOrigin?.() ?? takeRunOrigin(options.originSource));
+      const origin = session.run.origin;
       // Only now. Not on admission, not when the launch call began (AC-14a, AC-20).
       reporter.browserStarted(origin);
       browserStartedAtIso = origin.browserStartedAt.toISOString();
@@ -746,50 +666,48 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       });
 
       const runSession = session.run;
-      if (runSession !== undefined) {
-        /**
-         * One path for both reasons a parent ends a run it started (AC-3, AC-15).
-         *
-         * Idempotent: the drain can arrive while the deadline is already killing, and the second
-         * caller must not order a second stop or reclassify the first one's reason.
-         */
-        const endRun = (reason: SessionKillReason): void => {
-          if (kills.length > 0) return;
-          stopped.reason = reason;
-          // The entry is written before the signal, so a report built from a snapshot taken
-          // mid-kill already names the cause (AC-3, ADR-002 §17.7 item 1).
-          snapshot.appendLog({
-            // `null`, not `0` and not a computed elapsed time: the parent holds no reading on the
-            // run timeline, and `null` is what the contract provides for exactly this (ADR-002
-            // §INT-1, §11.2). A wall-derived number would be the second origin §11.5 forbids.
-            // Bounded by `maxLogEntryLength` like every other entry (AC-10).
-            atMs: null,
-            level: 'error',
-            message:
-              reason === 'total-runtime'
-                ? `The total browser runtime deadline of ${String(runtimeCapMs)}ms was reached; ` +
-                  'the browser process tree is being stopped.'
-                : reason === 'cancel'
-                  ? 'The run was cancelled; the browser process tree is being stopped.'
-                  : 'The runner drained while this run was still in flight; the browser process ' +
-                    'tree is being stopped.',
-          });
-          kills.push(runSession.kill(reason));
-        };
-        terminate = endRun;
-        terminators.add(endRun);
-        control.end = endRun;
-
-        deadline = createRuntimeDeadline({
-          capMs: runtimeCapMs,
-          now: options.now,
-          timers: options.timers ?? SYSTEM_DEADLINE_TIMERS,
-          onExpire: () => {
-            endRun('total-runtime');
-          },
+      /**
+       * One path for both reasons a parent ends a run it started (AC-3, AC-15).
+       *
+       * Idempotent: the drain can arrive while the deadline is already killing, and the second
+       * caller must not order a second stop or reclassify the first one's reason.
+       */
+      const endRun = (reason: SessionKillReason): void => {
+        if (kills.length > 0) return;
+        stopped.reason = reason;
+        // The entry is written before the signal, so a report built from a snapshot taken
+        // mid-kill already names the cause (AC-3, ADR-002 §17.7 item 1).
+        snapshot.appendLog({
+          // `null`, not `0` and not a computed elapsed time: the parent holds no reading on the
+          // run timeline, and `null` is what the contract provides for exactly this (ADR-002
+          // §INT-1, §11.2). A wall-derived number would be the second origin §11.5 forbids.
+          // Bounded by `maxLogEntryLength` like every other entry (AC-10).
+          atMs: null,
+          level: 'error',
+          message:
+            reason === 'total-runtime'
+              ? `The total browser runtime deadline of ${String(runtimeCapMs)}ms was reached; ` +
+                'the browser process tree is being stopped.'
+              : reason === 'cancel'
+                ? 'The run was cancelled; the browser process tree is being stopped.'
+                : 'The runner drained while this run was still in flight; the browser process ' +
+                  'tree is being stopped.',
         });
-        deadline.arm();
-      }
+        kills.push(runSession.kill(reason));
+      };
+      terminate = endRun;
+      terminators.add(endRun);
+      control.end = endRun;
+
+      deadline = createRuntimeDeadline({
+        capMs: runtimeCapMs,
+        now: options.now,
+        timers: options.timers ?? SYSTEM_DEADLINE_TIMERS,
+        onExpire: () => {
+          endRun('total-runtime');
+        },
+      });
+      deadline.arm();
 
       // A cancel that arrived while the browser was launching: stop it before a step is sent. The
       // session is closed by the `finally` below exactly as on every other path.
@@ -803,17 +721,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
 
       let result: SessionRunResult;
       try {
-        result = runSession
-          ? await runSession.execute({
-              steps,
-              variables: job.resolvedVars,
-              secrets: job.resolvedSecrets,
-              secretOrigins: job.secretOrigins ?? {},
-              reporter: stepReporter,
-            })
-          : await executeInProcess(session, steps, resolver, stepReporter, origin);
+        result = await runSession.execute({ reporter: stepReporter });
       } finally {
-        deadline?.cancel();
+        deadline.cancel();
         await session.close();
       }
 
@@ -832,6 +742,10 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
                 result.failureMessage === null ? null : redactor.redact(result.failureMessage),
             };
 
+      outcome = { ...outcome, secretUse: result.secretUse ?? {} };
+      if (result.failureMessage === 'LOGIN_REQUIRED' && result.detail) outcome = { ...outcome, result: 'FAILED', errorCode: OBSERVED_RUNNER_ERROR_CODES.LOGIN_REQUIRED, errorMessage: null, detail: result.detail };
+      else if (result.failureMessage === 'REFERENCE_MISMATCH') outcome = { ...outcome, result: 'ERROR', errorCode: OBSERVED_RUNNER_ERROR_CODES.REFERENCE_MISMATCH, errorMessage: null };
+      else if (result.failureMessage === 'PASSWORD_CONTROL_READ_REFUSED') outcome = { ...outcome, result: 'FAILED', errorCode: OBSERVED_RUNNER_ERROR_CODES.PASSWORD_CONTROL_READ_REFUSED, errorMessage: null };
       // Evidence and outcome are settled independently, in that order, and neither reads the
       // other (§6.1, AC-8, ADR-002 §17.4). `partial` comes from the session's observation of how
       // the **recorder** ended — never from `outcome`, `errorCode` or any step status. There is
@@ -842,6 +756,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         partial: result.recording.partial,
       };
       recordingPath = result.recording.path;
+      verifiedFile=result.recording.verifiedFile;
       if (result.recording.error !== null) {
         snapshot.appendLog({
           atMs: null,
@@ -879,6 +794,23 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // Progress deliveries settle before the terminal report is built, so FINAL always carries
       // the highest sequence number of the attempt.
       await reporter.settled();
+
+      // R10c (STUDIO-OBS-009 AC-11 f-h, T0 ruling A12; 012A R8-OBS-1). After Ready, a stop the API never recorded (the
+      // secret control window the runner decided alone, source `control-window`) is a run fault, not a cancel anyone asked
+      // for: outer RUN_ERROR with the closed reason CANCELLED, exactly as R8.1 does before Ready. It is decided HERE, after
+      // the progress deliveries have settled, because an acknowledgement is where a revocation or cancel the API did record
+      // reaches a run whose control read was lost, and that fact (`control.recorded`) keeps the outer CANCELLED the API maps
+      // to AUTHORIZATION_REVOKED. No new vocabulary: both values exist; no window, deadline, TTL or margin moves.
+      const selfStopped = outcome.errorCode === RUNNER_ERROR_CODES.CANCELLED && control.cancelled && !control.recorded && browserStartedAtIso !== null;
+      if (selfStopped) {
+        outcome = { ...outcome, result: 'ERROR', errorCode: RUNNER_ERROR_CODES.RUN_ERROR, errorMessage: RUNNER_ERROR_CODES.CANCELLED };
+        // The step the stop interrupted says what the kill path already says (below): stopped, not judged. A child that
+        // honoured the stop reported it `FAIL` with its own closed code; that code is not a verdict on the step either.
+        for (const step of stepReporter.interrupted()) {
+          snapshot.stepFinished({ stepIndex: step.stepIndex, status: 'SKIPPED', startedAtMs: step.startedAtMs, finishedAtMs: null, durationMs: null, failure: STOPPED_STEP_MESSAGE });
+          snapshot.appendLog({ atMs: null, level: 'info', message: `step ${String(step.stepIndex)} SKIPPED: ${STOPPED_STEP_MESSAGE}` });
+        }
+      }
 
       // D1, the kill half: a cancel whose grace ran out left the child no chance to report the
       // step it was in, so the step is still `RUNNING`. It was stopped, not judged — say so on the
@@ -923,6 +855,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
         outcome,
         evidence,
         recordingPath,
+        ...(verifiedFile?{verifiedFile}:{}),
         browserStartedAtIso,
         redactor,
         logger: childLogger,
@@ -943,8 +876,9 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       // on every attempt, and releasing it early would send an unredacted retry. It dies with
       // this closure when the run returns, which is the same instant the report client does.
       await runScratch.clear();
-      resolver.wipe();
-      if(observed){for(const input of observed.job.inputs)(input as {value:string}).value='';(observed.job.accountHandle as {opaqueHandle:string}).opaqueHandle='';}
+      // The resolved values live only in the admitted job (the envelope projection shares its
+      // `secrets` object), so blanking them there leaves nothing in the process holding them.
+      for(const input of observed.job.inputs)(input as {value:string}).value='';for(const key of Object.keys(observed.job.secrets))(observed.job.secrets as Record<string,string>)[key]='';
       // The wipe is observable, so AC-3's asserted sequence is read off captured runtime output
       // rather than off the order of statements in this file (AC-23).
       childLogger.info('run.values_wiped', {
@@ -979,6 +913,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     outcome: RunOutcome;
     evidence: EvidenceState;
     recordingPath: string | null;
+    verifiedFile?:SessionRecording['verifiedFile'];
     browserStartedAtIso: string | null;
     redactor: ReturnType<typeof createRedactor>;
     logger: Logger;
@@ -999,6 +934,7 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       const uploaded = await uploadRecording(ports, window, {
         videoKey: input.job.videoKey,
         path: input.recordingPath,
+        ...(input.verifiedFile?{verifiedFile:input.verifiedFile}:{}),
         state: input.evidence.state,
         partial: input.evidence.partial,
       });
@@ -1063,44 +999,6 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
     return settled;
   }
 
-  /**
-   * The in-process path: a session that exposes an adapter but does not run the job itself.
-   *
-   * This is 10.6's fake launcher, and it is the reason the coordinator takes an origin of its own
-   * — so that **no** path can reach `executeSteps` without an explicitly chosen clock (AC-11.1).
-   */
-  async function executeInProcess(
-    session: BrowserSession,
-    steps: readonly ExecutableStep[],
-    resolver: ValueResolver,
-    reporter: StepReporter,
-    origin: SessionOrigin,
-  ): Promise<SessionRunResult> {
-    if (origin.clock === null) {
-      throw new Error('An in-process session must carry the run clock it was zeroed with.');
-    }
-    const run = await executeSteps({
-      steps,
-      adapter: session.adapter,
-      reporter,
-      resolver,
-      clock: origin.clock,
-    });
-    return {
-      ok: run.ok,
-      failureKind: run.ok
-        ? null
-        : run.refusal === null
-          ? 'step'
-          : failureKindForRefusal(run.refusal),
-      failureMessage: null,
-      // No browser, no recorder: nothing was attempted, so nothing failed (AC-9), and a
-      // recording that does not exist is not a partial one (ADR-002 §17.3).
-      recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE', partial: false },
-      observedHosts: [],
-    };
-  }
-
   return {
     get inFlight(): number {
       return inFlight.size;
@@ -1152,115 +1050,21 @@ export function createRunCoordinator(options: RunCoordinatorOptions): RunCoordin
       try{
         observedJob=validateObserved<ObservedJob>('replay-job',body,4194304);
         const selected=support.policies.find(p=>p.policyId===observedJob.binding.scope.policyId&&p.policyVersion===observedJob.binding.scope.policyVersion);demand(selected,'POLICY_REFUSED');policy=validateTrustedPolicy(selected,observedJob.binding.scope);
-        validateObservedJob(observedJob,support.build,policy);demand(observedJob.runtime.stepTimeoutMs<=options.maxima.stepTimeoutMs,'LIMIT_EXCEEDED');accountProvider(support.accounts,observedJob.accountHandle);
+        validateObservedJob(observedJob,support.build,policy);demand(observedJob.runtime.stepTimeoutMs<=options.maxima.stepTimeoutMs,'LIMIT_EXCEEDED');
         demand(/^[A-Za-z0-9_-]{1,20}$/u.test(observedJob.binding.csiId),'INVALID_CONTRACT');
-      }catch(error){const code=error instanceof ObservedRefusal?error.code:'INVALID_CONTRACT';return {status:['PROFILE_MISMATCH','AUTHORIZATION_EXPIRED','POLICY_REFUSED','ACCOUNT_UNAVAILABLE','REFERENCE_REFUSED'].includes(code)?409:400,code};}
+      }catch(error){const code=error instanceof ObservedRefusal?error.code:'INVALID_CONTRACT';return {status:['PROFILE_MISMATCH','AUTHORIZATION_EXPIRED','POLICY_REFUSED','REFERENCE_REFUSED'].includes(code)?409:400,code};}
       if(pool.draining)return {status:503,code:'RUNNER_DRAINING'};
       const slot=pool.tryAcquire();if(!slot)return {status:429,code:'CAPACITY_SATURATED',retryAfterSeconds:options.retryAfterSeconds};
       const b=observedJob.binding,identity=newAdmissionIdentity(options.runnerInstanceId);
-      const request:AdmissionRequest={schemaVersion:2,kind:'observed',executionId:b.executionId,startedAt:b.startedAt,attemptId:b.attemptId,runnerInstanceId:identity.runnerInstanceId,admissionId:identity.admissionId,revisionId:b.revisionId,revisionDigest:b.revisionDigest,artifactHash:b.artifactHash,configurationHash:b.configurationHash,learnedPlanHash:b.learnedPlanHash,referencePolicyHash:b.referencePolicyHash,publicationEvidenceHash:b.publicationEvidenceHash,scopeHash:b.scopeHash,currentPolicyHash:b.currentPolicyHash,grantId:b.replayGrant.grantId,accountGrantId:b.accountAuthorization.grantId,profile:b.requiredProfile,build:b.requiredBuild};
+      const request:AdmissionRequest={schemaVersion:3,kind:'observed',executionId:b.executionId,startedAt:b.startedAt,attemptId:b.attemptId,runnerInstanceId:identity.runnerInstanceId,admissionId:identity.admissionId,revisionId:b.revisionId,revisionDigest:b.revisionDigest,artifactHash:b.artifactHash,configurationHash:b.configurationHash,learnedPlanHash:b.learnedPlanHash,referencePolicyHash:b.referencePolicyHash,publicationEvidenceHash:b.publicationEvidenceHash,scopeHash:b.scopeHash,currentPolicyHash:b.currentPolicyHash,grantId:b.replayGrant.grantId,profile:b.requiredProfile,build:b.requiredBuild};
       let receipt:AdmissionReceipt;
       try{receipt=await admitObserved({http:options.http,baseUrl:options.callbackBaseUrl,identityToken:options.callbackIdentityToken,timeoutMs:options.reportTimeoutMs,logger},request);}catch{slot.release();return {status:503,code:'ADMISSION_NOT_ACKNOWLEDGED'};}
       const prefix=`studio/${b.csiId}/${b.testId}/${b.executionId}/${b.attemptId}`;
-      // Internal evidence metadata only. No legacy artifact/source validator sees this projection.
-      const job:JobEnvelope={executionId:b.executionId,attemptId:b.attemptId,revisionId:b.revisionId,artifactHash:b.artifactHash,artifact:null,source:[],configuration:observedJob.configuration,csi:b.csiId,references:{variables:[],secrets:[]},resolvedVars:{},resolvedSecrets:{},deadlines:{admittedStartMs:Math.max(0,Date.parse(receipt.startDeadlineAt)-Date.now()),totalRuntimeMs:observedJob.runtime.totalRuntimeMs},videoKey:prefix+'.webm',manifestKey:prefix+'.result.json'};
-      const control:RunControl={cancelled:false,end:null};controls.set(b.executionId,control);
-      const task=execute(job,[],identity.admissionId,options.now(),control,{job:observedJob,admission:receipt,policy}).catch(()=>{logger.error('observed.run.failed',{code:'INTERNAL_ERROR'});}).finally(()=>{slot.release();inFlight.delete(task);});inFlight.add(task);
+      // Internal evidence metadata only: no artifact source travels in this projection.
+      const job:JobEnvelope={executionId:b.executionId,attemptId:b.attemptId,revisionId:b.revisionId,artifactHash:b.artifactHash,configuration:observedJob.configuration,csi:b.csiId,references:{variables:[],secrets:Object.keys(observedJob.secrets)},resolvedSecrets:observedJob.secrets,deadlines:{admittedStartMs:Math.max(0,Date.parse(receipt.startDeadlineAt)-Date.now()),totalRuntimeMs:observedJob.runtime.totalRuntimeMs},videoKey:prefix+'.webm',manifestKey:prefix+'.result.json'};
+      const control:RunControl={cancelled:false,recorded:false,end:null};controls.set(b.executionId,control);
+      const task=execute(job,identity.admissionId,options.now(),control,{job:observedJob,admission:receipt,policy}).catch(()=>{logger.error('observed.run.failed',{code:'INTERNAL_ERROR'});}).finally(()=>{slot.release();inFlight.delete(task);});inFlight.add(task);
       return {status:202,code:'ADMITTED'};
-    },
-    async submit(body: unknown): Promise<RunDecision> {
-      // ── 1. Envelope. An invalid job consumes no capacity and reaches no API. ───────────────
-      const envelope = validateEnvelope(body);
-      if (!envelope.ok) {
-        return { status: 400, code: 'JOB_INVALID', detail: envelope.problems };
-      }
-      const job = envelope.job;
-
-      // ── 2. Artifact. Pure, browser-free, bounded; still before the slot. ──────────────────
-      const validation = validateArtifact(
-        job.artifact,
-        job.source,
-        job.references,
-        { defaultTimeoutMs: effectiveStepTimeoutMs(job.configuration.timeoutSeconds, options.maxima) },
-        job.referencePolicy,
-      );
-      if (!validation.ok) {
-        const all = [...validation.diagnostics, ...validation.steps.flatMap((step) => step.diagnostics)];
-        return { status: 400, code: 'ARTIFACT_INVALID', detail: boundedCodes(all) };
-      }
-      const steps: ExecutableStep[] = validation.steps
-        .filter((step) => step.operations !== null)
-        .map((step) => ({ stepIndex: step.stepIndex, operations: step.operations ?? [] }));
-
-      // ── 3. Draining and capacity. Different conditions, different answers (AC-10, AC-11). ──
-      if (pool.draining) {
-        return { status: 503, code: 'RUNNER_DRAINING' };
-      }
-
-      // One atomic acquire. Nothing awaits between observing free capacity and holding the slot.
-      const slot = pool.tryAcquire();
-      if (slot === null) {
-        // Definite non-acceptance: no slot, no admission request, no scratch, no browser.
-        logger.record('info', 'runs.saturated', 'runner.runs.saturated', {
-          executionId: job.executionId,
-          attemptId: job.attemptId,
-        });
-        return {
-          status: 429,
-          code: 'CAPACITY_SATURATED',
-          retryAfterSeconds: options.retryAfterSeconds,
-        };
-      }
-
-      // ── 4. Admission CAS. Exactly one request, whatever it answers. ───────────────────────
-      const identity = newAdmissionIdentity(options.runnerInstanceId);
-      const outcome = await admission.admit({
-        executionId: job.executionId,
-        attemptId: job.attemptId,
-        identity,
-        runtimeVersions: options.runtimeVersions,
-      });
-
-      if (outcome.kind === 'REFUSED') {
-        // Definite. Stop, release, and never re-attempt under any identity (AC-8).
-        slot.release();
-        return outcome.status === 409
-          ? { status: 409, code: outcome.code }
-          : { status: 503, code: 'ADMISSION_REJECTED' };
-      }
-
-      if (outcome.kind === 'AMBIGUOUS') {
-        // Not permission to replay. The admission may already have been granted on the API side,
-        // and a second request risks a second browser for one attempt (AC-9).
-        slot.release();
-        return { status: 503, code: `ADMISSION_AMBIGUOUS_${outcome.reason}` };
-      }
-
-      // ── 5. Admitted. Only now does anything start. ────────────────────────────────────────
-      //
-      // The admitted-start deadline is measured from here: the instant the API granted the
-      // admission, which is the instant §5.2's "the runner refuses to launch after the
-      // server-issued admission/start deadline" starts counting from.
-      const admittedAtMs = options.now();
-      // Registered before the run starts, so a cancel that races the `202` still finds it.
-      const control: RunControl = { cancelled: false, end: null };
-      controls.set(job.executionId, control);
-      const task = execute(job, steps, identity.admissionId, admittedAtMs, control)
-        .catch((error: unknown) => {
-          logger.error('run.failed', {
-            executionId: job.executionId,
-            attemptId: job.attemptId,
-            admissionId: identity.admissionId,
-            reason: error instanceof Error ? error.name : 'unknown',
-          });
-        })
-        .finally(() => {
-          slot.release();
-          inFlight.delete(task);
-        });
-      inFlight.add(task);
-
-      return { status: 202, code: 'ADMITTED' };
     },
   };
 }

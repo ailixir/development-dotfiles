@@ -1,12 +1,10 @@
 /**
  * The loopback fixture-page server (AC-18a, AC-19).
  *
- * `fixtures/reference/manifest.json` binds the four controlled pages to `https://example.com/...`
- * URLs. The real adapter has to reach *those pages* without reaching that host, and the story's
- * implementation notes give two ways: rewrite the URLs onto a loopback `node:http` server, or
- * fulfil the requests inside the process. This is the first, and it is the one the notes prefer,
- * because it exercises the real navigation path — a real socket, a real response, a real DOM —
- * and keeps the adapter free of a routing behaviour the validated language does not have.
+ * The four controlled pages are bound to `https://example.com/...` paths ({@link FIXTURE_PAGES});
+ * a test reaches *those pages* without reaching that host by rewriting the URLs onto this
+ * loopback `node:http` server, which exercises the real navigation path — a real socket, a real
+ * response, a real DOM.
  *
  * It binds `127.0.0.1:0`, so there is **no DNS lookup at all** and nothing to resolve outside the
  * machine. That is what makes AC-19's "nothing left the machine" observable by counting
@@ -21,7 +19,6 @@ import { readFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { packageRoot } from './corpus.js';
-import { loadReferenceManifest } from './reference-manifest.js';
 
 export interface RecordedPageRequest {
   readonly method: string;
@@ -34,13 +31,7 @@ export interface PageServer {
   readonly port: number;
   /** Every request the server actually served, in order (AC-19). */
   readonly requests: readonly RecordedPageRequest[];
-  /**
-   * Rewrites a manifest URL onto this server.
-   *
-   * The corpus is left untouched: 10.3 pinned it and `SYNTAX_REFERENCE_VERSION` is compared
-   * exactly, so editing a fixture to point at loopback would be a runtime-compatibility change
-   * dressed up as a test convenience.
-   */
+  /** Rewrites a fixture-page URL onto this server. */
   rewrite(url: string): string;
   close(): Promise<void>;
 }
@@ -54,16 +45,23 @@ const CONTENT_TYPES: Readonly<Record<string, string>> = {
 };
 
 /**
- * Path → fixture file, derived from the manifest rather than restated.
+ * Fixture file → the URL it stands for.
  *
- * A page added to the manifest is served here without a second edit, and a page the manifest no
- * longer names stops being served — which is the direction that matters, because an orphaned
- * route is a page the corpus could reach without any test knowing.
+ * Ported verbatim from the `pages` block of the deleted artifact-1 reference manifest
+ * (`fixtures/reference/manifest.json`, STUDIO-OBS-012A AC-3), which is where these bindings used to
+ * be read from.
  */
+export const FIXTURE_PAGES: Readonly<Record<string, string>> = {
+  'home.html': 'https://example.com/',
+  'login.html': 'https://example.com/login',
+  'dashboard.html': 'https://example.com/dashboard',
+  'forms.html': 'https://example.com/forms',
+};
+
+/** Path → fixture file. */
 export function routeTable(): Map<string, string> {
-  const manifest = loadReferenceManifest();
   const routes = new Map<string, string>();
-  for (const [file, url] of Object.entries(manifest.pages)) {
+  for (const [file, url] of Object.entries(FIXTURE_PAGES)) {
     routes.set(new URL(url).pathname, file);
   }
   return routes;
@@ -94,8 +92,8 @@ export function startPageServer(): Promise<PageServer> {
     const extension = file.slice(file.lastIndexOf('.'));
     response.writeHead(200, {
       'content-type': CONTENT_TYPES[extension] ?? 'application/octet-stream',
-      // No caching: two corpus runs must see the same page for the same reason, not because one
-      // of them was served from memory (AC-18a's determinism).
+      // No caching: two runs must see the same page for the same reason, not because one of them
+      // was served from memory (AC-18a's determinism).
       'cache-control': 'no-store',
     });
     response.end(readFileSync(path));
@@ -127,15 +125,7 @@ export function startPageServer(): Promise<PageServer> {
   });
 }
 
-/**
- * Pages this story adds that the pinned corpus does not reference.
- *
- * `popup.html` drives AC-15, `timeline.html` drives AC-12a and `stall.html` holds a run mid-step
- * for the Studio v1 WP11 cancel tier. They are deliberately **not** in
- * `fixtures/reference/manifest.json`: that manifest is the pinned syntax reference, compared
- * exactly by `src/compat`, and adding a page to it would bump `SYNTAX_REFERENCE_VERSION` and make
- * every confirmed artifact incompatible. A test page is not a language change.
- */
+/** Pages served by name rather than through {@link FIXTURE_PAGES}. */
 function extraPage(pathname: string): string | null {
   const name = pathname.replace(/^\//u, '');
   return name === 'popup.html' || name === 'timeline.html' || name === 'stall.html' ? name : null;

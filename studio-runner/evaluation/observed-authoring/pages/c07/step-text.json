@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C07-ambiguous-search-locator",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "28af958a-bc5b-45bd-85d8-739ce1d2ac4f",
+        "text": "Open <var searchUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "7c662f53-49ac-41d4-89e9-c74520b57364",
+        "text": "Type hosting in the search box and press Enter.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "searchUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/search"
+    }
+  ]
+}

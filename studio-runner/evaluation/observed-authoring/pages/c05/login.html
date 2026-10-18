@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Sign in</title></head>
+<body>
+<main><h1>Sign in</h1><form id="f"><label>User <input name="u" autocomplete="off"></label><label>Password <input name="p" type="password" autocomplete="off"></label><button type="submit">Sign in</button></form></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+document.getElementById('f').addEventListener('submit',async(e)=>{e.preventDefault();const r=await fetch('__login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({username:e.target.u.value,password:e.target.p.value})});if(r.ok)location.href='dashboard';});
+</script>
+</body>
+</html>

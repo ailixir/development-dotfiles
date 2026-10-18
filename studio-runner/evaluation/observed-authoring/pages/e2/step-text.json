@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "caseId": "E2-shadow-dom-open",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "68b2bbf1-ab9c-4c4d-8929-e6aa7a8448f2",
+        "text": "Open <var shadowUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "7291602a-5a49-4518-855e-7bdb74dda8ce",
+        "text": "Fill Reference with ORD-42.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "1ad88d60-966a-4770-8f71-8efc9587956c",
+        "text": "Click Apply.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "683f6467-f27b-4706-88c8-9e4a57f1a346",
+        "text": "Check that the page shows Applied ORD-42.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "shadowUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/shadow"
+    }
+  ]
+}

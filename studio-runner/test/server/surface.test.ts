@@ -4,6 +4,10 @@
  *
  * `src/index.ts` is what the rest of the system imports. A re-export that silently disappears in
  * a refactor breaks a consumer at build time and nowhere else, so the surface is asserted here.
+ *
+ * STUDIO-OBS-012A AC-3 deleted the artifact-1 validator, executor, compatibility check, envelope
+ * validator and admission client; the surface now carries the observed admission client in their
+ * place, and the deleted names are asserted absent.
  */
 import { describe, expect, it } from 'vitest';
 
@@ -14,6 +18,9 @@ import { createCounters, createLogger, createRecordingLogSink, createStdoutSink 
 import { createRedactor, NULL_REDACTOR } from '../../src/executor/redaction.js';
 import { createRunSnapshot, serializeBounded } from '../../src/reporting/snapshot.js';
 import { DEFAULT_REPORT_BOUNDS, boundSteps, byteLength } from '../../src/reporting/bounds.js';
+import * as configSurface from '../../src/server/config.js';
+import * as identitySurface from '../../src/server/identity.js';
+import * as listenerSurface from '../../src/server/server.js';
 import { PERMITTED_DESTINATIONS } from '../../src/server/config.js';
 
 describe('package surface', () => {
@@ -30,12 +37,11 @@ describe('package surface', () => {
       expect(serverSurface).toHaveProperty(name);
     }
     for (const name of [
-      'createAdmissionClient',
+      'admitObserved',
       'createReportClient',
       'createRunReporter',
       'createRunSnapshot',
       'createFetchHttpClient',
-      'validateEnvelope',
     ]) {
       expect(packageSurface, name).toHaveProperty(name);
       expect(reportingSurface).toHaveProperty(name);
@@ -43,8 +49,10 @@ describe('package surface', () => {
   });
 
   it('still exports what stories 10.2 and 10.3 shipped', () => {
-    for (const name of ['validateArtifact', 'executeSteps', 'createRedactor', 'isCompatible']) {
-      expect(packageSurface).toHaveProperty(name);
+    // The redactor survives the artifact-1 engine; the engine's own entry points do not.
+    expect(packageSurface).toHaveProperty('createRedactor');
+    for (const name of ['validateArtifact', 'executeSteps', 'isCompatible', 'validateEnvelope', 'createAdmissionClient']) {
+      expect(packageSurface, name).not.toHaveProperty(name);
     }
   });
 
@@ -63,6 +71,19 @@ describe('package surface', () => {
     // the module stopped exporting anything.
     expect(reportingSurface).toHaveProperty('boundSteps');
     expect(reportingSurface).toHaveProperty('DEFAULT_REPORT_BOUNDS');
+  });
+
+  it('has one listener module and one configuration module: TLS listener, peer pin, three loaders, and no standalone guided worker (STUDIO-OBS-009 AC-1)', () => {
+    expect(Object.keys(listenerSurface).sort()).toEqual(['LISTENER_TIMEOUTS', 'createRunnerServer', 'readListenerMaterial']);
+    expect(identitySurface).toHaveProperty('createPeerPin');
+    for (const name of ['loadConfig', 'loadListenerConfig', 'loadGuidedConfig', 'loadEvidenceConfig']) {
+      expect(configSurface, name).toHaveProperty(name);
+    }
+    // Neither the package nor the server surface re-exports a second process, a guided worker entry or a plaintext server.
+    for (const name of ['guidedMain', 'createGuidedServer', 'installGuidedShutdown', 'parseGuidedMountedConfig']) {
+      expect(packageSurface, name).not.toHaveProperty(name);
+      expect(serverSurface, name).not.toHaveProperty(name);
+    }
   });
 
   it('names the three destinations the runner may talk to, and no fourth', () => {

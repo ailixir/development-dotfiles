@@ -34,6 +34,7 @@
  * reason: a bounded retry must retain one bounded body and not re-render it per attempt.
  */
 import type { Redactor } from '../executor/redaction.js';
+import type { ActionTiming, BridgeRecordingEvidence } from '../guided/types.js';
 
 /** The schema version these bytes are written under. Read by the API before anything else. */
 export const RESULT_MANIFEST_SCHEMA_VERSION = 1;
@@ -93,6 +94,60 @@ export interface ResultManifestInput {
 }
 
 /**
+ * The guided-recording disclosure (STUDIO-OBS-013 AC-5, design R3 §4 "Video" residual).
+ *
+ * A constant: the manifest states the password-only masking rule and its one residual, and no
+ * page, session or model text ever reaches it.
+ */
+export const GUIDED_RECORDING_DISCLOSURE =
+  'Password fills are rendered as masked dots (password-only rule). A page that later displays a secret in plain text is not protected by this recording.';
+
+/** The guided wire vocabulary for a settled recording (AR-1 R3): no `PENDING`. */
+export type GuidedRecordingState = BridgeRecordingEvidence['state'];
+
+/**
+ * The guided recording manifest (AR-1 R3 "guidedManifest"): a separate body type serialized by
+ * the same redact-twice {@link serializeResultManifest}. IDs, keys, integers, enums and one
+ * constant disclosure only. The backend does not read it in OBS-013; it is the audit record that
+ * travels next to the video under the same server-derivable prefix.
+ */
+export interface GuidedRecordingManifestBody {
+  readonly schemaVersion: 1;
+  readonly kind: 'guidedRecording';
+  readonly sessionId: string;
+  readonly recordingId: string;
+  readonly workerId: string;
+  readonly ownerFence: number;
+  readonly evidenceState: GuidedRecordingState;
+  readonly evidencePartial: boolean;
+  readonly videoKey: string;
+  readonly manifestKey: string;
+  /** The same rounded items the callback carries (`result.schema.json#/definitions/actionTiming`). */
+  readonly timings: readonly ActionTiming[];
+  readonly disclosure: typeof GUIDED_RECORDING_DISCLOSURE;
+}
+
+export type GuidedRecordingManifestInput = Omit<GuidedRecordingManifestBody, 'schemaVersion' | 'kind' | 'disclosure'>;
+
+/** Property order is wire order, as for {@link buildResultManifest}. `evidencePartial` is carried. */
+export function buildGuidedRecordingManifest(input: GuidedRecordingManifestInput): GuidedRecordingManifestBody {
+  return {
+    schemaVersion: RESULT_MANIFEST_SCHEMA_VERSION,
+    kind: 'guidedRecording',
+    sessionId: input.sessionId,
+    recordingId: input.recordingId,
+    workerId: input.workerId,
+    ownerFence: input.ownerFence,
+    evidenceState: input.evidenceState,
+    evidencePartial: input.evidencePartial,
+    videoKey: input.videoKey,
+    manifestKey: input.manifestKey,
+    timings: input.timings.map((timing) => ({ ...timing })),
+    disclosure: GUIDED_RECORDING_DISCLOSURE,
+  };
+}
+
+/**
  * Builds the manifest body.
  *
  * `durationMs` is browser execution time and is derived from the two instants this runner already
@@ -138,10 +193,10 @@ export function buildResultManifest(input: ResultManifestInput): ResultManifestB
  * The second pass alone would miss (1); the first alone would miss (2). Both are cheap.
  */
 export function serializeResultManifest(
-  manifest: ResultManifestBody,
+  manifest: ResultManifestBody | GuidedRecordingManifestBody,
   redactor: Redactor,
 ): Uint8Array {
-  const scrubbed = redactStrings(manifest, redactor) as ResultManifestBody;
+  const scrubbed = redactStrings(manifest, redactor);
   const text = redactor.redact(JSON.stringify(scrubbed));
   return new TextEncoder().encode(text);
 }

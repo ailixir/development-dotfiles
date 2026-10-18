@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C09-negation-trap",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "5254e32f-3d81-415b-8438-ee5f59f9e00b",
+        "text": "Open <var formsUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "fee5485c-145d-4d7e-8ed4-9e2f726feb7e",
+        "text": "Check that the Delete button is not visible.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "formsUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/forms"
+    }
+  ]
+}

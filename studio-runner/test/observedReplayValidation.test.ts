@@ -1,10 +1,15 @@
+import {currentReference} from './helpers/currentWorlds.js';
+import type {ValidationBasis} from '../src/executor/observedOperations.js';
+import type {TestDocument} from './helpers/publicationFixture.js';
 import controlFixture from '../fixtures/observed-reference/control-value-reference.json' with { type: 'json' };
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+import * as observedPolicy from '../src/validator/observedReferencePolicy.js';
+import {incrementalBoundaryFixture,oneByteOverBoundary,boundaryHash,BOUNDARY_CLASSIFICATION} from './helpers/incrementalBoundaryFixture.js';
 import fixture from '../fixtures/observed-reference/fresh-order-reference.json' with { type: 'json' };
 import { deriveObservedArtifact, validateReplayArtifact, validateObservedRequest } from '../src/validator/observedReplay.js';
 import { OBSERVED_LIMITS, OBSERVED_PROFILE, OBSERVED_SCHEMA_BUNDLE_HASH, boundedObserved, canonicalObserved, hashObserved, parseObservedBytes, validateObserved } from '../src/validator/observedReferencePolicy.js';
 const build = { profileHash: hashObserved(OBSERVED_PROFILE), schemaBundleHash: OBSERVED_SCHEMA_BUNDLE_HASH, referenceBundleHash: 'a'.repeat(64), executableImageDigest: 'b'.repeat(64), chromiumBuild: 'fixture-123' };
-const request = () => ({ schemaVersion: 2, attemptId: '00000000-0000-4000-8000-000000000900', claimId: '00000000-0000-4000-8000-000000000901', snapshotHash: 'c'.repeat(64), basisHash: hashObserved(fixture.basis), requiredProfile: OBSERVED_PROFILE, requiredBuild: build, artifact: structuredClone(fixture.artifact), validationBasis: structuredClone(fixture.basis) });
+const request = () => { expect(deriveObservedArtifact(fixture.basis)).toEqual({artifact:fixture.artifact,hashes:fixture.hashes}); return { schemaVersion: 3, attemptId: '00000000-0000-4000-8000-000000000900', claimId: '00000000-0000-4000-8000-000000000901', snapshotHash: 'c'.repeat(64), basisHash: hashObserved(fixture.basis), requiredProfile: OBSERVED_PROFILE, requiredBuild: build, artifact: structuredClone(fixture.artifact), validationBasis: structuredClone(fixture.basis) }; };
 describe('independent packaged observed validator', () => {
     it('derives fixed manual graph, original guard facts, source recipes and every hash', () => {
         expect(deriveObservedArtifact(fixture.basis)).toEqual({ artifact: fixture.artifact, hashes: fixture.hashes });
@@ -23,12 +28,10 @@ describe('independent packaged observed validator', () => {
         expect(validateObservedRequest(r, build)).toMatchObject({ ok: false, errorCode: 'OPERATION_MISMATCH' });
     });
 });
-describe('original evidence bidirectional joins', () => {
-    it('derives authorized control-value read independently', () => { expect(deriveObservedArtifact(controlFixture.basis)).toEqual({ artifact: controlFixture.artifact, hashes: controlFixture.hashes }); });
-    it.each(['scope', 'allocation', 'producer', 'consumer', 'obligation', 'source-reference', 'prepared-target', 'observation-node', 'observation-hash', 'proof-fence', 'ledger-count', 'ledger-state', 'operation-hash', 'extra-observation', 'missing-preparation', 'translation-id', 'bootstrap-origin', 'input-span', 'config-map'])('refuses %s mutation', name => {
-        const b = structuredClone(fixture.basis);
+const BASIS_JOIN_MUTATIONS=['scope', 'allocation', 'producer', 'consumer', 'obligation', 'source-reference', 'prepared-target', 'observation-node', 'observation-hash', 'proof-fence', 'ledger-count', 'ledger-state', 'operation-hash', 'extra-observation', 'missing-preparation', 'translation-id', 'bootstrap-origin', 'input-span', 'config-map'] as const;
+function mutateBasisJoin(name:typeof BASIS_JOIN_MUTATIONS[number],b:TestDocument<ValidationBasis>):void {
         if (name === 'scope')
-            b.scope.accountRef = 'different';
+            b.scope.principalId = 'different';
         if (name === 'allocation')
             required(b.allocations[0]).bindingId = 'substitute';
         if (name === 'producer')
@@ -66,9 +69,23 @@ describe('original evidence bidirectional joins', () => {
         if (name === 'input-span')
             required(b.inputs[1]).provenance.endUtf16 = 999;
         if (name === 'config-map')
-            required(b.configurationReferences[0]).inputId = 'wrong';
+            required<TestDocument<ValidationBasis['configurationReferences'][number]>>(b.configurationReferences[0]).inputId = 'wrong';
+}
+describe('original evidence bidirectional joins', () => {
+    it('derives authorized control-value read independently', () => { expect(deriveObservedArtifact(controlFixture.basis)).toEqual({ artifact: controlFixture.artifact, hashes: controlFixture.hashes }); });
+    it.each(BASIS_JOIN_MUTATIONS)('refuses %s mutation', name => {
+        const reference=name==='config-map'?currentReference('configuration'):fixture;
+        expect(deriveObservedArtifact(reference.basis)).toEqual({artifact:reference.artifact,hashes:reference.hashes});
+        const b:TestDocument<ValidationBasis> = structuredClone(reference.basis);
+        mutateBasisJoin(name,b);
         b.translationHash = hashObserved(b.translationPlan);
         expect(() => deriveObservedArtifact(b)).toThrow();
+    });
+    it.each(BASIS_JOIN_MUTATIONS)('preserves control-value subtype while refusing %s basis mutation',name=>{
+        const reference=currentReference(name==='config-map'?'configuration':'control');
+        expect(deriveObservedArtifact(reference.basis)).toEqual({artifact:reference.artifact,hashes:reference.hashes});
+        const b=structuredClone(validateObserved<ValidationBasis>('replay-validation#/definitions/ValidationBasis',reference.basis,OBSERVED_LIMITS.basis)) as TestDocument<ValidationBasis>;
+        mutateBasisJoin(name,b);b.translationHash=hashObserved(b.translationPlan);expect(()=>deriveObservedArtifact(b)).toThrow();
     });
     it.each(['click', 'fill', 'read', 'press', 'check', 'uncheck', 'hover', 'selectOption', 'assert'])('cannot replace the exercised first navigation with %s', kind => {
         const r = request();
@@ -103,9 +120,10 @@ function required<T>(value: T | null | undefined): T {
     return value;
 }
 
-import publicationFixtures from '../../docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json' with {type:'json'};
+import {publicationFixture as publicationFixtures} from './helpers/publicationFixture.js';
 const observedChoice=publicationFixtures.observedChoice;
 type ChoiceBasis=typeof observedChoice.basis;
+function choiceBasis():ChoiceBasis { return currentReference('choice').basis; }
 function witness(b:ChoiceBasis){return required(required(b.preparations[3]).observedChoice);}
 function resealWitness(b:ChoiceBasis):void{
   const w=witness(b),c=w.context.questionCapture;
@@ -114,41 +132,41 @@ function resealWitness(b:ChoiceBasis):void{
 }
 describe('independent original observed-choice publication witness',()=>{
   it('accepts ten complete original alternatives and still preserves the selected target',()=>{
-    const b=structuredClone(observedChoice.basis),w=witness(b),old=required(b.observations.find(o=>o.observationHash===w.context.questionCapture.observationHash));
+    const b=choiceBasis(),w=witness(b),old=required(b.observations.find(o=>o.observationHash===w.context.questionCapture.observationHash));
     for(let i=0;i<8;i++){
       const node=structuredClone(required(old.observation.nodes.find(n=>n.nodeId===w.receipt.answer.nodeId)));node.nodeId=`alternative-${String(i)}`;node.locatorHints=[{kind:'testId',value:node.nodeId,exact:true}];old.observation.nodes.push(node);
       const meaning={...structuredClone(required(w.meanings[1]).meaning),nodeId:node.nodeId,locator:required(node.locatorHints[0])};
-      w.meanings.push({choiceId:`server-${String(i)}`,meaning});w.attempt.modelQuestion.choices.push({choiceId:`provider-extra-${String(i)}`,safeLabel:'Untrusted alternate',meaning:structuredClone(meaning)});w.context.question.choices.push({choiceId:`server-${String(i)}`,safeLabel:'Alternate field',nodeId:node.nodeId,bindingId:null});
+      w.meanings.push({choiceId:`server-${String(i)}`,meaning});w.attempt.modelQuestion.choices.push({choiceId:`provider-extra-${String(i)}`,safeLabel:'Untrusted alternate',meaning:structuredClone(meaning)});w.context.question.choices.push({choiceId:`server-${String(i)}`,safeLabel:'Alternate field',labelSource:'PAGE',role:node.role,region:node.regionId,nodeId:node.nodeId,bindingId:null});
     }
     old.observationHash=hashObserved(old.observation);w.context.questionCapture.observationHash=old.observationHash;w.context.questionCapture.executionEvidence.observationHash=old.observationHash;w.context.questionCapture.evidenceHash=hashObserved(w.context.questionCapture.executionEvidence);w.attempt.executionEvidence=structuredClone(w.context.questionCapture.executionEvidence);resealWitness(b);
     expect(w.meanings).toHaveLength(10);expect(deriveObservedArtifact(b).artifact.guards).toEqual(observedChoice.artifact.guards);
   });
   it.each(['2026-02-30T03:00:05.123456789Z','2026-10-08T03:00:60Z','2026-10-08T03:00:05.123456789+00:00','2026-10-08T24:00:00Z'])('rejects invalid original calendar/UTC instant %s',instant=>{
-    const b=structuredClone(observedChoice.basis),w=witness(b);w.receipt.answer.resolvedAt=instant;resealWitness(b);
+    const b=choiceBasis(),w=witness(b);w.receipt.answer.resolvedAt=instant;resealWitness(b);
     expect(()=>deriveObservedArtifact(b)).toThrow('INVALID_CONTRACT');
   });
   it('compares preserved original instants exactly through nanoseconds without rewriting their bytes',()=>{
-    const b=structuredClone(observedChoice.basis),w=witness(b);w.context.question.expiresAt=w.receipt.answer.resolvedAt;resealWitness(b);
+    const b=choiceBasis(),w=witness(b);w.context.question.expiresAt=w.receipt.answer.resolvedAt;resealWitness(b);
     expect(deriveObservedArtifact(b).artifact.guards).toEqual(observedChoice.artifact.guards);
     expect(w.receipt.answer.resolvedAt).toBe('2026-10-08T03:00:05.123456789Z');
     w.receipt.answer.resolvedAt='2026-10-08T03:00:05.123456790Z';resealWitness(b);
     expect(()=>deriveObservedArtifact(b)).toThrow('EVIDENCE_MISMATCH');
   });
   it('rejects old bundle pins even when the executable profile is identical',()=>{
-    const current={...request(),requiredBuild:{...build},artifact:structuredClone(observedChoice.artifact),validationBasis:structuredClone(observedChoice.basis),basisHash:hashObserved(observedChoice.basis)};
+    const current={...request(),requiredBuild:{...build},artifact:structuredClone(observedChoice.artifact),validationBasis:choiceBasis(),basisHash:hashObserved(observedChoice.basis)};
     expect(validateObservedRequest(current,build).ok).toBe(true);
     current.requiredBuild.schemaBundleHash='0'.repeat(64);
     expect(()=>validateObservedRequest(current,build)).toThrow('PROFILE_MISMATCH');
     expect(current.requiredProfile).toEqual(OBSERVED_PROFILE);
   });
   it('supports a later plan revision only when the original admitted obligation is unchanged',()=>{
-    const b=structuredClone(observedChoice.basis);b.translationRevision='2';
+    const b=choiceBasis();b.translationRevision='2';
     expect(deriveObservedArtifact(b).artifact.guards).toEqual(observedChoice.artifact.guards);
     const w=witness(b);required(w.questionPlan.plan.obligations[3]).needId='changed-original-meaning';resealWitness(b);
     expect(()=>deriveObservedArtifact(b)).toThrow('EVIDENCE_MISMATCH');
   });
   it.each(['provider-id','old-ambiguous','fresh-ambiguous','old-hidden','old-truncated','old-unsupported','missing-old','unused-old','locator-kind','locator-exact','wrong-input','wrong-binding','extra-proof-key'] as const)('refuses independently joined %s despite coherent outer hashes',name=>{
-    const b=structuredClone(observedChoice.basis),w=witness(b),p=required(b.preparations[3]);
+    const b=choiceBasis(),w=witness(b),p=required(b.preparations[3]);
     const old=required(b.observations.find(o=>o.observationHash===w.context.questionCapture.observationHash));
     const fresh=required(b.observations.find(o=>o.observationHash===p.observationHash));
     if(name==='provider-id')required(w.attempt.modelQuestion.choices[1]).choiceId=required(w.attempt.modelQuestion.choices[0]).choiceId;
@@ -186,7 +204,7 @@ describe('independent original observed-choice publication witness',()=>{
   });
   it.each(['missing-proof','null-proof','wrong-preparation','wrong-accepted','wrong-answer-node','wrong-answer-binding','expired-answer','wrong-context','wrong-worker','wrong-scope','wrong-source','wrong-config','wrong-attempt','wrong-request','wrong-response-request','unaccepted-attempt','wrong-kind','wrong-plan-revision','wrong-plan-obligation','wrong-model-meaning','singleton','eleven','duplicate-meaning','duplicate-choice','reordered-map','wrong-old-node','wrong-old-locator','wrong-old-observation','stale-generation','unused-old-observation','wrong-fresh-locator','extra-witness'] as const)('rejects coherently resealed %s',name=>{
     expect(deriveObservedArtifact(observedChoice.basis).artifact).toEqual(observedChoice.artifact);
-    const b=structuredClone(observedChoice.basis),p=required(b.preparations[3]),w=witness(b);
+    const b=choiceBasis(),p=required(b.preparations[3]),w=witness(b);
     if(name==='wrong-preparation')w.receipt.preparationId='different';
     if(name==='wrong-accepted'){w.acceptedChoiceId='choice-original';w.receipt.acceptedChoiceId='choice-original';w.receipt.answer.choiceId='choice-original';w.receipt.answer.nodeId='label-input';}
     if(name==='wrong-answer-node')w.receipt.answer.nodeId='label-input';
@@ -227,7 +245,7 @@ describe('independent original observed-choice publication witness',()=>{
 describe('independent composed canonical UTF-8 ceilings',()=>{
   const bytes=(v:unknown)=>Buffer.byteLength(canonicalObserved(v));
   it('keeps the structural preparation/witness cardinality at 200 independently of byte caps',()=>{
-    const b=structuredClone(observedChoice.basis),p=required(b.preparations[3]);b.preparations=Array.from({length:200},()=>structuredClone(p));
+    const b=choiceBasis(),p=required(b.preparations[3]);b.preparations=Array.from({length:200},()=>structuredClone(p));
     validateObserved('replay-validation#/definitions/ValidationBasis',b,OBSERVED_LIMITS.basis);
     b.preparations.push(structuredClone(p));expect(()=>validateObserved('replay-validation#/definitions/ValidationBasis',b,OBSERVED_LIMITS.basis)).toThrow('INVALID_CONTRACT');
   });
@@ -269,7 +287,7 @@ describe('independent composed canonical UTF-8 ceilings',()=>{
     expect(excess).toBe(0);expect(bytes(value)).toBe(target);
   }
   it('accepts exactly 262144 witness bytes and refuses one more, counting multibyte scalars',()=>{
-    const b=structuredClone(observedChoice.basis),w=witness(b);growHistoricalPlan(w,500);
+    const b=choiceBasis(),w=witness(b);growHistoricalPlan(w,500);
     trimTo(w,262144,w.questionPlan.plan.obligations.slice(5));
     expect(validateObserved('replay-validation#/definitions/ObservedChoiceWitness1',w,262144)).toEqual(w);
     expect(canonicalObserved(w).length).toBeLessThan(262144);
@@ -277,7 +295,7 @@ describe('independent composed canonical UTF-8 ceilings',()=>{
     expect(()=>boundedObserved(w,262144)).toThrow('LIMIT_EXCEEDED');
   });
   it('keeps the 6291456 basis ceiling separate inside a sub8388608 request with many bounded witnesses',()=>{
-    const b=structuredClone(observedChoice.basis),template=structuredClone(required(b.preparations[3]));growHistoricalPlan(required(template.observedChoice),80);
+    const b=choiceBasis(),template=structuredClone(required(b.preparations[3]));growHistoricalPlan(required(template.observedChoice),80);
     b.preparations=Array.from({length:100},()=>structuredClone(template));
     const filler=b.preparations.flatMap(p=>required(p.observedChoice).questionPlan.plan.obligations.slice(5));
     trimTo(b,OBSERVED_LIMITS.basis,filler);
@@ -301,4 +319,48 @@ describe('independent composed canonical UTF-8 ceilings',()=>{
     expect(validateObservedRequest(parseObservedBytes(exact,OBSERVED_LIMITS.validation),build).ok).toBe(true);
     expect(()=>parseObservedBytes(Buffer.concat([exact,Buffer.from(' ')]),OBSERVED_LIMITS.validation)).toThrow('LIMIT_EXCEEDED');
   });
+  it('accepts the lawful fully joined semantic 6291456-byte parent and refuses one legal byte before hashing',()=>{
+    const parent=incrementalBoundaryFixture(),b=parent.basis,before=canonicalObserved(b);
+    expect(parent.classification).toBe(BOUNDARY_CLASSIFICATION);
+    expect(parent.construction.targetBytes).toBe(6291456);expect(bytes(b)).toBe(6291456);expect(canonicalObserved(b).length).toBeLessThan(6291456);
+    expect(b.sourceSteps).toHaveLength(100);expect(b.actions).toHaveLength(100);expect(b.preparations).toHaveLength(100);expect(b.obligationAssociations).toHaveLength(100);expect(b.translationPlan.obligations).toHaveLength(100);
+    for(const ids of [b.sourceSteps.map(s=>s.stepId),b.actions.map(a=>a.ledger.admission.admissionId),b.preparations.map(p=>p.preparationId),b.obligationAssociations.map(a=>a.obligationId),b.actions.map(a=>a.ledger.idempotencyKey)])expect(new Set(ids).size).toBe(100);
+    expect(b.materializationEvidence.versions).toHaveLength(1);expect(b.materializationEvidence.entries).toHaveLength(1);expect(b.inputs).toHaveLength(1);
+    expect(boundaryHash(parent.privateInputEnvelope)).toBe(b.authoredInputsHash);
+    for(const collection of [b.allocations,b.producers,b.consumerEdges,b.bindings,b.transfers])expect(collection).toEqual([]);
+    const inc=required(b.incrementalEvidence);expect(inc.plan.initialFirstLearnIndex).toBe(0);expect(inc.switch.reason).toBe('EMPTY_PREFIX');expect(inc.program.actions).toEqual([]);expect(inc.program.sourceStepIds).toEqual([]);expect(b.snapshotEvidence.baseProof).toBeNull();expect(b.snapshotEvidence.pinnedBase).not.toBeNull();
+    const witnesses=b.preparations.flatMap(p=>p.observedChoice?[p.observedChoice]:[]);expect(witnesses).toHaveLength(99);
+    for(const ids of [witnesses.map(w=>w.context.clarificationId),witnesses.map(w=>w.receipt.obligationId),witnesses.map(w=>w.attempt.attemptId),witnesses.map(w=>w.attempt.requestId)])expect(new Set(ids).size).toBe(99);
+    for(const w of witnesses){
+      expect(w.questionPlan.plan).toEqual(b.translationPlan);expect(w.meanings).toHaveLength(2);
+      expect(w.context.questionCapture.executionEvidence.generation).toBeLessThan(required(b.preparations.find(p=>p.preparationId===w.receipt.preparationId)).executionEvidence.generation);
+      for(const [value,cap]of [[w,262144],[w.context,65536],[w.meanings,65536],[w.receipt,16384]]as const)expect(boundedObserved(value,cap)).toBeLessThanOrEqual(cap);
+      for(const choice of w.attempt.modelQuestion.choices)expect(Array.from(choice.safeLabel).length).toBeLessThanOrEqual(256);
+    }
+    expect(b.observations).toHaveLength(198);expect(new Set(b.observations.map(o=>o.observationHash)).size).toBe(198);
+    for(const row of b.observations){expect(row.observation.nodes).toHaveLength(2);expect(boundedObserved(row.observation,32768)).toBeLessThanOrEqual(32768);}
+    expect(b.observations.reduce((sum,row)=>sum+bytes(row.observation),0)).toBeLessThanOrEqual(1048576);
+    expect(b.sourceSteps.reduce((sum,step)=>sum+Buffer.byteLength(step.source),0)).toBeLessThanOrEqual(1048576);
+    for(const obligation of b.translationPlan.obligations)expect(Array.from(obligation.targetIntent).length).toBeLessThanOrEqual(500);
+    expect(boundedObserved(parent.expectedArtifact,OBSERVED_LIMITS.artifact)).toBeLessThanOrEqual(OBSERVED_LIMITS.artifact);
+    expect(boundedObserved(parent.expectedArtifact.replayPolicy,OBSERVED_LIMITS.policy)).toBeLessThanOrEqual(OBSERVED_LIMITS.policy);
+    // The offered expected candidate was built from declared fixture facts before the subject runs.
+    expect(deriveObservedArtifact(b)).toEqual({artifact:parent.expectedArtifact,hashes:parent.expectedHashes});
+    const r={...request(),validationBasis:b,basisHash:boundaryHash(b),artifact:parent.expectedArtifact};
+    expect(bytes(r)).toBeLessThan(OBSERVED_LIMITS.validation);expect(validateObservedRequest(r,build)).toMatchObject({ok:true,errorCode:null,artifactHash:parent.expectedHashes.artifactHash});
+    const over=oneByteOverBoundary(b);expect(bytes(over)).toBe(6291457);
+    const overWitness=required(required(over.preparations[1]).observedChoice);expect(Array.from(required(overWitness.attempt.modelQuestion.choices[0]).safeLabel).length).toBeLessThanOrEqual(256);
+    // The shape remains closed and legal with the transport allowance; the component cap owns refusal.
+    expect(validateObserved('replay-validation#/definitions/ValidationBasis',over,OBSERVED_LIMITS.validation)).toEqual(over);
+    const overRequest={...r,validationBasis:over};expect(bytes(overRequest)).toBeLessThan(OBSERVED_LIMITS.validation);
+    // Installed only after all module initialization and expected-fixture construction hashes.
+    const hash=vi.spyOn(observedPolicy,'hashObserved');
+    try{
+      expect(validateObservedRequest(r,build).ok).toBe(true);expect(hash).toHaveBeenCalled();
+      hash.mockClear();expect(()=>deriveObservedArtifact(over)).toThrow('LIMIT_EXCEEDED');expect(hash).not.toHaveBeenCalled();
+      hash.mockClear();expect(()=>validateObservedRequest(overRequest,build)).toThrow('LIMIT_EXCEEDED');expect(hash).not.toHaveBeenCalled();
+    }finally{hash.mockRestore();}
+    expect(canonicalObserved(b)).toBe(before);
+    // Harness capacity only: builds, hashes and validates two ~6 MiB bases (4.3 s idle, >5 s under load).
+  },20000);
 });

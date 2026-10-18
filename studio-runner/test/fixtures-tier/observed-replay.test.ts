@@ -1,31 +1,29 @@
 import {randomUUID} from 'node:crypto';
 import type {ServerResponse} from 'node:http';
 import {writeRuntimeVersionsFile} from '../../scripts/write-runtime-versions.mjs';
-import * as versionConstants from '../../src/versions.js';
 import {loadObservedBuild} from '../../src/compat/runtime-versions.js';
 import { createServer } from 'node:http';
-import { mkdtemp, writeFile, rm, readFile, appendFile } from 'node:fs/promises';
+import { mkdtemp, writeFile, rm, readFile } from 'node:fs/promises';
 import { tmpdir, homedir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, it, expect } from 'vitest';
 import fixture from '../../fixtures/observed-reference/fresh-order-reference.json' with { type: 'json' };
-import type { ObservedJob, TrustedPolicy, Scope, Artifact2 } from '../../src/executor/observedOperations.js';
+import type { ObservedJob, TrustedPolicy, Scope, Artifact3 } from '../../src/executor/observedOperations.js';
 import { hashObserved, OBSERVED_PROFILE, OBSERVED_SCHEMA_BUNDLE_HASH } from '../../src/validator/observedReferencePolicy.js';
 import { createChildBrowserLauncher } from '../../src/run/launcher.js';
 import { validateReplayArtifact } from '../../src/validator/observedReplay.js';
 import { createApplication } from '../../src/server/application.js';
+import { secureFetch, testListener } from '../helpers/guidedTls.js';
 import { loadConfig } from '../../src/server/config.js';
 import { createRecordingLogSink } from '../../src/server/logging.js';
 import { untilMs } from './realRunner.js';
 const uid = (n: number) => '00000000-0000-4000-8000-' + String(n).padStart(12, '0');
 describe('observed ordinary recorded child', () => {
-    it.each(['fresh', 'async-confirmation', 'never-confirmation', 'application', 'control', 'apply-delay', 'no-grant', 'hidden', 'password', 'sensitive-descendant', 'duplicate', 'readonly', 'prepare-failure', 'apply-failure', 'cancel-apply', 'drain-apply'] as const)('uses actual recorded normal pipeline: %s', async (mode) => {
-        const positive = mode === 'fresh' || mode === 'async-confirmation' || mode === 'application' || mode === 'control' || mode === 'apply-delay';
+    it.each(['fresh', 'async-confirmation', 'never-confirmation', 'application', 'control', 'no-grant', 'hidden', 'password', 'sensitive-descendant', 'duplicate', 'readonly'] as const)('uses actual recorded normal pipeline: %s', async (mode) => {
+        const positive = mode === 'fresh' || mode === 'async-confirmation' || mode === 'application' || mode === 'control';
         const asynchronous=mode==='async-confirmation'||mode==='never-confirmation';
         const issuedValues:string[]=[],acquisitions:string[]=[],invocations:string[]=[];let heldReceipt:{response:ServerResponse;value:string}|null=null;
-        const accountStages: string[] = [];
-        const preReady = ['prepare-failure', 'apply-failure', 'cancel-apply', 'drain-apply'].includes(mode);
         const receipts: string[] = [], reports: Record<string, unknown>[] = [];
         let visits = 0, admissions = 0;
         const ownership = new Map<string, {state:'ADMITTED'|'RUNNING'|'FINAL'; attemptId:unknown; admissionId:unknown; runnerInstanceId:unknown}>();
@@ -38,12 +36,7 @@ describe('observed ordinary recorded child', () => {
                     res.end('OK');
                 });return;
             }
-            if (req.url === '/account') {
-                let text = '';
-                req.on('data', (b: Buffer) => { text += b.toString(); });
-                req.on('end', () => { accountStages.push(text); res.end('OK'); });
-                return;
-            }
+
             if (req.url?.startsWith('/internal/')) {
                 if (req.headers.authorization !== 'Bearer callback') {
                     res.writeHead(401);
@@ -63,7 +56,7 @@ describe('observed ordinary recorded child', () => {
                         admissions++;
                         ownership.set(String(body.executionId),{state:'ADMITTED',attemptId:body.attemptId,admissionId:body.admissionId,runnerInstanceId:body.runnerInstanceId});
                         const now = Date.now();
-                        res.end(JSON.stringify({ schemaVersion: 2, kind: 'observed', admissionId: body.admissionId, request: body, admittedAt: new Date(now).toISOString(), startDeadlineAt: new Date(now + 30000).toISOString(), runDeadlineAt: new Date(now + 60000).toISOString() }));
+                        res.end(JSON.stringify({ schemaVersion: 3, kind: 'observed', admissionId: body.admissionId, request: body, admittedAt: new Date(now).toISOString(), startDeadlineAt: new Date(now + 30000).toISOString(), runDeadlineAt: new Date(now + 60000).toISOString() }));
                     }
                     else {
                         const owner=ownership.get(String(body.executionId));
@@ -110,9 +103,9 @@ describe('observed ordinary recorded child', () => {
         const dir = await mkdtemp(join(tmpdir(), 'observed-replay-'));
         try {
             // Manual projection of the same five approved primitive operations onto this controlled app.
-            const a = structuredClone(fixture.artifact) as unknown as Artifact2;
+            const a = structuredClone(fixture.artifact) as unknown as Artifact3;
             const mutable = JSON.parse(JSON.stringify(a)) as typeof fixture.artifact;
-            mutable.replayPolicy.scope.allowedOrigins = [origin];
+            mutable.replayPolicy.scope.allowedOrigins = [origin];mutable.replayPolicy.scope.policyVersion='observed-4-full-chromium-1';
             mutable.learnedPlan.actions.forEach(x => {
                 if (x.origin !== null)
                     x.origin = origin;
@@ -150,7 +143,7 @@ describe('observed ordinary recorded child', () => {
             mutable.learnedPlanHash = hashObserved(mutable.learnedPlan);
             mutable.replayPolicy.learnedPlanHash = mutable.learnedPlanHash;
             const artifact = validateReplayArtifact(mutable), frozen = hashObserved(artifact), scope = { principalId: 'current-user', ...artifact.replayPolicy.scope } as Scope;
-            const policy: TrustedPolicy = { version: 1, policyId: scope.policyId, policyVersion: scope.policyVersion, applicationId: scope.applicationId, environment: scope.environment, accountRef: scope.accountRef, entryPolicyId: scope.entryPolicyId, allowedOrigins: scope.allowedOrigins, rules: [], applicationPolicy: { policyRuleId: 'app', allowStructuralDiscovery: true, readGrants: [{ policyRuleId: 'business-reference', origin, region: { kind: 'role', role: 'main', name: 'Operations', exact: true }, visibleText: { classification: 'permittedBusinessData' }, controlValue: { classification: 'nonsecretApproved', types: ['text', 'textarea'] } }] } };
+            const policy: TrustedPolicy = { version: 1, policyId: scope.policyId, policyVersion: scope.policyVersion, applicationId: scope.applicationId, environment: scope.environment,  entryPolicyId: scope.entryPolicyId, allowedOrigins: scope.allowedOrigins, rules: [], applicationPolicy: { policyRuleId: 'app', allowStructuralDiscovery: true, readGrants: [{ policyRuleId: 'business-reference', origin, region: { kind: 'role', role: 'main', name: 'Operations', exact: true }, visibleText: { classification: 'permittedBusinessData' }, controlValue: { classification: 'nonsecretApproved', types: ['text', 'textarea'] } }] } };
             if (mode === 'no-grant')
                 (policy.applicationPolicy as unknown as {
                     readGrants: unknown[];
@@ -159,94 +152,55 @@ describe('observed ordinary recorded child', () => {
                 (required(policy.applicationPolicy).readGrants[0] as {
                     region: unknown;
                 }).region = { kind: 'application' };
-            writeRuntimeVersionsFile({root:resolve('.'),versions:versionConstants,env:process.env,nodeVersion:process.version});
+            writeRuntimeVersionsFile({root:resolve('.'),env:process.env,nodeVersion:process.version});
             const packaged=JSON.parse(await readFile(resolve('dist/runtime-versions.json'),'utf8')) as {observedReferenceBundleHash:string;observedChromiumBuild:string};
+            // AC-1 P2 a: the record the real writer emits carries observed identities and none of the artifact-1 stamps.
+            for (const retired of ['artifact','validatorSchema','validatorParser','syntaxReference','executor']) expect(packaged).not.toHaveProperty(retired);
             const build = { profileHash: hashObserved(OBSERVED_PROFILE), schemaBundleHash: OBSERVED_SCHEMA_BUNDLE_HASH, referenceBundleHash: packaged.observedReferenceBundleHash, executableImageDigest: 'b'.repeat(64), chromiumBuild: packaged.observedChromiumBuild };
             const catalogPath=join(dir,'controlled-release-catalog.json');await writeFile(catalogPath,JSON.stringify({profile:OBSERVED_PROFILE,build}));
             const browserRoot=process.env.PLAYWRIGHT_BROWSERS_PATH??(process.platform==='darwin'?join(homedir(),'Library','Caches','ms-playwright'):join(homedir(),'.cache','ms-playwright'));
             const startup={STUDIO_RUNNER_OBSERVED_CATALOG_FILE:catalogPath,STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST:build.executableImageDigest,PLAYWRIGHT_BROWSERS_PATH:browserRoot};
             expect(loadObservedBuild(startup,resolve('dist/runtime-versions.json'),resolve('dist/observed-reference.json'))).toEqual(build);
-            const child = join(dir, 'controlled-account-child.mjs');
-            await writeFile(child, `import {startChild} from ${JSON.stringify(pathToFileURL(resolve('dist/run/child.js')).href)};import {loadObservedBuild} from ${JSON.stringify(pathToFileURL(resolve('dist/compat/runtime-versions.js')).href)};import {playwrightBrowserFactory} from ${JSON.stringify(pathToFileURL(resolve('dist/run/browser.js')).href)};const actualBuild=loadObservedBuild(${JSON.stringify(startup)});const originalLaunch=playwrightBrowserFactory.launch.bind(playwrightBrowserFactory);playwrightBrowserFactory.launch=async request=>{const handle=await originalLaunch(request);const create=handle.createObservationSession.bind(handle);handle.createObservationSession=config=>{const session=create(config),acquire=session.acquire.bind(session),invoke=session.invoke.bind(session);session.acquire=async request=>{const result=await acquire(request);if(request.locator.kind==='role'&&request.locator.name==='Confirmation')await fetch(${JSON.stringify(origin+'/acquisition')},{method:'POST',body:result.kind});return result;};session.invoke=async (...args)=>{const result=await invoke(...args);const request=args[0];await fetch(${JSON.stringify(origin+'/invocation')},{method:'POST',body:request.operation.kind});return result;};return session;};return handle;};const mode=${JSON.stringify(mode)};const note=stage=>fetch(${JSON.stringify(origin + '/account')},{method:'POST',body:stage});const provider={async consume(){await note('consume');return {capability:{}}},async prepare(x){await note('prepare');if(mode==='prepare-failure')throw Error('PRIVATE-ACCOUNT-CANARY');return x},async apply(x){await note('apply');if(mode==='apply-delay')await new Promise(r=>setTimeout(r,250));if(mode==='apply-failure'){await new Promise(r=>setTimeout(r,150));throw Error('PRIVATE-ACCOUNT-CANARY');}if(mode==='cancel-apply'||mode==='drain-apply')await new Promise(()=>{});return x},async dispose(){await note('dispose')}};startChild(process,{observedBuild:actualBuild,observedAccounts:new Map([['fixture',provider]])});`);
+            const child = join(dir, 'controlled-observed-child.mjs');
+            await writeFile(child, `import {startChild} from ${JSON.stringify(pathToFileURL(resolve('dist/run/child.js')).href)};import {loadObservedBuild} from ${JSON.stringify(pathToFileURL(resolve('dist/compat/runtime-versions.js')).href)};import {playwrightBrowserFactory} from ${JSON.stringify(pathToFileURL(resolve('dist/run/browser.js')).href)};const actualBuild=loadObservedBuild(${JSON.stringify(startup)});const originalLaunch=playwrightBrowserFactory.launch.bind(playwrightBrowserFactory);playwrightBrowserFactory.launch=async request=>{const handle=await originalLaunch(request);const create=handle.createObservationSession.bind(handle);handle.createObservationSession=config=>{const session=create(config),acquire=session.acquire.bind(session),invoke=session.invoke.bind(session);session.acquire=async request=>{const result=await acquire(request);if(request.locator.kind==='role'&&request.locator.name==='Confirmation')await fetch(${JSON.stringify(origin+'/acquisition')},{method:'POST',body:result.kind});return result;};session.invoke=async (...args)=>{const result=await invoke(...args);const request=args[0];await fetch(${JSON.stringify(origin+'/invocation')},{method:'POST',body:request.operation.kind});return result;};return session;};return handle;};startChild(process,{observedBuild:actualBuild});`);
             for (let run = 0; run < (positive ? 2 : 1); run++) {
                 const now = Date.now(), issuedAt = new Date(now).toISOString(), expiresAt = new Date(now + 30000).toISOString(), executionId = uid(30 + run), attemptId = uid(40 + run), revisionDigest = 'c'.repeat(64), scopeHash = hashObserved(scope);
-                const authorization = { version: 1 as const, grantId: uid(50 + run), providerId: 'fixture', executionId, attemptId, revisionDigest, scope, scopeHash, issuedAt, expiresAt };
-                const binding = { version: 1 as const, executionId, attemptId, startedAt: issuedAt, revisionId: uid(70), revisionDigest, testId: uid(10), csiId: scope.csiId, principalId: scope.principalId, environment: scope.environment, artifactHash: frozen, configurationHash: artifact.configurationHash, learnedPlanHash: artifact.learnedPlanHash, referencePolicyHash: hashObserved(artifact.replayPolicy), publicationEvidenceHash: artifact.replayPolicy.publicationEvidenceHash, requiredProfile: OBSERVED_PROFILE, requiredBuild: build, scope, scopeHash, currentPolicyHash: hashObserved(policy), replayGrant: { version: 1 as const, grantId: uid(60 + run), executionId, attemptId, revisionId: uid(70), revisionDigest, principalId: scope.principalId, csiId: scope.csiId, scopeHash, profileHash: hashObserved(OBSERVED_PROFILE), buildHash: hashObserved(build), currentPolicyHash: hashObserved(policy), accountGrantId: authorization.grantId, issuedAt, expiresAt }, accountAuthorization: authorization };
-                const job: ObservedJob = { schemaVersion: 2, kind: 'observed', binding, artifact, configuration: fixture.basis.configuration as ObservedJob['configuration'], inputs: artifact.inputRecipes.map(i => ({ inputId: i.inputId, value: i.kind === 'destination' ? origin + '/start' : 'label' })), accountHandle: { version: 1, authorization, opaqueHandle: 'fixture' }, runtime: { stepTimeoutMs: 10000, totalRuntimeMs: 20000 }, recording: { width: 640, height: 480 } };
+                const binding = { version: 1 as const, executionId, attemptId, startedAt: issuedAt, revisionId: uid(70), revisionDigest, testId: uid(10), csiId: scope.csiId, principalId: scope.principalId, environment: scope.environment, artifactHash: frozen, configurationHash: artifact.configurationHash, learnedPlanHash: artifact.learnedPlanHash, referencePolicyHash: hashObserved(artifact.replayPolicy), publicationEvidenceHash: artifact.replayPolicy.publicationEvidenceHash, requiredProfile: OBSERVED_PROFILE, requiredBuild: build, scope, scopeHash, currentPolicyHash: hashObserved(policy), replayGrant: { version: 1 as const, grantId: uid(60 + run), executionId, attemptId, revisionId: uid(70), revisionDigest, principalId: scope.principalId, csiId: scope.csiId, scopeHash, profileHash: hashObserved(OBSERVED_PROFILE), buildHash: hashObserved(build), currentPolicyHash: hashObserved(policy),  issuedAt, expiresAt } };
+                const job: ObservedJob = { schemaVersion: 3, kind: 'observed', binding, artifact, configuration: fixture.basis.configuration as ObservedJob['configuration'], inputs: artifact.inputRecipes.map(i => ({ inputId: i.inputId, value: i.kind === 'destination' ? origin + '/start' : 'label' })), secrets: {}, secretOrigins: {}, runtime: { stepTimeoutMs: 10000, totalRuntimeMs: 20000 }, recording: { width: 640, height: 480 } };
                 const launcher = createChildBrowserLauncher({ recording: job.recording, stepTimeoutMs: 10000, launchTimeoutMs: 30000, maxFailureMessageLength: 400, seekOriginCalibrationMs: 0, childModulePath: child });
                 const cfg = loadConfig({ STUDIO_RUNNER_PORT: '0', STUDIO_RUNNER_HOST: '127.0.0.1', STUDIO_RUNNER_SERVICE_IDENTITY: 'service', STUDIO_RUNNER_CALLBACK_IDENTITY: 'callback', STUDIO_RUNNER_CALLBACK_BASE_URL: origin, STUDIO_RUNNER_INSTANCE_ID: 'fixture-runner', STUDIO_RUNNER_SCRATCH_DIR: join(dir, 'scratch-' + String(run)), STUDIO_RUNNER_OBJECT_STORE_DIR: join(dir, 'objects-' + String(run)), STUDIO_RUNNER_DRAIN_TIMEOUT_MS: '100' });
-                const provider = { consume() { return Promise.resolve({ capability: {} }); }, prepare() { return Promise.resolve({ capability: {} }); }, apply() { return Promise.resolve({ capability: {} }); }, dispose() { return Promise.resolve(); } };
                 const sink = createRecordingLogSink();
-                const app = createApplication(cfg, { launcher, runtimeVersions: { playwright: '1.63.0', validatorSchema: '2.0.0', syntaxReference: '2.1.0', executor: '2.1.0' }, observed: { build, policies: [policy], accounts: new Map([['fixture', provider]]), validationEnabled: run === 0, replayEnabled: true }, logSink: sink });
-                let drained = false;
+                const app = createApplication(cfg, { listener: testListener, launcher, runtimeVersions: { playwright: '1.63.0', validatorSchema: '2.0.0', syntaxReference: '2.1.0', executor: '2.1.0' }, observed: { build, policies: [policy],  validationEnabled: run === 0, replayEnabled: true }, logSink: sink });
                 try {
                     const port = await app.start();
-                    const response = await fetch(`http://127.0.0.1:${String(port)}/v2/runs`, { method: 'POST', headers: { authorization: 'Bearer service', 'content-type': 'application/json' }, body: JSON.stringify(job) });
+                    const response = await secureFetch(`https://127.0.0.1:${String(port)}/v2/runs`, { method: 'POST', headers: { authorization: 'Bearer service', 'content-type': 'application/json' }, body: JSON.stringify(job) });
                     expect(response.status, await response.text()).toBe(202);
-                    if (mode === 'cancel-apply' || mode === 'drain-apply') {
-                        await untilMs(() => accountStages.includes('apply'), 10000);
-                        if (mode === 'cancel-apply')
-                            expect(app.coordinator.cancel(executionId).status).toBe(202);
-                        else {
-                            await app.drain();
-                            drained = true;
-                        }
-                    }
+
                     await untilMs(() => app.coordinator.inFlight === 0, 30000);
                     const final = reports.filter(r => r.kind === 'FINAL').at(-1);
                     expect(rejectedReports,'receiver rejects PROGRESS before STARTED').toEqual([]);
                     expect(final).toBeDefined();
                     expect(ownership.get(executionId)?.state).toBe('FINAL');
-                    if (mode === 'apply-delay') {
-                        const steps = required(final).steps as {
-                            startedAtMs: number;
-                        }[];
-                        expect(required(steps[0]).startedAtMs).toBeGreaterThanOrEqual(250);
-                    }
-                    expect(final).toMatchObject({ outcome: { result: positive ? 'PASSED' : 'ERROR' } });
+
+                    expect(final).toMatchObject({ outcome: { result: positive ? 'PASSED' : mode === 'password' || mode === 'sensitive-descendant' ? 'FAILED' : 'ERROR' } });
                     const prefix = `studio/${binding.csiId}/${binding.testId}/${executionId}/${attemptId}`;
                     const manifest = JSON.parse(await readFile(join(dir, 'objects-' + String(run), prefix + '.result.json'), 'utf8')) as Record<string, unknown>;
-                    expect(manifest).toMatchObject({ outcome: positive ? 'PASSED' : 'ERROR', evidenceState: mode === 'prepare-failure' ? 'UNAVAILABLE' : 'STORED', artifactHash: frozen });
-                    if (mode !== 'prepare-failure')
+                    expect(manifest).toMatchObject({ outcome: positive ? 'PASSED' : mode === 'password' || mode === 'sensitive-descendant' ? 'FAILED' : 'ERROR', evidenceState: 'STORED', artifactHash: frozen });
                         expect((await readFile(join(dir, 'objects-' + String(run), prefix + '.webm'))).length).toBeGreaterThan(0);
-                    if (preReady) {
-                        expect(manifest.browserStartedAt).toBeNull();
-                        expect(manifest.durationMs).toBeNull();
-                        expect(reports.map(r=>r.kind)).toEqual(['FINAL']);
-                        expect(required(final).browserStartedAt).toBeNull();
-                        expect(manifest.evidencePartial).toBe(false);
-                        expect(sink.lines.join('\n')).not.toContain('ownership_lost');
-                        expect(accountStages.filter(x => x === 'consume')).toHaveLength(1);
-                        expect(accountStages.filter(x => x === 'apply')).toHaveLength(mode === 'prepare-failure' ? 0 : 1);
-                        expect(accountStages.filter(x => x === 'dispose')).toHaveLength(1);
-                        const steps = required(final).steps as {
-                            status: string;
-                            startedAtMs: number | null;
-                            finishedAtMs: number | null;
-                            durationMs: number | null;
-                        }[];
-                        expect(steps).toHaveLength(3);
-                        for (const step of steps)
-                            expect(step).toMatchObject({ status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null });
-                    }
+
                     const retained = JSON.stringify({ reports, sink: sink.lines, manifest });
                     expect(retained).not.toContain('fresh-');for(const value of issuedValues)expect(retained).not.toContain(value);
                     expect(retained).not.toContain('UNKNOWN-PAGE-CANARY');
                     expect(retained).not.toContain('PRIVATE-ACCOUNT-CANARY');
                     expect(hashObserved(artifact)).toBe(frozen);
-                    const evidenceFile=process.env.OBS006_PRE_READY_EVIDENCE_FILE;
-                    if(preReady&&evidenceFile){
-                        const videoBytes=mode==='prepare-failure'?null:(await readFile(join(dir,'objects-'+String(run),prefix+'.webm'))).length;
-                        await appendFile(evidenceFile,JSON.stringify({mode,admissions,accountStages,reportKinds:reports.map(r=>r.kind),rejectedReports,final,manifest,videoBytes})+'\n');
-                    }
+
                 }
                 finally {
-                    if (!drained)
                         await app.drain();
                 }
             }
             expect(admissions).toBe(positive ? 2 : 1);
-            expect(visits).toBe(preReady ? 0 : positive ? 2 : 1);
+            expect(visits).toBe(positive ? 2 : 1);
             expect(receipts).toEqual(positive||asynchronous?issuedValues:[]);
             if(asynchronous){expect(acquisitions).toContain('ABSENT');expect(invocations.filter(kind=>kind==='read')).toHaveLength(positive?2:1);expect(invocations.filter(kind=>kind==='fill')).toHaveLength(positive?4:2);expect(invocations.filter(kind=>kind==='assert')).toHaveLength(positive?2:0);if(positive)expect(acquisitions.filter(kind=>kind==='READY')).toHaveLength(2);else expect(acquisitions).not.toContain('READY');}
         }

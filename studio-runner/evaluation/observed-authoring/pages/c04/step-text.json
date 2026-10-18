@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C04-account-save",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "2425ffe4-a99b-4c05-833d-31dce9e1d717",
+        "text": "Open <var trialUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "efff2f5f-cf2f-4fa9-8907-ff1cd5273d53",
+        "text": "Click Log in.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "b57c2f9d-ff09-4543-88fe-d6c2a82fa26d",
+        "text": "Click Save target.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "6862b9ce-2804-4a2c-8b02-c2064c37b405",
+        "text": "Check that the page shows Saved target.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "trialUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/trial"
+    }
+  ]
+}

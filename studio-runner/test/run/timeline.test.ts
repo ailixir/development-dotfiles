@@ -11,19 +11,15 @@
  * Every assertion below is about one of the four consequences ADR-002 §11.6 assigns here (O-8):
  * the process-origin default gone from production, the two reads paired, the **scale** asserted
  * rather than the shape, and a report with `browserStartedAt: null` carrying no reading.
+ *
+ * The AC-11.3 cases drove the artifact-1 `executeSteps` with an injected clock and were deleted
+ * with it (STUDIO-OBS-012A AC-3); the observed child takes the same origin (`takeRunOrigin`) at
+ * recording-context readiness.
  */
 import { describe, expect, it } from 'vitest';
 
-import { executeSteps } from '../../src/executor/executor.js';
-import {
-  createFakeBrowserAdapter,
-  createFakeClock,
-  createRecordingStepReporter,
-} from '../helpers/fakeAdapters.js';
-import { createValueResolver } from '../../src/executor/executor.js';
 import {
   systemOriginSource,
-  takeProcessOriginForFalsification,
   takeRunOrigin,
 } from '../../src/run/timeline.js';
 import type { OriginSource } from '../../src/run/timeline.js';
@@ -164,72 +160,5 @@ describe('story 10.32 AC-2 — the seek-origin calibration', () => {
     const source = countingSource([5_000, 9_999], [0]);
     takeRunOrigin(source, 50);
     expect(source.monotonicReads).toEqual([5_000]);
-  });
-});
-
-describe('AC-11.3 — the scale, falsified', () => {
-  /**
-   * The runner's contract-test validator implements `$ref`/`type`/`required`/`properties`/
-   * `additionalProperties`/`enum`/`allOf`/`anyOf`/`oneOf`/`const` and **ignores `minimum`**
-   * (ADR-002 §11.6 item 3). The `minimum: 0` the amendment added is therefore documentary, and no
-   * schema can tell a process-origin reading from a legitimate late one. The scale has to be
-   * asserted by a test, and the test has to be shown failing under the defect.
-   */
-  const SMALL_BOUND_MS = 250;
-
-  it('puts the first step reading within a small, named bound of 0', async () => {
-    const origin = takeRunOrigin();
-    const result = await executeSteps({
-      steps: [{ stepIndex: 0, operations: [] }],
-      adapter: createFakeBrowserAdapter(),
-      reporter: createRecordingStepReporter(),
-      resolver: createValueResolver({}),
-      clock: origin.clock,
-    });
-    const startedAtMs = result.steps[0]?.startedAtMs ?? Number.NaN;
-    expect(startedAtMs).toBeGreaterThanOrEqual(0);
-    expect(startedAtMs).toBeLessThan(SMALL_BOUND_MS);
-  });
-
-  it('FAILS under a process-origin clock — the defect this story closes', async () => {
-    // A plausible process uptime at the moment a pod admits its first run: the image started,
-    // configuration loaded, the server bound a port, an admission round trip completed. The
-    // number is injected rather than read from this test process so the falsification is
-    // deterministic — a guard that only fails on a slow machine is not a guard.
-    const uptimeMs = 87_432.5;
-    const defective = takeProcessOriginForFalsification(countingSource([uptimeMs], [0]));
-    const result = await executeSteps({
-      steps: [{ stepIndex: 0, operations: [] }],
-      adapter: createFakeBrowserAdapter(),
-      reporter: createRecordingStepReporter(),
-      resolver: createValueResolver({}),
-      clock: defective.clock,
-    });
-    const startedAtMs = result.steps[0]?.startedAtMs ?? Number.NaN;
-    // The same assertion as above, inverted: the reading is the process uptime, not an offset
-    // from the browser start. Under the merged code every reading the runner produced looked like
-    // this — and `minimum: 0` was satisfied by all of them, which is why the schema could not see
-    // it and this test has to (ADR-002 §11.6 item 3).
-    expect(startedAtMs).toBeGreaterThan(SMALL_BOUND_MS);
-    expect(startedAtMs).toBe(uptimeMs);
-    // And the origin it reports is not the browser start at all: `startedAtMs` on the origin is
-    // the uptime rather than 0, so the STARTED log line and the step readings disagree.
-    expect(defective.startedAtMs).not.toBe(0);
-  });
-
-  it('the fake clock’s startMs is not what makes the bound pass', async () => {
-    // `createFakeClock`'s default `startMs = 1_000` is a number nobody chose for this property.
-    // Running the same case at 0 and at a deliberately large offset shows the executor reports
-    // whatever clock it is given: the scale is a property of the *origin*, not of the fake.
-    for (const startMs of [0, 1_000, 5_000_000]) {
-      const result = await executeSteps({
-        steps: [{ stepIndex: 0, operations: [] }],
-        adapter: createFakeBrowserAdapter(),
-        reporter: createRecordingStepReporter(),
-        resolver: createValueResolver({}),
-        clock: createFakeClock(startMs),
-      });
-      expect(result.steps[0]?.startedAtMs).toBe(startMs);
-    }
   });
 });

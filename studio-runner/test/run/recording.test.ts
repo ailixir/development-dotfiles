@@ -15,7 +15,11 @@ import {
   WEBM_MAGIC,
   evidenceFor,
   hasWebmHeader,
+  inspectRecordingFile,
 } from '../../src/run/recording.js';
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
 import type { RecordingObservation } from '../../src/run/recording.js';
 
 function observed(overrides: Partial<RecordingObservation> = {}): RecordingObservation {
@@ -92,5 +96,19 @@ describe('the webm header check', () => {
     expect(hasWebmHeader(Uint8Array.from([0x1a, 0x45]))).toBe(false);
     expect(hasWebmHeader(Uint8Array.from([0x00, 0x00, 0x00, 0x00]))).toBe(false);
     expect(hasWebmHeader(Uint8Array.from([]))).toBe(false);
+  });
+});
+
+describe('inspectRecordingFile (shared by the replay child and the guided session, STUDIO-OBS-013)', () => {
+  it('reads four bytes and the size, and reports a missing file and no path honestly', async () => {
+    const directory = await mkdtemp(join(tmpdir(), 'inspect-recording-'));
+    try {
+      const path = join(directory, 'video.webm');
+      const body = Buffer.alloc(MIN_PLAYABLE_RECORDING_BYTES, 1); body.set(WEBM_MAGIC, 0); await writeFile(path, body);
+      expect(await inspectRecordingFile(path, false)).toEqual({ attempted: true, path, bytes: MIN_PLAYABLE_RECORDING_BYTES, header: true, error: null, orderlyClose: false });
+      expect(evidenceFor(await inspectRecordingFile(path))).toMatchObject({ state: 'PENDING', partial: false });
+      expect(await inspectRecordingFile(null)).toEqual({ attempted: true, path: null, bytes: null, header: false, error: null, orderlyClose: true });
+      expect(await inspectRecordingFile(join(directory, 'absent.webm'), true)).toMatchObject({ attempted: true, bytes: null, header: false, error: 'Error' });
+    } finally { await rm(directory, { recursive: true, force: true }); }
   });
 });

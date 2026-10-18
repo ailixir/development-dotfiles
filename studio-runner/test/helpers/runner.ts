@@ -1,5 +1,6 @@
+import {currentJob as declaredCurrentJob} from './currentWorlds.js';
 /**
- * Fakes and helpers for the 10.6 suite.
+ * Fakes and helpers for the server suite (10.6), retargeted at `POST /v2/runs` by STUDIO-OBS-012A.
  *
  * They live under `test/` rather than `src/` on purpose: a fake browser launcher has no business
  * being shipped inside the image whose entire job is to be the only thing that launches a real
@@ -15,23 +16,39 @@
  * that moved scratch creation before the CAS, or the `202` before the admission call, changes the
  * sequence in that array and fails an equality assertion — it is not merely "no adapter was
  * called", it is "the calls happened in this exact order".
+ *
+ * ## The fake session is an observed one
+ *
+ * The artifact-1 in-process session (a fake `BrowserAdapter` the coordinator drove with
+ * `executeSteps`) was deleted with the artifact-1 engine. A fake session now has the shape every
+ * real one has — a `run` that reports the admitted observed job's steps through the coordinator's
+ * reporter and can be killed — and a test steers it with a {@link FakeRunScript}: pass, fail at a
+ * step, or hang in a step until the parent ends the run.
  */
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
-import { connect } from 'node:net';
 import type { Socket } from 'node:net';
+import { connect } from 'node:tls';
+import { testTls } from './guidedTls.js';
 
-import type { BrowserAdapter } from '../../src/executor/adapters/BrowserAdapter.js';
-import { createFakeBrowserAdapter } from './fakeAdapters.js';
-import type { FakeBrowserAdapter } from './fakeAdapters.js';
+import {publicationFixture as fixture} from './publicationFixture.js';
+import type { BuildIdentity, ObservedJob, TrustedPolicy } from '../../src/executor/observedOperations.js';
+import type { StepReporter } from '../../src/executor/stepReporter.js';
+import type { ObservedRunnerSupport } from '../../src/server/runCoordinator.js';
+import { OBSERVED_SCHEMA_BUNDLE_HASH } from '../../src/validator/observedReferencePolicy.js';
 import type {
   BrowserLauncher,
   BrowserSession,
   LaunchOptions,
   RunScratch,
   ScratchStore,
+  SessionKillReason,
+  SessionRecording,
+  SessionRunResult,
 } from '../../src/server/adapters.js';
 import type { HttpClient, HttpOutcome, HttpRequest } from '../../src/reporting/httpClient.js';
+import { ObservedPreReadyFailure } from '../../src/run/errors.js';
+import { CANCELLED_MESSAGE, TOTAL_TIMEOUT_MESSAGE } from '../../src/run/launcher.js';
 
 // ── Shared ordered event log ──────────────────────────────────────────────────────────────────
 
@@ -79,7 +96,11 @@ export interface FakeHttpClient extends HttpClient {
   readonly reportRequests: readonly RecordedHttpRequest[];
   /** `GET …/control` reads (ADR-002 §29), kept apart so report counts stay report counts. */
   readonly controlRequests: readonly RecordedHttpRequest[];
-  /** Outcome for the next admission call, or a function of (request, call index). */
+  /**
+   * Outcome for the next admission call, or a function of (request, call index). Defaults to
+   * {@link observedAdmissionReceipt}: a closed receipt echoing the request, which is what the API's
+   * observed CAS answers when it grants the admission.
+   */
   admissionOutcome: OutcomeSource;
   reportOutcome: OutcomeSource;
   controlOutcome: OutcomeSource;
@@ -88,6 +109,29 @@ export interface FakeHttpClient extends HttpClient {
 }
 
 const OK: HttpOutcome = { kind: 'response', status: 200, body: '{}' };
+
+/**
+ * The API's answer to a granted observed admission: a closed receipt that echoes the request
+ * byte-for-byte, with a start deadline 30 s and a run deadline 60 s out (on the real wall clock,
+ * because `admitObserved` checks the receipt against `Date.now()`).
+ */
+export function observedAdmissionReceipt(request: HttpRequest): HttpOutcome {
+  const body = JSON.parse(request.body) as { admissionId: string };
+  const now = Date.now();
+  return {
+    kind: 'response',
+    status: 200,
+    body: JSON.stringify({
+      schemaVersion: 3,
+      kind: 'observed',
+      admissionId: body.admissionId,
+      request: body,
+      admittedAt: new Date(now - 1).toISOString(),
+      startDeadlineAt: new Date(now + 30_000).toISOString(),
+      runDeadlineAt: new Date(now + 60_000).toISOString(),
+    }),
+  };
+}
 
 /**
  * @param onReportRequest observes a report request **at the instant it is handed to the
@@ -112,7 +156,7 @@ export function createFakeHttpClient(
     admissionRequests,
     reportRequests,
     controlRequests,
-    admissionOutcome: OK,
+    admissionOutcome: observedAdmissionReceipt,
     reportOutcome: OK,
     controlOutcome: { kind: 'response', status: 200, body: '{"cancelRequested":false}' },
     holdAdmission(): () => void {
@@ -132,7 +176,7 @@ export function createFakeHttpClient(
         body: request.body,
       };
       requests.push(recorded);
-      const isAdmission = request.url.endsWith('/admission');
+      const isAdmission = request.url.endsWith('/observed-admission');
       if (isAdmission) {
         admissionRequests.push(recorded);
         log?.push('admission.request');
@@ -162,22 +206,19 @@ export function createFakeHttpClient(
 /**
  * A single-winner compare-and-set standing in for the API's ledger (AC-7b).
  *
- * The CAS itself is story 10.7's; this fake plays its part here exactly as the fake browser and
- * storage adapters play theirs. The property under test on the runner side is that the runner
- * *obeys* the verdict and never acts on a non-success.
+ * The CAS itself is the API's; this fake plays its part here exactly as the fake browser and
+ * storage adapters play theirs. The first admission for an attempt is granted with a closed
+ * receipt; a different `admissionId` for the same attempt is refused `409`. The property under
+ * test on the runner side is that the runner *obeys* the verdict and never acts on a non-success.
  */
 export function singleWinnerAdmission(): (request: HttpRequest) => HttpOutcome {
   const owners = new Map<string, string>();
   return (request: HttpRequest): HttpOutcome => {
     const parsed = JSON.parse(request.body) as { attemptId: string; admissionId: string };
     const existing = owners.get(parsed.attemptId);
-    if (existing === undefined) {
+    if (existing === undefined || existing === parsed.admissionId) {
       owners.set(parsed.attemptId, parsed.admissionId);
-      return { kind: 'response', status: 200, body: '{}' };
-    }
-    if (existing === parsed.admissionId) {
-      // Duplicate identical admission is idempotent (architecture §5.1.4).
-      return { kind: 'response', status: 200, body: '{}' };
+      return observedAdmissionReceipt(request);
     }
     return { kind: 'response', status: 409, body: '{"code":"ADMISSION_COMPETING"}' };
   };
@@ -185,27 +226,84 @@ export function singleWinnerAdmission(): (request: HttpRequest) => HttpOutcome {
 
 // ── Fake browser launcher ─────────────────────────────────────────────────────────────────────
 
+/** How a fake session's run behaves. The default passes every step of the admitted job. */
+export interface FakeRunScript {
+  /** The step that fails; later steps are reported `SKIPPED` with null timings. */
+  readonly failAt?: number | undefined;
+  /** The closed error code the failing step and the result carry. Defaults to an assertion. */
+  readonly errorCode?: string | undefined;
+  /** The step the run hangs in until the parent ends it (`SessionRun.kill`). */
+  readonly hangAt?: number | undefined;
+  /** The recording the session reports. Defaults to a playable, complete one. */
+  readonly recording?: SessionRecording | undefined;
+  /** Whether the ordered stop the kill performs "completes". Defaults to true. */
+  readonly orderedStop?: boolean | undefined;
+}
+
+/** A recording that flushed cleanly: playable, complete, not yet stored. */
+export const FAKE_RECORDING: SessionRecording = {
+  path: '/fake-scratch/video/app.webm',
+  bytes: 24_576,
+  error: null,
+  state: 'PENDING',
+  partial: false,
+};
+
+/** What a fake session saw happen to it. */
+export interface FakeSession {
+  readonly options: LaunchOptions;
+  /** Every kill the parent ordered, by reason, in order. */
+  readonly kills: SessionKillReason[];
+  /** Steps the run reported as started, in order. */
+  readonly started: number[];
+  /** Whether the run is currently hanging in a step. */
+  readonly hanging: boolean;
+}
+
 export interface FakeBrowserLauncher extends BrowserLauncher {
   readonly launches: readonly LaunchOptions[];
-  readonly adapters: readonly FakeBrowserAdapter[];
+  readonly sessions: readonly FakeSession[];
   readonly closed: number;
   /** Makes the next launch reject, so the never-started path can be exercised (AC-14a). */
   failNextLaunch(error: Error): void;
   /** Holds the launch open until the returned function is called. */
   holdLaunch(): () => void;
+  /** The script the next launched session runs. Sticky until replaced. */
+  script: FakeRunScript;
 }
 
+/** The real launcher's classification of a kill (`src/run/launcher.ts`), mirrored. */
+const KILL_KINDS: Readonly<Record<SessionKillReason, string>> = {
+  'total-runtime': 'total-timeout',
+  drain: 'run-fault',
+  cancel: 'cancelled',
+};
+
+const KILL_TEXT: Readonly<Record<SessionKillReason, string>> = {
+  'total-runtime': TOTAL_TIMEOUT_MESSAGE,
+  drain: 'The runner drained while this run was still in flight; the browser process tree was stopped.',
+  cancel: CANCELLED_MESSAGE,
+};
+
+/**
+ * A launcher whose sessions run the admitted observed job in-process.
+ *
+ * Step readings are on a fake run clock (`10 * (stepIndex + 1)`, `+5` for the finish), the way the
+ * child reports readings on its own scale and the parent passes them through. The kill classifies
+ * the reason first and then ends the run, as the real launcher does (`src/run/launcher.ts`).
+ */
 export function createFakeBrowserLauncher(log?: EventLog): FakeBrowserLauncher {
   const launches: LaunchOptions[] = [];
-  const adapters: FakeBrowserAdapter[] = [];
+  const sessions: FakeSession[] = [];
   let closed = 0;
   let failure: Error | null = null;
   let release: (() => void) | null = null;
   let gate: Promise<void> | null = null;
 
-  return {
+  const launcher: FakeBrowserLauncher = {
     launches,
-    adapters,
+    sessions,
+    script: {},
     get closed(): number {
       return closed;
     },
@@ -223,7 +321,22 @@ export function createFakeBrowserLauncher(log?: EventLog): FakeBrowserLauncher {
       };
     },
     async launch(options: LaunchOptions): Promise<BrowserSession> {
-      if (gate !== null) await gate;
+      if (gate !== null) {
+        // A held launch is abortable, as the real one is: the coordinator aborts the launch it is
+        // waiting on for a cancel or a drain, and the session never starts.
+        const signal = options.signal;
+        await Promise.race([
+          gate,
+          new Promise<void>((resolve) => {
+            signal?.addEventListener('abort', () => {
+              resolve();
+            }, { once: true });
+          }),
+        ]);
+      }
+      if (options.signal?.aborted === true) {
+        throw new ObservedPreReadyFailure('CANCELLED', { path: null, bytes: null, error: null, state: 'UNAVAILABLE', partial: false });
+      }
       if (failure !== null) {
         const error = failure;
         failure = null;
@@ -231,18 +344,84 @@ export function createFakeBrowserLauncher(log?: EventLog): FakeBrowserLauncher {
       }
       launches.push(options);
       log?.push('browser.launch');
-      const adapter = createFakeBrowserAdapter();
-      adapters.push(adapter);
+      const script = launcher.script;
+      const steps = options.observed.job.artifact.steps;
+      let endRun: ((reason: SessionKillReason) => void) | null = null;
+      let killReason: SessionKillReason | null = null;
+      const session: FakeSession & { hanging: boolean } = {
+        options,
+        kills: [],
+        started: [],
+        hanging: false,
+      };
+      sessions.push(session);
+      let closedOnce = false;
       return {
-        adapter: adapter as BrowserAdapter,
         close(): Promise<void> {
-          closed += 1;
-          log?.push('browser.close');
+          if (!closedOnce) {
+            closedOnce = true;
+            closed += 1;
+            log?.push('browser.close');
+          }
           return Promise.resolve();
+        },
+        run: {
+          origin: { browserStartedAt: new Date('2026-09-11T10:00:00.000Z'), startedAtMs: 0 },
+          async execute({ reporter }: { reporter: StepReporter }): Promise<SessionRunResult> {
+            const recording = script.recording ?? FAKE_RECORDING;
+            const result = (ok: boolean, failureKind: string | null, failureMessage: string | null): SessionRunResult => ({
+              ok,
+              failureKind,
+              failureMessage,
+              recording,
+              observedHosts: [],
+              secretUse: {},
+            });
+            for (const step of steps) {
+              const index = step.stepIndex;
+              const startedAtMs = 10 * (index + 1);
+              session.started.push(index);
+              reporter.stepStarted({ stepIndex: index, startedAtMs });
+              if (script.hangAt === index && killReason === null) {
+                session.hanging = true;
+                await new Promise<void>((resolve) => {
+                  endRun = (): void => {
+                    resolve();
+                  };
+                });
+                session.hanging = false;
+              }
+              if (killReason !== null) {
+                const failure = killReason === 'cancel' ? 'CANCELLED' : 'TIMEOUT';
+                reporter.stepFinished({ stepIndex: index, status: 'FAIL', startedAtMs, finishedAtMs: startedAtMs + 5, durationMs: 5, failure });
+                for (const later of steps.filter((entry) => entry.stepIndex > index)) {
+                  reporter.stepFinished({ stepIndex: later.stepIndex, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, failure: null });
+                }
+                return result(false, KILL_KINDS[killReason], KILL_TEXT[killReason]);
+              }
+              if (script.failAt === index) {
+                const code = script.errorCode ?? 'ASSERTION_FAILED';
+                reporter.stepFinished({ stepIndex: index, status: 'FAIL', startedAtMs, finishedAtMs: startedAtMs + 5, durationMs: 5, failure: code });
+                for (const later of steps.filter((entry) => entry.stepIndex > index)) {
+                  reporter.stepFinished({ stepIndex: later.stepIndex, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, failure: null });
+                }
+                return result(false, code === 'ASSERTION_FAILED' ? 'step' : 'run-fault', code);
+              }
+              reporter.stepFinished({ stepIndex: index, status: 'PASS', startedAtMs, finishedAtMs: startedAtMs + 5, durationMs: 5, failure: null });
+            }
+            return result(true, null, null);
+          },
+          kill(reason: SessionKillReason): Promise<{ orderedStopCompleted: boolean }> {
+            killReason ??= reason;
+            session.kills.push(reason);
+            endRun?.(reason);
+            return Promise.resolve({ orderedStopCompleted: script.orderedStop ?? true });
+          },
         },
       };
     },
   };
+  return launcher;
 }
 
 // ── Fake scratch store ────────────────────────────────────────────────────────────────────────
@@ -293,44 +472,57 @@ export function createFakeScratchStore(log?: EventLog): FakeScratchStore {
 
 // ── Job bodies ────────────────────────────────────────────────────────────────────────────────
 
-/** A job whose artifact validates and whose two steps reach the fake adapter. */
-export function validJob(overrides: Record<string, unknown> = {}): Record<string, unknown> {
-  return {
-    executionId: 'exec-1',
-    attemptId: 'attempt-1',
-    revisionId: 'rev-1',
-    artifactHash: 'sha256:abc',
-    csi: 'CSI-1234',
-    videoKey: 'studio/exec-1/video.webm',
-    manifestKey: 'studio/exec-1/manifest.json',
-    source: ['Go to "https://example.com/login"', 'Type "<secret PW>" in the password field'],
-    artifact: {
-      version: 1,
-      steps: [
-        {
-          stepIndex: 0,
-          originalText: 'Go to "https://example.com/login"',
-          code: "await page.goto('https://example.com/login');",
-        },
-        {
-          stepIndex: 1,
-          originalText: 'Type "<secret PW>" in the password field',
-          code: "await page.getByTestId('password').fill(vars.secret('PW'));",
-        },
-      ],
-    },
-    references: { variables: [], secrets: ['PW'] },
-    resolvedVars: {},
-    resolvedSecrets: { PW: 'canary-secret-value' },
-    configuration: {
-      browser: 'chromium',
-      viewport: { width: 1280, height: 720 },
-      timeoutSeconds: 30,
-      waitStrategy: 'load',
-    },
-    deadlines: { admittedStartMs: 30_000, totalRuntimeMs: 120_000 },
-    ...overrides,
-  };
+/** The build identity this checkout's observed schema bundle produces. */
+export const OBSERVED_BUILD: BuildIdentity = { ...fixture.build, schemaBundleHash: OBSERVED_SCHEMA_BUNDLE_HASH };
+
+/** The trusted policy the fixture job's scope selects. */
+export const OBSERVED_POLICY = fixture.trustedPolicy as TrustedPolicy;
+
+/** Runner support that validates and replays the fixture job. */
+export const OBSERVED_SUPPORT: ObservedRunnerSupport = {
+  build: OBSERVED_BUILD,
+  policies: [OBSERVED_POLICY],
+  validationEnabled: true,
+  replayEnabled: true,
+};
+
+/** The fixture job's execution id, which is the path segment `DELETE /v2/runs/{id}` names. */
+export const OBSERVED_EXECUTION_ID: string = fixture.job.binding.executionId;
+
+/** The fixture job's attempt id. */
+export const OBSERVED_ATTEMPT_ID: string = fixture.job.binding.attemptId;
+
+/** The evidence keys the coordinator derives for a fixture job run with these ids. */
+export function observedEvidenceKeys(
+  executionId: string = OBSERVED_EXECUTION_ID,
+  attemptId: string = OBSERVED_ATTEMPT_ID,
+): { readonly videoKey: string; readonly manifestKey: string } {
+  const prefix = `studio/${fixture.job.binding.csiId}/${fixture.job.binding.testId}/${executionId}/${attemptId}`;
+  return { videoKey: `${prefix}.webm`, manifestKey: `${prefix}.result.json` };
+}
+
+/** The non-secret input values the fixture job carries; none may reach a log line. */
+export const OBSERVED_INPUT_VALUES: readonly string[] = fixture.job.inputs
+  .map((input) => input.value)
+  .filter((value) => value.trim() !== '');
+
+/**
+ * A closed observed job the runner admits: the v3 contract fixture with this checkout's build and
+ * a replay grant issued a moment ago. Three steps, no secrets.
+ *
+ * `executionId` / `attemptId` move the binding and the grant together, so two jobs can be distinct
+ * runs (or the same attempt raced by two runners) without breaking the grant join.
+ * `totalRuntimeMs` is the job's own runtime ask, which the coordinator clamps to the server limit.
+ */
+export function observedJob(
+  overrides: { readonly executionId?: string; readonly attemptId?: string; readonly totalRuntimeMs?: number } = {},
+): ObservedJob {
+  return declaredCurrentJob(OBSERVED_BUILD,overrides);
+}
+
+/** {@link observedJob}, serialized for `POST /v2/runs`. */
+export function observedBody(overrides: Parameters<typeof observedJob>[0] = {}): string {
+  return JSON.stringify(observedJob(overrides));
 }
 
 // ── Raw HTTP helpers ──────────────────────────────────────────────────────────────────────────
@@ -341,7 +533,10 @@ export interface RawResponse {
   readonly body: string;
 }
 
-/** Minimal HTTP client for the real-server tests; `fetch` cannot interleave a body by hand. */
+/**
+ * Minimal HTTPS client for the real-server tests; `fetch` cannot interleave a body by hand. It presents the
+ * test controller certificate, the one the harness pins.
+ */
 export function post(
   port: number,
   path: string,
@@ -391,7 +586,7 @@ export function parseResponse(raw: string): RawResponse {
 
 function rawRequest(port: number, request: { head: string; body: string }): Promise<RawResponse> {
   return new Promise<RawResponse>((resolve, reject) => {
-    const socket = connect(port, '127.0.0.1', () => {
+    const socket = connect(port, '127.0.0.1', { ...testTls, rejectUnauthorized: true }, () => {
       // One write: a route that answers before reading the body (the 401/403 path, AC-2a) ends
       // its response while an unflushed upload is still in the socket, and Node then closes the
       // connection under it. Sending the whole request at once removes that race from the
@@ -434,11 +629,12 @@ export function postInterleaved(
   for (const [index] of bodies.entries()) {
     settled.push(
       new Promise<RawResponse>((resolve, reject) => {
-        const socket = connect(port, '127.0.0.1');
+        const socket = connect(port, '127.0.0.1', { ...testTls, rejectUnauthorized: true });
         sockets.push(socket);
         socket.setEncoding('utf8');
-        // Registered in the same synchronous pass as `connect`, so the event cannot be missed.
-        socket.on('connect', () => {
+        // Registered in the same synchronous pass as `connect`, so the event cannot be missed. The
+        // listener is TLS (STUDIO-OBS-009 AC-3): a connection is usable once the handshake is done.
+        socket.on('secureConnect', () => {
           connected += 1;
           if (connected === bodies.length) begin();
         });

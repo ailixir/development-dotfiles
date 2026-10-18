@@ -7,22 +7,22 @@ import { tmpdir } from 'node:os';
 import { TLSSocket } from 'node:tls';
 import { createGuidedServer,guidedCallback,guidedClaimClient,verifyGuidedJwt } from '../../src/guided/transport.js';
 import { launchGuidedBrowser } from '../../src/run/browser.js';
-import { guidedContext,proposal,dispatch,ownershipSession,assignmentFor } from '../helpers/guided.js';
+import { guidedContext,proposal,dispatch,ownershipSession,assignmentFor,withContextPolicy } from '../helpers/guided.js';
 import { testTls,testFingerprint,jwtPolicy,jwt,post } from '../helpers/guidedTls.js';
 import { identity,hash,validate } from '../../src/guided/contracts.js';
-import type { BridgeBootstrap,BridgePreparation,BridgeOutcome,Session,CommandsClaim,AssignmentReceipt,BridgeObservation } from '../../src/guided/types.js';
+import type { BridgeBootstrap,BridgePreparation,BridgeOrdinaryOutcome as BridgeOutcome,CommandsClaim,AssignmentReceipt,BridgeObservation } from '../../src/guided/types.js';
 
 it('uses real mTLS + service JWT for blank-to-Chromium control and data-free callbacks',async()=>{
   let receipts=0;const pages=httpServer((_req,res)=>{receipts++;res.setHeader('content-type','text/html');res.end('<button>Ready</button>');});await new Promise<void>(resolve=>pages.listen(0,'127.0.0.1',resolve));const pageAddress=pages.address();if(!pageAddress||typeof pageAddress==='string')throw new Error('PORT');
-  const messages:{route:string;body:unknown;key?:string}[]=[];const claims:CommandsClaim[]=[];let currentGrant:Session|null=null;
+  const messages:{route:string;body:unknown;key?:string}[]=[];const claims:CommandsClaim[]=[];let currentGrant:ReturnType<typeof ownershipSession>|null=null;
   const callbacks=httpsServer({...testTls,requestCert:true,rejectUnauthorized:true},(req,res)=>{
     try {expect(req.socket).toBeInstanceOf(TLSSocket);verifyGuidedJwt(req.headers.authorization,{...jwtPolicy,subject:'worker-one'},'studio-guided-controller','owning-worker');}catch{res.writeHead(401);res.end();return;}
     let text='';req.on('data',(b:Buffer)=>{text+=b.toString();});req.on('end',()=>{const route=req.url?.split('/').at(-1)??'';const body=JSON.parse(text) as unknown;if(route==='claim'){const command=validate<CommandsClaim>('commands',body,'claim');claims.push(command);if(!currentGrant){res.writeHead(409);res.end('{}');return;}currentGrant.owner.leaseExpiresAt=new Date(Math.min(Date.now()+30_000,Date.parse(currentGrant.expiresAt))).toISOString();res.writeHead(202);res.end(JSON.stringify(currentGrant));return;}messages.push({route,body,...(typeof req.headers['idempotency-key']==='string'?{key:req.headers['idempotency-key']}:{})});res.writeHead(202);res.end(JSON.stringify({sessionResponse:'x'.repeat(70_000)}));});
   });await new Promise<void>(resolve=>callbacks.listen(0,'127.0.0.1',resolve));const callbackAddress=callbacks.address();if(!callbackAddress||typeof callbackAddress==='string')throw new Error('PORT');
-  const directory=await mkdtemp(join(tmpdir(),'guided-wire-'));const context=guidedContext(`http://127.0.0.1:${String(pageAddress.port)}`);
+  const directory=await mkdtemp(join(tmpdir(),'guided-wire-'));const context=withContextPolicy(guidedContext(`http://127.0.0.1:${String(pageAddress.port)}`),{policyRuleId:'application',allowStructuralDiscovery:true,readGrants:[]});
   currentGrant=ownershipSession(context);const assignment=assignmentFor(context);
   const client={baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))};
-  const app=createGuidedServer({workerId:context.workerId,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,rules:[],applicationPolicy:{policyRuleId:'application',allowStructuralDiscovery:true},launch:launchGuidedBrowser,claim:guidedClaimClient(client),callback:guidedCallback({baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))})});
+  const app=createGuidedServer({workerId:context.workerId,journalDirectory:directory,tls:testTls,controllerJwt:jwtPolicy,controllerCertificateFingerprint256:testFingerprint,launch:launchGuidedBrowser,claim:guidedClaimClient(client),callback:guidedCallback({baseUrl:`https://127.0.0.1:${String(callbackAddress.port)}`,tls:testTls,controllerCertificateFingerprint256:testFingerprint,token:()=>Promise.resolve(jwt({aud:'studio-guided-controller',role:'owning-worker',sub:context.workerId}))})});
   await new Promise<void>(resolve=>app.server.listen(0,'127.0.0.1',resolve));const address=app.server.address();if(!address||typeof address==='string')throw new Error('PORT');const path=`/internal/v2/studio/guided-sessions/${context.sessionId}`;
   try {
     await expect(post(address.port,`${path}/context`,context,{certificate:false})).rejects.toThrow();
@@ -30,7 +30,7 @@ it('uses real mTLS + service JWT for blank-to-Chromium control and data-free cal
     expect((await post(address.port,`${path}/context`,context,{fence:2})).status).toBe(409);
     expect(receipts).toBe(0);expect((await post(address.port,`${path}/context`,context,{key:'unassigned'})).status).toBe(409);
     const assignmentText=JSON.stringify(assignment);
-    const malformed=[Buffer.from(assignmentText.replace('"schemaVersion":2','"schemaVersion":1,"schemaVersion":2')),Buffer.from(assignmentText.replace('"schemaVersion":2','"schemaVersion":1,"\\u0073chemaVersion":2')),Buffer.from(assignmentText+' {}'),Buffer.from(assignmentText.replace('"contract":2','"contract":1,"contract":2')),Buffer.from(assignmentText.replace('"expectedFence":0','"expectedFence":-0')),Buffer.concat([Buffer.from(assignmentText.slice(0,-1)+',"bad":"'),Buffer.from([0xc3,0x28]),Buffer.from('"}')])];
+    const malformed=[Buffer.from(assignmentText.replace('"schemaVersion":3','"schemaVersion":1,"schemaVersion":3')),Buffer.from(assignmentText.replace('"schemaVersion":3','"schemaVersion":1,"\\u0073chemaVersion":2')),Buffer.from(assignmentText+' {}'),Buffer.from(assignmentText.replace('"contract":3','"contract":1,"contract":3')),Buffer.from(assignmentText.replace('"expectedFence":0','"expectedFence":-0')),Buffer.concat([Buffer.from(assignmentText.slice(0,-1)+',"bad":"'),Buffer.from([0xc3,0x28]),Buffer.from('"}')])];
     for(const raw of malformed){const denied=await post(address.port,`${path}/assign`,assignment,{fence:null,raw});expect(denied.status).toBe(409);expect(denied.body).toEqual({code:'SCHEMA'});expect(claims).toHaveLength(0);expect(receipts).toBe(0);}
     const firstOwned=await post(address.port,`${path}/assign`,assignment,{fence:null});expect(firstOwned.status).toBe(200);expect(claims).toHaveLength(1);expect(receipts).toBe(0);
     // Real wall clock and real mutually authenticated claim HTTP: no fixture impersonation.

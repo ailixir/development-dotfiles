@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { createApplication } from '../../src/server/application.js';
 import { loadConfig } from '../../src/server/config.js';
 import { createLocalObjectStore } from '../../src/run/objectStore.js';
+import { testFingerprint, testTls } from '../helpers/guidedTls.js';
 import { createFakeBrowserLauncher } from '../helpers/runner.js';
 
 describe('local evidence survives the runner lifecycle', () => {
@@ -23,7 +24,7 @@ describe('local evidence survives the runner lifecycle', () => {
       STUDIO_RUNNER_CALLBACK_BASE_URL: 'http://127.0.0.1:8080',
       STUDIO_RUNNER_SCRATCH_DIR: scratch, STUDIO_RUNNER_OBJECT_STORE_DIR: objects,
     });
-    const app = createApplication(config, { launcher: createFakeBrowserLauncher(), runtimeVersions: {}, logSink: { write: () => undefined } });
+    const app = createApplication(config, { listener: { tls: testTls, controllerCertificateFingerprint256: testFingerprint }, launcher: createFakeBrowserLauncher(), runtimeVersions: {}, logSink: { write: () => undefined } });
     let started = false;
     try {
       await app.start();

@@ -1,7 +1,7 @@
 /**
- * `POST /v1/runs` order of operations and admission verdicts.
+ * `POST /v2/runs` order of operations and admission verdicts.
  *
- * AC-6, AC-7, AC-8, AC-9, AC-10. The interleaved and two-instance races live in
+ * AC-6, AC-7, AC-9, AC-10. The interleaved and two-instance races live in
  * `test/server/concurrency.test.ts`; this file establishes the single-request behaviour those
  * races depend on.
  *
@@ -11,13 +11,20 @@
  * assertions below compare the *exact order* in which those boundaries were crossed. Moving
  * scratch creation ahead of the admission call changes the array and fails, even though the same
  * set of calls happened.
+ *
+ * STUDIO-OBS-012A AC-3 deleted the artifact-1 run route and its admission client. The observed
+ * admission client accepts only a closed receipt echoing the request and answers every other
+ * outcome — a `409`, a `401`/`403`, a timeout, a transport loss, a `5xx`, a redirect — with
+ * `503 ADMISSION_NOT_ACKNOWLEDGED`, sent once. The AC-8 cases that asserted the artifact-1 client's
+ * distinct refusal codes, the artifact-1 runtime-version report and its ambiguity counter were
+ * deleted with it, as was the artifact-validator refusal.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
 import type { HttpOutcome } from '../../src/reporting/httpClient.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
+import { observedBody, observedJob, post } from '../helpers/runner.js';
 
 let harness: Harness | null = null;
 
@@ -32,8 +39,8 @@ afterEach(async () => {
   harness = null;
 });
 
-async function submit(runner: Harness, body = validJob()): Promise<number> {
-  const response = await post(runner.port, '/v1/runs', JSON.stringify(body), SERVICE_TOKEN);
+async function submit(runner: Harness, body = observedBody()): Promise<number> {
+  const response = await post(runner.port, '/v2/runs', body, SERVICE_TOKEN);
   return response.status;
 }
 
@@ -59,33 +66,13 @@ describe('AC-6 — order of operations', () => {
 
   it('an invalid envelope reaches neither the pool nor the API', async () => {
     const runner = await start();
-    expect(await submit(runner, validJob({ attemptId: '' }))).toBe(400);
+    expect(await submit(runner, JSON.stringify({ ...observedJob(), schemaVersion: 2 }))).toBe(400);
     expect(runner.log.events).toEqual([]);
-    expect(runner.app.pool.inUse).toBe(0);
-  });
-
-  it('an invalid artifact reaches neither the pool nor the API', async () => {
-    const runner = await start();
-    const status = await submit(
-      runner,
-      validJob({
-        source: ['Evaluate'],
-        artifact: {
-          version: 1,
-          steps: [{ stepIndex: 0, originalText: 'Evaluate', code: 'await page.evaluate("x");' }],
-        },
-        references: { variables: [], secrets: [] },
-        resolvedSecrets: {},
-      }),
-    );
-    expect(status).toBe(400);
-    expect(runner.log.events).toEqual([]);
-    expect(runner.http.requests).toEqual([]);
     expect(runner.app.pool.inUse).toBe(0);
   });
 
   const nonSuccess: readonly [string, HttpOutcome, number][] = [
-    ['409 competing', { kind: 'response', status: 409, body: '{"code":"ADMISSION_COMPETING"}' }, 409],
+    ['409 competing', { kind: 'response', status: 409, body: '{"code":"ADMISSION_COMPETING"}' }, 503],
     ['401', { kind: 'response', status: 401, body: '{}' }, 503],
     ['403', { kind: 'response', status: 403, body: '{}' }, 503],
     ['timeout', { kind: 'timeout' }, 503],
@@ -116,9 +103,15 @@ describe('AC-6 — order of operations', () => {
 describe('AC-7 — admission identity belongs to this instance and this run', () => {
   it('keeps runnerInstanceId stable and generates a fresh admissionId per run', async () => {
     const runner = await start();
-    await submit(runner, validJob({ executionId: 'exec-a', attemptId: 'attempt-a' }));
+    await submit(
+      runner,
+      observedBody({ executionId: '00000000-0000-4000-8000-00000000a0e1', attemptId: '00000000-0000-4000-8000-00000000a0a1' }),
+    );
     await until(() => runner.app.coordinator.inFlight === 0);
-    await submit(runner, validJob({ executionId: 'exec-b', attemptId: 'attempt-b' }));
+    await submit(
+      runner,
+      observedBody({ executionId: '00000000-0000-4000-8000-00000000b0e1', attemptId: '00000000-0000-4000-8000-00000000b0a1' }),
+    );
     await until(() => runner.app.coordinator.inFlight === 0);
 
     const bodies = runner.http.admissionRequests.map(
@@ -128,15 +121,6 @@ describe('AC-7 — admission identity belongs to this instance and this run', ()
     expect(bodies[0]?.runnerInstanceId).toBe('runner-a');
     expect(bodies[1]?.runnerInstanceId).toBe('runner-a');
     expect(bodies[0]?.admissionId).not.toBe(bodies[1]?.admissionId);
-  });
-
-  it('reports the recorded runtime versions on the admission request', async () => {
-    const runner = await start();
-    await submit(runner);
-    const body = JSON.parse(runner.http.admissionRequests[0]?.body ?? '{}') as {
-      runtimeVersions: Record<string, unknown>;
-    };
-    expect(body.runtimeVersions.playwright).toBe('1.63.0');
   });
 
   it.each(nonSuccessIdentities())(
@@ -160,39 +144,15 @@ function nonSuccessIdentities(): readonly [string, HttpOutcome][] {
   ];
 }
 
-describe('AC-8 — a definite refusal stops the run', () => {
-  it('409 answers 409 and is explicit about non-acceptance', async () => {
-    const runner = await start();
-    runner.http.admissionOutcome = {
-      kind: 'response',
-      status: 409,
-      body: '{"code":"ADMISSION_COMPETING"}',
-    };
-    const response = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
-    expect(response.status).toBe(409);
-    expect((JSON.parse(response.body) as { code: string }).code).toBe('ADMISSION_COMPETING');
-    expect(runner.app.logger.counters.snapshot()['runner.admission.refused']).toBe(1);
-  });
-
-  it.each([401, 403])('%s answers 503 ADMISSION_REJECTED and releases the slot', async (status) => {
-    const runner = await start();
-    runner.http.admissionOutcome = { kind: 'response', status, body: '{}' };
-    const response = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
-    expect(response.status).toBe(503);
-    expect((JSON.parse(response.body) as { code: string }).code).toBe('ADMISSION_REJECTED');
-    expect(runner.app.pool.inUse).toBe(0);
-  });
-});
-
 describe('AC-9 — an ambiguous outcome is not permission to replay', () => {
   const ambiguous: readonly [string, HttpOutcome, string][] = [
-    ['a 10 s timeout', { kind: 'timeout' }, 'ADMISSION_AMBIGUOUS_TIMEOUT'],
-    ['connection loss', { kind: 'transport', reason: 'ECONNRESET' }, 'ADMISSION_AMBIGUOUS_TRANSPORT'],
-    ['a 500', { kind: 'response', status: 500, body: '' }, 'ADMISSION_AMBIGUOUS_SERVER_ERROR'],
-    ['a 502', { kind: 'response', status: 502, body: '' }, 'ADMISSION_AMBIGUOUS_SERVER_ERROR'],
+    ['a 10 s timeout', { kind: 'timeout' }, 'ADMISSION_NOT_ACKNOWLEDGED'],
+    ['connection loss', { kind: 'transport', reason: 'ECONNRESET' }, 'ADMISSION_NOT_ACKNOWLEDGED'],
+    ['a 500', { kind: 'response', status: 500, body: '' }, 'ADMISSION_NOT_ACKNOWLEDGED'],
+    ['a 502', { kind: 'response', status: 502, body: '' }, 'ADMISSION_NOT_ACKNOWLEDGED'],
     // A followed redirect is a second admission POST wearing a different name.
-    ['a 307 redirect', { kind: 'response', status: 307, body: '' }, 'ADMISSION_AMBIGUOUS_REDIRECT'],
-    ['a 308 redirect', { kind: 'response', status: 308, body: '' }, 'ADMISSION_AMBIGUOUS_REDIRECT'],
+    ['a 307 redirect', { kind: 'response', status: 307, body: '' }, 'ADMISSION_NOT_ACKNOWLEDGED'],
+    ['a 308 redirect', { kind: 'response', status: 308, body: '' }, 'ADMISSION_NOT_ACKNOWLEDGED'],
   ];
 
   it.each(ambiguous)(
@@ -200,12 +160,7 @@ describe('AC-9 — an ambiguous outcome is not permission to replay', () => {
     async (_label, outcome, code) => {
       const runner = await start();
       runner.http.admissionOutcome = outcome;
-      const response = await post(
-        runner.port,
-        '/v1/runs',
-        JSON.stringify(validJob()),
-        SERVICE_TOKEN,
-      );
+      const response = await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
 
       expect(response.status).toBe(503);
       expect((JSON.parse(response.body) as { code: string }).code).toBe(code);
@@ -216,21 +171,6 @@ describe('AC-9 — an ambiguous outcome is not permission to replay', () => {
       expect(runner.app.pool.inUse).toBe(0);
     },
   );
-
-  it('records the ambiguity as a structured audit line plus a counter', async () => {
-    const runner = await start();
-    runner.http.admissionOutcome = { kind: 'timeout' };
-    await submit(runner);
-
-    expect(runner.app.logger.counters.snapshot()['runner.admission.ambiguous']).toBe(1);
-    const line = runner.sink.lines.find((entry) => entry.includes('admission.ambiguous'));
-    expect(line).toBeDefined();
-    const parsed = JSON.parse(line ?? '{}') as Record<string, unknown>;
-    expect(parsed.reason).toBe('TIMEOUT');
-    expect(parsed.attemptId).toBe('attempt-1');
-    // Identity fields only: no job values reached the audit line.
-    expect(line).not.toContain('canary-secret-value');
-  });
 
   it('the HTTP client never follows a redirect, so a 307 cannot become a second POST', async () => {
     const runner = await start();
@@ -244,13 +184,13 @@ describe('AC-10 — capacity saturation is a definite non-acceptance', () => {
   it('returns 429 with Retry-After and never contacts the API', async () => {
     const runner = await start();
     const release = runner.http.holdAdmission();
-    const first = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const first = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.http.admissionRequests.length === 1);
 
     const second = await post(
       runner.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ attemptId: 'attempt-2' })),
+      '/v2/runs',
+      observedBody({ attemptId: '00000000-0000-4000-8000-0000000000a2' }),
       SERVICE_TOKEN,
     );
 
@@ -269,18 +209,18 @@ describe('AC-10 — capacity saturation is a definite non-acceptance', () => {
   it('honours a larger configured pool', async () => {
     const runner = await start({ env: { STUDIO_RUNNER_POOL_SIZE: '2' } });
     const release = runner.http.holdAdmission();
-    const first = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const first = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     const second = post(
       runner.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ attemptId: 'attempt-2' })),
+      '/v2/runs',
+      observedBody({ executionId: '00000000-0000-4000-8000-0000000000e2', attemptId: '00000000-0000-4000-8000-0000000000a2' }),
       SERVICE_TOKEN,
     );
     await until(() => runner.http.admissionRequests.length === 2);
     const third = await post(
       runner.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ attemptId: 'attempt-3' })),
+      '/v2/runs',
+      observedBody({ executionId: '00000000-0000-4000-8000-0000000000e3', attemptId: '00000000-0000-4000-8000-0000000000a3' }),
       SERVICE_TOKEN,
     );
     expect(third.status).toBe(429);

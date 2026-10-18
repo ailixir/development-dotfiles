@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C07-ambiguous-search-locator",
+  "kind": "EXPECTED_OUTCOME",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "note": "Written before any run. Receipts are the fixture-owned app-side record (page views and posted events), not the model or runner result.",
+  "class": "P",
+  "receipts": {
+    "phases": {
+      "run": {
+        "actions": [
+          {
+            "type": "search.submit",
+            "fields": {
+              "term": "hosting"
+            }
+          }
+        ]
+      }
+    },
+    "views": {
+      "required": [
+        "search"
+      ],
+      "allowed": [
+        "search"
+      ]
+    }
+  },
+  "session": {
+    "terminal": [
+      "SUCCEEDED"
+    ],
+    "published": true,
+    "clarifications": 0
+  }
+}

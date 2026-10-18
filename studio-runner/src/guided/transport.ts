@@ -1,12 +1,13 @@
 import { createServer, request as httpsRequest } from 'node:https';
 import type { ServerOptions } from 'node:https';
-import type { IncomingMessage } from 'node:http';
+import type { IncomingMessage, ServerResponse } from 'node:http';
 import { TLSSocket, checkServerIdentity } from 'node:tls';
 import { verify, randomUUID, createPublicKey } from 'node:crypto';
 import { parseWireJson } from './json.js';
-import { hash, identity, insist, validate } from './contracts.js';
-import type { BridgeIdentity, Assignment, AssignmentStop, AssignmentLifecycle, Session } from './types.js';
+import { canonical, hash, identity, insist, validate } from './contracts.js';
+import type { BridgeIdentity, BridgeDispatch, BridgePrefixPrepare, BridgePrefixDriftCallback, Assignment, AssignmentStop, AssignmentLifecycle, Session } from './types.js';
 import { GuidedOwnership } from './ownership.js';
+import { describeStartFailure } from './diagnostics.js';
 import type { ClaimPort } from './ownership.js';
 import type { GuidedRuntimeOptions } from './runtime.js';
 
@@ -41,24 +42,63 @@ async function readBody(req: IncomingMessage): Promise<unknown> {
   for await (const raw of req) { const part = raw as Buffer; size += part.length; insist(size <= 1024 * 1024, 'SCHEMA'); parts.push(part); }
   try { return parseWireJson(Buffer.concat(parts)); } catch { throw new Error('SCHEMA'); }
 }
-export interface GuidedServerOptions extends GuidedRuntimeOptions {
-  tls: Pick<ServerOptions, 'key' | 'cert' | 'ca'>;
+/**
+ * The guided bridge without a listener (STUDIO-OBS-009 AC-1). The one runner listener
+ * (`src/server/server.ts`) hands every `/internal/v2/studio/guided-sessions/...` request to
+ * {@link GuidedBridge.handle}; the bridge owns the peer pin, the JWT and the session ownership, and
+ * owns no socket.
+ */
+export interface GuidedBridgeOptions extends GuidedRuntimeOptions {
   claim: ClaimPort;
   controllerJwt: GuidedJwtPolicy;
   /** Bind the service certificate as well as the issuer JWT to the controller. */
   controllerCertificateFingerprint256: string;
   capacity?: number;
 }
-export function createGuidedServer(options: GuidedServerOptions) {
+/** What `createGuidedServer` additionally takes: the TLS material of the listener it wraps. */
+export interface GuidedServerOptions extends GuidedBridgeOptions {
+  tls: Pick<ServerOptions, 'key' | 'cert' | 'ca'>;
+}
+export interface GuidedBridge {
+  /** One bridge request. Every refusal is a closed answer; nothing is thrown to the caller. */
+  handle(req: IncomingMessage, res: ServerResponse): void;
+  /**
+   * Stops every owned session with `CONTEXT_LOST` and waits for the recordings to settle. Rejects
+   * `CONTEXT_LOST` when any stop could not be confirmed (the slot is then held until the process ends).
+   */
+  closeSessions(): Promise<void>;
+}
+export function guidedDispatchIdentity(body: unknown): { digest: string; secretIdentity: string } {
+  insist(body && typeof body === 'object' && !Array.isArray(body), 'SCHEMA');
+  const { secret, ...publicBody } = body as Record<string, unknown>;
+  let secretIdentity = '';
+  if (secret !== undefined) {
+    const request = validate<BridgeDispatch>('bridge', body, 'dispatch');
+    insist(request.proposal.operation.kind === 'fill' && request.proposal.operation.value.kind === 'secretRef' && request.secret, 'SCHEMA');
+    secretIdentity = canonical({ secretId: request.secret.secretId, sourceInputId: request.proposal.operation.value.sourceInputId });
+  }
+  return { digest: hash(publicBody), secretIdentity };
+}
+/** Closed refusal vocabulary of the guided bridge: the source of truth for bridge#/definitions/refusal
+ * (STUDIO-OBS-014 AR-2 r14-stops ruling 2), whose `code` enum is this list plus the POLICY_DENIED fallback. */
+export const GUIDED_REFUSAL_CODES = ['AUTH_DENIED','IDEMPOTENCY_CONFLICT','SCHEMA','IDENTITY_MISMATCH','CAPACITY','CONTEXT_LOST','ALREADY_CONSUMED','BUSY','TARGET_CHANGED','PREPARATION_DENIED','ADMISSION_DENIED','BINDING_UNAVAILABLE','BINDING_DENIED','BINDING_ORDER','ACTION_ORDER','CONTEXT_REVISION','INPUT_IDENTITY','BUDGET_EXCEEDED'] as const;
+export const GUIDED_REFUSAL_REASONS = ['PASSWORD_TARGET_ABSENT','PASSWORD_TARGET_AMBIGUOUS','PASSWORD_FORM_ACTION_NOT_ALLOWED','PASSWORD_CONTROL_READ_REFUSED'] as const;
+export function createGuidedBridge(options: GuidedBridgeOptions): GuidedBridge {
   insist(!process.env.DEBUG && !process.env.PWDEBUG && !process.env.NODE_DEBUG && !process.env.NODE_OPTIONS, 'CONFIGURATION_DENIED');
+  insist((options.capacity ?? 1) === 1, 'CONFIGURATION_DENIED');
+  // STUDIO-OBS-014 AC-1: the policy is per session, from the hash-bound runner context only; neither a
+  // policy nor field rules may be configured on the server (ar-mounted-rules: refused in every form).
+  insist(!Object.hasOwn(options, 'applicationPolicy'), 'CONFIGURATION_DENIED');
+  insist(!Object.hasOwn(options, 'rules'), 'CONFIGURATION_DENIED');
   const ownership = new GuidedOwnership(options);
-  const replay = new Map<string, {digest:string;promise:Promise<unknown>}>();
-  const server = createServer({...options.tls,minVersion:'TLSv1.2',requestCert:true,rejectUnauthorized:true},(req,res)=>{
+  const replay = new Map<string, {digest:string;secretIdentity:string;promise:Promise<unknown>}>();
+  const handleRequest=(req:IncomingMessage,res:ServerResponse):void=>{
+    const began=Date.now();let routed:{operation:string;sessionId:string}|null=null;
     const handle=async():Promise<void>=>{
       insist(req.socket instanceof TLSSocket&&req.socket.authorized&&req.socket.getPeerCertificate().fingerprint256===options.controllerCertificateFingerprint256,'AUTH_DENIED');
       verifyGuidedJwt(req.headers.authorization,options.controllerJwt,'studio-guided-runner','backend-controller');
       insist(req.method==='POST'&&req.headers['content-type']?.split(';')[0]==='application/json','SCHEMA');
-      const route=/^\/internal\/v2\/studio\/guided-sessions\/([^/]+)\/(assign|context|prepare|dispatch|observe|stop)$/u.exec(req.url??'');insist(route,'SCHEMA');const sessionId=decodeURIComponent(route[1]??'');const operation=route[2];
+      const route=/^\/internal\/v2\/studio\/guided-sessions\/([^/]+)\/(assign|context|prepare|dispatch|observe|stop)$/u.exec(req.url??'');insist(route,'SCHEMA');const sessionId=decodeURIComponent(route[1]??'');const operation=route[2];routed={operation:operation??'',sessionId};
       const key=req.headers['idempotency-key'];insist(typeof key==='string'&&key.length>0&&key.length<=256,'SCHEMA');
       const body=await readBody(req);insist(body&&typeof body==='object'&&!Array.isArray(body),'SCHEMA');
       let envelope:BridgeIdentity|null=null;
@@ -66,16 +106,20 @@ export function createGuidedServer(options: GuidedServerOptions) {
         const assignment=validate<Assignment>('assignment',body);insist(assignment.sessionId===sessionId&&assignment.workerId===options.workerId&&req.headers['x-owner-fence']===undefined,'IDENTITY_MISMATCH');
       }else if(operation==='stop'&&'kind' in body&&body.kind==='assignment'){
         const stop=validate<AssignmentStop>('assignment-stop',body);insist(stop.assignment.sessionId===sessionId&&stop.assignment.workerId===options.workerId&&req.headers['x-owner-fence']===undefined,'IDENTITY_MISMATCH');
+      }else if(operation==='prepare' && 'kind' in body && body.kind==='prefix') {
+        const prefix = validate<BridgePrefixPrepare>('bridge', body, 'PrefixPrepare');
+        envelope = { ...prefix.request, versions: { contract: 3 } };
+        insist(envelope.sessionId===sessionId&&envelope.workerId===options.workerId&&req.headers['x-owner-fence']===String(envelope.ownerFence),'IDENTITY_MISMATCH');
       }else{
         envelope=validate<BridgeIdentity>('bridge',identity(body as BridgeIdentity),'identity');insist(envelope.sessionId===sessionId&&envelope.workerId===options.workerId&&req.headers['x-owner-fence']===String(envelope.ownerFence),'IDENTITY_MISMATCH');
       }
-      const replayKey=JSON.stringify([sessionId,operation,key]),digest=hash(body),prior=replay.get(replayKey);if(prior)insist(prior.digest===digest,'IDEMPOTENCY_CONFLICT');
+      const replayKey=JSON.stringify([sessionId,operation,key]),{digest,secretIdentity}=guidedDispatchIdentity(body),prior=replay.get(replayKey);if(prior)insist(prior.digest===digest&&prior.secretIdentity===secretIdentity,'IDEMPOTENCY_CONFLICT');
       const execute=async():Promise<unknown>=>{
         if(operation==='assign')return ownership.assign(body);
-        if(operation==='context')return ownership.context(body);
+        if(operation==='context')return ownership.context(body,key);
         if(operation==='stop')return ownership.stop(body);
         insist(envelope,'IDENTITY_MISMATCH');const runtime=ownership.getRuntime(envelope);
-        if(operation==='prepare')return runtime.prepare(body);
+        if(operation==='prepare')return 'kind' in body && body.kind==='prefix' ? runtime.preparePrefix(body) : runtime.prepare(body);
         if(operation==='observe')return runtime.refreshObservation(body,key);
         return runtime.dispatch(body);
       };
@@ -85,16 +129,31 @@ export function createGuidedServer(options: GuidedServerOptions) {
         // OWNED is current acknowledged authority, never a historical winning claim replay.
         if(operation==='assign')result=await execute();
         else{if(operation!=='stop'){insist(envelope,'IDENTITY_MISMATCH');ownership.getRuntime(envelope);}result=await prior.promise;if(operation==='observe'){insist(envelope,'IDENTITY_MISMATCH');result=ownership.getRuntime(envelope).currentObservation(result);}}
-      }else{insist(replay.size<10000,'CAPACITY');const promise=execute();replay.set(replayKey,{digest,promise});result=await promise;}
+      }else{insist(replay.size<10000,'CAPACITY');const promise=execute();replay.set(replayKey,{digest,secretIdentity,promise});result=await promise;}
       res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify(result));
     };
     void handle().catch((error:unknown)=>{
-      const code=error instanceof Error&&['AUTH_DENIED','IDEMPOTENCY_CONFLICT','SCHEMA','IDENTITY_MISMATCH','CAPACITY','CONTEXT_LOST','ALREADY_CONSUMED','BUSY','TARGET_CHANGED','PREPARATION_DENIED','ADMISSION_DENIED','BINDING_UNAVAILABLE','BINDING_DENIED','BINDING_ORDER','ACTION_ORDER','CONTEXT_REVISION','INPUT_IDENTITY','BUDGET_EXCEEDED'].includes(error.message)?error.message:'POLICY_DENIED';
-      if(!res.headersSent)res.writeHead(code==='AUTH_DENIED'?401:409,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({code}));
+      const code=error instanceof Error&&(GUIDED_REFUSAL_CODES as readonly string[]).includes(error.message)?error.message:'POLICY_DENIED';
+      const reason = error instanceof Error && (GUIDED_REFUSAL_REASONS as readonly string[]).includes(error.message) ? error.message : null;
+      // REL-001: a refused assign/context ends the session, so the worker says why on stderr. The wire answer below is unchanged.
+      if(code==='CONTEXT_LOST'&&routed&&(routed.operation==='assign'||routed.operation==='context')){
+        try{(options.diagnosticStderr??((text:string)=>{process.stderr.write(text);}))(describeStartFailure(error,{operation:routed.operation,sessionId:routed.sessionId,elapsedMs:Date.now()-began}));}catch{/* A diagnostic never changes the verdict. */}
+      }
+      if(!res.headersSent)res.writeHead(code==='AUTH_DENIED'?401:409,{'content-type':'application/json','cache-control':'no-store'});res.end(JSON.stringify({code,...(reason ? {reason} : {})}));
     });
-  });
+  };
+  return {handle:handleRequest,closeSessions:()=>ownership.close()};
+}
+/**
+ * The bridge wrapped in a listener of its own, with the timeouts of the one runner listener. Not used by
+ * the runner process (`main.ts` serves the bridge on the one listener); kept for the tiers that drive the
+ * bridge on its own socket.
+ */
+export function createGuidedServer(options: GuidedServerOptions) {
+  const bridge = createGuidedBridge(options);
+  const server = createServer({...options.tls,minVersion:'TLSv1.2',requestCert:true,rejectUnauthorized:true},(req,res)=>{bridge.handle(req,res);});
   server.requestTimeout = 15_000; server.headersTimeout = 10_000; server.timeout = 30_000;
-  return {server,async close(){const stopped=await Promise.allSettled([ownership.close()]);server.closeAllConnections();await new Promise<void>((resolve,reject)=>server.close(error=>{if(error)reject(error);else resolve();}));if(stopped.some(result=>result.status==='rejected'))throw new Error('CONTEXT_LOST');}};
+  return {server,async close(){const stopped=await Promise.allSettled([bridge.closeSessions()]);server.closeAllConnections();await new Promise<void>((resolve,reject)=>server.close(error=>{if(error)reject(error);else resolve();}));if(stopped.some(result=>result.status==='rejected'))throw new Error('CONTEXT_LOST');}};
 }
 export interface GuidedCallbackOptions {
   baseUrl: string;
@@ -129,16 +188,18 @@ async function controllerRequest(options: GuidedCallbackOptions, sessionId: stri
 }
 export function guidedCallback(options: GuidedCallbackOptions): GuidedRuntimeOptions['callback'] {
   return async(route,message,idempotencyKey)=>{
-    const definition=route==='bootstrap-evidence'?'bootstrap':route==='observations'?'observation':route==='outcomes'?'outcome':'lifecycle';
-    const notice=validate<BridgeIdentity|AssignmentLifecycle>('bridge',message,definition);
-    const assignment='kind' in notice ? notice.assignment : null;
-    const result=await controllerRequest(options,assignment?.sessionId??(notice as BridgeIdentity).sessionId,route,message,assignment?undefined:(notice as BridgeIdentity).ownerFence,idempotencyKey??randomUUID(),10_000);
+    const definition=route==='bootstrap-evidence'?'bootstrap':route==='observations'?'observation':route==='outcomes'?'outcome':route==='recording-evidence'?'recordingEvidence':'lifecycle';
+    const notice=validate<BridgeIdentity|AssignmentLifecycle|BridgePrefixDriftCallback>('bridge',message,definition);
+    const drift='kind' in notice && notice.kind==='prefixDrift' ? notice.receipt : null;
+    const assignment='kind' in notice && notice.kind==='assignment' ? notice.assignment : null;
+    const result=await controllerRequest(options,assignment?.sessionId??drift?.sessionId??(notice as BridgeIdentity).sessionId,route,message,assignment?undefined:drift?.ownerFence??(notice as BridgeIdentity).ownerFence,idempotencyKey??randomUUID(),10_000);
     insist(result.status===202,'CALLBACK_DENIED');
   };
 }
 export function guidedClaimClient(options: GuidedCallbackOptions): ClaimPort {
   return async(command,key,timeoutMs,signal)=>{
     const result=await controllerRequest(options,command.sessionId,'claim',command,command.expectedFence,key,timeoutMs,signal);
+    if (result.status === 403 || result.status === 409 && typeof result.body === 'object' && result.body !== null && 'code' in result.body && result.body.code === 'SECRET_USE_REVOKED') throw new Error('REVOKED');
     insist(result.status===202,'CLAIM_DENIED');
     return validate<Session>('session',result.body);
   };

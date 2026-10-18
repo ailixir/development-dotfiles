@@ -3,8 +3,11 @@
  * Emits `dist/runtime-versions.json` (10.2 AC-16, 10.3 AC-3, ADR-001 §4.2).
  *
  * The file records the four copies of the Playwright pin (declared, locked, image tag, runtime)
- * plus the browser build, Node, validator and executor versions, so every admission and final
- * report can state exactly what ran (architecture §4.6).
+ * plus the browser build and Node, and, once the packaged observed schemas exist, the observed
+ * identities (schema and reference bundle hashes, Chromium build, browser provenance, launcher
+ * sha256), so every admission and final report can state exactly what ran (architecture §4.6).
+ * The artifact-1 stamps (`artifact`, `validatorSchema`, `validatorParser`, `syntaxReference`,
+ * `executor`) are not recorded and nothing replaces them (STUDIO-OBS-009 AC-1 P2 a).
  *
  * This script *records*; it does not enforce. The equality check that fails the build on any
  * disagreement between these copies is `scripts/check-pins.mjs` (story 10.3).
@@ -19,7 +22,8 @@ import { readFileSync, writeFileSync, existsSync, readdirSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { createHash } from 'node:crypto';
 import { dirname, join } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';
+import { fileURLToPath } from 'node:url';
+import {readBrowserProvenance,fileSha256} from './browser-provenance.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -66,13 +70,12 @@ export function readChromiumBuild(browsersPath) {
 /**
  * Builds the recorded runtime versions.
  *
- * Pure apart from the two filesystem reads it is given explicit paths for, so the generation
+ * Pure apart from the filesystem reads it is given explicit paths for, so the generation
  * contract can be tested without running a build.
  *
- * @param {{root: string, versions: object, env: Record<string, string | undefined>,
- *          nodeVersion: string}} input
+ * @param {{root: string, env: Record<string, string | undefined>, nodeVersion: string}} input
  */
-export function buildRuntimeVersions({ root, versions, env, nodeVersion }) {
+export function buildRuntimeVersions({ root, env, nodeVersion }) {
   const readJson = (relative) => JSON.parse(readFileSync(join(root, relative), 'utf8'));
 
   const pkg = readJson('package.json');
@@ -80,13 +83,6 @@ export function buildRuntimeVersions({ root, versions, env, nodeVersion }) {
 
   const declaredPlaywright = pkg.dependencies?.playwright ?? null;
   const lockedPlaywright = lock.packages?.['node_modules/playwright']?.version ?? null;
-  const declaredTypescript = pkg.dependencies?.typescript ?? null;
-
-  if (versions.VALIDATOR_PARSER.version !== declaredTypescript) {
-    throw new Error(
-      `VALIDATOR_PARSER.version (${versions.VALIDATOR_PARSER.version}) does not match the pinned typescript dependency (${declaredTypescript}).`,
-    );
-  }
 
   const dockerfile = readFileSync(join(root, 'Dockerfile'), 'utf8');
   const imagePin = /^ARG PLAYWRIGHT_VERSION=(.+)$/m.exec(dockerfile)?.[1]?.trim() ?? null;
@@ -101,11 +97,6 @@ export function buildRuntimeVersions({ root, versions, env, nodeVersion }) {
     node: nodeVersion,
     nodeEngineRange: pkg.engines?.node ?? null,
     nodeMajorPin: nvmrc,
-    validatorSchema: versions.VALIDATOR_SCHEMA_VERSION,
-    validatorParser: `${versions.VALIDATOR_PARSER.name}@${versions.VALIDATOR_PARSER.version}`,
-    syntaxReference: versions.SYNTAX_REFERENCE_VERSION,
-    executor: versions.EXECUTOR_VERSION,
-    artifact: versions.ARTIFACT_VERSION,
     // `ARG IMAGE_TAG` in the Dockerfile, exported as an env var for this script (AC-3).
     // Absent, empty and whitespace-only all record as null so an unnamed image cannot pass
     // `--require-image` (QA MED-1).
@@ -120,21 +111,25 @@ export function writeRuntimeVersionsFile(input) {
   const runtimeVersions = buildRuntimeVersions(input);
   const fixtureRoot=join(input.root,'fixtures','observed-reference');
   const schemasPath=join(input.root,'dist','validator','observedSchemas.json');
-  if(existsSync(schemasPath)&&existsSync(fixtureRoot)){
+  if(existsSync(schemasPath)){
     const canonical=v=>v===null||typeof v!=='object'?JSON.stringify(v):Array.isArray(v)?'['+v.map(canonical).join(',')+']':'{'+Object.keys(v).sort().map(k=>JSON.stringify(k)+':'+canonical(v[k])).join(',')+'}';
     const hash=v=>createHash('sha256').update(canonical(v)).digest('hex');
     const references=Object.fromEntries(readdirSync(fixtureRoot).filter(n=>n.endsWith('.json')).sort().map(n=>[n,JSON.parse(readFileSync(join(fixtureRoot,n),'utf8'))]));
-    const choicePath=join(input.root,'..','docs','specs','studio-observed-authoring','contracts','v2','publication-fixtures.json');
+    const packagedChoice=references['accepted-observed-choice.json'];
+    if(!packagedChoice||packagedChoice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Observed choice reference evidence is missing or invalid.');
+    const choicePath=join(input.root,'..','docs','specs','studio-observed-authoring','contracts','v3','publication-fixtures.json');
     if(existsSync(choicePath)){
       const choice=JSON.parse(readFileSync(choicePath,'utf8')).observedChoice;
       if(!choice||choice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Observed choice reference evidence is missing or invalid.');
-      references['accepted-observed-choice.json']=choice;
+      if(hash(choice)!==hash(packagedChoice))throw new Error('Observed choice reference evidence is stale.');
     }
     writeFileSync(join(input.root,'dist','observed-reference.json'),JSON.stringify(references)+'\n');
     runtimeVersions.observedSchemaBundleHash=hash(JSON.parse(readFileSync(schemasPath,'utf8')));
     runtimeVersions.observedReferenceBundleHash=hash(references);
     const localBrowsers=envBrowserRoot(input.env);
     runtimeVersions.observedChromiumBuild=readChromiumBuild(localBrowsers);
+    runtimeVersions.observedBrowserProvenance=readBrowserProvenance(localBrowsers,runtimeVersions.observedChromiumBuild);
+    runtimeVersions.observedBrowserLauncherSha256=fileSha256(join(input.root,'dist','run','browser.js'));
   }
   const target = join(input.root, 'dist', 'runtime-versions.json');
   writeFileSync(target, `${JSON.stringify(runtimeVersions, null, 2)}\n`, 'utf8');
@@ -143,31 +138,24 @@ export function writeRuntimeVersionsFile(input) {
 
 /*
  * The CLI wrapper below is exercised by `npm run build` (CI stage 5), not by the unit tier: it
- * imports the freshly compiled `dist/versions.js`, which does not exist during `npm test`. Its
- * output is asserted by `check:pins`, which reads the file it writes. Everything it computes lives
- * in `buildRuntimeVersions` / `writeRuntimeVersionsFile` above and is covered there.
+ * writes into the real `dist/`, which does not exist during `npm test`. Its output is asserted by
+ * `check:pins`, which reads the file it writes. Everything it computes lives in
+ * `buildRuntimeVersions` / `writeRuntimeVersionsFile` above and is covered there.
  */
 /* v8 ignore start */
 
 /**
- * CLI entry point: loads the freshly compiled version constants and records them.
+ * CLI entry point: records the build's runtime identities next to the freshly compiled `dist/`.
  *
- * The constants are read from `dist/` rather than from `src/` on purpose — what is recorded must
- * be what the image will actually load.
+ * Nothing is read from the compiled version constants any more: the record is computed from the
+ * package files, the packaged observed schemas and references, the installed browser and the
+ * compiled launcher, which is what the image will actually load.
  */
 export async function runCli() {
   const root = join(here, '..');
-  const distVersions = join(root, 'dist', 'versions.js');
-  if (!existsSync(distVersions)) {
-    throw new Error(
-      'dist/versions.js is missing; run `tsc -p tsconfig.build.json` before this script.',
-    );
-  }
-  const versions = await import(pathToFileURL(distVersions).href);
 
   const target = writeRuntimeVersionsFile({
     root,
-    versions,
     env: process.env,
     nodeVersion: process.version,
   });

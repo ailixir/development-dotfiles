@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>City</title></head>
+<body>
+<main><h1>Delivery city</h1><form id="f"><label for="city">City</label><select id="city" name="c"><option>Paris</option><option>London</option><option>Berlin</option></select><button type="submit">Save</button></form><p id="s" role="status"></p></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+document.getElementById('f').addEventListener('submit',async(e)=>{e.preventDefault();await rec('city.save',{city:e.target.c.value});document.getElementById('s').textContent='Saved '+e.target.c.value;});
+</script>
+</body>
+</html>

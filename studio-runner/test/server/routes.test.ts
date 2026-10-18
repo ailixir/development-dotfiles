@@ -1,16 +1,25 @@
 /**
  * Routes, service identity, bounded bodies, validate and health/ready.
  *
- * AC-2a, AC-3, AC-4, AC-5, AC-11. Everything here runs against a real `node:http` listener on an
- * ephemeral port, because a handler called directly cannot show that identity is rejected *before
- * the body is read*, and cannot show that an oversized body is refused while it arrives.
+ * AC-2a, AC-3, AC-4, AC-11. Everything here runs against the real TLS listener (STUDIO-OBS-009
+ * AC-3: `node:https`, client certificate pinned) on an ephemeral port, because a handler called directly cannot show that identity is rejected *before
+ * the body is read*.
+ *
+ * STUDIO-OBS-012A AC-3 deleted the artifact-1 validate and run routes. The identity, health/ready,
+ * callback-destination and unknown-route cases are ported to `POST /v2/validate-observed` and
+ * `POST /v2/runs`; the cases that asserted the artifact-1 validate body codes and the artifact-1
+ * run-body refusal log line were deleted with the routes they described.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
+import fixture from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
 import { createIdentityChecker } from '../../src/server/identity.js';
 import { createHarness, SERVICE_TOKEN } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { get, post, validJob } from '../helpers/runner.js';
+import { OBSERVED_BUILD, OBSERVED_EXECUTION_ID, get, observedBody, observedJob, post } from '../helpers/runner.js';
+
+/** A validation request this checkout's build accepts. */
+const VALIDATION_REQUEST = JSON.stringify({ ...fixture.validationRequest, requiredBuild: OBSERVED_BUILD });
 
 let harness: Harness | null = null;
 
@@ -27,8 +36,8 @@ afterEach(async () => {
 
 describe('AC-2a — service identity on all four routes', () => {
   const routes: readonly [string, string][] = [
-    ['POST', '/v1/validate'],
-    ['POST', '/v1/runs'],
+    ['POST', '/v2/validate-observed'],
+    ['POST', '/v2/runs'],
     ['GET', '/health'],
     ['GET', '/ready'],
   ];
@@ -38,14 +47,14 @@ describe('AC-2a — service identity on all four routes', () => {
     const response =
       method === 'GET'
         ? await get(runner.port, path, null)
-        : await post(runner.port, path, JSON.stringify(validJob()), null);
+        : await post(runner.port, path, observedBody(), null);
 
     expect(response.status).toBe(401);
     const body = JSON.parse(response.body) as Record<string, unknown>;
     expect(body.code).toBe('IDENTITY_MISSING');
     // A code and no job detail: no execution id, no attempt id, no artifact, no stack.
     expect(Object.keys(body)).toEqual(['code']);
-    expect(response.body).not.toContain('exec-1');
+    expect(response.body).not.toContain(OBSERVED_EXECUTION_ID);
   });
 
   it.each(routes)('%s %s rejects a wrong credential with 403', async (method, path) => {
@@ -53,14 +62,14 @@ describe('AC-2a — service identity on all four routes', () => {
     const response =
       method === 'GET'
         ? await get(runner.port, path, 'not-the-token')
-        : await post(runner.port, path, JSON.stringify(validJob()), 'not-the-token');
+        : await post(runner.port, path, observedBody(), 'not-the-token');
     expect(response.status).toBe(403);
     expect((JSON.parse(response.body) as { code: string }).code).toBe('IDENTITY_REJECTED');
   });
 
   it('rejects a blank and a malformed credential distinctly', async () => {
     const runner = await start();
-    const blank = await post(runner.port, '/v1/runs', '{}', '   ');
+    const blank = await post(runner.port, '/v2/runs', '{}', '   ');
     expect(blank.status).toBe(401);
     const checker = createIdentityChecker(SERVICE_TOKEN);
     expect(checker.check('Basic abc')).toMatchObject({ status: 401, code: 'IDENTITY_MALFORMED' });
@@ -71,7 +80,7 @@ describe('AC-2a — service identity on all four routes', () => {
 
   it('rejects before any handler work: no slot is reserved and no admission is issued', async () => {
     const runner = await start();
-    await post(runner.port, '/v1/runs', JSON.stringify(validJob()), 'wrong');
+    await post(runner.port, '/v2/runs', observedBody(), 'wrong');
     expect(runner.app.pool.inUse).toBe(0);
     expect(runner.http.admissionRequests).toHaveLength(0);
     expect(runner.launcher.launches).toHaveLength(0);
@@ -99,16 +108,16 @@ describe('AC-11 — health and ready are four distinct states', () => {
     expect((await get(runner.port, '/ready', SERVICE_TOKEN)).status).toBe(200);
   });
 
-  it('saturated: health 200, ready STILL 200, and /v1/runs answers 429', async () => {
+  it('saturated: health 200, ready STILL 200, and /v2/runs answers 429', async () => {
     const runner = await start();
     const release = runner.http.holdAdmission();
-    const first = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const first = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     // The slot is held while the admission call is in flight.
     while (runner.http.admissionRequests.length === 0) await new Promise(setImmediate);
 
     const health = await get(runner.port, '/health', SERVICE_TOKEN);
     const ready = await get(runner.port, '/ready', SERVICE_TOKEN);
-    const second = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const second = await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
 
     expect(health.status).toBe(200);
     // Capacity saturation alone keeps readiness TRUE. This is the distinction that matters:
@@ -121,13 +130,13 @@ describe('AC-11 — health and ready are four distinct states', () => {
     await first;
   });
 
-  it('draining: health STILL 200, ready 503, and /v1/runs answers 503', async () => {
+  it('draining: health STILL 200, ready 503, and /v2/runs answers 503', async () => {
     const runner = await start();
     runner.app.pool.beginDrain();
 
     const health = await get(runner.port, '/health', SERVICE_TOKEN);
     const ready = await get(runner.port, '/ready', SERVICE_TOKEN);
-    const run = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const run = await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
 
     expect(health.status).toBe(200);
     expect((JSON.parse(health.body) as { draining: boolean }).draining).toBe(true);
@@ -140,68 +149,15 @@ describe('AC-11 — health and ready are four distinct states', () => {
   });
 });
 
-describe('AC-4, AC-5 — POST /v1/validate', () => {
-  it('validates without launching anything or creating scratch state', async () => {
-    const runner = await start();
-    const job = validJob();
-    const response = await post(
-      runner.port,
-      '/v1/validate',
-      JSON.stringify({ artifact: job.artifact, source: job.source, references: job.references }),
-      SERVICE_TOKEN,
-    );
-
-    expect(response.status).toBe(200);
-    const body = JSON.parse(response.body) as { ok: boolean; steps: { stepIndex: number }[] };
-    expect(body.ok).toBe(true);
-    expect(body.steps).toHaveLength(2);
-    expect(runner.launcher.launches).toEqual([]);
-    expect(runner.scratch.present).toEqual([]);
-    expect(runner.http.requests).toEqual([]);
-  });
-
-  it('returns bounded per-step diagnostics and never echoes the artifact', async () => {
-    const runner = await start();
-    const response = await post(
-      runner.port,
-      '/v1/validate',
-      JSON.stringify({
-        artifact: {
-          version: 1,
-          steps: [{ stepIndex: 0, originalText: 'Evaluate', code: 'await page.evaluate("x");' }],
-        },
-        source: ['Evaluate'],
-      }),
-      SERVICE_TOKEN,
-    );
-
-    expect(response.status).toBe(200);
-    const body = JSON.parse(response.body) as {
-      ok: boolean;
-      steps: { diagnostics: { code: string }[] }[];
-    };
-    expect(body.ok).toBe(false);
-    expect(body.steps[0]?.diagnostics.length).toBeGreaterThan(0);
-    // Diagnostics carry codes. The artifact's code text is not echoed back wholesale.
-    expect(response.body).not.toContain('await page.evaluate');
-    // No operation list escapes: the caller gets diagnostics, never something executable.
-    expect(response.body).not.toContain('"operations"');
-  });
-
+describe('AC-4 — POST /v2/validate-observed', () => {
   it('cannot reserve a capacity slot: it answers while the pool is fully saturated', async () => {
     const runner = await start();
     const release = runner.http.holdAdmission();
-    const run = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const run = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     while (runner.http.admissionRequests.length === 0) await new Promise(setImmediate);
     expect(runner.app.pool.inUse).toBe(1);
 
-    const job = validJob();
-    const response = await post(
-      runner.port,
-      '/v1/validate',
-      JSON.stringify({ artifact: job.artifact, source: job.source, references: job.references }),
-      SERVICE_TOKEN,
-    );
+    const response = await post(runner.port, '/v2/validate-observed', VALIDATION_REQUEST, SERVICE_TOKEN);
 
     expect(response.status).toBe(200);
     expect((JSON.parse(response.body) as { ok: boolean }).ok).toBe(true);
@@ -212,46 +168,10 @@ describe('AC-4, AC-5 — POST /v1/validate', () => {
     await run;
   });
 
-  it.each([
-    ['not JSON at all', 'this is not json', 400, 'BODY_NOT_JSON'],
-    ['a JSON array', '[1,2,3]', 400, 'BODY_NOT_OBJECT'],
-    ['an unknown key', '{"artifact":{},"source":[],"policy":{}}', 400, 'BODY_UNKNOWN_KEY'],
-    ['a non-string source', '{"artifact":{},"source":[1]}', 400, 'SOURCE_INVALID'],
-  ])('rejects %s with %s', async (_label, body, status, code) => {
-    const runner = await start();
-    const response = await post(runner.port, '/v1/validate', body, SERVICE_TOKEN);
-    expect(response.status).toBe(status);
-    expect((JSON.parse(response.body) as { code: string }).code).toBe(code);
-    // No stack trace, no file path.
-    expect(response.body).not.toMatch(/at .*\.ts:/u);
-    expect(response.body).not.toContain('/studio-runner/');
-  });
-
-  it('rejects an oversized body with 413 while it arrives', async () => {
-    const runner = await start({ env: { STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES: '512' } });
-    const oversized = JSON.stringify({ artifact: { pad: 'x'.repeat(4096) }, source: [] });
-    const response = await post(runner.port, '/v1/validate', oversized, SERVICE_TOKEN);
-    expect(response.status).toBe(413);
-    expect((JSON.parse(response.body) as { code: string }).code).toBe('BODY_TOO_LARGE');
-  });
-
-  it('rejects a source longer than the bound with 413', async () => {
-    const runner = await start();
-    const source = Array.from({ length: 101 }, (_value, index) => `Step ${String(index)}`);
-    const response = await post(
-      runner.port,
-      '/v1/validate',
-      JSON.stringify({ artifact: { version: 1, steps: [] }, source }),
-      SERVICE_TOKEN,
-    );
-    expect(response.status).toBe(413);
-    expect((JSON.parse(response.body) as { code: string }).code).toBe('SOURCE_TOO_MANY_STEPS');
-  });
-
   it('reports an over-budget validation rather than answering silently slowly', async () => {
     // The validator is synchronous and cannot be interrupted mid-call, so the wall-clock bound is
-    // enforced by the input bounds and *reported* on the way out. A clock that jumps past the
-    // budget between the two reads is exactly the situation the report exists for.
+    // *reported* on the way out. A clock that jumps past the budget between the two reads is
+    // exactly the situation the report exists for.
     let ticks = 0;
     const runner = await start({
       env: { STUDIO_RUNNER_VALIDATE_TIMEOUT_MS: '1' },
@@ -260,16 +180,10 @@ describe('AC-4, AC-5 — POST /v1/validate', () => {
         return ticks * 1000;
       },
     });
-    const job = validJob();
-    const response = await post(
-      runner.port,
-      '/v1/validate',
-      JSON.stringify({ artifact: job.artifact, source: job.source, references: job.references }),
-      SERVICE_TOKEN,
-    );
+    const response = await post(runner.port, '/v2/validate-observed', VALIDATION_REQUEST, SERVICE_TOKEN);
     expect(response.status).toBe(503);
     expect((JSON.parse(response.body) as { code: string }).code).toBe('VALIDATE_OVER_BUDGET');
-    expect(runner.app.logger.counters.snapshot()['runner.validate.over_budget']).toBe(1);
+    expect(runner.launcher.launches).toEqual([]);
   });
 });
 
@@ -286,18 +200,15 @@ describe('AC-3 — the callback destination is deployment configuration only', (
     const attacker = 'https://attacker.example/collect';
     const response = await post(
       runner.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ [key]: attacker })),
+      '/v2/runs',
+      JSON.stringify({ ...observedJob(), [key]: attacker }),
       SERVICE_TOKEN,
     );
 
+    // The observed job is a closed schema: the key is refused before capacity, by code only.
     expect(response.status).toBe(400);
-    const body = JSON.parse(response.body) as {
-      code: string;
-      detail: { code: string; field: string }[];
-    };
-    expect(body.code).toBe('JOB_INVALID');
-    expect(body.detail).toContainEqual({ code: 'JOB_CALLBACK_NOT_PERMITTED', field: key });
+    expect(JSON.parse(response.body)).toEqual({ code: 'INVALID_CONTRACT' });
+    expect(response.body).not.toContain('attacker');
     // Nothing left for the attacker's URL — not an admission, not a report, nothing.
     expect(runner.http.requests).toEqual([]);
     for (const request of runner.http.requests) expect(request.url).not.toContain('attacker');
@@ -307,22 +218,22 @@ describe('AC-3 — the callback destination is deployment configuration only', (
     const runner = await start();
     const response = await post(
       runner.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ reportingEndpointNobodyPredicted: 'https://elsewhere' })),
+      '/v2/runs',
+      JSON.stringify({ ...observedJob(), reportingEndpointNobodyPredicted: 'https://elsewhere' }),
       SERVICE_TOKEN,
     );
     expect(response.status).toBe(400);
-    const body = JSON.parse(response.body) as { detail: { code: string; field: string }[] };
-    expect(body.detail).toContainEqual({
-      code: 'JOB_UNKNOWN_KEY',
-      field: 'reportingEndpointNobodyPredicted',
-    });
+    expect(JSON.parse(response.body)).toEqual({ code: 'INVALID_CONTRACT' });
+    expect(runner.app.pool.inUse).toBe(0);
+    expect(runner.http.requests).toEqual([]);
   });
 
   it('sends every outbound request to the configured destination with the credential in a header', async () => {
     const runner = await start();
-    await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
+    await runner.app.coordinator.awaitInFlight(5_000);
     expect(runner.http.admissionRequests).toHaveLength(1);
+    expect(runner.http.reportRequests.length).toBeGreaterThan(0);
     for (const request of runner.http.requests) {
       expect(request.url.startsWith('https://api.internal.example/')).toBe(true);
       // No credential in any URL or query string.
@@ -339,136 +250,44 @@ describe('AC-3 — the callback destination is deployment configuration only', (
     expect((JSON.parse(response.body) as { code: string }).code).toBe('NOT_FOUND');
   });
 
+  it('serves none of the deleted artifact-1 routes (STUDIO-OBS-012A AC-3)', async () => {
+    const runner = await start();
+    for (const path of ['/v1/validate', '/v1/runs']) {
+      const response = await post(runner.port, path, observedBody(), SERVICE_TOKEN);
+      expect(response.status).toBe(404);
+      expect(JSON.parse(response.body)).toEqual({ code: 'NOT_FOUND' });
+    }
+    expect(runner.http.requests).toEqual([]);
+    expect(runner.app.pool.inUse).toBe(0);
+  });
+
   it('rejects a non-JSON run body', async () => {
     const runner = await start();
-    const response = await post(runner.port, '/v1/runs', 'nope', SERVICE_TOKEN);
+    const response = await post(runner.port, '/v2/runs', 'nope', SERVICE_TOKEN);
     expect(response.status).toBe(400);
-    expect((JSON.parse(response.body) as { code: string }).code).toBe('BODY_NOT_JSON');
+    expect((JSON.parse(response.body) as { code: string }).code).toBe('INVALID_CONTRACT');
     expect(runner.http.requests).toEqual([]);
   });
 });
 
-/**
- * Story 10.35 AC-3 (gate FAIL `AC3-RUNNER-SILENT-ON-BODY-REFUSAL`). The co-run harness tells
- * "refused the body" from "never reached" by whether the runner wrote anything while the dispatch
- * was in flight. A pre-admission refusal of `POST /v1/runs` must therefore write exactly one line,
- * and that line carries codes and field NAMES only: the body holds resolved secrets and job keys.
- */
-describe('Story 10.35 AC-3 — a refused run body is recorded, by code and field name only', () => {
-  const CANARIES = [
-    'canary-secret-value',
-    'exec-1',
-    'attempt-1',
-    'rev-1',
-    'sha256:abc',
-    'CSI-1234',
-    'studio/exec-1',
-    'example.com',
-    SERVICE_TOKEN,
-  ];
-
-  interface RefusalLine {
-    level: string;
-    event: string;
-    route: string;
-    status: number;
-    code: string;
-    problemCodes?: string;
-    problemFields?: string;
-  }
-
-  async function refusalWindow(
-    runner: Harness,
-    body: string,
-  ): Promise<{ status: number; lines: string[] }> {
-    const mark = runner.sink.lines.length;
-    const response = await post(runner.port, '/v1/runs', body, SERVICE_TOKEN);
-    return { status: response.status, lines: runner.sink.lines.slice(mark) };
-  }
-
-  function onlyRefusal(lines: readonly string[]): RefusalLine {
-    expect(lines).toHaveLength(1);
-    const line = JSON.parse(lines[0] ?? '{}') as RefusalLine;
-    expect(line.event).toBe('runs.refused');
-    expect(line.level).toBe('warn');
-    expect(line.route).toBe('/v1/runs');
-    // Never the identity shape: the harness would read that as "refused on IDENTITY".
-    expect(lines[0]).not.toContain('request.unauthenticated');
-    for (const canary of CANARIES) expect(lines[0]).not.toContain(canary);
-    return line;
-  }
-
-  it('records a missing required key as one JOB_INVALID line naming the field', async () => {
+describe('STUDIO-OBS-009 AC-1 — the guided bridge is not routed on a runner without guided mode', () => {
+  it('answers a guided session path with the replay 404 NOT_FOUND, before any JWT work', async () => {
     const runner = await start();
-    const job = validJob();
-    delete job.manifestKey;
-    const window = await refusalWindow(runner, JSON.stringify(job));
-    expect(window.status).toBe(400);
-    const line = onlyRefusal(window.lines);
-    expect(line).toMatchObject({
-      status: 400,
-      code: 'JOB_INVALID',
-      problemCodes: 'JOB_FIELD_MISSING',
-      problemFields: 'manifestKey',
-    });
-    expect(runner.app.logger.counters.snapshot()['runner.runs.refused']).toBe(1);
+    const path = '/internal/v2/studio/guided-sessions/00000000-0000-4000-8000-000000000001/assign';
+    const served = await post(runner.port, path, '{}', SERVICE_TOKEN);
+    expect(served.status).toBe(404);
+    expect(JSON.parse(served.body)).toEqual({ code: 'NOT_FOUND' });
+    // A token that is not even shaped like a JWT gets the same answer: nothing verified it.
+    const garbage = await post(runner.port, path, '{}', 'not.a.jwt');
+    expect(garbage.status).toBe(404);
+    expect(JSON.parse(garbage.body)).toEqual({ code: 'NOT_FOUND' });
   });
 
-  it('names an unknown key but never writes the value it carried', async () => {
+  it('keeps /ready at exactly its four fields and /health at its two (D1-T3 baseline: no guided field)', async () => {
     const runner = await start();
-    const window = await refusalWindow(
-      runner,
-      JSON.stringify(validJob({ webhookUrl: 'https://attacker.example/canary-secret-value' })),
-    );
-    const line = onlyRefusal(window.lines);
-    expect(line.code).toBe('JOB_INVALID');
-    expect(line.problemFields?.split(',')).toContain('webhookUrl');
-    expect(window.lines[0]).not.toContain('attacker');
-  });
-
-  it('records an artifact the validator refuses as one ARTIFACT_INVALID line', async () => {
-    const runner = await start();
-    const job = validJob();
-    const window = await refusalWindow(
-      runner,
-      JSON.stringify({
-        ...job,
-        artifact: {
-          version: 1,
-          steps: [{ stepIndex: 0, originalText: 'x', code: 'process.exit(1); // canary-secret-value' }],
-        },
-        source: ['x'],
-        references: { variables: [], secrets: [] },
-        resolvedSecrets: {},
-      }),
-    );
-    expect(window.status).toBe(400);
-    const line = onlyRefusal(window.lines);
-    expect(line.code).toBe('ARTIFACT_INVALID');
-    expect(line.problemFields).toMatch(/^artifact(,artifact)*$/u);
-  });
-
-  it('records a body that is not JSON as one BODY_NOT_JSON line without echoing it', async () => {
-    const runner = await start();
-    const window = await refusalWindow(runner, 'not json canary-secret-value');
-    expect(window.status).toBe(400);
-    expect(onlyRefusal(window.lines)).toMatchObject({ status: 400, code: 'BODY_NOT_JSON' });
-  });
-
-  it('records an oversized body as one BODY_TOO_LARGE line', async () => {
-    const runner = await start({ env: { STUDIO_RUNNER_MAX_REQUEST_BODY_BYTES: '512' } });
-    const window = await refusalWindow(
-      runner,
-      JSON.stringify(validJob({ pad: 'canary-secret-value'.repeat(200) })),
-    );
-    expect(window.status).toBe(413);
-    expect(onlyRefusal(window.lines)).toMatchObject({ status: 413, code: 'BODY_TOO_LARGE' });
-  });
-
-  it('writes no refusal line for a job it admits', async () => {
-    const runner = await start();
-    const window = await refusalWindow(runner, JSON.stringify(validJob()));
-    expect(window.status).toBe(202);
-    expect(window.lines.some((line) => line.includes('runs.refused'))).toBe(false);
+    const ready = await get(runner.port, '/ready', SERVICE_TOKEN);
+    expect(Object.keys(JSON.parse(ready.body) as object).sort()).toEqual(['draining', 'inUse', 'ready', 'size']);
+    const health = await get(runner.port, '/health', SERVICE_TOKEN);
+    expect(JSON.parse(health.body)).toEqual({ status: 'ok', draining: false });
   });
 });

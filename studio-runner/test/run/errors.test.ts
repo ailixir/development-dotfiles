@@ -6,7 +6,7 @@
  * **(a)** the set is disjoint from the API's `ExecutionErrorCode` **except for `TIMEOUT` and
  * `CANCELLED`**. Architecture §5.4 assigns every other value there to the dispatcher or a reaper;
  * §8.2 fixes the parent-enforced total timeout, and ADR-002 §29 (Studio v1 WP4) the run stopped by
- * `DELETE /v1/runs/{id}` — the two conditions both sides observe.
+ * `DELETE /v2/runs/{id}` — the two conditions both sides observe.
  *
  * The list is **read out of the contract**, never copied. Story 10.7 adds `AUTHORIZATION_REVOKED`
  * and `REFERENCE_UNAVAILABLE` in this same wave, so a frozen list of "the five this component
@@ -15,6 +15,11 @@
  *
  * **(b)** every code the runner can produce is in the set, enforced by an exhaustive switch over
  * the run's failure kinds, so a new kind fails the type-check rather than inventing a string.
+ *
+ * STUDIO-OBS-012A AC-3 removed the kinds only the artifact-1 run path produced (revalidation,
+ * runtime compatibility, the sandbox and multi-page refusals of the artifact-1 child, and the two
+ * executor refusals) with their codes; the case that tied the set to the deleted compatibility
+ * module's spelling went with them.
  */
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -29,7 +34,6 @@ import {
   resultFor,
 } from '../../src/run/errors.js';
 import type { RunFailureKind } from '../../src/run/errors.js';
-import { RUNTIME_INCOMPATIBLE } from '../../src/compat/index.js';
 import { packageRoot } from '../helpers/corpus.js';
 import { parseYaml } from '../helpers/openapi.js';
 
@@ -106,26 +110,13 @@ describe('AC-17(b) — the mapping is total in both directions', () => {
     }
   });
 
-  it('reuses the compat module’s code rather than declaring a second spelling of it', () => {
-    expect(RUNNER_ERROR_CODES.RUNTIME_INCOMPATIBLE).toBe(RUNTIME_INCOMPATIBLE);
-  });
-
   it('names each condition distinctly', () => {
     expect(new Set(RUNNER_ERROR_CODE_VALUES).size).toBe(RUNNER_ERROR_CODE_VALUES.length);
     expect(new Set(RUN_FAILURE_KINDS).size).toBe(RUN_FAILURE_KINDS.length);
   });
 
   it('covers every condition AC-17 enumerates', () => {
-    const required: readonly RunFailureKind[] = [
-      'artifact-revalidation',
-      'runtime-incompatible',
-      'browser-launch',
-      'sandbox-unavailable',
-      'start-deadline',
-      'unsupported-multi-page',
-      'recording',
-      'step',
-    ];
+    const required: readonly RunFailureKind[] = ['browser-launch', 'start-deadline', 'recording', 'step'];
     for (const kind of required) expect(RUN_FAILURE_KINDS).toContain(kind);
   });
 });

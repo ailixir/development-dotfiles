@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C05-login-var-secret",
+  "kind": "EXPECTED_OUTCOME",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "note": "Written before any run. Receipts are the fixture-owned app-side record (page views and posted events), not the model or runner result.",
+  "class": "P",
+  "receipts": {
+    "phases": {
+      "run": {
+        "actions": [
+          {
+            "type": "login.submit",
+            "fields": {
+              "username": "pilot-user",
+              "accepted": true
+            }
+          }
+        ]
+      }
+    },
+    "views": {
+      "required": [
+        "login",
+        "dashboard"
+      ],
+      "allowed": [
+        "login",
+        "dashboard"
+      ]
+    }
+  },
+  "session": {
+    "terminal": [
+      "SUCCEEDED"
+    ],
+    "published": true,
+    "clarifications": 0
+  }
+}

@@ -10,6 +10,12 @@
  * - **AC-20 redaction** is asserted on the *serialized request body and the string handed to the
  *   log sink*, not on the in-memory objects, because a field added later is only caught by
  *   inspecting the finished payload.
+ *
+ * Runs are submitted to `POST /v2/runs` with the fixture observed job (three steps) and executed by
+ * the harness's fake observed session (STUDIO-OBS-012A AC-3 deleted the artifact-1 run route and
+ * the in-process executor these cases used to drive). Two AC-20 cases that relied on the artifact-1
+ * run redacting free failure text from resolved job values were deleted with it: the observed
+ * child reports closed codes only.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -21,7 +27,14 @@ import { createRedactor, NULL_REDACTOR, REDACTION_PLACEHOLDER } from '../../src/
 import { createLogger, createRecordingLogSink } from '../../src/server/logging.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
+import {
+  OBSERVED_ATTEMPT_ID,
+  OBSERVED_EXECUTION_ID,
+  OBSERVED_INPUT_VALUES,
+  observedBody,
+  observedEvidenceKeys,
+  post,
+} from '../helpers/runner.js';
 
 let harness: Harness | null = null;
 
@@ -36,8 +49,8 @@ afterEach(async () => {
   harness = null;
 });
 
-async function runOnce(runner: Harness, body = validJob()): Promise<void> {
-  const response = await post(runner.port, '/v1/runs', JSON.stringify(body), SERVICE_TOKEN);
+async function runOnce(runner: Harness, body = observedBody()): Promise<void> {
+  const response = await post(runner.port, '/v2/runs', body, SERVICE_TOKEN);
   expect(response.status).toBe(202);
   await until(() => runner.app.coordinator.inFlight === 0);
 }
@@ -54,8 +67,8 @@ describe('AC-13 — every report carries the full identity and a cumulative snap
     const all = reports(runner);
     expect(all.length).toBeGreaterThanOrEqual(3);
     for (const report of all) {
-      expect(report.executionId).toBe('exec-1');
-      expect(report.attemptId).toBe('attempt-1');
+      expect(report.executionId).toBe(OBSERVED_EXECUTION_ID);
+      expect(report.attemptId).toBe(OBSERVED_ATTEMPT_ID);
       expect(report.admissionId).toMatch(
         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u,
       );
@@ -68,10 +81,7 @@ describe('AC-13 — every report carries the full identity and a cumulative snap
     const final = all.at(-1);
     expect(final?.kind).toBe('FINAL');
     expect(final?.outcome).toMatchObject({ result: 'PASSED' });
-    expect(final?.evidence).toMatchObject({
-      videoKey: 'studio/exec-1/video.webm',
-      manifestKey: 'studio/exec-1/manifest.json',
-    });
+    expect(final?.evidence).toMatchObject(observedEvidenceKeys());
   });
 
   it('runnerSequence is strictly increasing within the attempt and never reused', async () => {
@@ -91,7 +101,13 @@ describe('AC-13 — every report carries the full identity and a cumulative snap
 
     // Reports accumulate across runs in the fake client; slice from here for the second run.
     const before = runner.http.reportRequests.length;
-    await runOnce(runner, validJob({ executionId: 'exec-2', attemptId: 'attempt-2' }));
+    await runOnce(
+      runner,
+      observedBody({
+        executionId: '00000000-0000-4000-8000-000000000120',
+        attemptId: '00000000-0000-4000-8000-000000000121',
+      }),
+    );
     const secondAttempt = reports(runner)
       .slice(before)
       .map((report) => report.runnerSequence);
@@ -106,7 +122,7 @@ describe('AC-13 — every report carries the full identity and a cumulative snap
 
     const progress = reports(runner).filter((report) => report.kind === 'PROGRESS');
     const last = progress.at(-1);
-    expect(last?.steps.map((step) => step.stepIndex)).toEqual([0, 1]);
+    expect(last?.steps.map((step) => step.stepIndex)).toEqual([0, 1, 2]);
     expect(last?.steps.every((step) => step.status !== 'RUNNING')).toBe(true);
   });
 });
@@ -173,16 +189,15 @@ describe('AC-14a — STARTED is sent only once the browser has actually started'
 describe('AC-15 — the StepReporter seam, and reporting asynchronous to execution', () => {
   it("carries the executor's outcomes to the wire unchanged, null timings included", async () => {
     const runner = await start();
-    // Make step 0 fail so step 1 is SKIPPED with null timings.
     runner.launcher.holdLaunch()();
-    const response = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const response = await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     expect(response.status).toBe(202);
-    await until(() => runner.launcher.adapters.length === 1);
-    // The adapter has already run by the time we get here for a passing run; assert the shape.
+    await until(() => runner.launcher.sessions.length === 1);
+    // The session has already run by the time we get here for a passing run; assert the shape.
     await until(() => runner.app.coordinator.inFlight === 0);
 
     const final = reports(runner).at(-1);
-    expect(final?.steps).toHaveLength(2);
+    expect(final?.steps).toHaveLength(3);
     for (const step of final?.steps ?? []) {
       expect(['PASS', 'FAIL', 'SKIPPED']).toContain(step.status);
     }
@@ -190,16 +205,8 @@ describe('AC-15 — the StepReporter seam, and reporting asynchronous to executi
 
   it('reports SKIPPED steps with null timings when an earlier step fails', async () => {
     const runner = await start();
-    // A goto to a URL the fake adapter is told to reject.
-    const original = runner.launcher.launch.bind(runner.launcher);
-    Object.assign(runner.launcher, {
-      async launch(options: Parameters<typeof original>[0]) {
-        const session = await original(options);
-        const adapter = runner.launcher.adapters.at(-1);
-        adapter?.failOn('goto', new Error('NavigationError: refused'));
-        return session;
-      },
-    });
+    // The first step's assertion fails in the session.
+    runner.launcher.script = { failAt: 0 };
 
     await runOnce(runner);
     const final = reports(runner).at(-1);
@@ -228,10 +235,9 @@ describe('AC-15 — the StepReporter seam, and reporting asynchronous to executi
     const final = reports(runner).at(-1);
     expect(final?.kind).toBe('FINAL');
     expect(final?.outcome).toMatchObject({ result: 'PASSED' });
-    expect(final?.steps).toHaveLength(2);
+    expect(final?.steps).toHaveLength(3);
     // Each step ran exactly once despite every progress delivery failing.
-    const adapter = runner.launcher.adapters[0];
-    expect(adapter?.calls.filter((call) => call.method === 'goto')).toHaveLength(1);
+    expect(runner.launcher.sessions[0]?.started).toEqual([0, 1, 2]);
   });
 });
 
@@ -250,12 +256,11 @@ describe('AC-16 — progress delivery is best-effort and never re-runs work', ()
     const all = reports(runner);
     const final = all.at(-1);
     // Every step is reported correctly despite the first two deliveries failing.
-    expect(final?.steps.map((step) => step.stepIndex)).toEqual([0, 1]);
+    expect(final?.steps.map((step) => step.stepIndex)).toEqual([0, 1, 2]);
     expect(final?.steps.every((step) => step.status === 'PASS')).toBe(true);
     // Nothing ran twice.
-    const adapter = runner.launcher.adapters[0];
-    expect(adapter?.calls.filter((call) => call.method === 'goto')).toHaveLength(1);
-    expect(adapter?.calls.filter((call) => call.method === 'fill')).toHaveLength(1);
+    expect(runner.launcher.sessions).toHaveLength(1);
+    expect(runner.launcher.sessions[0]?.started).toEqual([0, 1, 2]);
     // The drops were recorded rather than retried.
     expect(runner.app.logger.counters.snapshot()['runner.report.progress_dropped']).toBe(2);
   });
@@ -462,12 +467,14 @@ describe('AC-19 — outbound bounds and the retained-log drop policy', () => {
   });
 
   it('never emits a body over the configured size', async () => {
-    // 700 bytes sits above the irreducible identity floor and below a full snapshot, so the
-    // reduction path is exercised rather than skipped.
-    const runner = await start({ env: { STUDIO_RUNNER_MAX_REPORT_BODY_BYTES: '700' } });
+    // 1800 bytes sits above the irreducible floor of an observed report (identity, the observed
+    // profile and build on `runtimeVersions`, the FINAL's outcome and evidence: ~1755 bytes) and
+    // below every full snapshot of the fixture job's run (1810+ bytes), so the reduction path is
+    // exercised rather than skipped. The artifact-1 run's floor was lower, which is why this was 700.
+    const runner = await start({ env: { STUDIO_RUNNER_MAX_REPORT_BODY_BYTES: '1800' } });
     await runOnce(runner);
     for (const request of runner.http.reportRequests) {
-      expect(Buffer.byteLength(request.body, 'utf8')).toBeLessThanOrEqual(700);
+      expect(Buffer.byteLength(request.body, 'utf8')).toBeLessThanOrEqual(1800);
     }
     // A reduced payload says so rather than pretending it is complete.
     const final = reports(runner).at(-1);
@@ -496,6 +503,8 @@ describe('AC-19 — outbound bounds and the retained-log drop policy', () => {
       'step 0 PASS',
       'step 1 started',
       'step 1 PASS',
+      'step 2 started',
+      'step 2 PASS',
       'run PASSED',
     ]);
   });
@@ -577,14 +586,7 @@ describe('ADR-002 §INT-1 — log lines carry timeline positions, not placeholde
 
   it('gives a skipped step no position, because it has no reading to be positioned by', async () => {
     const runner = await start({ now: tickingClock() });
-    const original = runner.launcher.launch.bind(runner.launcher);
-    Object.assign(runner.launcher, {
-      async launch(options: Parameters<typeof original>[0]) {
-        const session = await original(options);
-        runner.launcher.adapters.at(-1)?.failOn('goto', new Error('NavigationError: refused'));
-        return session;
-      },
-    });
+    runner.launcher.script = { failAt: 0 };
     await runOnce(runner);
 
     const final = reports(runner).at(-1);
@@ -621,14 +623,7 @@ describe('ADR-002 §33 — log lines name the step they are about', () => {
 
   it('carries stepIndex on a failing step line and on the skipped line after it', async () => {
     const runner = await start();
-    const original = runner.launcher.launch.bind(runner.launcher);
-    Object.assign(runner.launcher, {
-      async launch(options: Parameters<typeof original>[0]) {
-        const session = await original(options);
-        runner.launcher.adapters.at(-1)?.failOn('goto', new Error('NavigationError: refused'));
-        return session;
-      },
-    });
+    runner.launcher.script = { failAt: 0 };
     await runOnce(runner);
 
     const entries = reports(runner).at(-1)?.logs ?? [];
@@ -652,62 +647,21 @@ describe('ADR-002 §33 — log lines name the step they are about', () => {
 describe('AC-20 — the secret canary appears in no form on any outbound byte', () => {
   const CANARY = 'canary-secret-value';
 
-  it('appears in no report body, in no log line and in no error message', async () => {
-    const runner = await start();
-    // Make the run fail with a message that embeds the secret, so the failure path is exercised.
-    const original = runner.launcher.launch.bind(runner.launcher);
-    Object.assign(runner.launcher, {
-      async launch(options: Parameters<typeof original>[0]) {
-        const session = await original(options);
-        runner.launcher.adapters
-          .at(-1)
-          ?.failOn('fill', new Error(`FillFailed: value was ${CANARY}`));
-        return session;
-      },
-    });
-    await runOnce(runner);
-
-    const variants = [
-      CANARY,
-      encodeURIComponent(CANARY),
-      encodeURI(CANARY),
-      encodeURIComponent(encodeURIComponent(CANARY)),
-      Buffer.from(CANARY, 'utf8').toString('base64'),
-      Buffer.from(CANARY, 'utf8').toString('base64').replace(/=+$/u, ''),
-      Buffer.from(CANARY, 'utf8').toString('base64url'),
-    ];
-
-    // The assertion is on the bytes that leave, not on the objects behind them.
-    for (const request of runner.http.requests) {
-      for (const variant of variants) {
-        expect(request.body, `variant leaked into ${request.url}`).not.toContain(variant);
-      }
-    }
-    for (const line of runner.sink.lines) {
-      for (const variant of variants) expect(line).not.toContain(variant);
-    }
-
-    // The failure did reach the wire — the test is not green because nothing happened.
-    const final = reports(runner).at(-1);
-    expect(final?.steps[0]?.status === 'FAIL' || final?.outcome?.result !== 'PASSED').toBe(true);
-  });
-
   it('never records job values, resolved values or artifact source text in a log line', async () => {
     const runner = await start();
     await runOnce(runner);
+    expect(OBSERVED_INPUT_VALUES.length).toBeGreaterThan(0);
     for (const line of runner.sink.lines) {
-      expect(line).not.toContain('await page.goto');
-      expect(line).not.toContain('resolvedSecrets');
-      expect(line).not.toContain('https://example.com/login');
+      for (const value of OBSERVED_INPUT_VALUES) expect(line).not.toContain(value);
+      expect(line).not.toContain('"secrets"');
+      expect(line).not.toContain('inputRecipes');
     }
   });
 
   it('redacts a value added to the payload later, because it redacts the finished bytes', async () => {
     // Asserted against the report client directly, with a body **no upstream redactor has ever
-    // seen**. In the end-to-end tests above the canary is already scrubbed by the executor's own
-    // redaction of step failure text before it reaches the snapshot, so those tests would stay
-    // green with the outbound pass deleted. Here the pass in `freezeBytes` is the only thing
-    // between this body and the wire: remove `redactor.redact(...)` and this test goes red.
+    // seen**. Here the pass in `freezeBytes` is the only thing between this body and the wire:
+    // remove `redactor.redact(...)` and this test goes red.
     const sent: string[] = [];
     const client = createReportClient({
       http: {
@@ -764,23 +718,6 @@ describe('AC-20 — the secret canary appears in no form on any outbound byte', 
       expect(bytes).toContain(`"fieldAddedLater":"${REDACTION_PLACEHOLDER}"`);
     }
   });
-
-  it('scrubs the canary from a launch failure that never reaches a step reporter', async () => {
-    // The end-to-end complement of the test above: a failure raised before any step exists, so
-    // the message travels through the run loop rather than the executor's step path.
-    const runner = await start();
-    const original = runner.launcher.launch.bind(runner.launcher);
-    Object.assign(runner.launcher, {
-      async launch(options: Parameters<typeof original>[0]) {
-        await original(options);
-        throw new Error(`LaunchFailed: ${CANARY}`);
-      },
-    });
-    await runOnce(runner);
-    for (const request of runner.http.reportRequests) {
-      expect(request.body).not.toContain(CANARY);
-    }
-  });
 });
 
 describe('AC-21 — ephemeral values never persist', () => {
@@ -802,10 +739,10 @@ describe('AC-21 — ephemeral values never persist', () => {
     await runOnce(runner);
 
     // Every byte ever queued for delivery is inspectable; none of them carries a value.
-    for (const request of runner.http.requests) {
-      expect(request.body).not.toContain('canary-secret-value');
+    for (const request of runner.http.reportRequests) {
+      for (const value of OBSERVED_INPUT_VALUES) expect(request.body).not.toContain(value);
+      expect(request.body).not.toContain('"secrets"');
       expect(request.body).not.toContain('resolvedSecrets');
-      expect(request.body).not.toContain('resolvedVars');
     }
   });
 

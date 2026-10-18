@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C05-login-var-secret",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "e16b9cdc-577e-41b4-8d58-2486d2eed60c",
+        "text": "Open <var loginUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "95101e57-a7cc-46ba-8a35-d203ceccf45e",
+        "text": "Fill User with <var USERNAME>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "c311eea3-412d-4bce-87ad-db84c2677d60",
+        "text": "Fill Password with <secret LOGIN_PW>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "2bf6d16f-9f4c-4558-8266-9524a2cfc048",
+        "text": "Click Sign in.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "7fedc0a5-78a2-4d96-819b-52c574292df6",
+        "text": "Check that the heading says Dashboard.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "loginUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/login"
+    },
+    {
+      "name": "USERNAME",
+      "kind": "plain",
+      "value": "pilot-user"
+    },
+    {
+      "name": "LOGIN_PW",
+      "kind": "secretRef",
+      "secretId": "LOGIN_PW"
+    }
+  ]
+}

@@ -10,22 +10,19 @@
  * Chromium in `test/fixtures-tier/real-chromium.test.ts`. The first needs a recording that fails,
  * which a healthy browser will not do on demand, so it is driven here through a session that
  * reports one. Both directions are asserted; only one of them can be staged with a real browser.
+ *
+ * The runs are observed jobs on `POST /v2/runs`, executed by the harness's fake observed session
+ * (STUDIO-OBS-012A AC-3). The case that echoed job-supplied evidence keys was deleted with the
+ * artifact-1 job: an observed job carries no keys, and the coordinator derives them from the
+ * admitted binding.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
-import type {
-  BrowserLauncher,
-  BrowserSession,
-  SessionRecording,
-  SessionRunRequest,
-  SessionRunResult,
-} from '../../src/server/adapters.js';
-import { createChildOwnedAdapter } from '../../src/run/launcher.js';
-import { takeRunOrigin } from '../../src/run/timeline.js';
+import type { BrowserLauncher, SessionRecording } from '../../src/server/adapters.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
+import { createFakeBrowserLauncher, observedBody, post } from '../helpers/runner.js';
 
 let harness: Harness | null = null;
 
@@ -35,7 +32,7 @@ afterEach(async () => {
 });
 
 /**
- * A session that runs the steps in-process and reports whatever recording it was told to.
+ * A session that runs the admitted job's steps and reports whatever recording it was told to.
  *
  * It is the real `SessionRun` shape — the same one the child-owned session satisfies — so what is
  * exercised below is the coordinator's actual mapping from a run result to an outcome and an
@@ -48,54 +45,15 @@ function launcherReporting(
   reported: Omit<SessionRecording, 'partial'> & { readonly partial?: boolean },
   ok = true,
 ): BrowserLauncher {
-  const recording: SessionRecording = { partial: false, ...reported };
-  return {
-    launch(): Promise<BrowserSession> {
-      const origin = takeRunOrigin();
-      const session: BrowserSession = {
-        adapter: createChildOwnedAdapter(),
-        close: () => Promise.resolve(),
-        run: {
-          origin: {
-            browserStartedAt: origin.browserStartedAt,
-            startedAtMs: origin.startedAtMs,
-            clock: null,
-          },
-          // This session finishes; nothing here is ever killed. The kill path has its own file.
-          kill: () => Promise.resolve({ orderedStopCompleted: true }),
-          execute(request: SessionRunRequest): Promise<SessionRunResult> {
-            // Two steps, reported through 10.6's reporter exactly as the child would.
-            for (const [index, step] of request.steps.entries()) {
-              const startedAtMs = origin.clock.now();
-              request.reporter.stepStarted({ stepIndex: step.stepIndex, startedAtMs });
-              request.reporter.stepFinished({
-                stepIndex: step.stepIndex,
-                status: ok ? 'PASS' : index === 0 ? 'FAIL' : 'SKIPPED',
-                startedAtMs: ok || index === 0 ? startedAtMs : null,
-                finishedAtMs: ok || index === 0 ? origin.clock.now() : null,
-                durationMs: ok || index === 0 ? 1 : null,
-                failure: !ok && index === 0 ? 'AssertionFailed: nope' : null,
-              });
-            }
-            return Promise.resolve({
-              ok,
-              failureKind: ok ? null : 'step',
-              failureMessage: null,
-              recording,
-              observedHosts: [],
-            });
-          },
-        },
-      };
-      return Promise.resolve(session);
-    },
-  };
+  const launcher = createFakeBrowserLauncher();
+  launcher.script = { recording: { partial: false, ...reported }, ...(ok ? {} : { failAt: 0 }) };
+  return launcher;
 }
 
-async function runWith(launcher: BrowserLauncher, job = validJob()): Promise<ReportBody> {
+async function runWith(launcher: BrowserLauncher, body = observedBody()): Promise<ReportBody> {
   harness = createHarness({ launcher });
   await harness.start();
-  const response = await post(harness.port, '/v1/runs', JSON.stringify(job), SERVICE_TOKEN);
+  const response = await post(harness.port, '/v2/runs', body, SERVICE_TOKEN);
   expect(response.status).toBe(202);
   await until(() => harness?.app.coordinator.inFlight === 0);
   const raw = harness.http.reportRequests.at(-1)?.body ?? '';
@@ -124,7 +82,7 @@ describe('AC-8 — evidence never alters the outcome, in either direction', () =
     expect(diagnostic?.level).toBe('error');
     expect(diagnostic?.message).toContain('not playable');
     // Every step status is untouched too.
-    expect(final.steps.map((step) => step.status)).toEqual(['PASS', 'PASS']);
+    expect(final.steps.map((step) => step.status)).toEqual(['PASS', 'PASS', 'PASS']);
   });
 
   it('(ii) a step failed and the recording is healthy → FAILED with healthy evidence', async () => {
@@ -141,7 +99,7 @@ describe('AC-8 — evidence never alters the outcome, in either direction', () =
     // evidence — is unchanged; only the word for "healthy" moved on.
     expect(final.evidence?.state).toBe('STORED');
     expect(final.logs.some((entry) => entry.message.startsWith('recording failed:'))).toBe(false);
-    expect(final.steps.map((step) => step.status)).toEqual(['FAIL', 'SKIPPED']);
+    expect(final.steps.map((step) => step.status)).toEqual(['FAIL', 'SKIPPED', 'SKIPPED']);
   });
 });
 
@@ -187,25 +145,6 @@ describe('AC-9 — the evidence vocabulary, and key discipline', () => {
     expect(playable.evidence?.state).toBe('STORED');
   });
 
-  it('echoes the job’s server-derived keys exactly, inventing nothing', async () => {
-    // Keys deliberately unlike anything the runner could compute from the identity it holds: a
-    // different prefix, a different extension, a different shape.
-    const job = validJob({
-      videoKey: 'archive/2026/09/11/af3c-not-derivable-from-anything.mkv',
-      manifestKey: 'archive/2026/09/11/af3c-manifest.txt',
-    });
-    const final = await runWith(
-      launcherReporting({ path: '/v/page.webm', bytes: 24_576, error: null, state: 'PENDING' }),
-      job,
-    );
-
-    expect(final.evidence?.videoKey).toBe('archive/2026/09/11/af3c-not-derivable-from-anything.mkv');
-    expect(final.evidence?.manifestKey).toBe('archive/2026/09/11/af3c-manifest.txt');
-    // Not derived from the identity, and not from the produced file's own name (§6.2).
-    expect(final.evidence?.videoKey).not.toContain(final.executionId);
-    expect(final.evidence?.videoKey).not.toContain('page.webm');
-  });
-
   it('carries no evidence and no outcome on STARTED or PROGRESS', async () => {
     harness = createHarness({
       launcher: launcherReporting({
@@ -216,7 +155,7 @@ describe('AC-9 — the evidence vocabulary, and key discipline', () => {
       }),
     });
     await harness.start();
-    const response = await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const response = await post(harness.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     expect(response.status).toBe(202);
     await until(() => harness?.app.coordinator.inFlight === 0);
 

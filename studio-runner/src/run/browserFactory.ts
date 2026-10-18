@@ -15,8 +15,7 @@ import type {InvocationControl} from '../executor/observedReplay.js';
 
 import type { ObservationConfig, ObservationSession } from './observationTypes.js';
 import type { Scope } from '../executor/observedOperations.js';
-import type { RecordedContextCapability } from './observedAccount.js';
-import type { PageLike } from './playwrightAdapter.js';
+import type {BrowserPreferenceEvidence} from './scratchLayout.js';
 
 export interface BrowserLaunchRequest {
   /** Job-supplied browser name. Only `chromium` is supported in V1. */
@@ -27,20 +26,32 @@ export interface BrowserLaunchRequest {
   /** The per-run scratch directory. Profile, video and temp output all live under it (AC-22). */
   readonly scratchPath: string;
   readonly observedScope?: Scope;
+  /** Private continuous admission/start bound, never a job/configuration option. */
+  readonly startup?:{readonly deadlineEpochMs:number;readonly signal:AbortSignal};
 }
 
 export interface BrowserHandle {
-  /** The single page of the single context. V1 has exactly one (§5.2). */
-  readonly page: PageLike;
+  readonly preferenceEvidence?:BrowserPreferenceEvidence;
+  /**
+   * The single page of the single context. V1 has exactly one (§5.2).
+   *
+   * Opaque on purpose: no run-path code drives it any more — the artifact-1 operation adapter that
+   * did was deleted by STUDIO-OBS-012A AC-3, and the observed replay reaches the page only through
+   * the `observed*` capabilities below. It stays on the handle as the fixtures tier's inspection
+   * seam (the real Playwright page, cast where a test needs it).
+   */
+  readonly page: object;
   observedBlankMatches?(): Promise<boolean>;
   observedInitialContextMatches?(): Promise<boolean>;
+  observedStartupReady?():boolean;
+  /** Private exact actual app Video capability; never a directory-selected recording. */
+  observedAppVideoPath?():Promise<string>;
   observedWait?(strategy:'load'|'domcontentloaded'|'networkidle',timeoutMs:number):Promise<void>;
   observedNavigateBlank?(destination:string, control?:InvocationControl): Promise<void>;
-  observedAccountContext?: RecordedContextCapability;
-  /** Optional on browser-free legacy fakes; implemented by the real trusted browser. */
+  /** Optional on browser-free unit fakes; implemented by the real trusted browser. */
   createObservationSession?(config: ObservationConfig): ObservationSession;
   /**
-   * Fires when the context opens a page other than {@link page} — a popup or `window.open`.
+   * Fires when the context opens a page other than its single page — a popup or `window.open`.
    *
    * The handle closes the extra page itself; the callback exists so the run can refuse rather
    * than continue against a page the recording no longer follows (AC-15).
@@ -60,3 +71,5 @@ export interface BrowserHandle {
 export interface BrowserFactory {
   launch(request: BrowserLaunchRequest): Promise<BrowserHandle>;
 }
+/** Unconfirmed cleanup leaves the child alive for the parent's bounded process-tree kill. */
+export class BrowserStartupCleanupFailure extends Error {constructor(){super('CONTEXT_LOST');}}

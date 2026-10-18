@@ -1,7 +1,6 @@
-import {readFileSync} from 'node:fs';
+import {readdirSync,readFileSync} from 'node:fs';
 import {fileURLToPath} from 'node:url';
-import packagedObservedSchemas from '../../src/validator/observedSchemas.json' with {type:'json'};
-import {parseWireJson} from '../../src/guided/json.js';
+import {parseDocumentJson} from './documentJson.js';
 /**
  * A YAML reader and a JSON-Schema conformance checker, for AC-1.
  *
@@ -77,9 +76,11 @@ export function parseYaml(text: string): YamlValue {
  */
 const referenceContexts=new WeakMap<object,YamlValue>();
 const documentIds=new WeakMap<object,number>();let nextDocumentId=0;
-const observedFiles=new Set([...Object.keys(packagedObservedSchemas).map(name=>name+'.schema.json'),'publication-fixtures.json']);
-const observedBase='https://checks.citi.example/contracts/observed/v2/';
-const observedDirectory=new URL('../../../docs/specs/studio-observed-authoring/contracts/v2/',import.meta.url);
+const observedBase='https://checks.citi.example/contracts/observed/v3/';
+const observedDirectory=new URL('../../../docs/specs/studio-observed-authoring/contracts/v3/',import.meta.url);
+// The one contract generation (STUDIO-OBS-012A): every closed v3 schema the public document may
+// name, listed once from the directory, plus the publication examples. Nothing else is readable.
+const observedFiles=new Set([...readdirSync(fileURLToPath(observedDirectory)).filter(name=>/^[a-z-]+\.schema\.json$/u.test(name)),'publication-fixtures.json']);
 const externalDocuments=new Map<string,YamlValue>();
 function registerContext(node:YamlValue,document:YamlValue,seen=new WeakSet(),depth=0):void {
   if(typeof node!=='object'||node===null||seen.has(node))return;
@@ -89,8 +90,8 @@ function registerContext(node:YamlValue,document:YamlValue,seen=new WeakSet(),de
 function loadObservedDocument(file:string):YamlValue {
   if(!observedFiles.has(file)||file.includes('/')||file.includes('\\')||file.includes('%'))throw new Error('Observed reference file is not allowlisted');
   const cached=externalDocuments.get(file);if(cached!==undefined)return cached;
-  const bytes=readFileSync(fileURLToPath(new URL(file,observedDirectory)));if(bytes.length>8388608)throw new Error('Observed reference file exceeds bound');
-  const document=parseWireJson(bytes) as YamlValue;
+  const bytes=readFileSync(fileURLToPath(new URL(file,observedDirectory)));const limit=file==='publication-fixtures.json'?33554432:8388608;if(bytes.length>limit)throw new Error('Observed reference file exceeds bound');
+  const document=parseDocumentJson(bytes,limit) as YamlValue;
   if(file.endsWith('.schema.json')&&(!isMapping(document)||document.$id!==observedBase+file))throw new Error('Observed canonical schema identity mismatch');
   registerContext(document,document);externalDocuments.set(file,document);return document;
 }
@@ -100,7 +101,7 @@ export function resolveRef(document: YamlValue, node: YamlValue): YamlValue {
     if(count>=64)throw new Error('Reference chain exceeds64');
     const pointer=current.$ref;let root=referenceContexts.get(current)??document,fragment=pointer;
     if(!pointer.startsWith('#/')){
-      const prefix=pointer.startsWith('../studio-observed-authoring/contracts/v2/')?'../studio-observed-authoring/contracts/v2/':pointer.startsWith(observedBase)?observedBase:null;
+      const prefix=pointer.startsWith('../studio-observed-authoring/contracts/v3/')?'../studio-observed-authoring/contracts/v3/':pointer.startsWith(observedBase)?observedBase:null;
       if(prefix===null)throw new Error(`Only local $ref is supported: ${pointer}`);
       const rest=pointer.slice(prefix.length),hash=rest.indexOf('#'),file=hash<0?rest:rest.slice(0,hash);fragment=hash<0?'':rest.slice(hash);root=loadObservedDocument(file);
     }
@@ -176,6 +177,10 @@ export function validateAgainstSchema(
 
   if (isMapping(value) && !Array.isArray(value)) {
     const properties = isMapping(resolved.properties) ? resolved.properties : {};
+    const patterns = isMapping(resolved.patternProperties) ? resolved.patternProperties : {};
+    if (typeof resolved.maxProperties === 'number' && Object.keys(value).length > resolved.maxProperties) {
+      violations.push(`${path}: too many properties`);
+    }
     for (const name of asList(resolved.required)) {
       if (typeof name === 'string' && !Object.hasOwn(value, name)) {
         violations.push(`${path}.${name}: required property is missing`);
@@ -187,6 +192,13 @@ export function validateAgainstSchema(
         violations.push(
           ...validateAgainstSchema(entry, propertySchema, document, `${path}.${name}`, depth+1),
         );
+        continue;
+      }
+      const matchingPatterns = Object.entries(patterns).filter(([pattern]) => new RegExp(pattern, 'u').test(name));
+      if (matchingPatterns.length > 0) {
+        for (const [, patternSchema] of matchingPatterns) {
+          violations.push(...validateAgainstSchema(entry, patternSchema, document, `${path}.${name}`, depth+1));
+        }
         continue;
       }
       const additional = resolved.additionalProperties;

@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Search</title></head>
+<body>
+<main><h1>Search the web</h1><input role="combobox" aria-label="Search" aria-expanded="false" aria-autocomplete="list" id="q" autocomplete="off"><p id="s" role="status"></p></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+document.getElementById('q').addEventListener('keydown',async(e)=>{if(e.key==='Enter'){e.preventDefault();await rec('search.submit',{term:e.target.value});document.getElementById('s').textContent='Searched';}});
+</script>
+</body>
+</html>

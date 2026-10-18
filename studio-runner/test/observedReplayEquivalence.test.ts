@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import vectors from '../../docs/specs/studio-observed-authoring/contracts/v2/publication-canonical-vectors.json' with { type: 'json' };
+import vectors from '../../docs/specs/studio-observed-authoring/contracts/v3/publication-canonical-vectors.json' with { type: 'json' };
 import { canonicalObserved, hashObserved, parseObservedBytes, validateTrustedPolicy, observationPolicy, OBSERVED_LIMITS } from '../src/validator/observedReferencePolicy.js';
 import type { Scope, TrustedPolicy } from '../src/executor/observedOperations.js';
-const scope: Scope = { principalId: 'p', csiId: 'CSI', environment: 'fixture', applicationId: 'app', accountRef: 'account', allowedOrigins: ['https://example.test'], capabilities: ['read'], policyId: 'policy', policyVersion: '1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
-const policy = (): TrustedPolicy => ({ version: 1, policyId: 'policy', policyVersion: '1', applicationId: 'app', environment: 'fixture', accountRef: 'account', allowedOrigins: scope.allowedOrigins, entryPolicyId: 'entry', applicationPolicy: null, rules: [{ testId: 'one', name: 'Reference', policyRuleId: 'shared', classification: 'permittedBusinessData' }, { testId: 'two', name: 'Other', policyRuleId: 'shared', classification: 'permittedBusinessData' }] });
+const scope: Scope = { principalId: 'p', csiId: 'CSI', environment: 'fixture', applicationId: 'app',  allowedOrigins: ['https://example.test'], capabilities: ['read'], policyId: 'policy', policyVersion: '1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
+const policy = (): TrustedPolicy => ({ version: 1, policyId: 'policy', policyVersion: '1', applicationId: 'app', environment: 'fixture',  allowedOrigins: scope.allowedOrigins, entryPolicyId: 'entry', applicationPolicy: null, rules: [{ testId: 'one', name: 'Reference', policyRuleId: 'shared', classification: 'permittedBusinessData' }, { testId: 'two', name: 'Other', policyRuleId: 'shared', classification: 'permittedBusinessData' }] });
 describe('packaged canonical and faithful current policy contracts', () => {
     it.each(vectors.positive)('matches independent canonical-v1 $name', v => { expect(Buffer.from(canonicalObserved(v.input)).toString('hex')).toBe(v.canonicalUtf8Hex); expect(hashObserved(v.input)).toBe(v.sha256); });
     it.each(vectors.negative)('refuses raw $name', v => { expect(() => parseObservedBytes(Buffer.from(v.utf8Hex, 'hex'), OBSERVED_LIMITS.validation)).toThrow(); });

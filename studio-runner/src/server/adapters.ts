@@ -1,6 +1,6 @@
 import type { AdmissionReceipt, ObservedJob, TrustedPolicy } from '../executor/observedOperations.js';
 /**
- * The two seams `POST /v1/runs` needs beyond the ones 10.2 already provides (AC-6, AC-12, AC-21).
+ * The two seams `POST /v2/runs` needs beyond the run package (AC-6, AC-12, AC-21).
  *
  * Both are deliberately tiny and both are faked in this story. The real `BrowserLauncher` is
  * story 10.12's (child process, native video, deadline killing); the real object-store client is
@@ -12,29 +12,21 @@ import type { AdmissionReceipt, ObservedJob, TrustedPolicy } from '../executor/o
  * cleared on every exit path. It is **not** a store for job values: resolved variables and
  * secrets are never written here (AC-21, architecture §9.2).
  */
-import type { BrowserAdapter } from '../executor/adapters/BrowserAdapter.js';
-import type { Clock, StepReporter } from '../executor/adapters/StepReporter.js';
-import type { ExecutableStep } from '../executor/executor.js';
+import type { StepReporter } from '../executor/stepReporter.js';
 
 /**
  * The two adjacent reads of one instant: the run clock's zero and `browserStartedAt` (AC-11.2).
  *
- * Observed **once**, at recording-context readiness, by whichever process holds the browser — the
- * child for a real session, the coordinator itself for an in-process one. Never re-derived, never
- * taken at launch-call time, never taken at admission (ADR-002 §11.6).
+ * Observed **once**, at recording-context readiness, by the child process that holds the browser.
+ * Never re-derived, never taken at launch-call time, never taken at admission (ADR-002 §11.6). The
+ * child sends the readings already on its own scale and the parent passes them through without
+ * re-basing (ADR-002 §11.5).
  */
 export interface SessionOrigin {
   /** The single wall-clock instant the runner holds for a run. Goes on the wire verbatim. */
   readonly browserStartedAt: Date;
   /** The first reading of the run clock: `0`, and a reading rather than a literal (AC-10). */
   readonly startedAtMs: number;
-  /**
-   * The run-scoped monotonic clock, zeroed at the origin.
-   *
-   * `null` when the readings are produced in another process — the child sends them already on
-   * its own scale and the parent passes them through without re-basing (ADR-002 §11.5).
-   */
-  readonly clock: Clock | null;
   /**
    * The seek-origin calibration the child reported applying (story 10.32 AC-4).
    *
@@ -45,23 +37,23 @@ export interface SessionOrigin {
   readonly calibrationOffsetMs?: number | undefined;
 }
 
-/** Everything the session needs to run the job, as data. No source text, ever (AC-3). */
+/**
+ * What the coordinator hands a started session.
+ *
+ * Only the reporter: the observed job — steps, guards, inputs and the resolved secrets — was bound
+ * into the session at launch (`LaunchOptions.observed`) and crosses to the child as the closed
+ * `Execute3` frame, never as source text (AC-3).
+ */
 export interface SessionRunRequest {
-  readonly steps: readonly ExecutableStep[];
-  readonly variables: Readonly<Record<string, string>>;
-  readonly secrets: Readonly<Record<string, string>>;
-  /**
-   * The origins each secret may be filled on, by secret id. Non-secret. Absent or missing an id
-   * means that secret is bound to no origin and the adapter refuses to fill it.
-   */
-  readonly secretOrigins?: Readonly<Record<string, readonly string[]>> | undefined;
-  /** 10.6's `RunReporter`, reached unchanged from inside or outside the process (AC-16). */
+  /** 10.6's `RunReporter`, reached unchanged from the other side of the process boundary (AC-16). */
   readonly reporter: StepReporter;
-  readonly maxFailureMessageLength?: number | undefined;
 }
 
 /** What the session observed about the recording. Evidence, never outcome (AC-8). */
+import type {VerifiedVideoFile} from '../run/appVideoOwnership.js';
 export interface SessionRecording {
+  /** Private pinned file opener, never serialized into reports/manifests or public contracts. */
+  readonly verifiedFile?:VerifiedVideoFile;
   readonly path: string | null;
   readonly bytes: number | null;
   readonly error: string | null;
@@ -90,7 +82,7 @@ export interface SessionRecording {
  * leaving while a run is still hung: §9.3 requires admitted work to be drained on `SIGTERM`, and
  * §5.4 requires that a runner never exit holding a browser — but the run did not exceed its
  * budget, so calling it a timeout would be a false statement about the test. It takes the
- * documented residual, `RUN_ERROR`. `cancel` is a principal's `DELETE /v1/runs/{id}` (Studio v1
+ * documented residual, `RUN_ERROR`. `cancel` is a principal's `DELETE /v2/runs/{id}` (Studio v1
  * WP4): the same stop, and a third answer, `CANCELLED` — neither a timeout nor a runner fault.
  */
 export type SessionKillReason = 'total-runtime' | 'drain' | 'cancel';
@@ -107,6 +99,8 @@ export interface SessionKillOutcome {
 }
 
 export interface SessionRunResult {
+  readonly secretUse?: Readonly<Record<string, 'USED' | 'NOT_USED' | 'REFUSED'>>;
+  readonly detail?: { readonly stepId: string; readonly loginStepsPresent: boolean };
   readonly ok: boolean;
   /**
    * A `RunFailureKind` from `src/run/errors.ts`, or `null` for a clean pass or step failure that
@@ -122,10 +116,9 @@ export interface SessionRunResult {
 /**
  * The half of a session that executes the job (AC-5, AC-10).
  *
- * Optional on {@link BrowserSession} so 10.6's in-process fakes keep the shape they have: they
- * expose `adapter`, and the coordinator drives `executeSteps` against it with a run clock it takes
- * itself at the moment the fake launch resolves. A real session executes in its own process, where
- * the origin is observable, and hands back the readings.
+ * The session executes in its own process, where the origin is observable, and hands back the
+ * readings. (The artifact-1 in-process path, which drove `executeSteps` against a parent-side
+ * adapter, was deleted by STUDIO-OBS-012A AC-3.)
  */
 export interface SessionRun {
   readonly origin: SessionOrigin;
@@ -141,25 +134,18 @@ export interface SessionRun {
 }
 
 export interface BrowserSession {
-  readonly adapter: BrowserAdapter;
   close(): Promise<void>;
-  /**
-   * Present when the session runs the job inside its own process (the real child, 10.12).
-   *
-   * Additive and optional: every existing implementor and consumer of `BrowserSession` — the fake
-   * launcher, `runCoordinator`, the 10.6 suite — compiles and behaves exactly as before, which is
-   * what AC-1's "keep their current shapes" protects.
-   */
-  readonly run?: SessionRun | undefined;
+  /** The run inside the child process (10.12); every observed session has one. */
+  readonly run: SessionRun;
 }
 
 /**
  * Where the child's captured stdout and stderr go, and what scrubs them (AC-8).
  *
  * Per **run**, not per launcher: the redactor is built from this job's resolved values, and the
- * launcher outlives any one of them. Optional, because 10.6's in-process fake sessions have no
- * child and no output; when it is absent the child's streams are drained and discarded rather than
- * inherited, so an unread pipe can never block the browser.
+ * launcher outlives any one of them. The observed launcher drains and discards the child's raw
+ * streams without ever writing them here, so an unread pipe can never block the browser and no
+ * child-formatted text reaches the pod log.
  */
 export interface ChildDiagnosticsSink {
   /** The run's redactor. Applied before the line is bounded, never after. */
@@ -169,7 +155,8 @@ export interface ChildDiagnosticsSink {
 
 export interface LaunchOptions {
   readonly signal?: AbortSignal;
-  readonly observed?: { readonly job: ObservedJob; readonly admission: AdmissionReceipt; readonly policy: TrustedPolicy };
+  /** The admitted observed job this launch is for; the only family a session may start. */
+  readonly observed: { readonly job: ObservedJob; readonly admission: AdmissionReceipt; readonly policy: TrustedPolicy };
   readonly browser: string;
   readonly viewport: { readonly width: number; readonly height: number };
   /**
@@ -182,8 +169,8 @@ export interface LaunchOptions {
   /**
    * Per-step timeout for this job, already clamped to the server maximum (AC-6).
    *
-   * `job.configuration.timeoutSeconds` was validated by the envelope and then ignored by the run;
-   * this is where §5.2's "configurable within server limits" starts being both.
+   * The observed job's `runtime.stepTimeoutMs` is refused at admission when it exceeds the server
+   * maximum; this is where §5.2's "configurable within server limits" reaches the child.
    */
   readonly stepTimeoutMs?: number | undefined;
   /** Directory the session may write to. Cleared when the run ends. */

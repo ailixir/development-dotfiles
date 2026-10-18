@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Forms</title></head>
+<body>
+<main><h1>Records</h1><button id="d">Delete</button><button id="e">Edit</button><p id="s" role="status"></p></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+document.getElementById('d').onclick=async()=>{await rec('record.delete',{id:'1'});document.getElementById('s').textContent='Deleted';};document.getElementById('e').onclick=async()=>{await rec('record.edit',{id:'1'});};
+</script>
+</body>
+</html>

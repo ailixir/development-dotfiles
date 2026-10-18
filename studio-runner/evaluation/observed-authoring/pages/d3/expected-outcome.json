@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "caseId": "D3-dataflow-multistep",
+  "kind": "EXPECTED_OUTCOME",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "note": "Protocol PR-1: one token-free guided Run submits once, finalization adds zero receipts, two later replays reuse the artifact (one submit each). The submitted body must equal the source value of THAT session (${sourceValue}); the fixture serves a fresh value per session.",
+  "class": "P",
+  "receipts": {
+    "phases": {
+      "run": {
+        "actions": [
+          {
+            "type": "receipt.post",
+            "fields": {
+              "body": "${sourceValue}"
+            }
+          }
+        ]
+      },
+      "finalize": {
+        "actions": []
+      },
+      "replay1": {
+        "actions": [
+          {
+            "type": "receipt.post",
+            "fields": {
+              "body": "${sourceValue}"
+            }
+          }
+        ]
+      },
+      "replay2": {
+        "actions": [
+          {
+            "type": "receipt.post",
+            "fields": {
+              "body": "${sourceValue}"
+            }
+          }
+        ]
+      }
+    },
+    "views": {
+      "required": [],
+      "allowed": []
+    }
+  },
+  "session": {
+    "terminal": [
+      "SUCCEEDED"
+    ],
+    "published": true,
+    "clarifications": 0
+  }
+}

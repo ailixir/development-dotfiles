@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Comment form</title></head>
+<body>
+<main><label>Comment <input id="c"></label><button id="p">Post</button></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+document.getElementById('p').onclick=async()=>{await rec('frame.post',{value:document.getElementById('c').value});};
+</script>
+</body>
+</html>

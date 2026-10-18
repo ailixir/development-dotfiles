@@ -136,10 +136,12 @@ describe('AC-22a — allowlist over the resolved production dependency closure',
     }
   });
 
-  it('story 10.6 added no production dependency: the HTTP server is node:http', () => {
-    // ADR-001 §5 permitted this story one HTTP server library. It took none.
+  it('story 10.6 added no production dependency: the HTTP server is node:https (the one TLS listener, STUDIO-OBS-009 AC-3)', () => {
+    // ADR-001 §5 permitted this story one HTTP server library. It took none. The listener is TLS with client
+    // certificates in every configuration, so the built-in server it uses is `node:https`; `node:http` is not imported.
     const serverSource = readFileSync(join(packageRoot, 'src', 'server', 'server.ts'), 'utf8');
-    expect(serverSource).toContain("from 'node:http'");
+    expect(serverSource).toContain("from 'node:https'");
+    expect(serverSource).not.toContain("from 'node:http'");
     expect(Object.keys(pkg.dependencies ?? {}).sort()).toEqual(['@aws-sdk/client-s3', 'playwright', 'typescript']);
   });
 

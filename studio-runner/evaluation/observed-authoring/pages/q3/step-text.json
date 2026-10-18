@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "caseId": "Q3-authored-echo-select-option",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "d5c62cf5-0f7a-4334-8d85-29fc5ca75144",
+        "text": "Open <var cityUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "d8f5b945-6e80-4460-8ee6-6f0fbe5b75bb",
+        "text": "Select London from City.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "11c17bb6-2d3c-448e-8161-e98f810f4767",
+        "text": "Click Save.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "59ddbd9b-a651-4742-826b-f8f3a4e9d7be",
+        "text": "Check that the page shows Saved London.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "cityUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/city"
+    }
+  ]
+}

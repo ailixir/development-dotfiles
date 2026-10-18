@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C10-unsupported-cpu",
+  "kind": "EXPECTED_OUTCOME",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "note": "Written before any run. Receipts are the fixture-owned app-side record (page views and posted events), not the model or runner result.",
+  "class": "N",
+  "receipts": {
+    "phases": {
+      "run": {
+        "actions": []
+      }
+    },
+    "views": {
+      "required": [],
+      "allowed": []
+    }
+  },
+  "session": {
+    "terminal": [
+      "FAILED",
+      "AWAITING_CLARIFICATION",
+      "CANCELLED",
+      "EXPIRED"
+    ],
+    "published": false,
+    "clarifications": "ANY"
+  }
+}

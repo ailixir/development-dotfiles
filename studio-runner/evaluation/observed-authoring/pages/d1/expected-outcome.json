@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "caseId": "D1-login-secret-fixture",
+  "kind": "EXPECTED_OUTCOME",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "note": "Receipts come from the existing secret-login fixture GET /__receipts (adapted by the harness: id and password are dropped, accepted is kept). The planted password canary must appear in no harness output (AC-10).",
+  "class": "P",
+  "receipts": {
+    "phases": {
+      "run": {
+        "actions": [
+          {
+            "type": "login.submit",
+            "fields": {
+              "username": "pilot-user",
+              "accepted": true
+            }
+          }
+        ]
+      }
+    },
+    "views": {
+      "required": [],
+      "allowed": []
+    }
+  },
+  "session": {
+    "terminal": [
+      "SUCCEEDED"
+    ],
+    "published": true,
+    "clarifications": 0
+  }
+}

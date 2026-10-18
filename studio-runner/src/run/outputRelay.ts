@@ -26,7 +26,7 @@
  *    invisibly is not.
  * 3. **It cannot block or delay anything.** Every method is synchronous and total: no `await`, no
  *    promise, and the sink is called inside a `try`. The relay runs on the parent's event loop —
- *    the one serving `/health`, `/ready` and `/v1/validate` for every other request — and a relay
+ *    the one serving `/health`, `/ready` and `/v2/validate-observed` for every other request — and a relay
  *    that awaited a slow sink would be a new way to hang the process this story exists to keep
  *    responsive. It is the same containment 10.12 already applies to step-event forwarding.
  * 4. **It holds no resolved value once the run is over.** {@link OutputRelay.release} drops the

@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "story": "STUDIO-OBS-015",
+  "classification": "OBS009_CORPUS_INPUT_NOT_EXECUTION_EVIDENCE",
+  "base": {
+    "authoring": {
+      "authoringSchemaVersion": 2,
+      "globalContext": {
+        "entries": [],
+        "evidenceReferences": []
+      },
+      "steps": [
+        {
+          "id": "00000000-0000-4000-8000-000000000001",
+          "text": "Open <var sourceUrl>.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000002",
+          "text": "Read the visible business reference from the source into the reference binding.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000003",
+          "text": "Open <var destinationUrl>.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000004",
+          "text": "Fill Destination with the captured reference.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000005",
+          "text": "Hover over Submit.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000006",
+          "text": "Assert that Submit is visible.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000007",
+          "text": "Fill Destination with the same captured reference.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000008",
+          "text": "Assert that Destination has the captured reference.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000009",
+          "text": "Click Submit.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        },
+        {
+          "id": "00000000-0000-4000-8000-000000000010",
+          "text": "Assert that Submit remains visible.",
+          "context": {
+            "entries": [],
+            "evidenceReferences": []
+          }
+        }
+      ]
+    },
+    "configuration": {
+      "environment": "controlled-fixture",
+      "browser": "chromium",
+      "viewport": {
+        "width": 1280,
+        "height": 720
+      },
+      "timeoutSeconds": 30,
+      "waitStrategy": "domcontentloaded"
+    },
+    "variables": [
+      {
+        "name": "sourceUrl",
+        "kind": "plain",
+        "value": "${fixtureOrigin}/source"
+      },
+      {
+        "name": "destinationUrl",
+        "kind": "plain",
+        "value": "${fixtureOrigin}/destination"
+      }
+    ]
+  },
+  "fixture": {
+    "server": "test/fixtures/guided-dataflow/server.ts",
+    "sourceValuePerSession": [
+      "base-reference-value",
+      "fresh-current-session-reference"
+    ],
+    "bindingId": "stable-reference",
+    "prefixSemanticSteps": [
+      "00000000-0000-4000-8000-000000000001",
+      "00000000-0000-4000-8000-000000000002",
+      "00000000-0000-4000-8000-000000000003"
+    ],
+    "runMode": "single-recorded-guided-browser-and-existing-observation-session"
+  },
+  "requiredOracles": [
+    "actual backend SOURCE_PLAN and NEXT_ACTION reservations/calls remain zero in prefix",
+    "fresh producer value under stable binding consumed in suffix",
+    "all suffix steps relearned",
+    "reused snapshots equal immediate immutable base byte-for-byte",
+    "current-session admission provenance",
+    "finalize performs no model/browser effect",
+    "merged revision ordinary replay model calls zero",
+    "one continuous finalized playable video with prefix/suffix offsets"
+  ],
+  "executionStatus": "NOT_RUN",
+  "caseId": "incremental-edit-step-4",
+  "current": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "00000000-0000-4000-8000-000000000001",
+        "text": "Open <var sourceUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000002",
+        "text": "Read the visible business reference from the source into the reference binding.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000003",
+        "text": "Open <var destinationUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000004",
+        "text": "Fill Destination with the captured reference. Use the current session value.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000005",
+        "text": "Hover over Submit.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000006",
+        "text": "Assert that Submit is visible.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000007",
+        "text": "Fill Destination with the same captured reference.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000008",
+        "text": "Assert that Destination has the captured reference.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000009",
+        "text": "Click Submit.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "00000000-0000-4000-8000-000000000010",
+        "text": "Assert that Submit remains visible.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "expected": {
+    "initialFirstLearnStepId": "00000000-0000-4000-8000-000000000004",
+    "initialFirstLearnIndex": 3,
+    "completedPrefixCount": 3,
+    "effectiveFirstLearnStepId": "00000000-0000-4000-8000-000000000004",
+    "reusedFromStepIds": [
+      "00000000-0000-4000-8000-000000000001",
+      "00000000-0000-4000-8000-000000000002",
+      "00000000-0000-4000-8000-000000000003"
+    ],
+    "equalSnapshotStepIds": [
+      "00000000-0000-4000-8000-000000000001",
+      "00000000-0000-4000-8000-000000000002",
+      "00000000-0000-4000-8000-000000000003"
+    ],
+    "differentSnapshotStepIds": [
+      "00000000-0000-4000-8000-000000000004",
+      "00000000-0000-4000-8000-000000000005",
+      "00000000-0000-4000-8000-000000000006",
+      "00000000-0000-4000-8000-000000000007",
+      "00000000-0000-4000-8000-000000000008",
+      "00000000-0000-4000-8000-000000000009",
+      "00000000-0000-4000-8000-000000000010"
+    ],
+    "prefixSourcePlanCalls": 0,
+    "prefixNextActionCalls": 0,
+    "suffixPlanningMustOccur": true
+  }
+}

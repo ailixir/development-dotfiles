@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "E4-virtualised-list",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "64abe808-b4ac-43a8-81cb-110e620150bf",
+        "text": "Open <var listUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "0837c9b1-8fd6-4603-88f1-61e3483c1f63",
+        "text": "Click Item 0420 in the list, scrolling the list if needed.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "listUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/list"
+    }
+  ]
+}

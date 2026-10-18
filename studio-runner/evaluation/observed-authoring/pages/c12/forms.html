@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Toolbar</title></head>
+<body>
+<main><h1>Toolbar</h1><button data-k="submit">Submit</button><button data-k="save">Save</button><button data-k="account">Account</button><button data-k="menu">Menu</button></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+for(const b of document.querySelectorAll('button'))b.onclick=async()=>{await rec('toolbar.click',{button:b.dataset.k});};
+</script>
+</body>
+</html>

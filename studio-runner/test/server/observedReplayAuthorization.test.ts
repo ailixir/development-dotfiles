@@ -1,16 +1,17 @@
+import {mutableCurrentJob} from '../helpers/currentWorlds.js';
 import { describe, it, expect } from 'vitest';
-import fixture from '../../../docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json' with { type: 'json' };
+import {publicationFixture as fixture} from '../helpers/publicationFixture.js';
 import { validateObservedJob } from '../../src/validator/observedReplay.js';
 import type { TrustedPolicy } from '../../src/executor/observedOperations.js';
 import {hashObserved,OBSERVED_SCHEMA_BUNDLE_HASH} from '../../src/validator/observedReferencePolicy.js';
 const currentBuild={...fixture.build,schemaBundleHash:OBSERVED_SCHEMA_BUNDLE_HASH};
 // Explicit new test authorization; historical fixture bytes and build pins remain unchanged.
-function currentJob(){const j=structuredClone(fixture.job);j.binding.requiredBuild={...currentBuild};j.binding.replayGrant.buildHash=hashObserved(currentBuild);return j;}
+function currentJob(){return mutableCurrentJob(currentBuild,now);}
 const now = Date.parse(fixture.job.binding.replayGrant.issuedAt) + 1;
 describe('ordinary observed authority joins', () => {
     it('accepts full configuration independently of recording geometry', () => { expect(validateObservedJob(currentJob(), currentBuild, fixture.trustedPolicy as TrustedPolicy, now).recording).not.toEqual(fixture.job.configuration.viewport); });
-    it('refuses the retained historical exact build on a changed bundle despite equal Profile',()=>{expect(()=>validateObservedJob(fixture.job,currentBuild,fixture.trustedPolicy as TrustedPolicy,now)).toThrow('PROFILE_MISMATCH');});
-    it.each(['principal', 'attempt', 'revision', 'account', 'profile', 'build', 'viewport', 'wait', 'environment', 'policy', 'expired', 'extra-input', 'input-id', 'destination-origin'])('refuses %s swap before admission', kind => {
+    it('refuses the retained historical exact build on a changed bundle despite equal Profile',()=>{const baseline=currentJob();expect(validateObservedJob(baseline,currentBuild,fixture.trustedPolicy as TrustedPolicy,now)).toBeDefined();const historical=structuredClone(baseline);historical.binding.requiredBuild.schemaBundleHash='0'.repeat(64);historical.binding.replayGrant.buildHash=hashObserved(historical.binding.requiredBuild);expect(historical.binding.requiredProfile).toEqual(baseline.binding.requiredProfile);expect(()=>validateObservedJob(historical,currentBuild,fixture.trustedPolicy as TrustedPolicy,now)).toThrow('PROFILE_MISMATCH');});
+    it.each(['principal', 'attempt', 'revision', 'profile', 'build', 'viewport', 'wait', 'environment', 'policy', 'expired', 'extra-input', 'input-id', 'destination-origin'])('refuses %s swap before admission', kind => {
         const j = currentJob();
         if (kind === 'principal')
             j.binding.principalId = 'other';
@@ -18,10 +19,8 @@ describe('ordinary observed authority joins', () => {
             j.binding.attemptId = '00000000-0000-4000-8000-000000000999';
         if (kind === 'revision')
             j.binding.revisionDigest = 'e'.repeat(64);
-        if (kind === 'account')
-            j.accountHandle.authorization.grantId = '00000000-0000-4000-8000-000000000999';
         if (kind === 'profile')
-            j.binding.requiredProfile.catalog = 'other';
+            j.binding.requiredProfile.contract = 2;
         if (kind === 'build')
             j.binding.requiredBuild.executableImageDigest = 'e'.repeat(64);
         if (kind === 'viewport')

@@ -1,4 +1,7 @@
 import { mkdir, open } from 'node:fs/promises';
+import { openSync, readFileSync, writeSync, fsyncSync, closeSync } from 'node:fs';
+import type { BridgeNativeFenceEvent } from './types.js';
+import { canonical } from './contracts.js';
 import { join, dirname, resolve } from 'node:path';
 import { hash, insist } from './contracts.js';
 
@@ -10,6 +13,7 @@ export class GuidedJournal {
   private poisoned = false;
   private writing = false;
   private written = '';
+  private readonly native = new Map<string, BridgeNativeFenceEvent>();
   private constructor(private readonly directory: string, private readonly path: string) {}
   static async open(directory: string, sessionId: string): Promise<GuidedJournal> {
     await mkdir(directory, { recursive: true, mode: 0o700 });
@@ -30,6 +34,23 @@ export class GuidedJournal {
     return journal;
   }
   get recovered(): boolean { return this.poisoned || this.consumed.size > 0; }
+  /** Synchronous reservation and fsync: InvocationControl cannot cross the native API boundary
+   * while a durable transition is still pending. No recovery ever recreates this browser. */
+  fence(event: BridgeNativeFenceEvent): void {
+    insist(!this.poisoned && !this.writing, 'JOURNAL_UNAVAILABLE');
+    const prior = this.native.get(event.admissionId);
+    if (prior) { insist(canonical(prior) === canonical(event), 'NATIVE_FENCE_REFUSED'); return; }
+    this.native.set(event.admissionId, structuredClone(event));
+    let fd: number | undefined;
+    try {
+      fd = openSync(this.path, 'r+');
+      insist(readFileSync(fd, 'utf8') === this.written, 'JOURNAL_UNAVAILABLE');
+      const record = canonical(event) + '\n'; const bytes = Buffer.from(record);
+      insist(writeSync(fd, bytes, 0, bytes.length, Buffer.byteLength(this.written)) === bytes.length, 'JOURNAL_UNAVAILABLE');
+      fsyncSync(fd); this.written += record;
+    } catch { this.poisoned = true; throw new Error('JOURNAL_UNAVAILABLE'); }
+    finally { if (fd !== undefined) closeSync(fd); }
+  }
   async consume(admission: unknown): Promise<void> {
     const key = hash(admission);
     insist(!this.poisoned && !this.consumed.has(key), 'ALREADY_CONSUMED');

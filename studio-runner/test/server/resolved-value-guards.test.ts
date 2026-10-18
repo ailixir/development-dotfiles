@@ -1,145 +1,19 @@
 /**
- * Story 10.17 AC-16a and AC-22 — the two guards that now stand between a **real** value and a
- * surface, re-falsified against real material rather than against a planted constant.
+ * Story 10.17 AC-22 — the guard that stands between a **real** value and the bounded log buffer,
+ * re-falsified against real material rather than against a planted constant.
  *
- * Both were already implemented before this story. Neither had ever been exercised with a value
- * behind the reference, because until story 10.17 the API resolved values at dispatch and then
- * threw them away, so no resolved value had ever reached a runner at all. What this file owes is
- * the re-falsification.
+ * The AC-16a cases — a secret refused in a forbidden artifact-1 argument position before capacity —
+ * were deleted with the artifact-1 validator and run route (STUDIO-OBS-012A AC-3). The observed
+ * replay binds a secret only to a `fill.value` slot of a password control, by schema.
  */
-import { afterEach, describe, expect, it } from 'vitest';
+import { describe, expect, it } from 'vitest';
 
 import { createRedactor } from '../../src/executor/redaction.js';
 import { createRunSnapshot } from '../../src/reporting/snapshot.js';
 import { DEFAULT_REPORT_BOUNDS } from '../../src/reporting/bounds.js';
 import type { LogBuffer, RedactedLogEntry } from '../../src/reporting/bounds.js';
-import { validateArtifact } from '../../src/validator/index.js';
-import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
-import type { Harness } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
 
 const SECRET = 'Position-Canary-Real-Value-3f81b0';
-
-let harness: Harness | null = null;
-
-afterEach(async () => {
-  await harness?.stop();
-  harness = null;
-});
-
-// ── AC-16a — the secret-position rule, with a real value behind the reference ──────────────────
-
-/**
- * The four positions §4.5 forbids: *"secret values only in approved action argument
- * positions/destinations, never selectors, URLs, assertions or log messages"*.
- */
-const FORBIDDEN_POSITIONS = [
-  {
-    id: 'a goto URL',
-    text: 'Go to "<secret PW>"',
-    code: "await page.goto(vars.secret('PW'));",
-  },
-  {
-    id: 'a locator',
-    text: 'Click the "<secret PW>" button',
-    code: "await page.getByRole('button', { name: vars.secret('PW') }).click();",
-  },
-  {
-    id: 'an assertion argument',
-    text: 'Expect the page to contain "<secret PW>"',
-    code: "await expect(page.getByTestId('out')).toHaveText(vars.secret('PW'));",
-  },
-  {
-    id: 'an option value',
-    text: 'Select "<secret PW>" from the "Region" dropdown',
-    code: "await page.getByLabel('Region').selectOption(vars.secret('PW'));",
-  },
-] as const;
-
-function artifactFor(text: string, code: string): unknown {
-  return { version: 1, steps: [{ stepIndex: 0, originalText: text, code }] };
-}
-
-describe('AC-16a — a secret in a forbidden position is refused before capacity, with a real value behind it', () => {
-  for (const position of FORBIDDEN_POSITIONS) {
-    it(`refuses ${position.id} with no capacity taken and no admission`, async () => {
-      harness = createHarness();
-      await harness.start();
-
-      const response = await post(
-        harness.port,
-        '/v1/runs',
-        JSON.stringify(
-          validJob({
-            source: [position.text],
-            artifact: artifactFor(position.text, position.code),
-            references: { variables: [], secrets: ['PW'] },
-            resolvedVars: {},
-            // The value is genuinely on the job. That is what makes this a re-falsification
-            // rather than a repeat of the rule's original unit test.
-            resolvedSecrets: { PW: SECRET },
-          }),
-        ),
-        SERVICE_TOKEN,
-      );
-
-      expect(response.status).toBe(400);
-      expect((JSON.parse(response.body) as { code: string }).code).toBe('ARTIFACT_INVALID');
-      expect(harness.app.pool.inUse, 'a refused artifact took a capacity slot').toBe(0);
-      expect(harness.http.admissionRequests).toHaveLength(0);
-      // And the refusal carries no part of the value it was refusing to place.
-      expect(response.body).not.toContain(SECRET);
-    });
-  }
-
-  it('the experiment is capable of failing: the same secret in a fill value is admitted', async () => {
-    // The permit companion. Without it "refuse every secret" would satisfy the four above, which
-    // would be a very effective way to pass this criterion and ship nothing.
-    harness = createHarness();
-    await harness.start();
-
-    const response = await post(
-      harness.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ resolvedSecrets: { PW: SECRET } })),
-      SERVICE_TOKEN,
-    );
-
-    expect(response.status, 'the approved position must still be approved').toBe(202);
-    await until(() => harness !== null && harness.http.admissionRequests.length > 0, 10_000);
-  });
-
-  it('re-asserts token correspondence in both directions against the typed declaration', () => {
-    const declared = { variables: [], secrets: ['PW'] };
-
-    // A source line naming a reference whose code does not use it.
-    const namedNotUsed = validateArtifact(
-      artifactFor('Type "<secret PW>" in the password field', "await page.getByTestId('pw').fill('literal');"),
-      ['Type "<secret PW>" in the password field'],
-      declared,
-    );
-    expect(namedNotUsed.ok).toBe(false);
-
-    // …and the reverse: code using a reference the source line does not name.
-    const usedNotNamed = validateArtifact(
-      artifactFor('Type the password', "await page.getByTestId('pw').fill(vars.secret('PW'));"),
-      ['Type the password'],
-      declared,
-    );
-    expect(usedNotNamed.ok).toBe(false);
-
-    // …and a reference the typed declaration does not carry at all.
-    const undeclared = validateArtifact(
-      artifactFor('Type "<secret OTHER>" in the password field', "await page.getByTestId('pw').fill(vars.secret('OTHER'));"),
-      ['Type "<secret OTHER>" in the password field'],
-      declared,
-    );
-    expect(undeclared.ok).toBe(false);
-    expect(
-      undeclared.steps.flatMap((step) => step.diagnostics).map((diagnostic) => diagnostic.code),
-    ).toContain('REFERENCE_UNDECLARED');
-  });
-});
 
 // ── AC-22 (MED-3) — the call-site guard over the truncating log buffer ─────────────────────────
 

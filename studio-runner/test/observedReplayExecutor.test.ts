@@ -1,11 +1,11 @@
 import { describe, it, expect } from 'vitest';
 import fixture from '../fixtures/observed-reference/fresh-order-reference.json' with { type: 'json' };
-import type { Execute2, Scope } from '../src/executor/observedOperations.js';
-import { executeObservedReplay, validateObservedExecute } from '../src/executor/observedReplay.js';
+import type { Execute3, Scope } from '../src/executor/observedOperations.js';
+import { executeObservedReplay, validateObservedExecute, replayError } from '../src/executor/observedReplay.js';
 import { hashObserved, OBSERVED_PROFILE } from '../src/validator/observedReferencePolicy.js';
-import type { StepFinishedEvent } from '../src/executor/adapters/StepReporter.js';
+import type { StepFinishedEvent } from '../src/executor/stepReporter.js';
 const scope = { principalId: 'fresh-user', ...fixture.artifact.replayPolicy.scope } as Scope;
-function frame(): Execute2 { return { kind: 'execute', protocolVersion: 2, mode: 'observed', runId: '00000000-0000-4000-8000-000000000020', attemptId: '00000000-0000-4000-8000-000000000021', profileHash: hashObserved(OBSERVED_PROFILE), configurationHash: fixture.artifact.configurationHash, waitStrategy: 'domcontentloaded', stepTimeoutMs: 1000, steps: fixture.artifact.steps, guards: fixture.artifact.guards, bindings: fixture.artifact.replayPolicy.bindings.map(b => ({ bindingId: b.bindingId, producer: b.producer, recipe: b.recipe, origin: b.sourceOrigin })), transfers: fixture.artifact.replayPolicy.transfers, inputs: fixture.artifact.inputRecipes.map(i => ({ inputId: i.inputId, stepId: i.stepId, kind: i.kind, intendedSlot: i.intendedSlot, value: i.kind === 'destination' ? 'https://orders.example.test/start' : 'label' })) } as Execute2; }
+function frame(): Execute3 { return { kind: 'execute', protocolVersion: 3, mode: 'observed', runId: '00000000-0000-4000-8000-000000000020', attemptId: '00000000-0000-4000-8000-000000000021', profileHash: hashObserved(OBSERVED_PROFILE), configurationHash: fixture.artifact.configurationHash, waitStrategy: 'domcontentloaded', stepTimeoutMs: 1000, steps: fixture.artifact.steps, guards: fixture.artifact.guards, bindings: fixture.artifact.replayPolicy.bindings.map(b => ({ bindingId: b.bindingId, producer: b.producer, recipe: b.recipe, origin: b.sourceOrigin })), transfers: fixture.artifact.replayPolicy.transfers, inputs: fixture.artifact.inputRecipes.map(i => ({ inputId: i.inputId, stepId: i.stepId, kind: i.kind, intendedSlot: i.intendedSlot, value: i.kind === 'destination' ? 'https://orders.example.test/start' : 'label' })), secrets: {}, secretOrigins: {} } as Execute3; }
 describe('private source-free replay graph', () => {
     it('captures fresh private values twice with unchanged IR, never reporting them', async () => {
         const m = frame(), original = JSON.stringify(m);
@@ -20,7 +20,7 @@ describe('private source-free replay graph', () => {
                         consumed.push(value ?? '');
                     return Promise.resolve(a.operation.kind === 'assert' ? { assertionPassed: value === fresh } : {});
                 }, withhold(v) { withheld = v; return Promise.resolve(); }, dispose() { disposed++; return Promise.resolve(); } }, scope, { now: () => 1 }, { stepStarted() { return; }, stepFinished(e) { events.push(e); } }, new AbortController().signal);
-            expect(result).toEqual({ ok: true, errorCode: null });
+            expect(result).toEqual({ ok: true, errorCode: null, secretUse: {} });
             expect(consumed).toEqual([fresh]);
             expect(withheld).toBe(fresh);
             expect(disposed).toBe(1);
@@ -70,13 +70,13 @@ function required<T>(value: T | null | undefined): T {
         throw new Error("Missing controlled fixture value");
     return value;
 }
-import { vi } from 'vitest';
+import { vi,type MockInstance } from 'vitest';
 import { ObservedInvocationControl, ReplayAcquisitionBudget, ACQUISITION_LIMITS } from '../src/executor/observedReplay.js';
 import { createObservedReplayAdapter } from '../src/run/observedReplayAdapter.js';
 import type { BrowserHandle } from '../src/run/browserFactory.js';
 import type { Observation, ObservationSession } from '../src/run/observationTypes.js';
 import type { Guard, TrustedPolicy, ReplayAction } from '../src/executor/observedOperations.js';
-import wire from '../../docs/specs/studio-observed-authoring/contracts/v2/publication-fixtures.json' with { type: 'json' };
+import wire from '../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
 function deferred<T>() { let fulfill: (value: T) => void = () => { throw Error('unset'); }; const promise = new Promise<T>(resolve => { fulfill = resolve; }); return { promise, resolve: (value?: T): void => { fulfill(value as T); } }; }
 describe('one-way observed invocation deadlines', () => {
     it.each((['collect', 'probe', 'matches', 'validate', 'invoke'] as const).flatMap(stage => (['timeout', 'cancel'] as const).map(reason => ({ stage, reason }))))('poisons late $stage on $reason before another effect can run', async ({ stage, reason }) => {
@@ -88,7 +88,7 @@ describe('one-way observed invocation deadlines', () => {
             await paused.promise;
         } };
         const original = required(fixture.basis.observations[0]).observation;
-        const observation = { ...structuredClone(original), schemaVersion: 1 } as Observation;
+        const observation = { ...structuredClone(original), schemaVersion: 3, coverage: { ...fixture.basis.observations[0]?.observation.coverage, passwordControls: 0 } } as Observation;
         const target = { documentId: observation.documentId, generation: observation.generation, nodeId: 'reference' };
         const session: ObservationSession = { async observe() { await wait('collect'); return { observation, json: '', bytes: 100, observationHash: 'a'.repeat(64) }; }, async acquire() { await wait('probe'); return { kind: 'READY', target }; }, async matches() { await wait('matches'); return true; }, async validateInvocation() { await wait('validate'); return true; }, async invoke(_invocation, control) { control?.beginInvocation(); invocations++; await wait('invoke'); return { value: 'PRIVATE-CAPTURE' }; }, dispose() { return Promise.resolve(); } };
         const handle = { createObservationSession: () => session, observedBlankMatches: () => Promise.resolve(false), observedNavigateBlank: () => Promise.resolve() } as unknown as BrowserHandle;
@@ -130,7 +130,7 @@ describe('one-way observed invocation deadlines', () => {
             } }, dispose() { return Promise.resolve(); } }, scope, { now: () => 1 }, { stepStarted() { return; }, stepFinished(event) { events.push(event); } }, abort.signal);
         await entered.promise;
         abort.abort();
-        expect(await work).toEqual({ ok: false, errorCode: 'CANCELLED' });
+        expect(await work).toEqual({ ok: false, errorCode: 'CANCELLED', secretUse: {} });
         paused.resolve();
         await Promise.resolve();
         expect(calls).toEqual(['navigate', 'read']);
@@ -149,7 +149,7 @@ describe('one-way observed invocation deadlines', () => {
             await entered.promise;
             now = 1001;
             await vi.advanceTimersByTimeAsync(1001);
-            expect(await work).toEqual({ ok: false, errorCode: 'OUTCOME_UNKNOWN' });
+            expect(await work).toEqual({ ok: false, errorCode: 'OUTCOME_UNKNOWN', secretUse: {} });
             paused.resolve();
             await vi.advanceTimersByTimeAsync(1);
             expect(calls).toEqual(['navigate', 'read']);
@@ -189,7 +189,7 @@ describe('one-way observed invocation deadlines', () => {
                 }
             } control.beginInvocation(); invocations.push(action.operation.kind); if (action.coordinate.stepId === scopeFixtureStep())
                 now = 600; return Promise.resolve(action.operation.kind === 'read' ? { value: 'FRESH' } : { assertionPassed: true }); }, withhold() { return Promise.resolve(); }, dispose() { return Promise.resolve(); } }, scope, { now: () => now }, { stepStarted() { return; }, stepFinished() { return; } }, new AbortController().signal);
-        expect(result).toEqual({ ok: false, errorCode: 'TIMEOUT' });
+        expect(result).toEqual({ ok: false, errorCode: 'TIMEOUT', secretUse: {} });
         expect(deadlines).toEqual([1000, 1000]);
         expect(invocations).toEqual(['navigate', 'read', 'fill']);
     });
@@ -276,9 +276,32 @@ describe('retained native input cancellation fencing', () => {
 });
 
 describe('adapter bounded passive acquisition versus terminal refusal',()=>{
+  it('maps a password-read validation refusal before invoke to the closed replay code',async()=>{
+    let validations=0,invocations=0;
+    const original=required(fixture.basis.observations[0]).observation;
+    const observation={...structuredClone(original),schemaVersion:3,coverage:{...original.coverage,passwordControls:0}} as Observation;
+    const target={documentId:observation.documentId,generation:observation.generation,nodeId:'reference'};
+    const session:ObservationSession={
+      observe(){return Promise.resolve({observation,json:'',bytes:100,observationHash:'a'.repeat(64)});},
+      acquire(){return Promise.resolve({kind:'READY',target});},
+      matches(){return Promise.resolve(true);},
+      validateInvocation(){validations++;return Promise.reject(new Error('PASSWORD_CONTROL_READ_REFUSED'));},
+      invoke(){invocations++;return Promise.resolve({});},
+      dispose(){return Promise.resolve();},
+    };
+    const handle={createObservationSession:()=>session,observedBlankMatches:()=>Promise.resolve(false),observedNavigateBlank:()=>Promise.resolve()} as unknown as BrowserHandle;
+    const adapter=createObservedReplayAdapter(handle,scope,wire.trustedPolicy as TrustedPolicy,'run',()=>undefined);
+    const control=new ObservedInvocationControl({now:()=>0},1000,new AbortController().signal,new ReplayAcquisitionBudget(),{extra:0});
+    try{
+      const failure=await control.run(()=>adapter.perform(required(required(fixture.artifact.steps[1]).operations[0]) as ReplayAction,required(fixture.artifact.guards[1]) as Guard,null,control)).then(()=>null,(error:unknown)=>error);
+      expect(validations).toBe(1);expect(invocations).toBe(0);
+      expect(failure).toMatchObject({code:'PASSWORD_CONTROL_READ_REFUSED'});
+      expect(replayError(failure)).toBe('PASSWORD_CONTROL_READ_REFUSED');
+    }finally{await adapter.dispose();}
+  });
   it.each(['eventually-ready','refused','replacement'] as const)('handles %s without repeating a capture',async mode=>{
     vi.useFakeTimers();let now=0,probes=0,collects=0,invokes=0,matches=0;
-    const observation={...structuredClone(required(fixture.basis.observations[0]).observation),schemaVersion:1} as Observation;
+    const observation={...structuredClone(required(fixture.basis.observations[0]).observation),schemaVersion:3,coverage:{...required(fixture.basis.observations[0]).observation.coverage,passwordControls:0}} as Observation;
     const target={documentId:observation.documentId,generation:observation.generation,nodeId:'reference'};
     const session:ObservationSession={observe(){collects++;return Promise.resolve({observation,json:'',bytes:100,observationHash:'a'.repeat(64)});},acquire(){probes++;return Promise.resolve(mode==='refused'?{kind:'REFUSED',code:'POLICY_REFUSED'}:probes===1?{kind:'ABSENT'}:probes===2?{kind:'VISIBILITY_PENDING'}:{kind:'READY',target});},matches(){matches++;return Promise.resolve(mode!=='replacement');},validateInvocation(){return Promise.resolve(true);},invoke(_i,control){control?.beginInvocation();invokes++;return Promise.resolve({value:'PRIVATE-ONCE'});},dispose(){return Promise.resolve();}};
     const handle={createObservationSession:()=>session,observedBlankMatches:()=>Promise.resolve(false),observedNavigateBlank:()=>Promise.resolve()} as unknown as BrowserHandle;
@@ -286,5 +309,77 @@ describe('adapter bounded passive acquisition versus terminal refusal',()=>{
     const work=control.run(()=>adapter.perform(required(required(fixture.artifact.steps[1]).operations[0]) as ReplayAction,required(fixture.artifact.guards[1]) as Guard,null,control));
     const result=mode==='eventually-ready'?expect(work).resolves.toEqual({value:'PRIVATE-ONCE'}):expect(work).rejects.toThrow(mode==='refused'?'POLICY_REFUSED':'TARGET_DRIFT');
     try{await vi.advanceTimersByTimeAsync(0);now=100;await vi.advanceTimersByTimeAsync(100);now=350;await vi.advanceTimersByTimeAsync(250);await result;expect(collects).toBe(mode==='refused'?1:3);expect(invokes).toBe(mode==='eventually-ready'?1:0);expect(matches).toBe(mode==='refused'?0:1);expect(budget.snapshot()).toEqual({extra:mode==='refused'?0:2,total:collects,bytes:100*collects});}finally{await adapter.dispose();vi.useRealTimers();}
+  });
+});
+
+// Ordinary preparation uses controlled ports here; native companions keep the actual password
+// primitive, recording and Vault/Core authority in their separately required tiers.
+import {PasswordNoEffect} from '../src/run/passwordControl.js';
+import {ObservedRefusal} from '../src/validator/observedReferencePolicy.js';
+import type {InvocationControl} from '../src/executor/observedReplay.js';
+import type {ObservedAdapter} from '../src/run/observedReplayAdapter.js';
+function ordinaryPasswordPreparation(prepare:(control:InvocationControl)=>Promise<void>,guardLive:()=>void=()=>undefined){
+  const original=required(fixture.basis.observations[0]).observation,observation={...structuredClone(original),schemaVersion:3,coverage:{...original.coverage,passwordControls:1}} as Observation;
+  const stepId='00000000-0000-4000-8000-000000000901',guard:Guard={guardId:'g0',origin:observation.origin,target:{kind:'passwordControl'}},action:ReplayAction={coordinate:{stepId,ordinal:0},guardId:'g0',operation:{kind:'fill',value:{kind:'secretRef',sourceInputId:'password-reference'}}};
+  const message:Execute3={...frame(),steps:[{stepIndex:0,stepId,operations:[action]}],guards:[guard],bindings:[],transfers:[],inputs:[{inputId:'password-reference',stepId,kind:'secretRef',intendedSlot:'fill.value',referenceName:'PASS'}],secrets:{PASS:'preparation-private-canary'},secretOrigins:{PASS:[observation.origin]}};
+  const scoped:Scope={...scope,initialContext:{kind:'observedDocument',origin:observation.origin}},events:StepFinishedEvent[]=[];
+  validateObservedExecute(message,scoped); // Prove the declared parent before any asynchronous port fault.
+  let current:InvocationControl|undefined;const failures:unknown[]=[];const begins:MockInstance<InvocationControl['beginInvocation']>[]=[];
+  const observe=vi.fn(()=>Promise.resolve({observation,json:'',bytes:100,observationHash:'a'.repeat(64)})),preparePassword=vi.fn(()=>prepare(required(current))),fillPassword=vi.fn<NonNullable<ObservationSession['fillPassword']>>((_target,_origin,_allowed,_value,control)=>{control?.beginInvocation();return Promise.resolve();}),dispose=vi.fn(()=>Promise.resolve()),withhold=vi.fn(()=>Promise.resolve());
+  const observations:ObservationSession={observe,preparePassword,fillPassword,withhold,dispose,matches:()=>Promise.resolve(true)},handle={createObservationSession:()=>observations,observedBlankMatches:()=>Promise.resolve(false),observedNavigateBlank:()=>Promise.resolve()} as unknown as BrowserHandle;
+  const ordinary=createObservedReplayAdapter(handle,scoped,wire.trustedPolicy as TrustedPolicy,'preparation-unit',guardLive),adapter:ObservedAdapter={...ordinary,perform:async(...args)=>{current=args[3];begins.push(vi.spyOn(current,'beginInvocation'));try{return await ordinary.perform(...args);}catch(error){failures.push(error);throw error;}}};
+  const run=(clock={now:()=>0},signal=new AbortController().signal)=>executeObservedReplay(message,adapter,scoped,clock,{stepStarted(){return;},stepFinished:event=>{events.push(event);}},signal);
+  return {message,scoped,guard,action,adapter,ordinary,run,events,observe,preparePassword,fillPassword,dispose,begins,failures};
+}
+describe('ordinary password preparation trust and lifetime boundary',()=>{
+  it.each(['PASSWORD_TARGET_ABSENT','PASSWORD_TARGET_AMBIGUOUS','TARGET_CHANGED'] as const)('classifies trusted %s without filling, invoking, reacquiring or leaking',async reason=>{
+    const h=ordinaryPasswordPreparation(()=>Promise.reject(new PasswordNoEffect(reason))),result=await h.run();
+    expect(result).toEqual({ok:false,errorCode:reason==='TARGET_CHANGED'?'TARGET_DRIFT':'POLICY_REFUSED',secretUse:{PASS:'REFUSED'}});expect(h.failures).toHaveLength(1);expect(h.failures[0]).toBeInstanceOf(ObservedRefusal);expect(h.failures[0]).toMatchObject({code:reason==='TARGET_CHANGED'?'TARGET_DRIFT':'POLICY_REFUSED',noEffect:true,reason});
+    expect(h.preparePassword).toHaveBeenCalledOnce();expect(h.observe).toHaveBeenCalledOnce();expect(h.fillPassword).not.toHaveBeenCalled();expect(required(h.begins[0])).not.toHaveBeenCalled();expect(h.dispose).toHaveBeenCalledOnce();
+    expect(JSON.stringify({result,events:h.events})).not.toContain('preparation-private-canary');
+  });
+  it.each(['same-text-absent','same-text-target','unknown-trusted','canary-unknown'] as const)('keeps %s unrecognized and private at the executor boundary',async mode=>{
+    const error=mode==='unknown-trusted'?new PasswordNoEffect('UNRECOGNIZED_PREPARATION'):new Error(mode==='same-text-absent'?'PASSWORD_TARGET_ABSENT':mode==='same-text-target'?'TARGET_CHANGED':'preparation-private-canary');
+    const h=ordinaryPasswordPreparation(()=>Promise.reject(error)),result=await h.run();expect(result).toEqual({ok:false,errorCode:'INTERNAL_ERROR',secretUse:{PASS:'REFUSED'}});
+    expect(h.preparePassword).toHaveBeenCalledOnce();expect(h.observe).toHaveBeenCalledOnce();expect(h.fillPassword).not.toHaveBeenCalled();expect(required(h.begins[0])).not.toHaveBeenCalled();expect(h.dispose).toHaveBeenCalledOnce();expect(JSON.stringify({result,events:h.events})).not.toMatch(/preparation-private-canary|PASSWORD_TARGET|UNRECOGNIZED_PREPARATION/u);
+  });
+  it.each(['observed-refusal','same-text','unknown-trusted','late-phase','non-password-target'] as const)('preserves exact %s rejection identity and never invents no-effect authority',async mode=>{
+    const error=mode==='observed-refusal'?new ObservedRefusal('POLICY_REFUSED','original-authority',false):mode==='same-text'?new Error('PASSWORD_TARGET_ABSENT'):new PasswordNoEffect(mode==='unknown-trusted'?'UNRECOGNIZED_PREPARATION':'PASSWORD_TARGET_ABSENT');
+    const h=ordinaryPasswordPreparation(control=>{if(mode==='late-phase')control.beginInvocation();return Promise.reject(error);});
+    const control=new ObservedInvocationControl({now:()=>0},1000,new AbortController().signal,new ReplayAcquisitionBudget(),{extra:0});
+    try{
+      if(mode==='non-password-target'){
+        // A trusted error at a different acquisition target cannot authorize password mapping.
+        const ordinaryGuard=required(fixture.artifact.guards[1]) as Guard;
+        const observation={...structuredClone(required(fixture.basis.observations[0]).observation),schemaVersion:3} as Observation;
+        const session:ObservationSession={observe:()=>Promise.resolve({observation,json:'',bytes:100,observationHash:'a'.repeat(64)}),acquire:()=>Promise.reject(error),matches:()=>Promise.resolve(true),dispose:()=>Promise.resolve()};
+        const handle={createObservationSession:()=>session,observedBlankMatches:()=>Promise.resolve(false),observedNavigateBlank:()=>Promise.resolve()} as unknown as BrowserHandle;
+        const adapter=createObservedReplayAdapter(handle,h.scoped,wire.trustedPolicy as TrustedPolicy,'non-password-preparation',()=>undefined);
+        try{await expect(adapter.perform(h.action,ordinaryGuard,'preparation-private-canary',control)).rejects.toBe(error);}finally{await adapter.dispose();}
+      }else await expect(h.adapter.perform(h.action,h.guard,'preparation-private-canary',control,{secretId:'PASS',allowedOrigins:h.scoped.allowedOrigins})).rejects.toBe(error);
+      expect(h.fillPassword).not.toHaveBeenCalled();expect(control.phase).toBe(mode==='late-phase'?'INVOKING':'PREPARING');
+      if(mode==='late-phase')expect(required(h.begins[0])).toHaveBeenCalledOnce();else if(mode!=='non-password-target')expect(required(h.begins[0])).not.toHaveBeenCalled();
+    }finally{await h.adapter.dispose();expect(h.dispose).toHaveBeenCalledOnce();}
+  });
+  it.each(['cancel','deadline','authority'] as const)('preserves %s precedence while password preparation is held',async mode=>{
+    const entered=deferred<undefined>(),released=deferred<undefined>();let now=0,withdrawn=false;
+    const h=ordinaryPasswordPreparation(async()=>{entered.resolve();await released.promise;throw new PasswordNoEffect('PASSWORD_TARGET_ABSENT');},()=>{if(withdrawn)throw new ObservedRefusal('AUTHORIZATION_EXPIRED');}),abort=new AbortController();
+    vi.useFakeTimers();const work=h.run({now:()=>now},abort.signal);
+    // Observe immediately, without changing the original promise/rejection used below. A
+    // tagged rejection is a test failure, never successful preparation or a swallowed error.
+    const completion=work.then(value=>({kind:'completed',value})as const,(error:unknown)=>({kind:'rejected',error})as const);
+    try{
+      const first=await Promise.race([entered.promise.then(()=>({kind:'entered'})as const),completion]);
+      if(first.kind==='rejected')throw first.error;
+      if(first.kind==='completed')throw Error('WORK_COMPLETED_BEFORE_PASSWORD_PREPARATION');
+      if(mode==='cancel')abort.abort();else if(mode==='deadline'){now=1001;await vi.advanceTimersByTimeAsync(1001);}else withdrawn=true;
+      released.resolve();await vi.advanceTimersByTimeAsync(0);const result=await work;expect(result.ok).toBe(false);expect(result.errorCode).toBe(mode==='cancel'?'CANCELLED':mode==='deadline'?'TIMEOUT':'AUTHORIZATION_EXPIRED');
+      expect(h.preparePassword).toHaveBeenCalledOnce();expect(h.observe).toHaveBeenCalledOnce();expect(h.fillPassword).not.toHaveBeenCalled();expect(required(h.begins[0])).not.toHaveBeenCalled();expect(h.dispose).toHaveBeenCalledOnce();expect(JSON.stringify({result,events:h.events})).not.toContain('preparation-private-canary');
+    }finally{released.resolve();await vi.advanceTimersByTimeAsync(0);vi.useRealTimers();}
+  });
+  it('keeps a legal prepared password fill as exactly one invocation and positive USED evidence',async()=>{
+    const h=ordinaryPasswordPreparation(()=>Promise.resolve()),result=await h.run();expect(result).toEqual({ok:true,errorCode:null,secretUse:{PASS:'USED'}});
+    // The existing exact target is prepared, then revalidated by performPrepared before fill.
+    expect(h.preparePassword).toHaveBeenCalledTimes(2);expect(h.observe).toHaveBeenCalledOnce();expect(h.fillPassword).toHaveBeenCalledOnce();expect(required(h.begins[0])).toHaveBeenCalledOnce();expect(h.dispose).toHaveBeenCalledOnce();expect(JSON.stringify({result,events:h.events})).not.toContain('preparation-private-canary');
   });
 });

@@ -11,10 +11,11 @@
  *
  * The criterion says "a bounded time" and leaves the number open. Inventing one here would be
  * inventing a requirement, so the bound is read from the deployment's own configuration:
- * `STUDIO_RUNNER_VALIDATE_TIMEOUT_MS`. §4.5 groups `/health`, `/ready` and `/v1/validate` as one
- * set — *"control/validation endpoints have separate bounded resources"* — and that key is the
- * only enumerated bound the runner holds over any member of the set. It bounds the heaviest one:
- * a full artifact revalidation. `/health` and `/ready` do strictly less work on the same event
+ * `STUDIO_RUNNER_VALIDATE_TIMEOUT_MS`. §4.5 groups `/health`, `/ready` and the validate route
+ * (`/v2/validate-observed` since STUDIO-OBS-012A AC-3 deleted the artifact-1 one) as one set —
+ * *"control/validation endpoints have separate bounded resources"* — and that key is the only
+ * enumerated bound the runner holds over any member of the set. It bounds the heaviest one:
+ * a full revalidation. `/health` and `/ready` do strictly less work on the same event
  * loop, so a deployment that accepts that bound for the heavy member accepts it for the light
  * ones, and a control plane inside it is a control plane within the budget its own configuration
  * already names.
@@ -26,6 +27,9 @@
  * What the bound is *not* is a claim that the event loop was never blocked at all. It is the claim
  * the criterion makes: the control endpoints answer, `/ready` stays true, validation still works
  * and a second run is refused rather than queued — while a browser child sits there doing nothing.
+ *
+ * The runs are observed jobs on `POST /v2/runs` and the scripted child speaks the observed protocol
+ * (STUDIO-OBS-012A AC-3).
  */
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -38,11 +42,17 @@ import { createFsScratchStore } from '../../src/server/scratch.js';
 import { createChildDriver } from '../helpers/childDriver.js';
 import { createHarness, until, SERVICE_TOKEN } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { get, post, validJob } from '../helpers/runner.js';
+import fixture from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
+import { OBSERVED_BUILD, get, observedBody, post } from '../helpers/runner.js';
 import { createFakeScheduler } from '../helpers/scheduler.js';
 import type { FakeScheduler } from '../helpers/scheduler.js';
 
 const TOTAL_RUNTIME_MS = 120_000;
+
+/** The observed job these cases run, asking for the server's whole runtime budget. */
+function job(attemptId?: string): string {
+  return observedBody({ totalRuntimeMs: TOTAL_RUNTIME_MS, ...(attemptId === undefined ? {} : { attemptId }) });
+}
 
 let harness: Harness | null = null;
 const roots: string[] = [];
@@ -82,7 +92,7 @@ async function hangOne(options: { readonly writes?: boolean } = {}): Promise<Hun
   harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
   await harness.start();
 
-  const admitted = await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+  const admitted = await post(harness.port, '/v2/runs', job(), SERVICE_TOKEN);
   expect(admitted.status).toBe(202);
   // The deadline is armed, so the child is up and hung and nothing has fired yet.
   await until(() => scheduler.pending().length > 0, 20_000);
@@ -134,21 +144,8 @@ describe('AC-14 — the control endpoints stay responsive while a child is hung'
     const validated = await timed(() =>
       post(
         runner.port,
-        '/v1/validate',
-        JSON.stringify({
-          artifact: {
-            version: 1,
-            steps: [
-              {
-                stepIndex: 0,
-                originalText: 'Go to "https://example.com/login"',
-                code: "await page.goto('https://example.com/login');",
-              },
-            ],
-          },
-          source: ['Go to "https://example.com/login"'],
-          references: { variables: [], secrets: [] },
-        }),
+        '/v2/validate-observed',
+        JSON.stringify({ ...fixture.validationRequest, requiredBuild: OBSERVED_BUILD }),
         SERVICE_TOKEN,
       ),
     );
@@ -165,17 +162,12 @@ describe('AC-14 — the control endpoints stay responsive while a child is hung'
     await until(() => runner.app.coordinator.inFlight === 0, 20_000);
   }, 20_000);
 
-  it('answers a second POST /v1/runs with 429 and Retry-After rather than blocking on the hang', async () => {
+  it('answers a second POST /v2/runs with 429 and Retry-After rather than blocking on the hang', async () => {
     const { harness: runner, scheduler } = await hangOne();
     const boundMs = runner.config.validateTimeoutMs;
 
     const second = await timed(() =>
-      post(
-        runner.port,
-        '/v1/runs',
-        JSON.stringify(validJob({ attemptId: 'attempt-2' })),
-        SERVICE_TOKEN,
-      ),
+      post(runner.port, '/v2/runs', job('00000000-0000-4000-8000-000000000221'), SERVICE_TOKEN),
     );
 
     expect(second.value.status).toBe(429);
@@ -217,10 +209,10 @@ describe('AC-14 — the control endpoints stay responsive while a child is hung'
     expect(health.value.status).toBe(200);
     expect(health.elapsedMs).toBeLessThan(boundMs);
 
-    // And the flood was bounded rather than relayed wholesale.
+    // And none of the flood was relayed: the observed launcher drains the child's raw streams and
+    // discards them, so no child-formatted text reaches the pod log at all.
     const relayed = runner.sink.lines.filter((line) => line.includes('run.child_output'));
-    expect(relayed.length).toBeGreaterThan(0);
-    expect(relayed.length).toBeLessThanOrEqual(501);
+    expect(relayed).toEqual([]);
 
     scheduler.advance(TOTAL_RUNTIME_MS);
     await until(() => runner.app.coordinator.inFlight === 0, 20_000);
@@ -246,7 +238,7 @@ describe('AC-13 — the slot is released and the next run succeeds', () => {
 
     // A second run, admitted immediately, executing end to end on a child that behaves.
     const secondDriver = createChildDriver({
-      result: { ok: true, failureKind: null, failureMessage: null },
+      result: { ok: true, errorCode: null },
       onStop: 'flush',
     });
     const secondScheduler = createFakeScheduler();
@@ -257,23 +249,16 @@ describe('AC-13 — the slot is released and the next run succeeds', () => {
       scratch: realScratch(),
     });
     await harness.start();
-    const admitted = await post(
-      harness.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ attemptId: 'attempt-2' })),
-      SERVICE_TOKEN,
-    );
+    const admitted = await post(harness.port, '/v2/runs', job('00000000-0000-4000-8000-000000000221'), SERVICE_TOKEN);
     expect(admitted.status).toBe(202);
     await until(() => harness?.app.coordinator.inFlight === 0, 20_000);
 
     const final = JSON.parse(harness.http.reportRequests.at(-1)?.body ?? '') as ReportBody;
     expect(final.kind).toBe('FINAL');
     expect(final.outcome?.result).toBe('PASSED');
-    // `PENDING` until story 10.14 gave the terminal path an upload; a playable recording that the
-    // store acknowledged is `STORED`. What this case is about — the second run works at all after
-    // a killed one — is unchanged.
-    expect(final.evidence?.state).toBe('STORED');
-    // And it is not partial: this run's recorder closed in an orderly way.
+    // The scripted child owns no app video, so the evidence is `UNAVAILABLE` rather than stored.
+    // What this case is about — the second run works at all after a killed one — is unchanged.
+    expect(final.evidence?.state).toBe('UNAVAILABLE');
     expect(final.evidence?.partial).toBe(false);
     // No leaked timer from the killed run fired into this one.
     expect(harness.app.pool.inUse).toBe(0);
@@ -299,7 +284,7 @@ describe('AC-15 — drain on SIGTERM finishes or ends admitted work; it never or
       env: { STUDIO_RUNNER_DRAIN_TIMEOUT_MS: '30' },
     });
     await harness.start();
-    await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(harness.port, '/v2/runs', job(), SERVICE_TOKEN);
     await until(() => scheduler.pending().length > 0, 20_000);
 
     const drained = await harness.app.drain();
@@ -327,12 +312,12 @@ describe('AC-15 — drain on SIGTERM finishes or ends admitted work; it never or
   it('lets a run that finishes inside the drain window finish, without killing it', async () => {
     const scheduler = createFakeScheduler();
     const driver = createChildDriver({
-      result: { ok: true, failureKind: null, failureMessage: null },
+      result: { ok: true, errorCode: null },
       onStop: 'flush',
     });
     harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
     await harness.start();
-    await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(harness.port, '/v2/runs', job(), SERVICE_TOKEN);
     await until(() => harness?.app.coordinator.inFlight === 0, 20_000);
 
     const drained = await harness.app.drain();

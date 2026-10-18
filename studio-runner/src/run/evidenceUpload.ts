@@ -33,6 +33,7 @@ import type { Redactor } from '../executor/redaction.js';
 import type { ObjectStoreClient } from './objectStore.js';
 import { ObjectStoreUnavailableError } from './objectStore.js';
 import type { RunnerEvidenceState } from './recording.js';
+import type {VerifiedVideoFile} from './appVideoOwnership.js';
 
 /**
  * The filesystem capabilities this module is given.
@@ -76,6 +77,7 @@ export function openEvidenceWindow(ports: EvidenceUploadPorts): EvidenceWindow {
 }
 
 export interface VideoUploadRequest {
+  readonly verifiedFile?:VerifiedVideoFile;
   /** The key the **job** supplied. This module never derives, defaults or normalizes one. */
   readonly videoKey: string;
   /** The scratch path of the recording, or `null` when none was produced. */
@@ -116,7 +118,7 @@ export async function uploadRecording(
 
   let bytes: number | null = null;
   try {
-    bytes = (await ports.fileSystem.stat(request.path)).size;
+    bytes = request.verifiedFile?.bytes??(await ports.fileSystem.stat(request.path)).size;
   } catch (error) {
     return {
       state: 'FAILED',
@@ -130,7 +132,7 @@ export async function uploadRecording(
   const attempt = await putWithBoundedRetry(ports, window, {
     key: request.videoKey,
     // A file reference, never a buffer: the client streams it and a retry re-opens it (AC-5).
-    body: { kind: 'file', path: request.path },
+    body: { kind: 'file', path: request.path,...(request.verifiedFile?{verifiedFile:request.verifiedFile}:{}) },
     contentType: 'video/webm',
   });
 

@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 import { createHash } from 'node:crypto';
+import {readBrowserProvenance,fileSha256} from './browser-provenance.mjs';
+import {envBrowserRoot} from './write-runtime-versions.mjs';
 /**
  * Pin consistency check (AC-1, ADR-001 §4.2, architecture §4.3).
  *
@@ -14,8 +16,9 @@ import { createHash } from 'node:crypto';
  * | Recorded | `dist/runtime-versions.json` → `playwright` (written by the build) |
  *
  * It additionally asserts that the floor major of `engines.node` equals `.nvmrc`, and — when the
- * recorded copy exists — that the recorded lockfile/image/node copies and the validator parser
- * still agree with the declared ones.
+ * recorded copy exists — that the recorded lockfile/image/node copies still agree with the
+ * declared ones and the recorded observed identities still match the packaged bytes. The retired
+ * artifact-1 `validatorParser` stamp is no longer compared (STUDIO-OBS-009 AC-1 P2 b).
  *
  * **Node.** `runtime-versions.json` → `node` is the one recorded value that comes from the runtime
  * that actually executed rather than from a declaration, so it gets two rules that differ on
@@ -143,7 +146,6 @@ export function collectPins(root) {
     locked: lock?.packages?.['node_modules/playwright']?.version ?? null,
     image: imagePin,
     recorded: runtime?.playwright ?? null,
-    declaredTypescript: pkg?.dependencies?.typescript ?? null,
     engines: pkg?.engines?.node ?? null,
     nvmrc,
     runtime,
@@ -235,11 +237,6 @@ export function checkPins(root, options = {}) {
       ['dist/runtime-versions.json playwrightLocked', runtime.playwrightLocked, pins.locked],
       ['dist/runtime-versions.json playwrightImageTag', runtime.playwrightImageTag, pins.image],
       ['dist/runtime-versions.json nodeMajorPin', runtime.nodeMajorPin, pins.nvmrc],
-      [
-        'dist/runtime-versions.json validatorParser',
-        runtime.validatorParser,
-        pins.declaredTypescript === null ? null : `typescript@${pins.declaredTypescript}`,
-      ],
     ];
     for (const [label, recorded, expected] of recordedCopies) {
       if (expected !== null && recorded !== expected) {
@@ -336,16 +333,20 @@ export function checkPins(root, options = {}) {
       const packaged=read(observedSchemas),references=read(join(root,'dist','observed-reference.json'));
       const refsRoot=join(root,'fixtures','observed-reference');
       const sourceReferences=Object.fromEntries(readdirSync(refsRoot).filter(n=>n.endsWith('.json')).sort().map(n=>[n,read(join(refsRoot,n))]));
-      const choicePath=join(root,'..','docs','specs','studio-observed-authoring','contracts','v2','publication-fixtures.json');
+      const includedChoice=sourceReferences['accepted-observed-choice.json'];
+      if(!includedChoice||includedChoice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Missing observed choice reference.');
+      const choicePath=join(root,'..','docs','specs','studio-observed-authoring','contracts','v3','publication-fixtures.json');
       if(existsSync(choicePath)){
         const choice=read(choicePath).observedChoice;
         if(!choice||choice.basis?.preparations?.filter(p=>p.observedChoice?.version===1).length!==1)throw new Error('Missing observed choice reference.');
-        sourceReferences['accepted-observed-choice.json']=choice;
+        if(hash(choice)!==hash(includedChoice))failures.push('Observed packaged reference bundle is stale.');
       }
       if(hash(packaged)!==hash(sourceSchemas)||pins.runtime?.observedSchemaBundleHash!==hash(packaged))failures.push('Observed packaged schema bundle is stale.');
       if(hash(references)!==hash(sourceReferences)||pins.runtime?.observedReferenceBundleHash!==hash(references))failures.push('Observed packaged reference bundle is stale.');
-      const profile=packaged['replay-profile'];
-      if(profile?.properties?.playwright?.const!==pins.declared)failures.push('Observed profile Playwright pin differs from actual package.');
+      const actualBrowser=readBrowserProvenance(envBrowserRoot(process.env),pins.runtime?.observedChromiumBuild);
+      if(hash(actualBrowser)!==hash(pins.runtime?.observedBrowserProvenance)||pins.runtime?.observedBrowserLauncherSha256!==fileSha256(join(root,'dist','run','browser.js')))failures.push('Observed full Chromium provenance is stale or incompatible.');
+      // The replay profile collapsed to {contract:3} (STUDIO-OBS-012A): Playwright is asserted by the
+      // package/lock/Dockerfile/runtime copies above and the browser build by BuildIdentity.
     }catch{failures.push('Observed packaged support files are missing or invalid.');}
   }
   return { ok: failures.length === 0, failures, notAsserted, pins };

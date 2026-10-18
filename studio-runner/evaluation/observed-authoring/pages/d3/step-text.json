@@ -1,0 +1,84 @@
+{
+  "schemaVersion": 1,
+  "caseId": "D3-dataflow-multistep",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "b084609e-081b-475d-8079-353ac2b7d421",
+        "text": "Open <var sourceUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "3e66557d-c5b2-4ce8-8e5e-6be4b6bf045b",
+        "text": "Read the visible business reference from the source into the reference binding.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "826e2b61-caf1-4bc2-8a98-c3c4a3d59d56",
+        "text": "Open <var destinationUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "31b66e48-a3c6-47b5-8383-32abf5a79e46",
+        "text": "Fill Destination with the captured reference.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "74beeb72-3563-43a6-844b-bb5fbbe952f6",
+        "text": "Click Submit.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "c58d3050-cee2-4e45-87f3-4d860748d7d2",
+        "text": "Assert that Submit remains visible.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "sourceUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/source"
+    },
+    {
+      "name": "destinationUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/destination"
+    }
+  ]
+}

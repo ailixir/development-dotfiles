@@ -13,7 +13,7 @@
  * increasing within an attempt, starts fresh for a new attempt — the runner holds no cross-run
  * state, so it is a per-run counter — and is never reused or decremented, including on a retry.
  */
-import type { StepStatus } from '../executor/adapters/StepReporter.js';
+import type { StepStatus } from '../executor/stepReporter.js';
 import type { LogEntry, LogView, ReportBounds } from './bounds.js';
 import { boundSteps, createLogBuffer, redactLogEntry } from './bounds.js';
 
@@ -33,6 +33,8 @@ export interface SnapshotStep {
 
 export interface RunOutcome {
   readonly result: 'PASSED' | 'FAILED' | 'ERROR';
+  readonly detail?: { readonly stepId: string; readonly loginStepsPresent: boolean };
+  readonly secretUse?: Readonly<Record<string, 'USED' | 'NOT_USED' | 'REFUSED'>>;
   readonly errorCode: string | null;
   readonly errorMessage: string | null;
 }
@@ -65,6 +67,7 @@ export interface ReportIdentity {
 
 /** Exactly what goes on the wire (architecture §8.4 "Reports include ..."). */
 export interface ReportBody extends ReportIdentity {
+  readonly secretUse?: Readonly<Record<string, 'USED' | 'NOT_USED' | 'REFUSED'>>;
   readonly kind: ReportKind;
   readonly runnerSequence: number;
   /** Describes the **run**, not the delivery. Fixed when the report is built (AC-17). */
@@ -81,6 +84,8 @@ export interface ReportBody extends ReportIdentity {
 }
 
 export interface SnapshotOptions {
+  /** Trusted exact frozen secret recipes; only the authenticated observed parent wires this. */
+  readonly observedSecretConsumers?:ReadonlyMap<number,readonly string[]>;
   /** Observed pre-Ready failure can report unexecuted coordinates with no clock readings. */
   readonly allowUnstartedSkippedSteps?: boolean;
   readonly identity: ReportIdentity;
@@ -149,6 +154,8 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
   const { identity, bounds, runtimeVersions, wallClock, redactor } = options;
   const logs = createLogBuffer(bounds.maxLogEntries, bounds.maxLogEntryLength);
   const steps = new Map<number, SnapshotStep>();
+  const used=new Map<string,Set<number>>();
+  const validPass=(step:SnapshotStep):boolean=>step.status==='PASS'&&step.failure===null&&step.startedAtMs!==null&&step.finishedAtMs!==null&&step.durationMs!==null&&[step.startedAtMs,step.finishedAtMs,step.durationMs].every(n=>Number.isFinite(n)&&n>=0)&&step.finishedAtMs>=step.startedAtMs&&Math.abs(step.durationMs-(step.finishedAtMs-step.startedAtMs))<0.001;
   let sequence = 0;
   let browserStartedAt: string | null = null;
 
@@ -188,7 +195,8 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
       });
     },
     stepFinished(step: SnapshotStep): void {
-      steps.set(step.stepIndex, step);
+      if(browserStartedAt!==null&&validPass(step))for(const name of options.observedSecretConsumers?.get(step.stepIndex)??[]){const proofs=used.get(name)??new Set<number>();proofs.add(step.stepIndex);used.set(name,proofs);}
+      steps.set(step.stepIndex, {...step});
     },
     appendLog(entry: LogEntry): void {
       // Redact, then let the buffer bound. Every producer reachable from a run passes through
@@ -210,17 +218,21 @@ export function createRunSnapshot(options: SnapshotOptions): RunSnapshot {
       // scale the wire has no way to name, and `minimum: 0` cannot tell a process-origin reading
       // from a legitimate late one (ADR-002 §11.6 item 3).
       const started = browserStartedAt !== null;
+      const retained=started?boundSteps(ordered,bounds.maxSteps):options.allowUnstartedSkippedSteps?boundSteps(ordered.filter(step=>step.status==='SKIPPED'&&step.startedAtMs===null&&step.finishedAtMs===null&&step.durationMs===null&&step.failure===null),bounds.maxSteps):[];
+      const support=new Set(retained.filter(validPass).map(step=>step.stepIndex));
+      const progressUse=Object.fromEntries([...used].filter(([,proofs])=>[...proofs].some(index=>support.has(index))).map(([name])=>[name,'USED' as const]));
       return {
         ...identity,
         kind,
         runnerSequence: sequence,
         reportedAt: wallClock().toISOString(),
         browserStartedAt,
-        steps: started ? boundSteps(ordered, bounds.maxSteps) : options.allowUnstartedSkippedSteps ? boundSteps(ordered.filter(step=>step.status==='SKIPPED'&&step.startedAtMs===null&&step.finishedAtMs===null&&step.durationMs===null&&step.failure===null),bounds.maxSteps) : [],
+        steps:retained,
         logs: started ? logs.entries() : logs.entries().map(withoutReading),
         logsTruncated: logs.truncated,
         runtimeVersions,
-        outcome,
+        outcome: outcome ? {result: outcome.result, errorCode: outcome.errorCode, errorMessage: outcome.errorMessage, ...(outcome.detail ? {detail: outcome.detail} : {})} : null,
+        ...(kind==='PROGRESS'&&Object.keys(progressUse).length?{secretUse:progressUse}:kind==='FINAL'&&outcome?.secretUse?{secretUse:outcome.secretUse}:{}),
         evidence,
       };
     },
@@ -256,5 +268,7 @@ export function serializeBounded(body: ReportBody, bounds: ReportBounds): string
   if (Buffer.byteLength(trimmed, 'utf8') <= bounds.maxBodyBytes) return trimmed;
 
   const minimal: ReportBody = { ...withoutLogs, steps: [] };
+  // A progressive positive claim requires its PASS receipt in this same payload.
+  if(minimal.kind==='PROGRESS')delete(minimal as {secretUse?:ReportBody['secretUse']}).secretUse;
   return JSON.stringify(minimal);
 }

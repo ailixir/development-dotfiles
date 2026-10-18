@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import * as sanitizer from '../../src/run/observationSanitizer.js';
 import type { CollectorOptions } from '../../src/run/observationTypes.js';
-import { playwrightBrowserFactory } from '../../src/run/browser.js';
+import { playwrightBrowserFactory } from './preparedBrowser.js';
 import type { BrowserHandle } from '../../src/run/browserFactory.js';
 import type { ObservationSession, ObservationRule, GuidedInvocation, ObservationReadGrant } from '../../src/run/observationTypes.js';
 import { startPageServer } from '../helpers/pageServer.js';
@@ -29,7 +29,7 @@ describe('retained isolated target at invocation',()=>{
     const wrong={...h.invocation,operation:{kind:'read' as const,bindingId:'other',recipe:{kind:'controlValue' as const,classification:'nonsecretApproved' as const,controlType:'text' as const,policyRuleId:'invented'}}};await expect(h.session.invoke?.(wrong)).rejects.toThrow('TARGET_CHANGED');
   });
   it.each(['password','hidden','email'])('refuses a post-prepare type change to %s',async type=>{
-    const h=await prepared('<input data-testid="field" aria-label="Approved field" value="private">');expect(await h.session.matches(h.invocation.target,h.invocation.target.locator)).toBe(true);await page.locator('input').evaluate((element,type)=>{element.setAttribute('type',type);},type);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
+    const h=await prepared('<input data-testid="field" aria-label="Approved field" value="private">');expect(await h.session.matches(h.invocation.target,h.invocation.target.locator)).toBe(true);await page.locator('input').evaluate((element,type)=>{element.setAttribute('type',type);},type);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow(type === 'password' ? 'PASSWORD_CONTROL_READ_REFUSED' : 'TARGET_CHANGED');
   });
   it('refuses replacement by an indistinguishable node and never fills the replacement',async()=>{
     const h=await prepared('<input data-testid="field" aria-label="Approved field">');await page.locator('input').evaluate(element=>{element.replaceWith(element.cloneNode());});h.invocation.operation={kind:'fill',value:{kind:'authoredLiteral',sourceInputId:'source'}};h.invocation.resolvedValue='NEVER_FILL';await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');expect(await page.locator('input').inputValue()).toBe('');
@@ -127,7 +127,7 @@ describe('retained isolated target at invocation',()=>{
       const h=await prepared(`<input data-testid="field" aria-label="Approved field" value="expected" ${attribute}>`);h.invocation.operation={kind:'assert',predicate:'hasValue',expected:{kind:'authoredLiteral',sourceInputId:'expected'}};h.invocation.resolvedValue='expected';expect(await h.session.invoke?.(h.invocation)).toEqual({assertionPassed:true});
     }
     for(const type of ['password','hidden']){
-      const h=await prepared('<input data-testid="field" aria-label="Approved field" value="expected">');h.invocation.operation={kind:'assert',predicate:'hasValue',expected:{kind:'authoredLiteral',sourceInputId:'expected'}};h.invocation.resolvedValue='expected';await page.locator('input').evaluate((e,type)=>{e.setAttribute('type',type);},type);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow('TARGET_CHANGED');
+      const h=await prepared('<input data-testid="field" aria-label="Approved field" value="expected">');h.invocation.operation={kind:'assert',predicate:'hasValue',expected:{kind:'authoredLiteral',sourceInputId:'expected'}};h.invocation.resolvedValue='expected';await page.locator('input').evaluate((e,type)=>{e.setAttribute('type',type);},type);await expect(h.session.invoke?.(h.invocation)).rejects.toThrow(type === 'password' ? 'PASSWORD_CONTROL_READ_REFUSED' : 'TARGET_CHANGED');
     }
   });
 

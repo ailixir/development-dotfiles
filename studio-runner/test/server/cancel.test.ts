@@ -1,5 +1,5 @@
 /**
- * Studio v1 WP4 — `DELETE /v1/runs/{id}` (ADR-002 §29, decision D4).
+ * Studio v1 WP4 — `DELETE /v2/runs/{id}` (ADR-002 §29, decision D4).
  *
  * The cancel reuses the deadline's stop path, so the arrangement is `deadline-outcome.test.ts`'s:
  * a **real listening server**, the real child launcher over a scripted child at the spawn seam,
@@ -8,9 +8,14 @@
  *
  * The grace is observed on the real timer the launcher uses: a child that honours the stop is
  * never signalled, and a child that ignores it is signalled only once the grace has run out.
+ *
+ * STUDIO-OBS-012A AC-3 moved the cancel to `DELETE /v2/runs/{id}` with the artifact-1 run route's
+ * deletion; the runs here are observed jobs and the scripted child speaks the observed protocol.
+ * D1's rewrite of a child-reported `FAIL` into `SKIPPED` was artifact-1 only (the observed child
+ * reports the interrupted step itself, with its closed code) and its case was deleted.
  */
 import { mkdtempSync, rmSync } from 'node:fs';
-import { request as httpRequest } from 'node:http';
+import { request as httpRequest } from 'node:https';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -24,15 +29,16 @@ import {
   STOPPED_STEP_MESSAGE,
 } from '../../src/server/runCoordinator.js';
 import { createFsScratchStore } from '../../src/server/scratch.js';
-import { createChildDriver } from '../helpers/childDriver.js';
+import { createChildDriver, scriptedStartMs } from '../helpers/childDriver.js';
 import type { ChildScript } from '../helpers/childDriver.js';
 import { createHarness, until, SERVICE_TOKEN } from '../helpers/harness.js';
+import { testTls } from '../helpers/guidedTls.js';
 import type { Harness } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
+import { OBSERVED_EXECUTION_ID, observedBody, post } from '../helpers/runner.js';
 import { createFakeScheduler } from '../helpers/scheduler.js';
 
 /** The job's execution id, which is the path segment the API relays. */
-const EXECUTION_ID = String(validJob().executionId);
+const EXECUTION_ID = OBSERVED_EXECUTION_ID;
 
 /** Long enough to measure on a loaded machine, short enough not to slow the suite. */
 const GRACE_MS = 250;
@@ -70,6 +76,8 @@ function del(port: number, path: string, token: string | null): Promise<Response
         port,
         path,
         method: 'DELETE',
+        // The one listener is TLS with a pinned client certificate (STUDIO-OBS-009 AC-3).
+        ...testTls,
         headers: token === null ? {} : { authorization: `Bearer ${token}` },
       },
       (incoming) => {
@@ -99,7 +107,7 @@ async function hangOne(
   harness = runner;
   configure(runner);
   await runner.start();
-  const admitted = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+  const admitted = await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
   expect(admitted.status).toBe(202);
   // The runtime deadline is armed, so the browser is up and the step is hung.
   await until(() => scheduler.pending().length > 0, 20_000);
@@ -130,7 +138,7 @@ describe('a running run: ordered stop, bounded grace, then the process tree', ()
   it('stops a child that honours the stop inside the grace, without a signal, and delivers ERROR / CANCELLED', async () => {
     const { driver, runner } = await hangOne({ hangOnStep: 0, onStop: 'flush' });
 
-    const answered = await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
+    const answered = await del(runner.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
     expect(answered.status).toBe(202);
     expect(answered.body.code).toBe('CANCELLING');
 
@@ -143,9 +151,10 @@ describe('a running run: ordered stop, bounded grace, then the process tree', ()
     expect(final.outcome?.result).toBe('ERROR');
     expect(final.outcome?.errorCode).toBe('CANCELLED');
     expect(final.outcome?.errorMessage).toBe(CANCELLED_MESSAGE);
-    // The recorder flushed inside the grace, so the recording is whole, and it was uploaded.
+    // The scripted child owns no app video, so there is nothing to upload — and nothing is
+    // claimed partial: a recording that does not exist is not a partial one (ADR-002 §17.3).
     expect(final.evidence?.partial).toBe(false);
-    expect(final.evidence?.state).toBe('STORED');
+    expect(final.evidence?.state).toBe('UNAVAILABLE');
     // The cause is on the run's own log, written before the signal.
     expect(JSON.stringify(final.logs)).toContain('The run was cancelled');
   }, 20_000);
@@ -154,7 +163,7 @@ describe('a running run: ordered stop, bounded grace, then the process tree', ()
     const { driver, runner } = await hangOne({ hangOnStep: 0, onStop: 'ignore' });
 
     const orderedAt = Date.now();
-    expect((await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
+    expect((await del(runner.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
     await within(() => driver.child().killed > 0, GRACE_MS + 5_000);
     const killedAfterMs = Date.now() - orderedAt;
 
@@ -174,8 +183,8 @@ describe('a running run: ordered stop, bounded grace, then the process tree', ()
   it('orders exactly one stop however many times it is asked', async () => {
     const { driver, runner } = await hangOne({ hangOnStep: 0, onStop: 'ignore' });
 
-    const first = await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
-    const second = await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
+    const first = await del(runner.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
+    const second = await del(runner.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
     expect([first.status, second.status]).toEqual([202, 202]);
 
     await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
@@ -194,10 +203,10 @@ describe('a run cancelled before a step ran', () => {
     harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
     const runner = harness;
     await runner.start();
-    expect((await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN)).status).toBe(202);
+    expect((await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN)).status).toBe(202);
     await until(() => driver.spawner.children.length > 0 && driver.scratchPath() !== null, 20_000);
 
-    expect((await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
+    expect((await del(runner.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
     driver.releaseReady();
     await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
 
@@ -214,7 +223,7 @@ describe('what the route answers when there is nothing to stop', () => {
     harness = createHarness();
     await harness.start();
 
-    const answered = await del(harness.port, '/v1/runs/never-admitted-here', SERVICE_TOKEN);
+    const answered = await del(harness.port, '/v2/runs/never-admitted-here', SERVICE_TOKEN);
     expect(answered.status).toBe(404);
     expect(answered.body.code).toBe('RUN_NOT_FOUND');
   });
@@ -223,13 +232,13 @@ describe('what the route answers when there is nothing to stop', () => {
     harness = createHarness();
     const runner = harness;
     await runner.start();
-    expect((await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN)).status).toBe(202);
+    expect((await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN)).status).toBe(202);
     runner.advance(1);
     await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
     const reportsBefore = runner.http.reportRequests.length;
     const outcome = finalReport(runner).outcome?.result;
 
-    const answered = await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
+    const answered = await del(runner.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
     expect(answered.status).toBe(409);
     expect(answered.body.code).toBe('RUN_FINISHED');
     expect(runner.http.reportRequests).toHaveLength(reportsBefore);
@@ -241,17 +250,19 @@ describe('what the route answers when there is nothing to stop', () => {
     harness = createHarness();
     await harness.start();
 
-    expect((await del(harness.port, `/v1/runs/${EXECUTION_ID}`, null)).status).toBe(401);
-    expect((await del(harness.port, `/v1/runs/${EXECUTION_ID}`, 'not-the-token')).status).toBe(403);
+    expect((await del(harness.port, `/v2/runs/${EXECUTION_ID}`, null)).status).toBe(401);
+    expect((await del(harness.port, `/v2/runs/${EXECUTION_ID}`, 'not-the-token')).status).toBe(403);
   });
 
   it('serves DELETE on one run only: the collection and a nested path are not routes', async () => {
     harness = createHarness();
     await harness.start();
 
-    expect((await del(harness.port, '/v1/runs', SERVICE_TOKEN)).status).toBe(404);
-    expect((await del(harness.port, `/v1/runs/${EXECUTION_ID}/steps`, SERVICE_TOKEN)).status).toBe(404);
-    expect((await del(harness.port, '/v1/runs', SERVICE_TOKEN)).body.code).toBe('NOT_FOUND');
+    expect((await del(harness.port, '/v2/runs', SERVICE_TOKEN)).status).toBe(404);
+    expect((await del(harness.port, `/v2/runs/${EXECUTION_ID}/steps`, SERVICE_TOKEN)).status).toBe(404);
+    expect((await del(harness.port, '/v2/runs', SERVICE_TOKEN)).body.code).toBe('NOT_FOUND');
+    // The deleted artifact-1 cancel route is not served either.
+    expect((await del(harness.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(404);
   });
 });
 
@@ -308,7 +319,7 @@ describe('the owning runner pulls the cancel, whatever pod the DELETE reached', 
     // run, with no DELETE and no control read at all.
     runner.http.reportOutcome = CANCEL_ACK;
     await runner.start();
-    expect((await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN)).status).toBe(202);
+    expect((await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN)).status).toBe(202);
 
     await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
 
@@ -348,7 +359,7 @@ describe('the owning runner pulls the cancel, whatever pod the DELETE reached', 
 
     // The API records the cancel and relays it through the Service, which picks the other pod.
     recorded = true;
-    const relayed = await del(other.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
+    const relayed = await del(other.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN);
     expect(relayed.status).toBe(404);
     expect(relayed.body.code).toBe('RUN_NOT_FOUND');
     expect(sentKinds(driver)).not.toContain('stop');
@@ -365,51 +376,24 @@ describe('the owning runner pulls the cancel, whatever pod the DELETE reached', 
   }, 20_000);
 });
 
-// ── Decision D1: the step a cancel interrupted is SKIPPED, never FAIL ─────────────────────────
-
-/** What a real child reported for the interrupted step before D1 (measured in the fixtures tier). */
-const CLOSED_UNDER_IT = 'Error: page.goto: net::ERR_ABORTED at http://127.0.0.1:4321/never';
+// ── Decision D1: a step the kill left RUNNING is SKIPPED with the stop text ─────────────────
 
 function stepZero(body: ReportBody): ReportBody['steps'][number] | undefined {
   return body.steps.find((step) => step.stepIndex === 0);
 }
 
 describe('D1 — the step a cancel interrupted is reported SKIPPED with the stop text', () => {
-  it('rewrites the FAIL the closing context caused, on the PROGRESS and on the FINAL', async () => {
-    const { runner } = await hangOne({ hangOnStep: 0, onStop: 'flush', onStopFailsStep: CLOSED_UNDER_IT });
-
-    expect((await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
-    await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
-
-    const final = finalReport(runner);
-    expect(final.outcome?.errorCode).toBe('CANCELLED');
-    expect(stepZero(final)).toEqual({
-      stepIndex: 0,
-      status: 'SKIPPED',
-      // It started and it ended; both readings are the child's and they stay.
-      startedAtMs: 12,
-      finishedAtMs: 40,
-      durationMs: 28,
-      failure: STOPPED_STEP_MESSAGE,
-    });
-    // Neither the closing browser's error nor its URL reaches any report, PROGRESS included.
-    for (const request of runner.http.reportRequests) {
-      expect(request.body).not.toContain('ERR_ABORTED');
-      expect(request.body).not.toContain('"FAIL"');
-    }
-  }, 20_000);
-
   it('turns a step still RUNNING when the grace ran out into SKIPPED on the FINAL, with no finish', async () => {
     const { driver, runner } = await hangOne({ hangOnStep: 0, onStop: 'ignore' });
 
-    expect((await del(runner.port, `/v1/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
+    expect((await del(runner.port, `/v2/runs/${EXECUTION_ID}`, SERVICE_TOKEN)).status).toBe(202);
     await within(() => runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
 
     expect(driver.child().killed).toBeGreaterThan(0);
     expect(stepZero(finalReport(runner))).toEqual({
       stepIndex: 0,
       status: 'SKIPPED',
-      startedAtMs: 12,
+      startedAtMs: scriptedStartMs(0),
       finishedAtMs: null,
       durationMs: null,
       failure: STOPPED_STEP_MESSAGE,
@@ -418,7 +402,7 @@ describe('D1 — the step a cancel interrupted is reported SKIPPED with the stop
 
   it('is the cancel’s rule only: a deadline kill leaves the step as the child reported it', async () => {
     // §18.1 has the API name a TIMEOUT step still RUNNING; D1 decides nothing about deadlines.
-    const flushed = await hangOne({ hangOnStep: 0, onStop: 'flush', onStopFailsStep: CLOSED_UNDER_IT });
+    const flushed = await hangOne({ hangOnStep: 0, onStop: 'flush' });
     flushed.runner.scheduler.advance(120_000);
     await within(() => flushed.runner.app.coordinator.inFlight === 0, GRACE_MS + 5_000);
     expect(finalReport(flushed.runner).outcome?.errorCode).toBe('TIMEOUT');

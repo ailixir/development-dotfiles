@@ -16,19 +16,18 @@ workspace member and shares no lockfile with `frontend/` (ADR-001 §3).
 | `IMAGE_TAG` | full image tag being built | Recorded as `image` in `runtime-versions.json`. Only set on stages 5–7 when they run inside the image. |
 | `PLAYWRIGHT_BROWSERS_PATH` | inherited from the image | Source of the recorded `chromiumBuild`. Never point it at a mixed-version browser root. |
 
-**Node.** `.nvmrc` (22) pins the Node major **the image must ship**; `engines.node`
-(`>=22.11.0 <25.0.0`) is the wider range story 10.2 chose deliberately so the package still
-installs on a newer developer machine. `.npmrc` sets `engine-strict=true`, so a Node outside the
-range fails at install time rather than at runtime. Stage 3 asserts the recorded Node against the
-range everywhere, and against the `.nvmrc` major whenever the record came from inside the pinned
-image.
+**Node.** `.nvmrc` (24) pins the Node major **the image ships**; `engines.node`
+(`>=24.11.0 <25.0.0`) allows that one major, patch releases only. `.npmrc` sets
+`engine-strict=true`, so a Node outside the range fails at install time rather than at runtime.
+Stage 3 asserts the recorded Node against the range everywhere, and against the `.nvmrc` major
+whenever the record came from inside the pinned image. Every stage that runs on the host, including
+the unit tier (its pins tests record the host's `process.version`), needs Node 24.
 
-> **OPEN — stage 6a fails today, deliberately.** The public
-> `mcr.microsoft.com/playwright:v1.63.0-noble` base image ships **Node v24.20.0**, not 22. Stage 6a
-> now names that as a failure instead of passing quietly. It is a real conflict, not a check bug:
-> the internal image (`ED-05`) must be built on the `.nvmrc` major, or `.nvmrc` must be changed by
-> ADR amendment with @architect. Do **not** widen `.nvmrc` to turn the pipeline green — that
-> deletes the only copy that pins Node.
+> **RESOLVED — O-2a.** The public `mcr.microsoft.com/playwright:v1.63.0-noble` base image ships
+> **Node v24.20.0**. The pins used to say 22, so stage 6a failed by design; the pins now follow the
+> image (ADR-001 §4.2 amendment, ED-05 pin-fix01). The internal image (`ED-05`) must ship the
+> `.nvmrc` major (24); stage 6a is what proves it. Do **not** widen `.nvmrc` or `engines.node` to
+> turn the pipeline green — a base-image change that moves the Node major moves both in one change.
 
 ## Stages
 
@@ -106,9 +105,10 @@ npm run build      # tsc -p tsconfig.build.json && node scripts/write-runtime-ve
   only validating the build.
 - **Produces:** `dist/` (JS + `.d.ts` + source maps) and `dist/runtime-versions.json`.
 - `runtime-versions.json` records `{playwright, playwrightLocked, playwrightImageTag, chromiumBuild,
-  node, nodeEngineRange, nodeMajorPin, validatorSchema, validatorParser, syntaxReference, executor,
-  artifact, image}`. `chromiumBuild` and `image` are `null` unless the stage ran inside the pinned
-  image with `IMAGE_TAG` set.
+  node, nodeEngineRange, nodeMajorPin, observedSchemaBundleHash, observedReferenceBundleHash,
+  observedChromiumBuild, observedBrowserProvenance, observedBrowserLauncherSha256, image}`. The
+  artifact-1 version stamps are not recorded (STUDIO-OBS-009 AC-1 P2). `chromiumBuild` and `image`
+  are `null` unless the stage ran inside the pinned image with `IMAGE_TAG` set.
 
 ### 6. Fixture corpus inside the pinned image — **GATED BY `ED-05`**
 
@@ -170,15 +170,13 @@ npm run check:pins -- --require-image
   `IMAGE_TAG` build arg that was omitted arrives as an empty string inside the image; empty and
   whitespace-only count as *not recorded*, so the slip this stage exists to catch is caught.
 - The recorded `node` is asserted here too — this is where the `.nvmrc` major rule applies.
-  **Expect this stage to fail against the public base image** until `ED-05` lands (see Environment
-  above). Record it as a real failure; do not waive it by editing `.nvmrc`.
-- **Open item O-2a is still open, and story 10.12 did not resolve it.** The public base image at
-  the pinned Playwright version ships Node v24.20.0 against a `.nvmrc` of 22, so this stage fails
-  by design. 10.12 ran Chromium on a developer machine, where the in-image rule does not apply —
-  it is read off `chromiumBuild`, which only exists under the image's `PLAYWRIGHT_BROWSERS_PATH` —
-  and `test/run/confinement.test.ts` now asserts `.nvmrc` still reads `22` and that
-  `engines.node` is unchanged, so a convenience edit is a red build rather than a quiet one. The
-  fix remains a base-image choice under `ED-05` or an ADR-001 §4.2 amendment.
+  The public base image ships Node v24.20.0 and `.nvmrc` pins 24, so the Node rule passes against
+  it; the internal image `ED-05` delivers must ship the same major.
+- **Open item O-2a is resolved by moving the pins, not by touching the check.** Story 10.12 ran
+  Chromium on a developer machine, where the in-image rule does not apply — it is read off
+  `chromiumBuild`, which only exists under the image's `PLAYWRIGHT_BROWSERS_PATH` —
+  and `test/run/confinement.test.ts` asserts `.nvmrc` reads `24` and that `engines.node` is
+  `>=24.11.0 <25.0.0`, so changing one without the other is a red build rather than a quiet one.
 - This is the stage that makes the browser build and the Node major part of the pin rather than a
   convention.
 
@@ -205,12 +203,29 @@ docker push "registry.citi.com/put/checks-studio-runner:<appVersion>-<gitSha>"
 ### 8. Helm lint / template
 
 ```bash
-helm lint helm-chart/put-checks --set studioRunner.enabled=true
-helm template helm-chart/put-checks --set studioRunner.enabled=true
+# The controller-certificate pin has no default and the render fails without it (STUDIO-OBS-009
+# ruling A3): it is the SHA-256 of an environment's backend client certificate, which CI cannot
+# know. Lint and template are given a FIXTURE pin here. It is the same value as `TEST_PIN` in
+# `studio-runner/test/deployment/helm.ts`, it proves the chart renders, and it is never a
+# deployment value (a real release supplies its own with --set-string).
+PIN='0B:12:19:20:27:2E:35:3C:43:4A:51:58:5F:66:6D:74:7B:82:89:90:97:9E:A5:AC:B3:BA:C1:C8:CF:D6:DD:E4'
+helm lint helm-chart/put-checks --set studioRunner.enabled=true \
+  --set-string studioRunner.tls.controllerCertificateFingerprint256="$PIN"
+helm template helm-chart/put-checks --set studioRunner.enabled=true \
+  --set-string studioRunner.tls.controllerCertificateFingerprint256="$PIN"
 ```
 
 - **Image:** any with Helm.
 - **Produces:** rendered manifests for review.
+- **Without the pin:** `helm template` fails naming `controllerCertificateFingerprint256`, and
+  `helm lint` (Helm 4.2.0) exits 0 but prints a `missing required values` WARN naming the same key
+  [observed 2026-10-18]. Treat either as a red stage: the pin argument is part of the command, and a
+  stage that drops it is a stage that stopped rendering the runner.
+- **Guided mode** is rendered by the deployment tier (stage 9), which layers a guided overlay over
+  all four values files. To lint it here as well, add `--set studioRunner.guided.enabled=true
+  --set studioRunner.replicaCount=1` and the three guided token inputs
+  (`studioRunner.guided.token.issuer`, `.controllerSubject`, `.publicKey`); the render refuses guided
+  mode with more than one replica, with the autoscaler, or without the runner (A2.6).
 - The `studioRunner` chart component landed with story 10.18a: the Deployment, the ClusterIP
   Service and the NetworkPolicy, plus the `studioRunner` block in all four values files. This stage
   renders and lints them.
@@ -284,5 +299,5 @@ recorded decision — never a green one.
 |---|---|---|
 | O-1 | Pipeline definition location, image-build slot, registry credentials | @devops |
 | O-2 | Internal Playwright image following the `v<version>-<distro>` tag convention (`ED-05`) | Platform/SRE |
-| O-2a | **The internal image must ship the `.nvmrc` Node major (22).** The public base image at the pinned Playwright version ships Node v24.20.0, so stage 6a fails today by design. Resolving it is either a base-image choice (`ED-05`) or an ADR-001 §4.2 amendment — not a change to `.nvmrc`. | Platform/SRE with @architect |
+| O-2a | **Resolved by pin-fix01 (pins moved to the image's Node 24; ADR-001 §4.2 amendment).** The internal image must still ship the `.nvmrc` Node major (24); stage 6a proves it in the deployed image. | Platform/SRE with @architect (verification only) |
 | O-3 | Location of the language-neutral contract files consumed by `backend/` and `studio-runner/` | 10.1 |

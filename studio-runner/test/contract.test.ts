@@ -64,40 +64,20 @@ import {
   responseSchema,
   validateAgainstSchema,
 } from './helpers/openapi.js';
-import { ACCEPTED_JOB_KEYS } from '../src/reporting/envelope.js';
-import { get, post, validJob } from './helpers/runner.js';
+import { get, observedBody, post } from './helpers/runner.js';
 
 const CONTRACT_PATH = join(packageRoot, '..', 'docs', 'specs', 'studio', 'openapi.yaml');
 const CONTRACT_PRESENT = existsSync(CONTRACT_PATH);
 
-/** Routes this runner serves (architecture §8.4). */
-const RUNNER_ROUTES = ['/v1/validate', '/v1/runs', '/health', '/ready'] as const;
-
 /**
- * The key set `components.schemas.RunJob.properties` declares, read from the frozen document.
- *
- * Every step throws rather than returning an empty list, because an empty list would make the
- * set-equality assertion below pass for the wrong reason the day the schema is renamed — which is
- * the failure mode ADR-002 O-15 exists to close, one level up.
+ * Routes this runner serves (architecture §8.4). STUDIO-OBS-012A: the artifact-1 `/v1/validate`
+ * and `/v1/runs` are gone; the observed `/v2/*` family is the one run surface.
  */
-function declaredRunJobKeys(document: YamlValue): string[] {
-  const schema = (document as { components?: { schemas?: Record<string, unknown> } }).components
-    ?.schemas?.RunJob;
-  if (schema === undefined || schema === null || typeof schema !== 'object') {
-    throw new Error('components.schemas.RunJob is absent from the frozen contract');
-  }
-  const properties = (schema as { properties?: unknown }).properties;
-  if (properties === undefined || properties === null || typeof properties !== 'object') {
-    throw new Error('components.schemas.RunJob.properties is absent from the frozen contract');
-  }
-  const keys = Object.keys(properties as Record<string, unknown>);
-  if (keys.length === 0) throw new Error('components.schemas.RunJob.properties is empty');
-  return keys;
-}
+const RUNNER_ROUTES = ['/v2/validate-observed', '/v2/runs', '/health', '/ready'] as const;
 
-/** API routes this runner calls as a client. Story 10.7 implements the handlers. */
+/** API routes this runner calls as a client for an observed run (admission CAS, then reports). */
 const API_ROUTES = [
-  '/internal/studio/executions/{id}/admission',
+  '/internal/studio/executions/{id}/observed-admission',
   '/internal/studio/executions/{id}/progress',
 ] as const;
 
@@ -108,7 +88,6 @@ interface WireBodies {
   readonly admissionRequest: string;
   /** Every progress and terminal report body, exactly as handed to the HTTP client. */
   readonly progressRequests: readonly string[];
-  readonly validate200: string;
   readonly runs202: string;
   readonly health200: string;
   readonly ready200: string;
@@ -125,21 +104,13 @@ async function captureWireBodies(): Promise<WireBodies> {
   const runner = createHarness();
   await runner.start();
   try {
-    const job = validJob();
-    const validate = await post(
-      runner.port,
-      '/v1/validate',
-      JSON.stringify({ artifact: job.artifact, source: job.source, references: job.references }),
-      SERVICE_TOKEN,
-    );
-    expect(validate.status).toBe(200);
-
     const health = await get(runner.port, '/health', SERVICE_TOKEN);
     expect(health.status).toBe(200);
     const ready = await get(runner.port, '/ready', SERVICE_TOKEN);
     expect(ready.status).toBe(200);
 
-    const runs = await post(runner.port, '/v1/runs', JSON.stringify(job), SERVICE_TOKEN);
+    // The observed job (v3 contract fixture, this checkout's build, a fresh replay grant).
+    const runs = await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     expect(runs.status).toBe(202);
     await until(() => runner.app.coordinator.inFlight === 0);
 
@@ -150,7 +121,6 @@ async function captureWireBodies(): Promise<WireBodies> {
     return {
       admissionRequest: admission ?? '',
       progressRequests: runner.http.reportRequests.map((request) => request.body),
-      validate200: validate.body,
       runs202: runs.body,
       health200: health.body,
       ready200: ready.body,
@@ -183,7 +153,7 @@ info:
   title: Studio internal API (stub)
   version: 0.0.0
 paths:
-  /internal/studio/executions/{id}/admission:
+  /internal/studio/executions/{id}/observed-admission:
     post:
       tags: [internal]
       summary: >
@@ -201,7 +171,7 @@ paths:
             application/json:
               schema:
                 type: object
-  /v1/runs:
+  /v2/runs:
     post:
       tags: [internal]
       responses:
@@ -238,13 +208,33 @@ components:
       type: object
       additionalProperties: false
       required:
+        - schemaVersion
+        - kind
         - executionId
+        - startedAt
         - attemptId
         - runnerInstanceId
         - admissionId
-        - runtimeVersions
+        - revisionId
+        - revisionDigest
+        - artifactHash
+        - configurationHash
+        - learnedPlanHash
+        - referencePolicyHash
+        - publicationEvidenceHash
+        - scopeHash
+        - currentPolicyHash
+        - grantId
+        - profile
+        - build
       properties:
+        schemaVersion:
+          type: integer
+        kind:
+          type: string
         executionId:
+          type: string
+        startedAt:
           type: string
         attemptId:
           type: string
@@ -252,7 +242,29 @@ components:
           type: string
         admissionId:
           type: string
-        runtimeVersions:
+        revisionId:
+          type: string
+        revisionDigest:
+          type: string
+        artifactHash:
+          type: string
+        configurationHash:
+          type: string
+        learnedPlanHash:
+          type: string
+        referencePolicyHash:
+          type: string
+        publicationEvidenceHash:
+          type: string
+        scopeHash:
+          type: string
+        currentPolicyHash:
+          type: string
+        grantId:
+          type: string
+        profile:
+          type: object
+        build:
           type: object
 `;
 
@@ -332,8 +344,9 @@ describe('AC-1 — internal contract', () => {
         readonly status: number;
         readonly body: string;
       }[] = [
-        { path: '/v1/validate', method: 'post', status: 200, body: wire.validate200 },
-        { path: '/v1/runs', method: 'post', status: 202, body: wire.runs202 },
+        // STUDIO-OBS-012A: the artifact-1 `POST /v1/validate` and `POST /v1/runs` are no longer
+        // declared; the observed run is accepted on `POST /v2/runs`.
+        { path: '/v2/runs', method: 'post', status: 202, body: wire.runs202 },
         { path: '/health', method: 'get', status: 200, body: wire.health200 },
         { path: '/ready', method: 'get', status: 200, body: wire.ready200 },
       ];
@@ -356,40 +369,9 @@ describe('AC-1 — internal contract', () => {
     const routes = readFileSync(join(packageRoot, 'src', 'server', 'routes.ts'), 'utf8');
     for (const route of RUNNER_ROUTES) expect(routes).toContain(`'${route}'`);
     // A fifth route would be a contract change, not an implementation detail.
-    const declared = [...routes.matchAll(/path === '([^']+)'/gu)].map((match) => match[1]);
+    const declared = [...routes.matchAll(/path\s*===\s*'([^']+)'/gu)].map((match) => match[1]);
     expect([...new Set(declared)].sort()).toEqual([...RUNNER_ROUTES].sort());
   });
-
-  it.skipIf(!CONTRACT_PRESENT)(
-    'accepts exactly the job keys the frozen RunJob declares — ADR-002 O-15',
-    () => {
-      // **A count is not a correspondence.** `ACCEPTED_JOB_KEYS` is the runner's inbound
-      // default-deny set and `RunJob` is the API's closed outbound one; until this landed, the
-      // only assertion over the runner's half was `expect(ACCEPTED_JOB_KEYS.size).toBe(14)` in
-      // `test/run/canary.test.ts`, which a rename or a swap on either side leaves green. That
-      // assertion is **replaced** by this one rather than kept beside it: a hand-maintained count
-      // next to a derived comparison is ADR-002 §15.6's arrangement, and this epic has shipped it
-      // seven times.
-      //
-      // @qa named the gap "the remaining half of the DEF-01 cause". DEF-01 was this same drift in
-      // the other direction — the API sent eight of the fourteen required keys plus four the
-      // closed schema forbids, so **every real dispatch was refused `400 JOB_INVALID`** and no
-      // test looked. Story 10.17 closed the API side with `InternalBodyContractConformanceTest`;
-      // this is the runner's counterpart, and it is a **property** assertion over the document
-      // rather than the byte assertion `confinement.test.ts` makes, so a legitimate amendment
-      // elsewhere in the file leaves it green instead of producing a false red on a blameless
-      // story (ADR-002 §23.1).
-      const document: YamlValue = parseYaml(readFileSync(CONTRACT_PATH, 'utf8'));
-      const declared = declaredRunJobKeys(document);
-
-      // Set equality, both directions at once: a key the runner would accept and the document
-      // does not declare is as much a divergence as one the document declares and the runner
-      // would refuse.
-      expect([...declared].sort(), 'the runner accepts a different job key set than RunJob declares').toEqual(
-        [...ACCEPTED_JOB_KEYS].sort(),
-      );
-    },
-  );
 
   it('calls exactly the two API routes architecture §8.4 names', () => {
     const admission = readFileSync(
@@ -398,7 +380,7 @@ describe('AC-1 — internal contract', () => {
     );
     const report = readFileSync(join(packageRoot, 'src', 'reporting', 'reportClient.ts'), 'utf8');
     expect(admission).toContain('/internal/studio/executions/');
-    expect(admission).toContain('/admission');
+    expect(admission).toContain('/observed-admission');
     expect(report).toContain('/internal/studio/executions/');
     expect(report).toContain('/progress');
   });
@@ -414,13 +396,22 @@ describe('AC-1 — internal contract', () => {
 describe('AC-1 — the conformance check itself', () => {
   const document = parseYaml(STUB_CONTRACT);
 
+  it('accepts bounded secret usage codes and refuses private values and unknown IDs', () => {
+    const contract = parseYaml(readFileSync(CONTRACT_PATH, 'utf8'));
+    const schema = { $ref: '#/components/schemas/RunnerReport/properties/secretUse' };
+    expect(validateAgainstSchema({ PASS: 'USED', OTHER: 'NOT_USED' }, schema, contract)).toEqual([]);
+    expect(validateAgainstSchema({ PASS: 'CANARY_VALUE' }, schema, contract)).not.toEqual([]);
+    expect(validateAgainstSchema({ 'bad ID': 'USED' }, schema, contract)).not.toEqual([]);
+    expect(validateAgainstSchema(Object.fromEntries(Array.from({ length: 65 }, (_, n) => [`ID${String(n)}`, 'NOT_USED'])), schema, contract)).not.toEqual([]);
+  });
+
   it('reads the document shapes an OpenAPI file uses', () => {
     expect(isInternal(document, ADMISSION_OPERATION)).toBe(true);
     // Flow sequence, block sequence and the non-internal operation are all read correctly.
-    expect(isInternal(document, { path: '/v1/runs', method: 'post' })).toBe(true);
+    expect(isInternal(document, { path: '/v2/runs', method: 'post' })).toBe(true);
     expect(isInternal(document, { path: '/public/thing', method: 'get' })).toBe(false);
     // A quoted status key and a `$ref` into components both resolve.
-    expect(responseSchema(document, { path: '/v1/runs', method: 'post' }, 202)).toBeDefined();
+    expect(responseSchema(document, { path: '/v2/runs', method: 'post' }, 202)).toBeDefined();
     const schema = requestSchema(document, ADMISSION_OPERATION);
     expect(validateAgainstSchema({}, schema, document)).not.toEqual([]);
   });
@@ -435,10 +426,10 @@ describe('AC-1 — the conformance check itself', () => {
     expect(violations).toEqual([]);
   });
 
-  it('accepts the exact 202 bytes the runner serves on POST /v1/runs', () => {
+  it('accepts the exact 202 bytes the runner serves on POST /v2/runs', () => {
     const violations = validateAgainstSchema(
       JSON.parse(wire.runs202),
-      responseSchema(document, { path: '/v1/runs', method: 'post' }, 202),
+      responseSchema(document, { path: '/v2/runs', method: 'post' }, 202),
       document,
       'runs202',
     );
@@ -466,8 +457,8 @@ describe('AC-1 — the conformance check itself', () => {
     },
     {
       label: 'an object property arrives as an array',
-      mutate: (body) => ({ ...body, runtimeVersions: ['playwright'] }),
-      expected: 'admissionRequest.runtimeVersions: expected type object, got array',
+      mutate: (body) => ({ ...body, profile: ['contract'] }),
+      expected: 'admissionRequest.profile: expected type object, got array',
     },
     {
       label: 'a property the contract does not declare is sent',
@@ -502,7 +493,7 @@ describe('AC-1 — the conformance check itself', () => {
       requestSchema(parseYaml(STUB_CONTRACT), { path: '/public/thing', method: 'get' }),
     ).toThrow();
     expect(() =>
-      responseSchema(parseYaml(STUB_CONTRACT), { path: '/v1/runs', method: 'post' }, 500),
+      responseSchema(parseYaml(STUB_CONTRACT), { path: '/v2/runs', method: 'post' }, 500),
     ).toThrow();
   });
 });

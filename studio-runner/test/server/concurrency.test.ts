@@ -11,6 +11,10 @@
  * — no production code is modified or made test-aware — and the assertion is that the suite then
  * *fails*. A concurrency test that cannot be made to fail is a concurrency test that proves
  * nothing.
+ *
+ * The runs are observed jobs on `POST /v2/runs` (STUDIO-OBS-012A AC-3). The observed admission
+ * client answers every non-grant — a `409` from a competing CAS, a timeout — with `503
+ * ADMISSION_NOT_ACKNOWLEDGED`, and it keeps no per-outcome counters.
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
@@ -19,7 +23,28 @@ import type { CapacityPool, CapacitySlot } from '../../src/server/capacity.js';
 import { createCapacityPool } from '../../src/server/capacity.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { post, postInterleaved, singleWinnerAdmission, validJob } from '../helpers/runner.js';
+import fixture from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
+import type { RunDecision } from '../../src/server/runCoordinator.js';
+import {
+  OBSERVED_BUILD,
+  observedAdmissionReceipt,
+  observedBody,
+  post,
+  postInterleaved,
+  singleWinnerAdmission,
+} from '../helpers/runner.js';
+
+/** `POST /v2/runs` after the body is parsed, as the route calls it. */
+function submit(runner: Harness, body: string): Promise<RunDecision> {
+  const coordinator = runner.app.coordinator;
+  if (coordinator.submitObserved === undefined) throw new Error('observed replay is not enabled');
+  return coordinator.submitObserved(JSON.parse(body) as unknown);
+}
+
+/** A distinct execution and attempt id for job `index`. */
+function uuid(index: number, kind: 'e' | 'a'): string {
+  return `00000000-0000-4000-8000-${String((kind === 'e' ? 500 : 600) + index)}`.padEnd(36, '0');
+}
 
 const started: Harness[] = [];
 
@@ -36,7 +61,7 @@ afterEach(async () => {
 
 function bodies(count: number): string[] {
   return Array.from({ length: count }, (_value, index) =>
-    JSON.stringify(validJob({ attemptId: `attempt-${String(index)}`, executionId: `exec-${String(index)}` })),
+    observedBody({ executionId: uuid(index, 'e'), attemptId: uuid(index, 'a') }),
   );
 }
 
@@ -44,15 +69,10 @@ describe('Case 1 — a held slot refuses the next request without issuing an adm
   it('returns 429 while the slot is held by an in-flight run', async () => {
     const runner = await start();
     const release = runner.http.holdAdmission();
-    const first = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const first = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.http.admissionRequests.length === 1);
 
-    const second = await post(
-      runner.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ attemptId: 'attempt-2' })),
-      SERVICE_TOKEN,
-    );
+    const second = await post(runner.port, '/v2/runs', bodies(1)[0] ?? '', SERVICE_TOKEN);
 
     expect(second.status).toBe(429);
     // Still one admission request: the refusal was decided without contacting the API.
@@ -70,7 +90,7 @@ describe('Case 2 — interleaved acquire: N concurrent requests, exactly one 202
     // response, and the winner keeps the single slot for the whole test.
     const release = runner.launcher.holdLaunch();
 
-    const responses = await postInterleaved(runner.port, '/v1/runs', bodies(8), SERVICE_TOKEN);
+    const responses = await postInterleaved(runner.port, '/v2/runs', bodies(8), SERVICE_TOKEN);
 
     const accepted = responses.filter((response) => response.status === 202);
     const refused = responses.filter((response) => response.status === 429);
@@ -91,7 +111,7 @@ describe('Case 2 — interleaved acquire: N concurrent requests, exactly one 202
    *
    * The HTTP case above proves the observable behaviour, but Node delivers eight loopback
    * requests across several event-loop turns, so it does not *guarantee* that two acquires ever
-   * raced within one turn. Calling `submit` eight times in a single synchronous burst does: every
+   * raced within one turn. Calling `submitObserved` eight times in a single synchronous burst does: every
    * call reaches the capacity decision before any of them has yielded. This is the falsifiable
    * form of AC-10's "no `await` between observing free capacity and holding the slot".
    */
@@ -99,9 +119,7 @@ describe('Case 2 — interleaved acquire: N concurrent requests, exactly one 202
     const runner = await start();
     const release = runner.launcher.holdLaunch();
 
-    const decisions = await Promise.all(
-      bodies(8).map((body) => runner.app.coordinator.submit(JSON.parse(body) as unknown)),
-    );
+    const decisions = await Promise.all(bodies(8).map((body) => submit(runner, body)));
 
     expect(decisions.filter((decision) => decision.status === 202)).toHaveLength(1);
     expect(decisions.filter((decision) => decision.status === 429)).toHaveLength(7);
@@ -121,9 +139,7 @@ describe('Case 2 — interleaved acquire: N concurrent requests, exactly one 202
     const runner = await start({ pool: readThenWritePool(1) });
     const release = runner.launcher.holdLaunch();
 
-    const decisions = await Promise.all(
-      bodies(8).map((body) => runner.app.coordinator.submit(JSON.parse(body) as unknown)),
-    );
+    const decisions = await Promise.all(bodies(8).map((body) => submit(runner, body)));
 
     expect(decisions.filter((decision) => decision.status === 202).length).toBeGreaterThan(1);
     expect(runner.http.admissionRequests.length).toBeGreaterThan(1);
@@ -185,22 +201,23 @@ function readThenWritePool(size: number): CapacityPool {
 }
 
 describe('Case 3 — two instances, one attempt: exactly one browser launch (AC-7b)', () => {
-  it('one runner wins, the other gets 409, launches nothing and never re-attempts', async () => {
+  it('one runner wins, the other gets 503, launches nothing and never re-attempts', async () => {
     const cas = singleWinnerAdmission();
     const runnerA = await start({ env: { STUDIO_RUNNER_INSTANCE_ID: 'runner-a' } });
     const runnerB = await start({ env: { STUDIO_RUNNER_INSTANCE_ID: 'runner-b' } });
     runnerA.http.admissionOutcome = cas;
     runnerB.http.admissionOutcome = cas;
 
-    const job = JSON.stringify(validJob({ attemptId: 'contested-attempt' }));
+    const job = observedBody({ attemptId: '00000000-0000-4000-8000-000000000777' });
     // Both in flight simultaneously against one single-winner CAS.
     const [responseA, responseB] = await Promise.all([
-      post(runnerA.port, '/v1/runs', job, SERVICE_TOKEN),
-      post(runnerB.port, '/v1/runs', job, SERVICE_TOKEN),
+      post(runnerA.port, '/v2/runs', job, SERVICE_TOKEN),
+      post(runnerB.port, '/v2/runs', job, SERVICE_TOKEN),
     ]);
 
     const statuses = [responseA.status, responseB.status].sort((a, b) => a - b);
-    expect(statuses).toEqual([202, 409]);
+    // The CAS refused the loser `409`; the observed client answers any non-grant `503`.
+    expect(statuses).toEqual([202, 503]);
 
     await until(
       () => runnerA.app.coordinator.inFlight === 0 && runnerB.app.coordinator.inFlight === 0,
@@ -209,7 +226,7 @@ describe('Case 3 — two instances, one attempt: exactly one browser launch (AC-
     const launches = runnerA.launcher.launches.length + runnerB.launcher.launches.length;
     expect(launches).toBe(1);
 
-    const loser = responseA.status === 409 ? runnerA : runnerB;
+    const loser = responseA.status === 503 ? runnerA : runnerB;
     // The loser launched nothing, created no scratch and no evidence key.
     expect(loser.launcher.launches).toEqual([]);
     expect(loser.scratch.present).toEqual([]);
@@ -220,8 +237,8 @@ describe('Case 3 — two instances, one attempt: exactly one browser launch (AC-
   });
 
   /**
-   * Falsification for the *runner-side* property. `AdmissionClient` is a seam, so wrapping it to
-   * map `409 → ADMITTED` neutralises "obey the CAS verdict" without touching production code. If
+   * Falsification for the *runner-side* property. The HTTP client is a seam, so wrapping it to
+   * map `409 → a granted receipt` neutralises "obey the CAS verdict" without touching production code. If
    * the runner did not actually obey the verdict, the assertion above would be green for the
    * wrong reason — here it produces two launches for one attempt.
    */
@@ -233,10 +250,10 @@ describe('Case 3 — two instances, one attempt: exactly one browser launch (AC-
     runnerB.http.admissionOutcome = cas;
     disobeyAdmissionVerdict(runnerB);
 
-    const job = JSON.stringify(validJob({ attemptId: 'contested-attempt' }));
+    const job = observedBody({ attemptId: '00000000-0000-4000-8000-000000000777' });
     await Promise.all([
-      post(runnerA.port, '/v1/runs', job, SERVICE_TOKEN),
-      post(runnerB.port, '/v1/runs', job, SERVICE_TOKEN),
+      post(runnerA.port, '/v2/runs', job, SERVICE_TOKEN),
+      post(runnerB.port, '/v2/runs', job, SERVICE_TOKEN),
     ]);
     await until(
       () => runnerA.app.coordinator.inFlight === 0 && runnerB.app.coordinator.inFlight === 0,
@@ -258,29 +275,22 @@ function disobeyAdmissionVerdict(runner: Harness): void {
   runner.http.admissionOutcome = (request, index) => {
     const outcome = typeof original === 'function' ? original(request, index) : original;
     if (outcome.kind === 'response' && outcome.status === 409) {
-      return { kind: 'response', status: 200, body: '{}' };
+      return observedAdmissionReceipt(request);
     }
     return outcome;
   };
 }
 
-describe('Case 4 — /v1/validate stays responsive while the slot is held', () => {
+describe('Case 4 — /v2/validate-observed stays responsive while the slot is held', () => {
   it('answers validate concurrently with an in-flight admission', async () => {
     const runner = await start();
     const release = runner.http.holdAdmission();
-    const run = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const run = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.http.admissionRequests.length === 1);
 
-    const job = validJob();
+    const request = JSON.stringify({ ...fixture.validationRequest, requiredBuild: OBSERVED_BUILD });
     const validations = await Promise.all(
-      Array.from({ length: 4 }, () =>
-        post(
-          runner.port,
-          '/v1/validate',
-          JSON.stringify({ artifact: job.artifact, source: job.source, references: job.references }),
-          SERVICE_TOKEN,
-        ),
-      ),
+      Array.from({ length: 4 }, () => post(runner.port, '/v2/validate-observed', request, SERVICE_TOKEN)),
     );
 
     for (const response of validations) expect(response.status).toBe(200);
@@ -296,12 +306,12 @@ describe('Case 5 — SIGTERM during the in-flight run drains without abandoning 
   it('finishes and reports the admitted run while refusing everything new', async () => {
     const runner = await start();
     const releaseLaunch = runner.launcher.holdLaunch();
-    await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.app.coordinator.inFlight === 1);
 
     const drained = runner.app.drain();
     const refused = await Promise.all(
-      bodies(3).map((body) => post(runner.port, '/v1/runs', body, SERVICE_TOKEN)),
+      bodies(3).map((body) => post(runner.port, '/v2/runs', body, SERVICE_TOKEN)),
     );
     for (const response of refused) expect(response.status).toBe(503);
 
@@ -336,7 +346,7 @@ describe('Case 6 — a FINAL retry racing the drain deadline resolves once', () 
     };
 
     const releaseLaunch = runner.launcher.holdLaunch();
-    await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.app.coordinator.inFlight === 1);
 
     const drained = runner.app.drain();
@@ -361,7 +371,7 @@ describe('Case 7 — an ambiguous admission racing SIGTERM', () => {
     const release = runner.http.holdAdmission();
     runner.http.admissionOutcome = { kind: 'timeout' };
 
-    const submission = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const submission = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.http.admissionRequests.length === 1);
 
     // SIGTERM arrives while the ambiguous admission is still open.
@@ -370,15 +380,12 @@ describe('Case 7 — an ambiguous admission racing SIGTERM', () => {
 
     const response = await submission;
     expect(response.status).toBe(503);
-    expect((JSON.parse(response.body) as { code: string }).code).toBe(
-      'ADMISSION_AMBIGUOUS_TIMEOUT',
-    );
+    expect((JSON.parse(response.body) as { code: string }).code).toBe('ADMISSION_NOT_ACKNOWLEDGED');
     await drained;
 
     expect(runner.http.admissionRequests).toHaveLength(1);
     expect(runner.launcher.launches).toEqual([]);
     expect(runner.scratch.present).toEqual([]);
-    expect(runner.app.logger.counters.snapshot()['runner.admission.ambiguous']).toBe(1);
   });
 });
 

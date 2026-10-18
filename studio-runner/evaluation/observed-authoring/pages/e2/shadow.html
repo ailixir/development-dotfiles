@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Shadow DOM</title></head>
+<body>
+<main><h1>Open shadow root</h1><div id="host"></div><p id="s" role="status"></p></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+const root=document.getElementById('host').attachShadow({mode:'open'});root.innerHTML='<label>Reference <input name="ref"></label><button type="button">Apply</button>';
+root.querySelector('button').addEventListener('click',async()=>{const v=root.querySelector('input').value;await rec('shadow.apply',{value:v});document.getElementById('s').textContent='Applied '+v;});
+</script>
+</body>
+</html>

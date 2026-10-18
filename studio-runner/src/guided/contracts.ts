@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import schemasJson from './schemas.json' with { type: 'json' };
 import type { BridgeIdentity } from './types.js';
 
-interface Schema { $id?: string; $ref?: string; const?: unknown; enum?: unknown[]; type?: string | string[]; properties?: Record<string, Schema>; required?: string[]; additionalProperties?: boolean; items?: Schema; minItems?: number; maxItems?: number; uniqueItems?: boolean; minLength?: number; maxLength?: number; minimum?: number; maximum?: number; pattern?: string; format?: string; oneOf?: Schema[]; allOf?: Schema[]; not?: Schema; if?: Schema; then?: Schema; else?: Schema; definitions?: Record<string, Schema> }
+interface Schema { $id?: string; $ref?: string; const?: unknown; enum?: unknown[]; type?: string | string[]; properties?: Record<string, Schema>; required?: string[]; additionalProperties?: boolean | Schema; propertyNames?: Schema; minProperties?: number; maxProperties?: number; items?: Schema; minItems?: number; maxItems?: number; uniqueItems?: boolean; minLength?: number; maxLength?: number; minimum?: number; maximum?: number; pattern?: string; format?: string; oneOf?: Schema[]; allOf?: Schema[]; not?: Schema; if?: Schema; then?: Schema; else?: Schema; definitions?: Record<string, Schema>; contains?: Schema; dependencies?: Record<string, Schema | string[] | boolean> }
 const schemas = schemasJson as Record<string, Schema>;
 export function insist(condition: unknown, code = 'POLICY_DENIED'): asserts condition { if (!condition) throw new Error(code); }
 export function canonical(value: unknown): string {
@@ -11,10 +11,10 @@ export function canonical(value: unknown): string {
   if (typeof value === 'number') { insist(Number.isSafeInteger(value) && !Object.is(value, -0), 'SCHEMA'); return String(value); }
   if (Array.isArray(value)) return `[${value.map(canonical).join(',')}]`;
   insist(typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype, 'SCHEMA');
-  return `{${Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([k,v]) => { insist(/^[A-Za-z][A-Za-z0-9]*$/u.test(k), 'SCHEMA'); return `${JSON.stringify(k)}:${canonical(v)}`; }).join(',')}}`;
+  return `{${Object.entries(value).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([k,v]) => { insist(/^[\x20-\x7e]+$/u.test(k), 'SCHEMA'); return `${JSON.stringify(k)}:${canonical(v)}`; }).join(',')}}`;
 }
 export function hash(value: unknown): string { return createHash('sha256').update(canonical(value)).digest('hex'); }
-const supportedKeywords = new Set(['$id','$schema','$ref','title','description','default','const','enum','type','properties','required','additionalProperties','items','minItems','maxItems','uniqueItems','minLength','maxLength','minimum','maximum','pattern','format','oneOf','allOf','not','if','then','else','definitions']);
+const supportedKeywords = new Set(['$id','$schema','$ref','title','description','default','const','enum','type','properties','propertyNames','minProperties','maxProperties','required','additionalProperties','items','minItems','maxItems','uniqueItems','minLength','maxLength','minimum','maximum','pattern','format','oneOf','allOf','not','if','then','else','definitions','contains','dependencies']);
 /** Audit the actually bundled wire subset at load time. Unknown semantics never degrade to {}. */
 export function auditSchemaBundle(bundle: unknown): WeakMap<Schema, Schema> {
   insist(bundle && typeof bundle === 'object' && !Array.isArray(bundle), 'SCHEMA_CONFIGURATION');
@@ -38,17 +38,27 @@ export function auditSchemaBundle(bundle: unknown): WeakMap<Schema, Schema> {
       references.push({schema,base});
     }
     if (schema.type !== undefined) insist((Array.isArray(schema.type)?schema.type:[schema.type]).every(type=>['null','string','boolean','integer','object','array'].includes(type)), 'SCHEMA_CONFIGURATION');
-    for (const keyword of ['minItems','maxItems','minLength','maxLength','minimum','maximum']) if (record[keyword] !== undefined) insist(Number.isSafeInteger(record[keyword]), 'SCHEMA_CONFIGURATION');
-    for (const keyword of ['additionalProperties','uniqueItems']) if (record[keyword] !== undefined) insist(typeof record[keyword] === 'boolean', 'SCHEMA_CONFIGURATION');
+    for (const keyword of ['minItems','maxItems','minLength','maxLength','minimum','maximum','minProperties','maxProperties']) if (record[keyword] !== undefined) insist(Number.isSafeInteger(record[keyword]), 'SCHEMA_CONFIGURATION');
+    if (schema.additionalProperties !== undefined) insist(typeof schema.additionalProperties === 'boolean' || typeof schema.additionalProperties === 'object', 'SCHEMA_CONFIGURATION');
+    if (record.uniqueItems !== undefined) insist(typeof record.uniqueItems === 'boolean', 'SCHEMA_CONFIGURATION');
     if (schema.required !== undefined) insist(Array.isArray(schema.required) && schema.required.every(key=>typeof key==='string') && new Set(schema.required).size===schema.required.length, 'SCHEMA_CONFIGURATION');
     if (schema.enum !== undefined) insist(Array.isArray(schema.enum) && schema.enum.length>0, 'SCHEMA_CONFIGURATION');
     if (schema.pattern !== undefined) { insist(typeof schema.pattern==='string','SCHEMA_CONFIGURATION'); try { new RegExp(schema.pattern,'u'); } catch { throw new Error('SCHEMA_CONFIGURATION'); } }
-    if (schema.format !== undefined) insist(['date-time','uri'].includes(schema.format), 'SCHEMA_CONFIGURATION');
+    if (schema.format !== undefined) insist(['date-time','uri','uuid'].includes(schema.format), 'SCHEMA_CONFIGURATION');
     for (const keyword of ['properties','definitions']) if (record[keyword] !== undefined) {
       const children=record[keyword]; insist(children && typeof children==='object' && !Array.isArray(children),'SCHEMA_CONFIGURATION');
       for (const child of Object.values(children)) walk(child,base);
     }
-    for (const keyword of ['items','not','if','then','else']) if (record[keyword] !== undefined) walk(record[keyword],base);
+    for (const keyword of ['items','not','if','then','else','propertyNames','contains']) if (record[keyword] !== undefined) walk(record[keyword],base);
+    if (schema.dependencies !== undefined) {
+      insist(typeof schema.dependencies === 'object' && !Array.isArray(schema.dependencies), 'SCHEMA_CONFIGURATION');
+      for (const dependency of Object.values(schema.dependencies)) {
+        if (Array.isArray(dependency)) insist(dependency.every(key => typeof key === 'string') && new Set(dependency).size === dependency.length, 'SCHEMA_CONFIGURATION');
+        else if (typeof dependency !== 'boolean') walk(dependency, base);
+      }
+    }
+    const additional=record.additionalProperties;
+    if (typeof additional === 'object') { insist(additional && !Array.isArray(additional) && Object.keys(additional).length > 0, 'SCHEMA_CONFIGURATION'); walk(additional, base); }
     for (const keyword of ['oneOf','allOf']) if (record[keyword] !== undefined) { const children=record[keyword]; insist(Array.isArray(children)&&children.length>0,'SCHEMA_CONFIGURATION'); for(const child of children)walk(child,base); }
   };
   for(const [base,root] of documents)walk(root,base);
@@ -65,14 +75,16 @@ export function auditSchemaBundle(bundle: unknown): WeakMap<Schema, Schema> {
     }
     insist(visited.has(target as Schema),'SCHEMA_CONFIGURATION'); resolved.set(schema,target as Schema);
   }
+  // Declarations are inventoried above, but definitions do not evaluate against an instance.
+  // Only references and same-instance applicators can form a non-progressing recursion.
   const active=new Set<Schema>(),complete=new Set<Schema>();
   const acyclic=(schema:Schema):void=>{
     insist(!active.has(schema),'SCHEMA_CONFIGURATION');if(complete.has(schema))return;active.add(schema);
     const target=resolved.get(schema);if(target)acyclic(target);
-    for(const child of [...Object.values(schema.properties??{}),...Object.values(schema.definitions??{}),...(schema.oneOf??[]),...(schema.allOf??[]),schema.items,schema.not,schema.if,schema.then,schema.else])if(child)acyclic(child);
+    for(const child of [...(schema.oneOf??[]),...(schema.allOf??[]),schema.not,schema.if,schema.then,schema.else,...Object.values(schema.dependencies??{}).filter((dependency): dependency is Schema => typeof dependency === 'object' && !Array.isArray(dependency))])if(child)acyclic(child);
     active.delete(schema);complete.add(schema);
   };
-  for(const root of documents.values())acyclic(root);
+  for(const schema of visited)acyclic(schema);
   return resolved;
 }
 const resolvedReferences = auditSchemaBundle(schemas);
@@ -91,6 +103,7 @@ function matches(s: Schema, value: unknown): boolean {
   if (typeof value === 'string') {
     const length = Array.from(value).length;
     if (length < (s.minLength ?? 0) || length > (s.maxLength ?? Infinity) || (s.pattern && !new RegExp(s.pattern, 'u').test(value))) return false;
+    if (s.format === 'uuid' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(value)) return false;
     if (s.format === 'date-time') {
       const parts=/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,9})?Z$/u.exec(value);
       if (parts?.[0] !== value) return false;
@@ -102,9 +115,16 @@ function matches(s: Schema, value: unknown): boolean {
     if (s.format === 'uri') { try { new URL(value); } catch { return false; } }
   }
   if (typeof value === 'number' && (value < (s.minimum ?? -Infinity) || value > (s.maximum ?? Infinity))) return false;
+  if (Array.isArray(value) && s.contains && !value.some(item => matches(s.contains ?? {},item))) return false;
   if (Array.isArray(value) && (value.length < (s.minItems ?? 0) || value.length > (s.maxItems ?? Infinity) || (s.items && !value.every(v => matches(s.items ?? {},v))) || (s.uniqueItems && new Set(value.map(canonical)).size !== value.length))) return false;
   if (value && typeof value === 'object' && !Array.isArray(value)) {
     const record = value as Record<string, unknown>;
+    for (const [key, dependency] of Object.entries(s.dependencies ?? {})) if (Object.hasOwn(record,key)) {
+      if (Array.isArray(dependency) ? dependency.some(required => !Object.hasOwn(record,required)) : typeof dependency === 'boolean' ? !dependency : !matches(dependency,record)) return false;
+    }
+    if (Object.keys(record).length < (s.minProperties ?? 0) || Object.keys(record).length > (s.maxProperties ?? Infinity)) return false;
+    if (s.propertyNames && !Object.keys(record).every(key => matches(s.propertyNames ?? {}, key))) return false;
+    if (typeof s.additionalProperties === 'object' && Object.entries(record).some(([key, item]) => !Object.hasOwn(s.properties ?? {}, key) && !matches(s.additionalProperties as Schema, item))) return false;
     if (s.required?.some(k => !Object.hasOwn(record,k))) return false;
     if (s.additionalProperties === false && Object.keys(record).some(k => !Object.hasOwn(s.properties ?? {},k))) return false;
     if (Object.entries(s.properties ?? {}).some(([k,v]) => Object.hasOwn(record,k) && !matches(v,record[k]))) return false;
@@ -115,6 +135,8 @@ function matches(s: Schema, value: unknown): boolean {
 // The caller supplies its schema-corresponding wire type; validation is the narrowing boundary.
 // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
 export function validate<T>(name: string, value: unknown, definition?: string): T {
+  let nodes=0;const pending:{value:unknown;depth:number}[]=[{value,depth:0}];
+  while(pending.length){const entry=pending.pop();insist(entry&&entry.depth<=64&&++nodes<=1000000,'SCHEMA');if(entry.value&&typeof entry.value==='object')for(const child of Object.values(entry.value))pending.push({value:child,depth:entry.depth+1});}
   canonical(value);
   const root = schemas[`${name}.schema.json`];
   const schema=definition?root?.definitions?.[definition]:root;

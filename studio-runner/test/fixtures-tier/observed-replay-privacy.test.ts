@@ -4,7 +4,7 @@ import { createServer } from 'node:http';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { playwrightBrowserFactory } from '../../src/run/browser.js';
+import { playwrightBrowserFactory } from './preparedBrowser.js';
 import { createObservedReplayAdapter } from '../../src/run/observedReplayAdapter.js';
 import { observationPolicy } from '../../src/validator/observedReferencePolicy.js';
 import type { Guard, ReplayAction, Scope, TrustedPolicy } from '../../src/executor/observedOperations.js';
@@ -27,8 +27,8 @@ describe('observed retained native/fixed primitive behavior', () => {
         if (!address || typeof address === 'string')
             throw Error('port');
         const origin = `http://127.0.0.1:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'observed-native-'));
-        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app', accountRef: 'account', allowedOrigins: [origin], capabilities: ['navigate', 'click', 'hover', 'press', 'fill', 'check', 'uncheck', 'selectOption', 'read', 'assert'], policyId: 'policy', policyVersion: '1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
-        const policy: TrustedPolicy = { version: 1, policyId: 'policy', policyVersion: '1', applicationId: 'app', environment: 'fixture', accountRef: 'account', entryPolicyId: 'entry', allowedOrigins: [origin], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true, readGrants: [{ policyRuleId: 'approved', origin, region: { kind: 'application' }, controlValue: { classification: 'nonsecretApproved', types: ['text', 'textarea'] } }] } };
+        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app',  allowedOrigins: [origin], capabilities: ['navigate', 'click', 'hover', 'press', 'fill', 'check', 'uncheck', 'selectOption', 'read', 'assert'], policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
+        const policy: TrustedPolicy = { version: 1, policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', applicationId: 'app', environment: 'fixture',  entryPolicyId: 'entry', allowedOrigins: [origin], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true, readGrants: [{ policyRuleId: 'approved', origin, region: { kind: 'application' }, controlValue: { classification: 'nonsecretApproved', types: ['text', 'textarea'] } }] } };
         const handle = await playwrightBrowserFactory.launch({ browser: 'chromium', viewport: { width: 1280, height: 720 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
         const adapter = createObservedReplayAdapter(handle, scope, policy, 'run', () => undefined);
         const probe = required(handle.createObservationSession?.bind(handle))({ sessionId: 'probe', scopeHash: 'a'.repeat(64), approvedOrigins: [origin], knownSecrets: [], ...observationPolicy(policy) });
@@ -116,7 +116,7 @@ describe('real private acquisition without public observation widening', () => {
         if (!address || typeof address === 'string')
             throw Error('port');
         const origin = `http://127.0.0.1:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'observed-acquire-'));
-        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app', accountRef: 'account', allowedOrigins: [origin], capabilities: ['navigate', 'click'], policyId: 'policy', policyVersion: '1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
+        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app',  allowedOrigins: [origin], capabilities: ['navigate', 'click'], policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
         const handle = await playwrightBrowserFactory.launch({ browser: 'chromium', viewport: { width: 1000, height: 600 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
         const session = required(handle.createObservationSession?.bind(handle))({ sessionId: 'probe', scopeHash: 'b'.repeat(64), approvedOrigins: [origin], knownSecrets: [], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true } });
         try {
@@ -163,7 +163,7 @@ describe('actual retained native preparation and input fences', () => {
         if (!address || typeof address === 'string')
             throw Error('port');
         const origin = `http://127.0.0.1:${String(address.port)}`, dir = await mkdtemp(join(tmpdir(), 'native-fence-'));
-        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app', accountRef: 'account', allowedOrigins: [origin], capabilities: ['click'], policyId: 'policy', policyVersion: '1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
+        const scope: Scope = { principalId: 'p', csiId: 'csi', environment: 'fixture', applicationId: 'app',  allowedOrigins: [origin], capabilities: ['click'], policyId: 'policy', policyVersion: 'observed-4-full-chromium-1', entryPolicyId: 'entry', initialContext: { kind: 'initialBlank' } };
         const handle = await playwrightBrowserFactory.launch({ browser: 'chromium', viewport: { width: 1000, height: 600 }, recording: { width: 640, height: 480 }, scratchPath: dir, observedScope: scope });
         const session = required(handle.createObservationSession?.bind(handle))({ sessionId: 'native', scopeHash: 'c'.repeat(64), approvedOrigins: [origin], knownSecrets: [], rules: [], applicationPolicy: { policyRuleId: 'structural', allowStructuralDiscovery: true } });
         try {
@@ -201,8 +201,8 @@ describe('actual retained native preparation and input fences', () => {
 describe('actual initial-blank CDP acknowledgement fence',()=>{
   it.each(['timeout','cancel'] as const)('keeps held inner blank check PREPARING on %s and never navigates later',async reason=>{
     let receipts=0;const server=createServer((_req,res)=>{receipts++;res.end('<main>Receipt</main>');});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();if(!address||typeof address==='string')throw Error('port');const origin=`http://127.0.0.1:${String(address.port)}`,dir=await mkdtemp(join(tmpdir(),'blank-fence-'));
-    const scope:Scope={principalId:'p',csiId:'csi',environment:'fixture',applicationId:'app',accountRef:'account',allowedOrigins:[origin],capabilities:['navigate'],policyId:'policy',policyVersion:'1',entryPolicyId:'entry',initialContext:{kind:'initialBlank'}};
-    const policy:TrustedPolicy={version:1,policyId:'policy',policyVersion:'1',applicationId:'app',environment:'fixture',accountRef:'account',entryPolicyId:'entry',allowedOrigins:[origin],rules:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}};
+    const scope:Scope={principalId:'p',csiId:'csi',environment:'fixture',applicationId:'app',allowedOrigins:[origin],capabilities:['navigate'],policyId:'policy',policyVersion:'observed-4-full-chromium-1',entryPolicyId:'entry',initialContext:{kind:'initialBlank'}};
+    const policy:TrustedPolicy={version:1,policyId:'policy',policyVersion:'observed-4-full-chromium-1',applicationId:'app',environment:'fixture',entryPolicyId:'entry',allowedOrigins:[origin],rules:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true,readGrants:[]}};
     const handle=await playwrightBrowserFactory.launch({browser:'chromium',viewport:{width:1000,height:600},recording:{width:640,height:480},scratchPath:dir,observedScope:scope});
     // Observe/hold the real public CDPSession.send acknowledgement, never substitute a result.
     interface PublicSession {send(method:string,parameters?:Record<string,unknown>):Promise<unknown>;detach():Promise<void>}
@@ -221,7 +221,7 @@ describe('actual initial-blank CDP acknowledgement fence',()=>{
 
 it('poisons an expired real retained scroll before held cleanup can permit validation or input',async()=>{
   const server=createServer((_req,res)=>{res.setHeader('content-type','text/html');res.end('<div style="height:2400px"></div><button aria-label="Commit" style="width:200px;height:60px">Commit</button>');});await new Promise<void>(resolve=>server.listen(0,'127.0.0.1',resolve));const address=server.address();if(!address||typeof address==='string')throw Error('port');const origin=`http://127.0.0.1:${String(address.port)}`,dir=await mkdtemp(join(tmpdir(),'reveal-fence-'));
-  const scope:Scope={principalId:'p',csiId:'csi',environment:'fixture',applicationId:'app',accountRef:'account',allowedOrigins:[origin],capabilities:['click'],policyId:'policy',policyVersion:'1',entryPolicyId:'entry',initialContext:{kind:'initialBlank'}};
+  const scope:Scope={principalId:'p',csiId:'csi',environment:'fixture',applicationId:'app',allowedOrigins:[origin],capabilities:['click'],policyId:'policy',policyVersion:'observed-4-full-chromium-1',entryPolicyId:'entry',initialContext:{kind:'initialBlank'}};
   const handle=await playwrightBrowserFactory.launch({browser:'chromium',viewport:{width:1000,height:600},recording:{width:640,height:480},scratchPath:dir,observedScope:scope});const observationSession=required(handle.createObservationSession?.bind(handle))({sessionId:'reveal',scopeHash:'d'.repeat(64),approvedOrigins:[origin],knownSecrets:[],rules:[],applicationPolicy:{policyRuleId:'structural',allowStructuralDiscovery:true}});
   await required(handle.observedNavigateBlank?.bind(handle))(origin+'/');const observation=await observationSession.observe(),node=required(observation.observation.nodes.find(n=>n.name==='Commit')),locator=required(node.locatorHints.find(h=>h.kind==='role'));
   interface PublicSession {send(method:string,parameters?:Record<string,unknown>):Promise<unknown>;detach():Promise<void>}

@@ -16,3 +16,14 @@ export function post(port:number,path:string,body:unknown,options:{token?:string
     const req=request({hostname:'127.0.0.1',port,path,method:'POST',...(options.certificate===false?{ca:testCert}:testTls),headers:{authorization:`Bearer ${options.token??jwt()}`,'content-type':'application/json','idempotency-key':options.key??'request',...(options.fence===null?{}:{'x-owner-fence':String(options.fence??1)})}},res=>{let data='';res.on('data',(b:Buffer)=>{data+=b.toString();});res.on('end',()=>{resolve({status:res.statusCode??0,body:JSON.parse(data) as unknown});});});req.on('error',reject);req.end(options.raw??JSON.stringify(body));
   });
 }
+
+/** The listener settings a test runner is built with: the fixture pair, pinned to the fixture certificate itself. */
+export const testListener={tls:testTls,controllerCertificateFingerprint256:testFingerprint};
+/** `fetch` over the one TLS listener, presenting the pinned test controller certificate. */
+export function secureFetch(url:string,init:{method:string;headers:Record<string,string>;body:string|ArrayBuffer}):Promise<{status:number;json():Promise<unknown>;text():Promise<string>}> {
+  return new Promise((resolve,reject)=>{
+    const body=typeof init.body==='string'?Buffer.from(init.body):Buffer.from(init.body);
+    const req=request(url,{method:init.method,headers:{...init.headers,'content-length':String(body.length)},...testTls},res=>{const chunks:Buffer[]=[];res.on('data',(chunk:Buffer)=>chunks.push(chunk));res.on('end',()=>{const text=Buffer.concat(chunks).toString('utf8');resolve({status:res.statusCode??0,json:()=>Promise.resolve(JSON.parse(text) as unknown),text:()=>Promise.resolve(text)});});});
+    req.on('error',reject);req.end(body);
+  });
+}

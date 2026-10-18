@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "caseId": "Q2-authored-echo-assert-same-name",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "93a07801-4b0e-42c8-8d17-f814543fc99a",
+        "text": "Open <var homeUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "6097cd08-3ed1-448e-8beb-efda166c3371",
+        "text": "Click Reports.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "bda22aae-4af3-4686-8466-cd3538066af4",
+        "text": "Check that the heading says Reports.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "homeUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/home"
+    }
+  ]
+}

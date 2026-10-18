@@ -7,6 +7,12 @@
  *
  * The canary assertions are the ones AC-21 asks to be made *on the spawn arguments actually
  * passed* — which is only checkable if the spawn is a seam rather than an inline statement.
+ *
+ * STUDIO-OBS-012A AC-3 deleted the artifact-1 launch path; every launch here is an observed one
+ * (the v3 contract fixture's job, receipt and policy) and the fake child answers in observed
+ * frames. Deleted with the artifact-1 path: the sandbox-classification-before-ready case, the
+ * reporter-exception-swallowing case (the observed launcher treats any fault in a step frame's
+ * handling as a protocol violation and ends the run) and the two child-owned-adapter cases.
  */
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -14,22 +20,26 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import type { StepReporter } from '../../src/executor/adapters/StepReporter.js';
+import wireJson from '../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json' with { type: 'json' };
+import type {PublicationDocument} from '../helpers/publicationFixture.js';
+import type { AdmissionReceipt, Launch3, ObservedJob } from '../../src/executor/observedOperations.js';
+import type { StepReporter } from '../../src/executor/stepReporter.js';
 import {
   CODE_LOADING_ENV_PREFIXES,
   DEFAULT_CHILD_MODULE_PATH,
   INHERITED_ENV_KEYS,
   assertNoCodeLoadingKeys,
   createChildBrowserLauncher,
-  createChildOwnedAdapter,
   isCodeLoadingEnvKey,
 } from '../../src/run/launcher.js';
-import { parseLaunchMessage } from '../../src/run/protocol.js';
 import { SCRATCH_SUBDIRECTORIES } from '../../src/run/scratchLayout.js';
 import type { BrowserSession, LaunchOptions } from '../../src/server/adapters.js';
+import { hashObserved, OBSERVED_LIMITS, validateObserved } from '../../src/validator/observedReferencePolicy.js';
 import { packageRoot } from '../helpers/corpus.js';
 import { createFakeSpawner } from '../helpers/child.js';
 import type { FakeChildProcess, FakeSpawner } from '../helpers/child.js';
+// Typed view of the static JSON import: the file exceeds tsserver's 4 MiB non-TS limit, so ESLint's projectService types it as `error`.
+const wire=wireJson as unknown as PublicationDocument;
 
 const CANARY = 'canary-secret-value';
 
@@ -67,26 +77,75 @@ function launcherWith(spawner: FakeSpawner, overrides: Record<string, unknown> =
   });
 }
 
-function options(path: string): LaunchOptions {
+/** A receipt for the fixture job, with deadlines a launch can still meet. */
+function admission(): AdmissionReceipt {
+  return {
+    ...wire.admissionReceipt,
+    startDeadlineAt: new Date(Date.now() + 10_000).toISOString(),
+    runDeadlineAt: new Date(Date.now() + 20_000).toISOString(),
+  } as AdmissionReceipt;
+}
+
+function options(path: string, job: ObservedJob = wire.job): LaunchOptions {
   return {
     browser: 'chromium',
     viewport: { width: 1280, height: 720 },
     totalRuntimeMs: 120_000,
     scratchPath: path,
+    observed: { job, admission: admission(), policy: wire.trustedPolicy },
   };
 }
 
-/** Answers the launch handshake as a healthy child would. */
-function answerReady(child: FakeChildProcess, startedAt = '2026-09-11T10:00:00.000Z'): void {
-  child.emit({ kind: 'ready', browserStartedAt: startedAt, startedAtMs: 0 });
+/** The launch frame the parent sent this child. */
+function launchFrame(child: FakeChildProcess): Launch3 {
+  const frame = child.sent.find((message) => message.kind === 'launch');
+  if (frame === undefined) throw new Error('no launch frame was sent');
+  return frame;
 }
 
-async function launched(spawner: FakeSpawner, path: string): Promise<{
+/** The identity every frame from this child must carry. */
+function frameBase(child: FakeChildProcess): { protocolVersion: 3; mode: 'observed'; runId: string; attemptId: string } {
+  const launch = launchFrame(child);
+  return { protocolVersion: 3, mode: 'observed', runId: launch.runId, attemptId: launch.attemptId };
+}
+
+/** Answers the launch handshake as a healthy child would. */
+function answerReady(child: FakeChildProcess, startedAt = '2026-09-11T10:00:00.000Z', calibrationOffsetMs = 0): void {
+  const launch = launchFrame(child);
+  child.emit({
+    ...frameBase(child),
+    kind: 'ready',
+    profileHash: hashObserved(launch.profile),
+    build: launch.build,
+    admissionId: launch.admission.admissionId,
+    browserStartedAt: startedAt,
+    startedAtMs: 0,
+    calibrationOffsetMs,
+  });
+}
+
+/** The child's single result frame. */
+function emitResult(child: FakeChildProcess, ok: boolean, errorCode: string | null): void {
+  const launch = launchFrame(child);
+  child.emit({
+    ...frameBase(child),
+    kind: 'result',
+    admissionId: launch.admission.admissionId,
+    profileHash: hashObserved(launch.profile),
+    build: launch.build,
+    ok,
+    errorCode,
+    secretUse: {},
+    recording: { path: null, bytes: null, errorCode: null, state: 'UNAVAILABLE', partial: false },
+  });
+}
+
+async function launched(spawner: FakeSpawner, path: string, job?: ObservedJob): Promise<{
   session: BrowserSession;
   child: FakeChildProcess;
 }> {
   const launcher = launcherWith(spawner);
-  const pending = launcher.launch(options(path));
+  const pending = launcher.launch(options(path, job));
   const child = spawner.children[0];
   if (child === undefined) throw new Error('the launcher spawned nothing');
   answerReady(child);
@@ -232,25 +291,10 @@ describe('AC-21 — nothing job-shaped reaches the command line or the environme
   it('carries resolved values over the IPC channel and only there', async () => {
     const spawner = createFakeSpawner();
     const path = scratchPath();
-    const { session, child } = await launched(spawner, path);
+    const { session, child } = await launched(spawner, path, secretBearingJob(CANARY));
 
-    const run = session.run;
-    expect(run).toBeDefined();
-    const pending = run?.execute({
-      steps: [{ stepIndex: 0, operations: [] }],
-      variables: {},
-      secrets: { PW: CANARY },
-      reporter: silentReporter(),
-    });
-    child.emit({
-      kind: 'result',
-      ok: true,
-      executorVersion: '1.0.0',
-      failureKind: null,
-      failureMessage: null,
-      recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE' },
-      observedHosts: [],
-    });
+    const pending = session.run.execute({ reporter: silentReporter() });
+    emitResult(child, false, 'CANCELLED');
     child.end();
     await pending;
 
@@ -281,11 +325,10 @@ describe('AC-1, AC-20 — launch resolving means Chromium started', () => {
     if (spawned === undefined) throw new Error('the launcher spawned nothing');
     answerReady(spawned);
     const session = await pending;
-    expect(session.run?.origin.browserStartedAt.toISOString()).toBe('2026-09-11T10:00:00.000Z');
-    expect(session.run?.origin.startedAtMs).toBe(0);
     // The readings are taken on the child's clock and pass through unchanged; the parent never
     // re-derives an origin (ADR-002 §11.5).
-    expect(session.run?.origin.clock).toBeNull();
+    expect(session.run.origin.browserStartedAt.toISOString()).toBe('2026-09-11T10:00:00.000Z');
+    expect(session.run.origin.startedAtMs).toBe(0);
   });
 
   it('carries the calibration the child reported applying onto the session origin (story 10.32 AC-4)', async () => {
@@ -293,24 +336,20 @@ describe('AC-1, AC-20 — launch resolving means Chromium started', () => {
     const pending = launcherWith(spawner).launch(options(scratchPath()));
     const spawned = spawner.children[0];
     if (spawned === undefined) throw new Error('the launcher spawned nothing');
-    spawned.emit({
-      kind: 'ready',
-      browserStartedAt: '2026-09-11T10:00:00.000Z',
-      startedAtMs: 0,
-      calibrationOffsetMs: 7,
-    });
+    answerReady(spawned, '2026-09-11T10:00:00.000Z', 7);
     const session = await pending;
-    expect(session.run?.origin.calibrationOffsetMs).toBe(7);
+    expect(session.run.origin.calibrationOffsetMs).toBe(7);
   });
 
   it('sends the launch message with the explicitly configured recording geometry', async () => {
     const spawner = createFakeSpawner();
     const path = scratchPath();
     const { child } = await launched(spawner, path);
+    // The geometry is the admitted job's, never a library default (§6.1, AC-7).
     expect(child.sent[0]).toMatchObject({
       kind: 'launch',
       browser: 'chromium',
-      recording: { width: 1280, height: 720 },
+      recording: wire.job.recording,
       seekOriginCalibrationMs: 0,
       scratchPath: path,
       totalRuntimeMs: 120_000,
@@ -318,19 +357,20 @@ describe('AC-1, AC-20 — launch resolving means Chromium started', () => {
   });
 
   it('sends a launch message the child’s own parser accepts, carrying the calibration (story 10.32 AC-3)', async () => {
-    // The message production sends, read by the parser the child applies. Removing the key from
-    // `ACCEPTED_LAUNCH_KEYS` while still sending it makes this an `unknownKey` refusal.
+    // The frame production sends, read by the closed schema the child applies to it.
     const spawner = createFakeSpawner();
     const { child } = await launched(spawner, scratchPath());
-    const parsed = parseLaunchMessage(child.sent[0]);
-    expect(parsed.ok ? [] : parsed.problems).toEqual([]);
-    expect(parsed.ok && parsed.message.seekOriginCalibrationMs).toBe(0);
+    const parsed = validateObserved<Launch3>('replay-ipc#/definitions/Launch3', child.sent[0], OBSERVED_LIMITS.launch);
+    expect(parsed.seekOriginCalibrationMs).toBe(0);
   });
 
+  // 012A R8-ADJ-2: with no child result, the parent names the pre-Ready failure from the reviewed
+  // reasons only — an expired launch wait is TIMEOUT, an exit or protocol violation is
+  // INTERNAL_ERROR, an abort is CANCELLED. The runner-local LAUNCH_UNKNOWN no longer exists.
   it('fails the launch when the child never reports a start', async () => {
     const spawner = createFakeSpawner();
     const launcher = launcherWith(spawner);
-    await expect(launcher.launch(options(scratchPath()))).rejects.toThrow(/did not start within/u);
+    await expect(launcher.launch(options(scratchPath()))).rejects.toMatchObject({ code: 'TIMEOUT' });
     expect(spawner.children[0]?.killed).toBe(1);
   });
 
@@ -339,23 +379,26 @@ describe('AC-1, AC-20 — launch resolving means Chromium started', () => {
     const launcher = launcherWith(spawner);
     const pending = launcher.launch(options(scratchPath()));
     spawner.children[0]?.end(1);
-    await expect(pending).rejects.toThrow(/exited before it reported a start/u);
+    await expect(pending).rejects.toMatchObject({ code: 'INTERNAL_ERROR' });
   });
 
-  it('classifies a sandbox failure reported before ready', async () => {
+  it('fails the launch as INTERNAL_ERROR when a malformed message arrives before a start', async () => {
     const spawner = createFakeSpawner();
-    const launcher = launcherWith(spawner);
+    const launcher = launcherWith(spawner, { launchTimeoutMs: 5_000 });
     const pending = launcher.launch(options(scratchPath()));
-    spawner.children[0]?.emit({
-      kind: 'result',
-      ok: false,
-      executorVersion: '',
-      failureKind: 'sandbox-unavailable',
-      failureMessage: 'No usable sandbox!',
-      recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE' },
-      observedHosts: [],
-    });
-    await expect(pending).rejects.toMatchObject({ failureKind: 'sandbox-unavailable' });
+    spawner.children[0]?.emit({ kind: 'ready', unexpected: true });
+    await expect(pending).rejects.toMatchObject({ code: 'INTERNAL_ERROR' });
+    expect(spawner.children[0]?.killed).toBeGreaterThanOrEqual(1);
+  });
+
+  it('fails the launch as CANCELLED when it is aborted while the child is silent', async () => {
+    const spawner = createFakeSpawner();
+    const launcher = launcherWith(spawner, { launchTimeoutMs: 5_000 });
+    const abort = new AbortController();
+    const pending = launcher.launch({ ...options(scratchPath()), signal: abort.signal });
+    abort.abort();
+    await expect(pending).rejects.toMatchObject({ code: 'CANCELLED' });
+    expect(spawner.children[0]?.killed).toBe(1);
   });
 });
 
@@ -370,100 +413,30 @@ describe('AC-16 — step events reach 10.6’s reporter, across the process boun
       stepFinished: (event) => finished.push(event),
     };
 
-    const pending = session.run?.execute({
-      steps: [{ stepIndex: 0, operations: [] }],
-      variables: {},
-      secrets: {},
-      reporter,
-    });
+    const pending = session.run.execute({ reporter });
 
-    child.emit({ kind: 'step-started', stepIndex: 0, startedAtMs: 1.25 });
-    child.emit({
-      kind: 'step-finished',
-      stepIndex: 0,
-      status: 'FAIL',
-      startedAtMs: 1.25,
-      finishedAtMs: 9.5,
-      durationMs: 8.25,
-      failure: 'AssertionFailed: nope',
-    });
-    child.emit({
-      kind: 'step-finished',
-      stepIndex: 1,
-      status: 'SKIPPED',
-      startedAtMs: null,
-      finishedAtMs: null,
-      durationMs: null,
-      failure: null,
-    });
-    child.emit({
-      kind: 'result',
-      ok: false,
-      executorVersion: '1.0.0',
-      failureKind: 'step',
-      failureMessage: null,
-      recording: { path: '/video.webm', bytes: 4096, error: null, state: 'PENDING' },
-      observedHosts: ['127.0.0.1:8123'],
-    });
+    const base = frameBase(child);
+    const [first, second, third] = wire.job.artifact.steps;
+    if (first === undefined || second === undefined || third === undefined) throw new Error('fixture');
+    child.emit({ ...base, kind: 'step-started', stepIndex: 0, stepId: first.stepId, startedAtMs: 1.25 });
+    child.emit({ ...base, kind: 'step-finished', stepIndex: 0, stepId: first.stepId, status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, errorCode: 'ASSERTION_FAILED' });
+    child.emit({ ...base, kind: 'step-finished', stepIndex: 1, stepId: second.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, errorCode: null });
+    child.emit({ ...base, kind: 'step-finished', stepIndex: 2, stepId: third.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, errorCode: null });
+    emitResult(child, false, 'ASSERTION_FAILED');
     child.end();
     const result = await pending;
 
     expect(started).toEqual([{ stepIndex: 0, startedAtMs: 1.25 }]);
-    expect(finished).toHaveLength(2);
+    expect(finished).toHaveLength(3);
+    expect(finished[0]).toMatchObject({ status: 'FAIL', startedAtMs: 1.25, finishedAtMs: 9.5, durationMs: 8.25, failure: 'ASSERTION_FAILED' });
     expect(finished[1]).toMatchObject({ status: 'SKIPPED', startedAtMs: null, durationMs: null });
-    expect(result).toMatchObject({ ok: false, failureKind: 'step' });
-    expect(result?.observedHosts).toEqual(['127.0.0.1:8123']);
-  });
-
-  it('a slow or failing reporter cannot block or alter a step', async () => {
-    const spawner = createFakeSpawner();
-    const { session, child } = await launched(spawner, scratchPath());
-    const seen: number[] = [];
-    const reporter: StepReporter = {
-      stepStarted(event): void {
-        seen.push(event.startedAtMs);
-        throw new Error('the callback is having a bad day');
-      },
-      stepFinished(): void {
-        throw new Error('so is this one');
-      },
-    };
-
-    const pending = session.run?.execute({
-      steps: [{ stepIndex: 0, operations: [] }],
-      variables: {},
-      secrets: {},
-      reporter,
-    });
-    // The reporter throws on every event. Nothing escapes: this runs inside the IPC message
-    // handler, and an exception here would surface as an uncaught exception in the **parent** —
-    // the process serving /health, /ready and /v1/validate for everything else.
-    expect(() => {
-      child.emit({ kind: 'step-started', stepIndex: 0, startedAtMs: 3.5 });
-    }).not.toThrow();
-    child.emit({
-      kind: 'result',
-      ok: true,
-      executorVersion: '1.0.0',
-      failureKind: null,
-      failureMessage: null,
-      recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE' },
-      observedHosts: [],
-    });
-    child.end();
-    expect(await pending).toMatchObject({ ok: true });
-    expect(seen).toEqual([3.5]);
+    expect(result).toMatchObject({ ok: false, failureKind: 'step', failureMessage: 'ASSERTION_FAILED' });
   });
 
   it('reports a run fault when the child exits without a result', async () => {
     const spawner = createFakeSpawner();
     const { session, child } = await launched(spawner, scratchPath());
-    const pending = session.run?.execute({
-      steps: [],
-      variables: {},
-      secrets: {},
-      reporter: silentReporter(),
-    });
+    const pending = session.run.execute({ reporter: silentReporter() });
     child.end(137);
     expect(await pending).toMatchObject({ ok: false, failureKind: 'run-fault' });
   });
@@ -475,14 +448,9 @@ describe('AC-16 — step events reach 10.6’s reporter, across the process boun
     const spawner = createFakeSpawner();
     const { session, child } = await launched(spawner, scratchPath());
     child.end(9);
-    const result = await session.run?.execute({
-      steps: [],
-      variables: {},
-      secrets: {},
-      reporter: silentReporter(),
-    });
-    expect(result).toMatchObject({ ok: false, failureKind: 'run-fault' });
-    expect(result?.failureMessage).toMatch(/exited before it reported a result/u);
+    const result = await session.run.execute({ reporter: silentReporter() });
+    // A run fault, and no claim about why: the child said nothing the parent could validate.
+    expect(result).toMatchObject({ ok: false, failureKind: 'run-fault', failureMessage: null });
   });
 });
 
@@ -507,57 +475,17 @@ describe('AC-5 — the session closes the child on every path', () => {
   it('is idempotent, so close after execute does not stop twice', async () => {
     const spawner = createFakeSpawner();
     const { session, child } = await launched(spawner, scratchPath());
-    const pending = session.run?.execute({
-      steps: [],
-      variables: {},
-      secrets: {},
-      reporter: silentReporter(),
-    });
-    child.emit({
-      kind: 'result',
-      ok: true,
-      executorVersion: '1.0.0',
-      failureKind: null,
-      failureMessage: null,
-      recording: { path: null, bytes: null, error: null, state: 'UNAVAILABLE' },
-      observedHosts: [],
-    });
-    child.end();
+    const pending = session.run.execute({ reporter: silentReporter() });
+    // The child reports a complete, valid result and stays alive, so the run's own close orders
+    // the one stop.
+    const base = frameBase(child);
+    for (const step of wire.job.artifact.steps) {
+      child.emit({ ...base, kind: 'step-finished', stepIndex: step.stepIndex, stepId: step.stepId, status: 'SKIPPED', startedAtMs: null, finishedAtMs: null, durationMs: null, errorCode: null });
+    }
+    emitResult(child, false, 'CANCELLED');
     await pending;
     await session.close();
     expect(child.sent.filter((message) => message.kind === 'stop')).toHaveLength(1);
-  });
-});
-
-describe('AC-1 — the parent does not drive the adapter of a child-owned session', () => {
-  it('keeps the BrowserSession shape and refuses with the reason, not silently', async () => {
-    const spawner = createFakeSpawner();
-    const { session } = await launched(spawner, scratchPath());
-    // It throws synchronously, which is what a caller wants: the mistake surfaces at the call
-    // site rather than as an unhandled rejection somewhere downstream.
-    expect(() => session.adapter.goto('http://127.0.0.1/')).toThrow(/executes in its own process/u);
-  });
-
-  it('refuses every method, so no operation is quietly a no-op', async () => {
-    const adapter = createChildOwnedAdapter();
-    const handle = { kind: 'locator-handle' } as const;
-    const calls: Promise<unknown>[] = [
-      Promise.resolve().then(() => adapter.locate({ segments: [] })),
-      Promise.resolve().then(() => adapter.click(handle)),
-      Promise.resolve().then(() => adapter.fill(handle, 'x')),
-      Promise.resolve().then(() => adapter.press(handle, 'Enter')),
-      Promise.resolve().then(() => adapter.check(handle)),
-      Promise.resolve().then(() => adapter.uncheck(handle)),
-      Promise.resolve().then(() => adapter.hover(handle)),
-      Promise.resolve().then(() => adapter.selectOption(handle, 'x')),
-      Promise.resolve().then(() => adapter.expectVisible(handle)),
-      Promise.resolve().then(() => adapter.expectContainText(handle, { kind: 'string', value: 'x' })),
-      Promise.resolve().then(() => adapter.expectValue(handle, { kind: 'string', value: 'x' })),
-      Promise.resolve().then(() => adapter.expectUrl({ kind: 'string', value: 'x' })),
-      Promise.resolve().then(() => adapter.expectTitle({ kind: 'string', value: 'x' })),
-      Promise.resolve().then(() => adapter.waitForURL({ kind: 'string', value: 'x' })),
-    ];
-    for (const call of calls) await expect(call).rejects.toThrow(/session\.run\.execute/u);
   });
 });
 
@@ -569,6 +497,30 @@ describe('the default child module path points at the compiled entry', () => {
 
 function silentReporter(): StepReporter {
   return { stepStarted: () => undefined, stepFinished: () => undefined };
+}
+
+/**
+ * The fixture job with one secret bound to a password-control fill, carrying `value`.
+ *
+ * The same construction `test/run/observedReplayProtocol.test.ts` uses for its secret-evidence
+ * cases: step 1 fills the `pass` secret reference on a password control, origin-bound.
+ */
+function secretBearingJob(value: string): ObservedJob {
+  const job = structuredClone(wire.job);
+  const step = job.artifact.steps[1];
+  if (!step) throw new Error('STEP');
+  (step.operations[0] as { operation: unknown }).operation = { kind: 'fill', value: { kind: 'secretRef', sourceInputId: 'pass' } };
+  (job.artifact.guards[1] as { target: unknown }).target = { kind: 'passwordControl' };
+  const last = job.artifact.steps[2], literal = last?.operations[1], literalGuard = job.artifact.guards[3];
+  if (!last || !literal || !literalGuard) throw new Error('LITERAL');
+  (last as { operations: unknown }).operations = [{ ...literal, coordinate: { stepId: last.stepId, ordinal: 0 }, guardId: 'g2' }];
+  (job.artifact as { guards: unknown }).guards = [job.artifact.guards[0], job.artifact.guards[1], { ...literalGuard, guardId: 'g2' }];
+  (job.artifact.replayPolicy as { bindings: unknown }).bindings = [];
+  (job.artifact.replayPolicy as { transfers: unknown }).transfers = [];
+  (job.artifact.inputRecipes as unknown[]).push({ inputId: 'pass', stepId: step.stepId, kind: 'secretRef', intendedSlot: 'fill.value', provenance: { kind: 'configuration', referenceId: 'pass-ref', referenceName: 'PASS' } });
+  (job as { secrets: unknown }).secrets = { PASS: value };
+  (job as { secretOrigins: unknown }).secretOrigins = { PASS: [job.binding.scope.allowedOrigins[0]] };
+  return job;
 }
 
 /**

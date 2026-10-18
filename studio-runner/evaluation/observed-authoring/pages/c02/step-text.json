@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C02-rf-wiki-url",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "685c7a03-5b9b-4773-8e00-81d70aa3e030",
+        "text": "Open <var wikiUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "a398e5ae-ef5b-450c-8344-a78de02dcd78",
+        "text": "Check that the page address contains /wiki.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "wikiUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/wiki"
+    }
+  ]
+}

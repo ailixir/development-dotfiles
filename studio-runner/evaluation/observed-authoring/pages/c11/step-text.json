@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C11-unsupported-second-tab",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "59127e57-69fd-49b0-8e75-39620a85bfe8",
+        "text": "Open <var homeUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "e6645b47-889e-4d09-8c9c-2ecf04ad52f1",
+        "text": "Open a second browser tab and compare its contents with the first tab.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "homeUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/home"
+    }
+  ]
+}

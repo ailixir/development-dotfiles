@@ -19,10 +19,10 @@ describe('trusted observation policy and canonical export', () => {
     expect(() => observationOptions({ ...config, rules: [{ testId: 'x', name: 'Name', accessibleName: 'Other', classification: 'nonsecretApproved', policyRuleId: 'p' }] })).toThrow();
   });
   it('exports immutable canonical bytes and hashes compatible with the frozen corpus', () => {
-    const fixtures = JSON.parse(readFileSync(new URL('../../../docs/specs/studio-observed-authoring/contracts/fixtures.json', import.meta.url), 'utf8')) as { documents: { observation: Observation }; canonicalVector: { json: string; sha256: string } };
+    const fixtures = JSON.parse(readFileSync(new URL('../../../docs/specs/studio-observed-authoring/contracts/v3/fixtures.json', import.meta.url), 'utf8')) as { documents: { observedPage: Observation }; canonicalVector: { json: string; sha256: string } };
     expect(canonicalObservation({ b: 2, a: 'é' })).toBe(fixtures.canonicalVector.json);
     expect(createHash('sha256').update(canonicalObservation({ b: 2, a: 'é' })).digest('hex')).toBe(fixtures.canonicalVector.sha256);
-    const observation = fixtures.documents.observation;
+    const observation = fixtures.documents.observedPage;
     const result = exportObservation(observation, 32768);
     expect(result.bytes).toBe(Buffer.byteLength(result.json));
     expect(result.observationHash).toBe(createHash('sha256').update(result.json).digest('hex'));
@@ -88,6 +88,9 @@ it('enforces policy and visited-element ceilings with a structural DOM, without 
   const action = { target: { ...node, locator: { kind: 'testId' as const, value: 'go', exact: true as const } }, operation: { kind: 'click' as const }, origin: config.approvedOrigins[0] ?? '', resolvedValue: null, maxValueBytes: 4096 };
   expect(collector.validateInvocation(action)).toBe(true);
   expect(collector.nativeTarget(action)).toBe(button);
+  vi.stubGlobal('HTMLAnchorElement', class extends FixtureElement {});
+  vi.stubGlobal('HTMLButtonElement', class extends FixtureElement {});
+  expect(collector.navigationExpected(action)).toBe(false);
   expect(collector.nativePoint(action)).toEqual({ x: 5, y: 5, alreadyChecked: false });
   vi.stubGlobal('innerWidth',100); vi.stubGlobal('innerHeight',100);
   expect(collector.nativeState(action)).toEqual({alreadyChecked:false,requiresReveal:false});

@@ -9,16 +9,19 @@
  *
  * The assertions are made on the bytes the runner hands to its HTTP client, not on intermediate
  * objects — the same posture `test/contract.test.ts` takes, and for the same reason.
+ *
+ * The runs are observed jobs on `POST /v2/runs` (STUDIO-OBS-012A AC-3). The AC-11.3 falsification
+ * substituted a process-origin clock into the artifact-1 in-process session, which no longer exists;
+ * the observed child takes its origin at recording-context readiness (`test/run/timeline.test.ts`).
  */
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { takeProcessOriginForFalsification } from '../../src/run/timeline.js';
 import { DEFAULT_REPORT_BOUNDS } from '../../src/reporting/bounds.js';
 import { createRunSnapshot } from '../../src/reporting/snapshot.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
 import { createHarness, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
+import { observedBody, post } from '../helpers/runner.js';
 import { NULL_REDACTOR } from '../../src/executor/redaction.js';
 
 let harness: Harness | null = null;
@@ -39,7 +42,7 @@ function reports(runner: Harness): ReportBody[] {
 }
 
 async function runOnce(runner: Harness): Promise<void> {
-  const response = await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+  const response = await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
   expect(response.status).toBe(202);
   await until(() => runner.app.coordinator.inFlight === 0);
 }
@@ -83,35 +86,9 @@ describe('AC-11.3 — every reading in the report is on the run timeline', () =>
     expect(final?.logs.at(-1)?.atMs).toBeNull();
   });
 
-  it('FAILS with a process-origin clock — the same run, the defect reinstated', async () => {
-    // AC-11.3 requires the assertion above to go red when the run clock is replaced by a
-    // process-origin one. This is that run, with the substitution made deliberately, so the guard
-    // is one that has been seen to fail.
-    const uptimeMs = 87_432.5;
-    let reads = 0;
-    const runner = await start({
-      takeOrigin: () =>
-        takeProcessOriginForFalsification({
-          monotonicNow: () => uptimeMs + reads++,
-          wallNow: () => new Date('2026-09-11T10:00:00.000Z'),
-        }),
-    });
-    await runOnce(runner);
-
-    const final = reports(runner).at(-1);
-    expect(final?.steps[0]?.startedAtMs ?? Number.NaN).toBeGreaterThan(SMALL_BOUND_MS);
-  });
-
   it('keeps SKIPPED timings null rather than filing them at the browser start', async () => {
     const runner = await start();
-    const original = runner.launcher.launch.bind(runner.launcher);
-    Object.assign(runner.launcher, {
-      async launch(options: Parameters<typeof original>[0]) {
-        const session = await original(options);
-        runner.launcher.adapters.at(-1)?.failOn('goto', new Error('NavigationError: refused'));
-        return session;
-      },
-    });
+    runner.launcher.script = { failAt: 0 };
     await runOnce(runner);
 
     const final = reports(runner).at(-1);

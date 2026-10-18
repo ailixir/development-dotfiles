@@ -1,7 +1,7 @@
 import { loadObservedBuild } from '../compat/runtime-versions.js';
-import { compiledObservedAccountRegistry } from '../run/observedAccount.js';
 import type { ObservedRunnerSupport } from './runCoordinator.js';
 import { readFileSync } from 'node:fs';
+import { X509Certificate } from 'node:crypto';
 import { demand, projectMountedPolicy, parseObservedBytes } from '../validator/observedReferencePolicy.js';
 /**
  * Wiring (AC-11, AC-12). `main.ts` is the thin shell around this; everything testable lives here.
@@ -9,18 +9,23 @@ import { demand, projectMountedPolicy, parseObservedBytes } from '../validator/o
  * The drain sequence, in order, because the order is the criterion:
  *
  * 1. `pool.beginDrain()` — readiness goes **false** immediately and no further slot is handed
- *    out, so `/v1/runs` answers `503` from the next request onward.
+ *    out, so `/v2/runs` answers `503` from the next request onward.
  * 2. Wait for the in-flight run to deliver its terminal report, bounded by the drain timeout.
  *    The process does **not** exit here just because `SIGTERM` arrived: an admitted attempt that
  *    is abandoned silently becomes the API's problem to reap.
  * 3. Close the listener.
  * 4. Clear scratch.
  *
+ * With guided mode on (STUDIO-OBS-009 AC-1) the guided half joins the same drain, concurrently with
+ * step 2 and ahead of step 3: every owned guided session is stopped `CONTEXT_LOST` and its recording
+ * is waited for (bounded, `GuidedOwnership.close`). A stop that could not be confirmed is reported
+ * as `guidedClosed: false`, which `main.ts` turns into exit code 1; the replay half's result and
+ * exit code are unchanged.
+ *
  * What this cannot promise, stated plainly: `SIGKILL` skips all four steps, and no test in this
  * package can claim otherwise. Recovering an attempt whose runner vanished is the running
  * reaper's job, and that is story 10.7.
  */
-import { createAdmissionClient } from '../reporting/admissionClient.js';
 import type { HttpClient } from '../reporting/httpClient.js';
 import { createFetchHttpClient } from '../reporting/httpClient.js';
 import type { ReportBounds } from '../reporting/bounds.js';
@@ -32,20 +37,47 @@ import { createIdentityChecker } from './identity.js';
 import type { LogSink, Logger } from './logging.js';
 import { createLogger, createStdoutSink } from './logging.js';
 import type { DeadlineTimers } from '../run/deadline.js';
-import type { RunOrigin } from '../run/timeline.js';
-import { readFile, stat } from 'node:fs/promises';
-
-import { createLocalObjectStore } from '../run/objectStore.js';
-import { createS3ObjectStore } from '../run/s3ObjectStore.js';
+import { createConfiguredObjectStore, evidenceBoundsFrom, NODE_EVIDENCE_FILE_SYSTEM } from '../run/objectStoreFactory.js';
+import type { RecordingScratch } from '../run/recordingScratch.js';
+import { systemOriginSource } from '../run/timeline.js';
 import type { ObjectStoreClient } from '../run/objectStore.js';
 import type { EvidenceFileSystem } from '../run/evidenceUpload.js';
 import { createRunCoordinator } from './runCoordinator.js';
 import type { RunCoordinator } from './runCoordinator.js';
 import { createFsScratchStore } from './scratch.js';
 import { createRunnerServer } from './server.js';
-import type { RunnerServer } from './server.js';
+import type { ListenerSettings, RunnerServer } from './server.js';
+import { createGuidedBridge, guidedCallback, guidedClaimClient } from '../guided/transport.js';
+import type { GuidedBridge, GuidedJwtPolicy } from '../guided/transport.js';
+import type { GuidedRuntimeOptions } from '../guided/runtime.js';
+import { createGuidedRecorder } from '../guided/evidence.js';
+import { createPeerPin } from './identity.js';
+
+/**
+ * Guided mode as the application sees it (STUDIO-OBS-009 AC-1): the configuration `main.ts` has already
+ * validated and read, plus the browser launcher and the swept recording scratch. Everything else the
+ * guided worker used to compose by itself — the object store, the recording geometry, the origin rule,
+ * the TLS material and the controller fingerprint — comes from the replay path's own, so there is one
+ * set of evidence settings and one trust chain.
+ */
+export interface GuidedModeDependencies {
+  readonly workerId: string;
+  readonly journalDirectory: string;
+  readonly controllerJwt: GuidedJwtPolicy;
+  /** https only; its own key, never derived from the replay callback URL (ruling A2.2). */
+  readonly callbackBaseUrl: string;
+  /** Re-read on every callback and claim: the issuer refreshes the file well inside the token lifetime. */
+  readonly callbackToken: () => Promise<string>;
+  readonly launch: GuidedRuntimeOptions['launch'];
+  /** The result of the RUNNER-SCRATCH startup sweep (`prepareRecordingScratch`), done by `main`. */
+  readonly recordingScratch: RecordingScratch;
+}
 
 export interface ApplicationDependencies {
+  /** The TLS material and the pinned controller certificate. There is no application without it. */
+  readonly listener: ListenerSettings;
+  /** Present exactly when `STUDIO_RUNNER_GUIDED_ENABLED` is true. */
+  readonly guided?: GuidedModeDependencies | undefined;
   readonly observed?: ObservedRunnerSupport;
   readonly launcher: BrowserLauncher;
   readonly runtimeVersions: Readonly<Record<string, unknown>>;
@@ -71,14 +103,6 @@ export interface ApplicationDependencies {
   readonly controlTimers?: DeadlineTimers | undefined;
   /** Test seam: an alternative pool, used to falsify the atomic-acquire guard (AC-23). */
   readonly pool?: CapacityPool | undefined;
-  /**
-   * Test seam: how the run origin is taken for an **in-process** session (10.12 AC-11.3).
-   *
-   * A real session takes it in the child at recording-context readiness. This exists so the scale
-   * assertion can substitute a process-origin clock and watch the bound go red — a guard nobody
-   * has seen fail is not a guard.
-   */
-  readonly takeOrigin?: (() => RunOrigin) | undefined;
   /** Substituted by the tests that assert the terminal ordering and the storage failure paths. */
   readonly objectStore?: ObjectStoreClient | undefined;
   readonly evidenceFileSystem?: EvidenceFileSystem | undefined;
@@ -92,8 +116,13 @@ export interface RunnerApplication {
   readonly config: RunnerConfig;
   /** Clears scratch and starts listening. Returns the bound port. */
   start(): Promise<number>;
-  /** The full `SIGTERM` drain: readiness false → finish in-flight → close → clear scratch. */
-  drain(): Promise<{ readonly completed: boolean }>;
+  /**
+   * The full `SIGTERM` drain: readiness false → finish in-flight (replay) and stop every owned
+   * session (guided), concurrently → close → clear scratch.
+   *
+   * `guidedClosed` is false only when a guided stop could not be confirmed; it is true when guided mode is off.
+   */
+  drain(): Promise<{ readonly completed: boolean; readonly guidedClosed: boolean }>;
 }
 
 function boundsFrom(config: RunnerConfig): ReportBounds {
@@ -104,20 +133,6 @@ function boundsFrom(config: RunnerConfig): ReportBounds {
     maxBodyBytes: config.maxReportBodyBytes,
   };
 }
-
-/**
- * The production filesystem port for the uploader.
- *
- * `readFile` is wired and never called — the uploader streams from a path and the store client
- * opens it. Declaring the capability is what makes "zero whole-file reads at any recording size" a
- * counted fact rather than a claim (story 10.14 AC-5).
- */
-const NODE_EVIDENCE_FILE_SYSTEM: EvidenceFileSystem = {
-  stat: async (path: string): Promise<{ readonly size: number }> => ({
-    size: (await stat(path)).size,
-  }),
-  readFile: (path: string): Promise<Uint8Array> => readFile(path),
-};
 
 const defaultSleep = (ms: number): Promise<void> =>
   new Promise<void>((resolve) => {
@@ -132,29 +147,14 @@ export function createApplication(
   const pool = dependencies.pool ?? createCapacityPool(config.poolSize);
   const http = dependencies.http ?? createFetchHttpClient();
   const scratch = dependencies.scratch ?? createFsScratchStore(config.scratchDir);
-  const s3 = dependencies.objectStore === undefined && config.objectStoreProvider === 's3'
-    ? createS3ObjectStore({
-      bucket: config.objectStoreBucket,
-      region: config.objectStoreRegion,
-      endpoint: config.objectStoreEndpoint,
-      forcePathStyle: config.objectStoreForcePathStyle,
-      credentialsDirectory: config.objectStoreCredentialsDirectory,
-      accessKeyIdFile: config.objectStoreAccessKeyIdFile,
-      secretAccessKeyFile: config.objectStoreSecretAccessKeyFile,
-      requestTimeoutMs: config.objectStoreWindowMs,
-    }) : undefined;
-  const objectStore = dependencies.objectStore ?? s3?.store
-    ?? createLocalObjectStore({ root: config.objectStoreDir });
+  // One composition shared with the guided worker (`run/objectStoreFactory.ts`, STUDIO-OBS-013).
+  // An injected test store is never closed by the application; a configured one is, on drain.
+  const configured = dependencies.objectStore === undefined
+    ? createConfiguredObjectStore(config)
+    : { store: dependencies.objectStore, close: (): void => undefined };
+  const objectStore = configured.store;
   const evidenceFileSystem = dependencies.evidenceFileSystem ?? NODE_EVIDENCE_FILE_SYSTEM;
   const bounds = boundsFrom(config);
-
-  const admission = createAdmissionClient({
-    http,
-    baseUrl: config.callbackBaseUrl,
-    identityToken: config.callbackIdentityToken,
-    timeoutMs: config.admissionTimeoutMs,
-    logger,
-  });
 
   const now = dependencies.now ?? ((): number => performance.now());
 
@@ -162,7 +162,6 @@ export function createApplication(
   const coordinator = createRunCoordinator({
     ...(observed ? {observed} : {}),
     pool,
-    admission,
     launcher: dependencies.launcher,
     scratch,
     http,
@@ -181,11 +180,7 @@ export function createApplication(
     },
     objectStore,
     evidenceFileSystem,
-    evidence: {
-      maxAttempts: config.objectStoreMaxAttempts,
-      windowMs: config.objectStoreWindowMs,
-      backoffMs: config.objectStoreBackoffMs,
-    },
+    evidence: evidenceBoundsFrom(config),
     now,
     wallClock: dependencies.wallClock ?? ((): Date => new Date()),
     sleep: dependencies.sleep ?? defaultSleep,
@@ -198,10 +193,28 @@ export function createApplication(
     },
     timers: dependencies.timers,
     controlTimers: dependencies.controlTimers,
-    takeOrigin: dependencies.takeOrigin,
   });
 
+  const controllerFingerprint = dependencies.listener.controllerCertificateFingerprint256;
+  const ownFingerprint = new X509Certificate(dependencies.listener.tls.cert).fingerprint256;
+  const guidedMode = dependencies.guided;
+  const bridge: GuidedBridge | undefined =
+    guidedMode === undefined
+      ? undefined
+      : createGuidedBridge(guidedBridgeOptions(guidedMode, {
+          listener: dependencies.listener,
+          store: objectStore,
+          fileSystem: evidenceFileSystem,
+          bounds: evidenceBoundsFrom(config),
+          config,
+          now,
+          sleep: dependencies.sleep ?? defaultSleep,
+        }));
+
   const server = createRunnerServer({
+    listener: dependencies.listener,
+    peer: createPeerPin(controllerFingerprint, ownFingerprint),
+    guided: bridge,
     identity: createIdentityChecker(config.serviceIdentityToken),
     pool,
     coordinator,
@@ -226,13 +239,26 @@ export function createApplication(
         port,
         poolSize: pool.size,
         runnerInstanceId: config.runnerInstanceId,
+        guided: bridge !== undefined,
       });
       return port;
     },
 
-    async drain(): Promise<{ completed: boolean }> {
+    async drain(): Promise<{ completed: boolean; guidedClosed: boolean }> {
       pool.beginDrain();
       logger.info('runner.draining', { inFlight: coordinator.inFlight });
+      // The guided half starts now, beside the replay half and not after it: a stopped session
+      // frees the one guided slot and settles its recording while a replay run is still reporting.
+      const guided: Promise<boolean> =
+        bridge === undefined
+          ? Promise.resolve(true)
+          : bridge.closeSessions().then(
+              () => true,
+              () => {
+                logger.record('error', 'runner.guided_close_unconfirmed', 'runner.guided.close.unconfirmed');
+                return false;
+              },
+            );
       const completed = await coordinator.awaitInFlight(config.drainTimeoutMs);
       if (!completed) {
         logger.record('error', 'runner.drain_deadline', 'runner.drain.deadline_exceeded', {
@@ -255,12 +281,58 @@ export function createApplication(
           await coordinator.awaitInFlight(config.browserStopTimeoutMs * 2);
         }
       }
+      const guidedClosed = await guided;
+      // Guided requests still in flight would hold the close open; the sessions they address are
+      // already stopped, so they are ended rather than waited for.
+      if (bridge !== undefined) server.closeAllConnections();
       await server.close();
       await scratch.clearAll();
-      s3?.close();
-      logger.info('runner.drained', { completed });
-      return { completed };
+      configured.close();
+      logger.info('runner.drained', { completed, guidedClosed });
+      return { completed, guidedClosed };
     },
+  };
+}
+
+interface GuidedWiring {
+  readonly listener: ListenerSettings;
+  readonly store: ObjectStoreClient;
+  readonly fileSystem: EvidenceFileSystem;
+  readonly bounds: ReturnType<typeof evidenceBoundsFrom>;
+  readonly config: RunnerConfig;
+  readonly now: () => number;
+  readonly sleep: (ms: number) => Promise<void>;
+}
+
+/**
+ * Composes the guided bridge from the replay path's own pieces: the same TLS pair that serves the
+ * listener is the runner's client identity on the guided callbacks and claims, the same controller
+ * fingerprint pins both directions, and the recorder uses the replay object store, bounds and
+ * recording geometry (STUDIO-OBS-013 AC-3).
+ */
+function guidedBridgeOptions(guided: GuidedModeDependencies, wiring: GuidedWiring): Parameters<typeof createGuidedBridge>[0] {
+  const fingerprint = wiring.listener.controllerCertificateFingerprint256;
+  const callbacks = { baseUrl: guided.callbackBaseUrl, tls: wiring.listener.tls, controllerCertificateFingerprint256: fingerprint, token: guided.callbackToken };
+  const recorder = createGuidedRecorder({
+    recordingScratch: guided.recordingScratch,
+    store: wiring.store,
+    fileSystem: wiring.fileSystem,
+    bounds: wiring.bounds,
+    size: { width: wiring.config.recordingWidth, height: wiring.config.recordingHeight },
+    calibrationOffsetMs: wiring.config.seekOriginCalibrationMs,
+    originSource: systemOriginSource,
+    now: wiring.now,
+    sleep: wiring.sleep,
+  });
+  return {
+    workerId: guided.workerId,
+    journalDirectory: guided.journalDirectory,
+    controllerJwt: guided.controllerJwt,
+    controllerCertificateFingerprint256: fingerprint,
+    launch: guided.launch,
+    recorder,
+    claim: guidedClaimClient(callbacks),
+    callback: guidedCallback(callbacks),
   };
 }
 
@@ -273,5 +345,5 @@ export function loadObservedRunnerSupport(env:Readonly<Record<string,string|unde
   demand(Array.isArray(raw)&&raw.length<=32,'POLICY_REFUSED');
   const policies=raw.map(projectMountedPolicy);
   demand(new Set(policies.map(p=>p.policyId+':'+p.policyVersion)).size===policies.length,'POLICY_REFUSED');
-  return {build,policies,accounts:compiledObservedAccountRegistry,validationEnabled,replayEnabled};
+  return {build,policies,validationEnabled,replayEnabled};
 }

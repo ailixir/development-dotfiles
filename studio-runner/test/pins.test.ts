@@ -15,13 +15,6 @@ import {
   satisfiesRange,
 } from '../scripts/check-pins.mjs';
 import { optionalEnv, writeRuntimeVersionsFile } from '../scripts/write-runtime-versions.mjs';
-import {
-  ARTIFACT_VERSION,
-  EXECUTOR_VERSION,
-  SYNTAX_REFERENCE_VERSION,
-  VALIDATOR_PARSER,
-  VALIDATOR_SCHEMA_VERSION,
-} from '../src/versions.js';
 import { packageRoot } from './helpers/corpus.js';
 
 /**
@@ -49,13 +42,6 @@ function makeRoot(mutate: (root: string) => void = () => undefined): string {
   mkdirSync(join(root, 'dist'), { recursive: true });
   writeRuntimeVersionsFile({
     root,
-    versions: {
-      VALIDATOR_SCHEMA_VERSION,
-      SYNTAX_REFERENCE_VERSION,
-      EXECUTOR_VERSION,
-      ARTIFACT_VERSION,
-      VALIDATOR_PARSER,
-    },
     env: {},
     nodeVersion: process.version,
   });
@@ -252,6 +238,27 @@ describe('other pin rules', () => {
     const result = checkPins(root);
     expect(result.ok).toBe(false);
     expect(result.failures.join('\n')).toContain('Dockerfile ARG PLAYWRIGHT_VERSION is missing');
+  });
+
+  /**
+   * STUDIO-OBS-009 AC-1 P2 b: the typescript pin was only compared against the `validatorParser`
+   * stamp. With the stamp gone, an image still carrying one is judged on the observed identities
+   * and the Playwright copies, never on the retired value.
+   */
+  it('does not compare the retired artifact-1 stamps', () => {
+    const root = makeRoot((target) => {
+      editJson<MutableRuntime>(join(target, 'dist', 'runtime-versions.json'), (runtime) => {
+        runtime.validatorParser = 'typescript@0.0.0';
+        runtime.validatorSchema = '0.0.0';
+        runtime.syntaxReference = '0.0.0';
+        runtime.executor = '0.0.0';
+        runtime.artifact = 0;
+      });
+    });
+    const result = checkPins(root);
+    expect(result.failures).toEqual([]);
+    expect(result.ok).toBe(true);
+    expect(result.pins).not.toHaveProperty('declaredTypescript');
   });
 
   it('rejects unknown CLI arguments', () => {
@@ -477,18 +484,27 @@ describe('the Node that actually ran (QA MED-2)', () => {
   });
 
   /**
-   * The regression QA found: the public `mcr.microsoft.com/playwright:v1.63.0-noble` image ships
-   * Node v24.20.0 against a `.nvmrc` of 22, and the check said OK. This is that exact record.
+   * The regression QA found (10.3): an image whose Node major is not the `.nvmrc` major was
+   * reported OK. The public `mcr.microsoft.com/playwright:v1.63.0-noble` image ships Node
+   * v24.20.0 and `.nvmrc` now pins 24, so the live record passes; this is the same in-image rule
+   * proven against the major the repository used to pin (22), so it stays a tested rule.
    */
-  it('fails on the Node the pinned Playwright image actually ships', () => {
-    const { status, output } = invoke(withRecordedNode('v24.20.0', '1243'), []);
+  it('fails on an image that ships another Node major than .nvmrc', () => {
+    const { status, output } = invoke(withRecordedNode('v22.20.0', '1243'), []);
     expect(status).toBe(1);
     expect(output).toContain(
       'the Node major inside the pinned Playwright image disagrees with .nvmrc',
     );
-    expect(output).toContain('major 24');
+    expect(output).toContain('major 22');
     expect(output).toContain('ED-05');
     expect(output).toContain('FIX THE IMAGE, NOT THIS FILE');
+  });
+
+  /** The exact record the pinned public image produces (final-gates01 image-final01-runtime-versions.json). */
+  it('passes on the Node the pinned Playwright image actually ships', () => {
+    const result = checkPins(withRecordedNode('v24.20.0', '1243'));
+    expect(result.failures).toEqual([]);
+    expect(result.ok).toBe(true);
   });
 
   it('fails on any in-image Node major other than .nvmrc', () => {
@@ -500,19 +516,21 @@ describe('the Node that actually ran (QA MED-2)', () => {
   });
 
   it('passes when the in-image Node major equals .nvmrc', () => {
-    const result = checkPins(withRecordedNode('v22.11.0', '1243'));
+    const result = checkPins(withRecordedNode('v24.11.0', '1243'));
     expect(result.failures).toEqual([]);
     expect(result.ok).toBe(true);
   });
 
   /**
-   * Off the image the `engines` range is the contract, not `.nvmrc`: story 10.2 widened it
-   * deliberately so the package still installs — and builds — on a newer developer machine.
+   * Off the image the `engines` range is the contract, and it names one major: a build recorded on
+   * a developer machine running another major (Node 23 here, 22 before ED-05 pin-fix01) is refused.
    */
-  it('permits an off-image Node whose major differs from .nvmrc but satisfies engines', () => {
-    const result = checkPins(withRecordedNode('v24.20.0', null));
-    expect(result.failures).toEqual([]);
-    expect(result.ok).toBe(true);
+  it('refuses an off-image Node of another major, because engines names one major', () => {
+    const result = checkPins(withRecordedNode('v23.10.0', null));
+    expect(result.ok).toBe(false);
+    expect(result.failures.join('\n')).toContain(
+      'the recorded Node version does not satisfy engines.node',
+    );
   });
 
   /** The in-image rule cannot be dodged by dropping the field that triggers it. */

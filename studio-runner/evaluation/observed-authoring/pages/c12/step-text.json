@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C12-clarify-click-button",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "3dca097e-7963-4feb-8a4f-bc6117f56738",
+        "text": "Open <var formsUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "7d16af72-6bb5-44bc-8383-0cec6d967078",
+        "text": "Click the button.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "formsUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/forms"
+    }
+  ]
+}

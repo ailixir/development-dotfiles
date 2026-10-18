@@ -9,7 +9,6 @@ export interface PinCopies {
   readonly locked: string | null;
   readonly image: string | null;
   readonly recorded: string | null;
-  readonly declaredTypescript: string | null;
   readonly engines: string | null;
   readonly nvmrc: string | null;
   readonly runtime: Record<string, unknown> | null;

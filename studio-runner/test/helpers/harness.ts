@@ -7,17 +7,17 @@
  */
 import type { BrowserLauncher, ScratchStore } from '../../src/server/adapters.js';
 import type { DeadlineTimers } from '../../src/run/deadline.js';
-import type { RunOrigin } from '../../src/run/timeline.js';
 import type { RunnerConfig } from '../../src/server/config.js';
 import { CONFIG_PREFIX, loadConfig } from '../../src/server/config.js';
 import { createApplication } from '../../src/server/application.js';
-import { SYNTAX_REFERENCE_VERSION } from '../../src/versions.js';
 import type { EvidenceFileSystem } from '../../src/run/evidenceUpload.js';
 import type { ObjectStoreClient } from '../../src/run/objectStore.js';
 import type { RunnerApplication } from '../../src/server/application.js';
 import type { CapacityPool } from '../../src/server/capacity.js';
+import type { ObservedRunnerSupport } from '../../src/server/runCoordinator.js';
 import { createRecordingLogSink } from '../../src/server/logging.js';
 import { createFakeObjectStore } from './fakeObjectStore.js';
+import { testFingerprint, testTls } from './guidedTls.js';
 import type { RecordingLogSink } from '../../src/server/logging.js';
 import type { FakeScheduler } from './scheduler.js';
 import { createFakeScheduler } from './scheduler.js';
@@ -29,6 +29,7 @@ import type {
   RecordedHttpRequest,
 } from './runner.js';
 import {
+  OBSERVED_SUPPORT,
   createEventLog,
   createFakeBrowserLauncher,
   createFakeHttpClient,
@@ -38,13 +39,17 @@ import {
 export const SERVICE_TOKEN = 'inbound-service-identity-stub';
 export const CALLBACK_TOKEN = 'outbound-service-identity-stub';
 
-/** Runtime versions as `runtime-versions.json` records them (architecture §4.6). */
+/**
+ * Runtime versions as `runtime-versions.json` records them (architecture §4.6): the Playwright pin
+ * and the observed identities (STUDIO-OBS-009 AC-1 P2 a). The artifact-1 stamps are gone.
+ */
 export const RUNTIME_VERSIONS: Readonly<Record<string, unknown>> = {
   playwright: '1.63.0',
   node: 'v22.11.0',
-  validatorSchema: '2.0.0',
-  executor: '2.1.0',
-  syntaxReference: SYNTAX_REFERENCE_VERSION,
+  observedSchemaBundleHash: 'a'.repeat(64),
+  observedReferenceBundleHash: 'b'.repeat(64),
+  observedChromiumBuild: '1243',
+  observedBrowserLauncherSha256: 'c'.repeat(64),
 };
 
 export interface HarnessOptions {
@@ -52,9 +57,12 @@ export interface HarnessOptions {
   readonly pool?: CapacityPool;
   /** Overrides the monotonic clock; used to make a synchronous call look slow (AC-4). */
   readonly now?: () => number;
-  /** Overrides how the in-process run origin is taken (10.12 AC-11.3). */
-  readonly takeOrigin?: () => RunOrigin;
-  /** Overrides the recorded runtime versions, so the §4.6 refusal can be driven (10.12 AC-2). */
+  /**
+   * The observed support the application runs with. Defaults to {@link OBSERVED_SUPPORT}, which
+   * admits `observedJob()`; a test of the disabled family passes its own.
+   */
+  readonly observed?: ObservedRunnerSupport;
+  /** Overrides the recorded runtime versions the reports carry. */
   readonly runtimeVersions?: Readonly<Record<string, unknown>>;
   /** Substitutes the browser launcher; the fixtures tier passes the real Chromium one (AC-20). */
   readonly launcher?: BrowserLauncher;
@@ -183,6 +191,9 @@ export function createHarness(options: HarnessOptions = {}): Harness {
   let port = 0;
 
   const app = createApplication(config, {
+    // The one listener is TLS with a pinned client certificate (STUDIO-OBS-009 AC-3); the suite's raw
+    // helpers (`post`, `get`, `postInterleaved`) present the same test certificate.
+    listener: { tls: testTls, controllerCertificateFingerprint256: testFingerprint },
     launcher: options.launcher ?? launcher,
     runtimeVersions: options.runtimeVersions ?? RUNTIME_VERSIONS,
     http,
@@ -202,7 +213,7 @@ export function createHarness(options: HarnessOptions = {}): Harness {
       return Promise.resolve();
     },
     random: () => 0.5,
-    takeOrigin: options.takeOrigin,
+    observed: options.observed ?? OBSERVED_SUPPORT,
     objectStore,
     evidenceFileSystem,
   });

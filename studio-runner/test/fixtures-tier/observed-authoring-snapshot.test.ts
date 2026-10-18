@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createRequire } from 'node:module';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
-import { playwrightBrowserFactory } from '../../src/run/browser.js';
+import { playwrightBrowserFactory } from './preparedBrowser.js';
 import type { BrowserHandle } from '../../src/run/browserFactory.js';
 import type { ObservationConfig, ObservationExport, ObservationRule, ObservationSession } from '../../src/run/observationTypes.js';
 import { startPageServer } from '../helpers/pageServer.js';
@@ -49,7 +49,7 @@ beforeAll(async () => {
   const Ajv = require('ajv') as new (options: object) => { compile(schema: unknown): (value: unknown) => boolean; addFormat(name: string, format: RegExp): void };
   const ajv = new Ajv({ strict: true });
   ajv.addFormat('date-time', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/u);
-  validate = ajv.compile(JSON.parse(await readFile(new URL('../../../docs/specs/studio-observed-authoring/contracts/observation.schema.json', import.meta.url), 'utf8')) as unknown);
+  validate = ajv.compile(JSON.parse(await readFile(new URL('../../../docs/specs/studio-observed-authoring/contracts/v3/observation.schema.json', import.meta.url), 'utf8')) as unknown);
   server = await startPageServer();
   scratch = await mkdtemp(join(tmpdir(), 'observed-authoring-'));
   browser = await playwrightBrowserFactory.launch({ browser: 'chromium', scratchPath: scratch, viewport: { width: 800, height: 600 }, recording: { width: 800, height: 600 } });

@@ -25,6 +25,7 @@
  * clear ahead of the delivery window deliberately, so "before the result is delivered" and "while
  * the file still exists" are different instants and only the second one is useful.
  */
+import { open } from 'node:fs/promises';
 
 /**
  * The runner's evidence states — now the contract's four (story 10.14 AC-8).
@@ -174,4 +175,41 @@ export function evidenceFor(observation: RecordingObservation): RecordingOutcome
 export function hasWebmHeader(head: Uint8Array): boolean {
   if (head.length < WEBM_MAGIC.length) return false;
   return WEBM_MAGIC.every((byte, index) => head[index] === byte);
+}
+
+/**
+ * Reads the produced file: its size and whether it begins with a readable webm header.
+ *
+ * Four bytes, never the file. Shared by the replay child (`childRuntime.ts`) and the guided
+ * session recording (`guided/evidence.ts`, STUDIO-OBS-013 AC-1) so both classify a recording with
+ * the same observation and the same {@link evidenceFor}.
+ */
+export async function inspectRecordingFile(
+  path: string | null,
+  orderlyClose = true,
+): Promise<RecordingObservation> {
+  if (path === null) {
+    return { attempted: true, path: null, bytes: null, header: false, error: null, orderlyClose };
+  }
+  try {
+    const file=await open(path,'r');let stats,head:Buffer;
+    try{stats=await file.stat();head=Buffer.alloc(4);await file.read(head,0,4,0);}finally{await file.close();}
+    return {
+      attempted: true,
+      path,
+      bytes: stats.size,
+      header: hasWebmHeader(head.subarray(0, 4)),
+      error: null,
+      orderlyClose,
+    };
+  } catch (error) {
+    return {
+      attempted: true,
+      path,
+      bytes: null,
+      header: false,
+      error: error instanceof Error ? error.name : 'unknown',
+      orderlyClose,
+    };
+  }
 }

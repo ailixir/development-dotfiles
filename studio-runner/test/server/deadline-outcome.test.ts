@@ -9,6 +9,13 @@
  * deadline, the real launcher, the real report bounding. Only the process is faked
  * (`test/helpers/childDriver.ts`), which is what keeps this tier browser-free while still
  * exercising the composition the criteria are about.
+ *
+ * STUDIO-OBS-012A AC-3: the runs are observed jobs on `POST /v2/runs` (asking for the same 120 s
+ * runtime the artifact-1 job did) and the scripted child speaks the observed protocol. The observed
+ * launcher evidences only an app video it owns (`src/run/appVideoOwnership.ts`); the scripted child
+ * owns none, so the AC-16 cases that needed a reported or salvaged playable file — (a), (b) and the
+ * partial-is-not-the-outcome pair — were deleted with the artifact-1 recording path that produced
+ * them. Observed recording evidence is OBS-013's.
  */
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -23,11 +30,16 @@ import type { ChildScript } from '../helpers/childDriver.js';
 import { createHarness, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
 import { SERVICE_TOKEN } from '../helpers/harness.js';
-import { post, validJob } from '../helpers/runner.js';
+import { observedBody, post } from '../helpers/runner.js';
 import { createFakeScheduler } from '../helpers/scheduler.js';
 
 const TOTAL_RUNTIME_MS = 120_000;
 const ADMITTED_START_MS = 30_000;
+
+/** The observed job these cases run: the fixture, asking for the server's whole runtime budget. */
+function job(totalRuntimeMs = TOTAL_RUNTIME_MS): string {
+  return observedBody({ totalRuntimeMs });
+}
 
 let harness: Harness | null = null;
 const scratchRoots: string[] = [];
@@ -70,7 +82,7 @@ interface RunOutput {
 async function runToDeadline(
   script: ChildScript,
   options: {
-    readonly job?: Record<string, unknown>;
+    readonly job?: string;
     readonly queueMs?: number;
     readonly env?: Record<string, string>;
   } = {},
@@ -85,12 +97,7 @@ async function runToDeadline(
   });
   await harness.start();
 
-  const response = await post(
-    harness.port,
-    '/v1/runs',
-    JSON.stringify(options.job ?? validJob()),
-    SERVICE_TOKEN,
-  );
+  const response = await post(harness.port, '/v2/runs', options.job ?? job(), SERVICE_TOKEN);
   expect(response.status).toBe(202);
 
   // Wait until the deadline has actually been armed, so the advance below cannot race the launch.
@@ -116,12 +123,12 @@ async function runToDeadline(
 }
 
 /** Runs to completion without any deadline firing, for the negative halves of the criteria. */
-async function runWithout(script: ChildScript, job = validJob()): Promise<RunOutput> {
+async function runWithout(script: ChildScript, body = job()): Promise<RunOutput> {
   const scheduler = createFakeScheduler();
   const driver = createChildDriver(script);
   harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
   await harness.start();
-  const response = await post(harness.port, '/v1/runs', JSON.stringify(job), SERVICE_TOKEN);
+  const response = await post(harness.port, '/v2/runs', body, SERVICE_TOKEN);
   expect(response.status).toBe(202);
   await until(() => harness?.app.coordinator.inFlight === 0, 20_000);
   const reports = harness.http.reportRequests;
@@ -174,7 +181,7 @@ describe('AC-3 — every deadline outcome is a distinguishable, truthful code', 
       },
     });
     await harness.start();
-    await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(harness.port, '/v2/runs', job(), SERVICE_TOKEN);
     await until(() => harness?.app.coordinator.inFlight === 0, 20_000);
 
     const final = JSON.parse(harness.http.reportRequests.at(-1)?.body ?? '') as ReportBody;
@@ -184,10 +191,17 @@ describe('AC-3 — every deadline outcome is a distinguishable, truthful code', 
     expect(driver.spawner.requests).toEqual([]);
   });
 
-  it('row 2: the child never reports ready → ERROR / BROWSER_LAUNCH_FAILED', async () => {
+  it('row 2: the child never reports ready → ERROR / RUN_ERROR, reason TIMEOUT', async () => {
     const { final } = await runWithout({ ready: false });
+    // The observed launcher reports a pre-Ready failure as a run fault carrying its closed code
+    // (`ObservedPreReadyFailure`), never as a step outcome and never with a browser start.
     expect(final.outcome?.result).toBe('ERROR');
-    expect(final.outcome?.errorCode).toBe('BROWSER_LAUNCH_FAILED');
+    expect(final.outcome?.errorCode).toBe('RUN_ERROR');
+    // createChildDriver({ready:false}) keeps a silent live child until the launch wait expires, so
+    // the parent names it TIMEOUT from the reviewed pre-Ready reasons (012A R8-ADJ-2). The outer
+    // code stays RUN_ERROR, which keeps it apart from the post-Ready total-runtime TIMEOUT row.
+    expect(final.outcome?.errorMessage).toBe('TIMEOUT');
+    expect(final.browserStartedAt).toBeNull();
     // Distinguishable from the timeout row, which is the whole point of the table.
     expect(final.outcome?.errorCode).not.toBe('TIMEOUT');
   });
@@ -197,16 +211,9 @@ describe('AC-3 — every deadline outcome is a distinguishable, truthful code', 
     // FAILED; a parent-enforced total timeout is ERROR / TIMEOUT". An implementation that let a
     // slow locator escalate into the run deadline has collapsed two vocabulary entries.
     const { final } = await runWithout({
-      // A locator that did not resolve in time. Playwright's per-operation bound fired **inside
+      // An assertion that did not hold within its bound. The per-operation bound fired **inside
       // the child**, the child reported it, and the run survived it.
-      result: { ok: false, failureKind: 'step', failureMessage: 'TimeoutError: locator' },
-      recording: {
-        path: '/scratch/run-1/video/page.webm',
-        bytes: 24_576,
-        error: null,
-        state: 'PENDING',
-        partial: false,
-      },
+      result: { ok: false, errorCode: 'ASSERTION_FAILED', failAt: 0 },
       onStop: 'flush',
     });
     expect(final.outcome?.result).toBe('FAILED');
@@ -214,9 +221,6 @@ describe('AC-3 — every deadline outcome is a distinguishable, truthful code', 
     // The vocabulary entry that must not be collapsed into the other one: a slow locator is not
     // a spent browser budget, and the parent killed nothing here.
     expect(final.outcome?.errorCode).not.toBe('TIMEOUT');
-    // `STORED` since story 10.14 uploads a playable recording before scratch is cleared. The
-    // evidence word moved; the outcome vocabulary this row is about did not.
-    expect(final.evidence?.state).toBe('STORED');
   });
 
   it('row 5: the child died for another reason → ERROR / RUN_ERROR', async () => {
@@ -224,7 +228,7 @@ describe('AC-3 — every deadline outcome is a distinguishable, truthful code', 
     const driver = createChildDriver({ hangOnStep: 0, onStop: 'ignore' });
     harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
     await harness.start();
-    await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(harness.port, '/v2/runs', job(), SERVICE_TOKEN);
     await until(() => scheduler.pending().length > 0, 20_000);
 
     // No deadline; the process simply went away. That is what `RUN_ERROR` is for, and it must
@@ -248,7 +252,7 @@ describe('AC-1, AC-2 — the two budgets, end to end', () => {
     const driver = createChildDriver({ holdReady: true, hangOnStep: 0, onStop: 'ignore' });
     harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
     await harness.start();
-    await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(harness.port, '/v2/runs', job(), SERVICE_TOKEN);
 
     await until(() => driver.spawner.requests.length > 0, 20_000);
     // Nine-tenths of the 30 s admitted-start budget, spent before the browser reported ready.
@@ -300,14 +304,7 @@ describe('AC-1, AC-2 — the two budgets, end to end', () => {
     const driver = createChildDriver({ hangOnStep: 0, onStop: 'ignore' });
     harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
     await harness.start();
-    await post(
-      harness.port,
-      '/v1/runs',
-      JSON.stringify(
-        validJob({ deadlines: { admittedStartMs: ADMITTED_START_MS, totalRuntimeMs: 600_000 } }),
-      ),
-      SERVICE_TOKEN,
-    );
+    await post(harness.port, '/v2/runs', job(600_000), SERVICE_TOKEN);
     await until(() => scheduler.pending().length > 0, 20_000);
 
     // The kill lands at the server's value, not the job's. §5.2: "configurable within server
@@ -326,14 +323,7 @@ describe('AC-1, AC-2 — the two budgets, end to end', () => {
     const driver = createChildDriver({ hangOnStep: 0, onStop: 'ignore' });
     harness = createHarness({ launcher: driver.launcher, scheduler, scratch: realScratch() });
     await harness.start();
-    await post(
-      harness.port,
-      '/v1/runs',
-      JSON.stringify(
-        validJob({ deadlines: { admittedStartMs: ADMITTED_START_MS, totalRuntimeMs: 5_000 } }),
-      ),
-      SERVICE_TOKEN,
-    );
+    await post(harness.port, '/v2/runs', job(5_000), SERVICE_TOKEN);
     await until(() => scheduler.pending().length > 0, 20_000);
     expect(scheduler.pending()).toEqual([5_000]);
 
@@ -345,50 +335,6 @@ describe('AC-1, AC-2 — the two budgets, end to end', () => {
 // ── AC-16: the three cases, on the serialized body ───────────────────────────────────────────
 
 describe('AC-16 — a truncated run tells the truth about its video', () => {
-  it('(a) the ordered stop completed and left a playable file → STORED, partial false', async () => {
-    const { final, finalBytes } = await runToDeadline({
-      hangOnStep: 0,
-      onStop: 'flush',
-      recording: {
-        path: '/scratch/run-1/video/page.webm',
-        bytes: 24_576,
-        error: null,
-        state: 'PENDING',
-        partial: false,
-      },
-    });
-
-    expect(final.outcome?.errorCode).toBe('TIMEOUT');
-    // `PENDING` until story 10.14; the upload now earns `STORED` inside the same terminal path.
-    expect(final.evidence?.state).toBe('STORED');
-    // §5.2's ordered close exists precisely so the webm is finalized. **A timeout is not
-    // automatically a truncation** (ADR-002 §17.3), and this is the case that says so.
-    expect(final.evidence?.partial).toBe(false);
-    expect(finalBytes).toContain('"partial":false');
-  });
-
-  it('(b) the grace expired, the tree was killed, and the file is nevertheless playable → STORED, partial TRUE', async () => {
-    // The dangerous case, and the one ADR-002 §17.7 item 1 added. Chromium writes the webm
-    // incrementally, so a killed recorder usually leaves a readable prefix. Reporting `PENDING`
-    // with `partial: false` over it is a salvaged prefix presented as a whole video — the exact
-    // sentence the epic's third acceptance bullet forbids.
-    const { final, finalBytes } = await runToDeadline({
-      hangOnStep: 0,
-      onStop: 'ignore',
-      // Chromium had already written a readable prefix when the tree was signalled. The child
-      // never got to say anything about it, so the **parent** reads the directory.
-      leavesVideo: { bytes: 24_576, header: true },
-    });
-
-    expect(final.outcome?.errorCode).toBe('TIMEOUT');
-    // Playable, so the evidence is real, worth keeping and — since story 10.14 — uploaded.
-    expect(final.evidence?.state).toBe('STORED');
-    // …and **partial**, because the ordered stop never completed. Today, without this, the API
-    // would publish `partial: false` over a salvaged prefix — a whole video that never existed.
-    expect(final.evidence?.partial).toBe(true);
-    expect(finalBytes).toContain('"partial":true');
-  });
-
   it('(c) no playable file → UNAVAILABLE, partial false — never PENDING over an unflushed one', async () => {
     const { final } = await runToDeadline({ hangOnStep: 0, onStop: 'ignore' });
     expect(final.evidence?.state).toBe('UNAVAILABLE');
@@ -412,44 +358,6 @@ describe('AC-16 — a truncated run tells the truth about its video', () => {
       await harness?.stop();
       harness = null;
     }
-  });
-
-  it('never derives partial from the outcome, in either direction', async () => {
-    // §17.4's two counter-examples, asserted as the pair they are. A mutation implementing
-    // `partial = (errorCode === TIMEOUT)` must turn both of these red — one because the timeout is
-    // false, the other because the passing run is true.
-    const flushedTimeout = await runToDeadline({
-      hangOnStep: 0,
-      onStop: 'flush',
-      recording: {
-        path: '/scratch/run-1/video/page.webm',
-        bytes: 24_576,
-        error: null,
-        state: 'PENDING',
-        partial: false,
-      },
-    });
-    expect(flushedTimeout.final.outcome?.errorCode).toBe('TIMEOUT');
-    expect(flushedTimeout.final.evidence?.partial).toBe(false);
-    await harness?.stop();
-    harness = null;
-
-    // …and the mirror image: a run the parent never killed, whose recorder nevertheless died and
-    // left a playable prefix behind. Nothing about the outcome says `TIMEOUT`, and the recording
-    // is partial all the same.
-    const crashedRecorder = await runWithout({
-      result: { ok: true, failureKind: null, failureMessage: null },
-      onStop: 'flush',
-      recording: {
-        path: '/scratch/run-1/video/page.webm',
-        bytes: 24_576,
-        error: null,
-        state: 'PENDING',
-        partial: true,
-      },
-    });
-    expect(crashedRecorder.final.outcome?.errorCode).not.toBe('TIMEOUT');
-    expect(crashedRecorder.final.evidence?.partial).toBe(true);
   });
 });
 
@@ -500,8 +408,10 @@ describe('AC-10 — message and retained-log caps hold on the deadline path', ()
   });
 
   it('keeps a flooded FINAL inside maxBodyBytes, with logsTruncated set', async () => {
-    // A run that floods log lines right up to the instant it is killed. A report rejected for size
-    // is a lost result the runner cannot replay, so an oversized body is never the answer.
+    // A run that floods its streams right up to the instant it is killed. A report rejected for
+    // size is a lost result the runner cannot replay, so an oversized body is never the answer.
+    // (The observed launcher drains and discards the child's raw streams, so the flood cannot
+    // reach the report at all; the bound is asserted all the same.)
     const flood = Array.from({ length: 400 }, (_unused, index) => ({
       stream: 'stderr' as const,
       chunk: `${'q'.repeat(600)} line ${String(index)}\n`,
@@ -532,17 +442,7 @@ describe('AC-5a — the finalization margin is bounded and sits outside both bud
   });
 
   it('does not signal the tree when the child honours the stop inside the grace', async () => {
-    const { driver } = await runToDeadline({
-      hangOnStep: 0,
-      onStop: 'flush',
-      recording: {
-        path: '/scratch/run-1/video/page.webm',
-        bytes: 24_576,
-        error: null,
-        state: 'PENDING',
-        partial: false,
-      },
-    });
+    const { driver } = await runToDeadline({ hangOnStep: 0, onStop: 'flush' });
     // The grace bought a flush, so there was nothing left to kill. A parent that signalled anyway
     // would be destroying the file it just waited for.
     expect(driver.child().killed).toBe(0);
@@ -569,7 +469,7 @@ describe('AC-5a — the finalization margin is bounded and sits outside both bud
       return { kind: 'response', status: 200, body: '{}' };
     };
 
-    await post(harness.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(harness.port, '/v2/runs', job(), SERVICE_TOKEN);
     await until(() => scheduler.pending().length > 0, 20_000);
     scheduler.advance(TOTAL_RUNTIME_MS);
     await until(() => harness?.app.coordinator.inFlight === 0, 20_000);

@@ -7,7 +7,7 @@
  * **queue** budget is the admitted-start deadline, measured from `admittedAtMs`, the instant the
  * admission CAS returned; `runCoordinator` already holds it and already refuses a launch after it.
  * The **runtime** budget is this module, and it is measured from the **browser start** and from
- * nothing else: not from `admittedAtMs`, not from the `POST /v1/runs` arriving, not from the spawn
+ * nothing else: not from `admittedAtMs`, not from the `POST /v2/runs` arriving, not from the spawn
  * call, not from the scratch directory being created. A run that spent nine-tenths of its queue
  * budget waiting still gets the whole of its browser time, because a slow queue is not the job's
  * fault and a run that dies before it has done anything wrong is a lie about the test.

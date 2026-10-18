@@ -41,7 +41,21 @@ export default defineConfig({
         'scripts/**',
       ],
       // Declaration files carry no statements; v8 reports them as 0% and drags the gate down.
-      exclude: ['**/*.d.ts', '**/*.d.mts'],
+      // STUDIO-OBS-012A: the two files below launch the real browser, and AC-25
+      // (confinement.test.ts) forbids any unit test from loading them. Where they run differs
+      // (STUDIO-OBS-009 AC-11 k, comment-only correction; guidedMain.ts is gone since the fold, D1):
+      //   - browser.ts runs in the fixtures tier twice over: in-process (those tests import
+      //     launchGuidedBrowser and the browser factory directly) and inside the forked child;
+      //   - child.ts runs in the fixtures tier only as that forked child, from dist/;
+      // Their coverage can only come from real Chromium, which the unit tier's v8 run cannot see.
+      // Counting them here made src/run/** pass only while the deleted artifact-1 playwrightAdapter
+      // padded the total. Thresholds are unchanged.
+      exclude: [
+        '**/*.d.ts',
+        '**/*.d.mts',
+        'src/run/browser.ts',
+        'src/run/child.ts',
+      ],
       thresholds: {
         lines: 85,
         statements: 85,

@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C12-clarify-click-button",
+  "kind": "EXPECTED_OUTCOME",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "note": "Written before any run. Receipts are the fixture-owned app-side record (page views and posted events), not the model or runner result.",
+  "class": "N",
+  "receipts": {
+    "phases": {
+      "run": {
+        "actions": []
+      }
+    },
+    "views": {
+      "required": [],
+      "allowed": [
+        "forms"
+      ]
+    }
+  },
+  "session": {
+    "terminal": [
+      "AWAITING_CLARIFICATION",
+      "CANCELLED",
+      "EXPIRED",
+      "FAILED"
+    ],
+    "mustObserve": [
+      "AWAITING_CLARIFICATION"
+    ],
+    "published": false,
+    "clarifications": "ANY"
+  },
+  "script": {
+    "answerClarifications": false,
+    "note": "the harness counts the clarification and cancels the session; it never answers (class N is not in the completion denominator)"
+  }
+}

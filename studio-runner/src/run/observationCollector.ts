@@ -1,5 +1,5 @@
 /// <reference lib="dom" />
-import type { CollectorOptions, Observation, ObservationNode, ObservedTarget, LocatorHint, GuidedInvocation, GuidedInvocationResult, AcquisitionRequest, AcquisitionResult } from './observationTypes.js';
+import type { CollectorOptions, Observation, ObservationNode, ObservedTarget, LocatorHint, GuidedInvocation, GuidedInvocationResult, AcquisitionRequest, AcquisitionResult, PasswordTarget } from './observationTypes.js';
 
 /** Fixed browser program. No callbacks, source text or selectors supplied by a model.
  * This function is closure-free so the sole browser boundary can install it as a trusted function.
@@ -20,6 +20,13 @@ export function installObservationCollector(options: CollectorOptions, priorInve
   let observedRevision = -1;
   let documentId = '';
   let generation = 0;
+  let navigationEvent: Event | null = null;
+  const navigationMonitor = (event: Event): void => { navigationEvent = event; };
+  for (const name of ['click', 'keydown', 'submit']) document.addEventListener(name, navigationMonitor);
+  class PasswordPrewriteRefusal extends Error {}
+  const passwordResult=(success:string,work:()=>void):{kind:string;code?:string}=>{try{work();return {kind:success};}catch(error){if(error instanceof PasswordPrewriteRefusal)return {kind:'passwordPrewriteRefusal',code:error.message};throw error;}};
+  let passwordUniverseComplete = true;
+  let passwordPin: { element: HTMLInputElement; revision: number; origin: string } | null = null;
   let candidateUniverseComplete = false;
   let identities = new Map<string, Element>();
   let resolutions: { element: Element; hints: LocatorHint[]; unresolvedRole: string | null; unresolvedLabel: boolean }[] = [];
@@ -87,6 +94,40 @@ export function installObservationCollector(options: CollectorOptions, priorInve
     const tree = element.getRootNode();
     return tree instanceof ShadowRoot ? tree.host : null;
   };
+  // STUDIO-OBS-009 AC-7 FOCUS-MUTATION-01 (T0 ruling A9, rule FM). An effect-safety guard, not a privacy or security boundary:
+  // what the focus window judges is whether THIS field, or the chain of its ancestors, was changed under the write. Closure-free
+  // like the rest of this function (it is installed by source text), so the allowlists live here.
+  const chainOf = (element: Element): Element[] | null => {
+    // Field to document root, crossing shadow roots through their hosts (parentOf). A chain deeper than the work limit
+    // cannot be judged, and is reported as such: null refuses.
+    const chain: Element[] = [];
+    for (let current: Element | null = element; current; current = parentOf(current)) {
+      if (chain.length > options.workLimits.depth + 1) return null;
+      chain.push(current);
+    }
+    return chain;
+  };
+  const focusTargetChanged = (records: readonly MutationRecord[], window: { field: Element; chain: Element[] | null }): boolean => {
+    const before = window.chain;
+    if (before === null) return true; // FM-2 could not be taken: fail closed.
+    if (records.length > options.workLimits.elements) return true; // FM-5: the record count stays a work cap.
+    // FM-4: attributes that may change on the field itself without the field becoming a different target.
+    const inertOnField = (name: string | null): boolean => name !== null && (['class', 'style', 'aria-expanded', 'aria-activedescendant', 'aria-describedby', 'aria-controls'].includes(name) || name.startsWith('data-focus'));
+    const inside = (node: Node | null, ancestor: Element): boolean => { for (let current: Node | null = node; current; current = current.parentNode ?? (current as Element).parentElement) if (current === ancestor) return true; return false; };
+    for (const record of records) {
+      if (record.type === 'attributes') {
+        // FM-3 (a): any attribute of the field that is not allowlisted. (c): hidden, inert or disabled on a chain ancestor.
+        if (record.target === window.field) { if (!inertOnField(record.attributeName)) return true; }
+        else if (before.includes(record.target as Element) && ['hidden', 'inert', 'disabled'].includes(record.attributeName ?? '')) return true;
+      } else if (record.type === 'childList') {
+        // FM-3 (b): a node of the captured chain added or removed.
+        for (const node of [...Array.from(record.addedNodes), ...Array.from(record.removedNodes)]) if (before.includes(node as Element)) return true;
+      } else if (inside(record.target, window.field)) return true; // FM-3 (d): characterData inside the field.
+    }
+    // FM-3 (b), the recomputed half: removed, replaced or moved, whether or not a record said so (an unobserved subtree has none).
+    const after = chainOf(window.field);
+    return after === null || after.length !== before.length || after.some((node, index) => node !== before[index]);
+  };
   // Apply identical source eligibility wherever text is reached: traversal, ARIA/native
   // labels, inline descendants and term/value neighborhoods. Relationships cannot escape a
   // denied ancestor or alias a password's label into an otherwise ordinary control.
@@ -134,6 +175,28 @@ export function installObservationCollector(options: CollectorOptions, priorInve
   const visible = (element: Element) => {
     const style = getComputedStyle(element);
     return !element.hasAttribute('hidden') && element.getAttribute('aria-hidden') !== 'true' && style.display !== 'none' && style.visibility !== 'hidden' && style.visibility !== 'collapse' && element.getBoundingClientRect().width > 0 && element.getBoundingClientRect().height > 0;
+  };
+  /** Sole password candidate definition for count, prepare and fill; off-screen rendered
+   * decoys count. Only this document and open shadow roots are traversed. */
+  const passwordCandidates = (): HTMLInputElement[] => {
+    const candidates: HTMLInputElement[] = [], pending: Element[] = [document.documentElement];
+    let visited = 0; passwordUniverseComplete = true;
+    while (pending.length) {
+      const element = pending.pop();
+      if (!element || ++visited > options.workLimits.elements) { passwordUniverseComplete = false; return []; }
+      if (element instanceof HTMLInputElement && element.type === 'password' && visible(element) && ariaVisible(element) && !element.matches(':disabled') && !element.readOnly && element.getAttribute('aria-disabled') !== 'true') candidates.push(element);
+      if (candidates.length > 500) throw new PasswordPrewriteRefusal('PASSWORD_TARGET_AMBIGUOUS');
+      for (const child of Array.from(element.children)) pending.push(child);
+      if (element.shadowRoot) {
+        observer.observe(element.shadowRoot, observationOptions);
+        for (const child of Array.from(element.shadowRoot.children)) pending.push(child);
+      }
+    }
+    return candidates;
+  };
+  const passwordGuard = (target: PasswordTarget, origin: string): void => {
+    drain();
+    if (disposed || inventoryFailed || !passwordUniverseComplete || root !== document.documentElement || target.documentId !== documentId || target.generation !== generation || location.origin !== origin || !options.approvedOrigins.includes(location.origin) || observedRevision !== revision) throw new PasswordPrewriteRefusal('TARGET_CHANGED');
   };
   // Role selectors use accessibility visibility, not the nonempty box needed for actionability.
   // Zero-area competitors must still count (or make the supported proof unresolved).
@@ -234,9 +297,9 @@ export function installObservationCollector(options: CollectorOptions, priorInve
       acquisitionCandidates=[];acquisitionNodes=new Map();hardDescendants=new Set();
       identities = new Map(); fields = []; resolutions = []; approvedHints = new Map(); styles = []; structure = []; trackedStyles = new Set(); candidateUniverseComplete = true;
       const observation: Observation = {
-        schemaVersion: 1, sessionId: options.sessionId, scopeHash: options.scopeHash,
+        schemaVersion: 3, sessionId: options.sessionId, scopeHash: options.scopeHash,
         documentId, generation, observedAt: identity.observedAt, origin: location.origin,
-        coverage: { mode: 'semantic', complete: true, truncated: false, withheldRegions: 0, reason: 'complete' }, nodes: [],
+        coverage: { mode: 'semantic', complete: true, truncated: false, withheldRegions: 0, passwordControls: passwordCandidates().length, reason: 'complete' }, nodes: [],
       };
       if (!options.approvedOrigins.includes(location.origin)) throw new Error('SCOPE_DENIED');
       const started = performance.now();
@@ -506,8 +569,36 @@ export function installObservationCollector(options: CollectorOptions, priorInve
       observation.coverage.reason = budget ? 'budget' : unsupported ? 'unsupportedSurface' : observation.coverage.withheldRegions ? 'sensitivity' : 'complete';
       observation.coverage.complete = observation.coverage.reason === 'complete';
       acquisitionNodes=new Map(observation.nodes.flatMap(node=>{const element=identities.get(node.nodeId);return element?[[element,node] as const]:[];}));
-      observedRevision = revision;
+      observedRevision = revision; passwordPin = null;
       return observation;
+    },
+    preparePasswordResult(target:PasswordTarget,origin:string):{kind:string;code?:string}{return passwordResult('passwordPrepared',()=>{this.preparePassword(target,origin);});},
+    fillPasswordResult(target:PasswordTarget,origin:string,allowedOrigins:string[],value:string):{kind:string;code?:string}{return passwordResult('passwordWriteCompleted',()=>{this.fillPassword(target,origin,allowedOrigins,value);});},
+    preparePassword(target: PasswordTarget, origin: string): void {
+      passwordGuard(target, origin);
+      const candidates = passwordCandidates();
+      if (candidates.length !== 1) throw new PasswordPrewriteRefusal(candidates.length === 0 ? 'PASSWORD_TARGET_ABSENT' : 'PASSWORD_TARGET_AMBIGUOUS');
+      const element = candidates[0]; if (!element) throw new PasswordPrewriteRefusal('PASSWORD_TARGET_ABSENT');
+      passwordPin = { element, revision, origin: location.origin };
+    },
+    fillPassword(target: PasswordTarget, origin: string, allowedOrigins: string[], value: string): void {
+      passwordGuard(target, origin);
+      const pin = passwordPin;
+      if (pin?.revision !== revision || !pin.element.isConnected || pin.element.type !== 'password') throw new PasswordPrewriteRefusal('TARGET_CHANGED');
+      const confirm = (focusStylesOnly = false): void => {
+        const mutations = observer.takeRecords();
+        if (mutations.length && (!focusStylesOnly || mutations.some(record => record.type !== 'attributes' || !['class','style'].includes(record.attributeName ?? '')))) revision++;
+        const candidates = passwordCandidates();
+        if (pin.revision !== revision || !pin.element.isConnected || pin.element.type !== 'password' || candidates.length !== 1 || candidates[0] !== pin.element || location.origin !== pin.origin) throw new PasswordPrewriteRefusal('TARGET_CHANGED');
+        if (!allowedOrigins.includes(location.origin) || !options.approvedOrigins.includes(location.origin)) throw new PasswordPrewriteRefusal('POLICY_DENIED');
+        if (pin.element.form ? !allowedOrigins.includes(new URL(pin.element.form.action, location.href).origin) : location.origin !== pin.origin) throw new PasswordPrewriteRefusal('PASSWORD_FORM_ACTION_NOT_ALLOWED');
+      };
+      confirm(); pin.element.focus(); confirm(true);
+      if ((pin.element.getRootNode() as Document | ShadowRoot).activeElement !== pin.element) throw new PasswordPrewriteRefusal('TARGET_CHANGED');
+      pin.element.value = value;
+      pin.element.dispatchEvent(new Event('input', { bubbles: true }));
+      pin.element.dispatchEvent(new Event('change', { bubbles: true }));
+      passwordPin = null;
     },
     acquire(request:AcquisitionRequest):AcquisitionResult {
       const refuse=(code:'TARGET_DRIFT'|'READ_REFUSED'|'POLICY_REFUSED'='TARGET_DRIFT'):AcquisitionResult=>({kind:'REFUSED',code});
@@ -541,9 +632,9 @@ export function installObservationCollector(options: CollectorOptions, priorInve
       if(op.kind==='read'&&(node.policyRuleId!==expected.readRuleId||node.policyRuleId!==op.recipe.policyRuleId||node.classification!==op.recipe.classification||(op.recipe.kind==='controlValue'&&node.controlType!==op.recipe.controlType)))return refuse('READ_REFUSED');
       return {kind:'READY',target:{documentId,generation,nodeId:node.nodeId}};
     },
-    matches(target: ObservedTarget, hint: LocatorHint, focusStylesOnly = false): boolean {
+    matches(target: ObservedTarget, hint: LocatorHint, focusWindow?: { field: Element; chain: Element[] | null }): boolean {
       const mutations = observer.takeRecords();
-      if (mutations.length && (!focusStylesOnly || mutations.length > options.workLimits.elements || mutations.some(record => record.type !== 'attributes' || !['class','style'].includes(record.attributeName ?? '')))) revision++;
+      if (focusWindow ? focusTargetChanged(mutations, focusWindow) : mutations.length) revision++;
       const started = performance.now();
       if ((hint as { exact: unknown }).exact !== true || !candidateUniverseComplete) return false;
       if (observedRevision !== revision || document.documentElement !== root || target.documentId !== documentId || target.generation !== generation ||
@@ -575,8 +666,9 @@ export function installObservationCollector(options: CollectorOptions, priorInve
     },
     validateInvocation(invocation: GuidedInvocation, allowViewportShift = false): boolean {
       const { target, operation, origin } = invocation;
-      if (location.origin !== origin || !this.matches(target, target.locator)) return false;
       const element = identities.get(target.nodeId);
+      if (element instanceof HTMLInputElement && element.type === 'password' && (operation.kind === 'read' || operation.kind === 'assert' && operation.predicate === 'hasValue')) throw new Error('PASSWORD_CONTROL_READ_REFUSED');
+      if (location.origin !== origin || !this.matches(target, target.locator)) return false;
       if (!(element instanceof HTMLElement) || !eligibleSource(element) || !visible(element)) return false;
       const field = element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement;
       const readable = field && (element instanceof HTMLTextAreaElement || ['text','search','email','tel','url'].includes(element.type));
@@ -614,6 +706,12 @@ export function installObservationCollector(options: CollectorOptions, priorInve
         !element.matches(':disabled') && (element.type === 'checkbox' || operation.kind === 'check' && element.type === 'radio') &&
         (operation.kind === 'check' || operation.kind === 'uncheck') && element.checked === (operation.kind === 'check');
     },
+    navigationExpected(invocation: GuidedInvocation): boolean {
+      navigationEvent = null;
+      const element = this.nativeTarget(invocation);
+      return invocation.operation.kind === 'click' && (element instanceof HTMLAnchorElement || element instanceof HTMLButtonElement && element.type === 'submit' && element.form !== null) || invocation.operation.kind === 'press' && invocation.operation.key === 'Enter' && element instanceof HTMLInputElement && element.form !== null;
+    },
+    navigationProceed(): boolean { return navigationEvent !== null && !navigationEvent.defaultPrevented; },
     nativeState(invocation: GuidedInvocation): { alreadyChecked: boolean; requiresReveal: boolean } {
       const element = this.nativeTarget(invocation); const op = invocation.operation;
       const alreadyChecked = element instanceof HTMLInputElement && (op.kind === 'check' || op.kind === 'uncheck') && element.checked === (op.kind === 'check');
@@ -667,11 +765,14 @@ export function installObservationCollector(options: CollectorOptions, priorInve
         case 'fill': {
           if (!editable) throw new Error('POLICY_DENIED');
           const originalType = element instanceof HTMLTextAreaElement ? 'textarea' : element.type;
+          // FM-2: the ancestor chain as it is before the handlers run.
+          const focusWindow = { field: element, chain: chainOf(element) };
           element.focus();
           // Focus handlers run synchronously and can replace, hide, retype or move this field.
-          // Only inert class/style mutations may be tolerated, and all retained structural,
-          // style, value, uniqueness and live-element checks still run before the write.
-          if (location.origin !== origin || !this.matches(target,target.locator,true) || identities.get(target.nodeId) !== element || !element.isConnected || !eligibleSource(element) || !visible(element) || (element.getRootNode() as Document | ShadowRoot).activeElement !== element || element.matches(':disabled') || element.readOnly || element.getAttribute('aria-disabled') === 'true' || (element instanceof HTMLTextAreaElement ? 'textarea' : element.type) !== originalType) throw new Error('POST_FOCUS_CHANGED');
+          // Only a change to this field or to its ancestor chain counts (FM-3); a change elsewhere on the
+          // page is not this fill's business. All retained structural, style, value, uniqueness and
+          // live-element checks still run before the write.
+          if (location.origin !== origin || !this.matches(target,target.locator,focusWindow) || identities.get(target.nodeId) !== element || !element.isConnected || !eligibleSource(element) || !visible(element) || (element.getRootNode() as Document | ShadowRoot).activeElement !== element || element.matches(':disabled') || element.readOnly || element.getAttribute('aria-disabled') === 'true' || (element instanceof HTMLTextAreaElement ? 'textarea' : element.type) !== originalType) throw new Error('POST_FOCUS_CHANGED');
           element.value = value(); event('input'); event('change'); return {};
         }
         case 'selectOption': {
@@ -684,12 +785,14 @@ export function installObservationCollector(options: CollectorOptions, priorInve
         case 'assert': {
           if (operation.predicate === 'visible') return { assertionPassed: true };
           if (operation.predicate === 'hasValue') { if (!readable) throw new Error('POLICY_DENIED'); return { assertionPassed: element.value === value() }; }
-          if (operation.predicate === 'containsText') return { assertionPassed: (element as HTMLElement).innerText.includes(value()) };
+          // F4 (studio-inference-contract-v1 §6): Playwright 1.63 normalizeWhiteSpace parity on both sides; read values stay byte-exact.
+          // PO R4 (2026-10-16): an expected value that is empty after normalization is not an assertion and never passes.
+          if (operation.predicate === 'containsText') { const expected = normalizeName(value()); return { assertionPassed: expected !== '' && normalizeName((element as HTMLElement).innerText).includes(expected) }; }
           throw new Error('POLICY_DENIED');
         }
         case 'navigate': throw new Error('POLICY_DENIED');
       }
     },
-    dispose(): void { disposed = true;acquisitionCandidates=[];acquisitionNodes.clear();hardDescendants.clear(); privateValues.clear(); inventoryBytes = 0; options.knownSecrets = []; observer.disconnect(); document.removeEventListener('input', changed, true); document.removeEventListener('change', changed, true); identities.clear(); nativeTypes.clear(); nativeGeometry.clear(); readPolicies.clear(); regionAnchors = []; fields = []; resolutions = []; approvedHints.clear(); styles = []; structure = []; trackedStyles.clear(); },
+    dispose(): void { navigationEvent = null; for (const name of ['click', 'keydown', 'submit']) document.removeEventListener(name, navigationMonitor); passwordPin = null; disposed = true;acquisitionCandidates=[];acquisitionNodes.clear();hardDescendants.clear(); privateValues.clear(); inventoryBytes = 0; options.knownSecrets = []; observer.disconnect(); document.removeEventListener('input', changed, true); document.removeEventListener('change', changed, true); identities.clear(); nativeTypes.clear(); nativeGeometry.clear(); readPolicies.clear(); regionAnchors = []; fields = []; resolutions = []; approvedHints.clear(); styles = []; structure = []; trackedStyles.clear(); },
   };
 }

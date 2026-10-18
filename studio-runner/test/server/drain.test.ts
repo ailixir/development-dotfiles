@@ -5,11 +5,14 @@
  * readiness false → refuse new work → in-flight run finishes and reports → listener closed →
  * scratch cleared.
  */
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { createServer as createNetServer } from 'node:net';
+import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import * as mainModule from '../../src/main.js';
 import { createConfiguredLauncher, main } from '../../src/main.js';
@@ -20,7 +23,13 @@ import { packageRoot } from '../helpers/corpus.js';
 import type { ReportBody } from '../../src/reporting/snapshot.js';
 import { createHarness, RUNTIME_VERSIONS, SERVICE_TOKEN, until } from '../helpers/harness.js';
 import type { Harness } from '../helpers/harness.js';
-import { createFakeBrowserLauncher, get, post, validJob } from '../helpers/runner.js';
+import { createFakeBrowserLauncher, get, observedBody, post } from '../helpers/runner.js';
+import { createApplication } from '../../src/server/application.js';
+import { GuidedOwnership } from '../../src/guided/ownership.js';
+import { prepareRecordingScratch } from '../../src/run/recordingScratch.js';
+import { testFingerprint, testTls } from '../helpers/guidedTls.js';
+
+const tlsFile = (name: string): string => fileURLToPath(new URL(`../fixtures/guided-tls/${name}.fixture`, import.meta.url));
 
 let harness: Harness | null = null;
 
@@ -39,7 +48,7 @@ describe('AC-12 — SIGTERM drains without abandoning an admitted attempt', () =
   it('flips readiness false, refuses new work, and lets the in-flight run report', async () => {
     const runner = await start();
     const releaseLaunch = runner.launcher.holdLaunch();
-    const admitted = post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    const admitted = post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.http.admissionRequests.length === 1);
     expect((await admitted).status).toBe(202);
 
@@ -50,8 +59,8 @@ describe('AC-12 — SIGTERM drains without abandoning an admitted attempt', () =
     expect(ready.status).toBe(503);
     const rejected = await post(
       runner.port,
-      '/v1/runs',
-      JSON.stringify(validJob({ attemptId: 'attempt-2' })),
+      '/v2/runs',
+      observedBody({ attemptId: '00000000-0000-4000-8000-000000000321' }),
       SERVICE_TOKEN,
     );
     expect(rejected.status).toBe(503);
@@ -76,7 +85,7 @@ describe('AC-12 — SIGTERM drains without abandoning an admitted attempt', () =
   it('reports the drain deadline rather than pretending it completed', async () => {
     const runner = await start({ env: { [`${CONFIG_PREFIX}DRAIN_TIMEOUT_MS`]: '5' } });
     const releaseLaunch = runner.launcher.holdLaunch();
-    await post(runner.port, '/v1/runs', JSON.stringify(validJob()), SERVICE_TOKEN);
+    await post(runner.port, '/v2/runs', observedBody(), SERVICE_TOKEN);
     await until(() => runner.app.coordinator.inFlight === 1);
 
     const result = await runner.app.drain();
@@ -125,6 +134,11 @@ describe('src/main.ts — process entry point', () => {
     [`${CONFIG_PREFIX}CALLBACK_IDENTITY`]: 'outbound',
     [`${CONFIG_PREFIX}CALLBACK_BASE_URL`]: 'https://api.internal.example',
     [`${CONFIG_PREFIX}SCRATCH_DIR`]: '/tmp/studio-runner-main-test',
+    // The one listener is TLS in every deployment (STUDIO-OBS-009 AC-3): the four listener keys are required.
+    [`${CONFIG_PREFIX}TLS_KEY_FILE`]: tlsFile('key'),
+    [`${CONFIG_PREFIX}TLS_CERT_FILE`]: tlsFile('cert'),
+    [`${CONFIG_PREFIX}TLS_CA_FILE`]: tlsFile('cert'),
+    [`${CONFIG_PREFIX}CONTROLLER_CERTIFICATE_FINGERPRINT256`]: testFingerprint,
   });
 
   it('starts, listens and wires SIGTERM and SIGINT to the drain path', async () => {
@@ -227,6 +241,54 @@ describe('src/main.ts — process entry point', () => {
     await result.application?.drain();
   });
 
+  it('AC-4: a runner started with STUDIO_RUNNER_VAULT_ADDRESS fails startup, names the key and never the value', async () => {
+    const lines: string[] = [];
+    let exitCode: number | null = null;
+    const result = await main({
+      env: { ...validEnv(), [`${CONFIG_PREFIX}VAULT_ADDRESS`]: 'https://vault.canary.internal:8200' },
+      onSignal: () => {
+        throw new Error('a refused start must not wire the drain');
+      },
+      write: (line) => lines.push(line),
+      setExitCode: (code) => {
+        exitCode = code;
+      },
+      launcher: createFakeBrowserLauncher(),
+      runtimeVersionsFile: runtimeVersionsFile(),
+    });
+    expect(result).toEqual({ started: false });
+    expect(exitCode).toBe(78);
+    expect(lines.join('\n')).toContain(`${CONFIG_PREFIX}VAULT_ADDRESS`);
+    expect(lines.join('\n')).not.toContain('vault.canary');
+  });
+
+  it('a listener that cannot bind ends with one closed line and exit 1, never a stack', async () => {
+    const holder = createNetServer();
+    await new Promise<void>((resolve) => { holder.listen(0, '127.0.0.1', resolve); });
+    const taken = (holder.address() as AddressInfo).port;
+    const lines: string[] = [];
+    let exitCode: number | null = null;
+    try {
+      const result = await main({
+        env: { ...validEnv(), [`${CONFIG_PREFIX}PORT`]: String(taken) },
+        onSignal: () => {
+          throw new Error('a failed start must not wire the drain');
+        },
+        write: (line) => lines.push(line),
+        setExitCode: (code) => {
+          exitCode = code;
+        },
+        launcher: createFakeBrowserLauncher(),
+        runtimeVersionsFile: runtimeVersionsFile(),
+      });
+      expect(result).toEqual({ started: false });
+      expect(exitCode).toBe(1);
+      expect(lines).toEqual([mainModule.RUNNER_START_FAILED]);
+    } finally {
+      await new Promise<void>((resolve) => { holder.close(() => { resolve(); }); });
+    }
+  });
+
   it('does not launder a programming fault into a configuration exit code', async () => {
     // `loadConfig` contracts to throw only ConfigurationError. An environment whose own key
     // enumeration throws produces something else, and `main` must let it propagate rather than
@@ -277,5 +339,169 @@ describe('src/main.ts — process entry point', () => {
     const source = readFileSync(join(packageRoot, 'src', 'main.ts'), 'utf8');
     expect(source).not.toMatch(/export const UNAVAILABLE_LAUNCHER/u);
     expect(source).not.toMatch(/BROWSER_LAUNCH_UNAVAILABLE:/u);
+  });
+});
+
+/**
+ * STUDIO-OBS-009 D1-T2 (ruling Q5): the guided half and the replay half are one drain. They run
+ * concurrently, after `pool.beginDrain()` and before the listener closes; an unconfirmed guided stop
+ * is exit code 1 and a clean one is 0; the replay half's own result and code do not change.
+ */
+describe('STUDIO-OBS-009 AC-1 — one SIGTERM drain for both halves', () => {
+  const dirs: string[] = [];
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  async function guidedApplication() {
+    const root = mkdtempSync(join(tmpdir(), 'studio-runner-drain-'));
+    dirs.push(root);
+    const config = loadConfig({
+      [`${CONFIG_PREFIX}PORT`]: '0',
+      [`${CONFIG_PREFIX}HOST`]: '127.0.0.1',
+      [`${CONFIG_PREFIX}SERVICE_IDENTITY`]: SERVICE_TOKEN,
+      [`${CONFIG_PREFIX}CALLBACK_IDENTITY`]: 'outbound',
+      [`${CONFIG_PREFIX}CALLBACK_BASE_URL`]: 'https://api.internal.example',
+      [`${CONFIG_PREFIX}SCRATCH_DIR`]: join(root, 'scratch'),
+      [`${CONFIG_PREFIX}OBJECT_STORE_DIR`]: join(root, 'objects'),
+    });
+    const journalDirectory = join(root, 'journal');
+    const app = createApplication(config, {
+      listener: { tls: testTls, controllerCertificateFingerprint256: testFingerprint },
+      guided: {
+        workerId: 'worker-one',
+        journalDirectory,
+        controllerJwt: { issuer: 'fixture-issuer', subject: 'controller', publicKey: testTls.cert.toString() },
+        callbackBaseUrl: 'https://127.0.0.1:9',
+        callbackToken: () => Promise.resolve('token'),
+        launch: () => Promise.reject(new Error('no browser in the drain test')),
+        recordingScratch: await prepareRecordingScratch({ workerId: 'worker-one', journalDirectory, evidenceRoot: root }),
+      },
+      launcher: createFakeBrowserLauncher(),
+      runtimeVersions: {},
+      logSink: { write: () => undefined },
+    });
+    await app.start();
+    return app;
+  }
+
+  const settled = async (promise: Promise<unknown>): Promise<boolean> => {
+    let done = false;
+    void promise.then(() => { done = true; }, () => { done = true; });
+    for (let tick = 0; tick < 20; tick += 1) await new Promise<void>((resolve) => { setImmediate(resolve); });
+    return done;
+  };
+
+  it('starts the guided stop while the replay half is still waiting, and finishes only when both are done', async () => {
+    const app = await guidedApplication();
+    let releaseReplay: (completed: boolean) => void = () => undefined;
+    let releaseGuided: () => void = () => undefined;
+    vi.spyOn(app.coordinator, 'awaitInFlight').mockImplementation(
+      () => new Promise<boolean>((resolve) => { releaseReplay = resolve; }),
+    );
+    const guidedClose = vi.spyOn(GuidedOwnership.prototype, 'close').mockImplementation(
+      () => new Promise<void>((resolve) => { releaseGuided = resolve; }),
+    );
+
+    const drained = app.drain();
+    // Replay is still in flight and the guided close has already begun: they are concurrent.
+    expect(app.pool.draining).toBe(true);
+    await settled(drained);
+    expect(guidedClose).toHaveBeenCalledTimes(1);
+
+    releaseReplay(true);
+    expect(await settled(drained)).toBe(false); // the guided half still holds the drain open
+    expect(app.server.raw.listening).toBe(true); // and the listener is closed only after both halves
+
+    releaseGuided();
+    expect(await drained).toEqual({ completed: true, guidedClosed: true });
+    expect(app.server.raw.listening).toBe(false);
+  });
+
+  it('is not held up by a replay run that is still reporting when the guided stop finishes first', async () => {
+    const app = await guidedApplication();
+    let releaseReplay: (completed: boolean) => void = () => undefined;
+    vi.spyOn(app.coordinator, 'awaitInFlight').mockImplementation(
+      () => new Promise<boolean>((resolve) => { releaseReplay = resolve; }),
+    );
+    vi.spyOn(GuidedOwnership.prototype, 'close').mockResolvedValue(undefined);
+    const drained = app.drain();
+    expect(await settled(drained)).toBe(false);
+    releaseReplay(true);
+    expect(await drained).toEqual({ completed: true, guidedClosed: true });
+  });
+
+  it('reports an unconfirmed guided stop as guidedClosed false, still closes the listener, and leaves the replay result alone', async () => {
+    const app = await guidedApplication();
+    vi.spyOn(GuidedOwnership.prototype, 'close').mockRejectedValue(new Error('CONTEXT_LOST'));
+    const result = await app.drain();
+    expect(result).toEqual({ completed: true, guidedClosed: false });
+    expect(app.server.raw.listening).toBe(false);
+    expect(app.logger.counters.snapshot()['runner.guided.close.unconfirmed']).toBe(1);
+  });
+
+  it('a runner without guided mode reports guidedClosed true and never touches guided ownership', async () => {
+    const close = vi.spyOn(GuidedOwnership.prototype, 'close');
+    const runner = createHarness();
+    await runner.start();
+    try {
+      expect(await runner.app.drain()).toEqual({ completed: true, guidedClosed: true });
+      expect(close).not.toHaveBeenCalled();
+    } finally {
+      await runner.stop();
+    }
+  });
+
+  it('main turns an unconfirmed guided stop into exit code 1 and a clean one into no code at all', async () => {
+    const root = mkdtempSync(join(tmpdir(), 'studio-runner-main-drain-'));
+    dirs.push(root);
+    writeFileSync(join(root, 'token'), 'token', 'utf8');
+    const env = {
+      [`${CONFIG_PREFIX}PORT`]: '0',
+      [`${CONFIG_PREFIX}HOST`]: '127.0.0.1',
+      [`${CONFIG_PREFIX}SERVICE_IDENTITY`]: SERVICE_TOKEN,
+      [`${CONFIG_PREFIX}CALLBACK_IDENTITY`]: 'outbound',
+      [`${CONFIG_PREFIX}CALLBACK_BASE_URL`]: 'https://api.internal.example',
+      [`${CONFIG_PREFIX}SCRATCH_DIR`]: join(root, 'scratch'),
+      [`${CONFIG_PREFIX}OBJECT_STORE_DIR`]: join(root, 'objects'),
+      [`${CONFIG_PREFIX}TLS_KEY_FILE`]: tlsFile('key'),
+      [`${CONFIG_PREFIX}TLS_CERT_FILE`]: tlsFile('cert'),
+      [`${CONFIG_PREFIX}TLS_CA_FILE`]: tlsFile('cert'),
+      [`${CONFIG_PREFIX}CONTROLLER_CERTIFICATE_FINGERPRINT256`]: testFingerprint,
+      [`${CONFIG_PREFIX}GUIDED_ENABLED`]: 'true',
+      [`${CONFIG_PREFIX}GUIDED_WORKER_ID`]: 'worker-one',
+      [`${CONFIG_PREFIX}GUIDED_JOURNAL_DIR`]: join(root, 'journal'),
+      [`${CONFIG_PREFIX}GUIDED_CONTROLLER_ISSUER`]: 'fixture-issuer',
+      [`${CONFIG_PREFIX}GUIDED_CONTROLLER_SUBJECT`]: 'controller',
+      [`${CONFIG_PREFIX}GUIDED_CONTROLLER_PUBLIC_KEY_FILE`]: tlsFile('cert'),
+      [`${CONFIG_PREFIX}GUIDED_CALLBACK_BASE_URL`]: 'https://127.0.0.1:9',
+      [`${CONFIG_PREFIX}GUIDED_CALLBACK_TOKEN_FILE`]: join(root, 'token'),
+    };
+    for (const unconfirmed of [true, false]) {
+      vi.restoreAllMocks();
+      vi.spyOn(GuidedOwnership.prototype, 'close').mockImplementation(() => (unconfirmed ? Promise.reject(new Error('CONTEXT_LOST')) : Promise.resolve()));
+      const handlers = new Map<string, () => void>();
+      let exitCode: number | null = null;
+      const result = await main({
+        env,
+        onSignal: (signal, handler) => { handlers.set(signal, handler); },
+        write: () => undefined,
+        setExitCode: (code) => { exitCode = code; },
+        launcher: createFakeBrowserLauncher(),
+        runtimeVersionsFile: (() => { const file = join(root, 'runtime-versions.json'); writeFileSync(file, JSON.stringify(RUNTIME_VERSIONS), 'utf8'); resetRuntimeVersionsCache(); return file; })(),
+        guidedSeams: {
+          assertBuild: () => undefined,
+          launchTree: () => true,
+          launch: () => Promise.reject(new Error('no browser')),
+          sweep: (options) => prepareRecordingScratch({ ...options, evidenceRoot: root }),
+        },
+      });
+      expect(result.started).toBe(true);
+      handlers.get('SIGTERM')?.();
+      await until(() => result.application?.pool.draining === true);
+      await until(() => !(result.application?.server.raw.listening ?? true));
+      await until(() => exitCode === (unconfirmed ? 1 : null) && result.application?.server.raw.listening === false);
+      expect(exitCode).toBe(unconfirmed ? 1 : null);
+    }
   });
 });

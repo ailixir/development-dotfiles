@@ -1,10 +1,12 @@
-import type { Execute2, Guard, ReplayAction, Scope, StepFinished2 } from './observedOperations.js';
+import { SecretUseEvidence } from '../run/secretUse.js';
+import { assertResolvedSecretLiterals, validateReplayArtifact } from '../validator/observedReplay.js';
+import type { Artifact3, Execute3, Guard, Launch3, ReplayAction, Scope, StepFinished3 } from './observedOperations.js';
 import type { ObservedAdapter } from '../run/observedReplayAdapter.js';
-import type { Clock, StepReporter } from './adapters/StepReporter.js';
-import { demand, equalObserved, hashObserved, OBSERVED_LIMITS, OBSERVED_PROFILE, ObservedRefusal, validateObserved } from '../validator/observedReferencePolicy.js';
-export type ReplayError = NonNullable<StepFinished2['errorCode']>;
+import type { Clock, StepReporter } from './stepReporter.js';
+import { boundedObserved, demand, equalObserved, hashObserved, isRecord, validateTrustedPolicy, OBSERVED_SCHEMA_BUNDLE_HASH, OBSERVED_LIMITS, OBSERVED_PROFILE, ObservedRefusal, validateObserved } from '../validator/observedReferencePolicy.js';
+export type ReplayError = NonNullable<StepFinished3['errorCode']>;
 export function replayError(error: unknown): ReplayError {
-    if (error instanceof ObservedRefusal && ['INVALID_CONTRACT', 'PROFILE_MISMATCH', 'AUTHORIZATION_EXPIRED', 'ACCOUNT_UNAVAILABLE', 'ACCOUNT_UNKNOWN', 'POLICY_REFUSED', 'TARGET_DRIFT', 'READ_REFUSED', 'REFERENCE_REFUSED', 'ASSERTION_FAILED', 'CANCELLED', 'TIMEOUT', 'OUTCOME_UNKNOWN', 'INTERNAL_ERROR'].includes(error.code))
+    if (error instanceof ObservedRefusal && ['INVALID_CONTRACT', 'PROFILE_MISMATCH', 'AUTHORIZATION_EXPIRED', 'REFERENCE_MISMATCH', 'POLICY_REFUSED', 'TARGET_DRIFT', 'READ_REFUSED', 'REFERENCE_REFUSED', 'ASSERTION_FAILED', 'CANCELLED', 'TIMEOUT', 'OUTCOME_UNKNOWN', 'INTERNAL_ERROR', 'LOGIN_REQUIRED', 'PASSWORD_CONTROL_READ_REFUSED'].includes(error.code))
         return error.code as ReplayError;
     return 'INTERNAL_ERROR';
 }
@@ -16,11 +18,15 @@ function arg(op: ReplayAction['operation']): {
 } | {
     kind: 'binding';
     bindingId: string;
+} | {
+    kind: 'secretRef';
+    sourceInputId: string;
 } | null { return op.kind === 'navigate' ? { kind: 'authoredLiteral', sourceInputId: op.destinationInputId } : op.kind === 'fill' || op.kind === 'selectOption' ? op.value : op.kind === 'assert' ? op.expected : null; }
 /** Check only facts the collector actually recorded; live checks own subtype/focus/state details. */
 export function validateRecordedTarget(operation: ReplayAction['operation'], target: Extract<Guard['target'], {
     kind: 'element';
 }>): void {
+    if (target.controlType === 'password' && (operation.kind === 'read' || operation.kind === 'assert' && operation.predicate === 'hasValue')) throw new ObservedRefusal('PASSWORD_CONTROL_READ_REFUSED');
     demand(target.visible, 'TARGET_DRIFT');
     const readable = (target.elementType === 'input' || target.elementType === 'textarea') && ['text', 'search', 'email', 'tel', 'url', 'textarea'].includes(target.controlType);
     if (operation.kind === 'fill' || operation.kind === 'assert' && operation.predicate === 'hasValue')
@@ -37,13 +43,80 @@ export function validateRecordedTarget(operation: ReplayAction['operation'], tar
             demand(!['input', 'textarea', 'select'].includes(target.elementType) && target.controlType === 'none', 'READ_REFUSED');
     }
 }
-/** Source-free independent child graph validation before an operation is invoked. */
-export function validateObservedExecute(raw: unknown, scope: Scope): Execute2 {
-    const m = validateObserved<Execute2>('replay-ipc#/definitions/Execute2', raw, OBSERVED_LIMITS.execute);
+/** A proof-frame cap never changes the ordinary Execute or artifact component limits. */
+export const RETAINED_EXECUTE_MAX_BYTES = OBSERVED_LIMITS.execute + OBSERVED_LIMITS.artifact + 64;
+export function boundObservedExecute(raw: unknown): void {
+    const proof = isRecord(raw) && Object.hasOwn(raw,'retainedArtifact');
+    boundedObserved(raw, proof ? RETAINED_EXECUTE_MAX_BYTES : OBSERVED_LIMITS.execute);
+    if (proof && isRecord(raw)) {
+        boundedObserved(Object.fromEntries(Object.entries(raw).filter(([key]) => key !== 'retainedArtifact')), OBSERVED_LIMITS.execute);
+        boundedObserved(raw.retainedArtifact, OBSERVED_LIMITS.artifact);
+    }
+}
+/** Local published joins only; the admitted whole artifact supplies the current-run commitment. */
+function retainedReadBindings(a: Artifact3): ReadonlySet<string> {
+    const zero = a.learnedPlan.bindings.filter(binding => binding.consumers.length === 0);
+    if (zero.length === 0) return new Set();
+    const plan=a.learnedPlan, inc=plan.incremental;
+    demand(inc && inc.retainedPrefixAdmissionIds.length > 0,'REFERENCE_MISMATCH');
+    const initial=plan.sourceSteps.indexOf(inc.initialFirstLearnStepId), effective=plan.sourceSteps.indexOf(inc.effectiveFirstLearnStepId);
+    demand(initial >= 0 && effective >= 0 && effective <= initial,'REFERENCE_MISMATCH');
+    const admissions=plan.actions.map(action=>action.admissionId), retained=inc.retainedPrefixAdmissionIds;
+    demand(new Set(admissions).size === admissions.length && new Set(retained).size === retained.length && retained.length <= admissions.length && equalObserved(retained,admissions.slice(0,retained.length)),'REFERENCE_MISMATCH');
+    for (const action of plan.actions.slice(0,retained.length)) demand(plan.sourceSteps.indexOf(action.coordinate.stepId) <= effective,'REFERENCE_MISMATCH');
+    for (const binding of zero) {
+        const action=plan.actions.find(item=>equalObserved(item.coordinate,binding.producer));
+        demand(action?.operation.kind==='read' && action.operation.bindingId===binding.bindingId && equalObserved(action.operation.recipe,binding.recipe) && action.origin===binding.sourceOrigin && action.admissionId===binding.provenance.producerAdmissionId && binding.provenance.sourceIntentStepId===action.coordinate.stepId && retained.includes(action.admissionId),'REFERENCE_MISMATCH');
+        const operation=a.steps.flatMap(step=>step.operations).find(item=>equalObserved(item.coordinate,binding.producer));
+        const guard=a.guards.find(item=>item.guardId===operation?.guardId);
+        demand(operation && equalObserved(operation.operation,action.operation) && guard?.target.kind==='element' && guard.origin===binding.sourceOrigin && equalObserved(guard.target.locator,action.locator) && guard.target.readRuleId===binding.recipe.policyRuleId,'REFERENCE_MISMATCH');
+    }
+    return new Set(zero.map(binding=>binding.bindingId));
+}
+/** Artifact-only structural validation. This cannot authorize an executable IPC frame. */
+export function validatePublishedArtifactGraph(a: Artifact3): void {
+    const zero=retainedReadBindings(a);
+    validateGraph({profileHash:hashObserved(a.profile),steps:a.steps,guards:a.guards,bindings:a.replayPolicy.bindings.map(binding=>({bindingId:binding.bindingId,producer:binding.producer,recipe:binding.recipe,origin:binding.sourceOrigin})),transfers:a.replayPolicy.transfers,inputs:a.inputRecipes.map(input=>input.kind==='secretRef'?{inputId:input.inputId,stepId:input.stepId,kind:'secretRef',intendedSlot:'fill.value',referenceName:input.provenance.kind==='configuration'?input.provenance.referenceName:''}:{inputId:input.inputId,stepId:input.stepId,kind:input.kind,intendedSlot:input.intendedSlot,value:input.kind==='destination'?(a.replayPolicy.scope.allowedOrigins[0]??'')+'/':''})},{principalId:'structure-validation',...a.replayPolicy.scope},zero);
+}
+/** Strict released-value child boundary. An optional typed accepted Launch is not an Execute-supplied grant. */
+export function validateObservedExecute(raw: unknown, scope: Scope, acceptedLaunch?: Launch3): Execute3 {
+    boundObservedExecute(raw);
+    const proof = isRecord(raw) && Object.hasOwn(raw,'retainedArtifact');
+    const m=validateObserved<Execute3>('replay-ipc#/definitions/Execute3',raw,proof?RETAINED_EXECUTE_MAX_BYTES:OBSERVED_LIMITS.execute);
+    const zero = new Set(m.bindings.filter(binding=>!m.transfers.some(transfer=>transfer.bindingId===binding.bindingId)).map(binding=>binding.bindingId));
+    demand(proof === (zero.size > 0),'REFERENCE_MISMATCH');
+    if (zero.size > 0) {
+        demand(acceptedLaunch,'REFERENCE_MISMATCH');
+        const launch=validateObserved<Launch3>('replay-ipc#/definitions/Launch3',acceptedLaunch,OBSERVED_LIMITS.launch), r=launch.admission.request;
+        demand(launch.build.schemaBundleHash===OBSERVED_SCHEMA_BUNDLE_HASH,'PROFILE_MISMATCH');
+        demand(launch.admission.admissionId===r.admissionId && m.runId===launch.runId && m.runId===r.executionId && m.attemptId===launch.attemptId && m.attemptId===r.attemptId && m.configurationHash===launch.configurationHash && m.configurationHash===r.configurationHash && m.profileHash===hashObserved(launch.profile) && equalObserved(launch.profile,r.profile) && equalObserved(launch.build,r.build),'EVIDENCE_MISMATCH');
+        demand(equalObserved(scope,launch.scope) && hashObserved(scope)===launch.scopeHash && launch.scopeHash===r.scopeHash && equalObserved(validateTrustedPolicy(launch.policy,scope),launch.policy) && hashObserved(launch.policy)===r.currentPolicyHash && launch.build.profileHash===m.profileHash,'POLICY_REFUSED');
+        demand(hashObserved({browser:launch.browser,viewport:launch.viewport,timeoutSeconds:m.stepTimeoutMs/1000,waitStrategy:m.waitStrategy,environment:scope.environment})===m.configurationHash,'EVIDENCE_MISMATCH');
+        const a=validateReplayArtifact(m.retainedArtifact);
+        demand(hashObserved(a)===r.artifactHash && hashObserved(a.learnedPlan)===r.learnedPlanHash && a.learnedPlanHash===r.learnedPlanHash && hashObserved(a.replayPolicy)===r.referencePolicyHash && a.replayPolicy.publicationEvidenceHash===r.publicationEvidenceHash && a.configurationHash===r.configurationHash && equalObserved(a.profile,launch.profile),'EVIDENCE_MISMATCH');
+        const requirements={csiId:scope.csiId,environment:scope.environment,applicationId:scope.applicationId,allowedOrigins:scope.allowedOrigins,capabilities:scope.capabilities,policyId:scope.policyId,policyVersion:scope.policyVersion,entryPolicyId:scope.entryPolicyId,initialContext:scope.initialContext};
+        demand(equalObserved(requirements,a.replayPolicy.scope) && equalObserved(m.steps,a.steps) && equalObserved(m.guards,a.guards) && equalObserved(m.transfers,a.replayPolicy.transfers) && equalObserved(m.bindings,a.replayPolicy.bindings.map(binding=>({bindingId:binding.bindingId,producer:binding.producer,recipe:binding.recipe,origin:binding.sourceOrigin}))),'REFERENCE_MISMATCH');
+        const metadata=m.inputs.map(input=>input.kind==='secretRef'?input:{inputId:input.inputId,stepId:input.stepId,kind:input.kind,intendedSlot:input.intendedSlot});
+        const recipes=a.inputRecipes.map(input=>{if(input.kind==='secretRef'){demand(input.provenance.kind==='configuration','REFERENCE_MISMATCH');return {inputId:input.inputId,stepId:input.stepId,kind:'secretRef',intendedSlot:'fill.value',referenceName:input.provenance.referenceName};}return {inputId:input.inputId,stepId:input.stepId,kind:input.kind,intendedSlot:input.intendedSlot};});
+        demand(equalObserved(metadata,recipes),'REFERENCE_MISMATCH');
+        const qualified=retainedReadBindings(a);demand(zero.size===qualified.size&&[...zero].every(id=>qualified.has(id)),'REFERENCE_MISMATCH');
+    }
+    demand(Object.values(m.secrets).every(value=>value.length<=4096),'LIMIT_EXCEEDED');
+    validateGraph(m,scope,zero);
+    const inputs=new Map(m.inputs.map(input=>[input.inputId,input]));
+    for(const action of m.steps.flatMap(step=>step.operations)){
+        const argument=arg(action.operation);
+        if(argument?.kind==='secretRef'){const input=inputs.get(argument.sourceInputId);demand(input?.kind==='secretRef'&&Object.hasOwn(m.secrets,input.referenceName),'REFERENCE_MISMATCH');}
+    }
+    return m;
+}
+/** Already schema-parsed structural projection only: no secret maps, origins or authority. */
+export function validateObservedReplayGraph(m: Pick<Execute3, 'profileHash' | 'steps' | 'guards' | 'bindings' | 'transfers' | 'inputs'>, scope: Scope): void { validateGraph(m,scope,new Set()); }
+function validateGraph(m: Pick<Execute3, 'profileHash' | 'steps' | 'guards' | 'bindings' | 'transfers' | 'inputs'>, scope: Scope, retainedZeroConsumerBindings: ReadonlySet<string>): void {
     demand(m.profileHash === hashObserved(OBSERVED_PROFILE), 'PROFILE_MISMATCH');
     const guards = new Map(m.guards.map(g => [g.guardId, g])), inputs = new Map(m.inputs.map(i => [i.inputId, i])), bindings = new Map(m.bindings.map(b => [b.bindingId, b]));
     demand(guards.size === m.guards.length && inputs.size === m.inputs.length && bindings.size === m.bindings.length);
-    demand(m.inputs.reduce((n, i) => n + Buffer.byteLength(i.value), 0) <= OBSERVED_LIMITS.inputs, 'LIMIT_EXCEEDED');
+    demand(m.inputs.reduce((n, i) => n + (i.kind === 'secretRef' ? 0 : Buffer.byteLength(i.value)), 0) <= OBSERVED_LIMITS.inputs, 'LIMIT_EXCEEDED');
     const actions = m.steps.flatMap(s => s.operations), coordinates = new Map(actions.map((a, i) => [key(a.coordinate), i]));
     demand(actions.length <= 200 && coordinates.size === actions.length && guards.size === actions.length);
     const stepIds = new Set<string>();
@@ -60,7 +133,8 @@ export function validateObservedExecute(raw: unknown, scope: Scope): Execute2 {
             else
                 demand(scope.allowedOrigins.includes(g.origin) && g.target.kind !== 'initialBlank', 'POLICY_REFUSED');
             const page = a.operation.kind === 'navigate' || a.operation.kind === 'assert' && ['url', 'title'].includes(a.operation.predicate);
-            demand(page === (g.target.kind !== 'element'));
+            demand(page === (g.target.kind === 'page' || g.target.kind === 'initialBlank'));
+            demand((a.operation.kind === 'fill' && a.operation.value.kind === 'secretRef') === (g.target.kind === 'passwordControl'), 'REFERENCE_MISMATCH');
             if (i === 0 && scope.initialContext.kind === 'initialBlank')
                 demand(g.target.kind === 'initialBlank');
             if (i === 0 && scope.initialContext.kind === 'observedDocument')
@@ -70,7 +144,7 @@ export function validateObservedExecute(raw: unknown, scope: Scope): Execute2 {
             const argument = arg(a.operation);
             if (argument?.kind === 'authoredLiteral') {
                 const input = inputs.get(argument.sourceInputId);
-                demand(input && input.stepId === s.stepId && input.intendedSlot === slot(a.operation), 'REFERENCE_REFUSED');
+                demand(input && input.kind !== 'secretRef' && input.stepId === s.stepId && input.intendedSlot === slot(a.operation), 'REFERENCE_REFUSED');
                 demand(Buffer.byteLength(input.value) <= 16384, 'LIMIT_EXCEEDED');
                 if (a.operation.kind === 'navigate') {
                     let u: URL;
@@ -83,6 +157,10 @@ export function validateObservedExecute(raw: unknown, scope: Scope): Execute2 {
                     demand(input.kind === 'destination' && scope.allowedOrigins.includes(u.origin) && !u.username && !u.password && Buffer.byteLength(input.value) <= 4096, 'POLICY_REFUSED');
                 }
             }
+            if (argument?.kind === 'secretRef') {
+                const input = inputs.get(argument.sourceInputId);
+                demand(input?.kind === 'secretRef' && input.stepId === s.stepId && input.intendedSlot === slot(a.operation), 'REFERENCE_MISMATCH');
+            }
             if (argument?.kind === 'binding') {
                 const binding = bindings.get(argument.bindingId), edges = m.transfers.filter(t => t.bindingId === argument.bindingId && key(t.consumer) === key(a.coordinate) && t.slot === slot(a.operation));
                 demand(binding && edges.length === 1 && g.origin === binding.origin, 'REFERENCE_REFUSED');
@@ -94,8 +172,10 @@ export function validateObservedExecute(raw: unknown, scope: Scope): Execute2 {
             i++;
         }
     }
-    for (const input of m.inputs)
+    for (const input of m.inputs) {
         demand(stepIds.has(input.stepId) && input.kind === 'destination' === (input.intendedSlot === 'navigate.destination'), 'REFERENCE_REFUSED');
+        if (input.kind === 'secretRef') demand(/^[A-Za-z0-9_.-]{1,64}$/u.test(input.referenceName), 'REFERENCE_MISMATCH');
+    }
     const seen = new Set<string>();
     for (const transfer of m.transfers) {
         const producer = coordinates.get(key(transfer.producer)), consumer = coordinates.get(key(transfer.consumer)), b = bindings.get(transfer.bindingId);
@@ -107,9 +187,8 @@ export function validateObservedExecute(raw: unknown, scope: Scope): Execute2 {
     }
     for (const b of m.bindings) {
         const producer = coordinates.get(key(b.producer)), op = producer === undefined ? undefined : actions[producer]?.operation;
-        demand(op?.kind === 'read' && op.bindingId === b.bindingId && m.transfers.some(t => t.bindingId === b.bindingId), 'REFERENCE_REFUSED');
+        demand(op?.kind === 'read' && op.bindingId === b.bindingId && (m.transfers.some(t => t.bindingId === b.bindingId) || retainedZeroConsumerBindings.has(b.bindingId)), 'REFERENCE_REFUSED');
     }
-    return m;
 }
 export const ACQUISITION_LIMITS = Object.freeze({ firstDelayMs: 100, nextDelayMs: 250, extraPerStep: 32, extraPerRun: 200, totalPerRun: 400, totalBytes: 13107200, observationBytes: 32768 });
 export interface AcquisitionStepBudget {
@@ -220,19 +299,24 @@ export class ObservedInvocationControl implements InvocationControl {
         }
     }
 }
-export async function executeObservedReplay(message: Execute2, adapter: ObservedAdapter, scope: Scope, clock: Clock, reporter: StepReporter, signal: AbortSignal, runDeadlineMs = clock.now() + message.stepTimeoutMs * message.steps.length): Promise<{
+export async function executeObservedReplay(message: Execute3, adapter: ObservedAdapter, scope: Scope, clock: Clock, reporter: StepReporter, signal: AbortSignal, runDeadlineMs = clock.now() + message.stepTimeoutMs * message.steps.length, usageEvidence?: SecretUseEvidence, acceptedLaunch?: Launch3): Promise<{
     ok: boolean;
     errorCode: ReplayError | null;
+    secretUse: Record<string, 'USED' | 'NOT_USED' | 'REFUSED'>;
+    detail?: { stepId: string; loginStepsPresent: boolean };
 }> {
-    validateObservedExecute(message, scope);
+    validateObservedExecute(message, scope, acceptedLaunch);
+    assertResolvedSecretLiterals(message);
     const values = new Map<string, string>(), inputs = new Map(message.inputs.map(i => [i.inputId, i])), guards = new Map<string, Guard>(message.guards.map(g => [g.guardId, g]));
     const budget = new ReplayAcquisitionBudget();
-    let totalBytes = 0, errorCode: ReplayError | null = null;
+    let totalBytes = 0, errorCode: ReplayError | null = null, loginStepsPresent = false;
+    let detail: { stepId: string; loginStepsPresent: boolean } | undefined;
+    const secretUse = usageEvidence ?? new SecretUseEvidence(Object.keys(message.secrets));
     try {
         const setup = new ObservedInvocationControl(clock, runDeadlineMs, signal, budget, { extra: 0 });
         const withholdInputs = async (): Promise<void> => { for (const input of message.inputs) {
             setup.check();
-            if (input.value.length > 0)
+            if (input.kind !== 'secretRef' && input.value.length > 0)
                 await adapter.withhold(input.value);
             setup.check();
         } };
@@ -256,8 +340,15 @@ export async function executeObservedReplay(message: Execute2, adapter: Observed
                     const perform = async (): Promise<void> => {
                         const argument = arg(action.operation);
                         let value: string | null = null;
-                        if (argument?.kind === 'authoredLiteral')
-                            value = inputs.get(argument.sourceInputId)?.value ?? null;
+                        if (argument?.kind === 'authoredLiteral') {
+                            const input = inputs.get(argument.sourceInputId);
+                            value = input && input.kind !== 'secretRef' ? input.value : null;
+                        }
+                        else if (argument?.kind === 'secretRef') {
+                            const input = inputs.get(argument.sourceInputId);
+                            demand(input?.kind === 'secretRef' && input.stepId === action.coordinate.stepId && input.intendedSlot === slot(action.operation), 'REFERENCE_MISMATCH');
+                            demand(Object.hasOwn(message.secrets,input.referenceName),'REFERENCE_MISMATCH'); value = message.secrets[input.referenceName] ?? null;
+                        }
                         else if (argument?.kind === 'binding')
                             value = values.get(argument.bindingId) ?? null;
                         if (argument !== null)
@@ -265,7 +356,21 @@ export async function executeObservedReplay(message: Execute2, adapter: Observed
                         const guard = guards.get(action.guardId);
                         demand(guard);
                         control.check();
-                        const result = await adapter.perform(action, guard, value, control);
+                        const secretInput = argument?.kind === 'secretRef' ? inputs.get(argument.sourceInputId) : null;
+                        const secret = secretInput?.kind === 'secretRef' ? { secretId: secretInput.referenceName, allowedOrigins: Object.hasOwn(message.secretOrigins,secretInput.referenceName) ? message.secretOrigins[secretInput.referenceName] ?? [] : [] } : undefined;
+                        if (secret) secretUse.attempting(secret.secretId);
+                        let result: Awaited<ReturnType<ObservedAdapter['perform']>>;
+                        try { result = await adapter.perform(action, guard, value, control, secret); }
+                        catch (error) {
+                            if(secret && (control.phase==='PREPARING' || error instanceof ObservedRefusal && error.noEffect)) secretUse.refusedBeforeEffect(secret.secretId);
+                            const code = replayError(error);
+                            if (!secret && (code === 'TARGET_DRIFT' || code === 'POLICY_REFUSED') && adapter.loginRequired?.()) {
+                                detail = { stepId: action.coordinate.stepId, loginStepsPresent }; throw new ObservedRefusal('LOGIN_REQUIRED');
+                            }
+                            throw error;
+                        }
+                        if (secret) { control.check(); secretUse.used(secret.secretId); loginStepsPresent = true; }
+                        value = null;
                         control.check();
                         demand(control.phase === 'INVOKING', 'INVALID_CONTRACT');
                         if (action.operation.kind === 'read') {
@@ -290,9 +395,9 @@ export async function executeObservedReplay(message: Execute2, adapter: Observed
                 errorCode = replayError(error);
             }
             const finishedAtMs = clock.now();
-            reporter.stepFinished({ stepIndex: step.stepIndex, status: errorCode === null ? 'PASS' : 'FAIL', startedAtMs, finishedAtMs, durationMs: finishedAtMs - startedAtMs, failure: errorCode });
+            reporter.stepFinished({ stepIndex: step.stepIndex, status: errorCode === null ? 'PASS' : 'FAIL', startedAtMs, finishedAtMs, durationMs: finishedAtMs - startedAtMs, failure: errorCode, ...(errorCode === 'LOGIN_REQUIRED' && detail ? {detail} : {}) });
         }
-        return { ok: errorCode === null, errorCode };
+        return { ok: errorCode === null, errorCode, secretUse: secretUse.snapshot(), ...(detail ? { detail } : {}) };
     }
     finally {
         values.clear();

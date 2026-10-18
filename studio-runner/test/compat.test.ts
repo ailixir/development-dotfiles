@@ -5,45 +5,37 @@ import { join } from 'node:path';
 import { afterAll, describe, expect, it } from 'vitest';
 
 import {
-  assertCompatible,
-  COMPATIBILITY_RULES,
   currentRuntimeVersions,
   DEFAULT_RUNTIME_VERSIONS_FILE,
-  isCompatible,
   loadRuntimeVersions,
   resetRuntimeVersionsCache,
-  RUNNER_VERSIONS,
-  RUNTIME_INCOMPATIBLE,
-  RuntimeIncompatibleError,
 } from '../src/compat/index.js';
-import type { ArtifactProvenance, RuntimeVersions } from '../src/compat/index.js';
-import { createValueResolver, executeSteps } from '../src/executor/executor.js';
-import {
-  createFakeBrowserAdapter,
-  createFakeClock,
-  createRecordingStepReporter,
-} from './helpers/fakeAdapters.js';
-import { validateArtifact } from '../src/validator/index.js';
-import { EXECUTOR_VERSION, SYNTAX_REFERENCE_VERSION, VALIDATOR_SCHEMA_VERSION } from '../src/versions.js';
-import { loadReferenceFixtures } from './helpers/corpus.js';
 
 /**
- * AC-7/AC-8: an artifact only ever runs on the runtime it was validated for (architecture §4.6).
+ * The recorded runtime versions (`dist/runtime-versions.json`) are read fail-closed.
+ *
+ * The artifact-1 compatibility cases (`isCompatible`, `assertCompatible`, the older-schema refusal)
+ * were deleted with the artifact-1 engine by STUDIO-OBS-012A AC-3. STUDIO-OBS-009 AC-1 P2 b moved
+ * the required-field list from the artifact-1 stamps to the observed identities.
  */
 
-const RUNTIME: RuntimeVersions = {
-  validatorSchema: VALIDATOR_SCHEMA_VERSION,
-  syntaxReference: SYNTAX_REFERENCE_VERSION,
+/** The identities a build must record (AC-1 P2 b): the Playwright pin and the four observed ones. */
+const OBSERVED_RECORD = {
   playwright: '1.63.0',
-  executor: EXECUTOR_VERSION,
+  observedSchemaBundleHash: 'a'.repeat(64),
+  observedReferenceBundleHash: 'b'.repeat(64),
+  observedChromiumBuild: '1243',
+  observedBrowserLauncherSha256: 'c'.repeat(64),
 };
 
-const MATCHING: ArtifactProvenance = { ...RUNTIME };
-
-const fixture = loadReferenceFixtures().find((entry) => entry.name === 'flow-login');
-if (fixture === undefined) {
-  throw new Error('The flow-login reference fixture is missing; the corpus is incomplete.');
-}
+/** The five stamps the deleted artifact-1 engine left behind. They satisfy nothing now. */
+const RETIRED_STAMPS = {
+  artifact: 1,
+  validatorSchema: '2.0.0',
+  validatorParser: 'typescript@5.9.3',
+  syntaxReference: '2.1.0',
+  executor: '2.1.0',
+};
 
 const files: string[] = [];
 
@@ -59,165 +51,15 @@ afterAll(() => {
   for (const directory of files) rmSync(directory, { recursive: true, force: true });
 });
 
-describe('isCompatible', () => {
-  it('accepts an artifact recorded on this exact runtime', () => {
-    const result = isCompatible(MATCHING, RUNTIME);
-    expect(result).toEqual({ ok: true, reason: null, code: null, mismatches: [] });
-  });
-
-  it('compares the runner versions it actually ships', () => {
-    expect(RUNNER_VERSIONS).toEqual({
-      validatorSchema: VALIDATOR_SCHEMA_VERSION,
-      syntaxReference: SYNTAX_REFERENCE_VERSION,
-      executor: EXECUTOR_VERSION,
-    });
-  });
-
-  it.each([
-    ['validatorSchema', '0.9.0'],
-    ['syntaxReference', '0.9.0'],
-    ['playwright', '1.62.0'],
-  ] as const)('rejects a differing %s under the exact rule', (field, recorded) => {
-    expect(COMPATIBILITY_RULES[field]).toBe('exact');
-    const result = isCompatible({ ...MATCHING, [field]: recorded }, RUNTIME);
-    expect(result.ok).toBe(false);
-    expect(result.code).toBe(RUNTIME_INCOMPATIBLE);
-    expect(result.mismatches.map((mismatch) => mismatch.field)).toEqual([field]);
-    expect(result.reason).toContain(field);
-    expect(result.reason).toContain(recorded);
-  });
-
-  it('rejects a newer Playwright as firmly as an older one', () => {
-    expect(isCompatible({ ...MATCHING, playwright: '1.64.0' }, RUNTIME).ok).toBe(false);
-  });
-
-  it.each([
-    ['1.0.0', true],
-    ['0.9.0', false],
-    ['2.0.0', false],
-    ['1.0.1', false],
-    ['not-a-version', false],
-  ])('applies the executor range to %s', (recorded, expected) => {
-    expect(COMPATIBILITY_RULES.executor).toBe('backwardCompatibleMinor');
-    const result = isCompatible({ ...MATCHING, executor: recorded }, { ...RUNTIME, executor: '1.0.0' });
-    expect(result.ok).toBe(expected);
-  });
-
-  it('accepts a runtime ahead of the artifact within the executor major', () => {
-    const runtime = { ...RUNTIME, executor: '1.4.2' };
-    expect(isCompatible({ ...MATCHING, executor: '1.2.9' }, runtime).ok).toBe(true);
-    expect(isCompatible({ ...MATCHING, executor: '1.4.1' }, runtime).ok).toBe(true);
-    expect(isCompatible({ ...MATCHING, executor: '1.4.3' }, runtime).ok).toBe(false);
-    expect(isCompatible({ ...MATCHING, executor: '1.5.0' }, runtime).ok).toBe(false);
-  });
-
-  it('runs a revision recorded under executor 2.0.0 on 2.1.0, and refuses the downgrade (VAL-031)', () => {
-    // Text-entry role equivalence is a backward-compatible minor: confirmed revisions keep running.
-    expect(EXECUTOR_VERSION).toBe('2.1.0');
-    expect(isCompatible({ ...MATCHING, executor: '2.0.0' }, RUNTIME).ok).toBe(true);
-    expect(isCompatible({ ...MATCHING, executor: '2.1.0' }, RUNTIME).ok).toBe(true);
-    // A backend pinned to 2.1.0 meeting a 2.0.0 runner is a downgrade: deploy the runner first.
-    const downgrade = isCompatible(
-      { ...MATCHING, executor: '2.1.0' },
-      { ...RUNTIME, executor: '2.0.0' },
-    );
-    expect(downgrade.ok).toBe(false);
-    expect(downgrade.code).toBe(RUNTIME_INCOMPATIBLE);
-    expect(downgrade.mismatches.map((mismatch) => mismatch.field)).toEqual(['executor']);
-  });
-
-  it('reports every differing field at once', () => {
-    const result = isCompatible(
-      { validatorSchema: '0.9.0', syntaxReference: '0.9.0', playwright: '1.60.0', executor: '0.9.0' },
-      RUNTIME,
-    );
-    expect(result.mismatches.map((mismatch) => mismatch.field)).toEqual([
-      'validatorSchema',
-      'syntaxReference',
-      'playwright',
-      'executor',
-    ]);
-  });
-});
-
-/**
- * AC-8: an artifact recorded under an older validator schema is refused, not reinterpreted.
- *
- * The sequence below is the caller contract: check first, then execute. The fake adapter proves
- * the refusal happens before any browser call is made. Server-side enforcement stays authoritative
- * (architecture §4.6); the backend maps this to `409 RUNTIME_INCOMPATIBLE` on execute (10.8).
- */
-describe('an artifact from an older validator schema', () => {
-  it('is refused with RUNTIME_INCOMPATIBLE and reaches no adapter call', async () => {
-    const stale: ArtifactProvenance = { ...MATCHING, validatorSchema: '0.9.0' };
-    const adapter = createFakeBrowserAdapter();
-
-    const result = validateArtifact(fixture.artifact, fixture.source, fixture.references);
-    expect(result.ok).toBe(true);
-
-    // The guard the caller places before execution.
-    let raised: unknown = null;
-    try {
-      assertCompatible(stale, RUNTIME);
-      await executeSteps({
-        steps: result.steps.map((step) => ({
-          stepIndex: step.stepIndex,
-          operations: step.operations ?? [],
-        })),
-        adapter,
-        reporter: createRecordingStepReporter(),
-        resolver: createValueResolver(fixture.values),
-        clock: createFakeClock(),
-      });
-    } catch (error) {
-      raised = error;
-    }
-
-    expect(raised).toBeInstanceOf(RuntimeIncompatibleError);
-    const failure = raised as RuntimeIncompatibleError;
-    expect(failure.code).toBe(RUNTIME_INCOMPATIBLE);
-    expect(failure.mismatches.map((mismatch) => mismatch.field)).toEqual(['validatorSchema']);
-    expect(failure.message).toContain('will not be reinterpreted');
-    expect(adapter.calls).toEqual([]);
-  });
-
-  it('executes normally once the provenance matches the runtime', async () => {
-    const adapter = createFakeBrowserAdapter();
-    const result = validateArtifact(fixture.artifact, fixture.source, fixture.references);
-
-    assertCompatible(MATCHING, RUNTIME);
-    const run = await executeSteps({
-      steps: result.steps.map((step) => ({
-        stepIndex: step.stepIndex,
-        operations: step.operations ?? [],
-      })),
-      adapter,
-      reporter: createRecordingStepReporter(),
-      resolver: createValueResolver(fixture.values),
-      clock: createFakeClock(),
-    });
-
-    expect(run.ok).toBe(true);
-    expect(adapter.calls.length).toBeGreaterThan(0);
-  });
-});
-
 describe('loadRuntimeVersions', () => {
-  it('reads the fields the compatibility check compares', () => {
+  it('reads the recorded version fields', () => {
     const file = writeRuntimeFile(
-      `${JSON.stringify({
-        playwright: '1.63.0',
-        validatorSchema: '2.0.0',
-        syntaxReference: SYNTAX_REFERENCE_VERSION,
-        executor: '2.1.0',
-        chromiumBuild: null,
-        image: null,
-      })}\n`,
+      `${JSON.stringify({ ...OBSERVED_RECORD, chromiumBuild: null, image: null })}\n`,
     );
     const loaded = loadRuntimeVersions(file);
     expect(loaded.playwright).toBe('1.63.0');
+    expect(loaded.observedChromiumBuild).toBe('1243');
     expect(loaded.chromiumBuild).toBeNull();
-    expect(isCompatible(MATCHING, loaded).ok).toBe(true);
   });
 
   it('fails closed when the file is absent', () => {
@@ -231,11 +73,34 @@ describe('loadRuntimeVersions', () => {
     expect(() => loadRuntimeVersions(file)).toThrow(/does not contain a runtime-versions object/);
   });
 
-  it('fails closed when a compared field is missing', () => {
+  it('fails closed when a required observed identity is missing', () => {
     const file = writeRuntimeFile(`${JSON.stringify({ playwright: '1.63.0' })}\n`);
     expect(() => loadRuntimeVersions(file)).toThrow(
-      /missing required version fields: validatorSchema, syntaxReference, executor/,
+      /missing required version fields: observedSchemaBundleHash, observedReferenceBundleHash, observedChromiumBuild, observedBrowserLauncherSha256/,
     );
+  });
+
+  it.each(Object.keys(OBSERVED_RECORD))('refuses a record without %s', (field) => {
+    const without = Object.fromEntries(Object.entries(OBSERVED_RECORD).filter(([key]) => key !== field));
+    const record: Record<string, unknown> = { ...OBSERVED_RECORD };
+    expect(() => loadRuntimeVersions(writeRuntimeFile(JSON.stringify(without)))).toThrow(
+      new RegExp(`missing required version fields: ${field}\\.`),
+    );
+    record[field] = null;
+    expect(() => loadRuntimeVersions(writeRuntimeFile(JSON.stringify(record)))).toThrow(
+      new RegExp(`missing required version fields: ${field}\\.`),
+    );
+    record[field] = '';
+    expect(() => loadRuntimeVersions(writeRuntimeFile(JSON.stringify(record)))).toThrow(
+      new RegExp(`missing required version fields: ${field}\\.`),
+    );
+  });
+
+  it('does not accept the retired artifact-1 stamps in place of the observed identities', () => {
+    const file = writeRuntimeFile(
+      `${JSON.stringify({ playwright: '1.63.0', ...RETIRED_STAMPS })}\n`,
+    );
+    expect(() => loadRuntimeVersions(file)).toThrow(/missing required version fields: observed/);
   });
 
   it('defaults to the file the build emits next to the compiled entry points', () => {
@@ -243,12 +108,7 @@ describe('loadRuntimeVersions', () => {
   });
 
   it('reads the record once and re-reads only after a reset', () => {
-    const record = {
-      playwright: '1.63.0',
-      validatorSchema: '2.0.0',
-      syntaxReference: '2.0.0',
-      executor: '2.0.0',
-    };
+    const record = OBSERVED_RECORD;
     const first = writeRuntimeFile(`${JSON.stringify(record)}\n`);
     const second = writeRuntimeFile(`${JSON.stringify({ ...record, playwright: '1.62.0' })}\n`);
 

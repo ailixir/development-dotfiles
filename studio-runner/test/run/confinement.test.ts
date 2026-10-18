@@ -12,6 +12,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
+import { parseDocument } from 'yaml';
 
 import { PLAYWRIGHT_MODULES } from '../../eslint.boundary-rules.js';
 import { packageRoot } from '../helpers/corpus.js';
@@ -38,6 +39,14 @@ function importsPlaywright(source: string): boolean {
 }
 
 describe('AC-1 — no Playwright import escapes the one module that starts a browser', () => {
+  it('SEC-10 removes the cookie-import capability and every trusted-browser call to it', () => {
+    const surface = readFileSync(join(packageRoot, 'src', 'run', 'browserFactory.ts'), 'utf8');
+    const browser = readFileSync(join(packageRoot, 'src', 'run', 'browser.ts'), 'utf8');
+    expect(surface).not.toContain('observedAccountContext');
+    expect(browser).not.toContain('observedAccountContext');
+    expect(browser).not.toMatch(/\.addCookies\s*\(/u);
+  });
+
   it('finds none in the validator, executor, server, reporting or compat trees', () => {
     // The property QA verified holds today, and which this story must not spend.
     const offenders = SOURCE_DIRECTORIES.flatMap((name) => filesUnder(join(packageRoot, 'src', name)))
@@ -54,13 +63,8 @@ describe('AC-1 — no Playwright import escapes the one module that starts a bro
     expect(offenders).toEqual([join('src', 'run', 'browser.ts')]);
   });
 
-  it('keeps the adapter itself Playwright-free, which is what makes it unit-testable', () => {
-    // The adapter is written against the structural page/locator surface it declares, so every
-    // one of its branches runs in the browser-free tier (AC-25) while the fixtures tier proves
-    // the same code against real Chromium.
-    const adapter = readFileSync(join(packageRoot, 'src', 'run', 'playwrightAdapter.ts'), 'utf8');
-    expect(importsPlaywright(adapter)).toBe(false);
-  });
+  // The case that kept `src/run/playwrightAdapter.ts` Playwright-free was deleted with that
+  // artifact-1 adapter (STUDIO-OBS-012A AC-3); the single-importer case above still covers it.
 
   it('exports no Playwright type from the run surface', () => {
     const index = readFileSync(join(packageRoot, 'src', 'run', 'index.ts'), 'utf8');
@@ -257,9 +261,43 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
   // Re-anchored for 10.27's gate finding: description cross-ref "section 29" → "§30" only.
   // Re-anchored by 10.48 (ADR-002 §13, O-22 execute check): `executeTest` description text only.
   // Re-anchored by 10.49 (ADR-002 §35/§13): `compileTest`/`confirmCompile` text, `deprecated` removed.
-  const BASE_SHA256 = 'ca98f80c590553dc2b453deb110bdec0309ce773eb010ae4eea85e99a6b5fa57';
+  // OBS-007: secretUse/revoked closed-schema bump; AUTH_CONNECTION_REQUIRED retired.
+  // STUDIO-OBS-012A (ADR-SC-005), lane C: compile/confirm-compile and runner /v1/validate,
+  // POST /v1/runs removed (with their orphaned schemas), cancel moved to DELETE /v2/runs/{id},
+  // validate-variables and the seven guided-session routes documented, readiness vocabulary and
+  // LEARN_REQUIRED. Whole document, no route excluded. Previous digest 08f091eca8a2…510d49.
+  // STUDIO-OBS-012A replay-cascade lane: ACCOUNT_UNAVAILABLE dropped from the POST /v2/runs 409
+  // x-conflict-codes (OBS-007 "Codes" table). Previous digest 30b3e866280d…ce2b3f.
+  // STUDIO-OBS-013 C1 (AR-1): getGuidedSessionVideo, the shared VideoNoEvidence/VideoExpired/
+  // VideoRangeNotSatisfiable responses and the readGuidedResult re-poll sentence. Previous digest
+  // f502160e0c74…e823e6.
+  // STUDIO-OBS-014 C2a (AR-3, AR-1 addendum E-1): claimAdmission and its AdmissionRequest/
+  // AdmissionResponse schemas deleted, executeTest Idempotency-Key required with the
+  // IDEMPOTENCY_KEY_REQUIRED 400, getExecutionVideo 404/410/416 moved to the shared responses, the
+  // clarification example's labelSource. Previous digest d40c744d924c…cdf1608e.
+  // STUDIO-OBS-014 C2b (c2b-spec.json): the five guided-policies operations, their tag and path
+  // parameters, startGuidedSession 409 POLICY_NOT_APPROVED and 429, readGuidedResult examples'
+  // video object, EXECUTION_SETTLED trimmed from the observed-admission 409 (2.N1). Previous
+  // digest 61181c8457bb…2ee2bd087.
+  // STUDIO-OBS-015 C3a/C3b: canonical v2-only authoring, readiness and incremental result examples.
+  // old "afec6c04cdd5bcc19e42b83f83656a342165c5e04407e90a7206de0b40c46183";
+  // new "54fd12cd9951cad6caa32e78693598eb0a23d4333a11749e2083b340d503cd0d". The operation count remains 43.
+  // STUDIO-OBS-015 aria-cap-ruling01 (ADR-002 changelog): the SOURCE_LINE_TOO_LONG text and the
+  // AuthoringStep.text description state the single 500 bound. Previous digest 54fd12cd9951…03cd0d.
+  // STUDIO-OBS-008 C-int W1 (P1-P3 + T0 A1): getStudioTestCapabilities, PublicProgress,
+  // PublicExplanation and ExecutionSnapshot.replayFailure; operations 43 -> 44.
+  // old "c053a7f75656628a1b3e031e02f40f4982aa3a85fc241a4c87c7229460f5d70f";
+  // C-int fix unit 2 (ReplayFailure else-branch admits null); previous digest c377e480…99ce515.
+  // STUDIO-OBS-008 C-int unit 3 (secret value bound 4096, OBS-007 AC-12);
+  // previous digest 2f4041ae…1700.
+  // STUDIO-OBS-009 C9 (AC-1 P2 c + C-OBS008-4, one unit): RuntimeVersions and
+  // ReportedRuntimeVersions describe the observed identities (T0 A7) and startGuidedSession
+  // declares 422 INVALID_CONTRACT (AUTHORING_REFERENCE_AMBIGUOUS); operations stay 44.
+  // Previous digest b5ecdcad…ae29244.
+  // new "bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4".
+  const BASE_SHA256 = 'bbf37fd1f96c0da33bbca6db4c04c94222a44429a4b6f0e33c92dfc59fca02c4';
 
-  it('preserves exact legacy OpenAPI bytes outside the three reviewed observed routes', () => {
+  it('pins the entire reviewed OpenAPI document including observed routes', () => {
     // ADR-002 §11.2 rejected `recordingOriginMs` and amended the document itself; §11.6 moved the
     // whole of the work runner-side. Under §12 a field on a closed runner body is Class B —
     // architect first — so the absence of a diff here *is* the acceptance, not an omission.
@@ -267,29 +305,31 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     // If this goes red because a *later* story legitimately amended the contract, the fix is to
     // re-anchor the constant in that story's PR, deliberately. It must never be re-anchored in a
     // PR whose subject is something else.
-    // OBS-006 adds exactly three independent-family routes. Preserve the original legacy bytes.
+    // OBS-007 deliberately pins the whole document, retaining the three-route presence check.
     const observedRoutes=new Set(['/v2/validate-observed','/v2/runs','/internal/studio/executions/{id}/observed-admission']);
-    let observed=false;const legacy:string[]=[];const seen=new Map<string,number>();
+    let observed=false;const seen=new Map<string,number>();
     for(const line of readFileSync(contract,'utf8').split('\n')){
       if(/^ {2}\/|^[^ ]/u.test(line)){const route=/^ {2}(\/[^:]+):$/u.exec(line)?.[1];observed=route!==undefined&&observedRoutes.has(route);if(observed&&route!==undefined)seen.set(route,(seen.get(route)??0)+1);}
-      if(!observed)legacy.push(line);
     }
     expect([...seen.entries()].sort()).toEqual([...observedRoutes].sort().map(route=>[route,1]));
-    const actual = createHash('sha256').update(legacy.join('\n')).digest('hex');
-    expect(actual, 'this story may not edit the contract (ADR-002 §12, Class B)').toBe(BASE_SHA256);
+    const actual = createHash('sha256').update(readFileSync(contract)).digest('hex');
+    expect(actual, 'the reviewed full-document contract digest changed').toBe(BASE_SHA256);
   });
 
-  it('carries the ADR-SC-003 referencePolicy only on the two internal bodies, and no expectedIntent', () => {
+  // STUDIO-OBS-012A (ADR-SC-005): the ADR-SC-003 artifact-1 ReferencePolicy retired with the
+  // `/v1/validate` and `/v1/runs` bodies that carried it; observed reference policy is v3's.
+  it('carries no artifact-1 ReferencePolicy schema and no expectedIntent', () => {
     const document = readFileSync(contract, 'utf8');
-    expect(document.match(/referencePolicy:/gu)).toHaveLength(2);
-    expect(document).toContain('ReferencePolicy:');
+    expect(document).not.toContain('ReferencePolicy:');
     expect(document).not.toMatch(/expectedIntent|ExpectedIntent/u);
   });
 
   it('emits the RunnerEvidence.partial that ADR-002 §20 promoted to required', () => {
-    const document = readFileSync(contract, 'utf8');
-    const start = document.indexOf('    RunnerEvidence:');
-    const body = document.slice(start, start + 2_400);
+    const document = parseDocument(readFileSync(contract, 'utf8')).toJS() as {
+      components: { schemas: Record<string, { properties: Record<string, unknown>; required: string[] }> };
+    };
+    const evidence = document.components.schemas.RunnerEvidence;
+    if (!evidence) throw new Error('RunnerEvidence is missing from the contract');
     // **Inverted, not deleted, by story 10.18a (ADR-002 §20.4).** As story 10.13 wrote it this
     // asserted the opposite — `toContain` the three-key form and `not.toContain` the four-key one
     // — because §17.5 deliberately left the field optional until a producer existed. That was true
@@ -308,21 +348,27 @@ describe('AC-13 — this story makes no contract edit, and that is the criterion
     // measurement. The `not.toContain` is **not** vacuous for that — QA falsified it on its own,
     // by planting the three-key literal inside the window while leaving the four-key `required` in
     // place, and it reddens alone.
-    expect(body).toContain('partial:');
-    expect(body).toContain('required: [videoKey, manifestKey, state, partial]');
-    expect(body).not.toContain('required: [videoKey, manifestKey, state]');
+    expect(evidence.properties).toHaveProperty('partial');
+    expect(evidence.required).toEqual(['videoKey', 'manifestKey', 'state', 'partial']);
+    expect(evidence.required).not.toEqual(['videoKey', 'manifestKey', 'state']);
   });
 
   it('keeps every runner-produced body closed, and widens no enum', () => {
-    const document = readFileSync(contract, 'utf8');
+    const document = parseDocument(readFileSync(contract, 'utf8')).toJS() as {
+      components: { schemas: Record<string, { additionalProperties: boolean; properties: Record<string, { enum?: string[] }> }> };
+    };
     for (const schema of ['RunnerStepState', 'RunnerLogEntry', 'RunOutcome', 'RunnerEvidence', 'RunnerReport']) {
-      const start = document.indexOf(`    ${schema}:`);
-      expect(start, `${schema} is missing from the contract`).toBeGreaterThan(0);
-      const body = document.slice(start, start + 400);
-      expect(body, `${schema} is no longer a closed body`).toContain('additionalProperties: false');
+      const body = document.components.schemas[schema];
+      expect(body, `${schema} is missing from the contract`).toBeDefined();
+      if (!body) throw new Error(`${schema} is missing from the contract`);
+      expect(body.additionalProperties, `${schema} is no longer a closed body`).toBe(false);
     }
     // The evidence enum still has four values, and this story emits three of them.
-    expect(document).toContain('enum: [PENDING, STORED, FAILED, UNAVAILABLE]');
+    const evidence = document.components.schemas.RunnerEvidence;
+    if (!evidence) throw new Error('RunnerEvidence is missing from the contract');
+    const state = evidence.properties.state;
+    if (!state) throw new Error('RunnerEvidence.state is missing from the contract');
+    expect(state.enum).toEqual(['PENDING', 'STORED', 'FAILED', 'UNAVAILABLE']);
   });
 });
 
@@ -370,20 +416,21 @@ describe('AC-24 — production dependencies remain explicit and exact-pinned', (
   });
 });
 
-describe('AC-23 — the pins hold and .nvmrc is not touched', () => {
-  it('still reads 22', () => {
-    // The public base image at the pinned Playwright version ships Node v24.20.0 against this
-    // `.nvmrc` of 22. That mismatch is `ci/stages.md` open item **O-2a**, owned by `ED-05`, and
-    // the fix is a base-image choice or an ADR-001 §4.2 amendment — never a convenience edit
-    // here. This assertion is what makes such an edit a red build instead of a quiet one.
-    expect(readFileSync(join(packageRoot, '.nvmrc'), 'utf8').trim()).toBe('22');
+describe('AC-23 — the pins hold and the Node pin follows the image', () => {
+  it('reads the Node major the pinned Playwright image ships', () => {
+    // The public base image at the pinned Playwright version ships Node v24.20.0, and `.nvmrc`
+    // pins that major (`ci/stages.md` open item O-2a, closed by ED-05 pin-fix01 under an ADR-001
+    // §4.2 amendment). `.nvmrc` follows the image: a base-image change that moves the Node major
+    // moves this file and `engines.node` in the same change. This assertion is what makes one
+    // without the other a red build instead of a quiet one.
+    expect(readFileSync(join(packageRoot, '.nvmrc'), 'utf8').trim()).toBe('24');
   });
 
-  it('keeps the engines range as it was, so the mismatch cannot be widened away either', () => {
+  it('keeps a single supported Node major in engines, so no second path is widened in', () => {
     const pkg = JSON.parse(readFileSync(join(packageRoot, 'package.json'), 'utf8')) as {
       engines?: { node?: string };
     };
-    expect(pkg.engines?.node).toBe('>=22.11.0 <25.0.0');
+    expect(pkg.engines?.node).toBe('>=24.11.0 <25.0.0');
   });
 
   it('keeps the Playwright pin at 1.63.0 in all four declared copies', () => {

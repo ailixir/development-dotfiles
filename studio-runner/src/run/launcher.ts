@@ -1,3 +1,4 @@
+import { provenSecretUseAfterLoss,mergeSecretUseEvidence } from './secretUse.js';
 import { ObservedPreReadyFailure } from './errors.js';
 /**
  * The real `BrowserLauncher`: the parent half of the killable child (AC-1, AC-4, AC-5, AC-20).
@@ -44,9 +45,8 @@ import { ObservedPreReadyFailure } from './errors.js';
  * Three things about the kill path are ordering, not detail:
  *
  * - **The reason is recorded before the signal.** A deadline kill makes the child exit without a
- *   result, and `createInbox`'s abandoned-result path synthesizes `failureKind: 'run-fault'` →
- *   `RUN_ERROR`, which is the code for "the protocol broke". §8.2 fixes this condition by hand as
- *   `ERROR`/`TIMEOUT`. Classifying after the exit would honestly describe the symptom and lose the
+ *   result, which on its own reads as `failureKind: 'run-fault'` → `RUN_ERROR`, the code for "the
+ *   protocol broke". §8.2 fixes this condition by hand as `ERROR`/`TIMEOUT`. Classifying after the exit would honestly describe the symptom and lose the
  *   cause, so {@link SessionRun.kill} sets the kind first.
  * - **Whether the ordered stop completed is recorded before the signal too**, for the same reason.
  *   It is the fact ADR-002 §17.7 makes `partial` depend on, and it stops existing the moment the
@@ -55,40 +55,37 @@ import { ObservedPreReadyFailure } from './errors.js';
  *   See `src/run/tree.ts`.
  */
 
-import type { Execute2, Launch2, Ready2, Result2 } from '../executor/observedOperations.js';
+import type { Execute3, Launch3, Ready3, Result3 } from '../executor/observedOperations.js';
 import { demand, equalObserved, hashObserved, isRecord, OBSERVED_LIMITS, validateObserved } from '../validator/observedReferencePolicy.js';
 import { validateObservedExecute } from '../executor/observedReplay.js';
-import type { ObservedChildMessage, ObservedParentMessage } from './protocol.js';
-import type { StepReporter } from '../executor/adapters/StepReporter.js';
+import type { ObservedChildMessage } from './protocol.js';
+import type { StepReporter } from '../executor/stepReporter.js';
 import { fork } from 'node:child_process';
 import { mkdirSync } from 'node:fs';
-import { readdir, readFile, stat, realpath } from 'node:fs/promises';
-import { join, sep } from 'node:path';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import type { BrowserAdapter } from '../executor/adapters/BrowserAdapter.js';
 import type {
   BrowserLauncher,
   BrowserSession,
   LaunchOptions,
-  SessionKillOutcome,
   SessionKillReason,
-  SessionRecording,
-  SessionRunRequest,
-  SessionRunResult,
 } from '../server/adapters.js';
-import { SCRATCH_SUBDIRECTORIES } from './scratchLayout.js';
-import { createOutputRelay } from './outputRelay.js';
-import type { OutputRelay, OutputStream } from './outputRelay.js';
-import type { RecordingObservation } from './recording.js';
-import { evidenceFor, hasWebmHeader } from './recording.js';
+import { SCRATCH_SUBDIRECTORIES,secureScratchDirectory } from './scratchLayout.js';
+import type { OutputStream } from './outputRelay.js';
 import { signalProcessTree } from './tree.js';
-import type { ChildMessage, ParentMessage, ProtocolStep } from './protocol.js';
-import { PROTOCOL_VERSION, parseChildMessage } from './protocol.js';
+import {descendantsOf,isAlive,canEnumerateProcessTree,readProcessTableAsync} from './tree.js';
+import type {ProcessRow} from './tree.js';
+import {createAppVideoRegistry,sealAppVideoOwner,observeOwnedAppRecording} from './appVideoOwnership.js';
+import type {AppVideoSnapshot} from './appVideoOwnership.js';
+import type { ParentMessage } from './protocol.js';
 
 /** A spawned child, reduced to what the launcher needs. Injected so the unit tier spawns none. */
 export interface ChildProcessHandle {
-  send(message: ParentMessage | ObservedParentMessage): void;
+  /** Private observed recovery: retain live descendants and prove all writers stopped. */
+  trackTree?():void;
+  quiesce?(remainingMs:number):Promise<boolean>;
+  send(message: ParentMessage): void;
   onMessage(listener: (value: unknown) => void): void;
   onExit(listener: (code: number | null, signal: string | null) => void): void;
   /**
@@ -220,43 +217,6 @@ export function assertNoCodeLoadingKeys(env: Readonly<Record<string, string>>): 
 /** Where the compiled child entry sits, relative to this module, once built. */
 export const DEFAULT_CHILD_MODULE_PATH = fileURLToPath(new URL('./child.js', import.meta.url));
 
-/**
- * The parent-side `BrowserAdapter` of a child-owned session.
- *
- * `BrowserSession` keeps its 10.6 shape, so a session has an `adapter`. A *real* session's
- * operations run in the child, next to the browser and on the child's run clock — driving them
- * from here would put every reading a round trip away from the thing it measures. Rather than
- * exposing a proxy that looks usable and silently spends the seek budget, this refuses and says
- * which path to use, so a future caller finds out at the first call rather than in a timing
- * report.
- */
-export function createChildOwnedAdapter(): BrowserAdapter {
-  const refuse = (): never => {
-    throw new Error(
-      'This session executes in its own process: use `session.run.execute(...)`. Driving the ' +
-        'adapter from the parent would take every step reading a round trip away from the ' +
-        'browser (ADR-002 §11.6).',
-    );
-  };
-  return {
-    goto: refuse,
-    waitForURL: refuse,
-    locate: refuse,
-    click: refuse,
-    fill: refuse,
-    press: refuse,
-    check: refuse,
-    uncheck: refuse,
-    hover: refuse,
-    selectOption: refuse,
-    expectVisible: refuse,
-    expectContainText: refuse,
-    expectValue: refuse,
-    expectUrl: refuse,
-    expectTitle: refuse,
-  };
-}
-
 /** The default spawner: `fork`, no arguments, an enumerated environment, an IPC channel. */
 export function createForkSpawner(): ChildSpawner {
   return {
@@ -281,9 +241,36 @@ export function createForkSpawner(): ChildSpawner {
         detached: true,
         serialization: 'json',
       });
+      // Descendant tracking for observed recovery. Sampling is **asynchronous and never
+      // overlapping**: the synchronous reader blocks the event loop for the length of a `ps` call,
+      // and at a 25 ms cadence that starved every runner timer — the secret-bearing control stop
+      // included — by up to ~50 ms (STUDIO-OBS-012A). A tick that finds a sample still in flight
+      // is skipped rather than queued, so a slow `ps` stretches the cadence instead of stacking
+      // readers. Each sample stays bounded by the same 100 ms `ps` timeout as before.
+      const remembered=new Set<number>();let tracking:ReturnType<typeof setInterval>|undefined,sampling:Promise<void>|undefined;
+      // The most recent asynchronous reading that actually showed processes (an unreadable `ps` answers `[]`, which is not a table).
+      // `kill()` signals from it, so the kill path never blocks the event loop on a synchronous `ps` (AC-11 j, R10-OBS-1).
+      let latest:readonly ProcessRow[]|null=null;
+      const absorb=(table:readonly ProcessRow[]):void=>{if(table.length>0)latest=table;if(child.pid)for(const pid of descendantsOf(child.pid,table))remembered.add(pid);};
+      const sample=():void=>{if(sampling||!child.pid)return;sampling=readProcessTableAsync(100).then(absorb).finally(()=>{sampling=undefined;});};
+      const remaining=(end:number):number=>Math.max(1,Math.min(100,end-Date.now()));
       return {
+        trackTree(){if(!tracking){sample();tracking=setInterval(sample,25);}},
+        async quiesce(remainingMs){
+          const end=Date.now()+Math.max(1,remainingMs);if(tracking){clearInterval(tracking);tracking=undefined;}
+          // A sample already in flight may hold the only reading of a descendant that has since
+          // been re-parented away from the exited leader, so it is awaited, never discarded —
+          // but only within this cleanup window.
+          const inFlight=sampling;if(inFlight){let timer:ReturnType<typeof setTimeout>|undefined;await Promise.race([inFlight,new Promise<void>(r=>{timer=setTimeout(r,Math.max(1,end-Date.now()));})]);clearTimeout(timer);}
+          absorb(await readProcessTableAsync(remaining(end)));const pid=child.pid;if(!pid)return false;
+          const table=await readProcessTableAsync(remaining(end)),enumerated=canEnumerateProcessTree(table);
+          // Known browser/encoder groups survive an exited Node leader. Signal retained trees,
+          // then poll the exact observed pids within the existing cleanup window.
+          const pids=[...remembered,pid];for(const member of pids)if(isAlive(member))signalProcessTree(member,'SIGKILL',undefined,table);
+          while(pids.some(member=>isAlive(member))){if(Date.now()>=end)return false;await new Promise<void>(r=>{setTimeout(r,Math.max(1,Math.min(5,end-Date.now())));});}return enumerated;
+        },
         send(message: ParentMessage): void {
-          if (child.connected) child.send(message);
+          if (child.connected) child.send(message, () => { /* Exit handling owns a closed IPC channel; raw error text is never emitted. */ });
         },
         onMessage(listener: (value: unknown) => void): void {
           child.on('message', listener);
@@ -310,9 +297,26 @@ export function createForkSpawner(): ChildSpawner {
           const pid = child.pid;
           if (pid === undefined) return;
           if (child.exitCode !== null || child.signalCode !== null) return;
-          // The group, never the pid alone. `src/run/tree.ts` falls back to the single pid only
-          // if the group signal is refused, and says which it did.
-          signalProcessTree(pid, 'SIGKILL');
+          // AC-11 j (R10-OBS-1): never `signalProcessTree`'s default table, which is the synchronous `ps` (up to 5 s of a
+          // blocked event loop, reachable on an IPC violation and on stop-grace exhaustion while the secret control poll is
+          // live). The signals are unchanged: the group of every process of the tree, deepest first, then the leader's.
+          // What changes is where the tree comes from. Two sources, both asynchronous: the latest sample, and every process
+          // any earlier sample showed. `quiesce()` re-enumerates asynchronously after every kill that matters, so a process
+          // spawned since the last sample is still reached.
+          const sweep = (table: readonly ProcessRow[]): void => {
+            // The group, never the pid alone. `src/run/tree.ts` falls back to the single pid only
+            // if the group signal is refused, and says which it did.
+            signalProcessTree(pid, 'SIGKILL', undefined, table);
+            for (const member of remembered) if (member !== pid && isAlive(member)) signalProcessTree(member, 'SIGKILL', undefined, table);
+          };
+          if (latest !== null) { sweep(latest); return; }
+          // No reading has landed yet (spawned a moment ago, or never tracked). Enumerate before signalling, always (tree.ts): read
+          // one table asynchronously, then signal. An unreadable `ps` still signals the leader's group and pid.
+          void readProcessTableAsync(100).then((table) => {
+            if (child.exitCode !== null || child.signalCode !== null) return;
+            absorb(table);
+            sweep(table);
+          }, () => undefined);
         },
         get pid(): number | null {
           return child.pid ?? null;
@@ -320,64 +324,6 @@ export function createForkSpawner(): ChildSpawner {
       };
     },
   };
-}
-
-/**
- * What the **parent** can see of the recording once the child is gone (AC-16 case (b)).
- *
- * On a deadline kill the child does not get to report: it was signalled. But a playable file may
- * still be sitting in scratch — Chromium writes the webm incrementally, so a killed recorder often
- * leaves a readable prefix. Reporting that as `UNAVAILABLE` would throw away real evidence;
- * reporting it as complete would be the salvaged prefix presented as a whole video that ADR-002
- * §17.7 item 1 exists to stop. So the parent looks, and reports it as what it is: `PENDING`, and
- * partial because the ordered stop did not complete.
- *
- * `orderlyClose` is passed in rather than inferred from the file, and that is the whole point: the
- * file cannot tell you how the recorder ended, which is why a mutation that reads partiality from
- * playability instead of from the stop observation is wrong.
- *
- * **`attempted` is `false` when the directory holds nothing**, and that is deliberate rather than
- * convenient. The child observes the *recorder*; the parent, on this path, observes only the
- * *directory*, because the process that could have said anything about the recorder is gone. With
- * no file at all the parent has nothing to have failed, so `evidenceFor` answers `UNAVAILABLE`,
- * which is what AC-16 case (c) asks for — and §17.3's "a recording that does not exist is not a
- * partial one" follows from it rather than being a second rule.
- */
-async function observeScratchRecording(
-  scratchPath: string,
-  orderlyClose: boolean,
-): Promise<RecordingObservation> {
-  const nothing: RecordingObservation = {
-    attempted: false,
-    path: null,
-    bytes: null,
-    header: false,
-    error: null,
-    orderlyClose,
-  };
-  const videoDir = join(scratchPath, SCRATCH_SUBDIRECTORIES.video);
-  try {
-    const entries = await readdir(videoDir);
-    let best: { path: string; bytes: number } | null = null;
-    for (const entry of entries) {
-      const path = join(videoDir, entry);
-      const stats = await stat(path);
-      if (!stats.isFile()) continue;
-      if (best === null || stats.size > best.bytes) best = { path, bytes: stats.size };
-    }
-    if (best === null) return nothing;
-    const head = await readFile(best.path);
-    return {
-      attempted: true,
-      path: best.path,
-      bytes: best.bytes,
-      header: hasWebmHeader(head.subarray(0, 4)),
-      error: null,
-      orderlyClose,
-    };
-  } catch {
-    return nothing;
-  }
 }
 
 function childEnvironment(
@@ -399,18 +345,6 @@ function childEnvironment(
   return env;
 }
 
-class LaunchFailure extends Error {
-  readonly failureKind: string;
-
-  constructor(failureKind: string, message: string) {
-    super(message);
-    this.name = 'LaunchFailure';
-    this.failureKind = failureKind;
-  }
-}
-
-export { LaunchFailure };
-
 /**
  * Builds the real launcher.
  *
@@ -423,186 +357,11 @@ export function createChildBrowserLauncher(options: ChildLauncherOptions): Brows
   const parentEnv = options.parentEnv ?? process.env;
 
   return {
-    async launch(launchOptions: LaunchOptions): Promise<BrowserSession> {
-      if(launchOptions.observed) return launchObservedChild(options,launchOptions,spawner,modulePath,parentEnv,stopTimeoutMs);
-      // Chromium's temp directory has to exist before it is pointed at (AC-22).
-      mkdirSync(join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), { recursive: true });
-
-      const child = spawner.spawn({
-        modulePath,
-        // Empty, always. Nothing about the job is visible in a process listing (AC-21).
-        args: [],
-        env: childEnvironment(parentEnv, launchOptions.scratchPath),
-      });
-
-      // Wired **before** the launch message, so output produced while the browser is still
-      // starting — the failure mode most worth seeing — is captured rather than lost or inherited.
-      const relay = attachOutputRelay(child, launchOptions);
-
-      const inbox = createInbox(child);
-
-      child.send({
-        kind: 'launch',
-        protocolVersion: PROTOCOL_VERSION,
-        runId: launchOptions.scratchPath,
-        browser: launchOptions.browser,
-        viewport: launchOptions.viewport,
-        recording: options.recording,
-        seekOriginCalibrationMs: options.seekOriginCalibrationMs,
-        scratchPath: launchOptions.scratchPath,
-        // Passed on. The parent enforces it; the child structures itself so it can be stopped.
-        totalRuntimeMs: launchOptions.totalRuntimeMs,
-      });
-
-      const ready = await inbox.awaitReady(options.launchTimeoutMs);
-      if (ready.kind !== 'ready') {
-        // The launch-failure path is one of AC-11a's six: the tree goes, not just the fork.
-        child.kill();
-        relay.close();
-        relay.release();
-        throw new LaunchFailure(ready.failureKind, ready.message);
-      }
-
-      /**
-       * Whether the ordered stop completed within the grace.
-       *
-       * `null` until a stop is ordered. Written **before** the group signal, which is the whole
-       * of ADR-002 §17.7 item 1: after the tree is gone there is nothing left to observe, and the
-       * file cannot answer the question because playability and completeness are different facts.
-       */
-      let orderedStopCompleted: boolean | null = null;
-      /** Set before the signal too, so the report names the cause rather than the symptom. */
-      let killReason: SessionKillReason | null = null;
-
-      /**
-       * The ordered stop, run **once** and awaited by everyone who asks for it.
-       *
-       * Sharing the promise rather than returning early on a flag is load-bearing, not tidiness.
-       * The child sends its `result` *before* it exits, so `execute`'s awaited result resolves
-       * while the first caller — the deadline's `kill` — is still inside `awaitExit`. A second
-       * caller that returned immediately would read `orderedStopCompleted` before the exit that
-       * sets it, conclude the ordered stop had not completed, and report a cleanly flushed
-       * recording as `partial: true`. Found by the real-Chromium tier, which is the only place
-       * the two callers actually overlap.
-       */
-      const performStop = async (): Promise<void> => {
-        child.send({ kind: 'stop' });
-        const exited = await inbox.awaitExit(stopTimeoutMs);
-        orderedStopCompleted = exited;
-        // Bounded, and then the group. A child that ignores `stop` cannot outlive its run, and
-        // signalling the fork alone would leave Chromium holding scratch and the video file.
-        if (!exited) child.kill();
-      };
-
-      let stopping: Promise<void> | null = null;
-      const stop = (): Promise<void> => {
-        stopping ??= performStop();
-        return stopping;
-      };
-
-      const finish = (): void => {
-        relay.close();
-        relay.release();
-      };
-
-      return {
-        adapter: createChildOwnedAdapter(),
-        async close(): Promise<void> {
-          await stop();
-          finish();
-        },
-        run: {
-          origin: {
-            browserStartedAt: new Date(ready.browserStartedAt),
-            startedAtMs: ready.startedAtMs,
-            // What the child actually applied, as it reported it. Read by the fixtures tier to
-            // assert its pin (story 10.32 AC-4); nothing on the reporting path consumes it.
-            calibrationOffsetMs: ready.calibrationOffsetMs,
-            // The readings are taken on the child's clock and pass through unchanged; the parent
-            // never re-derives an origin (ADR-002 §11.5).
-            clock: null,
-          },
-
-          async kill(reason: SessionKillReason): Promise<SessionKillOutcome> {
-            // Classified first, signalled second (AC-3). The abandoned-result path would
-            // otherwise report `run-fault` → `RUN_ERROR` for a condition §8.2 names as `TIMEOUT`,
-            // because a killed child exits without a result and the symptom is all that is left.
-            killReason ??= reason;
-            await stop();
-            return { orderedStopCompleted: orderedStopCompleted ?? false };
-          },
-
-          async execute(request: SessionRunRequest): Promise<SessionRunResult> {
-            const steps: ProtocolStep[] = request.steps.map((step) => ({
-              stepIndex: step.stepIndex,
-              operations: [...step.operations],
-            }));
-            inbox.forwardStepsTo(request.reporter);
-            child.send({
-              kind: 'execute',
-              protocolVersion: PROTOCOL_VERSION,
-              // Per-run and already clamped to the server maximum by the coordinator; the
-              // launcher's own value is the fallback for a caller that supplies none (AC-6).
-              stepTimeoutMs: launchOptions.stepTimeoutMs ?? options.stepTimeoutMs,
-              steps,
-              variables: request.variables,
-              secrets: request.secrets,
-              // Absent means no secret is bound to any origin, so no secret can be filled.
-              secretOrigins: request.secretOrigins ?? {},
-              maxFailureMessageLength:
-                request.maxFailureMessageLength ?? options.maxFailureMessageLength,
-            });
-            const result = await inbox.awaitResult();
-            await stop();
-
-            const recording = await settleRecording({
-              reported: result.recording,
-              sawChildResult: inbox.sawChildResult,
-              killed: killReason !== null,
-              orderedStopCompleted,
-              scratchPath: launchOptions.scratchPath,
-            });
-            finish();
-
-            return {
-              ok: killReason === null ? result.ok : false,
-              // §8.2 fixes the parent-enforced total timeout as `ERROR`/`TIMEOUT`, and the kind
-              // was decided before the signal rather than inferred from how the child exited. A
-              // drain kill is a different condition and takes the documented residual instead.
-              failureKind: killReason === null ? result.failureKind : KILL_FAILURE_KINDS[killReason],
-              failureMessage:
-                killReason === null ? result.failureMessage : KILL_MESSAGES[killReason],
-              recording,
-              observedHosts: result.observedHosts,
-            };
-          },
-        },
-      };
+    launch(launchOptions: LaunchOptions): Promise<BrowserSession> {
+      // The observed family is the only one (STUDIO-OBS-012A AC-3).
+      return launchObservedChild(options,launchOptions,spawner,modulePath,parentEnv,stopTimeoutMs);
     },
   };
-
-  /** Captures the child's two output streams behind the run's redactor and 10.6's caps (AC-8). */
-  function attachOutputRelay(child: ChildProcessHandle, launchOptions: LaunchOptions): OutputRelay {
-    const diagnostics = launchOptions.diagnostics;
-    const relay = createOutputRelay({
-      // With no sink configured the redaction is total and the output is discarded — but it is
-      // still *drained*, because a pipe nobody reads eventually blocks the writer, and a blocked
-      // browser child is the hang this story exists to prevent.
-      redactor: { redact: (text) => (diagnostics === undefined ? '' : diagnostics.redact(text)) },
-      // The same per-message cap 10.6 already applies to a retained log entry (AC-10).
-      maxLineLength: options.maxFailureMessageLength,
-      maxLines: MAX_CHILD_OUTPUT_LINES,
-      emit: (stream, line) => {
-        diagnostics?.write(stream, line);
-      },
-    });
-    // Synchronous, contained, and never awaited: a relay that could delay the run, the kill or the
-    // parent's control endpoints would be a new way to hang the process this story protects.
-    child.onOutput((stream, chunk) => {
-      relay.write(stream, chunk);
-    });
-    return relay;
-  }
 }
 
 /**
@@ -633,291 +392,43 @@ export const TOTAL_TIMEOUT_MESSAGE = KILL_MESSAGES['total-runtime'];
 /** Exported for the tests that assert the cancel's text on the serialized `FINAL` body. */
 export const CANCELLED_MESSAGE = KILL_MESSAGES.cancel;
 
-/**
- * Lines of child output one run may relay before the rest are dropped and counted (AC-8).
- *
- * A constant rather than a configuration key: AC-19's instruction is that this story must not
- * widen the surfaces it touches, and a chatty-browser bound is not something a deployment needs to
- * tune. It is deliberately larger than `maxLogEntries` (200) — the relay writes to the pod log, not
- * to the bounded report body, and the two have different consumers.
- */
-export const MAX_CHILD_OUTPUT_LINES = 500;
-
-/**
- * Reconciles what the child said about the recording with what the parent observed.
- *
- * Three inputs, one of which only exists for an instant:
- *
- * - the child's own report, when it lived long enough to make one;
- * - whether the parent's **ordered stop** completed within the grace, recorded before the signal;
- * - the scratch directory, which is all that is left when the child was killed.
- *
- * None of them is the outcome. `partial` is computed by `evidenceFor`/`partialFor` from
- * `orderlyClose` alone, and this function never sees an error code (ADR-002 §17.4).
- */
-async function settleRecording(input: {
-  readonly reported: SessionRecording;
-  readonly sawChildResult: boolean;
-  readonly killed: boolean;
-  readonly orderedStopCompleted: boolean | null;
-  readonly scratchPath: string;
-}): Promise<SessionRecording> {
-  if (!input.killed) return input.reported;
-
-  const orderly = input.orderedStopCompleted === true;
-
-  if (input.sawChildResult) {
-    // The child flushed and reported inside the grace. Its own file reading is better than a
-    // directory scan — but the completeness fact is the parent's, because the parent is the one
-    // that knows whether the stop it ordered finished.
-    return {
-      ...input.reported,
-      partial: input.reported.state === 'PENDING' ? !orderly : false,
-    };
-  }
-
-  // Killed without a word. Whatever is in scratch is the only evidence there is.
-  const observed = await observeScratchRecording(input.scratchPath, orderly);
-  const evidence = evidenceFor(observed);
-  return {
-    path: evidence.path,
-    bytes: evidence.bytes,
-    error: evidence.error,
-    state: evidence.state,
-    partial: evidence.partial,
-  };
-}
-
-type ReadyOutcome =
-  | {
-      readonly kind: 'ready';
-      readonly browserStartedAt: string;
-      readonly startedAtMs: number;
-      readonly calibrationOffsetMs: number | undefined;
-    }
-  | { readonly kind: 'failed'; readonly failureKind: string; readonly message: string };
-
-interface Inbox {
-  awaitReady(timeoutMs: number): Promise<ReadyOutcome>;
-  awaitResult(): Promise<Extract<ChildMessage, { kind: 'result' }>>;
-  awaitExit(timeoutMs: number): Promise<boolean>;
-  forwardStepsTo(reporter: SessionRunRequest['reporter']): void;
-  /**
-   * Whether the child actually reported, as opposed to the abandoned result synthesized on exit.
-   *
-   * The difference decides who can speak about the recording: a child that reported inspected its
-   * own file, and one that was signalled left only a scratch directory for the parent to look in.
-   */
-  readonly sawChildResult: boolean;
-}
-
-/**
- * Demultiplexes the child's messages.
- *
- * Step events are forwarded **synchronously** to 10.6's `RunReporter` as they arrive, which is
- * what keeps AC-16's property true across the process boundary: the reporter's deliveries are
- * detached, so a slow or failing callback cannot block, delay or alter a step — and now it cannot
- * do so from the other side of a pipe either.
- */
-function createInbox(child: ChildProcessHandle): Inbox {
-  let reporter: SessionRunRequest['reporter'] | null = null;
-
-  /**
-   * Delivers one step event, and swallows whatever the reporter does with it.
-   *
-   * This runs inside the IPC `message` handler, so a reporter that throws would surface as an
-   * uncaught exception **in the parent** — the process serving `/health`, `/ready` and
-   * `/v1/validate` for every other request. AC-15's "a slow or failing callback cannot block,
-   * delay or alter a step" has to keep holding across the process boundary, and a callback that
-   * kills the parent has done considerably worse than delay a step.
-   */
-  const forward = (deliver: () => void): void => {
-    try {
-      deliver();
-    } catch {
-      // The reporter's problem, not the run's. The readings are already what the child observed.
-    }
-  };
-  let onReady: ((outcome: ReadyOutcome) => void) | null = null;
-  let onResult: ((message: Extract<ChildMessage, { kind: 'result' }>) => void) | null = null;
-  let pendingReady: ReadyOutcome | null = null;
-  let pendingResult: Extract<ChildMessage, { kind: 'result' }> | null = null;
-  let sawChildResult = false;
-  let exited = false;
-  const exitListeners: (() => void)[] = [];
-
-  child.onExit(() => {
-    exited = true;
-    for (const listener of exitListeners.splice(0)) listener();
-    const failure: ReadyOutcome = {
-      kind: 'failed',
-      failureKind: 'browser-launch',
-      message: 'The browser child process exited before it reported a start.',
-    };
-    if (pendingReady === null) {
-      pendingReady = failure;
-      onReady?.(failure);
-    }
-    if (pendingResult === null) {
-      // Recorded, not merely delivered. A child that died *before* anyone awaited its result
-      // would otherwise leave `awaitResult` with nothing to resolve and the run would hang until
-      // the drain deadline — a runner that never reports is the state a reaper exists to clean up.
-      const abandoned: Extract<ChildMessage, { kind: 'result' }> = {
-        kind: 'result',
-        ok: false,
-        executorVersion: '',
-        failureKind: 'run-fault',
-        failureMessage: 'The browser child process exited before it reported a result.',
-        recording: {
-          path: null,
-          bytes: null,
-          error: null,
-          state: 'UNAVAILABLE',
-          // Not a claim about the file: `settleRecording` looks in scratch on the kill path,
-          // where a killed recorder often leaves a playable prefix (ADR-002 §17.7 item 1).
-          partial: false,
-        },
-        observedHosts: [],
-      };
-      pendingResult = abandoned;
-      onResult?.(abandoned);
-      onResult = null;
-    }
-  });
-
-  child.onMessage((value: unknown) => {
-    const message = parseChildMessage(value);
-    if (message === null) return;
-    switch (message.kind) {
-      case 'ready': {
-        const outcome: ReadyOutcome = {
-          kind: 'ready',
-          browserStartedAt: message.browserStartedAt,
-          startedAtMs: message.startedAtMs,
-          calibrationOffsetMs: message.calibrationOffsetMs,
-        };
-        pendingReady ??= outcome;
-        onReady?.(outcome);
-        return;
-      }
-      case 'step-started':
-        forward(() => {
-          reporter?.stepStarted({
-            stepIndex: message.stepIndex,
-            startedAtMs: message.startedAtMs,
-          });
-        });
-        return;
-      case 'step-finished':
-        forward(() => {
-          reporter?.stepFinished({
-            stepIndex: message.stepIndex,
-            status: message.status,
-            startedAtMs: message.startedAtMs,
-            finishedAtMs: message.finishedAtMs,
-            durationMs: message.durationMs,
-            failure: message.failure,
-          });
-        });
-        return;
-      case 'result':
-        sawChildResult = true;
-        if (pendingReady === null) {
-          // A result before `ready` is a launch that never happened.
-          pendingReady = {
-            kind: 'failed',
-            failureKind: message.failureKind ?? 'browser-launch',
-            message: message.failureMessage ?? 'The browser did not start.',
-          };
-          onReady?.(pendingReady);
-        }
-        pendingResult ??= message;
-        onResult?.(message);
-        return;
-    }
-  });
-
-  return {
-    get sawChildResult(): boolean {
-      return sawChildResult;
-    },
-
-    forwardStepsTo(next: SessionRunRequest['reporter']): void {
-      reporter = next;
-    },
-
-    awaitReady(timeoutMs: number): Promise<ReadyOutcome> {
-      if (pendingReady !== null) return Promise.resolve(pendingReady);
-      return new Promise<ReadyOutcome>((resolve) => {
-        const timer = setTimeout(() => {
-          onReady = null;
-          resolve({
-            kind: 'failed',
-            failureKind: 'browser-launch',
-            message: `The browser did not start within ${String(timeoutMs)}ms.`,
-          });
-        }, timeoutMs);
-        onReady = (outcome): void => {
-          clearTimeout(timer);
-          onReady = null;
-          resolve(outcome);
-        };
-      });
-    },
-
-    awaitResult(): Promise<Extract<ChildMessage, { kind: 'result' }>> {
-      if (pendingResult !== null) return Promise.resolve(pendingResult);
-      return new Promise<Extract<ChildMessage, { kind: 'result' }>>((resolve) => {
-        onResult = (message): void => {
-          onResult = null;
-          resolve(message);
-        };
-      });
-    },
-
-    awaitExit(timeoutMs: number): Promise<boolean> {
-      if (exited) return Promise.resolve(true);
-      return new Promise<boolean>((resolve) => {
-        const timer = setTimeout(() => {
-          resolve(false);
-        }, timeoutMs);
-        exitListeners.push(() => {
-          clearTimeout(timer);
-          resolve(true);
-        });
-      });
-    },
-  };
-}
-
 /** Observed family uses the same confined spawner, recorded child and bounded process-group stop. */
 async function launchObservedChild(options: ChildLauncherOptions, launchOptions: LaunchOptions, spawner: ChildSpawner, modulePath: string, parentEnv: Readonly<Record<string, string | undefined>>, stopTimeoutMs: number): Promise<BrowserSession> {
     const observed = launchOptions.observed;
     demand(observed);
     const { job, admission, policy } = observed, b = job.binding;
-    const execute: Execute2 = { kind: 'execute', protocolVersion: 2, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, profileHash: hashObserved(b.requiredProfile), configurationHash: b.configurationHash, waitStrategy: job.configuration.waitStrategy, stepTimeoutMs: launchOptions.stepTimeoutMs ?? job.runtime.stepTimeoutMs, steps: job.artifact.steps, guards: job.artifact.guards, bindings: job.artifact.replayPolicy.bindings.map(x => ({ bindingId: x.bindingId, producer: x.producer, recipe: x.recipe, origin: x.sourceOrigin })), transfers: job.artifact.replayPolicy.transfers, inputs: job.artifact.inputRecipes.map(i => { const v = job.inputs.find(x => x.inputId === i.inputId); demand(v); return { inputId: i.inputId, stepId: i.stepId, kind: i.kind, intendedSlot: i.intendedSlot, value: v.value }; }) };
-    validateObservedExecute(execute, b.scope);
-    const launch: Launch2 = { kind: 'launch', protocolVersion: 2, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, admission, profile: b.requiredProfile, build: b.requiredBuild, scopeHash: b.scopeHash, configurationHash: b.configurationHash, browser: 'chromium', viewport: job.configuration.viewport, recording: job.recording, seekOriginCalibrationMs: options.seekOriginCalibrationMs, scratchPath: launchOptions.scratchPath, totalRuntimeMs: launchOptions.totalRuntimeMs, accountHandle: job.accountHandle, policy };
-    validateObserved('replay-ipc#/definitions/Launch2', launch, OBSERVED_LIMITS.launch);
+    const launch: Launch3 = structuredClone({ kind: 'launch', protocolVersion: 3, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, admission, profile: b.requiredProfile, build: b.requiredBuild, scopeHash: b.scopeHash, configurationHash: b.configurationHash, browser: 'chromium', viewport: job.configuration.viewport, recording: job.recording, seekOriginCalibrationMs: options.seekOriginCalibrationMs, scratchPath: launchOptions.scratchPath, totalRuntimeMs: launchOptions.totalRuntimeMs, scope: b.scope, policy });
+    validateObserved('replay-ipc#/definitions/Launch3', launch, OBSERVED_LIMITS.launch);
+
+    const freezeLaunch=(value:unknown):void=>{if(value&&typeof value==='object'){for(const child of Object.values(value))freezeLaunch(child);Object.freeze(value);}};freezeLaunch(launch);
+    const execute: Execute3 = structuredClone({ kind: 'execute', protocolVersion: 3, mode: 'observed', runId: b.executionId, attemptId: b.attemptId, profileHash: hashObserved(b.requiredProfile), configurationHash: b.configurationHash, waitStrategy: job.configuration.waitStrategy, stepTimeoutMs: launchOptions.stepTimeoutMs ?? job.runtime.stepTimeoutMs, steps: job.artifact.steps, guards: job.artifact.guards, bindings: job.artifact.replayPolicy.bindings.map(x => ({ bindingId: x.bindingId, producer: x.producer, recipe: x.recipe, origin: x.sourceOrigin })), transfers: job.artifact.replayPolicy.transfers, inputs: job.artifact.inputRecipes.map(i => { if (i.kind === 'secretRef') { demand(i.provenance.kind === 'configuration'); return { inputId: i.inputId, stepId: i.stepId, kind: 'secretRef' as const, intendedSlot: 'fill.value' as const, referenceName: i.provenance.referenceName }; } const v = job.inputs.find(x => x.inputId === i.inputId); demand(v); return { inputId: i.inputId, stepId: i.stepId, kind: i.kind === 'destination' ? 'destination' : 'nonsecretText', intendedSlot: i.intendedSlot, value: v.value }; }), secrets: job.secrets, secretOrigins: job.secretOrigins, ...(job.artifact.learnedPlan.bindings.some(binding=>binding.consumers.length===0)?{retainedArtifact:job.artifact}:{}) });
+    validateObservedExecute(execute, b.scope, launch);
     mkdirSync(join(launchOptions.scratchPath, SCRATCH_SUBDIRECTORIES.temp), { recursive: true });
+    secureScratchDirectory(launchOptions.scratchPath);
+    const videoRegistry=createAppVideoRegistry(launchOptions.scratchPath);
     const env = childEnvironment(parentEnv, launchOptions.scratchPath);
     for (const key of ['STUDIO_RUNNER_OBSERVED_CATALOG_FILE', 'STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST'])
         if (parentEnv[key])
             env[key] = parentEnv[key] ?? '';
     demand(!launchOptions.signal?.aborted,'CANCELLED');
+    const runtimeDeadlineEpochMs=Math.min(Date.now()+launchOptions.totalRuntimeMs,Date.parse(admission.runDeadlineAt));
     const child = spawner.spawn({ modulePath, args: [], env });
-    // Drain and discard all raw output from BEFORE the first launch/account message.
+    child.trackTree?.();
+    // Drain and discard all raw output from BEFORE the first launch message.
     child.onOutput(() => undefined);
-    let result: Result2 | null = null, ready: Ready2 | null = null, exited = false, violation = false, executed = false, reporter: StepReporter | null = null, killReason: SessionKillReason | null = null;
+    let result: Result3 | null = null, ready: Ready3 | null = null, exited = false, violation = false, executed = false, reporter: StepReporter | null = null, killReason: SessionKillReason | null = null;
     const startedSteps = new Map<number, number>(), completedSteps = new Map<number, string>();
     const waiters = new Set<() => void>();
     const wake = (): void => { for (const f of waiters)
         f(); };
-    child.onExit(() => { exited = true; wake(); });
+    let videoOwner:AppVideoSnapshot|undefined,quiescent=false;
+    const sealVideo=():void=>{videoOwner??=sealAppVideoOwner(videoRegistry,launch,child.pid);};
+    const sealedVideo=():AppVideoSnapshot=>videoOwner??{kind:'absent'};
+    child.onExit(() => {sealVideo();exited = true; wake(); });
     child.onMessage(raw => {
         try {
             const kind = isRecord(raw) && typeof raw.kind === 'string' ? raw.kind : '';
-            const names: Readonly<Record<string, string>> = { ready: 'Ready2', result: 'Result2', 'step-started': 'StepStarted2', 'step-finished': 'StepFinished2' };
+            const names: Readonly<Record<string, string>> = { ready: 'Ready3', result: 'Result3', 'step-started': 'StepStarted3', 'step-finished': 'StepFinished3' };
             const name = names[kind];
             demand(name);
             const m = validateObserved<ObservedChildMessage>('replay-ipc#/definitions/' + name, raw, OBSERVED_LIMITS.result);
@@ -926,17 +437,19 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 demand(m.admissionId === admission.admissionId && m.profileHash === hashObserved(b.requiredProfile) && equalObserved(m.build, b.requiredBuild), 'PROFILE_MISMATCH');
             if (m.kind === 'ready') {
                 demand(!ready && !result);
-                validateObserved('replay-ipc#/definitions/Ready2', m, OBSERVED_LIMITS.ready);
+                validateObserved('replay-ipc#/definitions/Ready3', m, OBSERVED_LIMITS.ready);
                 ready = m;
             }
             else if (m.kind === 'result') {
                 demand(!result && (m.ok ? m.errorCode === null : m.errorCode !== null));
                 if (executed)
                     demand(completedSteps.size === execute.steps.length && (!m.ok || execute.steps.every(s => completedSteps.get(s.stepIndex) === 'PASS')));
+                const receipts=provenSecretUseAfterLoss(Object.keys(job.secrets),job.artifact.inputRecipes,job.artifact.steps,executed,completedSteps);
+                demand(!mergeSecretUseEvidence(receipts,m.secretUse,Object.keys(job.secrets)).contradictory);
                 result = m;
             }
             else {
-                validateObserved(m.kind === 'step-started' ? 'replay-ipc#/definitions/StepStarted2' : 'replay-ipc#/definitions/StepFinished2', m, OBSERVED_LIMITS.step);
+                validateObserved(m.kind === 'step-started' ? 'replay-ipc#/definitions/StepStarted3' : 'replay-ipc#/definitions/StepFinished3', m, OBSERVED_LIMITS.step);
                 demand(executed && reporter && job.artifact.steps[m.stepIndex]?.stepId === m.stepId && !result);
                 if (m.kind === 'step-started') {
                     demand(!startedSteps.has(m.stepIndex) && !completedSteps.has(m.stepIndex) && m.stepIndex === completedSteps.size);
@@ -946,7 +459,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
                 else {
                     demand(!completedSteps.has(m.stepIndex) && m.stepIndex === completedSteps.size);
                     demand(m.status === 'SKIPPED' ? !startedSteps.has(m.stepIndex) : startedSteps.get(m.stepIndex) === m.startedAtMs);
-                    demand(m.status === 'SKIPPED' ? m.startedAtMs === null && m.finishedAtMs === null && m.durationMs === null && m.errorCode === null : m.startedAtMs !== null && m.finishedAtMs !== null && m.durationMs !== null && m.finishedAtMs >= m.startedAtMs && Math.abs(m.durationMs - (m.finishedAtMs - m.startedAtMs)) < 0.001 && (m.status === 'PASS' ? m.errorCode === null : m.errorCode !== null));
+                    demand(m.status === 'SKIPPED' ? m.startedAtMs === null && m.finishedAtMs === null && m.durationMs === null && m.errorCode === null : m.startedAtMs !== null && m.finishedAtMs !== null && m.durationMs !== null && [m.startedAtMs,m.finishedAtMs,m.durationMs].every(n=>Number.isFinite(n)&&n>=0) && m.finishedAtMs >= m.startedAtMs && Math.abs(m.durationMs - (m.finishedAtMs - m.startedAtMs)) < 0.001 && (m.status === 'PASS' ? m.errorCode === null : m.errorCode !== null));
                     completedSteps.set(m.stepIndex, m.status);
                     reporter.stepFinished({ stepIndex: m.stepIndex, status: m.status, startedAtMs: m.startedAtMs, finishedAtMs: m.finishedAtMs, durationMs: m.durationMs, failure: m.errorCode });
                 }
@@ -955,6 +468,7 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
         }
         catch {
             violation = true;
+            sealVideo();
             child.kill();
             wake();
         }
@@ -969,49 +483,56 @@ async function launchObservedChild(options: ChildLauncherOptions, launchOptions:
         } }; const timer = setTimeout(() => { waiters.delete(check); resolve(false); }, Math.max(1, timeoutMs)); waiters.add(check); check(); });
     };
     let stopping: Promise<void> | null = null, ordered = false;
-    const performStop = async (): Promise<void> => { const requestedWhileLive=!exited;if (requestedWhileLive)
-        child.send({ kind: 'stop' }); ordered = requestedWhileLive&&await wait(() => exited, stopTimeoutMs); if (!ordered)
-        child.kill(); };
+    const wasOrderly=(final:Result3|null):boolean=>quiescent&&final!==null&&final.recording.state==='PENDING'&&!final.recording.partial;
+    const performStop = async (): Promise<void> => {sealVideo();const end=Date.now()+stopTimeoutMs,requestedWhileLive=!exited;if (requestedWhileLive)
+        child.send({ kind: 'stop' }); const withinGrace=requestedWhileLive&&await wait(() => exited,Math.max(1,end-Date.now()));if(!withinGrace)child.kill();
+        // stopTimeoutMs is the ordered-close grace; the same existing cleanup bound caps
+        // a separate post-signal reaping wait. It grants no action/runtime/admission time.
+        quiescent=await child.quiesce?.(stopTimeoutMs)??false;
+        ordered=withinGrace&&wasOrderly(result);
+    };
     const stop = (): Promise<void> => { stopping ??= performStop(); return stopping; };
     const cancelLaunch=():void=>{killReason??='cancel';void stop();};
     launchOptions.signal?.addEventListener('abort',cancelLaunch,{once:true});
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Cancellation can arrive after the pre-spawn check.
     if(launchOptions.signal?.aborted)cancelLaunch();else child.send(launch);
-    await wait(() => ready !== null || result !== null || exited || violation, Math.min(options.launchTimeoutMs, Date.parse(admission.startDeadlineAt) - Date.now()));
+    // Read before stop(): performStop kills the child, so `exited` is true on every path after it.
+    // false means the wait timer expired with no ready, result, exit or violation (012A R8-ADJ-2).
+    const settled = await wait(() => ready !== null || result !== null || exited || violation, Math.min(options.launchTimeoutMs, Date.parse(admission.startDeadlineAt)-Date.now(),runtimeDeadlineEpochMs-Date.now()));
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
     if (!ready || violation || launchOptions.signal?.aborted) {
         await stop();
         launchOptions.signal?.removeEventListener('abort',cancelLaunch);
-        const final=result as Result2|null;
-        const recording=await settleRecording({reported:final?{...final.recording,error:final.recording.errorCode}:{path:null,bytes:null,error:null,state:'UNAVAILABLE',partial:false},sawChildResult:final!==null,killed:!final,orderedStopCompleted:ordered,scratchPath:launchOptions.scratchPath});
+        const final=result as Result3|null;
+        const recording=observeOwnedAppRecording(sealedVideo(),final?.recording.path,wasOrderly(final),quiescent);
+        // A reason the child sent wins. Otherwise: an abort is CANCELLED, an expired pre-Ready wait is
+        // TIMEOUT, and an exit or protocol violation before Ready is INTERNAL_ERROR (R8-ADJ-2).
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- Abort/IPC callbacks settle independently of the launch await.
-        throw new ObservedPreReadyFailure(final?.errorCode??(launchOptions.signal?.aborted?'CANCELLED':'ACCOUNT_OR_LAUNCH_UNKNOWN'),await confineObservedRecording(recording,launchOptions.scratchPath));
+        throw new ObservedPreReadyFailure(final?.errorCode??(launchOptions.signal?.aborted?'CANCELLED':!settled?'TIMEOUT':'INTERNAL_ERROR'),recording);
     }
     launchOptions.signal?.removeEventListener('abort',cancelLaunch);
-    const origin = ready as Ready2;
-    return { adapter: createChildOwnedAdapter(), close: stop, run: { origin: { browserStartedAt: new Date(origin.browserStartedAt), startedAtMs: origin.startedAtMs, clock: null, ...(origin.calibrationOffsetMs === null ? {} : { calibrationOffsetMs: origin.calibrationOffsetMs }) }, async kill(reason) { killReason ??= reason; await stop(); return { orderedStopCompleted: ordered }; }, async execute(request) {
+    const origin = ready as Ready3;
+    return { close: stop, run: { origin: { browserStartedAt: new Date(origin.browserStartedAt), startedAtMs: origin.startedAtMs, ...(origin.calibrationOffsetMs === null ? {} : { calibrationOffsetMs: origin.calibrationOffsetMs }) }, async kill(reason) { killReason ??= reason; await stop(); return { orderedStopCompleted: ordered }; }, async execute(request) {
                 demand(!executed && !result && !violation);
+                // A void/backpressured/disconnected send cannot prove non-delivery. Mark the
+                // private attempt before entering transport; missing child receipts stay unknown.
                 executed = true;
                 reporter = request.reporter;
                 child.send(execute);
-                await wait(() => result !== null || exited || violation, Math.min(launchOptions.totalRuntimeMs, Date.parse(admission.runDeadlineAt) - Date.now()));
+                await wait(() => result !== null || exited || violation, runtimeDeadlineEpochMs-Date.now());
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
-                if (!result && !exited) {
+                if (!result && !exited && !violation) {
                     killReason ??= 'total-runtime';
                     await stop();
                 }
                 else
                     await stop();
-                const final = result as Result2 | null;
-                const recording = await settleRecording({ reported: final ? { ...final.recording, error: final.recording.errorCode } : { path: null, bytes: null, error: null, state: 'UNAVAILABLE', partial: false }, sawChildResult: final !== null, killed: killReason !== null, orderedStopCompleted: ordered, scratchPath: launchOptions.scratchPath });
+                const final = result as Result3 | null;
+                const usage=mergeSecretUseEvidence(provenSecretUseAfterLoss(Object.keys(job.secrets),job.artifact.inputRecipes,job.artifact.steps,executed,completedSteps),final?.secretUse,Object.keys(job.secrets));
+                const recording=observeOwnedAppRecording(sealedVideo(),final?.recording.path,wasOrderly(final),quiescent);
                 // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition -- IPC callbacks and stop may change this state while the parent awaits.
-                return { ok: killReason === null && !violation && final?.ok === true, failureKind: killReason ? KILL_FAILURE_KINDS[killReason] : final?.errorCode === 'ASSERTION_FAILED' ? 'step' : final?.ok ? null : 'run-fault', failureMessage: killReason ? KILL_MESSAGES[killReason] : final?.errorCode ?? (violation ? 'INVALID_CONTRACT' : null), recording: await confineObservedRecording(recording,launchOptions.scratchPath), observedHosts: [] };
+                return { ok: killReason === null && !violation && final?.ok === true, failureKind: killReason ? KILL_FAILURE_KINDS[killReason] : final?.errorCode === 'ASSERTION_FAILED' ? 'step' : final?.ok ? null : 'run-fault', failureMessage: killReason ? KILL_MESSAGES[killReason] : final?.errorCode ?? (violation ? 'INVALID_CONTRACT' : null), recording, observedHosts: [], secretUse: usage.facts, ...(final?.detail ? {detail: final.detail} : {}) };
             } } };
 }
 
 /** A child-supplied path is never an unrestricted file-upload capability. */
-async function confineObservedRecording(recording:SessionRecording,scratchPath:string):Promise<SessionRecording>{
-    if(recording.path===null)return recording;
-    try{const root=await realpath(scratchPath),file=await realpath(recording.path);if(!file.startsWith(root+sep)||!(await stat(file)).isFile())throw new Error('RECORDING_FAILED');return {...recording,path:file};}
-    catch{return {path:null,bytes:null,error:'RECORDING_FAILED',state:'FAILED',partial:false};}
-}

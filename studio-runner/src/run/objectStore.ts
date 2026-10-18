@@ -35,6 +35,7 @@
  * and the diagnostic says which one happened.
  */
 import { createReadStream } from 'node:fs';
+import type {VerifiedVideoFile} from './appVideoOwnership.js';
 import { mkdir, rename, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve, sep } from 'node:path';
 import { pipeline } from 'node:stream/promises';
@@ -46,6 +47,8 @@ export type ObjectBody =
       readonly kind: 'file';
       /** Absolute path inside the per-run scratch directory. Streamed, never read whole. */
       readonly path: string;
+      /** Trusted observed exact-file opener; no public request/job property. */
+      readonly verifiedFile?:VerifiedVideoFile;
     }
   | {
       readonly kind: 'bytes';
@@ -137,7 +140,7 @@ export function createLocalObjectStore(options: LocalObjectStoreOptions): Object
         if (request.body.kind === 'bytes') {
           await writeFile(staging, request.body.data, { signal: request.signal });
         } else {
-          await pipeline(createReadStream(request.body.path), createWriteStream(staging), { signal: request.signal });
+          await pipeline(request.body.verifiedFile?.open()??createReadStream(request.body.path), createWriteStream(staging), { signal: request.signal });
         }
         await rename(staging, target);
       } catch (error) {

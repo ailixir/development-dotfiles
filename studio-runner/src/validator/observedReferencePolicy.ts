@@ -3,10 +3,10 @@ import schemasJson from './observedSchemas.json' with { type: 'json' };
 import { parseWireJson } from '../guided/json.js';
 import type { BuildIdentity, Profile, TrustedPolicy, Scope } from '../executor/observedOperations.js';
 import type { ObservationApplicationPolicy, ObservationRule } from '../run/observationTypes.js';
-export const OBSERVED_LIMITS = Object.freeze({ artifact: 1048576, policy: 524288, basis: 6291456, validation: 8388608, verdict: 65536, job: 4194304, launch: 131072, execute: 2097152, ready: 4096, step: 8192, result: 65536, account: 8192, trustedPolicy: 65536, inputs: 262144 });
-export type ObservedErrorCode = 'INVALID_CONTRACT' | 'EVIDENCE_MISMATCH' | 'OPERATION_MISMATCH' | 'REFERENCE_MISMATCH' | 'PROFILE_MISMATCH' | 'LIMIT_EXCEEDED' | 'AUTHORIZATION_EXPIRED' | 'ACCOUNT_UNAVAILABLE' | 'ACCOUNT_UNKNOWN' | 'POLICY_REFUSED' | 'TARGET_DRIFT' | 'READ_REFUSED' | 'REFERENCE_REFUSED' | 'ASSERTION_FAILED' | 'CANCELLED' | 'TIMEOUT' | 'OUTCOME_UNKNOWN' | 'INTERNAL_ERROR';
+export const OBSERVED_LIMITS = Object.freeze({ artifact: 1048576, policy: 524288, basis: 6291456, validation: 8388608, verdict: 65536, job: 4194304, launch: 131072, execute: 2097152, ready: 4096, step: 8192, result: 65536, trustedPolicy: 65536, inputs: 262144 });
+export type ObservedErrorCode = 'INVALID_CONTRACT' | 'EVIDENCE_MISMATCH' | 'OPERATION_MISMATCH' | 'REFERENCE_MISMATCH' | 'PROFILE_MISMATCH' | 'LIMIT_EXCEEDED' | 'AUTHORIZATION_EXPIRED' | 'POLICY_REFUSED' | 'TARGET_DRIFT' | 'READ_REFUSED' | 'REFERENCE_REFUSED' | 'ASSERTION_FAILED' | 'CANCELLED' | 'TIMEOUT' | 'OUTCOME_UNKNOWN' | 'INTERNAL_ERROR' | 'LOGIN_REQUIRED' | 'PASSWORD_CONTROL_READ_REFUSED';
 export class ObservedRefusal extends Error {
-    constructor(readonly code: ObservedErrorCode) { super(code); this.name = 'ObservedRefusal'; }
+    constructor(readonly code: ObservedErrorCode, readonly reason?: string, readonly noEffect=false) { super(code); this.name = 'ObservedRefusal'; }
 }
 export function demand(value: unknown, code: ObservedErrorCode = 'INVALID_CONTRACT'): asserts value { if (!value)
     throw new ObservedRefusal(code); }
@@ -38,6 +38,7 @@ export function boundedObserved(value: unknown, maxBytes: number): number {
     catch {
         throw new ObservedRefusal('INVALID_CONTRACT');
     }
+    demand(typeof json === 'string');
     demand(Buffer.byteLength(json, 'utf8') <= maxBytes, 'LIMIT_EXCEEDED');
     let nodes = 0;
     function walk(v: unknown, depth: number): void {
@@ -80,8 +81,12 @@ interface Schema {
     enum?: unknown[];
     type?: string | string[];
     properties?: Record<string, Schema>;
+    patternProperties?: Record<string, Schema>;
+    maxProperties?: number;
     required?: string[];
-    additionalProperties?: boolean;
+    additionalProperties?: boolean | Schema;
+    propertyNames?: Schema;
+    minProperties?: number;
     items?: Schema;
     minItems?: number;
     maxItems?: number;
@@ -101,10 +106,11 @@ interface Schema {
     else?: Schema;
     contains?: Schema;
     definitions?: Record<string, Schema>;
+    dependencies?: Record<string, Schema | string[] | boolean>;
 }
 const schemas = schemasJson as Record<string, Schema>;
 const schemaById = new Map(Object.values(schemas).map(s => [s.$id, s]));
-const base = 'https://checks.citi.example/contracts/observed/v2/';
+const base = 'https://checks.citi.example/contracts/observed/v3/';
 function resolve(reference: string, baseId: string): {
     schema: Schema;
     baseId: string;
@@ -124,16 +130,29 @@ function resolve(reference: string, baseId: string): {
     demand(isRecord(value));
     return { schema: value as Schema, baseId: url.href };
 }
-const supportedKeywords = new Set(['$schema', '$id', '$ref', 'title', 'description', 'default', 'const', 'enum', 'type', 'properties', 'required', 'additionalProperties', 'items', 'minItems', 'maxItems', 'uniqueItems', 'minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'format', 'oneOf', 'anyOf', 'allOf', 'not', 'if', 'then', 'else', 'contains', 'definitions']);
+const supportedKeywords = new Set(['$schema', '$id', '$ref', 'title', 'description', 'default', 'const', 'enum', 'type', 'properties', 'patternProperties', 'maxProperties', 'minProperties', 'propertyNames', 'required', 'additionalProperties', 'items', 'minItems', 'maxItems', 'uniqueItems', 'minLength', 'maxLength', 'minimum', 'maximum', 'pattern', 'format', 'oneOf', 'anyOf', 'allOf', 'not', 'if', 'then', 'else', 'contains', 'definitions', 'dependencies']);
 function audit(s: Schema, baseId: string, visiting: Set<Schema>): void {
     demand(!visiting.has(s));
     visiting.add(s);
     demand(Object.keys(s).every(key => supportedKeywords.has(key)));
+    if (s.patternProperties) {
+        demand(isRecord(s.patternProperties) && Object.keys(s.patternProperties).length === 1 && Object.hasOwn(s.patternProperties, '^[A-Za-z0-9_.-]{1,64}$'));
+    }
+    if (s.maxProperties !== undefined) demand(Number.isSafeInteger(s.maxProperties) && s.maxProperties >= 0 && s.maxProperties <= 100);
+    if (s.minProperties !== undefined) demand(Number.isSafeInteger(s.minProperties) && s.minProperties >= 0);
+    if (s.format !== undefined) demand(['date-time','uri','uuid'].includes(s.format));
+    if (s.dependencies !== undefined) {
+        demand(isRecord(s.dependencies));
+        for (const dependency of Object.values(s.dependencies)) {
+            if (Array.isArray(dependency)) demand(dependency.every(key => typeof key === 'string') && new Set(dependency).size === dependency.length);
+            else if (typeof dependency !== 'boolean') audit(dependency, baseId, visiting);
+        }
+    }
     if (s.$ref) {
         const resolved = resolve(s.$ref, baseId);
         audit(resolved.schema, resolved.baseId, visiting);
     }
-    for (const child of [...Object.values(s.properties ?? {}), ...(s.oneOf ?? []), ...(s.anyOf ?? []), ...(s.allOf ?? []), s.items, s.not, s.if, s.then, s.else, s.contains])
+    for (const child of [...Object.values(s.properties ?? {}), ...Object.values(s.patternProperties ?? {}), ...(s.oneOf ?? []), ...(s.anyOf ?? []), ...(s.allOf ?? []), s.propertyNames, typeof s.additionalProperties === 'object' ? s.additionalProperties : undefined, s.items, s.not, s.if, s.then, s.else, s.contains])
         if (child)
             audit(child, baseId, visiting);
     visiting.delete(s);
@@ -179,6 +198,7 @@ function matches(s: Schema, value: unknown, baseId: string): boolean {
         const length = Array.from(value).length;
         if (s.minLength !== undefined && length < s.minLength || s.maxLength !== undefined && length > s.maxLength || s.pattern && !new RegExp(s.pattern, 'u').test(value))
             return false;
+        if (s.format === 'uuid' && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(value)) return false;
         if (s.format === 'date-time' && !dateTime(value))
             return false;
         if (s.format === 'uri') {
@@ -203,9 +223,18 @@ function matches(s: Schema, value: unknown, baseId: string): boolean {
             return false;
     }
     if (isRecord(value)) {
+        for (const [key,dependency] of Object.entries(s.dependencies ?? {})) if (Object.hasOwn(value,key)) {
+            if (Array.isArray(dependency) ? dependency.some(required => !Object.hasOwn(value,required)) : typeof dependency === 'boolean' ? !dependency : !matches(dependency,value,baseId)) return false;
+        }
+        if (s.minProperties !== undefined && Object.keys(value).length < s.minProperties) return false;
+        if (s.propertyNames && !Object.keys(value).every(key => matches(s.propertyNames ?? {}, key, baseId))) return false;
+        if (typeof s.additionalProperties === 'object' && Object.entries(value).some(([key, item]) => !Object.hasOwn(s.properties ?? {}, key) && !Object.entries(s.patternProperties ?? {}).some(([pattern]) => new RegExp(pattern, 'u').test(key)) && !matches(s.additionalProperties as Schema, item, baseId))) return false;
+        if (s.maxProperties !== undefined && Object.keys(value).length > s.maxProperties) return false;
+        const patterns = Object.entries(s.patternProperties ?? {}).map(([pattern, child]) => ({ expression: new RegExp(pattern, 'u'), child }));
+        for (const [key, entry] of Object.entries(value)) for (const pattern of patterns) if (pattern.expression.test(key) && !matches(pattern.child, entry, baseId)) return false;
         if (s.required?.some(key => !Object.hasOwn(value, key)))
             return false;
-        if (s.additionalProperties === false && Object.keys(value).some(key => !Object.hasOwn(s.properties ?? {}, key)))
+        if (s.additionalProperties === false && Object.keys(value).some(key => !Object.hasOwn(s.properties ?? {}, key) && !patterns.some(pattern => pattern.expression.test(key))))
             return false;
         for (const [key, child] of Object.entries(s.properties ?? {}))
             if (Object.hasOwn(value, key) && !matches(child, value[key], baseId))
@@ -253,7 +282,7 @@ export function projectMountedPolicy(value:unknown):TrustedPolicy {
 }
 export function validateTrustedPolicy(value: unknown, scope: Scope): TrustedPolicy {
     const policy = validateObserved<TrustedPolicy>('replay-ipc#/definitions/TrustedPolicy', value, OBSERVED_LIMITS.trustedPolicy);
-    for (const key of ['policyId', 'policyVersion', 'applicationId', 'environment', 'accountRef', 'entryPolicyId'] as const)
+    for (const key of ['policyId', 'policyVersion', 'applicationId', 'environment', 'entryPolicyId'] as const)
         demand(policy[key] === scope[key], 'POLICY_REFUSED');
     demand(equalObserved(policy.allowedOrigins, scope.allowedOrigins), 'POLICY_REFUSED');
     policy.allowedOrigins.forEach(canonicalOrigin);

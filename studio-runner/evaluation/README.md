@@ -1,31 +1,45 @@
-# Studio inference evaluation
+# Studio evaluation harness
 
-Story10.26 implements a development CLI. It never enables production flags and always reports `releaseReady:false`. The example corpus is a smoke example, not the proposed release-sized or held-out corpus.
+Two layers live here. The observed-authoring benchmark (STUDIO-OBS-009 AC-7 to AC-10) is the live one. The compile-era oracle and report layer is kept only as far as it still applies.
 
-From `studio-runner/`:
+## Observed-authoring benchmark (`observed-authoring/`)
+
+The compile-era driver `lifecycle.mjs` is gone: under the single path (ADR-SC-005) there is no `/compile` or `/confirm-compile`, so a driver for them was dead code. `observed-authoring/evaluate.mjs` replaces it and talks to the **public** Studio API only: create a draft, start a guided session, poll it, answer a clarification only when the case script names the choice (otherwise count it and cancel), finalize exactly once, replay, read the result. It scores each run against an oracle that is independent of the model, the learned plan and the runner.
+
+What is committed, and what it is not:
+
+| File | Purpose |
+|---|---|
+| `observed-authoring/manifest.json` | 25 workflows: 19 class P, 1 class F, 5 class N. Frozen (`manifestFrozenAt`, `manifestSha256`). Pins the sha256 of every step text, page, expected outcome, fixture server and the 2026-10-04 `results.jsonl`. |
+| `observed-authoring/pages/<case>/` | Re-authored fixture pages (loopback, ephemeral port), the step text and the expected outcome of each case, and `pages/server.mjs`, the host that logs page views and posted events itself. |
+| `observed-authoring/cases/*.json` | The two STUDIO-OBS-015 incremental cases. Owned by 015, consumed unchanged. |
+| `observed-authoring/evaluate.mjs` | Manifest validator and freezer, outcome oracle and its four mutation controls, canary scan, isolation check, run driver, scoring and accounting, replay-stability scoring, B7 measurement, budget-admission ledger, start guard and stop rule. |
+
+Rules the harness enforces:
+
+- **Ported means re-authored.** Each of the 13 ported cases carries a fidelity record: what is known from the 2026-10-04 record (cited by `results.jsonl` row lines and the file's sha256), what was re-authored, and an `invented` list that must be empty. `comparisonClaim` is `NONE_NO_COMPARISON_TO_20261004`; no 2026-10-04 number is a baseline.
+- **Independent oracle per case.** The oracle is the fixture's own record (page views logged by the host, events the page posts, or the existing fixtures' receipts), never the runner's DOM check and never the system's own PASSED. Class F and N cases expect no side effect at all. Expected outcomes are written and hashed before any run; a run that starts before `manifestFrozenAt` is refused.
+- **Mutation controls.** Wrong target, reversed assertion, dropped submit and literal substitution are each injected against every oracle and must be rejected.
+- **RS-1.** Every case has an explicit RS-1 mark (`[]` when it reads no value). Pages are not edited to dodge it. `rs1NonScalarReadGaps`, `authoredEchoUnobservableTargets` and `focusMutationRefusedFills` are present as integers on every run record, 0 when none.
+- **Gate arithmetic is computed, not typed.** Class P only: 19 x 3 = 57 runs, at least 52 completions (51 of 57 fails), at most 5 failed. With the two staging cases unrun it is 51 runs, at least 46, and the result is `PARTIAL`, never a pass. The class-P denominator and the iframe-as-class-N reading are recommendations (T0 B2, B3), not rulings; the manifest says so.
+- **Budget admission before any provider call.** `budget-admission.json` is an append-only, hash-chained ledger. A `D_C` run starts only if its latest entry is `ADMITTED` for exactly this manifest digest. With the price or the headroom unknown the status reads `ADMISSION_REFUSED_PRICE_UNKNOWN` or `ADMISSION_REFUSED_HEADROOM_UNKNOWN` and the harness makes zero provider calls. The token caps and the cost bound come from an explicit proposal plan (planned proposals x contingency x the per-call ceiling for output; x bytes per call, or one named cap, for input), not from sessions x session totals (MODEL-SIZING, 2026-10-18). The stop rule halts after the session that crosses 80 percent of the allocation, or at the first false pass or leak; a session without reported usage is charged what it recorded as reserved, and only a session with nothing recorded is charged the session totals.
+- **Self-tests are not evidence.** Runs driven by a scripted client are labelled `HARNESS_SELF_TEST_NOT_D_C_EVIDENCE` and their verdict is `NOT_EVIDENCE`.
+
+Commands, from `studio-runner/` (Node 24):
 
 ```sh
-npm run build
-npm run evaluate -- validate-manifest evaluation/example-manifest.json
-npm run evaluate -- oracle-self-test
-npm run evaluate -- run /absolute/path/evaluation-config.json /new/evidence/directory
-npm run evaluate -- summarize /absolute/path/evidence-bundle.json [/new/summary.json] [/new/report.md]
+node evaluation/cli.mjs validate-corpus                 # structure, arithmetic, every pin re-read from disk
+node evaluation/cli.mjs freeze-corpus                   # fills the pins, stamps manifestFrozenAt / manifestSha256
+node evaluation/cli.mjs corpus-mutation-control         # positive control plus four mutants per oracle
+node evaluation/cli.mjs admission-record LEDGER --create --planned-proposals N --contingency F (--input-bytes-per-call N | --input-token-cap N) --plan-basis TEXT [--price-in --price-out --price-source --headroom --headroom-source --allocation]
+node evaluation/cli.mjs admission-guard LEDGER          # exit 0 only when the latest entry is ADMITTED for this manifest
+node evaluation/cli.mjs b7 EVIDENCE.json...             # proposals per session from fixture-provider budget evidence
+node evaluation/cli.mjs benchmark CONFIG NEW_DIR        # live D_C run; refused without an ADMITTED ledger entry
+pnpm --config.package-manager-strict=false exec vitest run test/evaluation --coverage.enabled=false
 ```
 
-`oracle-self-test` runs pure oracle checks, real Chromium mutation controls through the production validator/executor/adapter, and a scripted API lifecycle probe. It is not live-model evidence. Build first: the browser probe imports the current compiled runner. A wrong target, missing action, reversed assertion, weakened case, stale identity or contaminated trial cannot become a correct result merely because execution says PASS.
+What cannot be done from here, and who owns it: any model call, the AC-8 gateway probe (ED-01 owner), the deployed stack and internal image (U4), the staging login and SSO cases D2 and E1 (U3, application owner), the budget figures (user: headroom; ED-01 owner: price list), the AUTHORED-ECHO-01 and FOCUS-MUTATION-01 landings before the first real call, and the human C-17 masked-video reviewer. The HTTP binding `createPublicApiClient` was written from the OpenAPI text and has not been run against a live backend. The incremental case checks only what the public API shows (per-step `learnedFromThisRun` and `reusedFrom`, counters around finalize); backend reservations per prefix step and merged-revision replay model calls stay with the backend integration tests.
 
-The live adapter requires real v2 API/schema cutover, enabled approved gateway and runner, trusted identities, permitted fixture destinations, and an approved gateway/quota evidence file. It does not replace missing inference with a script. Tokens come only from `STUDIO_EVAL_API_TOKEN` and `STUDIO_EVAL_FIXTURE_TOKEN`; never put them in arguments, source or manifests. Development/live evaluations of synthetic cases explicitly perform candidate confirmation and full execution through normal API routes.
+## Compile-era oracle and report layer
 
-Config fields: `tier:"live"`, `purpose:"development"`, `manifest` path, `apiBaseUrl` (ending `/api/v2/studio`), `executionApiBaseUrl` (ending `/api/v1/studio`), `fixtureControlUrl`, `csiId`, `environment`, `sourceCommit`, `dirtyBaselineDigest`, `pins:{validator,executor,playwright}`, `allowedTargetOrigins`, `approvedGatewayEvidence` path, `maxApiCalls`, `maxTransportCalls`, `maxElapsedMs`, `repetitions`, optional `concurrency`1–8, `orderSeed`, `split`, and execution `configuration`. The gateway evidence file must record `status:"PASS"`, accountable `approvedBy`, positive `quotaUsd` and `quotaEnforced:true`; Gage must verify that declaration against the actual gateway before use. This file is a trusted operator prerequisite, not proof manufactured by the CLI.
-
-Transport reservations conservatively spend9 calls before every compile; baseline and edited requests both count. Total elapsed time bounds all HTTP and polling. Each treatment uses an isolated namespace and fresh full run. A pair builds and verifies its own baseline, resets the fixture, edits the stable IDs, requests FULL or AUTO, confirms, and executes every step. Records include baseline/final usage, actual mode, preservation, identities, runtime pins, outcomes and timings. Missing usage remains null. Evidence is a new immutable manifest, per-trial JSONL, summary and report; repeated IDs and missing trials cannot pass. Summaries group requested modes. Detailed stage metrics require backend telemetry; this harness does not invent unavailable timings.
-
-Exit0 means the requested development checks passed,1 means behavioral checks failed,2 means incomplete evidence/prerequisites/budgets. Any incomplete baseline is retained as an incomplete trial. Intended failures require typed assertion-origin evidence; the current execution API does not expose that field, so such live cases cannot yet score correct. A same-step crash or transport error must never count as the intended assertion failure. Release-sized held-out evaluation, approved-image tests, agreed numeric targets and typed failure evidence remain open gates.
-
-For local fixture hosting, set a synthetic `STUDIO_EVAL_FIXTURE_TOKEN` and run `node evaluation/fixture-server.mjs`. It binds target4100 and separately authenticated control4101 to loopback (override ports with `STUDIO_EVAL_TARGET_PORT`/`STUDIO_EVAL_CONTROL_PORT`). The model sees only the namespace-specific target URL. Reset/snapshot credentials and expected domain events never enter its prompt. The target requires login before saving and records exact account events. Shared environments need an approved equivalent deployment; do not loosen production target policy for this local server.
-
-## Report (Story 10.26 AC-3)
-
-`run` writes `summary.json` (schema 2, `report.mjs`) and a readable `report.md`. Each section states numerator, denominator and the denominator's definition: pins (declared pins, source commit, dirty-baseline and manifest digests, fixture version, observed runtime pins and mismatches); correctness and coverage (planned supported trials stay in the denominator when incomplete, refused or timed out; supported coverage so rejecting everything scores 0); unsupported/clarification handling and wrong acceptance per class; false success per supported trial and per PASS execution; compile-to-candidate, backend inference and end-to-end p50/p95 with missing samples at the configured worker concurrency and observed peak in-flight compiles; token totals (baseline included; null unless every completed trial reported them), observed transport attempts, reserved calls, API calls and elapsed time against their ceilings and which ceiling stopped work; repairs entered, repair yield (valid candidate and correct oracle) and missing repair telemetry; admission refusals (HTTP 429/503) and recovery time to the next accepted admission. Cost, repair regressions, post-deadline calls, deadline slot recovery and generation/model/prompt pins (`pins.inference`) are reported as `unavailable`: the API does not expose them, and the harness does not estimate them. The `tier` label is `scripted-transport` whenever a transport is injected (fixture-backed tests) and `T3-unverified` for a real transport: spec §1 reserves T3 for a real approved gateway, and the harness cannot verify that provenance itself. A plain-ID `plannedIds` entry that was never observed has no class; it is counted as not handled in every class denominator and listed as an evidence gap (exit 2). `summarize` accepts `{planned|plannedIds, trials, run?, capacityEvents?}`; without `run` the report lists the gap and exits 2.
-
-`test/evaluation/` (default `npm test`) runs fixture-backed evaluations: the real fixture app and oracle with a scripted API/runner that performs fixed fixture actions. These tests cover the report, a planted wrong-account false success, a refused admission and recovery, repairs and a hard call ceiling. They are not live model evidence; SPK-01 still gates live Vertex/proxy evaluation.
+`oracle.mjs`, `report.mjs`, `fixture-server.mjs`, `example-manifest.json` and `oracle.test.mjs` belong to Story 10.26. `node evaluation/cli.mjs validate-manifest FILE`, `oracle-self-test` (now `oracle.test.mjs` only) and `summarize FILE [OUT_JSON] [OUT_MD]` still work. The `run` command went with `lifecycle.mjs`. `browser-oracle.test.mjs` imports `dist/validator`, which no longer exists after the compile retirement, so it fails at the baseline before this change and is no longer run by `oracle-self-test`.

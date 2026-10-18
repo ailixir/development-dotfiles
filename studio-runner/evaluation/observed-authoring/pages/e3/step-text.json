@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "caseId": "E3-iframe",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "5d4fdeb1-e4ef-495c-81d5-f11128821761",
+        "text": "Open <var frameUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "fc08b838-9c31-4a63-8ec7-ea2472e22e7a",
+        "text": "Type Looks good in the Comment field and click Post.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "frameUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/frame"
+    }
+  ]
+}

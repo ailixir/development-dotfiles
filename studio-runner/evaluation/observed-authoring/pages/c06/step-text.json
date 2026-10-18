@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "caseId": "C06-forms-fill-save",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "06923bc2-d677-4dc4-85fd-36b1d071d8c9",
+        "text": "Open <var formsUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "db112c5d-942b-42c4-89e4-7bb27d572542",
+        "text": "Select GBP from Currency.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "a3bcd294-fd71-4c8b-8479-6ff9811a65bc",
+        "text": "Tick Remember me.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "fa1f1318-68c6-4ef0-8ec2-357e66fbfe49",
+        "text": "Fill Notes with urgent.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "4c755050-c898-40f9-8664-84e86b323d59",
+        "text": "Click Save.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "f20f68ff-13d9-4569-83a3-7b5532881dc2",
+        "text": "Check that the page shows Saved.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "formsUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/forms"
+    }
+  ]
+}

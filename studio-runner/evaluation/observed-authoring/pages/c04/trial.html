@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Account review</title></head>
+<body>
+<main><h1>Account review</h1><button id="login">Log in</button>
+<button id="t" disabled>Save target</button><button id="o" disabled>Save other</button><p id="status" role="status">Not saved</p></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+let on=false;document.getElementById('login').onclick=async()=>{await rec('login.accepted',{account:'synthetic-user'});on=true;document.getElementById('t').disabled=false;document.getElementById('o').disabled=false;document.getElementById('status').textContent='Logged in';};
+for(const [id,acct] of [['t','target'],['o','other']])document.getElementById(id).onclick=async()=>{if(!on)return;await rec('form.saved',{account:acct});document.getElementById('status').textContent='Saved '+acct;};
+</script>
+</body>
+</html>

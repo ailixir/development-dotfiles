@@ -1,0 +1,14 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Address</title></head>
+<body>
+<main><h1>Address</h1><form id="f"><label>City <input id="c" name="c" autocomplete="off"></label><div id="hint-slot"></div><button type="submit">Save</button></form><p id="s" role="status"></p></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+const c=document.getElementById('c');
+c.addEventListener('focus',()=>{const h=document.createElement('p');h.className='hint';h.textContent='Start typing to see suggestions';document.getElementById('hint-slot').replaceChildren(h);
+const box=document.createElement('ul');box.setAttribute('role','listbox');box.id='portal';box.style.cssText='position:fixed;top:0;right:0;margin:0';for(const t of ['London','Lyon','Lisbon']){const li=document.createElement('li');li.setAttribute('role','option');li.textContent=t;box.appendChild(li);}document.body.appendChild(box);});
+document.getElementById('f').addEventListener('submit',async(e)=>{e.preventDefault();await rec('form.save',{city:c.value});document.getElementById('s').textContent='Saved';});
+</script>
+</body>
+</html>

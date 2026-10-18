@@ -16,17 +16,17 @@ import type { SessionRecording } from '../server/adapters.js';
  * **emitted by story 10.13**, which owns the enforcement. The test reads the contract's
  * enumeration rather than a copy of it, because 10.7 adds dispatch-time codes in the same wave.
  * Studio v1 WP4 adds the second shared value, `CANCELLED`, for a run stopped by
- * `DELETE /v1/runs/{id}` (ADR-002 §29); the API assigns its own copy only against a cancel it
+ * `DELETE /v2/runs/{id}` (ADR-002 §29); the API assigns its own copy only against a cancel it
  * recorded.
  *
  * **(b) Total.** {@link RunFailureKind} enumerates the run's failure conditions and
  * {@link errorCodeFor} switches exhaustively over them, so a new failure kind fails the
  * type-check instead of inventing a string at the call site.
+ *
+ * STUDIO-OBS-012A AC-3 removed the kinds only the deleted artifact-1 run path could produce —
+ * `artifact-revalidation`, `runtime-incompatible`, `sandbox-unavailable`, `unsupported-multi-page`,
+ * `url-scheme-not-permitted` and `secret-origin-not-allowed` — together with their codes.
  */
-
-import { RUNTIME_INCOMPATIBLE } from '../compat/index.js';
-import { STEP_REFUSAL_CODES } from '../executor/refusals.js';
-import type { StepRefusalCode } from '../executor/refusals.js';
 
 /**
  * Every `outcome.errorCode` this runner may emit, each traced to an observable condition.
@@ -37,21 +37,8 @@ import type { StepRefusalCode } from '../executor/refusals.js';
  * unless the producer enumerates its own.
  */
 export const RUNNER_ERROR_CODES = {
-  /** The confirmed artifact failed default-deny revalidation after admission (AC-2). */
-  ARTIFACT_REVALIDATION_FAILED: 'ARTIFACT_REVALIDATION_FAILED',
-  /** `src/compat` refused the runtime this build is running (AC-2). */
-  RUNTIME_INCOMPATIBLE,
   /** Chromium did not start. The generic case: no browser process, no readings (AC-6a). */
   BROWSER_LAUNCH_FAILED: 'BROWSER_LAUNCH_FAILED',
-  /**
-   * Chromium refused to start **with the sandbox enabled**.
-   *
-   * Separated from the generic case on purpose: architecture §9.3 forbids relaunching without it,
-   * so the one failure an operator must be able to see by its own name is this one. There is no
-   * code path that retries, and `test/run/sandbox.test.ts` drives this path and asserts a single
-   * launch attempt.
-   */
-  BROWSER_SANDBOX_UNAVAILABLE: 'BROWSER_SANDBOX_UNAVAILABLE',
   /**
    * The job's admitted-start deadline had already elapsed at the launch point (AC-4, §5.2).
    *
@@ -60,8 +47,6 @@ export const RUNNER_ERROR_CODES = {
    * different observation made by a different component.
    */
   START_DEADLINE_EXCEEDED: 'START_DEADLINE_EXCEEDED',
-  /** A second page or popup appeared; V1 supports one page (AC-15, §5.2). */
-  UNSUPPORTED_MULTI_PAGE: 'UNSUPPORTED_MULTI_PAGE',
   /**
    * The run could not produce or flush a recording **and had no assertion outcome to report**.
    *
@@ -73,24 +58,13 @@ export const RUNNER_ERROR_CODES = {
   /** A step's assertion or action failed. The run stops at the first one (§5.2). */
   STEP_FAILED: 'STEP_FAILED',
   /**
-   * A `goto` whose URL came from a variable resolved to something other than an absolute
-   * `http:`/`https:` URL. The validator checks literal URLs; this is the same rule at resolution.
-   * Spelled once, in `src/executor/refusals.ts`, where the refusal is raised.
-   */
-  URL_SCHEME_NOT_PERMITTED: STEP_REFUSAL_CODES.URL_SCHEME_NOT_PERMITTED,
-  /**
-   * A secret was about to be filled on a page whose origin is not among the origins the secret is
-   * bound to, or the secret is bound to none. Nothing was typed.
-   */
-  SECRET_ORIGIN_NOT_ALLOWED: STEP_REFUSAL_CODES.SECRET_ORIGIN_NOT_ALLOWED,
-  /**
    * **Reserved, not emitted here.** §8.2 fixes the parent-enforced total-runtime timeout as
    * `ERROR`/`TIMEOUT`, and it is the single value this set shares with `ExecutionErrorCode`.
    * Enforcement — the deadline, the kill and the emission — is story **10.13**.
    */
   TIMEOUT: 'TIMEOUT',
   /**
-   * The run was stopped by `DELETE /v1/runs/{id}` (Studio v1 WP4, ADR-002 §29): ordered stop,
+   * The run was stopped by `DELETE /v2/runs/{id}` (Studio v1 WP4, ADR-002 §29): ordered stop,
    * bounded grace, then the process tree — the deadline's own path, for a different reason. Also
    * the answer for a run cancelled before its browser started, which then never starts one.
    *
@@ -110,6 +84,15 @@ export const RUNNER_ERROR_CODES = {
   RUN_ERROR: 'RUN_ERROR',
 } as const;
 
+export const OBSERVED_RUNNER_ERROR_CODES = {
+  /** An existing observed failure is annotated with the trusted login signature. */
+  LOGIN_REQUIRED: 'LOGIN_REQUIRED',
+  /** Observed password controls never grant a value-read capability. */
+  PASSWORD_CONTROL_READ_REFUSED: 'PASSWORD_CONTROL_READ_REFUSED',
+  /** Revalidated source input metadata no longer binds to its declaring step/slot. */
+  REFERENCE_MISMATCH: 'REFERENCE_MISMATCH',
+} as const;
+
 export type RunnerErrorCode = (typeof RUNNER_ERROR_CODES)[keyof typeof RUNNER_ERROR_CODES];
 
 /** The enumeration as a list, for the disjointness and completeness assertions. */
@@ -124,32 +107,20 @@ export const RUNNER_ERROR_CODE_VALUES: readonly RunnerErrorCode[] =
  * package), so adding a condition without giving it a code does not compile.
  */
 export type RunFailureKind =
-  | 'artifact-revalidation'
-  | 'runtime-incompatible'
   | 'browser-launch'
-  | 'sandbox-unavailable'
   | 'start-deadline'
-  | 'unsupported-multi-page'
   | 'recording'
   | 'step'
-  | 'url-scheme-not-permitted'
-  | 'secret-origin-not-allowed'
   | 'total-timeout'
   | 'cancelled'
   | 'run-fault';
 
 /** Every failure kind, so a test can assert the mapping is total in both directions. */
 export const RUN_FAILURE_KINDS: readonly RunFailureKind[] = [
-  'artifact-revalidation',
-  'runtime-incompatible',
   'browser-launch',
-  'sandbox-unavailable',
   'start-deadline',
-  'unsupported-multi-page',
   'recording',
   'step',
-  'url-scheme-not-permitted',
-  'secret-origin-not-allowed',
   'total-timeout',
   'cancelled',
   'run-fault',
@@ -160,45 +131,20 @@ export type RunFailureResult = 'FAILED' | 'ERROR';
 
 export function errorCodeFor(kind: RunFailureKind): RunnerErrorCode {
   switch (kind) {
-    case 'artifact-revalidation':
-      return RUNNER_ERROR_CODES.ARTIFACT_REVALIDATION_FAILED;
-    case 'runtime-incompatible':
-      return RUNNER_ERROR_CODES.RUNTIME_INCOMPATIBLE;
     case 'browser-launch':
       return RUNNER_ERROR_CODES.BROWSER_LAUNCH_FAILED;
-    case 'sandbox-unavailable':
-      return RUNNER_ERROR_CODES.BROWSER_SANDBOX_UNAVAILABLE;
     case 'start-deadline':
       return RUNNER_ERROR_CODES.START_DEADLINE_EXCEEDED;
-    case 'unsupported-multi-page':
-      return RUNNER_ERROR_CODES.UNSUPPORTED_MULTI_PAGE;
     case 'recording':
       return RUNNER_ERROR_CODES.RECORDING_FAILED;
     case 'step':
       return RUNNER_ERROR_CODES.STEP_FAILED;
-    case 'url-scheme-not-permitted':
-      return RUNNER_ERROR_CODES.URL_SCHEME_NOT_PERMITTED;
-    case 'secret-origin-not-allowed':
-      return RUNNER_ERROR_CODES.SECRET_ORIGIN_NOT_ALLOWED;
     case 'total-timeout':
       return RUNNER_ERROR_CODES.TIMEOUT;
     case 'cancelled':
       return RUNNER_ERROR_CODES.CANCELLED;
     case 'run-fault':
       return RUNNER_ERROR_CODES.RUN_ERROR;
-  }
-}
-
-/**
- * The failure kind for a step the executor refused on policy. Exhaustive over the refusal codes,
- * so a new refusal without a kind does not compile.
- */
-export function failureKindForRefusal(code: StepRefusalCode): RunFailureKind {
-  switch (code) {
-    case 'URL_SCHEME_NOT_PERMITTED':
-      return 'url-scheme-not-permitted';
-    case 'SECRET_ORIGIN_NOT_ALLOWED':
-      return 'secret-origin-not-allowed';
   }
 }
 

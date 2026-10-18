@@ -16,12 +16,12 @@ package does today and the defaults callers can override.
 |---|---|
 | `src/validator/` | Artifact envelope checks, default-deny AST validation, argument/reference schemas, bounds. Pure and browser-free. |
 | `src/executor/` | Trusted executor over a `BrowserAdapter`, `StepReporter` and `ValueResolver`, with outbound redaction. |
-| `src/compat/` | `isCompatible` / `assertCompatible`: refuses an artifact whose recorded runtime differs from the running one, with `RUNTIME_INCOMPATIBLE`. |
+| `src/compat/` | Reads `dist/runtime-versions.json` (`loadRuntimeVersions`) and refuses a record that lacks a required identity field. The artifact-1 compatibility check was deleted with its engine (STUDIO-OBS-012A); the observed path proves its runtime through the build identity (`assertBuild`). |
 | `src/server/` | The four internal HTTP routes, the capacity pool, the service-identity check, bounded bodies and structured redacted logging. |
 | `src/reporting/` | The admission CAS **client**, the progress/terminal report client, and the `StepReporter` implementation 10.2 left as a seam. |
 | `src/run/` | The real browser: the `BrowserLauncher` that forks a killable child, the data-only parent↔child protocol, the Playwright adapter, the recording lifecycle and evidence vocabulary, the run-scoped clock and the runner error-code set — plus story 10.13's **runtime deadline** (`deadline.ts`), **process-tree kill and observation** (`tree.ts`) and **captured, redacted child output relay** (`outputRelay.ts`). |
 | `src/main.ts` | Process entry: configuration, server start, `SIGTERM` drain, scratch clearing at startup and on exit. |
-| `src/versions.ts` | `VALIDATOR_SCHEMA_VERSION`, `SYNTAX_REFERENCE_VERSION`, `EXECUTOR_VERSION`, `ARTIFACT_VERSION`, `VALIDATOR_PARSER`. |
+| `src/versions.ts` | `OBSERVED_CONTRACT_VERSION` only. The artifact-1 stamps were retired by STUDIO-OBS-009 AC-1 P2; the executable pins are the `const`s of the generated v3 schemas. |
 
 Not yet present: `src/evidence/` (10.14). Uploading a recording, the durable result manifest and
 the `STORED` evidence state are 10.14's; a recording still lives and dies in scratch.
@@ -35,6 +35,7 @@ neither consumes the other.
 |---|---|---|---|
 | **Queue** — admitted-start | `admittedAtMs`, the instant the admission CAS returned | `job.deadlines.admittedStartMs` (§8.5 starting value 30 s) | a **refusal** in `runCoordinator`: `ERROR` / `START_DEADLINE_EXCEEDED`, no browser started |
 | **Runtime** — total browser | the `ready` handshake, and nothing else | `min(job.deadlines.totalRuntimeMs, STUDIO_RUNNER_MAX_TOTAL_RUNTIME_MS)` (§5.2, §8.5, 120 s) | **enforcement**: ordered stop, bounded grace, process-tree kill → `ERROR` / `TIMEOUT` |
+| **Step** — per-step | step start | `min(timeoutSeconds×1000, run deadline)`; ceiling `STUDIO_RUNNER_MAX_STEP_TIMEOUT_MS` = 120 000 (contract max, loader-enforced) | observed jobs above it refused `LIMIT_EXCEEDED` |
 
 A run that spends nine-tenths of its queue budget waiting still gets the **whole** of its browser
 time: the timer is armed at the handshake and the arithmetic never subtracts one budget from the
@@ -208,6 +209,9 @@ env -i PATH="$PATH" HOME="$HOME" TMPDIR="$WORK" \
   STUDIO_RUNNER_SERVICE_IDENTITY="$STUDIO_RUNNER_SERVICE_TOKEN" \
   STUDIO_RUNNER_CALLBACK_IDENTITY="$STUDIO_CALLBACK_SERVICE_TOKEN" \
   STUDIO_RUNNER_CALLBACK_BASE_URL=http://127.0.0.1:8080 \
+  STUDIO_RUNNER_TLS_KEY_FILE="$TLS/runner.key" STUDIO_RUNNER_TLS_CERT_FILE="$TLS/runner.crt" \
+  STUDIO_RUNNER_TLS_CA_FILE="$TLS/ca.crt" \
+  STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256="$BACKEND_CERT_FINGERPRINT256" \
   STUDIO_RUNNER_SCRATCH_DIR="$WORK/scratch" STUDIO_RUNNER_OBJECT_STORE_DIR="$WORK/objects" \
   node dist/main.js
 ```
@@ -388,8 +392,8 @@ What they cannot prove: they stop the runner *linking* a client, not reaching a 
 HTTP through a dependency it already has. The complement is the configured outbound destination
 allowlist — callback API, object store, target page, and nothing else.
 
-ADR-001 §5 allowed this story one HTTP server library. It took none: `node:http` covers a four-route
-surface with no middleware, so the closure did not grow.
+ADR-001 §5 allowed this story one HTTP server library. It took none: `node:https` (the one TLS listener,
+client certificate required) covers the small route surface with no middleware, so the closure did not grow.
 
 ## Bounds (AC-10 defaults)
 
@@ -434,7 +438,7 @@ URLs must be absolute `http`/`https`; `locator()` rejects Playwright selector-en
 (`text=`, `xpath=`, `>>`, `:has-text(...)`, …); regular expressions reject backreferences,
 lookbehind, unpermitted flags and quantifier nesting beyond the configured depth.
 
-### Text-entry role equivalence (executor 2.1.0, VAL-031)
+### Text-entry role equivalence (VAL-031)
 
 The compiler cannot see the page, so the role of a text field is a guess: `searchbox`, `textbox`
 and `combobox` are all things "the search field" can be. For `fill` and `press` only, when the
@@ -456,7 +460,7 @@ chain's **terminal** segment is `getByRole` with one of those three roles and op
 `checked`/`expanded`/`selected`/`pressed`/`level` are unchanged. The step report does not yet name
 the resolved role; adding it is an ADR-002 Class B change.
 
-### Visible-only resolution of actions (executor 2.1.0, VAL-040)
+### Visible-only resolution of actions (VAL-040)
 
 Real pages carry hidden twins of their controls. Wikipedia's search input has hidden copies with
 the same placeholder, so `getByPlaceholder('Search Wikipedia')` matched 2 elements. Google's
@@ -483,7 +487,6 @@ hidden element can't be acted on anyway. For the action operations (`click`, `fi
   the child writes one stderr line through the output relay: `visible-only-resolution: step=<i>
   total=<n>`. It carries counts only, never the locator text.
 
-This is part of the same unreleased executor 2.1.0 as VAL-031. There is no further version bump.
 
 ## Fixture corpora
 
@@ -492,7 +495,7 @@ This is part of the same unreleased executor 2.1.0 as VAL-031. There is no furth
 | `fixtures/reference/` | The pinned syntax reference: one valid artifact per permitted method and option key, each asserting the exact `BrowserAdapter` call sequence. `manifest.json` binds every example to the methods and option keys it demonstrates and to the fixture page it targets. |
 | `fixtures/adversarial/` | One rejected artifact per denial class. Every code in `DIAGNOSTIC_CODES` must have a fixture; a test fails when one does not. |
 | `fixtures/lint/` | Files containing each construct the execution-boundary lint rules forbid. Excluded from `tsconfig.json` and from `npm run lint` on purpose, and linted programmatically by a test. |
-| `fixtures/pages/` | Controlled local HTML the reference corpus targets. Every element carries an explicit `role` attribute so the fixture tier can check a locator against the page exactly. Served on loopback by `test/helpers/pageServer.ts` at the paths `manifest.json` binds them to, so a real Chromium reaches them without reaching `example.com` and without a DNS lookup. `popup.html` and `timeline.html` belong to story 10.12 (unsupported multi-page workflow; seek measurement) and are deliberately **not** in `manifest.json` — that file is the pinned syntax reference, and adding a page to it would bump `SYNTAX_REFERENCE_VERSION`. |
+| `fixtures/pages/` | Controlled local HTML the reference corpus targets. Every element carries an explicit `role` attribute so the fixture tier can check a locator against the page exactly. Served on loopback by `test/helpers/pageServer.ts` at the paths `manifest.json` binds them to, so a real Chromium reaches them without reaching `example.com` and without a DNS lookup. `popup.html` and `timeline.html` belong to story 10.12 (unsupported multi-page workflow; seek measurement) and are deliberately **not** in `manifest.json` — that file is the pinned syntax reference. |
 
 ### Adding a reference example
 
@@ -502,13 +505,14 @@ This is part of the same unreleased executor 2.1.0 as VAL-031. There is no furth
    `methods`, `optionKeys` and `referenceKinds` fields are re-derived from the validator by
    `test/reference-manifest.test.ts`, which prints the exact expected arrays when they disagree —
    a declaration cannot claim coverage the example does not have.
-3. Bump `SYNTAX_REFERENCE_VERSION` in `src/versions.ts`: the corpus is part of the pinned runtime.
 
 ## Versions
 
 `npm run build` writes `dist/runtime-versions.json` with the declared, locked and image copies of the
-Playwright pin plus the Chromium build, Node, validator, parser, syntax-reference and executor
-versions (architecture §4.6, ADR-001 §4.2).
+Playwright pin plus the Chromium build, Node and the observed identities (`observedSchemaBundleHash`,
+`observedReferenceBundleHash`, `observedChromiumBuild`, `observedBrowserProvenance`,
+`observedBrowserLauncherSha256`). The artifact-1 version stamps are not recorded and nothing
+replaces them (architecture §4.6, ADR-001 §4.2; STUDIO-OBS-009 AC-1 P2).
 
 `chromiumBuild` and `image` can only be observed inside the pinned Playwright image — from the
 `chromium-<revision>` directory under `PLAYWRIGHT_BROWSERS_PATH` and from the `IMAGE_TAG` build arg.
@@ -536,27 +540,26 @@ each copy alone in a temporary directory and asserts the check fails for every o
 
 #### The Node pin
 
-`.nvmrc` and `engines.node` are not two spellings of the same thing, and `check:pins` treats them
-differently on purpose:
+`.nvmrc` and `engines.node` pin the **same single major**, and `check:pins` asserts that they do:
 
 | Copy | What it pins | Asserted how |
 |---|---|---|
-| `.nvmrc` (`22`) | the Node major **the image must ship** | equals the `engines.node` floor major; and equals the major of the recorded `node` whenever the record came from inside the pinned image |
-| `engines.node` (`>=22.11.0 <25.0.0`) | what the package is allowed to be installed and built on | the recorded `node` must satisfy it, everywhere |
+| `.nvmrc` (`24`) | the Node major **the pinned image ships** (`mcr.microsoft.com/playwright:v1.63.0-noble` carries Node v24.20.0) | equals the `engines.node` floor major; and equals the major of the recorded `node` whenever the record came from inside the pinned image |
+| `engines.node` (`>=24.11.0 <25.0.0`) | what the package is allowed to be installed and built on: Node 24 LTS, patch releases only | the recorded `node` must satisfy it, everywhere |
 
-Story 10.2 widened `engines.node` to a range deliberately, so the package still installs on a
-developer machine running a newer Node under `engine-strict=true`. That widening is not licence for
-the *image* to drift: ADR-001 §4.2 scopes the `.nvmrc` obligation to the image ("`node --version`
-inside the image"), and that is exactly where `check:pins` applies it. "Inside the image" is read
-off the record — a recorded `chromiumBuild` exists only under the image's `PLAYWRIGHT_BROWSERS_PATH`
-— so it cannot be asserted by a flag, and dropping it to dodge the rule fails `--require-image` on
-the missing field instead.
+There is one supported Node major and no second path. A developer machine on any other major
+(Node 23 or 22 included) is not supported: `engine-strict=true` rejects the install and
+`check:pins` rejects a build recorded on it. ADR-001 §3 defines `.nvmrc` as the Node major shipped
+by the pinned Playwright image, so it follows the image: a Playwright bump whose image ships a new
+Node major moves `.nvmrc` and `engines.node` in that same change (see the upgrade procedure).
+"Inside the image" is read off the record — a recorded `chromiumBuild` exists only under the
+image's `PLAYWRIGHT_BROWSERS_PATH` — so it cannot be asserted by a flag, and dropping it to dodge
+the rule fails `--require-image` on the missing field instead.
 
-> **Known conflict (`ED-05`).** The public `mcr.microsoft.com/playwright:v1.63.0-noble` base image
-> ships Node v24.20.0, which satisfies `engines.node` but is not the `.nvmrc` major. `check:pins`
-> therefore **fails** against that image, by design, and says so. The fix belongs to the internal
-> image or to an ADR amendment. Widening `.nvmrc` to match whatever the base image ships would
-> delete the only copy that pins Node and is not an acceptable way to make the pipeline green.
+> **Resolved (`ED-05`, O-2a).** The pins used to say 22 while the public base image shipped Node
+> v24.20.0, which made `check:pins --require-image` fail by design. The pins now follow the image
+> (ADR-001 §4.2 amendment). The internal image `ED-05` delivers must keep the `v<version>-<distro>`
+> tag convention and ship Node 24; `check:pins --require-image` is what proves it.
 
 ### Runtime upgrade procedure
 
@@ -576,63 +579,70 @@ the drift `check:pins` exists to stop.
    against the current validator) and `npm run test:fixtures` inside the pinned image. A reference
    example that no longer validates, or an adversarial fixture that is no longer rejected, blocks
    the upgrade. This is the fixture-corpus run §4.6 requires before release.
-5. **Decide the compatibility rule** — `src/compat/compatibility.ts` compares Playwright with
-   `exact` today. If the fixture tier gives evidence that a range is safe, relax `COMPATIBILITY_RULES`
-   in the same PR and record the evidence in its description. Never relax it speculatively.
-6. **Record compatibility for existing confirmed revisions** — every confirmed revision carries the
-   versions it was validated under. After the bump, `isCompatible` refuses those revisions with
-   `RUNTIME_INCOMPATIBLE` and the differing fields, and the backend returns
-   `409 RUNTIME_INCOMPATIBLE` on execute (10.8). Preserve the revision and explain why it is
-   blocked.
+5. **Compatibility is the build identity, not a rule table.** The artifact-1 per-field rule table
+   was deleted with its engine (STUDIO-OBS-012A). The observed path compares the bundle hashes,
+   the Chromium build and the launcher hash it reports (`assertBuild`), so a bump that changes any of
+   them is visible in the next run's identity. Do not reintroduce a range rule speculatively.
+6. **Existing recorded runs.** A run records the identity it ran under. After the bump new runs
+   report the new identity; preserve the old runs and do not reinterpret them.
 7. **Never rewrite approved source.** A revision is recompiled only by an explicit, reconfirmed
    authoring action. An upgrade does not silently reinterpret an artifact under the new runtime,
    and a vulnerable runtime is not kept alive to preserve replay.
 
-Bump `SYNTAX_REFERENCE_VERSION` in `src/versions.ts` whenever a reference example is added, removed
-or changed; it is compared exactly, so the bump is what stops an artifact proposed against the old
-corpus from being reinterpreted against the new one.
-
 ### Runtime compatibility
 
-`src/compat/` compares an artifact's recorded provenance with the running `runtime-versions.json`:
-
-| Field | Rule | Why |
-|---|---|---|
-| `validatorSchema` | exact | The accepted language and its parser decide what the source *means*. |
-| `syntaxReference` | exact | The corpus the proposal was made against. |
-| `playwright` | exact (V1 decision) | The browser image is pinned to the package; nothing has yet measured which deltas are behaviour-preserving. |
-| `executor` | same major, runtime `minor.patch` ≥ recorded | Additive changes to the operation contract are compatible; a new major or an older runtime is not. |
-
-`assertCompatible` throws `RuntimeIncompatibleError` with `code: 'RUNTIME_INCOMPATIBLE'` and the
-differing fields. Callers place it before any adapter call, so an incompatible artifact never
-reaches a browser. Server-side enforcement remains authoritative (architecture §4.6).
+`src/compat/` reads the `runtime-versions.json` this build emitted and fails closed when a required
+field is missing or empty: `playwright`, `observedSchemaBundleHash`, `observedReferenceBundleHash`,
+`observedChromiumBuild` and `observedBrowserLauncherSha256`. There is no fallback to an older field.
+The artifact-1 per-field rules and its compatibility check were deleted with the artifact-1 engine
+(STUDIO-OBS-012A); the observed path proves its runtime through the build identity instead.
 
 ## Node version
 
-`.nvmrc` pins the Node major shipped by the Playwright image (22). `engines.node` is expressed as a
-range rather than `22.x` so the package also installs on a developer machine running a newer Node;
-`engine-strict=true` still rejects anything outside the range, and story 10.3's CI check asserts the
-Node version inside the image against `.nvmrc`.
+`.nvmrc` pins the Node major shipped by the Playwright image (24). `engines.node` is
+`>=24.11.0 <25.0.0`: Node 24 LTS, patch releases only. `engine-strict=true` rejects anything outside
+the range, and story 10.3's CI check asserts the Node version inside the image against `.nvmrc`.
 
 ### Guided observed-2 worker
 
-Build with `npm run build`, then launch the isolated guided service with
-`STUDIO_GUIDED_CONFIG_FILE=/mounted/guided.json npm run start:guided`.
-The trusted mounted JSON configuration contains:
+Guided mode is a **mode of the one runner process** (STUDIO-OBS-009 AC-1): `node dist/main.js` with
+`STUDIO_RUNNER_GUIDED_ENABLED=true`, served by the same TLS listener as the replay routes. There is no
+second entry point, no second start script and no mounted JSON file. Build with `npm run build`; the
+configuration is environment keys, every one a `STUDIO_RUNNER_*` name the loader enumerates:
 
-- `workerId`, `host`, `port`, `journalDirectory` (persistent, private, outside disposable replay scratch).
-- `tlsKeyFile`, `tlsCertFile`, `tlsCaFile` for mutually authenticated HTTPS.
-- `controllerIssuer`, `controllerSubject`, `controllerPublicKeyFile`, and
-  `controllerCertificateFingerprint256` to bind controller JWT and certificate identities.
-- `callbackBaseUrl` and `callbackTokenFile`; the issuer-issued worker token is reread for each
-  callback so an external credential mount can rotate it. The worker never signs credentials.
-- `rules` (trusted `ObservationRule` entries), and optional `applicationPolicy` with
-  `policyRuleId` and `allowStructuralDiscovery: true`.
+- Every deployment, guided or not: `STUDIO_RUNNER_TLS_KEY_FILE`, `STUDIO_RUNNER_TLS_CERT_FILE` (the leaf
+  first; it needs `serverAuth` and `clientAuth`, or no extended key usage), `STUDIO_RUNNER_TLS_CA_FILE`
+  and `STUDIO_RUNNER_CONTROLLER_CERTIFICATE_FINGERPRINT256` (the backend's client certificate, 32
+  upper-case hex pairs joined by `:`). `STUDIO_RUNNER_HOST` and `STUDIO_RUNNER_PORT` are the one listener's.
+- With the switch on, all seven are required, and with it off any of them is refused:
+  `STUDIO_RUNNER_GUIDED_WORKER_ID` (equal to the backend's `translation.worker-id`),
+  `..._JOURNAL_DIR` (persistent, private, disjoint from `SCRATCH_DIR` and `OBJECT_STORE_DIR`),
+  `..._CONTROLLER_ISSUER`, `..._CONTROLLER_SUBJECT`, `..._CONTROLLER_PUBLIC_KEY_FILE`,
+  `..._CALLBACK_BASE_URL` (https only; its own key, never derived from `CALLBACK_BASE_URL`) and
+  `..._CALLBACK_TOKEN_FILE`; the issuer-issued worker token is reread for each callback so an external
+  credential mount can rotate it. The worker never signs credentials.
+- There is no capacity key (the guided capacity is the constant 1) and no policy-hash key (the hash
+  arrives in the hash-bound runner context).
+
+Startup order and refusals: configuration (exit 78, one `configuration rejected:` line per problem), the
+process table (69), then with guided on the debug environment (`CONFIGURATION_DENIED DEBUG_ENV`, 78), the
+build identity (`GUIDED_WORKER_UNAVAILABLE`, 1), `canEnumerateLaunchTree()` including pid greater than 1
+(`CONFIGURATION_DENIED LAUNCH_TREE`, 78), the TLS files, and the recording-scratch sweep; only then does
+anything listen. Any other failure is `RUNNER_START_FAILED` (1). Each is one value-free line.
+`SIGTERM` runs one drain for both halves and exits 1 only when a guided stop could not be confirmed.
+
+Nothing else. What the worker may observe or read is not mounted configuration: a mounted
+`applicationPolicy` or `rules` key, in any form, is an unenumerated `STUDIO_RUNNER_*` name and the
+runner refuses to start; `createGuidedBridge` refuses either as an option with `CONFIGURATION_DENIED`
+(STUDIO-OBS-014 AC-1). The governed observation policy arrives per session as `applicationPolicy`
+in the runner context, bound by `policyHash`; the worker recomputes the hash before the first
+observation and refuses a mismatch with a `409` `IDENTITY_MISMATCH` refusal. Guided learning
+uses no field rules.
 
 The controller commits the context identity before sending `/context`: the worker creates an
 actual isolated `about:blank` page and sends its bootstrap callback during that request. The
 controller supplies the frozen inputs, cumulative allocations/producer evidence/consumer edges,
-lease and lowered limits from the observed-v2 contract. Successful receiver responses are HTTP
+lease and lowered limits from the observed-v3 contract. Successful receiver responses are HTTP
 200; authenticated policy/conflict failures return bounded `{code}` with HTTP409, and failed
 service authentication returns HTTP401. Mutual TLS handshake failures never reach HTTP.
 Callbacks accept HTTP202 and discard a response bounded at1MiB. An outcome acknowledgement
@@ -643,8 +653,9 @@ process or restarted worker from recreating a consumed session. A missing/corrup
 or lost local browser/value context requires a new backend session. Do not delete the journal to
 resume a session. Values remain private to this worker and are cleared on teardown. The guided
 launch has no video, host report or parent IPC; diagnostic environment switches are refused.
-Production account setup, model planning and learned-plan publication are separate fail-closed
-ports owned by the later observed-authoring stories. Existing one-shot replay remains unchanged.
+Secret references use names-only recipe metadata and a transient run-scoped secret inventory.
+The password candidate count, admission and fill share the isolated collector's single definition;
+password reads are refused. Ordinary observed replay uses frozen recipes without model calls.
 
 Guided native mouse/keyboard operations retain the isolated-world element, verify current document,
 origin, classification/type, geometry, deep hit target and focus, then issue public Chromium CDP
@@ -655,8 +666,9 @@ including a lost input acknowledgement, and the worker stops without retry. Publ
 has no atomic retained-node precondition: the guarantee is immediate checks, no locator reacquisition
 and no retries, not an atomic transaction with arbitrary application scripts.
 
-Positive generic reads are configured once in the trusted application policy, independently of
-structural discovery. Omission means no generic read permission. For example:
+Positive generic reads are granted by the governed policy (the runner context's
+`applicationPolicy`, an approved and audited policy version), independently of structural
+discovery. `readGrants` is required; `[]` means no generic read permission. For example:
 
 ```json
 {
@@ -674,8 +686,9 @@ structural discovery. Omission means no generic read permission. For example:
 
 An explicit `{ "kind": "application" }` region grants the named read kinds at the exact approved
 origin. A unique matching semantic region takes precedence; conflicting equally specific grants
-or duplicate region anchors deny reading. Exact field rules remain optional overrides, and an
-explicit `structuralOnly` field rule vetoes broader permission. Visible-text grants support scalar
+or duplicate region anchors deny reading. In replay only, the published `TrustedPolicy` may also
+carry exact field rules as optional overrides, and an explicit `structuralOnly` field rule vetoes
+broader permission; guided learning has no field rules. Visible-text grants support scalar
 business surfaces such as named output/status elements and term/value cells; they never authorize
 arbitrary subtree capture. Hidden, sensitive, password, unsupported or mixed sensitive descendants
 refuse the entire source. The same resolver supplies sanitized metadata, preparation and the final
@@ -689,13 +702,54 @@ marker prevents reacquisition after restart. Repeated live assignments return th
 lease; stopped/expired assignment retries return HTTP409. Confirmed `/stop` returns `STOPPED` for
 assignment-scoped teardown and omits the fence header, including cancellation before context.
 
-The worker renews serially approximately every10 seconds with a fresh key, while waiting for
+The observed worker renews serially at an absolute one-second cadence with a fresh key and a
+one-second request cap, while waiting for
 context, executing or awaiting clarification. Only acknowledged same-fence grants extend local
 authority. Context timestamps cannot extend that authority or regress a newer acknowledgement;
 preparation expiry is capped to the acknowledged lease. Invalid, stale, failed or late renewal
 stops without replay or resurrection. Assignment and browser share one capacity reservation until
 confirmed teardown. Diagnostic environment switches are rejected before reading credentials or
 performing initial claim traffic.
+
+Current observed guided and replay startup use bundled full Chromium with `channel: 'chromium'`,
+`headless: true`, `chromiumSandbox: true` and empty arguments. Fresh `Default/Preferences` disables
+credential saving and both autofill kinds and sets `session.restore_on_startup` to5. Startup checks
+the selected executable, confined active Default profile and all four effective registered values.
+The obsolete `profile.password_manager_enabled` key supplies no effective-policy evidence.
+
+Recorded replay verifies those values on the sole trusted startup page in the same persistent
+recorded context. It closes that page, awaits and deletes only its captured confined native video,
+checks that no page or startup artifact remains, then creates the sole clean about:blank app page.
+Unexpected page events remain latched through app creation and late subscriptions. The child samples
+its paired origin once at app recording readiness; startup consumes the existing admitted runtime
+window and absolute start/run deadlines. Close returns only the app's native recording. The native
+video fixtures independently decode initial navigation and failure seeks within500ms; outstanding
+staging calibration and internal-image approval remain separate requirements.
+
+Observed recovery uses one bounded, closed, write-once private receipt of the actual app Video.path
+in an exclusively created scratch directory. It binds existing launch/admission/process and scratch
+identity without adding a job or IPC field. The parent seals one snapshot before stop/kill; late
+publication cannot establish ownership afterward. It inspects only that native file through a
+no-follow descriptor after writer/tree teardown, reads four header bytes and retains the512-byte
+eligibility threshold. Stream retries reopen the same pinned file descriptor identity. No largest,
+newest or stray recording selection is used on the observed path.
+
+Ownership supplies no execution, Ready, usage or finalization fact. A missing owner leaves evidence
+unavailable; an owned attempted recorder with no usable file has failed evidence. Genuine playable
+owned recovery can remain partial without received Ready or FINAL; only authenticated native close
+facts establish complete finalization. Video/receipt failure preserves the actual assertion outcome.
+
+Authenticated completed PASS receipts may support monotone `USED` entries on existing PROGRESS
+reports. Each positive entry retains its matching frozen secretRef step and exact timing support.
+Missing or lost receipts after an Execute send attempt leave unknown use omitted; final reports
+retain earlier confirmed positives. Diagnostics redact all current and previously released values
+before interpolation, bounds and the stderr/callback/separate diagnostic journal writes.
+
+The build packages the mandatory independently authored observed-choice reference alongside the
+actual included corpus. Runtime provenance binds the fixed browser mode, installed executable SHA256
+and compiled launcher SHA256; startup rejects shell or mismatched installations. A local catalog's
+image digest is controlled test identity, never image provenance. `check:pins --require-image` retains
+the Node22/internal-image ED-05 gate even when a public Playwright image supplies a working browser.
 
 The authenticated, fenced `/observe` control refreshes actual browser evidence between source steps
 or after a resolved clarification. It requires the current generation and an idle live context,
@@ -726,7 +780,7 @@ refused during preparation, before effects. Already-satisfied supported toggles 
 Guided request bodies, controller responses and JWT segments use fatal UTF-8, duplicate-key and
 trailing-data rejection. Numeric tokens must be canonical safe integers (no fraction, exponent or
 negative zero); JWT claims are closed to `iss/sub/aud/role/iat/exp` and optional nonnegative `nbf`.
-The v2 wire timestamp profile is uppercase UTC `YYYY-MM-DDTHH:mm:ss[.fraction]Z`, with valid
+The v3 wire timestamp profile is uppercase UTC `YYYY-MM-DDTHH:mm:ss[.fraction]Z`, with valid
 Gregorian dates, seconds00–59 and optional1–9 fractional digits. Offsets, lowercase, whitespace,
 leap seconds and excess precision are refused without normalizing signed/hashed data. The bundled
 validator audits its supported keywords, formats and resolved references/pointers at startup;
@@ -735,15 +789,21 @@ schemas. This supports the currently enforced bridge schemas only.
 
 ### Observed replay (artifact 2)
 
-Observed artifacts use the separate `observed-replay-1` execution profile. The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Legacy artifact 1 validation, AST semantics and protocol 1 remain separate.
+Observed artifacts use the one collapsed replay profile `{contract: 3}`, compared together with the exact build identity (STUDIO-OBS-012A). The authenticated `POST /v2/validate-observed` endpoint independently derives the plan, operation guards, input recipes and binding graph from original immutable evidence. `POST /v2/runs` uses ordinary admission, capacity, the confined recorded child, cancellation, reporting and evidence upload. Legacy artifact 1 validation, AST semantics and protocol 1 remain separate.
 
 Enable validation and replay independently with `STUDIO_RUNNER_OBSERVED_VALIDATION_ENABLED` and `STUDIO_RUNNER_OBSERVED_REPLAY_ENABLED` (both default false). Trusted startup supplies `STUDIO_RUNNER_OBSERVED_CATALOG_FILE` containing exactly `{profile,build}`, `STUDIO_RUNNER_OBSERVED_IMAGE_DIGEST`, and `STUDIO_RUNNER_OBSERVED_POLICY_FILE` containing the mounted policy projections. The catalog must match packaged schema/reference hashes, the installed Chromium revision and the independently supplied immutable release image digest. A local build records `observedChromiumBuild` separately; it does not assert container provenance or satisfy `check:pins --require-image`.
 
-The compiled account registry in `run/observedAccount.ts` defaults to unavailable. OBS-007 supplies reviewed account connectivity through consume/prepare/apply/dispose; job data cannot select a module, executable function, credential source or account entry URL. The child consumes and prepares before browser creation, then applies once to that same recorded context. Replay values begin empty and remain private to the child. No model call, guided-session continuation, sampled value or original node/receipt authority is used to execute a saved artifact.
+Observed login is author-owned: a `<secret ID>` source becomes a value-less `secretRef` input/recipe. Guided delivery carries the value only on its admitted dispatch frame; replay resolves all declared values once per run and uses value-less child metadata to bind each secret ID to its declaring step and `fill.value` slot. The child has no account provider or cookie import and invokes no model during replay.
 
-A failed or uncertain account apply never emits Ready or permits an authored action. Real recording evidence may still be retained through the ordinary upload path, with `browserStartedAt` and unavailable timings null. Unexecuted steps are SKIPPED with null readings; no synchronized timeline is claimed for a pre-Ready failure. Captured values, account details and raw child output do not enter diagnostics. Fill/select preserve the fixed isolated DOM primitive; click/check/uncheck/hover/press preserve the retained-target native pointer/key primitive and its uncertainty rules.
+Secrets fill only the unique rendered, enabled password input in the top-level document, including open shadow roots. The count, preparation and fill share one isolated-world candidate definition. An off-screen rendered decoy counts; frames and closed shadows do not. The prepared element must remain the same attached password input, with unchanged document/generation/mutation/navigation identity. Document origin must belong to both the approved and secret-origin lists, and an owning form action must remain within the secret-origin list. Multi-password pages and secret fills into non-password controls are unsupported at GA; absence/ambiguity refuses with nothing typed, and there is no fallback adapter. Password value assertions and reads are refused.
 
-Run `node ../tools/build-studio-observed-schemas.cjs` before building after contract changes. `npm run build` packages the closed schemas and fixed independent reference fixtures; `npm run check:pins` rejects stale source/dist bundle hashes. The fixtures tier exercises real Chromium and ordinary recorded replay with a controlled account provider; it does not establish production account connectivity or immutable container identity.
+Both launch modes use a persistent scratch profile with a prewritten `Preferences` file disabling credential/password saving, profile/credit-card autofill and session restore. Chromium launch refuses a missing or unsafe file. Controlled tests scan profile bytes before context close and scratch cleanup, recording the exact browser version in evidence. Transient Chromium files, in-memory strings and operator dumps remain stated operational residuals; masked video frames require the manual OBS-009 inspection.
+
+Secret-bearing observed runs and guided contexts recheck names-only authorization on an absolute one-second cadence, with a one-second response deadline. Denial, malformed authority or a missed deadline stops locally before another step; a step already in flight may complete. `LOGIN_REQUIRED` annotates an existing drift/refusal only, using password count plus an actionable exported button/input. Registration/change-password pages can match this signature; passing steps remain passing. Custom password widgets and non-approved SSO origins are outside that signature.
+
+Replay usage reports contain only confirmed `USED`, proven pre-effect `REFUSED`, and proven unreached `NOT_USED` facts. An interrupted invocation or missing child result leaves its uncertain entry absent; later faults retain confirmed use. Guided failure diagnostics redact released secrets and known values before bounds or writes. The optional callback `errorMessage`, stderr text, and private bounded per-session diagnostic JSONL carry the same redacted text. The separate diagnostic file has no consume/recovery authority; its delivery failure cannot change a completed verdict. Raw errors are never serialized wholesale.
+
+Run `node ../tools/build-studio-observed-schemas.cjs` before building after contract changes. `npm run build` packages the closed schemas and fixed independent reference fixtures; `npm run check:pins` rejects stale source/dist bundle hashes. The fixtures tier exercises real Chromium and ordinary recorded replay with controlled secret fixtures; it does not establish production authorization, credential-hop TLS provisioning or immutable container identity.
 # Accepted observed choices during publication
 
 An accepted observed target choice carries private `ObservedChoiceWitness1` evidence on its original preparation. The pure validator checks the original model attempt, historical plan, question, immutable mapping, acceptance snapshot, original question observation and later preparation independently. It selects only the exact accepted locator; the original operation, authored argument, binding and read permission stay authoritative. Question node IDs may differ from refreshed preparation node IDs. Missing prospective question capture, acceptance receipt or original observation refuses publication, including old learning histories; no proof is reconstructed.

@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "caseId": "Q1-focus-time-helper-autocomplete",
+  "authoredBy": "@dev (Dex) EP lane draft; @qa (Quinn) review PENDING",
+  "authoring": {
+    "authoringSchemaVersion": 2,
+    "globalContext": {
+      "entries": [],
+      "evidenceReferences": []
+    },
+    "steps": [
+      {
+        "id": "095132bd-bb58-46ab-814d-35e8f04ce793",
+        "text": "Open <var formUrl>.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "50e44427-65a3-4feb-83b6-42efc19e1264",
+        "text": "Fill City with London.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      },
+      {
+        "id": "cda4d06d-5b02-49ad-8108-25ea655fe97c",
+        "text": "Click Save.",
+        "context": {
+          "entries": [],
+          "evidenceReferences": []
+        }
+      }
+    ]
+  },
+  "configuration": {
+    "environment": "controlled-fixture",
+    "browser": "chromium",
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "timeoutSeconds": 30,
+    "waitStrategy": "domcontentloaded"
+  },
+  "variables": [
+    {
+      "name": "formUrl",
+      "kind": "plain",
+      "value": "${fixtureOrigin}/form"
+    }
+  ]
+}

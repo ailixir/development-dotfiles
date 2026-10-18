@@ -80,11 +80,21 @@ export function ackRequestsCancel(body: string): boolean {
     return (
       typeof parsed === 'object' &&
       parsed !== null &&
-      (parsed as { cancelRequested?: unknown }).cancelRequested === true
+      ((parsed as { cancelRequested?: unknown }).cancelRequested === true || (parsed as { revoked?: unknown }).revoked === true)
     );
   } catch {
     return false;
   }
+}
+
+/** Secret-bearing executions fail closed on malformed or mismatched control authority. */
+export function validSecretControl(body: string, executionId: string): boolean {
+  try {
+    const value = JSON.parse(body) as unknown;
+    if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+    const control = value as Record<string, unknown>;
+    return Object.keys(control).sort().join(',') === 'cancelRequested,executionId,revoked' && control.executionId === executionId && typeof control.cancelRequested === 'boolean' && typeof control.revoked === 'boolean';
+  } catch { return false; }
 }
 
 export interface ReportClient {

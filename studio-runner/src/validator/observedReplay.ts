@@ -1,5 +1,8 @@
-import { validateObservedExecute, validateRecordedTarget } from '../executor/observedReplay.js';
-import type { Artifact2, BuildIdentity, PreparationFact, AcceptedTranslationPlan, Guard, HistoricalBinding, InputRecipe, LearnedPlan, Policy3, ReplayAction, Transfer, ValidationBasis, ValidationRequest, ValidationVerdict, ObservedJob, Scope, TrustedPolicy } from '../executor/observedOperations.js';
+import { deriveSnapshotMaps } from './observedSnapshots.js';
+import { effectiveGraph, historicalVersion, validateMaterializationHistory, validateIncrementalHistory } from './observedHistory.js';
+import { validatePublishedArtifactGraph, validateRecordedTarget } from '../executor/observedReplay.js';
+import { OBSERVED_CONTRACT_VERSION } from '../versions.js';
+import type { Execute3, Artifact3, BuildIdentity, PreparationFact, AcceptedTranslationPlan, Guard, HistoricalBinding, InputRecipe, LearnedPlan, Policy4, ReplayAction, Transfer, ValidationBasis, ValidationRequest, ValidationVerdict, ObservedJob, Scope, TrustedPolicy } from '../executor/observedOperations.js';
 import { OBSERVED_LIMITS, OBSERVED_PROFILE, assertBuild, assertProfile, boundedObserved, canonicalObserved, canonicalOrigin, demand, equalsOriginalTargetIntent, ObservedRefusal, equalObserved, hashObserved, validateObserved, validateTrustedPolicy } from './observedReferencePolicy.js';
 export interface ObservedHashes {
     sourceHash: string;
@@ -15,7 +18,7 @@ export interface ObservedHashes {
     profileHash: string;
 }
 export interface DerivedObserved {
-    artifact: Artifact2;
+    artifact: Artifact3;
     hashes: ObservedHashes;
 }
 type Coordinate = ReplayAction['coordinate'];
@@ -51,6 +54,9 @@ function argumentOf(op: ReplayAction['operation']): {
 } | {
     kind: 'binding';
     bindingId: string;
+} | {
+    kind: 'secretRef';
+    sourceInputId: string;
 } | null {
     if (op.kind === 'navigate')
         return { kind: 'authoredLiteral', sourceInputId: op.destinationInputId };
@@ -84,7 +90,7 @@ function selectedOriginalLocator(b:ValidationBasis,p:PreparationFact,ob:Accepted
     demand(originalInstantNanos(answer.resolvedAt)<=originalInstantNanos(q.expiresAt),'EVIDENCE_MISMATCH');
     demand(capture.obligationId===ob.obligationId&&capture.attemptId===a.attemptId&&capture.requestId===a.requestId&&capture.attempt===a.attempt&&a.responseRequestId===a.requestId,'EVIDENCE_MISMATCH');
     demand(capture.workerId===a.owner.workerId&&capture.ownerFence===a.owner.fence&&capture.workerId===p.proof.workerId&&capture.ownerFence===p.proof.ownerFence&&capture.ownerFence===b.bootstrap.ownerFence&&capture.ownerFence>0,'EVIDENCE_MISMATCH');
-    demand(capture.contextId===b.bootstrap.contextId&&capture.contextId===p.proof.contextId&&capture.contextRevision===b.bootstrap.contextRevision&&capture.contextRevision===p.proof.contextRevision&&capture.authoredInputsHash===b.authoredInputsHash&&capture.authoredInputsHash===p.proof.authoredInputsHash,'EVIDENCE_MISMATCH');
+    demand(capture.contextId===b.bootstrap.contextId&&capture.contextId===p.proof.contextId&&capture.contextRevision===p.proof.contextRevision&&capture.authoredInputsHash===historicalVersion(b,capture.contextRevision).authoredInputsHash&&capture.authoredInputsHash===p.proof.authoredInputsHash,'EVIDENCE_MISMATCH');
     demand(a.scopeHash===scopeHash,'EVIDENCE_MISMATCH');same(a.scope,b.scope);same(a.executionEvidence,capture.executionEvidence);
     const evidence=capture.executionEvidence;
     demand(evidence.kind==='observedDocument'&&evidence.sessionId===b.sessionId&&evidence.contextId===capture.contextId&&evidence.documentId===q.documentId&&evidence.generation===q.generation&&a.documentId===q.documentId&&a.generation===q.generation,'EVIDENCE_MISMATCH');
@@ -131,10 +137,12 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
     demand(b.scope.csiId === b.csiId && b.scope.sourceRevision === b.sourceRevision && b.scope.configurationRevision === b.configurationRevision && b.runAuthorization.scopeHash === scopeHash && b.runAuthorization.principalId === b.scope.principalId, 'EVIDENCE_MISMATCH');
     b.scope.approvedOrigins.forEach(canonicalOrigin);
     const req = b.replayRequirements;
-    demand(req.csiId === b.csiId && req.environment === b.scope.environmentId && req.environment === b.configuration.environment && req.applicationId === b.scope.applicationId && req.accountRef === b.scope.accountRef, 'EVIDENCE_MISMATCH');
+    demand(req.csiId === b.csiId && req.environment === b.scope.environmentId && req.environment === b.configuration.environment && req.applicationId === b.scope.applicationId, 'EVIDENCE_MISMATCH');
     same(req.allowedOrigins, b.scope.approvedOrigins);
     same(req.capabilities, b.scope.capabilities.filter(v => v !== 'observe'));
-    demand(b.bootstrap.inputsHash === b.authoredInputsHash && b.bootstrap.contextRevision > 0 && b.bootstrap.ownerFence > 0 && b.bootstrap.materializationRevision > 0, 'EVIDENCE_MISMATCH');
+    validateMaterializationHistory(b); validateIncrementalHistory(b);
+    const graph = effectiveGraph(b);
+    demand( b.bootstrap.contextRevision > 0 && b.bootstrap.ownerFence > 0 && b.bootstrap.materializationRevision > 0, 'EVIDENCE_MISMATCH');
     demand(b.bootstrap.initialEvidence.sessionId === b.sessionId && b.bootstrap.initialEvidence.contextId === b.bootstrap.contextId, 'EVIDENCE_MISMATCH');
     const compare = (a: Coordinate, c: Coordinate): number => { const x = steps.indexOf(a.stepId), y = steps.indexOf(c.stepId); demand(x >= 0 && y >= 0, 'EVIDENCE_MISMATCH'); return x - y || a.ordinal - c.ordinal; };
     const ordered = [...b.actions].sort((a, c) => compare(a.ledger.coordinate, c.ledger.coordinate));
@@ -142,6 +150,11 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
     indexUnique(ordered, a => coordinateKey(a.ledger.coordinate));
     const preparations = indexUnique(b.preparations, p => p.preparationId), observations = indexUnique(b.observations, o => o.observationHash);
     const usedObservations = new Set<string>();
+    for (const request of b.incrementalEvidence?.prefixRequests ?? []) for (const row of b.observations) {
+        const o = row.observation;
+        if (hashObserved({kind:'observedDocument',sessionId:b.sessionId,contextId:b.bootstrap.contextId,documentId:o.documentId,generation:o.generation,origin:o.origin,observationHash:row.observationHash}) === request.evidenceHash) usedObservations.add(row.observationHash);
+    }
+    for (const old of b.incrementalEvidence?.excludedAttempts ?? []) if (old.preparation.observationHash) usedObservations.add(old.preparation.observationHash);
     indexUnique(b.preparations.filter(p=>p.observedChoice),p=>p.observedChoice?.context.clarificationId??'', 'EVIDENCE_MISMATCH');
     indexUnique(b.preparations.filter(p=>p.observedChoice),p=>p.observedChoice?.receipt.obligationId??'', 'EVIDENCE_MISMATCH');
     demand(preparations.size === ordered.length, 'EVIDENCE_MISMATCH');
@@ -165,9 +178,12 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
     const inputs = indexUnique(b.inputs, i => i.inputId, 'REFERENCE_MISMATCH');
     const inputByReference = indexUnique(b.inputs, i => hashObserved(i.provenance), 'REFERENCE_MISMATCH');
     const configurationRefs = indexUnique(b.configurationReferences, c => c.referenceId, 'REFERENCE_MISMATCH');
-    demand(inputs.size === b.translationPlan.sourceReferences.length, 'REFERENCE_MISMATCH');
-    for (const ref of b.translationPlan.sourceReferences)
-        demand(inputByReference.has(hashObserved(ref)), 'REFERENCE_MISMATCH');
+    const effectiveReferences = new Set(b.translationPlan.obligations.flatMap(obligation => obligation.referenceIndex === null ? [] : [obligation.referenceIndex]));
+    demand(inputs.size === effectiveReferences.size, 'REFERENCE_MISMATCH');
+    for (const index of effectiveReferences) demand(inputByReference.has(hashObserved(b.translationPlan.sourceReferences[index])), 'REFERENCE_MISMATCH');
+    // The accepted cumulative plan and immutable input history retain unexercised old intent.
+    // Only effective references become replay recipes; raw references stay committed by basisHash.
+    for (const ref of b.translationPlan.sourceReferences) demand(b.materializationEvidence.entries.some(entry => equalObserved(entry.metadata.provenance, ref)), 'REFERENCE_MISMATCH');
     const recipes: InputRecipe[] = [];
     const configUsed = new Set<string>();
     for (const input of b.inputs) {
@@ -179,6 +195,7 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
             demand(source !== undefined && p.sourceRevision === b.sourceRevision && p.startUtf16 < p.endUtf16 && p.endUtf16 <= source.length, 'REFERENCE_MISMATCH');
             const boundary = (i: number) => i === 0 || i === source.length || !(source.charCodeAt(i - 1) >= 0xd800 && source.charCodeAt(i - 1) <= 0xdbff && source.charCodeAt(i) >= 0xdc00 && source.charCodeAt(i) <= 0xdfff);
             demand(boundary(p.startUtf16) && boundary(p.endUtf16), 'REFERENCE_MISMATCH');
+            for (const token of source.matchAll(/<secret\s+[A-Za-z0-9_.-]{1,64}>/gu)) demand(!(p.startUtf16 < token.index + token[0].length && p.endUtf16 > token.index), 'REFERENCE_MISMATCH');
             recipes.push({ inputId: input.inputId, stepId: input.stepId, kind: input.kind, intendedSlot: input.intendedSlot, provenance: { kind: 'sourceSpan', start: p.startUtf16, end: p.endUtf16, sourceHash: b.sourceHash } });
         }
         else {
@@ -194,12 +211,12 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
     for (let index = 0; index < ordered.length; index++) {
         const evidence = ordered[index];
         demand(evidence, 'EVIDENCE_MISMATCH');
-        const l = evidence.ledger, p = preparations.get(evidence.preparationId);
+        const l = evidence.ledger, version = historicalVersion(b,l.contextRevision), p = preparations.get(evidence.preparationId);
         demand(p && p.preparationId === l.preparationId, 'EVIDENCE_MISMATCH');
         const proposal = p.proposal, proof = p.proof, e = proposal.executionEvidence;
         const ob = obligations.get(evidence.obligationId), association = associations.get(evidence.obligationId);
         demand(ob && association, 'EVIDENCE_MISMATCH');
-        demand(l.sessionId === b.sessionId && proposal.sessionId === b.sessionId && l.scopeHash === scopeHash && proposal.scopeHash === scopeHash && l.ownerFence === b.bootstrap.ownerFence && l.contextRevision === b.bootstrap.contextRevision && l.authoredInputsHash === b.authoredInputsHash && proposal.authoredInputsHash === b.authoredInputsHash, 'EVIDENCE_MISMATCH');
+        demand(l.sessionId === b.sessionId && proposal.sessionId === b.sessionId && l.scopeHash === scopeHash && proposal.scopeHash === scopeHash && l.ownerFence === b.bootstrap.ownerFence && l.contextRevision === version.contextRevision && l.authoredInputsHash === version.authoredInputsHash && proposal.authoredInputsHash === version.authoredInputsHash, 'EVIDENCE_MISMATCH');
         demand(l.state === 'SUCCEEDED' && l.dispatchCount === 1 && l.outcomeCode === 'OK' && l.assertionPassed === (proposal.operation.kind === 'assert' ? true : null), 'EVIDENCE_MISMATCH');
         demand(l.admission.authorizationId === b.runAuthorization.authorizationId, 'EVIDENCE_MISMATCH');
         same(l.admission.policyDecisionHash, hashObserved({scopeHash,preparation:proof,requestDigest:hashObserved(proposal)}));
@@ -213,16 +230,18 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
         same(p.executionEvidence, e);
         same(l.executionEvidence, e);
         demand(e.sessionId === b.sessionId && e.contextId === b.bootstrap.contextId && l.documentId === e.documentId && l.generation === e.generation && proposal.generation === e.generation && proposal.target.documentId === e.documentId && proposal.target.generation === e.generation, 'EVIDENCE_MISMATCH');
-        demand(proposal.evidenceHash === hashObserved(e) && l.evidenceHash === proposal.evidenceHash && proof.evidenceHash === proposal.evidenceHash && proof.requestDigest === l.requestDigest && proof.preparationId === p.preparationId && proof.authoredInputsHash === b.authoredInputsHash, 'EVIDENCE_MISMATCH');
-        demand(proof.sessionId === b.sessionId && proof.scopeHash === scopeHash && proof.contextId === b.bootstrap.contextId && proof.contextRevision === b.bootstrap.contextRevision && proof.ownerFence === b.bootstrap.ownerFence && proof.sourceRevision === b.sourceRevision && proof.configurationRevision === b.configurationRevision, 'EVIDENCE_MISMATCH');
+        demand(proposal.evidenceHash === hashObserved(e) && l.evidenceHash === proposal.evidenceHash && proof.evidenceHash === proposal.evidenceHash && proof.requestDigest === l.requestDigest && proof.preparationId === p.preparationId && proof.authoredInputsHash === version.authoredInputsHash, 'EVIDENCE_MISMATCH');
+        demand(proof.sessionId === b.sessionId && proof.scopeHash === scopeHash && proof.contextId === b.bootstrap.contextId && proof.contextRevision === version.contextRevision && proof.ownerFence === b.bootstrap.ownerFence && proof.sourceRevision === b.sourceRevision && proof.configurationRevision === b.configurationRevision, 'EVIDENCE_MISMATCH');
         worker ??= proof.workerId;
         demand(proof.workerId === worker, 'EVIDENCE_MISMATCH');
-        same(proof.versions, { contract: 2, learnedPlan: 2, observation: 2, guidedPolicy: 2, referencePolicy: 3, lowering: 1, artifact: 2, language: 'observed-2', executor: 'observed-2' });
-        demand(proposal.contextRevision === b.bootstrap.contextRevision, 'EVIDENCE_MISMATCH');
+        same(proof.versions, { contract: OBSERVED_CONTRACT_VERSION });
+        demand(proposal.contextRevision === version.contextRevision, 'EVIDENCE_MISMATCH');
         demand(b.scope.capabilities.includes(proposal.operation.kind), 'OPERATION_MISMATCH');
         if(index===0)same(e,b.bootstrap.initialEvidence);
         const kind = proposal.operation.kind, page = kind === 'navigate' || kind === 'assert' && ['url', 'title'].includes(proposal.operation.predicate);
-        demand(page === ('kind' in proposal.target), 'OPERATION_MISMATCH');
+        const secretFill = proposal.operation.kind === 'fill' && proposal.operation.value.kind === 'secretRef';
+        demand(page === ('kind' in proposal.target && proposal.target.kind === 'page'), 'OPERATION_MISMATCH');
+        demand(secretFill === ('kind' in proposal.target && proposal.target.kind === 'passwordControl'), 'REFERENCE_MISMATCH');
         const locator = 'locator' in proposal.target ? proposal.target.locator : null;
         const selected=selectedOriginalLocator(b,p,ob,observations,usedObservations);
         const effective=selected?{...ob,targetIntent:selected.kind==='role'?selected.name:selected.value,selectedLocator:selected}:ob;
@@ -240,7 +259,10 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
             const observed = observations.get(e.observationHash);
             demand(observed && observed.observation.documentId === e.documentId && observed.observation.generation === e.generation && observed.observation.origin === e.origin, 'EVIDENCE_MISMATCH');
             usedObservations.add(e.observationHash);
-            if ('kind' in proposal.target)
+            if ('kind' in proposal.target && proposal.target.kind === 'passwordControl') {
+                demand(observed.observation.coverage.passwordControls === 1, 'REFERENCE_MISMATCH');
+                guard = { guardId: `g${String(index)}`, origin: e.origin, target: { kind: 'passwordControl' } };
+            } else if ('kind' in proposal.target)
                 guard = { guardId: `g${String(index)}`, origin: e.origin, target: { kind: 'page' } };
             else {
                 const target = proposal.target;
@@ -258,7 +280,7 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
         const hasRef = ob.referenceIndex !== null, hasNeed = ob.needId !== null;
         if (hasRef) {
             const ref = b.translationPlan.sourceReferences[ob.referenceIndex], input = ref ? inputByReference.get(hashObserved(ref)) : undefined;
-            demand(input && input.stepId === ob.stepId && input.intendedSlot === slotOf(kind) && arg?.kind === 'authoredLiteral' && arg.sourceInputId === input.inputId && !hasNeed, 'REFERENCE_MISMATCH');
+            demand(input && input.stepId === ob.stepId && input.intendedSlot === slotOf(kind) && arg?.kind === (input.kind === 'secretRef' ? 'secretRef' : 'authoredLiteral') && 'sourceInputId' in arg && arg.sourceInputId === input.inputId && !hasNeed, 'REFERENCE_MISMATCH');
         }
         if (hasNeed) {
             const need = b.translationPlan.needs.find(n => n.needId === ob.needId);
@@ -281,7 +303,7 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
         same(b.translationPlan.sourceReferences[o[0].referenceIndex], selected.reference, 'REFERENCE_MISMATCH');
     }
     same(b.bootstrap.allocationHash, hashObserved(b.allocations), 'REFERENCE_MISMATCH');
-    const allocations = indexUnique(b.allocations, a => a.bindingId, 'REFERENCE_MISMATCH'), needs = indexUnique(b.translationPlan.needs, n => n.bindingId, 'REFERENCE_MISMATCH'), producers = indexUnique(b.producers, p => p.bindingId, 'REFERENCE_MISMATCH');
+    const allocations = indexUnique(graph.allocations, a => a.bindingId, 'REFERENCE_MISMATCH'), needs = indexUnique(b.translationPlan.needs, n => n.bindingId, 'REFERENCE_MISMATCH'), producers = indexUnique(b.producers, p => p.bindingId, 'REFERENCE_MISMATCH');
     demand(allocations.size === needs.size && producers.size === needs.size, 'REFERENCE_MISMATCH');
     const bindings: HistoricalBinding[] = [], transfers: Transfer[] = [];
     const exercised = new Set<string>();
@@ -295,8 +317,8 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
         same(action.operation.recipe, prod.recipe);
         same(action.origin, prod.origin);
         same(prod.availability, { bindingId: prod.bindingId, producerAdmissionId: prod.producerAdmissionId, contextId: b.bootstrap.contextId, workerId: worker, ownerFence: b.bootstrap.ownerFence });
-        const edges = b.consumerEdges.filter(e => e.bindingId === prod.bindingId).sort((a, c) => compare(a.coordinate, c.coordinate) || scalarCompare(a.argumentSlot, c.argumentSlot) || scalarCompare(a.bindingId, c.bindingId));
-        demand(edges.length > 0, 'REFERENCE_MISMATCH');
+        const edges = graph.consumerEdges.filter(e => e.bindingId === prod.bindingId).sort((a, c) => compare(a.coordinate, c.coordinate) || scalarCompare(a.argumentSlot, c.argumentSlot) || scalarCompare(a.bindingId, c.bindingId));
+        // Empty effective consumers are authorized only by effectiveGraph's exact retained-prefix proof.
         for (const edge of edges) {
             const consumer = actions.find(a => a.admissionId === edge.consumerAdmissionId);
             demand(consumer && edge.producerAdmissionId === prod.producerAdmissionId && compare(prod.coordinate, edge.coordinate) < 0 && edge.destinationOrigin === prod.origin, 'REFERENCE_MISMATCH');
@@ -311,9 +333,9 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
             transfers.push({ bindingId: prod.bindingId, producer: prod.coordinate, consumer: edge.coordinate, slot: edge.argumentSlot, origin: prod.origin });
         }
         demand(need.consumers.every(c => edges.some(e => e.coordinate.stepId === c.stepId && e.argumentSlot === c.argumentSlot)), 'REFERENCE_MISMATCH');
-        bindings.push({ schemaVersion: 2, bindingId: prod.bindingId, valueType: 'string', producer: prod.coordinate, recipe: prod.recipe, sourceOrigin: prod.origin, consumers: edges, provenance: { sessionId: b.sessionId, producerAdmissionId: prod.producerAdmissionId, sourceIntentStepId: prod.coordinate.stepId }, transferPolicy: 'sameOrigin', preserveBytes: true });
+        bindings.push({ schemaVersion: 3, bindingId: prod.bindingId, valueType: 'string', producer: prod.coordinate, recipe: prod.recipe, sourceOrigin: prod.origin, consumers: edges, provenance: { sessionId: b.sessionId, producerAdmissionId: prod.producerAdmissionId, sourceIntentStepId: prod.coordinate.stepId }, transferPolicy: 'sameOrigin', preserveBytes: true });
     }
-    demand(exercised.size === b.consumerEdges.length, 'REFERENCE_MISMATCH');
+    demand(exercised.size === graph.consumerEdges.length, 'REFERENCE_MISMATCH');
     for (const a of actions) {
         const arg = argumentOf(a.operation);
         if (arg?.kind === 'binding')
@@ -325,11 +347,11 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
     transfers.sort((a, c) => compare(a.producer, c.producer) || compare(a.consumer, c.consumer) || scalarCompare(a.slot, c.slot) || scalarCompare(a.bindingId, c.bindingId));
     same(b.bindings, bindings, 'REFERENCE_MISMATCH');
     same(b.transfers, transfers, 'REFERENCE_MISMATCH');
-    const plan: LearnedPlan = { schemaVersion: 2, planId: 'plan-' + hashObserved({ sessionId: b.sessionId }), scopeHash, sourceRevision: b.sourceRevision, configurationRevision: b.configurationRevision, authoredInputsHash: b.authoredInputsHash, initialContext: req.initialContext, sourceSteps: steps, versions: { contract: 2, learnedPlan: 2, observation: 2, guidedPolicy: 2, referencePolicy: 3, lowering: 1, artifact: 2, language: 'observed-2', executor: 'observed-2' }, actions, bindings };
+    const plan: LearnedPlan = { schemaVersion: 3, planId: 'plan-' + hashObserved({ sessionId: b.sessionId }), scopeHash, sourceRevision: b.sourceRevision, configurationRevision: b.configurationRevision, authoredInputsHash: b.authoredInputsHash, initialContext: req.initialContext, sourceSteps: steps, versions: { contract: OBSERVED_CONTRACT_VERSION }, actions, bindings, ...deriveSnapshotMaps(b,{actions,bindings}) };
     const learnedPlanHash = hashObserved(plan), runAuthorizationHash = hashObserved(b.runAuthorization), admissionProvenanceHash = hashObserved(ordered.map(({ ledger: l }) => ({ coordinate: l.coordinate, admission: l.admission, operationHash: l.operationHash, scopeHash: l.scopeHash })));
     const publicationEvidenceHash = hashObserved({ version: 1, basisHash: hashObserved(b), runAuthorizationHash, translationHash: b.translationHash, bootstrapHash: hashObserved(b.bootstrap), sourceManifestHash: b.sourceManifestHash });
-    const inputRecipes = sortInputRecipes(recipes, steps), replayPolicy: Policy3 = { schemaVersion: 3, learnedPlanHash, admissionProvenanceHash, publicationEvidenceHash, runAuthorizationHash, scope: req, inputs: inputRecipes, bindings, transfers };
-    const artifact: Artifact2 = { version: 2, kind: 'observed', profile: OBSERVED_PROFILE, sourceHash: b.sourceHash, configurationHash: b.configurationHash, authoringHash: b.authoringHash, learnedPlan: plan, learnedPlanHash, inputRecipes, guards, replayPolicy, steps: steps.map((stepId, stepIndex) => ({ stepIndex, stepId, operations: replay.filter(a => a.coordinate.stepId === stepId) })) };
+    const inputRecipes = sortInputRecipes(recipes, steps), replayPolicy: Policy4 = { schemaVersion: 4, learnedPlanHash, admissionProvenanceHash, publicationEvidenceHash, runAuthorizationHash, scope: req, inputs: inputRecipes, bindings, transfers };
+    const artifact: Artifact3 = { version: 3, kind: 'observed', profile: OBSERVED_PROFILE, sourceHash: b.sourceHash, configurationHash: b.configurationHash, authoringHash: b.authoringHash, learnedPlan: plan, learnedPlanHash, inputRecipes, guards, replayPolicy, steps: steps.map((stepId, stepIndex) => ({ stepIndex, stepId, operations: replay.filter(a => a.coordinate.stepId === stepId) })) };
     validateObserved('replay-artifact', artifact);
     boundedObserved(replayPolicy, OBSERVED_LIMITS.policy);
     const hashes: ObservedHashes = { sourceHash: b.sourceHash, configurationHash: b.configurationHash, authoringHash: b.authoringHash, learnedPlanHash, artifactHash: hashObserved(artifact), referencePolicyHash: hashObserved(replayPolicy), operationEquivalenceHash: hashObserved({ operations: replay, guards, inputRecipes, bindings, transfers }), admissionProvenanceHash, publicationEvidenceHash, runAuthorizationHash, profileHash: hashObserved(OBSERVED_PROFILE) };
@@ -338,17 +360,18 @@ export function deriveObservedArtifact(raw: unknown): DerivedObserved {
 /** Actual packaged pure endpoint validator; all expected semantics come from original basis. */
 export function validateObservedRequest(raw: unknown, build: BuildIdentity): ValidationVerdict {
     const request = validateObserved<ValidationRequest>('replay-validation', raw, OBSERVED_LIMITS.validation);
+    boundedObserved(request.validationBasis, OBSERVED_LIMITS.basis);
     assertProfile(request.requiredProfile);
     assertBuild(request.requiredBuild, build);
     same(hashObserved(request.validationBasis), request.basisHash);
     const derived = deriveObservedArtifact(request.validationBasis);
     const hashes = derived.hashes;
     const equal = equalObserved(request.artifact, derived.artifact);
-    return { schemaVersion: 2, attemptId: request.attemptId, claimId: request.claimId, snapshotHash: request.snapshotHash, basisHash: request.basisHash, profile: OBSERVED_PROFILE, build, ok: equal, artifactHash: hashes.artifactHash, learnedPlanHash: hashes.learnedPlanHash, referencePolicyHash: hashes.referencePolicyHash, operationEquivalenceHash: hashes.operationEquivalenceHash, admissionProvenanceHash: hashes.admissionProvenanceHash, publicationEvidenceHash: hashes.publicationEvidenceHash, errorCode: equal ? null : 'OPERATION_MISMATCH' };
+    return { schemaVersion: 3, attemptId: request.attemptId, claimId: request.claimId, snapshotHash: request.snapshotHash, basisHash: request.basisHash, profile: OBSERVED_PROFILE, build, ok: equal, artifactHash: hashes.artifactHash, learnedPlanHash: hashes.learnedPlanHash, referencePolicyHash: hashes.referencePolicyHash, operationEquivalenceHash: hashes.operationEquivalenceHash, admissionProvenanceHash: hashes.admissionProvenanceHash, publicationEvidenceHash: hashes.publicationEvidenceHash, errorCode: equal ? null : 'OPERATION_MISMATCH' };
 }
 /** Replay checks immutable structure/joins without pretending the historical basis is on the job. */
-export function validateReplayArtifact(raw: unknown): Artifact2 {
-    const a = validateObserved<Artifact2>('replay-artifact', raw);
+export function validateReplayArtifact(raw: unknown): Artifact3 {
+    const a = validateObserved<Artifact3>('replay-artifact', raw);
     assertProfile(a.profile);
     same(hashObserved(a.learnedPlan), a.learnedPlanHash);
     same(a.replayPolicy.learnedPlanHash, a.learnedPlanHash);
@@ -356,6 +379,8 @@ export function validateReplayArtifact(raw: unknown): Artifact2 {
     same(a.learnedPlan.bindings, a.replayPolicy.bindings);
     const ids = indexUnique(a.inputRecipes, i => i.inputId, 'REFERENCE_MISMATCH');
     const guards = indexUnique(a.guards, g => g.guardId, 'EVIDENCE_MISMATCH');
+    const referencedInputs=new Set(a.learnedPlan.actions.flatMap(action=>{const argument=argumentOf(action.operation);return argument&&'sourceInputId'in argument?[argument.sourceInputId]:[];}));
+    demand(referencedInputs.size===ids.size&&a.inputRecipes.every(recipe=>referencedInputs.has(recipe.inputId)),'REFERENCE_MISMATCH');
     const steps = a.learnedPlan.sourceSteps;
     demand(a.steps.length === steps.length, 'OPERATION_MISMATCH');
     let ordinal = 0;
@@ -393,12 +418,15 @@ export function validateReplayArtifact(raw: unknown): Artifact2 {
             demand(consumer && consumer.admissionId === edge.consumerAdmissionId && edge.producerAdmissionId === producer.admissionId && edge.bindingId === binding.bindingId && edge.destinationOrigin === binding.sourceOrigin, 'REFERENCE_MISMATCH');
         }
     }
-    validateObservedExecute({ kind: 'execute', protocolVersion: 2, mode: 'observed', runId: '00000000-0000-4000-8000-000000000000', attemptId: '00000000-0000-4000-8000-000000000001', profileHash: hashObserved(a.profile), configurationHash: a.configurationHash, waitStrategy: 'load', stepTimeoutMs: 1, steps: a.steps, guards: a.guards, bindings: a.replayPolicy.bindings.map(b => ({ bindingId: b.bindingId, producer: b.producer, recipe: b.recipe, origin: b.sourceOrigin })), transfers: a.replayPolicy.transfers, inputs: a.inputRecipes.map(i => ({ inputId: i.inputId, stepId: i.stepId, kind: i.kind, intendedSlot: i.intendedSlot, value: i.kind === 'destination' ? (a.replayPolicy.scope.allowedOrigins[0] ?? '') + '/' : '' })) }, { principalId: 'structure-validation', ...a.replayPolicy.scope });
+    for (const recipe of a.inputRecipes) if (recipe.provenance.kind === 'sourceSpan') demand(recipe.provenance.sourceHash === a.sourceHash && recipe.provenance.start < recipe.provenance.end, 'REFERENCE_MISMATCH');
+    for (const recipe of a.inputRecipes)
+        if (recipe.kind === 'secretRef') demand(recipe.provenance.kind === 'configuration' && /^[A-Za-z0-9_.-]{1,64}$/u.test(recipe.provenance.referenceName) && recipe.intendedSlot === 'fill.value', 'REFERENCE_MISMATCH');
+    validatePublishedArtifactGraph(a);
     return a;
 }
 export function validateObservedJob(raw: unknown, build: BuildIdentity, policy: TrustedPolicy, now = Date.now()): ObservedJob {
     const job = validateObserved<ObservedJob>('replay-job', raw, OBSERVED_LIMITS.job);
-    const b = job.binding, a = validateReplayArtifact(job.artifact), g = b.replayGrant, aa = b.accountAuthorization;
+    const b = job.binding, a = validateReplayArtifact(job.artifact), g = b.replayGrant;
     assertBuild(b.requiredBuild, build);
     assertProfile(b.requiredProfile);
     demand(b.artifactHash === hashObserved(a) && b.configurationHash === a.configurationHash && hashObserved(job.configuration) === a.configurationHash && b.learnedPlanHash === a.learnedPlanHash && b.referencePolicyHash === hashObserved(a.replayPolicy) && b.publicationEvidenceHash === a.replayPolicy.publicationEvidenceHash, 'EVIDENCE_MISMATCH');
@@ -411,16 +439,13 @@ export function validateObservedJob(raw: unknown, build: BuildIdentity, policy: 
     same(hashObserved(currentPolicy), b.currentPolicyHash);
     for (const key of ['executionId', 'attemptId', 'revisionId', 'revisionDigest', 'principalId', 'csiId', 'scopeHash', 'currentPolicyHash'] as const)
         demand(g[key] === b[key], 'EVIDENCE_MISMATCH');
-    demand(g.profileHash === hashObserved(b.requiredProfile) && g.buildHash === hashObserved(build) && g.accountGrantId === aa.grantId, 'EVIDENCE_MISMATCH');
-    demand(aa.executionId === b.executionId && aa.attemptId === b.attemptId && aa.revisionDigest === b.revisionDigest && aa.scopeHash === b.scopeHash, 'EVIDENCE_MISMATCH');
-    same(aa.scope, scope);
-    same(job.accountHandle.authorization, aa);
-    demand(Date.parse(g.issuedAt) <= now && Date.parse(g.expiresAt) > now && Date.parse(g.expiresAt) - Date.parse(g.issuedAt) <= 30000 && Date.parse(aa.issuedAt) <= now && Date.parse(aa.expiresAt) >= Date.parse(g.expiresAt), 'AUTHORIZATION_EXPIRED');
-    boundedObserved(job.accountHandle, OBSERVED_LIMITS.account);
+    demand(g.profileHash === hashObserved(b.requiredProfile) && g.buildHash === hashObserved(build), 'EVIDENCE_MISMATCH');
+    demand(Date.parse(g.issuedAt) <= now && Date.parse(g.expiresAt) > now && Date.parse(g.expiresAt) - Date.parse(g.issuedAt) <= 30000, 'AUTHORIZATION_EXPIRED');
     const inputs = indexUnique(job.inputs, i => i.inputId, 'REFERENCE_MISMATCH');
-    demand(inputs.size === a.inputRecipes.length, 'REFERENCE_MISMATCH');
+    demand(inputs.size === a.inputRecipes.filter(input => input.kind !== 'secretRef').length, 'REFERENCE_MISMATCH');
     let bytes = 0;
     for (const recipe of a.inputRecipes) {
+        if (recipe.kind === 'secretRef') { demand(recipe.provenance.kind === 'configuration' && recipe.intendedSlot === 'fill.value' && Object.hasOwn(job.secrets, recipe.provenance.referenceName), 'REFERENCE_MISMATCH'); continue; }
         const input = inputs.get(recipe.inputId);
         demand(input, 'REFERENCE_MISMATCH');
         bytes += Buffer.byteLength(input.value);
@@ -439,4 +464,18 @@ export function validateObservedJob(raw: unknown, build: BuildIdentity, policy: 
     demand(bytes <= OBSERVED_LIMITS.inputs, 'LIMIT_EXCEEDED');
     demand(job.runtime.stepTimeoutMs === job.configuration.timeoutSeconds * 1000 && job.runtime.stepTimeoutMs > 0 && job.runtime.totalRuntimeMs > 0, 'INVALID_CONTRACT');
     return job;
+}
+
+/** Transient check at the Execute3 value boundary; no Vault access or retained value state. */
+export function assertResolvedSecretLiterals(message: Pick<Execute3, 'inputs' | 'steps' | 'secrets'>): void {
+    const values = new Set(Object.values(message.secrets));
+    for (const action of message.steps.flatMap(step => step.operations)) {
+        const op = action.operation;
+        if (op.kind === 'fill' && op.value.kind === 'authoredLiteral') {
+            const sourceInputId = op.value.sourceInputId;
+            const input = message.inputs.find(entry => entry.inputId === sourceInputId);
+            demand(input && input.kind !== 'secretRef' && !values.has(input.value), 'REFERENCE_MISMATCH');
+        }
+    }
+    values.clear();
 }

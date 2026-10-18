@@ -1,3 +1,4 @@
+import { prepareBrowserProfile } from './scratchLayout.js';
 import { fileURLToPath } from 'node:url';
 /**
  * The browser child's process entry (AC-5).
@@ -15,9 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { attachChildRuntime } from './childRuntime.js';
 import type { ChildChannel } from './childRuntime.js';
 import { loadObservedBuild } from '../compat/runtime-versions.js';
-import { compiledObservedAccountRegistry } from './observedAccount.js';
 import { playwrightBrowserFactory } from './browser.js';
-import type { ChildMessage, ObservedChildMessage } from './protocol.js';
+import type { ObservedChildMessage } from './protocol.js';
 import type { ChildRuntimeDependencies } from './childRuntime.js';
 
 /** Binds the runtime to a Node process. Exported so a test can drive it with a fake process. */
@@ -27,12 +27,12 @@ export interface ChildProcessLike {
   exit(code?: number): never;
 }
 
-export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRuntimeDependencies, 'observedBuild'|'observedAccounts'> = {}): void {
+export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRuntimeDependencies, 'observedBuild'|'publishAppVideoOwner'> = {}): void {
   const channel: ChildChannel = {
     onMessage(listener: (value: unknown) => void): void {
       processLike.on('message', listener);
     },
-    send(message: ChildMessage | ObservedChildMessage): void {
+    send(message: ObservedChildMessage): void {
       processLike.send?.(message);
     },
     exit(code: number): void {
@@ -40,7 +40,7 @@ export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRu
       processLike.exit(code);
     },
   };
-  attachChildRuntime({ channel, browsers: playwrightBrowserFactory, ...observed });
+  attachChildRuntime({ channel, browsers: { launch(request) { prepareBrowserProfile(request.scratchPath); return playwrightBrowserFactory.launch(request); } }, ...observed });
 }
 
 // Not reachable under vitest: the module is imported by the fixtures tier, never invoked as the
@@ -48,6 +48,6 @@ export function startChild(processLike: ChildProcessLike, observed: Pick<ChildRu
 /* v8 ignore start */
 if (process.send !== undefined && process.argv[1] === fileURLToPath(import.meta.url)) {
   const build=loadObservedBuild();
-  startChild(process as unknown as ChildProcessLike,{...(build?{observedBuild:build}:{}),observedAccounts:compiledObservedAccountRegistry});
+  startChild(process as unknown as ChildProcessLike,{...(build?{observedBuild:build}:{})});
 }
 /* v8 ignore stop */

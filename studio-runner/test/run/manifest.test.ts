@@ -28,6 +28,8 @@ import { NULL_REDACTOR, createRedactor } from '../../src/executor/redaction.js';
 import {
   RESULT_MANIFEST_CONTENT_TYPE,
   RESULT_MANIFEST_SCHEMA_VERSION,
+  GUIDED_RECORDING_DISCLOSURE,
+  buildGuidedRecordingManifest,
   buildResultManifest,
   serializeResultManifest,
 } from '../../src/run/manifest.js';
@@ -243,3 +245,16 @@ function inputWithCanaries(): ResultManifestInput {
     },
   };
 }
+
+describe('guided recording manifest (STUDIO-OBS-013 AC-5, AR-1 R3 guidedManifest)', () => {
+  it('serializes the guided body in wire order through the same redact-twice serializer, with the constant disclosure', () => {
+    const body = buildGuidedRecordingManifest({ sessionId: 'session-1', recordingId: 'rec-1', workerId: 'worker-one', ownerFence: 2, evidenceState: 'STORED', evidencePartial: true, videoKey: 'studio/CSI-1/guided/session-1.webm', manifestKey: 'studio/CSI-1/guided/session-1.manifest.json', timings: [{ kind: 'action', stepId: 'nav', admissionId: 'a-1', ordinal: 0, startMs: 3, endMs: null }] });
+    const text = new TextDecoder().decode(serializeResultManifest(body, NULL_REDACTOR));
+    expect(Object.keys(JSON.parse(text) as object)).toEqual(['schemaVersion', 'kind', 'sessionId', 'recordingId', 'workerId', 'ownerFence', 'evidenceState', 'evidencePartial', 'videoKey', 'manifestKey', 'timings', 'disclosure']);
+    expect(JSON.parse(text)).toMatchObject({ schemaVersion: RESULT_MANIFEST_SCHEMA_VERSION, kind: 'guidedRecording', evidencePartial: true, disclosure: GUIDED_RECORDING_DISCLOSURE });
+    expect(GUIDED_RECORDING_DISCLOSURE).toContain('masked dots');
+    expect(GUIDED_RECORDING_DISCLOSURE).toContain('not protected by this recording');
+    const redacted = new TextDecoder().decode(serializeResultManifest(body, createRedactor(['worker-one'])));
+    expect(redacted).not.toContain('worker-one');
+  });
+});

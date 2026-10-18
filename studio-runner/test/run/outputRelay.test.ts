@@ -247,8 +247,8 @@ describe('AC-8 — the relay cannot block, delay or break the run', () => {
     });
 
     // This runs on the parent's event loop — the one serving `/health`, `/ready` and
-    // `/v1/validate`. A throw escaping here would be an uncaught exception in the *parent*, which
-    // is considerably worse than a lost diagnostic.
+    // `/v2/validate-observed`. A throw escaping here would be an uncaught exception in the
+    // *parent*, which is considerably worse than a lost diagnostic.
     expect(() => {
       relay.write('stdout', 'first\n');
       relay.write('stdout', 'second\n');

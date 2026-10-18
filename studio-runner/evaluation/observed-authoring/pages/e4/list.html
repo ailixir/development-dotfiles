@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Virtual list</title></head>
+<body>
+<main><h1>Orders</h1><div id="v" role="region" aria-label="Orders list" style="height:240px;overflow:auto;position:relative"><div id="sp"></div></div></main>
+<script>
+const rec=(type,fields)=>fetch('__event',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({type,...fields}),keepalive:true});
+const N=500,H=24,v=document.getElementById('v'),sp=document.getElementById('sp');sp.style.height=(N*H)+'px';
+function paint(){for(const e of [...v.querySelectorAll('button')])e.remove();const first=Math.floor(v.scrollTop/H);
+for(let i=first;i<Math.min(N,first+12);i++){const b=document.createElement('button');b.style.cssText='position:absolute;left:0;height:'+H+'px;top:'+(i*H)+'px';
+const id=String(i+1).padStart(4,'0');b.textContent='Item '+id;b.onclick=()=>rec('item.pick',{id});v.appendChild(b);}}
+v.addEventListener('scroll',paint);paint();
+</script>
+</body>
+</html>
