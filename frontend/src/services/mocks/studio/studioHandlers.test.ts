@@ -2,9 +2,14 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { studioMockServer } from './server';
 import { resetStudioMocks } from './handlers';
 import { MOCK_READABLE_CSIS, OTHER_CSI, mockExecutions, mockTests } from './fixtures';
-import { awaitingDraft, needsRevisionDraft, readyDraft } from './compileFixtures';
+import { draftsByReadiness, readinessDrafts } from './readinessFixtures';
 import studioApi from '@/services/api/studioApi';
-import { CANCELLED_ERROR_CODE, defaultConfiguration } from '@/types/studio/studioTypes';
+import {
+  CANCELLED_ERROR_CODE,
+  defaultConfiguration,
+  type AuthoringStep,
+  type TestRequest,
+} from '@/types/studio/studioTypes';
 
 /**
  * Story 10.1 AC-16 / AC-21 — the mock behaves like the server, including where it refuses.
@@ -36,11 +41,8 @@ describe('list scoping', () => {
     expect(
       page.data.every(
         (test) =>
-          test.currentCandidateArtifact == null &&
-          test.currentCandidateArtifactHash == null &&
           test.confirmedRevisionArtifact == null &&
-          test.confirmedRevisionArtifactHash == null &&
-          test.compileDiagnostics == null,
+          test.confirmedRevisionArtifactHash == null,
       ),
     ).toBe(true);
 
@@ -82,24 +84,30 @@ describe('list scoping', () => {
   });
 });
 
+/** Stable step IDs the way an editor mints them: one per step, kept for as long as the step lives. */
+const authored = (...texts: string[]): AuthoringStep[] =>
+  texts.map((text) => ({ id: crypto.randomUUID(), text }));
+
 describe('write paths follow the contract', () => {
-  const baseRequest = {
+  const baseRequest: TestRequest = {
+    authoringSchemaVersion: 2,
     name: 'Mock draft',
     description: 'created by a test',
     csiId: MOCK_READABLE_CSIS[0],
     environment: 'Production',
-    steps: ['Go to "https://www.citi.com"'],
+    steps: authored('Go to "https://www.citi.com"'),
     variables: [],
     configuration: defaultConfiguration(),
   };
 
-  it('creates a draft that starts STALE with no confirmed revision', async () => {
+  it('creates a draft that starts UNLEARNED with no confirmed revision', async () => {
     const created = await studioApi.createTest(baseRequest);
 
-    expect(created.compileStatus).toBe('STALE');
+    expect(created.readiness).toBe('UNLEARNED');
+    expect(created.firstChangedStepId).toBeNull();
     expect(created.confirmedRevisionId).toBeNull();
     expect(created.sourceRevision).toBe(1);
-    expect(created.steps).toEqual(baseRequest.steps);
+    expect(created.steps).toMatchObject(baseRequest.steps);
   });
 
   it('rejects an engine other than the canonical one', async () => {
@@ -117,26 +125,26 @@ describe('write paths follow the contract', () => {
     await expect(
       studioApi.updateTest(created.id, {
         ...baseRequest,
-        steps: ['Go to "https://www.citi.com/other"'],
+        steps: authored('Go to "https://www.citi.com/other"'),
         sourceRevision: 99,
         configurationRevision: 99,
       }),
     ).rejects.toBeDefined();
   });
 
-  it('advances the source revision and invalidates the candidate on a step change', async () => {
+  it('advances the source revision and leaves the draft unlearned on a step change', async () => {
     const created = await studioApi.createTest(baseRequest);
 
     const updated = await studioApi.updateTest(created.id, {
       ...baseRequest,
-      steps: ['Go to "https://www.citi.com/other"'],
+      steps: [{ id: baseRequest.steps[0].id, text: 'Go to "https://www.citi.com/other"' }],
       sourceRevision: created.sourceRevision,
       configurationRevision: created.configurationRevision,
     });
 
     expect(updated.sourceRevision).toBe(created.sourceRevision + 1);
-    expect(updated.compileStatus).toBe('STALE');
-    expect(updated.currentCandidateRevisionId).toBeNull();
+    expect(updated.readiness).toBe('UNLEARNED');
+    expect(updated.firstChangedStepId).toBeNull();
   });
 });
 
@@ -192,71 +200,76 @@ describe('cancel (Studio v1)', () => {
   });
 });
 
-
-describe('story 10.10: the compile-review corpus is served the way the contract declares', () => {
-  it('the single-draft read carries the diagnostics document', async () => {
-    const test = await studioApi.getTest(needsRevisionDraft.id);
-
-    expect(test.compileStatus).toBe('NEEDS_REVISION');
-    expect(test.compileDiagnostics).not.toBeNull();
-    expect(test.compileDiagnostics!.steps).toHaveLength(test.steps.length);
-  });
-
-  it('the list never carries a review draft, so the projection stays the declared one', async () => {
-    const page = await studioApi.listTests();
-    expect(page.data.map((test) => test.id)).not.toContain(needsRevisionDraft.id);
-    for (const test of page.data) {
-      expect(test.compileDiagnostics ?? null).toBeNull();
+describe('STUDIO-OBS-012B: the single-path routes are served the way the contract declares', () => {
+  it('the single-draft read serves every readiness fixture by id, and the list never carries one', async () => {
+    for (const [readiness, draft] of Object.entries(draftsByReadiness)) {
+      const test = await studioApi.getTest(draft.id);
+      expect(test.readiness).toBe(readiness);
+    }
+    const page = await studioApi.listTests({ size: 100 });
+    const listed = page.data.map((test) => test.id);
+    for (const draft of readinessDrafts) {
+      expect(listed).not.toContain(draft.id);
     }
   });
 
-  it('confirm-compile refuses a body short of the four declared fields', async () => {
-    await expect(
-      studioApi.confirmCompile(awaitingDraft.id, {
-        revisionId: awaitingDraft.currentCandidateRevisionId!,
-        sourceRevision: awaitingDraft.sourceRevision,
-        configurationRevision: awaitingDraft.configurationRevision,
-      } as never),
-    ).rejects.toBeDefined();
+  it('execute answers 409 LEARN_REQUIRED for a readable draft that is not READY', async () => {
+    const unlearned = mockTests.find(
+      (test) => test.readiness !== 'READY' && test.csiId !== null && MOCK_READABLE_CSIS.includes(test.csiId),
+    );
+    expect(unlearned, 'fixture: a readable draft that is not READY').toBeDefined();
+    await expect(studioApi.executeTest(unlearned!.id)).rejects.toMatchObject({
+      response: { status: 409, data: { error: 'LEARN_REQUIRED' } },
+    });
   });
 
-  it('confirm-compile answers 409 STALE_CANDIDATE when the identity does not match', async () => {
-    await expect(
-      studioApi.confirmCompile(awaitingDraft.id, {
-        revisionId: '22222222-2222-2222-2222-2222222222ff',
-        artifactHash: 'b'.repeat(64),
-        sourceRevision: awaitingDraft.sourceRevision,
-        configurationRevision: awaitingDraft.configurationRevision,
-      }),
-    ).rejects.toThrow('STALE_CANDIDATE');
-  });
-
-  it('confirm-compile answers 409 for a draft that is not awaiting confirmation', async () => {
-    await expect(
-      studioApi.confirmCompile(readyDraft.id, {
-        revisionId: readyDraft.currentCandidateRevisionId!,
-        artifactHash: 'b'.repeat(64),
-        sourceRevision: readyDraft.sourceRevision,
-        configurationRevision: readyDraft.configurationRevision,
-      }),
-    ).rejects.toThrow('STALE_CANDIDATE');
-  });
-
-  it('confirming the exact identity on screen moves the draft to READY', async () => {
-    const confirmed = await studioApi.confirmCompile(awaitingDraft.id, {
-      revisionId: awaitingDraft.currentCandidateRevisionId!,
-      artifactHash: 'b'.repeat(64),
-      sourceRevision: awaitingDraft.sourceRevision,
-      configurationRevision: awaitingDraft.configurationRevision,
+  it('validate-variables reports undeclared, unvalued and unused references and writes nothing', async () => {
+    const created = await studioApi.createTest({
+      ...baseRequestFor('Variables draft'),
+      steps: authored('Type <var USER_ID> into "User"', 'Type <secret PW> into "Password"', 'Type <var MISSING> into "x"'),
+      variables: [
+        { name: 'USER_ID', kind: 'plain', value: '' },
+        { name: 'SPARE', kind: 'plain', value: 'x' },
+      ],
     });
 
-    expect(confirmed.compileStatus).toBe('READY');
-    expect(confirmed.confirmedRevisionId).toBe(awaitingDraft.currentCandidateRevisionId);
+    const report = await studioApi.validateVariables(created.id, {});
+    expect(report).toEqual({
+      testId: created.id,
+      isValid: false,
+      valid: false,
+      hasVariables: true,
+      missing: ['<var MISSING>', '<secret PW>', 'USER_ID'],
+      undeclared: ['<var MISSING>', '<secret PW>'],
+      unvalued: ['USER_ID'],
+      conflicting: [],
+      unused: ['SPARE'],
+    });
+
+    // A supplied value counts by presence only; the draft itself is unchanged.
+    const supplied = await studioApi.validateVariables(created.id, { USER_ID: 'pilot' });
+    expect(supplied.unvalued).toEqual([]);
+    const after = await studioApi.getTest(created.id);
+    expect(after.sourceRevision).toBe(created.sourceRevision);
+    expect(after.variables).toEqual(created.variables);
   });
 
-  it('compile answers 202 with the revisions it was asked about', async () => {
-    const accepted = await studioApi.compileTest(awaitingDraft.id);
-    expect(accepted.compileStatus).toBe('COMPILING');
-    expect(accepted.sourceRevision).toBe(awaitingDraft.sourceRevision);
+  it('validate-variables refuses an id the caller cannot read with the same 403 as the read', async () => {
+    await expect(studioApi.validateVariables(otherCsiTest.id, {})).rejects.toMatchObject({
+      response: { status: 403, data: { error: 'STUDIO_FORBIDDEN' } },
+    });
   });
 });
+
+function baseRequestFor(name: string): TestRequest {
+  return {
+    authoringSchemaVersion: 2,
+    name,
+    description: null,
+    csiId: MOCK_READABLE_CSIS[0],
+    environment: 'Production',
+    steps: [],
+    variables: [],
+    configuration: defaultConfiguration(),
+  };
+}

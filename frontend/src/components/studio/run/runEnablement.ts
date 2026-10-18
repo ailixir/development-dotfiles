@@ -1,81 +1,83 @@
-import type { CompileStatus } from '@/types/studio/studioTypes';
+import type { TestReadiness } from '@/types/studio/studioTypes';
 
 /**
- * What pressing Run does next, and nothing else decides it (story 10.11a, AC-1, AC-2).
+ * What pressing Run does next, and nothing else decides it (story 10.11a, AC-1, AC-2; ADR-SC-005;
+ * STUDIO-OBS-008 AC-2).
  *
- * Architecture §4.6 puts readiness on the server and story 10.8's AC-26 makes the server-side gate
- * unconditional, so the client's job is to agree with the server rather than to form a second
- * opinion. Before story 10.11a the page refused to run unless its own English-grammar validator
- * was happy, which is the path architecture §8.3 retires by name — *"Remove client grammar
- * validation and Python generation as authoritative paths"*.
+ * Readiness is the server's: `GET /tests/{id}` derives `readiness` on every read and the execute
+ * route refuses a draft without a matching published revision with `409 LEARN_REQUIRED`. The
+ * client's job is to agree with the server rather than to form a second opinion, so this module
+ * answers *what to do* from the declared state alone.
  *
- * Run used to be available in exactly one state, because saving a draft compiled it in the
- * background and the author waited. Saving no longer compiles: the author presses Run, and Run
- * prepares the saved revision and then executes it. So a draft that has no fresh artifact is not a
- * blocked draft any more — it is a draft whose first Run step is a compile. That is the whole
- * change here, and it is why this module answers *what to do* rather than *whether to allow*.
+ * **One Run, three modes (STUDIO-OBS-008 AC-2).** `READY` replays the published revision through the
+ * ordinary `POST /tests/{id}/execute`. `UNLEARNED` starts a guided learning session. `NEEDS_RELEARN`
+ * starts a mixed-mode guided session from the server's first changed step. `LEARNING` means a guided
+ * session is already running, so Run is disabled and the live state is shown.
  *
- * **The mapping is total and has no fallback.** Every `compileStatus` the document declares gets an
- * explicit entry; {@link runActionFor} throws on anything else. A `??` or a `default:` here would
- * make a value the server starts sending render as one of the five — permissively, if the default
- * were `execute`, which is how an ungated Run ships. A sixth value must be loud.
+ * **The mapping is total and has no fallback.** Every `readiness` the document declares gets an
+ * explicit entry; {@link runModeFor} throws on anything else. A `??` or a
+ * `default:` here would make a value the server starts sending render as one of the four —
+ * permissively, if the default were `replay`, which is how an ungated Run ships. A fifth value must
+ * be loud.
  *
- * `studioContract.test.ts` reads the five states from
- * `components.schemas.TestDto.properties.compileStatus.enum` and asserts this record covers them
- * exactly, in both directions, through the binding story 10.10 installed.
+ * `studioContract.test.ts` reads the four states from
+ * `components.schemas.TestDto.properties.readiness.enum` and asserts {@link RUN_MODE} covers them
+ * exactly, in both directions, with `READY` the one state that replays.
  */
-export type RunAction =
-  /** The confirmed revision matches the saved draft: dispatch it. */
-  | 'execute'
-  /** No fresh artifact for the saved draft: compile it, then execute. */
-  | 'compile'
-  /** A compile is already running, here or in another tab: wait for it to settle. */
-  | 'wait';
 
-export const RUN_ACTION: Readonly<Record<CompileStatus, RunAction>> = {
-  STALE: 'compile',
-  COMPILING: 'wait',
-  AWAITING_CONFIRMATION: 'compile',
-  READY: 'execute',
-  NEEDS_REVISION: 'compile',
+/**
+ * The three Run modes, plus the one state in which Run is disabled (STUDIO-OBS-008 AC-2):
+ *  - `replay`: `READY`, the ordinary execute;
+ *  - `learn`: `UNLEARNED`, a guided session with no base and no boundary hint;
+ *  - `relearn`: `NEEDS_RELEARN`, a guided session with `baseRevisionId = confirmedRevisionId` and
+ *    `firstLearnStepId` = the server's `firstChangedStepId` (D-3), or the first current step when the
+ *    reason is `BASE_IDENTITY_INCOMPLETE` (D-4);
+ *  - `busy`: `LEARNING`, Run disabled while the session runs.
+ */
+export type RunMode = 'replay' | 'learn' | 'relearn' | 'busy';
+
+export const RUN_MODE: Readonly<Record<TestReadiness, RunMode>> = {
+  UNLEARNED: 'learn',
+  LEARNING: 'busy',
+  READY: 'replay',
+  NEEDS_RELEARN: 'relearn',
 };
 
-/**
- * Total lookup. Throws rather than defaulting — see the module comment.
- *
- * AC-1's first falsification adds a sixth member to an in-test copy of the document and asserts
- * the enumeration goes red; this throw is what makes that happen instead of a sixth state
- * rendering as a quietly disabled — or quietly enabled — control.
- *
- * @param status the draft's declared compile status
- * @returns what Run does next
- */
-export function runActionFor(status: string): RunAction {
-  const action = (RUN_ACTION as Record<string, RunAction>)[status];
-  if (!action) {
-    throw new Error(
-      `Unknown compileStatus "${status}": the five states of architecture §4.2 are the whole set, ` +
-        'and deciding what Run should do for an unknown sixth would be the client forming ' +
-        'an opinion the server did not give it.',
-    );
-  }
-  return action;
+function unknownReadiness(readiness: string): Error {
+  return new Error(
+    `Unknown readiness "${readiness}": the four states of ADR-SC-005 are the whole set, ` +
+      'and deciding what Run should do for an unknown fifth would be the client forming ' +
+      'an opinion the server did not give it.',
+  );
 }
 
 /**
- * Whether the control is available at all.
+ * Total lookup of the Run mode. Throws rather than defaulting — see the module comment.
  *
- * Only `wait` disables it: a compile is in flight and a second one would be refused anyway.
+ * @param readiness the draft's declared readiness
+ * @returns the mode Run starts in, or `busy`
+ */
+export function runModeFor(readiness: string): RunMode {
+  const mode = (RUN_MODE as Record<string, RunMode>)[readiness];
+  if (!mode) {
+    throw unknownReadiness(readiness);
+  }
+  return mode;
+}
+
+/**
+ * Whether the control can be pressed for this readiness: every state but `LEARNING`, where a guided
+ * session is already running and the live state is shown instead (AC-2).
  *
- * @param status the draft's declared compile status
+ * @param readiness the draft's declared readiness
  * @returns whether Run can be pressed
  */
-export function runAvailableFor(status: string): boolean {
-  return runActionFor(status) !== 'wait';
+export function runAvailableFor(readiness: string): boolean {
+  return runModeFor(readiness) !== 'busy';
 }
 
-/** The one state the server will dispatch without preparation, named so a reader need not scan. */
-export const EXECUTABLE_COMPILE_STATUS: CompileStatus = 'READY';
+/** The one state the server replays without learning, named so a reader need not scan. */
+export const EXECUTABLE_READINESS: TestReadiness = 'READY';
 
-/** The one state in which Run must wait rather than act. */
-export const WAITING_COMPILE_STATUS: CompileStatus = 'COMPILING';
+/** The learned chip for `READY` (UX panel 2026-10-09 single-path state model). */
+export const LEARNED_READY_LABEL = 'Learned · ready to repeat';

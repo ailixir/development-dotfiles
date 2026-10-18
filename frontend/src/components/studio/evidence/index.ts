@@ -1,5 +1,9 @@
 export { VideoEvidencePanel } from './VideoEvidencePanel';
-export type { VideoEvidencePanelProps } from './VideoEvidencePanel';
+export type { VideoEvidencePanelProps, GuidedVideoEvidence } from './VideoEvidencePanel';
+export { GuidedSeekControls } from './GuidedSeekControls';
+export type { GuidedSeekControlsProps } from './GuidedSeekControls';
+export { guidedSeekTargets } from './guidedSeekTargets';
+export type { GuidedStepSeekTarget, GuidedActionSeekTarget } from './guidedSeekTargets';
 export {
   VIDEO_EVIDENCE_NARRATIVES,
   PARTIAL_RECORDING_QUALIFIER,

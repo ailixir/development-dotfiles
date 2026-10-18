@@ -1,7 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type {
+  GuidedClarification,
+  GuidedResult,
+  GuidedSessionView,
+} from '@/types/studio/studioGuidedTypes';
 
 interface StudioState {
-  testSteps: string[];
   isExecuting: boolean;
   executionLogs: Array<{
     timestamp: string;
@@ -16,14 +20,26 @@ interface StudioState {
     timestamp: string;
   }>;
   currentStep: number;
+  /**
+   * Guided sessions (STUDIO-OBS-008 AC-2). The test ID to the session ID the page is following.
+   * Readiness is never derived here: it is read from `getTest` and the result.
+   */
+  guidedSessionByTestId: Record<string, string>;
+  guidedSessionViewById: Record<string, GuidedSessionView>;
+  guidedResultById: Record<string, GuidedResult>;
+  /** `null` is "read, none pending"; an absent key is "not read yet". */
+  guidedClarificationById: Record<string, GuidedClarification | null>;
 }
 
 const initialState: StudioState = {
-  testSteps: [],
   isExecuting: false,
   executionLogs: [],
   stepResults: [],
   currentStep: -1,
+  guidedSessionByTestId: {},
+  guidedSessionViewById: {},
+  guidedResultById: {},
+  guidedClarificationById: {},
 };
 
 const studioSlice = createSlice({
@@ -35,11 +51,9 @@ const studioSlice = createSlice({
       if (action.payload) {
         // Clear previous results when starting execution
         state.executionLogs = [];
-        state.stepResults = state.testSteps.map((_, index) => ({
-          stepIndex: index,
-          status: 'PENDING',
-          timestamp: new Date().toISOString(),
-        }));
+        // The Redux `testSteps` field was never written (cleanup inventory CLN-14), so this was
+        // always an empty list; the page keeps its own steps and per-step results.
+        state.stepResults = [];
         state.currentStep = -1;
       }
     },
@@ -79,6 +93,36 @@ const studioSlice = createSlice({
     clearLogs: (state) => {
       state.executionLogs = [];
     },
+
+    setGuidedSession: (state, action: PayloadAction<{ testId: string; sessionId: string }>) => {
+      state.guidedSessionByTestId[action.payload.testId] = action.payload.sessionId;
+    },
+
+    setGuidedSessionView: (state, action: PayloadAction<GuidedSessionView>) => {
+      state.guidedSessionViewById[action.payload.session.sessionId] = action.payload;
+    },
+
+    setGuidedResult: (state, action: PayloadAction<GuidedResult>) => {
+      state.guidedResultById[action.payload.sessionId] = action.payload;
+    },
+
+    setGuidedClarification: (
+      state,
+      action: PayloadAction<{ sessionId: string; clarification: GuidedClarification | null }>,
+    ) => {
+      state.guidedClarificationById[action.payload.sessionId] = action.payload.clarification;
+    },
+
+    /** Forgets the session a test was following, with its view, result and question. */
+    clearGuidedSession: (state, action: PayloadAction<{ testId: string }>) => {
+      const sessionId = state.guidedSessionByTestId[action.payload.testId];
+      delete state.guidedSessionByTestId[action.payload.testId];
+      if (sessionId !== undefined) {
+        delete state.guidedSessionViewById[sessionId];
+        delete state.guidedResultById[sessionId];
+        delete state.guidedClarificationById[sessionId];
+      }
+    },
   },
 });
 
@@ -88,6 +132,11 @@ export const {
   setAllStepResults,
   setCurrentStep,
   clearLogs,
+  setGuidedSession,
+  setGuidedSessionView,
+  setGuidedResult,
+  setGuidedClarification,
+  clearGuidedSession,
 } = studioSlice.actions;
 
 export default studioSlice.reducer;

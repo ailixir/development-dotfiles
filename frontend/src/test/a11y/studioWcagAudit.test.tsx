@@ -9,7 +9,7 @@ import path from 'node:path';
 import axe, { type AxeResults, type Result } from 'axe-core';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { awaitingDraft, readyDraft } from '@/services/mocks/studio/compileFixtures';
+import { readyDraft, unlearnedDraft } from '@/services/mocks/studio/readinessFixtures';
 import {
   DEV_TRANSPORT_SCENARIO,
   TERMINAL_EVIDENCE_SETTLED,
@@ -291,7 +291,7 @@ describe('AC-12(a): axe-core conformance scan of the seven named Studio surfaces
     renderPage(<StudioTestsPage />);
     // Wait for the served draft to actually appear, so the scan reads the loaded list rather than
     // a loading state. `findAllBy` because the name may render in more than one place.
-    await screen.findAllByText(/Compile review fixture/i);
+    await screen.findAllByText(/Run gate fixture/i);
     const drift = await scan('StudioTestsPage');
     expect(drift, drift.join('\n')).toEqual([]);
   }, SCAN_TIMEOUT_MS);
@@ -317,19 +317,23 @@ describe('AC-12(a): axe-core conformance scan of the seven named Studio surfaces
     expect(drift, drift.join('\n')).toEqual([]);
   }, SCAN_TIMEOUT_MS);
 
+  // Regression guard only (STUDIO-OBS-012B, cleanup inventory CLN-11): the review panel this surface
+  // was named for is deleted, so it scans the not-yet-learned author state under its old name and
+  // key. It is NOT rewritten to a guided state: ADR-SC-006 (functional accessibility only, no new
+  // audit surfaces) rules that out, so the name and pinned key stay as they are.
   it('surface 4 — ChecksStudioPage, compile-review state', async () => {
-    serveDraft(awaitingDraft);
+    serveDraft(unlearnedDraft);
     renderPage(<ChecksStudioPage />);
     await screen.findByRole('button', { name: 'Run Test' });
-    // The review panel is mounted inline by the page for the selected draft; awaitingDraft is the
-    // fixture whose compile status puts it in review.
     await waitFor(() => expect(document.body.textContent).toMatch(/step/i));
     const drift = await scan('ChecksStudioPage/compile-review');
     expect(drift, drift.join('\n')).toEqual([]);
   }, SCAN_TIMEOUT_MS);
 
+  // Regression guard only (STUDIO-OBS-012B, CLN-11): no confirm affordance exists on the single path,
+  // so this surface also scans the not-yet-learned author state. Not rewritten (ADR-SC-006).
   it('surface 5 — ChecksStudioPage, confirm state', async () => {
-    serveDraft(awaitingDraft);
+    serveDraft(unlearnedDraft);
     renderPage(<ChecksStudioPage />);
     await screen.findByRole('button', { name: 'Run Test' });
     const confirm = await screen

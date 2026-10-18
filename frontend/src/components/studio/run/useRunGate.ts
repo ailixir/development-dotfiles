@@ -1,14 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import studioApi from '@/services/api/studioApi';
 import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
-import type { CompileDiagnostics, CompileError, TestDto } from '@/types/studio/studioTypes';
-import { runActionFor, runAvailableFor, type RunAction } from './runEnablement';
-import { executeRefusalFor, type ExecuteRefusalNarrative } from './executeRefusals';
+import type { TestDetailDto } from '@/types/studio/studioTypes';
+import type {
+  GuidedStartContext,
+  GuidedStartRequest,
+  GuidedStartUnavailableCode,
+} from '@/types/studio/studioGuidedTypes';
+import { isStudioCapabilities } from '@/utils/config/studioCapabilities';
+import { runAvailableFor, runModeFor, type RunMode } from './runEnablement';
 import {
-  COMPILE_WATCH_WINDOW_MS,
-  compilePollSchedule,
-  RUN_POLL_SHAPE,
-} from '../review/compilePollBounds';
+  EXECUTE_FORBIDDEN_NARRATIVE,
+  executeRefusalFor,
+  type ExecuteRefusalNarrative,
+} from './executeRefusals';
 
 /**
  * The Run control's one source of truth (story 10.11a, AC-1, AC-2, AC-4).
@@ -19,51 +24,34 @@ import {
  * argument for the saved body and it is the same argument here: a client that takes apart
  * facts the server returned together is asserting a correspondence the server never promised.
  *
- * ## Run is the action that prepares and then runs
+ * ## One Run, three modes (STUDIO-OBS-008 AC-2)
  *
- * Saving used to compile in the background, which charged the author for translation work on every
- * keystroke-batch they saved, hid the cost, and — when the compile failed — left the draft `STALE`
- * with no way to ask again, because re-saving identical content is not a change and enqueued
- * nothing. Run now owns that work: save the draft if it is dirty, compile the saved revision if it
- * has no fresh artifact, then execute. One button, and the waiting is visible to the person who
- * asked for it.
+ * Run saves the draft if it is dirty and re-reads it. Then the fresh read's readiness decides:
+ *  - `READY` replays it through `POST /tests/{id}/execute`, under one key per activation;
+ *  - `UNLEARNED` starts a guided learning session with no base and no boundary hint;
+ *  - `NEEDS_RELEARN` starts a mixed-mode guided session with `baseRevisionId = confirmedRevisionId`
+ *    and `firstLearnStepId = firstChangedStepId`, both as served (D-3), or with the first current
+ *    step when `readinessReason` is `BASE_IDENTITY_INCOMPLETE` (D-4). The client never sends a step
+ *    positioned after the server's k;
+ *  - `LEARNING` keeps Run disabled: a session is already running.
  *
- * The server's own gate does not read `compileStatus` — it compares the confirmed revision's
- * revisions and hashes against the draft's. So `READY` is a hint, not a guarantee, and a
- * `409 COMPILE_REQUIRED` is the authority. One compile-then-execute retry answers it; a second
- * refusal is shown, because a client that retries a gate forever is arguing with it.
+ * A guided start follows plan P6: after the save, a fresh `GET /tests/{id}` and then
+ * `GET /tests/{id}/capabilities` (read directly, never from a cached hook answer). The capability's
+ * `guidedStart.context` is sent unchanged, and only when its test, revisions and environment agree
+ * exactly with the fresh read; `guidedStart.available: false` shows the existing refusal and makes
+ * no request. A draft with no steps never starts a session (D-11). The session itself, its keys,
+ * polling and the automatic finalize belong to `useGuidedSession`, which the page passes in as
+ * `startLearn`. There is no automatic retry anywhere: a refusal is shown as it is.
+ *
+ * "Learn again from step N" (T0 ruling A1.6) and the explicit first-step learn of a
+ * `BASE_IDENTITY_INCOMPLETE` refusal (architect P4) are the same start with a named step, through
+ * {@link RunGateState.learnFrom}. Their conditions are re-checked against the fresh read; if they no
+ * longer hold, nothing is sent.
  *
  * A refusal is held until the next activation. `POST /tests/{id}/execute` refuses *before any
  * dispatch effect* — no execution row, no ledger row, no browser — so a refused activation leaves
  * the surface exactly as it was, and saying so is the whole content of the narratives.
  */
-
-/**
- * How long Run waits for a compile before giving up (VAL-007 G4): the Code tab's watch window,
- * `studio.compile.abandonment.threshold` (300s) plus one `interval-ms` sweep pass (15s) = 315s.
- *
- * Not the attempt budget (240s): the server enforces that, and a compile that outlives it ends as
- * a declared state rather than as a silence. The case Run must outwait is the one where the server
- * itself went quiet — and a `COMPILING` row is swept to `STALE` at most one pass after it crosses
- * the threshold, so by the end of this window the server has answered. Giving up earlier reports
- * "took too long" moments before the answer; waiting longer watches for a transition that has
- * happened. `compileWaitBudget.test.ts` pins it to the window and to the shipped config.
- */
-export const COMPILE_WAIT_BUDGET_MS = COMPILE_WATCH_WINDOW_MS;
-
-/**
- * The delays between Run's reads while a compile settles (VAL-007 G3): 600ms, backing off ×1.6 to
- * a 5s ceiling, restarting for every compile. Derived from the same window it is bounded by.
- */
-export const RUN_COMPILE_POLL_DELAYS_MS: readonly number[] = compilePollSchedule(
-  COMPILE_WAIT_BUDGET_MS,
-  RUN_POLL_SHAPE,
-);
-
-/** The delay before the read after `attempt` reads, holding at the ceiling once it is reached. */
-function runPollDelay(attempt: number): number {
-  return RUN_COMPILE_POLL_DELAYS_MS[Math.min(attempt, RUN_COMPILE_POLL_DELAYS_MS.length - 1)];
-}
 
 export interface RunRefusalState {
   /** The wording, chosen by status and — for a `409` — by `error`. Never by the message. */
@@ -74,19 +62,8 @@ export interface RunRefusalState {
   readonly serverCode: string;
 }
 
-/** Why a compile started by Run did not produce something runnable. */
-export type RunCompileOutcome =
-  /** The validator refused the proposal. `diagnostics` carries the per-step reasons. */
-  | { readonly kind: 'needsRevision'; readonly diagnostics: CompileDiagnostics | null }
-  /** The attempt could not be completed — gateway, validator, pool, or budget. */
-  | { readonly kind: 'failed'; readonly error: CompileError | null }
-  /** A bound was refused before any compile state changed, so the draft is untouched. */
-  | { readonly kind: 'refused'; readonly message: string; readonly code: string }
-  /** The compile outlived {@link COMPILE_WAIT_BUDGET_MS}. The draft is unchanged. */
-  | { readonly kind: 'timedOut' };
-
 /** What Run is doing right now. */
-export type RunPhase = 'idle' | 'saving' | 'compiling' | 'starting';
+export type RunPhase = 'idle' | 'saving' | 'starting';
 
 /** What an injected save reported. Run continues only on `saved`. */
 export type RunSaveOutcome = 'saved' | 'conflict' | 'error';
@@ -107,7 +84,36 @@ export interface RunGateOptions {
    * second activation can slip into the moment between acceptance and the caller's re-render.
    */
   readonly isRunning?: boolean;
+  /**
+   * Starts a guided learning session (STUDIO-OBS-008 AC-2): the page's
+   * `useGuidedSession(testId).startLearn`. It resolves when the start was answered or refused, and
+   * rejects only when no response arrived. Without it, a draft that needs learning cannot be run
+   * from this control, and Run stays disabled for it.
+   */
+  readonly startLearn?: (request: GuidedStartRequest) => Promise<void>;
 }
+
+/**
+ * Why the client itself sent no guided start (plan P6): the capability said `guidedStart` is
+ * unavailable (`FORBIDDEN_SCOPE` or `RUNTIME_INCOMPATIBLE`), its start context disagreed with the
+ * fresh read of the test (a save landed in between), or an explicit learn whose conditions no longer
+ * hold on the fresh read. None is a session or a state.
+ */
+export type LearnStartBlock =
+  | { readonly kind: 'unavailable'; readonly code: GuidedStartUnavailableCode }
+  | { readonly kind: 'mismatch' };
+
+/**
+ * An explicit learn from a named step:
+ *  - `drift`: "Learn again from step N" after a replay drift (T0 ruling A1.6). Sent only while the
+ *    test is `READY`, its confirmed revision is the replayed one (`revisionId`), and the step is in
+ *    the current draft;
+ *  - `firstStep`: the explicit first-step learn a `BASE_IDENTITY_INCOMPLETE` refusal offers
+ *    (architect P4, D-4), from the first current step on the confirmed base.
+ */
+export type LearnFromRequest =
+  | { readonly kind: 'drift'; readonly stepId: string; readonly revisionId: string }
+  | { readonly kind: 'firstStep' };
 
 /**
  * Whether the caller may start a run of this test, as far as the server has said (story 10.48).
@@ -117,23 +123,23 @@ export interface RunGateOptions {
 export type ExecutePermission = 'allowed' | 'denied' | 'unknown';
 
 export interface RunGateState {
-  readonly test: TestDto | null;
+  readonly test: TestDetailDto | null;
   readonly executePermission: ExecutePermission;
   readonly loading: boolean;
   readonly loadError: string | null;
-  /** The total, fallback-free action for the draft's declared state. */
-  readonly action: RunAction | null;
+  /** The Run mode for the draft's declared state (`replay`, `learn`, `relearn` or `busy`). */
+  readonly mode: RunMode | null;
   readonly canRun: boolean;
   readonly refusal: RunRefusalState | null;
+  /** Why the last guided start was not sent by the client. Cleared by the next activation. */
+  readonly learnBlock: LearnStartBlock | null;
   /** True for every non-idle phase, so a caller can lock the editor with one flag. */
   readonly executeInFlight: boolean;
   readonly phase: RunPhase;
   readonly preparationMessage: string | null;
-  /** `Date.now()` when Run began waiting on the current compile, or null outside that phase. */
-  readonly compileStartedAt: number | null;
-  /** Set when a Run-started compile did not produce something runnable. */
-  readonly compileOutcome: RunCompileOutcome | null;
   readonly run: () => void;
+  /** An explicit learn from a named step. Same save, read, capability and start as Run. */
+  readonly learnFrom: (request: LearnFromRequest) => void;
 }
 
 interface ApiFailure {
@@ -151,11 +157,6 @@ function readFailure(error: unknown): { status: number | null; code: string; mes
   };
 }
 
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
 /**
  * How long an accepted activation holds the gate closed when the caller never reports the run as
  * running (VAL-039). The caller normally releases it sooner, when the run it showed ends.
@@ -164,8 +165,7 @@ export const ACCEPTED_LATCH_MS = 3000;
 
 /**
  * A fresh key per user activation (VAL-039): created once when Run is pressed and sent on that
- * activation's execute. Only the compile-then-retry after a `409 COMPILE_REQUIRED` /
- * `RUNTIME_INCOMPATIBLE` takes a key of its own, because the first one was answered with a refusal.
+ * activation's execute.
  *
  * The server's `IdempotencyFilter` refuses anything that is not a UUID with
  * `400 INVALID_IDEMPOTENCY_KEY`, so the fallback for environments without `crypto.randomUUID`
@@ -181,21 +181,67 @@ function idempotencyKey(): string {
   return `${hex(8)}-${hex(4)}-4${hex(3)}-${variant}${hex(3)}-${hex(12)}`;
 }
 
+/** The existing fallback wording when a Run could not be started and no narrative applies. */
+const START_FAILED = 'The run could not be started';
+
+/** The optional start hints, by mode (D-3, D-4). */
+type StartHints = Pick<GuidedStartRequest, 'baseRevisionId' | 'firstLearnStepId'>;
+
+/**
+ * `NEEDS_RELEARN`: the base is the confirmed revision and the boundary is the server's first changed
+ * step, both as served (D-3); `BASE_IDENTITY_INCOMPLETE` names the first current step instead (D-4).
+ * A value the server did not serve is not sent.
+ */
+function relearnHints(test: TestDetailDto): StartHints {
+  const firstLearnStepId =
+    test.readinessReason === 'BASE_IDENTITY_INCOMPLETE' ? test.steps[0]?.id : test.firstChangedStepId;
+  return {
+    ...(test.confirmedRevisionId ? { baseRevisionId: test.confirmedRevisionId } : {}),
+    ...(firstLearnStepId ? { firstLearnStepId } : {}),
+  };
+}
+
+/** The hints for an explicit learn, or `null` when its conditions no longer hold on the fresh read. */
+function learnFromHints(test: TestDetailDto, request: LearnFromRequest): StartHints | null {
+  if (test.confirmedRevisionId === null) return null;
+  if (request.kind === 'firstStep') {
+    const first = test.steps[0]?.id;
+    return first ? { baseRevisionId: test.confirmedRevisionId, firstLearnStepId: first } : null;
+  }
+  const holds =
+    test.readiness === 'READY' &&
+    test.confirmedRevisionId === request.revisionId &&
+    test.steps.some((step) => step.id === request.stepId);
+  return holds ? { baseRevisionId: test.confirmedRevisionId, firstLearnStepId: request.stepId } : null;
+}
+
+/** Plan P6: the capability's start context must agree exactly with the fresh read, or nothing starts. */
+function contextMatches(context: GuidedStartContext, test: TestDetailDto): boolean {
+  return (
+    context.testId === test.id &&
+    context.sourceRevision === String(test.sourceRevision) &&
+    context.configurationRevision === String(test.configurationRevision) &&
+    context.environmentId === test.environment
+  );
+}
+
+/** What one activation asks for. */
+type Activation = { readonly type: 'run' } | { readonly type: 'learnFrom'; readonly request: LearnFromRequest };
+
 export function useRunGate(
   testId: string | null,
   onAccepted?: (executionId: string) => void,
   refreshToken?: string | number,
   options?: RunGateOptions,
 ): RunGateState {
-  const [test, setTest] = useState<TestDto | null>(null);
+  const [test, setTest] = useState<TestDetailDto | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [refusal, setRefusal] = useState<RunRefusalState | null>(null);
   const [phase, setPhase] = useState<RunPhase>('idle');
   const [preparationMessage, setPreparationMessage] = useState<string | null>(null);
-  const [compileStartedAt, setCompileStartedAt] = useState<number | null>(null);
-  const [compileOutcome, setCompileOutcome] = useState<RunCompileOutcome | null>(null);
   const [executePermission, setExecutePermission] = useState<ExecutePermission>('unknown');
+  const [learnBlock, setLearnBlock] = useState<LearnStartBlock | null>(null);
 
   /**
    * Set synchronously, before the first `await`. AC-2 counts requests at the mock server, so the
@@ -245,8 +291,6 @@ export function useRunGate(
 
   useEffect(() => {
     let current = true;
-    let pollTimer: ReturnType<typeof setTimeout> | undefined;
-    let pollAttempt = 0;
     if (!testId) {
       setTest(null);
       setLoading(false);
@@ -257,16 +301,13 @@ export function useRunGate(
     setLoading(true);
     setLoadError(null);
     setRefusal(null);
+    setLearnBlock(null);
     const load = async (initial: boolean) => {
       try {
         const body = await studioApi.getTest(testId);
         if (!current) return;
         setTest(body);
         setLoading(false);
-        if (body.compileStatus === 'COMPILING') {
-          pollTimer = setTimeout(() => void load(false), runPollDelay(pollAttempt));
-          pollAttempt += 1;
-        }
       } catch (error: unknown) {
         if (!current) return;
         if (initial) setTest(null);
@@ -278,7 +319,6 @@ export function useRunGate(
     void load(true);
     return () => {
       current = false;
-      if (pollTimer) clearTimeout(pollTimer);
     };
   }, [refreshToken, testId]);
 
@@ -317,89 +357,27 @@ export function useRunGate(
     };
   }, [testId]);
 
-  const action = test ? runActionFor(test.compileStatus) : null;
+  const mode = test ? runModeFor(test.readiness) : null;
+  const canLearn = options?.startLearn !== undefined;
   const canRun =
     test !== null &&
-    runAvailableFor(test.compileStatus) &&
+    runAvailableFor(test.readiness) &&
+    (mode === 'replay' || canLearn) &&
     phase === 'idle' &&
     executePermission !== 'denied';
 
-  /**
-   * Waits for a compile to settle, publishing each body it reads.
-   *
-   * @param id the draft being prepared
-   * @returns the last body read, or null when the wait budget elapsed
-   */
-  const awaitCompileSettled = useCallback(async (id: string): Promise<TestDto | null> => {
-    const deadline = Date.now() + COMPILE_WAIT_BUDGET_MS;
-    for (let attempt = 0; ; attempt += 1) {
-      const body = await studioApi.getTest(id);
-      if (mounted.current) setTest(body);
-      if (body.compileStatus !== 'COMPILING') return body;
-      // The schedule fits inside the budget; the clock also counts the time the reads took.
-      if (attempt >= RUN_COMPILE_POLL_DELAYS_MS.length || Date.now() >= deadline) return null;
-      await sleep(RUN_COMPILE_POLL_DELAYS_MS[attempt]);
-    }
-  }, []);
-
-  /**
-   * Brings the saved draft to something the server will dispatch.
-   *
-   * @param id the draft being prepared
-   * @param current the body Run last read
-   * @returns the prepared body, or an outcome explaining why there is none
-   */
-  const prepare = useCallback(
-    async (
-      id: string,
-      current: TestDto,
-    ): Promise<{ ready: TestDto } | { outcome: RunCompileOutcome }> => {
-      let body = current;
-      // The elapsed clock restarts for every compile, including the one a 409 asks for.
-      setCompileStartedAt(Date.now());
-      if (runActionFor(body.compileStatus) === 'compile') {
-        setPhase('compiling');
-        setPreparationMessage('Preparing your test…');
-        try {
-          await studioApi.compileTest(id);
-        } catch (error: unknown) {
-          const failure = readFailure(error);
-          // A 400 is a bound refused before any state changed; a 409 is the lifecycle.
-          return {
-            outcome: {
-              kind: 'refused',
-              message: failure.message || 'This test could not be prepared',
-              code: failure.code,
-            },
-          };
-        }
-      }
-      setPhase('compiling');
-      setPreparationMessage('Preparing your test…');
-      const settled = await awaitCompileSettled(id);
-      if (settled === null) return { outcome: { kind: 'timedOut' } };
-      body = settled;
-      if (body.compileStatus === 'READY') return { ready: body };
-      if (body.compileStatus === 'NEEDS_REVISION') {
-        return { outcome: { kind: 'needsRevision', diagnostics: body.compileDiagnostics ?? null } };
-      }
-      return { outcome: { kind: 'failed', error: body.compileError ?? null } };
-    },
-    [awaitCompileSettled],
-  );
-
-  const run = useCallback(() => {
+  const activate = useCallback((intent: Activation) => {
     if (inFlight.current) return;
     if (!test || !testId) return;
-    if (!runAvailableFor(test.compileStatus)) return;
+    if (intent.type === 'run' && !runAvailableFor(test.readiness)) return;
     // The server said this caller may not run it: send nothing (story 10.48, AC-10b).
     if (executePermission === 'denied') return;
 
     inFlight.current = true;
-    setPhase(runOptions.current?.isDirty === true ? 'saving' : 'compiling');
+    setPhase(runOptions.current?.isDirty === true ? 'saving' : 'starting');
     setRefusal(null);
     setLoadError(null);
-    setCompileOutcome(null);
+    setLearnBlock(null);
 
     // One key per user activation, created before anything is awaited (VAL-039).
     const activationKey = idempotencyKey();
@@ -409,7 +387,6 @@ export function useRunGate(
       if (!mounted.current) return;
       setPhase('idle');
       setPreparationMessage(null);
-      setCompileStartedAt(null);
     };
 
     /** Settles an accepted activation, keeping the gate closed while the caller shows the run. */
@@ -429,7 +406,62 @@ export function useRunGate(
       if (!mounted.current) return;
       setPhase('idle');
       setPreparationMessage(null);
-      setCompileStartedAt(null);
+    };
+
+    /**
+     * Plan P6: the capability is read after the save and the fresh read, and its exact context is
+     * sent with the mode's hints. Every way it can say no ends here with no start request.
+     */
+    const startGuided = async (body: TestDetailDto, hints: StartHints): Promise<void> => {
+      const startLearn = runOptions.current?.startLearn;
+      // D-11: a draft with no steps never starts a session; the gate also disables Run for it.
+      if (!startLearn || body.steps.length === 0) {
+        settle();
+        return;
+      }
+      setPhase('starting');
+      setPreparationMessage('Starting the browser…');
+      let capabilities: unknown;
+      try {
+        capabilities = await studioApi.getCapabilities(testId);
+      } catch (error: unknown) {
+        inFlight.current = false;
+        if (!mounted.current) return;
+        setPhase('idle');
+        setPreparationMessage(null);
+        // Unavailable, never simulated. A 403 is the same refusal execute would give.
+        const failure = readFailure(error);
+        if (failure.status === 403) {
+          setRefusal({ narrative: EXECUTE_FORBIDDEN_NARRATIVE, serverMessage: failure.message, serverCode: failure.code });
+        } else {
+          setLoadError(START_FAILED);
+        }
+        return;
+      }
+      if (!isStudioCapabilities(capabilities)) {
+        if (mounted.current) setLoadError(START_FAILED);
+        settle();
+        return;
+      }
+      if (!capabilities.guidedStart.available) {
+        if (mounted.current) setLearnBlock({ kind: 'unavailable', code: capabilities.guidedStart.code });
+        settle();
+        return;
+      }
+      const { context } = capabilities.guidedStart;
+      if (!contextMatches(context, body)) {
+        if (mounted.current) setLearnBlock({ kind: 'mismatch' });
+        settle();
+        return;
+      }
+      try {
+        await startLearn({ ...context, ...hints });
+      } catch {
+        // No response ever arrived. The hook keeps its pointer, so the next Run retries the same
+        // request under the same key; nothing is retried here.
+        if (mounted.current) setLoadError(START_FAILED);
+      }
+      settle();
     };
 
     void (async () => {
@@ -445,80 +477,77 @@ export function useRunGate(
           }
         }
 
-        // Re-read after the save: the body Run started from may predate it.
-        let body = await studioApi.getTest(testId);
+        // Re-read after the save: the body Run started from may predate it, and a saved edit
+        // changes readiness. The fresh read alone decides the mode.
+        const body = await studioApi.getTest(testId);
         if (mounted.current) setTest(body);
 
-        let prepared = await prepare(testId, body);
-        if ('outcome' in prepared) {
-          if (mounted.current) setCompileOutcome(prepared.outcome);
-          settle();
-          return;
-        }
-        body = prepared.ready;
-
-        setPhase('starting');
-        setCompileStartedAt(null);
-        setPreparationMessage('Starting the browser…');
-        try {
-          const acceptedRun = await studioApi.executeTest(testId, activationKey);
-          settleAccepted(acceptedRun.executionId);
-          return;
-        } catch (error: unknown) {
-          const failure = readFailure(error);
-          const stale =
-            failure.status === 409 &&
-            (failure.code === 'COMPILE_REQUIRED' || failure.code === 'RUNTIME_INCOMPATIBLE');
-          if (!stale) throw error;
-
-          // The server's gate is the authority: prepare once more, then execute once more.
-          const refreshed = await studioApi.getTest(testId);
-          if (mounted.current) setTest(refreshed);
-          prepared = await prepare(testId, { ...refreshed, compileStatus: 'STALE' });
-          if ('outcome' in prepared) {
-            if (mounted.current) setCompileOutcome(prepared.outcome);
+        if (intent.type === 'learnFrom') {
+          const hints = learnFromHints(body, intent.request);
+          if (hints === null) {
+            // The conditions no longer hold on the fresh read: nothing starts, and the page says so (W5 UX-13).
+            if (mounted.current) setLearnBlock({ kind: 'mismatch' });
             settle();
             return;
           }
-          setPhase('starting');
-          setCompileStartedAt(null);
-          setPreparationMessage('Starting the browser…');
-          // The first key was answered with a refusal, so the retry carries its own.
-          const acceptedRun = await studioApi.executeTest(testId, idempotencyKey());
-          settleAccepted(acceptedRun.executionId);
+          await startGuided(body, hints);
           return;
         }
+
+        const freshMode = runModeFor(body.readiness);
+        if (freshMode === 'busy') {
+          settle();
+          return;
+        }
+        if (freshMode === 'learn') {
+          await startGuided(body, {});
+          return;
+        }
+        if (freshMode === 'relearn') {
+          await startGuided(body, relearnHints(body));
+          return;
+        }
+
+        setPhase('starting');
+        setPreparationMessage('Starting the browser…');
+        const acceptedRun = await studioApi.executeTest(testId, activationKey);
+        settleAccepted(acceptedRun.executionId);
       } catch (error: unknown) {
         inFlight.current = false;
         if (!mounted.current) return;
         setPhase('idle');
         setPreparationMessage(null);
-        setCompileStartedAt(null);
         const failure = readFailure(error);
         const narrative = executeRefusalFor(failure.status, failure.code);
         setRefusal(
           narrative ? { narrative, serverMessage: failure.message, serverCode: failure.code } : null,
         );
         if (!narrative) {
-          setLoadError(failure.message || 'The run could not be started');
+          setLoadError(failure.message || START_FAILED);
         }
       }
     })();
-  }, [executePermission, prepare, releaseLatch, test, testId]);
+  }, [executePermission, releaseLatch, test, testId]);
+
+  const run = useCallback(() => activate({ type: 'run' }), [activate]);
+  const learnFrom = useCallback(
+    (request: LearnFromRequest) => activate({ type: 'learnFrom', request }),
+    [activate],
+  );
 
   return {
     test,
     executePermission,
     loading,
     loadError,
-    action,
+    mode,
     canRun,
     refusal,
+    learnBlock,
     executeInFlight: phase !== 'idle',
     phase,
     preparationMessage,
-    compileStartedAt,
-    compileOutcome,
     run,
+    learnFrom,
   };
 }

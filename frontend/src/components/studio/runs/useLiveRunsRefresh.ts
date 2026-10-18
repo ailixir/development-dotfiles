@@ -1,11 +1,17 @@
 import { useEffect, useRef } from 'react';
-import type { CompilePollShape } from '@/components/studio/review/compilePollBounds';
+
+/** A backoff: the first delay, the factor each later delay grows by, and its ceiling. */
+export interface LiveRunsPollShape {
+  readonly firstDelayMs: number;
+  readonly backoffFactor: number;
+  readonly maxDelayMs: number;
+}
 
 /**
- * The list's live-refresh backoff, in the same shape as the compile watch. The first re-read comes
- * soon after a run appears; the ceiling keeps a long run from holding a request slot every second.
+ * The list's live-refresh backoff. The first re-read comes soon after a run appears; the ceiling
+ * keeps a long run from holding a request slot every second.
  */
-export const LIVE_RUNS_POLL_SHAPE: CompilePollShape = {
+export const LIVE_RUNS_POLL_SHAPE: LiveRunsPollShape = {
   firstDelayMs: 2_000,
   backoffFactor: 1.5,
   maxDelayMs: 15_000,
@@ -16,7 +22,7 @@ export interface LiveRunsRefreshOptions {
   active: boolean;
   /** One background re-read of the list. */
   refresh: () => Promise<void>;
-  shape?: CompilePollShape;
+  shape?: LiveRunsPollShape;
 }
 
 function isDocumentHidden(): boolean {

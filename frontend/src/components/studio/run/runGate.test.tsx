@@ -1,5 +1,5 @@
 import React from 'react';
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { http, HttpResponse } from 'msw';
@@ -8,29 +8,38 @@ import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { draftsByCompileStatus, readyDraft } from '@/services/mocks/studio/compileFixtures';
-import type { TestDto } from '@/types/studio/studioTypes';
-import CodeTab, {
-  CODE_VIEW_BLOCKER,
-  CODE_VIEW_UNAVAILABLE_TITLE,
-} from '@/components/studio/CodeTab';
-import { RunControl, RUN_LABEL } from './RunControl';
+import { setGuidedStartCapability } from '@/services/mocks/studio/capabilityHandlers';
+import { fixtureDetail, fixtureStepId } from '@/services/mocks/studio/authoringState';
+import {
+  draftsByReadiness,
+  learningDraft,
+  needsRelearnDraft,
+  readyDraft,
+  unlearnedDraft,
+} from '@/services/mocks/studio/readinessFixtures';
+import type { TestDetailDto, TestDto } from '@/types/studio/studioTypes';
+import type { GuidedStartRefusal, GuidedStartRequest } from '@/types/studio/studioGuidedTypes';
+import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
+import { RunControl, RUN_LABEL, type RunControlProps } from './RunControl';
+import { EXECUTE_CONFLICT_NARRATIVES } from './executeRefusals';
+import { LEARNED_READY_LABEL } from './runEnablement';
 
 /**
- * Story 10.11a — the run gate is the server's, and the two authorities it retires
- * (AC-1, AC-2, AC-3a).
+ * Story 10.11a — the run gate is the server's — on the single path of STUDIO-OBS-008 AC-2
+ * (ADR-SC-005): readiness comes from `GET /tests/{id}`. `READY` replays through the ordinary
+ * execute; `UNLEARNED` starts a guided learning session; `NEEDS_RELEARN` starts a mixed-mode one from
+ * the server's first changed step; `LEARNING` keeps Run disabled.
  *
- * **Everything that counts is counted at the mock server.** A source scan for `validation.isValid`
- * is the epic's fourth catalogued vacuity shape — a gate rebuilt through a differently-named local
- * passes a grep — so the discriminating assertions here are over the requests MSW actually
- * observed. The import scan at the end is named as the weaker supplement and nothing rests on it
- * alone.
+ * **Everything that counts is counted at the mock server**, and the guided start is counted at the
+ * one function the gate is given for it (`startLearn`, the page's `useGuidedSession`). The import
+ * scan at the end is the weaker supplement and nothing rests on it alone.
  */
 
 const STUDIO_BASE = '*/api/v1/studio';
 const SPEC_DIR = path.resolve(__dirname, '../../../../../docs/specs/studio');
 const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), 'utf8'));
-const DECLARED_STATES: string[] = openapi.components.schemas.TestDto.properties.compileStatus.enum;
+/** Read from the document, never from the module under test (VAC-11). */
+const DECLARED_STATES: string[] = openapi.components.schemas.TestDto.properties.readiness.enum;
 
 /** Every request the server saw, in order. Never a spy: a spy is one layer from the wire. */
 const observed: { method: string; url: string }[] = [];
@@ -43,9 +52,23 @@ function executeRequests(): { method: string; url: string }[] {
   return observed.filter((entry) => entry.method === 'POST' && entry.url.includes('/execute'));
 }
 
-/** Run now prepares before it dispatches, so what it asked the server to prepare is countable. */
-function compileRequests(): { method: string; url: string }[] {
-  return observed.filter((entry) => entry.method === 'POST' && entry.url.includes('/compile'));
+function capabilityReads(): { method: string; url: string }[] {
+  return observed.filter((entry) => entry.method === 'GET' && /\/tests\/[^/]+\/capabilities$/u.test(entry.url));
+}
+
+/**
+ * Every request outside the run gate's own reads and its one write. The single path has no
+ * client-side preparation step, so anything else Run sends is a second, undeclared path. The guided
+ * start itself is not a request of this control: it is the injected `startLearn`.
+ */
+function unexpectedRequests(): { method: string; url: string }[] {
+  return observed.filter(
+    (entry) =>
+      !(entry.method === 'GET' && /\/tests\/[^/]+(\?.*)?$/u.test(entry.url)) &&
+      !(entry.method === 'GET' && entry.url.includes('/schedule/capabilities')) &&
+      !(entry.method === 'GET' && /\/tests\/[^/]+\/capabilities$/u.test(entry.url)) &&
+      !(entry.method === 'POST' && /\/tests\/[^/]+\/execute$/u.test(entry.url)),
+  );
 }
 
 beforeAll(() => {
@@ -65,14 +88,17 @@ afterAll(() => {
 });
 
 /**
- * The draft for a declared state.
- *
- * A lookup with a constructed fallback rather than a bare lookup, and the difference is the whole
- * of AC-1's first falsification: a sixth member added to an in-test copy of the document must
- * reach a real render, not fall out of the loop as `undefined` and quietly prove nothing.
+ * The draft for a declared state. A lookup with a constructed fallback rather than a bare lookup:
+ * a fifth member added to an in-test copy of the document must reach a real render, not fall out
+ * of the loop as `undefined` and quietly prove nothing.
  */
 function draftFor(state: string): TestDto {
-  return draftsByCompileStatus[state] ?? { ...readyDraft, compileStatus: state as TestDto['compileStatus'] };
+  return (
+    (draftsByReadiness as Record<string, TestDto>)[state] ?? {
+      ...readyDraft,
+      readiness: state as TestDto['readiness'],
+    }
+  );
 }
 
 /** Observes a render-time throw so it is asserted rather than escaping as an unhandled error. */
@@ -95,56 +121,481 @@ class LoudFailureBoundary extends React.Component<
   }
 }
 
-function serve(test: TestDto) {
-  studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(test)));
-  return render(<RunControl testId={test.id} />);
+/** The guided start the gate is given: it records each request and resolves like an answered start. */
+function startLearnSpy() {
+  return vi.fn(async (_request: GuidedStartRequest) => undefined);
 }
 
-describe('AC-1: Run acts in every declared state except while a compile is already settling', () => {
-  it('enumerating every compileStatus the document declares — FX-RUNGATE-STATE-STALE, FX-RUNGATE-STATE-COMPILING, FX-RUNGATE-STATE-AWAITING_CONFIRMATION, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_REVISION', async () => {
+function serve(test: TestDto | TestDetailDto, props: Partial<RunControlProps> = {}) {
+  studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(test)));
+  return render(<RunControl testId={test.id} startLearn={startLearnSpy()} {...props} />);
+}
+
+/** Waits until the control has read the test: `data-run-mode` leaves `loading`. */
+async function settledControl(): Promise<HTMLElement> {
+  const control = await screen.findByRole('button', { name: RUN_LABEL });
+  await waitFor(() => expect(control.getAttribute('data-run-mode')).not.toBe('loading'));
+  return control;
+}
+
+/** The start context the capability mirror serves for a readiness fixture (plan P6). */
+function contextOf(test: TestDto) {
+  return {
+    schemaVersion: 3,
+    testId: test.id,
+    sourceRevision: String(test.sourceRevision),
+    configurationRevision: String(test.configurationRevision),
+    environmentId: test.environment,
+    applicationId: test.csiId,
+    versions: { contract: 3 },
+  };
+}
+
+describe('AC-1 / STUDIO-OBS-008 AC-2: Run acts in every state but LEARNING', () => {
+  it('enumerating every readiness the document declares — FX-RUNGATE-STATE-UNLEARNED, FX-RUNGATE-STATE-LEARNING, FX-RUNGATE-STATE-READY, FX-RUNGATE-STATE-NEEDS_RELEARN', async () => {
     expect(DECLARED_STATES.length).toBeGreaterThan(0);
     const enabledIn: string[] = [];
+    const modes: Record<string, string | null> = {};
 
     for (const state of DECLARED_STATES) {
-      const view = serve(draftFor(state));
-      const control = await screen.findByRole('button', { name: RUN_LABEL });
-      await waitFor(() => {
-        // The read has landed: the blocked explanation or the enabled control, never the
-        // pre-read disabled state, which would make every state look identical.
-        expect(control.hasAttribute('disabled') === false || screen.queryByTestId('run-blocked-reason')).toBeTruthy();
-      });
+      const view = serve(fixtureDetail(draftFor(state)));
+      const control = await settledControl();
+      modes[state] = control.getAttribute('data-run-mode');
       if (!control.hasAttribute('disabled')) {
         enabledIn.push(state);
       }
       view.unmount();
     }
 
-    // Saving no longer compiles, so a draft without a fresh artifact is not a blocked draft — it
-    // is a draft whose first Run step is a compile. The one state that still disables the control
-    // is COMPILING: a compile is already settling and a second would be refused anyway.
-    expect(
-      enabledIn.slice().sort(),
-      'Run is disabled in a state it should act in, or enabled while a compile is settling',
-    ).toEqual(DECLARED_STATES.filter((state) => state !== 'COMPILING').slice().sort());
+    // One Run, three modes: replay, learn, mixed-mode learn. A running session disables it.
+    expect(enabledIn.slice().sort()).toEqual(['NEEDS_RELEARN', 'READY', 'UNLEARNED']);
+    expect(modes).toEqual({ UNLEARNED: 'learn', LEARNING: 'busy', READY: 'replay', NEEDS_RELEARN: 'relearn' });
   });
 
   it('a state the document does not declare is a loud failure rather than a permissive default', async () => {
-    // The production symbol the name refers to is what gets mutated: `runEnablementFor` throws,
-    // so a sixth value cannot render a control at all — enabled or disabled. The boundary is here
-    // only so the throw is observed rather than escaping the run as an unhandled error; what is
-    // asserted is that the control is gone and the reason names the state.
-    const sixth = { ...readyDraft, compileStatus: 'SOMETHING_ELSE' as TestDto['compileStatus'] };
-    studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(sixth)));
+    // `runModeFor` throws, so a fifth value cannot render a control at all — enabled or
+    // disabled. The boundary is here only so the throw is observed rather than escaping.
+    const fifth = { ...readyDraft, readiness: 'SOMETHING_ELSE' as TestDto['readiness'] };
+    studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fifth)));
 
     render(
       <LoudFailureBoundary>
-        <RunControl testId={sixth.id} />
+        <RunControl testId={fifth.id} />
       </LoudFailureBoundary>,
     );
 
     const caught = await screen.findByTestId('loud-failure');
-    expect(caught.textContent).toMatch(/Unknown compileStatus "SOMETHING_ELSE"/);
+    expect(caught.textContent).toMatch(/Unknown readiness "SOMETHING_ELSE"/);
     expect(screen.queryByRole('button', { name: RUN_LABEL })).toBeNull();
+  });
+
+  it('without a guided transport, a draft that needs learning cannot be run from the control', async () => {
+    studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(unlearnedDraft))));
+    render(<RunControl testId={unlearnedDraft.id} />);
+    const control = await settledControl();
+    expect(control).toBeDisabled();
+    fireEvent.click(control);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(executeRequests()).toHaveLength(0);
+    expect(capabilityReads()).toHaveLength(0);
+  });
+});
+
+describe('STUDIO-OBS-008 AC-2: one Run, three modes, no hidden executions', () => {
+  it('(a) READY: Run sends one execute and nothing else, and starts no guided session', async () => {
+    studioMockServer.use(
+      http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
+        HttpResponse.json({ executionId: '77777777-7777-7777-7777-777777777770', status: 'PENDING' }, { status: 202 }),
+      ),
+    );
+    const startLearn = startLearnSpy();
+    serve(readyDraft, { startLearn });
+    const control = await settledControl();
+    await waitFor(() => expect(control).not.toBeDisabled());
+    await userEvent.click(control);
+
+    await waitFor(() => expect(executeRequests()).toHaveLength(1));
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(capabilityReads()).toHaveLength(0);
+    expect(unexpectedRequests(), 'Run sent something other than its reads and one execute').toEqual([]);
+  });
+
+  it('(b) UNLEARNED: Run reads the capability after the fresh read and starts with its exact context, no hints', async () => {
+    const startLearn = startLearnSpy();
+    serve(fixtureDetail(unlearnedDraft), { startLearn });
+    const control = await settledControl();
+    await userEvent.click(control);
+
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    expect(startLearn.mock.calls[0][0]).toEqual(contextOf(unlearnedDraft));
+    expect(startLearn.mock.calls[0][0]).not.toHaveProperty('baseRevisionId');
+    expect(startLearn.mock.calls[0][0]).not.toHaveProperty('firstLearnStepId');
+    expect(capabilityReads()).toHaveLength(1);
+    expect(executeRequests()).toHaveLength(0);
+    expect(unexpectedRequests()).toEqual([]);
+  });
+
+  it('(c) NEEDS_RELEARN: the start carries baseRevisionId = confirmedRevisionId and firstLearnStepId = firstChangedStepId, as served (D-3)', async () => {
+    const startLearn = startLearnSpy();
+    serve(fixtureDetail(needsRelearnDraft), { startLearn });
+    const control = await settledControl();
+    expect(screen.getByTestId('guided-readiness-chip')).toHaveTextContent('Steps changed — next Run learns from step 2');
+    await userEvent.click(control);
+
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    expect(startLearn.mock.calls[0][0]).toEqual({
+      ...contextOf(needsRelearnDraft),
+      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
+      firstLearnStepId: needsRelearnDraft.firstChangedStepId,
+    });
+    expect(executeRequests()).toHaveLength(0);
+  });
+
+  it('(d) D-4: NEEDS_RELEARN with BASE_IDENTITY_INCOMPLETE says saved learning cannot be reused and starts from the first current step', async () => {
+    const startLearn = startLearnSpy();
+    const draft: TestDetailDto = { ...fixtureDetail(needsRelearnDraft), readinessReason: 'BASE_IDENTITY_INCOMPLETE' };
+    serve(draft, { startLearn });
+    const control = await settledControl();
+    const chip = screen.getByTestId('guided-readiness-chip');
+    expect(chip).toHaveTextContent('Saved learning cannot be reused — next Run learns from step 1');
+    expect(chip.textContent).not.toMatch(/changed/i);
+    await userEvent.click(control);
+
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    expect(startLearn.mock.calls[0][0]).toEqual({
+      ...contextOf(needsRelearnDraft),
+      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
+      firstLearnStepId: fixtureStepId(0),
+    });
+  });
+
+  it('(e) D-4: a 409 BASE_IDENTITY_INCOMPLETE start refusal offers "Learn again from step 1", which starts only when pressed', async () => {
+    const startLearn = startLearnSpy();
+    const refusal: GuidedStartRefusal = {
+      httpStatus: 409,
+      error: { schemaVersion: 3, code: 'REVISION_CONFLICT', requestId: 'r-1', retryable: false, messageCode: 'BASE_IDENTITY_INCOMPLETE' },
+      platformCode: null,
+      retryAfterSeconds: null,
+    };
+    serve(fixtureDetail(needsRelearnDraft), { startLearn, guidedStartRefusal: refusal });
+    await settledControl();
+    const feedback = await screen.findByTestId('guided-start-feedback');
+    expect(feedback).toHaveTextContent('Saved learning cannot be reused, so this Run has to learn from step 1. Nothing was started.');
+    await new Promise((resolve) => setTimeout(resolve, 30));
+    expect(startLearn).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Learn again from step 1' }));
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    expect(startLearn.mock.calls[0][0]).toEqual({
+      ...contextOf(needsRelearnDraft),
+      baseRevisionId: needsRelearnDraft.confirmedRevisionId,
+      firstLearnStepId: fixtureStepId(0),
+    });
+  });
+
+  it('(f) LEARNING: Run is disabled while a session runs and sends nothing, programmatic requests included', async () => {
+    const startLearn = startLearnSpy();
+    serve(fixtureDetail(learningDraft), { startLearn, runRequest: 1 });
+    const control = await settledControl();
+    expect(control).toBeDisabled();
+    fireEvent.click(control);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(executeRequests()).toHaveLength(0);
+    expect(unexpectedRequests()).toEqual([]);
+  });
+
+  it('(f2) L5b-F1: LEARNING with no session this page follows says so beside the disabled Run; a followed session does not', async () => {
+    const view = serve(fixtureDetail(learningDraft));
+    const control = await settledControl();
+    expect(control).toBeDisabled();
+    const elsewhere = screen.getByTestId('run-learning-elsewhere');
+    expect(elsewhere).toHaveTextContent(guidedCopy('learningElsewhere'));
+    // W5 UX-04: Run does not come back by itself, so the sentence says what brings the page to read again.
+    expect(elsewhere).toHaveTextContent('Refresh test information');
+    view.unmount();
+
+    serve(fixtureDetail(learningDraft), { followsLearningSession: true });
+    await settledControl();
+    expect(screen.queryByTestId('run-learning-elsewhere')).toBeNull();
+  });
+
+  it('(g) guidedStart unavailable: learning could not start is said with the code, no cause and no "save again", and no start is sent (P6, P4, W5 UX-01)', async () => {
+    setGuidedStartCapability(unlearnedDraft.id, { available: false, code: 'RUNTIME_INCOMPATIBLE' });
+    const startLearn = startLearnSpy();
+    serve(fixtureDetail(unlearnedDraft), { startLearn });
+    await userEvent.click(await settledControl());
+
+    const feedback = await screen.findByTestId('guided-start-feedback');
+    expect(feedback).toHaveTextContent(guidedCopy('guidedStartUnavailable'));
+    expect(screen.getByTestId('guided-start-feedback-code')).toHaveTextContent('RUNTIME_INCOMPATIBLE');
+    expect(feedback).not.toHaveTextContent('Save the test again');
+    expect(feedback).not.toHaveTextContent(EXECUTE_CONFLICT_NARRATIVES.RUNTIME_INCOMPATIBLE.title);
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(capabilityReads()).toHaveLength(1);
+  });
+
+  it('(h) a start context that disagrees with the fresh read starts nothing (P6)', async () => {
+    setGuidedStartCapability(unlearnedDraft.id, {
+      available: true,
+      context: {
+        schemaVersion: 3,
+        testId: unlearnedDraft.id,
+        sourceRevision: String(unlearnedDraft.sourceRevision + 1),
+        configurationRevision: String(unlearnedDraft.configurationRevision),
+        environmentId: unlearnedDraft.environment,
+        applicationId: unlearnedDraft.csiId as string,
+        versions: { contract: 3 },
+      },
+    });
+    const startLearn = startLearnSpy();
+    serve(fixtureDetail(unlearnedDraft), { startLearn });
+    await userEvent.click(await settledControl());
+
+    expect(await screen.findByTestId('guided-start-mismatch')).toHaveTextContent(
+      'Press Run again to start from the latest saved steps.',
+    );
+    expect(startLearn).not.toHaveBeenCalled();
+  });
+
+  it('(i) D-11: a draft with no steps is not started, by the button or by a programmatic request', async () => {
+    const startLearn = startLearnSpy();
+    serve({ ...fixtureDetail(unlearnedDraft), steps: [] }, { startLearn, hasSteps: false, runRequest: 1 });
+    const control = await settledControl();
+    expect(control).toBeDisabled();
+    expect(screen.getByTestId('run-blocked-reason')).toHaveTextContent('Add a step to run this test.');
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(capabilityReads()).toHaveLength(0);
+  });
+
+  it('(j) A1.6: a "Learn again" request starts from that step on the confirmed revision, only while the A1 conditions hold', async () => {
+    const startLearn = startLearnSpy();
+    const ready = fixtureDetail(readyDraft);
+    const stepId = fixtureStepId(1);
+    const view = serve(ready, { startLearn });
+    await settledControl();
+    view.rerender(
+      <RunControl
+        testId={ready.id}
+        startLearn={startLearn}
+        learnRequest={{ token: 1, request: { kind: 'drift', stepId, revisionId: readyDraft.confirmedRevisionId as string } }}
+      />,
+    );
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    expect(startLearn.mock.calls[0][0]).toEqual({
+      ...contextOf(readyDraft),
+      baseRevisionId: readyDraft.confirmedRevisionId,
+      firstLearnStepId: stepId,
+    });
+
+    // A superseded revision: the conditions no longer hold on the fresh read, so nothing starts.
+    view.rerender(
+      <RunControl
+        testId={ready.id}
+        startLearn={startLearn}
+        learnRequest={{ token: 2, request: { kind: 'drift', stepId, revisionId: '33333333-3333-3333-3333-333333333333' } }}
+      />,
+    );
+    await waitFor(() => expect(observed.filter((entry) => entry.method === 'GET' && /\/tests\/[^/]+$/u.test(entry.url)).length).toBeGreaterThanOrEqual(3));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(startLearn).toHaveBeenCalledTimes(1);
+    expect(executeRequests()).toHaveLength(0);
+    // W5 UX-13: nothing starts, and the page says so rather than staying silent.
+    expect(await screen.findByTestId('guided-start-mismatch')).toHaveTextContent(guidedCopy('revisionNotReady'));
+  });
+
+  it('(j2) A1.6 case 4 at the gate: a "Learn again" request is dropped when the fresh read says NEEDS_RELEARN, even for the confirmed revision, and says so (tech gate L5b, W5 UX-13)', async () => {
+    const startLearn = startLearnSpy();
+    const needs = fixtureDetail(needsRelearnDraft);
+    expect(needs.confirmedRevisionId).not.toBeNull();
+    const view = serve(needs, { startLearn });
+    await settledControl();
+    view.rerender(
+      <RunControl
+        testId={needs.id}
+        startLearn={startLearn}
+        learnRequest={{
+          token: 1,
+          request: { kind: 'drift', stepId: fixtureStepId(1), revisionId: needs.confirmedRevisionId as string },
+        }}
+      />,
+    );
+    await waitFor(() =>
+      expect(observed.filter((entry) => entry.method === 'GET' && /\/tests\/[^/]+$/u.test(entry.url)).length).toBeGreaterThanOrEqual(2),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    // The ordinary Run already learns from the server's k; the client never sends another step.
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(capabilityReads()).toHaveLength(0);
+    expect(executeRequests()).toHaveLength(0);
+    expect(await screen.findByTestId('guided-start-mismatch')).toHaveTextContent(guidedCopy('revisionNotReady'));
+  });
+
+  it('(k) a 409 LEARN_REQUIRED from execute is shown as itself, once, with no preparation narrative', async () => {
+    studioMockServer.use(
+      http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
+        HttpResponse.json(
+          { error: 'LEARN_REQUIRED', message: 'No published revision matches the draft; run it to learn it' },
+          { status: 409 },
+        ),
+      ),
+    );
+
+    serve(readyDraft);
+    const control = await settledControl();
+    await waitFor(() => expect(control).not.toBeDisabled());
+    await userEvent.click(control);
+
+    const refusal = await screen.findByTestId('run-refusal');
+    expect(screen.getByTestId('run-refusal-title').textContent).toBe(
+      'This test has not learned its current steps',
+    );
+    expect(refusal.textContent).toMatch(/A Run that learns the steps clears this\./);
+    // The STUDIO-OBS-012B interim clause is gone with the interim state.
+    expect(refusal.textContent).not.toMatch(/learning is not yet available in this build/i);
+    // No retry and no preparation step: the server's refusal is the authority.
+    expect(executeRequests()).toHaveLength(1);
+    expect(unexpectedRequests()).toEqual([]);
+    expect(document.body.textContent).not.toMatch(/prepar|translat|confirm the/i);
+  });
+
+  it('(l) a dirty READY draft whose save leaves it unlearned learns after the save, and executes nothing', async () => {
+    let served: TestDto | TestDetailDto = fixtureDetail(readyDraft);
+    let saves = 0;
+    studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(served)));
+    const save = async () => {
+      saves += 1;
+      served = { ...fixtureDetail(readyDraft), readiness: 'UNLEARNED', confirmedRevisionId: null };
+      return 'saved' as const;
+    };
+    const startLearn = startLearnSpy();
+
+    render(<RunControl testId={readyDraft.id} isDirty onSaveBeforeRun={save} startLearn={startLearn} />);
+    const control = await settledControl();
+    await waitFor(() => expect(control).not.toBeDisabled());
+    await userEvent.click(control);
+
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    expect(saves).toBe(1);
+    expect(startLearn.mock.calls[0][0]).toEqual(contextOf(readyDraft));
+    expect(executeRequests()).toHaveLength(0);
+    expect(unexpectedRequests()).toEqual([]);
+  });
+
+  it('(m) the learned chip says "Learned · ready to repeat" for READY', async () => {
+    serve(readyDraft);
+    const chip = await screen.findByTestId('guided-readiness-chip');
+    expect(chip.textContent).toBe(LEARNED_READY_LABEL);
+    expect(LEARNED_READY_LABEL).toBe('Learned · ready to repeat');
+  });
+
+  it('(n) UX-A11Y-001: unsaved edits hide the readiness chip, and Run stays available because it saves first', async () => {
+    const view = serve(readyDraft);
+    await screen.findByTestId('guided-readiness-chip');
+
+    view.rerender(<RunControl testId={readyDraft.id} isDirty startLearn={startLearnSpy()} />);
+    await waitFor(() => expect(screen.queryByTestId('guided-readiness-chip')).toBeNull());
+    expect(screen.getByRole('button', { name: RUN_LABEL })).not.toBeDisabled();
+    // The STUDIO-OBS-012B interim region and sentence are gone with the interim state.
+    expect(screen.queryByTestId('run-learning-unavailable-status')).toBeNull();
+    expect(document.body.textContent).not.toMatch(/learning is not yet available/i);
+  });
+
+  it('(o) the busy spinner is decorative and names no retired phase', async () => {
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let served: TestDto | TestDetailDto = fixtureDetail(readyDraft);
+    studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(served)));
+    const save = async () => {
+      await held;
+      served = { ...fixtureDetail(readyDraft), readiness: 'UNLEARNED', confirmedRevisionId: null };
+      return 'saved' as const;
+    };
+    const startLearn = startLearnSpy();
+
+    const view = render(<RunControl testId={readyDraft.id} isDirty onSaveBeforeRun={save} startLearn={startLearn} />);
+    const control = await settledControl();
+    await waitFor(() => expect(control).not.toBeDisabled());
+    await userEvent.click(control);
+
+    await waitFor(() => expect(control.textContent).toBe('Saving…'));
+    const spinner = view.container.querySelector('.MuiCircularProgress-root');
+    expect(spinner).not.toBeNull();
+    expect(spinner).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.queryByRole('progressbar')).toBeNull();
+    expect(view.container.querySelector('[aria-label*="repar" i]')).toBeNull();
+    release();
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    expect(executeRequests()).toHaveLength(0);
+  });
+});
+
+describe('W5-1 / W5-11: a stored session whose read was refused blocks learning, never a replay', () => {
+  it('(p) W5-1: unreadable never blocks a READY replay; learn and relearn are off with the caption', async () => {
+    const readyView = serve(fixtureDetail(readyDraft), { sessionUnreadable: true });
+    const replay = await settledControl();
+    expect(replay.getAttribute('data-run-mode')).toBe('replay');
+    await waitFor(() => expect(replay).not.toBeDisabled());
+    expect(screen.queryByTestId('run-session-unreadable')).toBeNull();
+    readyView.unmount();
+
+    for (const [draft, mode] of [
+      [unlearnedDraft, 'learn'],
+      [needsRelearnDraft, 'relearn'],
+    ] as const) {
+      const view = serve(fixtureDetail(draft), { sessionUnreadable: true });
+      const control = await settledControl();
+      expect(control.getAttribute('data-run-mode')).toBe(mode);
+      expect(control).toBeDisabled();
+      expect(screen.getByTestId('run-session-unreadable')).toHaveTextContent(guidedCopy('sessionUnreadable'));
+      view.unmount();
+    }
+  });
+
+  it('(q) W5-11: a learn request while unreadable starts nothing, shows the caption, and is not replayed when the session reads', async () => {
+    const startLearn = startLearnSpy();
+    const ready = fixtureDetail(readyDraft);
+    const view = serve(ready, { startLearn, sessionUnreadable: true });
+    await settledControl();
+    expect(screen.queryByTestId('run-session-unreadable')).toBeNull();
+    const request = {
+      token: 1,
+      request: { kind: 'drift', stepId: fixtureStepId(1), revisionId: readyDraft.confirmedRevisionId as string },
+    } as const;
+
+    view.rerender(<RunControl testId={ready.id} startLearn={startLearn} sessionUnreadable learnRequest={request} />);
+    expect(await screen.findByTestId('run-session-unreadable')).toHaveTextContent(guidedCopy('sessionUnreadable'));
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(capabilityReads()).toHaveLength(0);
+
+    // The session reads now. The same token must not fire: nothing starts on its own.
+    view.rerender(<RunControl testId={ready.id} startLearn={startLearn} sessionUnreadable={false} learnRequest={request} />);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(capabilityReads()).toHaveLength(0);
+    expect(executeRequests()).toHaveLength(0);
+  });
+
+  it('(r) W5-1: "Learn again from step 1" is disabled while unreadable', async () => {
+    const startLearn = startLearnSpy();
+    const refusal: GuidedStartRefusal = {
+      httpStatus: 409,
+      error: { schemaVersion: 3, code: 'REVISION_CONFLICT', requestId: 'r-1', retryable: false, messageCode: 'BASE_IDENTITY_INCOMPLETE' },
+      platformCode: null,
+      retryAfterSeconds: null,
+    };
+    serve(fixtureDetail(needsRelearnDraft), { startLearn, guidedStartRefusal: refusal, sessionUnreadable: true });
+    await settledControl();
+    await screen.findByTestId('guided-start-feedback');
+    const learnAgain = screen.getByRole('button', { name: 'Learn again from step 1' });
+    expect(learnAgain).toBeDisabled();
+    fireEvent.click(learnAgain);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(startLearn).not.toHaveBeenCalled();
   });
 });
 
@@ -153,14 +604,13 @@ describe('AC-2: client-side English-grammar validation is no longer an execution
     // The step grammar validator is retired. Nothing on the run path consults the English, so the
     // server's READY alone dispatches the run.
     studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(readyDraft)),
       http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
         HttpResponse.json({ executionId: '77777777-7777-7777-7777-777777777777', status: 'PENDING' }, { status: 202 }),
       ),
     );
 
-    render(<RunControl testId={readyDraft.id} />);
-    const control = await screen.findByRole('button', { name: RUN_LABEL });
+    serve(readyDraft);
+    const control = await settledControl();
     await waitFor(() => expect(control).not.toBeDisabled());
     await userEvent.click(control);
 
@@ -168,47 +618,35 @@ describe('AC-2: client-side English-grammar validation is no longer an execution
     expect(executeRequests()).toHaveLength(1);
   });
 
-  it('the companion half: the client\u2019s opinion of the English still gates nothing \u2014 the server\u2019s state decides what Run does', async () => {
-    // A draft in a state that is not dispatchable. Run must not dispatch it as-is: it asks the
-    // server to prepare it first, and only the server's own READY moves it to /execute.
-    const awaiting = draftsByCompileStatus.AWAITING_CONFIRMATION;
-    let served: TestDto = awaiting;
-    studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(served)),
-      http.post(`${STUDIO_BASE}/tests/:id/compile`, () => {
-        served = { ...readyDraft, id: awaiting.id };
-        return HttpResponse.json({ compileRequestId: 'r', status: 'COMPILING' }, { status: 202 });
-      }),
-    );
+  it('the companion half: the client’s opinion of the English still gates nothing — the server’s state decides what Run does', async () => {
+    // The same English, two server answers. Only the server's readiness changes what Run does.
+    let served: TestDto = unlearnedDraft;
+    studioMockServer.use(http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(served)));
+    const startLearn = startLearnSpy();
 
-    render(<RunControl testId={awaiting.id} />);
-    const control = await screen.findByRole('button', { name: RUN_LABEL });
-    await waitFor(() => expect(control).not.toBeDisabled());
-    await userEvent.click(control);
+    const view = render(<RunControl testId={unlearnedDraft.id} refreshToken={0} startLearn={startLearn} />);
+    const control = await settledControl();
+    expect(control.getAttribute('data-run-mode')).toBe('learn');
 
-    // Prepared exactly once, then dispatched exactly once — never dispatched unprepared.
-    await waitFor(() => expect(executeRequests()).toHaveLength(1));
-    expect(compileRequests()).toHaveLength(1);
+    served = { ...readyDraft, id: unlearnedDraft.id, steps: unlearnedDraft.steps };
+    view.rerender(<RunControl testId={unlearnedDraft.id} refreshToken={1} startLearn={startLearn} />);
+    await waitFor(() => expect(screen.getByRole('button', { name: RUN_LABEL }).getAttribute('data-run-mode')).toBe('replay'));
+    expect(screen.getByRole('button', { name: RUN_LABEL })).not.toBeDisabled();
+    expect(executeRequests()).toHaveLength(0);
+    expect(startLearn).not.toHaveBeenCalled();
   });
 
   it('a programmatic run request is governed by the same predicate as the button', async () => {
     // `?autorun=1` and the terminal-error surface's re-run both come through `runRequest`. A
     // second activation path that skipped the gate would be the defect this story removed, put
-    // back by a different door.
-    // The draft stays NEEDS_REVISION however many times it is prepared, so the run must stop
-    // after the preparation rather than dispatch something the server would refuse.
-    studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id`, () =>
-        HttpResponse.json(draftsByCompileStatus.NEEDS_REVISION),
-      ),
-      http.post(`${STUDIO_BASE}/tests/:id/compile`, () =>
-        HttpResponse.json({ compileRequestId: 'r', status: 'COMPILING' }, { status: 202 }),
-      ),
-    );
-    render(<RunControl testId={draftsByCompileStatus.NEEDS_REVISION.id} runRequest={1} />);
-    await screen.findByTestId('run-compile-outcome');
-    await waitFor(() => expect(compileRequests()).toHaveLength(1));
+    // back by a different door. LEARNING is the state in which the predicate says no.
+    const startLearn = startLearnSpy();
+    serve(learningDraft, { runRequest: 1, startLearn });
+    await settledControl();
+    await new Promise((resolve) => setTimeout(resolve, 50));
     expect(executeRequests()).toHaveLength(0);
+    expect(startLearn).not.toHaveBeenCalled();
+    expect(unexpectedRequests()).toEqual([]);
   });
 
   it('a second activation while the first is in flight produces one request, not two', async () => {
@@ -237,67 +675,33 @@ describe('AC-2: client-side English-grammar validation is no longer an execution
     await waitFor(() => expect(executeRequests().length).toBeGreaterThan(0));
     expect(executeRequests()).toHaveLength(1);
   });
+
+  it('a second activation while a guided start is in flight starts once', async () => {
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const startLearn = vi.fn(async (_request: GuidedStartRequest) => {
+      await held;
+    });
+    serve(fixtureDetail(unlearnedDraft), { startLearn });
+    const control = await settledControl();
+    await userEvent.click(control);
+    await waitFor(() => expect(startLearn).toHaveBeenCalledTimes(1));
+    await userEvent.click(control, { pointerEventsCheck: 0 });
+    release();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(startLearn).toHaveBeenCalledTimes(1);
+  });
 });
 
-describe('AC-3(a): client-generated Python is retired, and the Code view says what it has not got', () => {
-  it('renders the exact saved runnable artifact without internal identifiers', async () => {
-    render(<CodeTab testId={readyDraft.id} />);
-
-    const source = await screen.findByTestId('confirmed-playwright-source');
-    const artifactSteps = readyDraft.confirmedRevisionArtifact?.steps ?? [];
-    expect(artifactSteps.length).toBeGreaterThan(0);
-
-    // Complete: every step's code AND the English it was translated from, index-aligned.
-    const codeBlocks = screen.getAllByTestId('code-view-step-code');
-    const stepTexts = screen.getAllByTestId('code-view-step-text');
-    expect(codeBlocks).toHaveLength(artifactSteps.length);
-    expect(stepTexts).toHaveLength(artifactSteps.length);
-    artifactSteps.forEach((step, index) => {
-      expect(codeBlocks[index].textContent).toBe(step.code);
-      expect(stepTexts[index].textContent).toBe(`${index + 1}. ${step.originalText}`);
-    });
-    expect(screen.getByTestId('code-view-step-count').textContent).toBe(
-      `${artifactSteps.length} steps`,
-    );
-    // Not a runnable file, and it does not pretend to be one.
-    expect(source.textContent).not.toMatch(/\bimport\b|\btest\(/u);
-
-    // Internal identifiers stay internal: the revision is named by a short prefix, never in full.
-    expect(document.body.textContent).not.toContain(readyDraft.confirmedRevisionId as string);
-    expect(document.body.textContent).not.toContain(readyDraft.confirmedRevisionArtifactHash as string);
-    expect(screen.getByTestId('code-view-revision').textContent).toContain(
-      (readyDraft.confirmedRevisionArtifactHash as string).slice(0, 8),
-    );
-    expect(screen.queryByTestId('code-view-unavailable-title')).toBeNull();
-  });
-
-  it('refreshes confirmed source when the same test is prepared without changing ids', async () => {
-    let served: TestDto = {
-      ...readyDraft,
-      confirmedRevisionId: null,
-      confirmedRevisionArtifactHash: null,
-      confirmedRevisionArtifact: null,
-    };
-    studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/${readyDraft.id}`, () => HttpResponse.json(served)),
-    );
-    const view = render(<CodeTab testId={readyDraft.id} refreshToken={0} />);
-    await screen.findByTestId('code-view-unavailable-title');
-
-    served = readyDraft;
-    view.rerender(<CodeTab testId={readyDraft.id} refreshToken={1} />);
-    await screen.findByTestId('confirmed-playwright-source');
-    const refreshed = screen.getAllByTestId('code-view-step-code').map((node) => node.textContent);
-    expect(refreshed).toEqual(
-      (readyDraft.confirmedRevisionArtifact?.steps ?? []).map((step) => step.code),
-    );
-  });
-
-  it('renders no generator-derived text for any fixture', () => {
+describe('AC-3(a): client-generated Python is retired', () => {
+  it('renders no generator-derived text for any fixture', async () => {
     // The falsification is wiring generated Python back in. The retired Python generator (deleted
     // by story 10.51) emitted these lines for every draft regardless of its steps, so they are
     // pinned here as static strings. Each is long and specific enough that a comparison against it
-    // cannot pass for an empty rendering.
+    // cannot pass for an empty rendering. The Code view that hosted this check is gone
+    // (STUDIO-OBS-012B); the Run surface is what renders for every draft now.
     const GENERATED_PYTHON_LINES = [
       '# Generated by Checks Studio',
       '# target: Playwright (Python)',
@@ -311,42 +715,19 @@ describe('AC-3(a): client-generated Python is retired, and the Code view says wh
       expect(line.length, 'a forbidden line too short to be distinctive').toBeGreaterThan(12);
     }
 
-    const drafts = Object.values(draftsByCompileStatus);
+    const drafts = Object.values(draftsByReadiness);
     expect(drafts.length).toBeGreaterThan(0);
 
-    for (let i = 0; i < drafts.length; i += 1) {
-      const view = render(<CodeTab />);
+    for (const draft of drafts) {
+      const view = serve(fixtureDetail(draft));
+      await settledControl();
       const rendered = view.container.textContent ?? '';
+      expect(rendered.length).toBeGreaterThan(0);
       for (const line of GENERATED_PYTHON_LINES) {
-        expect(rendered, `the Code view rendered generated source: ${line}`).not.toContain(line);
+        expect(rendered, `the Run surface rendered generated source: ${line}`).not.toContain(line);
       }
       view.unmount();
     }
-  });
-
-  it('names the blocker rather than rendering an empty state', () => {
-    render(<CodeTab />);
-    const title = screen.getByTestId('code-view-unavailable-title');
-    expect(title.textContent).toBe(CODE_VIEW_UNAVAILABLE_TITLE);
-
-    const blocker = screen.getByTestId('code-view-blocker');
-    expect(blocker.textContent).toBe(CODE_VIEW_BLOCKER);
-    expect(blocker.textContent).not.toMatch(/ADR|story|revision/i);
-  });
-
-  it('explains that the tab shows only saved runnable source', () => {
-    render(<CodeTab />);
-    const why = screen.getByTestId('code-view-why-not-candidate');
-    expect(why.textContent).toMatch(/saved test will run/i);
-  });
-
-  it('the Code view takes no source to render, so there is nothing to wire a generator into', () => {
-    // The weaker, structural half, named as such. `CodeTab` accepting no props at all is what
-    // makes the rendering assertions above stable: there is no slot a caller could fill.
-    expect(CodeTab.length).toBeLessThanOrEqual(1);
-    const rendered = render(<CodeTab />).container.textContent ?? '';
-    expect(rendered).not.toMatch(/Generated Python/i);
-    expect(rendered).not.toMatch(/Auto-sync/i);
   });
 });
 
@@ -384,7 +765,7 @@ describe('Story 10.48 AC-10b: Run is disabled, with a reason, when the server sa
     expect(control).toHaveAttribute('aria-describedby', reason.id);
     expect(control).toHaveAccessibleDescription(reason.textContent ?? '');
 
-    // Keyboard: tabbing and pressing Enter or Space reaches no execute and no compile.
+    // Keyboard: tabbing and pressing Enter or Space reaches no execute.
     await userEvent.tab();
     await userEvent.keyboard('{Enter}');
     await userEvent.keyboard(' ');
@@ -392,7 +773,7 @@ describe('Story 10.48 AC-10b: Run is disabled, with a reason, when the server sa
     fireEvent.click(control);
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(executeRequests()).toHaveLength(0);
-    expect(compileRequests()).toHaveLength(0);
+    expect(unexpectedRequests()).toEqual([]);
   });
 
   it('canManage true: Run is enabled and carries no reason', async () => {
@@ -440,5 +821,93 @@ describe('Story 10.48 AC-10b: Run is disabled, with a reason, when the server sa
     view.rerender(<RunControl testId={selected.id} refreshToken={3} isDirty />);
     await waitFor(() => expect(screen.getByRole('button', { name: RUN_LABEL })).toBeDisabled());
     expect(readsOfSelected()).toHaveLength(1);
+  });
+});
+
+/*
+ * Story 10.51 RETIRED guard, relocated here from `review/diagnostics.test.tsx` by STUDIO-OBS-012B
+ * (AC-1; cleanup inventory G7) before that file was deleted with `review/**`. Both modules below
+ * were deleted by story 10.51. The paths stay as string literals (never imports) so that
+ * re-introducing either module, and importing it from a Studio module, still fails here.
+ */
+const FRONTEND_SRC = path.resolve(__dirname, '../../..');
+const GUARDED_DIRECTORIES = [
+  path.join(FRONTEND_SRC, 'components/studio'),
+  path.join(FRONTEND_SRC, 'services/mocks/studio'),
+  path.join(FRONTEND_SRC, 'services/api'),
+];
+
+/** Every non-test module under the guarded directories. */
+function collectModules(dir: string, found: string[] = []): string[] {
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      collectModules(full, found);
+    } else if (/\.tsx?$/.test(entry.name) && !/\.test\.tsx?$/.test(entry.name)) {
+      found.push(full);
+    }
+  }
+  return found;
+}
+
+/** `import`/`export … from`, bare `import '…'`, dynamic `import(…)` and `require(…)`, any quote. */
+function moduleSpecifiers(source: string): string[] {
+  const patterns = [
+    /(?:^|[^\w$])(?:import|export)\s[^;]*?from\s*(['"`])([^'"`]+)\1/gs,
+    /(?:^|[^\w$])import\s*(['"`])([^'"`]+)\1/g,
+    /(?:^|[^\w$])(?:import|require)\s*\(\s*(['"`])([^'"`]+)\1\s*\)/g,
+  ];
+  const ordered: string[] = [];
+  for (const pattern of patterns) {
+    for (const match of source.matchAll(pattern)) {
+      ordered.push(match[2]);
+    }
+  }
+  return ordered;
+}
+
+describe('story 10.51 RETIRED guard (relocated by STUDIO-OBS-012B)', () => {
+  const GUARDED_MODULES = GUARDED_DIRECTORIES.flatMap((dir) => collectModules(dir));
+
+  it('imports neither the legacy grammar parser nor the Python generator', () => {
+    // The property here is about imports, so the instrument is the module text. Every specifier
+    // form is read, not one quote style: a single-quoted `from '…'` scan is blind to a
+    // double-quoted import, a backtick `await import(…)`, and a `require(…)`.
+    const modules = GUARDED_MODULES.map((file) => [file, fs.readFileSync(file, 'utf8')] as const);
+    expect(modules.length).toBeGreaterThanOrEqual(13);
+
+    const RETIRED = ['@/utils/studio/ir/parseSteps', '@/utils/studio/codegen/pythonGenerator'];
+
+    for (const [file, source] of modules) {
+      const specifiers = moduleSpecifiers(source);
+      for (const retired of RETIRED) {
+        const offending = specifiers.filter(
+          (specifier) => specifier === retired || specifier.endsWith(retired.replace('@/', '/')),
+        );
+        expect(offending, `${path.relative(FRONTEND_SRC, file)} imports ${retired}`).toEqual([]);
+      }
+    }
+  });
+
+  it('the import scanner sees every specifier form, so its silence means something', () => {
+    // Without this, the scan above could be reading nothing at all. Each line below is a way a
+    // module could reach the retired path.
+    const planted = [
+      "import { buildDefaultTestIR } from '@/utils/studio/ir/parseSteps';",
+      'import { generatePythonFromIR } from "@/utils/studio/codegen/pythonGenerator";',
+      "const mod = await import('@/utils/studio/ir/parseSteps');",
+      "const gen = require('@/utils/studio/codegen/pythonGenerator');",
+      'export { buildDefaultTestIR } from "@/utils/studio/ir/parseSteps";',
+    ].join('\n');
+
+    const found = moduleSpecifiers(planted);
+    expect(found).toHaveLength(5);
+    expect(found.filter((s) => s === '@/utils/studio/ir/parseSteps')).toHaveLength(3);
+    expect(found.filter((s) => s === '@/utils/studio/codegen/pythonGenerator')).toHaveLength(2);
+
+    // And it finds the real imports the modules genuinely have, so it is reading the files.
+    const real = GUARDED_MODULES.flatMap((file) => moduleSpecifiers(fs.readFileSync(file, 'utf8')));
+    expect(real).toContain('@/types/studio/studioTypes');
+    expect(real).toContain('@mui/material');
   });
 });

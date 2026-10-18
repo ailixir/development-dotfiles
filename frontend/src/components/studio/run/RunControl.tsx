@@ -1,28 +1,28 @@
-import React, { useEffect, useId, useRef } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Alert, AlertTitle, Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
 import { PlayArrow, Stop } from '@mui/icons-material';
-import { compileErrorNarrative } from '../review/compileErrorCodes';
-import { refusalNarrative } from '../review/compileDiagnosticNarratives';
-import { CompileElapsed } from '../review/CompileElapsed';
-import { useRunGate, type RunCompileOutcome, type RunSaveOutcome } from './useRunGate';
+import type { GuidedStartRefusal, GuidedStartRequest } from '@/types/studio/studioGuidedTypes';
+import { GuidedStartFeedback, type GuidedStartFeedbackInput } from '@/components/studio/guided/GuidedCompletion';
+import { ReadinessChip } from '@/components/studio/guided/ReadinessChip';
+import { guidedCopy } from '@/components/studio/guided/guidedNarratives';
+import { useRunGate, type LearnFromRequest, type RunSaveOutcome } from './useRunGate';
 
 /**
- * The single Run entry point.
+ * The single Run entry point (story 10.11a; STUDIO-OBS-008 AC-2).
  *
- * Run prepares and then runs: it saves the author's edits if there are any, asks the server to
- * translate the saved revision if it has no fresh artifact, and then dispatches it. Saving no
- * longer translates in the background, so there is no state in which the author is told to save
- * again and wait — the button they already pressed is doing the work, and it says so while it does.
+ * Run saves the author's edits if there are any, re-reads the test, and then acts on the server's
+ * readiness: `READY` replays the learned revision, `UNLEARNED` starts a guided learning session,
+ * `NEEDS_RELEARN` starts a mixed-mode session from the server's first changed step, and `LEARNING`
+ * keeps Run disabled while the session runs. The guided session itself is the page's
+ * `useGuidedSession`, passed in as `startLearn`; this control owns only whether and how a start is
+ * sent. A refused or unavailable start is shown inline as feedback, never as a session (architect P4).
  */
 export const RUN_LABEL = 'Run Test';
 export const STOP_LABEL = 'Stop';
 export const STOPPING_LABEL = 'Stopping…';
 export const SAVING_LABEL = 'Saving…';
-export const PREPARING_LABEL = 'Preparing…';
 export const STARTING_LABEL = 'Starting…';
-/** Shown when a compile started elsewhere is still settling, so Run must wait rather than act. */
-export const WAITING_LABEL = 'Getting ready…';
 /**
  * Shown beside a disabled Run when the server said this caller may not run the test (story 10.48,
  * ADR-002 O-22). Visible text, tied to the button with `aria-describedby`, never a tooltip alone.
@@ -46,7 +46,7 @@ export interface RunControlProps {
   readonly onPreparingChange?: (preparing: boolean) => void;
   /** Rendered beside the control when the draft has no steps to run. */
   readonly hasSteps?: boolean;
-  /** Visible editor state differs from the saved draft. Run saves it before preparing. */
+  /** Visible editor state differs from the saved draft. Run saves it before running. */
   readonly isDirty?: boolean;
   /**
    * Persists the author's unsaved edits, so Run never dispatches unsaved content.
@@ -74,27 +74,38 @@ export interface RunControlProps {
    */
   readonly runRequest?: number;
   /**
-   * Moves the author to a step the translator refused (VAL-009), so the refusal is linked to the
-   * line it is about. Without it the refusal is still listed, just not linked.
-   */
-  readonly onShowStep?: (stepIndex: number) => void;
-  /**
-   * Where the compile-outcome and refusal alerts render (VAL-038). The control sits in the page
+   * Where the refusal alerts render (VAL-038). The control sits in the page
    * header, and a full alert there squeezes the title and pushes the actions around, so the page
    * gives it a full-width slot below the header. Without one the alerts render under the button.
    */
   readonly alertsContainer?: HTMLElement | null;
-}
-
-/** The model's per-step refusals in a `NEEDS_REVISION` outcome, in step order. */
-function refusalsOf(outcome: RunCompileOutcome | null) {
-  if (outcome?.kind !== 'needsRevision' || !outcome.diagnostics) return [];
-  return outcome.diagnostics.steps.flatMap((entry) =>
-    entry.diagnostics.flatMap((diagnostic) => {
-      const text = refusalNarrative(diagnostic);
-      return text === null ? [] : [{ stepIndex: entry.stepIndex, text }];
-    }),
-  );
+  /**
+   * Starts a guided learning session: the page's `useGuidedSession(testId).startLearn`
+   * (STUDIO-OBS-008 AC-2). Without it, a draft that needs learning cannot be run from here.
+   */
+  readonly startLearn?: (request: GuidedStartRequest) => Promise<void>;
+  /** The server's refusal of the last guided start, shown inline as feedback (architect P4). */
+  readonly guidedStartRefusal?: GuidedStartRefusal | null;
+  /** "Open Variables" from a `MISSING_SOURCE` start refusal: the page's saved-inputs dialog. */
+  readonly onOpenVariables?: () => void;
+  /**
+   * A request to learn from a named step ("Learn again from step N" after a replay drift), as a
+   * monotonically increasing token, so it goes through this control's one gate like `runRequest`.
+   */
+  readonly learnRequest?: { readonly token: number; readonly request: LearnFromRequest } | null;
+  /**
+   * True while the page itself follows a guided session for this test. When the server says
+   * `LEARNING` and this is false, the session is one the page cannot show (another tab or user), and
+   * the control says so in visible text beside the disabled Run (ADR-SC-006; L5b-F1).
+   */
+  readonly followsLearningSession?: boolean;
+  /**
+   * True when the page follows a stored session whose read was refused before any view of it loaded
+   * (`useGuidedSession().unreadable`). Learning never starts from here while it holds. Learn, relearn
+   * and busy modes keep Run off with the caption. A READY replay stays enabled, and a learn-again
+   * request is dropped with the caption shown (ruling w5-unreadable-and-alias §2-3).
+   */
+  readonly sessionUnreadable?: boolean;
 }
 
 export const RunControl: React.FC<RunControlProps> = ({
@@ -109,64 +120,58 @@ export const RunControl: React.FC<RunControlProps> = ({
   onSaveBeforeRun,
   refreshToken,
   runRequest = 0,
-  onShowStep,
   alertsContainer,
+  startLearn,
+  guidedStartRefusal = null,
+  onOpenVariables,
+  learnRequest = null,
+  followsLearningSession = false,
+  sessionUnreadable = false,
 }) => {
   const gate = useRunGate(testId, onAccepted, refreshToken, {
     saveBeforeRun: onSaveBeforeRun,
     isDirty,
     isRunning,
+    startLearn,
   });
-  const runnable = gate.canRun && hasSteps;
+  // A replay posts `POST /tests/{id}/execute` and never touches the guided session, so only the modes
+  // that start learning are blocked by an unreadable stored session (W5-1).
+  const runnable = gate.canRun && hasSteps && !(sessionUnreadable && gate.mode !== 'replay');
+  /** A learn-again request arrived while the stored session was unreadable: dropped, and said so. */
+  const [learnBlocked, setLearnBlocked] = useState(false);
   /** Story 10.48: the server said no, so Run is disabled and says why. Never hidden. */
   const notPermitted = gate.executePermission === 'denied' && !isRunning;
   const notPermittedId = `${useId()}-run-not-permitted`;
 
-  /** A compile is settling and this control did not start it — there is nothing to press. */
-  const waiting = gate.action === 'wait' && gate.phase === 'idle';
+  /**
+   * The readiness chip (AC-3, D-4): "Learned · ready to repeat", or the `NEEDS_RELEARN` sentence
+   * naming k. Hidden while the editor holds unsaved edits, because saving them can change the steps
+   * and so the readiness (UX-A11Y-001); and while a run is on screen, which speaks for itself.
+   */
+  const chipTest = !isDirty && !isRunning ? gate.test : null;
+
+  /** `LEARNING`, and not a session this page is following: state and consequence, in text. */
+  const learningElsewhere = gate.mode === 'busy' && !isRunning && !followsLearningSession;
+
+  /** A start the client stopped itself, or the server refused: inline feedback, not a state (P4). */
+  const startFeedback: GuidedStartFeedbackInput | null =
+    gate.learnBlock?.kind === 'unavailable'
+      ? { kind: 'unavailable', code: gate.learnBlock.code }
+      : guidedStartRefusal !== null && gate.phase === 'idle'
+        ? { kind: 'refusal', refusal: guidedStartRefusal }
+        : null;
 
   const busyLabel = (() => {
     switch (gate.phase) {
       case 'saving':
         return SAVING_LABEL;
-      case 'compiling':
-        return PREPARING_LABEL;
       case 'starting':
         return STARTING_LABEL;
       case 'idle':
       default:
-        return waiting ? WAITING_LABEL : null;
+        return null;
     }
   })();
-
-  const compileMessage = (() => {
-    const outcome = gate.compileOutcome;
-    if (!outcome) return null;
-    switch (outcome.kind) {
-      case 'needsRevision':
-        return {
-          title: 'Some steps need attention',
-          body: 'The translation of your checklist was refused. Check the steps listed below, then run again.',
-        };
-      case 'failed':
-        return {
-          title: 'Your test could not be prepared',
-          body: outcome.error
-            ? compileErrorNarrative(outcome.error.code)
-            : 'Preparing this test did not finish. Your saved checklist is unchanged. Run again to retry.',
-        };
-      case 'refused':
-        return { title: 'This test could not be prepared', body: outcome.message };
-      case 'timedOut':
-      default:
-        return {
-          title: 'Preparing took too long',
-          body: 'Your saved checklist is unchanged. Run again to retry.',
-        };
-    }
-  })();
-
-  const refusals = refusalsOf(gate.compileOutcome);
 
   useEffect(() => {
     onPreparingChange?.(gate.executeInFlight && !isRunning);
@@ -177,47 +182,28 @@ export const RunControl: React.FC<RunControlProps> = ({
   useEffect(() => {
     if (runRequest <= servedRunRequest.current || !runnable || isRunning) return;
     servedRunRequest.current = runRequest;
+    setLearnBlocked(false);
     gate.run();
   }, [runRequest, runnable, isRunning, gate]);
+
+  const servedLearnRequest = useRef(0);
+  useEffect(() => {
+    if (learnRequest === null || learnRequest.token <= servedLearnRequest.current || isRunning) return;
+    // The token is consumed either way, so a request dropped while unreadable never fires later,
+    // when the session reads: nothing starts on its own (W5-11).
+    servedLearnRequest.current = learnRequest.token;
+    if (sessionUnreadable) {
+      setLearnBlocked(true);
+      return;
+    }
+    setLearnBlocked(false);
+    gate.learnFrom(learnRequest.request);
+  }, [learnRequest, isRunning, sessionUnreadable, gate]);
 
   const stopLabel = isStopping ? STOPPING_LABEL : STOP_LABEL;
 
   const alerts = (
     <>
-      {compileMessage && !gate.refusal && (
-        <Alert severity="warning" role="alert" data-testid="run-compile-outcome" sx={{ mt: 2 }}>
-          <AlertTitle data-testid="run-compile-outcome-title">{compileMessage.title}</AlertTitle>
-          <Typography variant="body2" data-testid="run-compile-outcome-body">
-            {compileMessage.body}
-          </Typography>
-          {refusals.length > 0 && (
-            <Stack component="ul" spacing={0.5} sx={{ pl: 2, mt: 1, mb: 0 }} data-testid="run-compile-refusals">
-              {refusals.map((refusal, position) => (
-                <Box component="li" key={`${refusal.stepIndex}-${position}`}>
-                  <Typography
-                    variant="body2"
-                    data-testid={`run-compile-refusal-${refusal.stepIndex}`}
-                    sx={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}
-                  >
-                    {refusal.text}
-                  </Typography>
-                  {onShowStep && (
-                    <Button
-                      size="small"
-                      variant="text"
-                      onClick={() => onShowStep(refusal.stepIndex)}
-                      sx={{ px: 0, minWidth: 0 }}
-                    >
-                      {`Go to step ${refusal.stepIndex + 1}`}
-                    </Button>
-                  )}
-                </Box>
-              ))}
-            </Stack>
-          )}
-        </Alert>
-      )}
-
       {gate.refusal && (
         <Alert
           severity={gate.refusal.narrative.scope === 'platform' ? 'warning' : 'error'}
@@ -250,9 +236,23 @@ export const RunControl: React.FC<RunControlProps> = ({
           </Stack>
         </Alert>
       )}
+      {startFeedback !== null && (
+        <Box sx={{ mt: 2 }}>
+          <GuidedStartFeedback
+            input={startFeedback}
+            onLearnFromFirstStep={() => gate.learnFrom({ kind: 'firstStep' })}
+            onOpenVariables={() => onOpenVariables?.()}
+            disabled={isRunning || gate.phase !== 'idle' || sessionUnreadable}
+          />
+        </Box>
+      )}
+      {gate.learnBlock?.kind === 'mismatch' && (
+        <Alert severity="warning" data-testid="guided-start-mismatch" sx={{ mt: 2 }}>
+          {guidedCopy('revisionNotReady')}
+        </Alert>
+      )}
     </>
   );
-
 
   return (
     <Box>
@@ -265,14 +265,23 @@ export const RunControl: React.FC<RunControlProps> = ({
           isRunning ? (
             <Stop />
           ) : busyLabel ? (
-            <CircularProgress aria-label="Preparing test" size={16} color="inherit" />
+            // Decorative: the button text and the role="status" message already say what is happening.
+            <CircularProgress aria-hidden="true" size={16} color="inherit" />
           ) : (
             <PlayArrow />
           )
         }
         color={isRunning ? 'error' : 'success'}
-        onClick={() => (isRunning ? onStop?.() : gate.run())}
+        onClick={() => {
+          if (isRunning) {
+            onStop?.();
+            return;
+          }
+          setLearnBlocked(false);
+          gate.run();
+        }}
         disabled={isRunning ? isStopping : !runnable}
+        data-run-mode={gate.mode ?? 'loading'}
         sx={{ minWidth: 132, minHeight: 42, whiteSpace: 'nowrap' }}
       >
         {isRunning ? stopLabel : (busyLabel ?? RUN_LABEL)}
@@ -301,15 +310,32 @@ export const RunControl: React.FC<RunControlProps> = ({
         </Typography>
       )}
 
-      {!isRunning && hasSteps && waiting && (
+      {sessionUnreadable && !isRunning && (gate.mode !== 'replay' || learnBlocked) && (
         <Typography
           variant="caption"
           color="text.secondary"
-          data-testid="run-blocked-reason"
-          sx={{ display: 'block', mt: 1 }}
+          data-testid="run-session-unreadable"
+          sx={{ display: 'block', mt: 1, overflowWrap: 'anywhere' }}
         >
-          Getting your saved test ready…
+          {guidedCopy('sessionUnreadable')}
         </Typography>
+      )}
+
+      {learningElsewhere && (
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          data-testid="run-learning-elsewhere"
+          sx={{ display: 'block', mt: 1, overflowWrap: 'anywhere' }}
+        >
+          {guidedCopy('learningElsewhere')}
+        </Typography>
+      )}
+
+      {chipTest !== null && (
+        <Box sx={{ mt: 1 }}>
+          <ReadinessChip test={chipTest} draftStepIds={chipTest.steps.map((step) => step.id)} />
+        </Box>
       )}
 
       {!isRunning && gate.preparationMessage && (
@@ -317,12 +343,6 @@ export const RunControl: React.FC<RunControlProps> = ({
           <Typography variant="caption" role="status" component="span">
             {gate.preparationMessage}
           </Typography>
-          {gate.phase === 'compiling' && gate.compileStartedAt !== null && (
-            <>
-              {' '}
-              <CompileElapsed key={gate.compileStartedAt} startedAt={gate.compileStartedAt} />
-            </>
-          )}
         </Box>
       )}
 

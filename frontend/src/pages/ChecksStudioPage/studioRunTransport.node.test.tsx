@@ -61,7 +61,7 @@ beforeAll(async () => {
 const EXECUTION_ID = '44444444-4444-4444-4444-4444444444aa';
 const SECOND_EXECUTION_ID = '44444444-4444-4444-4444-4444444444ab';
 
-const draftA: TestDto = { ...mockTests[0], compileStatus: 'READY' };
+const draftA: TestDto = { ...mockTests[0], readiness: 'READY' };
 const draftB: TestDto = {
   ...mockTests[0],
   id: '11111111-1111-1111-1111-11111111bbbb',
@@ -69,7 +69,7 @@ const draftB: TestDto = {
   // Deliberately a different length and different text from draftA's three steps, so that a
   // selection snapping from one to the other is visible on the surface rather than inferred.
   steps: ['Go to "https://example.invalid/only-step"'],
-  compileStatus: 'READY',
+  readiness: 'READY',
 };
 
 /** What `GET /studio/tests` currently lists. Mutable, so a reload can change it mid-test. */

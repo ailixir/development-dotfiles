@@ -1,12 +1,13 @@
-import type { CompileStatus, TestLastRunFilter } from '@/types/studio/studioTypes';
+import type { TestLastRunFilter, TestReadiness } from '@/types/studio/studioTypes';
+import { LEARNED_READY_LABEL } from '@/components/studio/run/runEnablement';
 
 /**
  * Display vocabulary for the Studio tests list (story 10.46, Track C).
  *
- * Readiness follows the five `compileStatus` states of architecture §4.2 with the same meaning the
- * editor's narratives give them (`compileStateNarratives.ts`). A value outside the five is shown as
- * sent with a neutral tone, so a server change is visible on the list instead of crashing it; the
- * editor's own total mappings stay the place that throws.
+ * Readiness follows the four single-path states of ADR-SC-005 (`TestDto.readiness`). A value
+ * outside the four is shown as sent with a neutral tone, so a server change is visible on the list
+ * instead of crashing it; the editor's own total mapping (`runEnablement.ts`) stays the place that
+ * throws.
  */
 
 export type ReadinessTone = 'success' | 'warning' | 'error' | 'info' | 'default';
@@ -18,31 +19,26 @@ export interface ReadinessPresentation {
   hint: string;
 }
 
-export const READINESS: Readonly<Record<CompileStatus, ReadinessPresentation>> = {
+export const READINESS: Readonly<Record<TestReadiness, ReadinessPresentation>> = {
   READY: {
-    label: 'Ready to run',
+    label: LEARNED_READY_LABEL,
     tone: 'success',
-    hint: 'A confirmed revision of this draft is runnable.',
+    hint: 'The learned steps match the saved draft, so Run repeats them.',
   },
-  AWAITING_CONFIRMATION: {
-    label: 'Needs confirmation',
-    tone: 'warning',
-    hint: 'A translation is waiting for your review and confirmation in the editor.',
-  },
-  COMPILING: {
-    label: 'Translating',
-    tone: 'info',
-    hint: 'The saved steps are being translated right now.',
-  },
-  NEEDS_REVISION: {
-    label: 'Needs changes',
-    tone: 'error',
-    hint: 'Some steps could not be made runnable. Open the test to see why.',
-  },
-  STALE: {
-    label: 'Not translated',
+  UNLEARNED: {
+    label: 'Not learned yet',
     tone: 'default',
-    hint: 'The saved steps have not been translated yet. Running the test translates them first.',
+    hint: 'No learned version matches the saved steps yet.',
+  },
+  LEARNING: {
+    label: 'Learning',
+    tone: 'info',
+    hint: 'A Run is learning the saved steps right now.',
+  },
+  NEEDS_RELEARN: {
+    label: 'Steps changed',
+    tone: 'warning',
+    hint: 'A step changed after the steps were learned.',
   },
 };
 

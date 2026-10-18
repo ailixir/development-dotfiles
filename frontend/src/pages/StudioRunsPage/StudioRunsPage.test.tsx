@@ -216,15 +216,17 @@ describe('Runs page — server list and URL state', () => {
     expect(await screen.findByTestId(`run-${available.executionId}`, {}, WAIT)).toBeInTheDocument();
   });
 
-  it('offers "Go to tests" when there are no runs and no filters, but not with a filter', async () => {
+  it('offers "Create Test" when there are no runs and no filters, but not with a filter', async () => {
     serve({ runs: [] });
     renderPage(`${LIST}?status=PASSED`);
     expect(await screen.findByText('No matching runs', {}, WAIT)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Go to tests' })).toBeNull();
+    // Only the header's Create Test; the empty state offers Clear Filters instead.
+    expect(screen.getAllByRole('button', { name: 'Create Test' })).toHaveLength(1);
 
     await userEvent.click(screen.getAllByRole('button', { name: 'Clear Filters' })[0]);
-    await userEvent.click(await screen.findByRole('button', { name: 'Go to tests' }, WAIT));
-    expect(location()).toBe('/checks/studio/tests');
+    await waitFor(() => expect(screen.getAllByRole('button', { name: 'Create Test' })).toHaveLength(2), WAIT);
+    await userEvent.click(screen.getAllByRole('button', { name: 'Create Test' })[1]);
+    expect(await screen.findByRole('dialog', {}, WAIT)).toBeInTheDocument();
   });
 });
 

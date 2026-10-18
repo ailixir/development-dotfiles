@@ -3,19 +3,16 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { AuthoringV2Request, LiteralInput } from './studioTypes';
 import {
-  adaptLegacyStudioAuthoring,
   isAuthoringV2Request,
   validateStudioAuthoring,
   type AuthoringValidationCategory,
-} from './legacyStudioAuthoringAdapter';
+} from './studioAuthoringValidation';
 
 const EXAMPLE_DIR = path.resolve(__dirname, '../../../../docs/specs/studio/examples');
 
 interface ValidCase {
   name: string;
-  legacy?: { steps: string[] };
   request?: unknown;
-  expected?: { steps: Array<{ id: string; text: string }> };
   transition?: Record<string, unknown>;
 }
 
@@ -45,7 +42,6 @@ function validCase(name: string): ValidCase {
 describe('Story 10.36 shared authoring contract fixtures', () => {
   it('enumerates the required valid and invalid corpus', () => {
     expect(validCases.map(({ name }) => name)).toEqual([
-      'legacy-empty-context',
       'global-and-step-context',
       'reorder-retains-identities',
       'copy-creates-fresh-identity',
@@ -56,7 +52,6 @@ describe('Story 10.36 shared authoring contract fixtures', () => {
     expect(invalidCases.map(({ name }) => name)).toEqual([
       'missing-step-id',
       'duplicate-step-id',
-      'mixed-legacy-v2-steps',
       'orphan-evidence-step-id',
       'unsupported-v2-field',
       'secret-reference-in-global-context',
@@ -80,17 +75,19 @@ describe('Story 10.36 shared authoring contract fixtures', () => {
     expect(isAuthoringV2Request(fixture.request)).toBe(false);
   });
 
-  it('adapts the shared legacy fixture with exact text and fixture-specified stable IDs', () => {
-    const fixture = validCase('legacy-empty-context');
-    if (!fixture.legacy || !fixture.expected) throw new Error('Incomplete legacy fixture');
-    let index = 0;
-    const adapted = adaptLegacyStudioAuthoring(
-      fixture.legacy,
-      () => fixture.expected!.steps[index++].id,
-    );
-
-    expect(adapted).toEqual(fixture.expected);
-    expect(adapted.steps.every((step) => !('context' in step))).toBe(true);
+  it('refuses string steps and a missing schema version as an invalid shape, never as another generation', () => {
+    const IDS = ['00000000-0000-4000-8000-000000000001', '00000000-0000-4000-8000-000000000002'];
+    const strings = validateStudioAuthoring({ authoringSchemaVersion: 2, steps: ['one', 'two'] });
+    expect(strings.map(({ category }) => category)).toEqual(['INVALID_SHAPE', 'INVALID_SHAPE']);
+    expect(validateStudioAuthoring({ steps: ['one'] })).toContainEqual({ category: 'INVALID_SHAPE', path: '$' });
+    expect(
+      validateStudioAuthoring({
+        authoringSchemaVersion: 2,
+        steps: ['one', { id: IDS[0], text: 'two' }],
+      }),
+    ).toContainEqual({ category: 'INVALID_SHAPE', path: '$.steps[0]' });
+    expect(isAuthoringV2Request({ authoringSchemaVersion: 2, steps: [{ id: IDS[0], text: ' x ' }] })).toBe(true);
+    expect(isAuthoringV2Request({ steps: [{ id: IDS[0], text: ' x ' }] })).toBe(false);
   });
 
   it('preserves empty, Unicode, quoted, backslash, newline and surrounding-space literals', () => {

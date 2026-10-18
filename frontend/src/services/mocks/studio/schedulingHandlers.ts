@@ -29,7 +29,7 @@ export function createSchedulingHandlers(storage: { getTest: (id: string) => Tes
     if (!s || s.deletedAt) return null;
     const input = activationInputs.get(test.id);
     if (s.requestedEnabled && input && (input.sourceRevision !== test.sourceRevision || input.configurationRevision !== test.configurationRevision || s.activatedRevisionId !== test.confirmedRevisionId)) {
-      const code = s.activatedRevisionId !== test.confirmedRevisionId ? 'ACTIVATION_REVISION_MISMATCH' : 'COMPILE_REQUIRED';
+      const code = s.activatedRevisionId !== test.confirmedRevisionId ? 'ACTIVATION_REVISION_MISMATCH' : 'LEARN_REQUIRED';
       if (s.state !== 'BLOCKED' || s.blockedCode !== code) { s.version += 1; s.updatedAt = timestamp(); }
       s.state = 'BLOCKED'; s.blockedCode = code;
       settleDeferred(test.id, code, true);
@@ -106,11 +106,11 @@ export function createSchedulingHandlers(storage: { getTest: (id: string) => Tes
       const body = await request.json() as ScheduleEnable;
       if (body.expectedVersion !== s.version) return error('SCHEDULE_VERSION_CONFLICT', 409);
       if (body.enabled) {
-        if (!test.confirmedRevisionId) return error('COMPILE_REQUIRED', 409);
+        if (!test.confirmedRevisionId) return error('LEARN_REQUIRED', 409);
         if (body.confirmedRevisionId !== test.confirmedRevisionId) return error('ACTIVATION_REVISION_MISMATCH', 409);
         const input = activationInputs.get(test.id);
         if (input && s.activatedRevisionId === test.confirmedRevisionId &&
-          (input.sourceRevision !== test.sourceRevision || input.configurationRevision !== test.configurationRevision)) return error('COMPILE_REQUIRED', 409);
+          (input.sourceRevision !== test.sourceRevision || input.configurationRevision !== test.configurationRevision)) return error('LEARN_REQUIRED', 409);
         if (JSON.stringify([...(body.acknowledgedUncertaintyExecutionIds ?? [])].sort()) !== JSON.stringify([...s.unacknowledgedUncertaintyExecutionIds].sort())) return error('UNCERTAINTY_ACKNOWLEDGEMENT_REQUIRED', 409);
         const next = mockSchedulePreview(s.cronExpression, s.timeZone).occurrences[0].scheduledAt;
         settleDeferred(test.id, 'SCHEDULE_UPDATED');

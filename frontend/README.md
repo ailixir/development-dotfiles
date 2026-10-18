@@ -11,15 +11,22 @@
 ## Quick Start
 
 ```bash
-# Install dependencies
-npm install
-
-# Initialize Mock Service Worker
-# npm run msw:init
+# Install dependencies (pnpm only; .npmrc sets node-linker=hoisted, which the webpack build needs)
+pnpm install
 
 # Start development (Module Federation dev server)
-npm start
+pnpm start
+
+# Unit tests, and browser specs (Playwright, MSW project)
+pnpm exec vitest run
+pnpm run test:e2e
 ```
+
+There is no browser Mock Service Worker: no `msw:init` step and no `public/mockServiceWorker.js`.
+MSW runs in Node, in the Vitest server (`src/services/mocks/studio/server.ts`) and in the Playwright
+proxy (`e2e/mswProxy.ts`). The `real-backend` Playwright project is selected with
+`CHECKS_E2E_REAL_BACKEND=1` and needs the backend running (`CHECKS_E2E_BACKEND_URL`, default
+`http://127.0.0.1:8080`).
 
 ## Environment Variables
 
@@ -29,28 +36,28 @@ These env vars make the module environment-agnostic across local dev, CI/CD, and
   - Default: `auto` (Webpack infers at runtime)
   - Example (CDN build):
   ```bash
-  PUBLIC_PATH=https://cdn.example.com/checks/ npm run build
+  PUBLIC_PATH=https://cdn.example.com/checks/ pnpm run build
   ```
 
-- **HOST**: Dev server host for `npm start`.
+- **HOST**: Dev server host for `pnpm start`.
   - Default: `0.0.0.0`
   - Example:
   ```bash
-  HOST=0.0.0.0 npm start
+  HOST=0.0.0.0 pnpm start
   ```
 
-- **PORT**: Dev server port for `npm start`.
+- **PORT**: Dev server port for `pnpm start`.
   - Default: `3002`
   - Example:
   ```bash
-  PORT=4002 npm start
+  PORT=4002 pnpm start
   ```
 
 - **VITE_ALLOW_INSECURE_MSW_FALLBACK**: Enables inline API mock fallback when Service Worker cannot run (for example, untrusted internal CA / insecure browser context).
   - Default: `true`
   - Example:
   ```bash
-  VITE_ALLOW_INSECURE_MSW_FALLBACK=true npm start
+  VITE_ALLOW_INSECURE_MSW_FALLBACK=true pnpm start
   ```
 
 Notes:

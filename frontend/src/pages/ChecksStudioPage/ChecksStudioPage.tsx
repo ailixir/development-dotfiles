@@ -57,7 +57,6 @@ import {
   PlayArrow,
 } from '@mui/icons-material';
 import OnboardingCoach from '@/components/studio/OnboardingCoach';
-import CodeTab from '@/components/studio/CodeTab';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store';
 import { selectIsSourceEnabled } from '@store/slices/sourcesSlice';
@@ -69,10 +68,12 @@ import {
   defaultConfiguration,
   DEFAULT_STEP_TIMEOUT_SECONDS,
   isTerminalExecutionStatus,
+  type AuthoringStep,
   type ExecutionSnapshot,
   type StudioVariable,
-  type TestDto,
-  type TestRequest,
+  type TestDetailDto,
+  type TestDraftHeader,
+  type TestUpdateRequest,
 } from '@/types/studio/studioTypes';
 import studioApi from '@/services/api/studioApi';
 import {
@@ -82,27 +83,43 @@ import {
 } from '@/services/api/studioTransportWiring';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import SecretInput from '@/components/studio/SecretInput';
-import { STUDIO_CAPABILITIES } from '@/utils/config/studioCapabilities';
+import {
+  useStudioCapabilities,
+  vaultSecretsEnabled,
+} from '@/utils/config/studioCapabilities';
 import {
   ExecutionProgressView,
   RunControl,
   executionStatusLabel,
   executionStatusTone,
+  type LearnFromRequest,
 } from '@/components/studio/run';
-import { VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
-import { PRODUCTION_ALPHA_TEMPLATES, type QuickStartTemplate } from '@/components/studio/templates';
+import { GuidedSeekControls, VideoEvidencePanel, useVideoSeek } from '@/components/studio/evidence';
+import { availableQuickStartTemplates, type QuickStartTemplate } from '@/components/studio/templates';
+import {
+  GuidedClarification,
+  GuidedCompletion,
+  GuidedRunStatus,
+  PlanExplanation,
+  guidedCopy,
+} from '@/components/studio/guided';
+import {
+  useGuidedSession,
+  type UseGuidedSessionOptions,
+} from '@/components/studio/guided/useGuidedSession';
+import {
+  ReferencePicker,
+  insertAtSelection,
+  secretsUnavailableText,
+  type InsertedReference,
+} from '@/components/studio/references';
+import { isGuidedTerminalState } from '@/types/studio/studioGuidedTypes';
 import { saveErrorMessage } from './saveErrorMessage';
+import { authoredLiteralHintStep } from './authoredLiteralHint';
+import { declareInsertedSecret, type EditableVariable } from './secretDeclaration';
 import { StudioScheduleDialog } from '@/components/studio/scheduling/StudioScheduleDialog';
 import { StudioScheduleSummary } from '@/components/studio/scheduling/StudioScheduleSummary';
 
-/** One row of the Variables dialog. `secret` rows hold a reference id, never a secret value. */
-type EditableVariable = {
-  id: string;
-  name: string;
-  type: 'plain' | 'secret';
-  value?: string;
-  secretId?: string;
-};
 
 function toEditableVariables(variables: StudioVariable[] | null | undefined): EditableVariable[] {
   return (variables ?? []).map((variable, index) => ({
@@ -114,13 +131,20 @@ function toEditableVariables(variables: StudioVariable[] | null | undefined): Ed
   }));
 }
 
-/** The contract's typed variables. A `secretRef` carries its reference only. */
+/**
+ * The contract's typed variables. A `secretRef` carries its reference only.
+ *
+ * Ruling D-8: a `secretRef` always carries the Vault name it points at, and no write sends
+ * `secretId` as null, empty or the alias. A secret row the author has not pointed at a secret yet
+ * stays visible in the Variables dialog, incomplete, and is not sent until a secret is chosen.
+ */
 function toContractVariables(rows: EditableVariable[]): StudioVariable[] {
   return rows
     .filter((row) => row.name.trim() !== '')
+    .filter((row) => row.type !== 'secret' || (row.secretId ?? '').trim() !== '')
     .map((row) =>
       row.type === 'secret'
-        ? { name: row.name.trim(), kind: 'secretRef', secretId: row.secretId ?? null }
+        ? { name: row.name.trim(), kind: 'secretRef', secretId: (row.secretId ?? '').trim() }
         : { name: row.name.trim(), kind: 'plain', value: row.value ?? '' },
     );
 }
@@ -192,18 +216,50 @@ const ExecutionTime: React.FC<{ snapshot: ExecutionSnapshot; running: boolean }>
   );
 };
 
+/**
+ * A step the author inserts gets a new stable ID here, at the moment of insertion (OpenAPI intro
+ * rules; STUDIO-OBS-008 item a). Editing and reordering keep a step's ID, and deleting drops it, so
+ * a save sends the server the identity it needs to compute the first changed step.
+ */
+const newAuthoringStep = (text: string): AuthoringStep => ({ id: crypto.randomUUID(), text });
+
+/** Identity and text only: the editor never edits a step's context, so that is all a change can be in. */
+const stepsKey = (steps: readonly AuthoringStep[]): string =>
+  JSON.stringify(steps.map((step) => [step.id, step.text]));
+
 /** The DOM id of a step's text field, so a refusal can link to the line it is about. */
 const stepInputId = (index: number) => `studio-step-input-${index}`;
 
-const ChecksStudioPageInner: React.FC = () => {
+/** The never-learned empty state, verbatim from the UX panel 2026-10-09 single-path state model. */
+export const NEVER_LEARNED_EMPTY_STATE =
+  'Write your steps, then press Run. The first Run works through them on the live page and saves what it learned. Later Runs repeat it in seconds.';
+
+/** Optional knobs for tests; the routed page passes none and uses the hook's defaults. */
+export interface ChecksStudioPageProps {
+  /** Poll and retry timing of the guided session (`useGuidedSession`). */
+  readonly guidedOptions?: UseGuidedSessionOptions;
+}
+
+/** Where "Insert reference" puts a token: the step being edited last, or the "Add a test step" field. */
+type InsertTarget = { readonly kind: 'new' } | { readonly kind: 'step'; readonly stepId: string };
+
+const ChecksStudioPageInner: React.FC<ChecksStudioPageProps> = ({ guidedOptions }) => {
   const theme = useTheme();
-  const [scenarios, setScenarios] = useState<TestDto[] | null>(null);
+  /** The list projection: names, readiness and run history. It carries no step IDs. */
+  const [scenarios, setScenarios] = useState<TestDraftHeader[] | null>(null);
   const [scenariosError, setScenariosError] = useState<string | null>(null);
   const [scenariosLoading, setScenariosLoading] = useState<boolean>(true);
   const [selectedScenario, setSelectedScenario] = useState<string | null>(null);
   const isRunning = useAppSelector((s: any) => s.studio.isExecuting);
   const currentStep = useAppSelector((s: any) => s.studio.currentStep);
-  const [testSteps, setTestSteps] = useState<string[]>([]);
+  const [testSteps, setTestSteps] = useState<AuthoringStep[]>([]);
+  /**
+   * The last `GET /tests/{id}` or save answer for the selected draft. It is the only source of the
+   * stable step IDs, the global context and the revisions a save must carry back.
+   */
+  const [draft, setDraft] = useState<TestDetailDto | null>(null);
+  /** The draft the author chose last, so a slow read for an earlier choice cannot overwrite the editor. */
+  const latestSelectionRef = useRef<string | null>(null);
   const [newStep, setNewStep] = useState('');
   const reduxLogs = useAppSelector((s: any) => s.studio.executionLogs);
   const executionLogs = useMemo(() => (reduxLogs || []).map((l: any) => ({
@@ -217,7 +273,7 @@ const ChecksStudioPageInner: React.FC = () => {
    * legacy player, its missing-file fallback, the store-held playback source and the index-derived
    * seek are retired (architecture §6.4: *"No synthetic index-times-ten mapping remains."*).
    */
-  const { videoRef, seekToOffset } = useVideoSeek();
+  const { videoRef, seekToOffset, recordingDurationMs } = useVideoSeek();
   const stepResultsArr = useAppSelector((s: any) => s.studio.stepResults) as Array<{ stepIndex: number; status: 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' }>;
   const stepResultsMap = useMemo(() => {
     const map: Record<number, 'passed' | 'failed' | 'pending'> = {};
@@ -228,7 +284,48 @@ const ChecksStudioPageInner: React.FC = () => {
   }, [stepResultsArr]);
   const [isSaving, setIsSaving] = useState(false);
   const [isPreparing, setIsPreparing] = useState(false);
-  const editorLocked = isRunning || isPreparing;
+  /**
+   * STUDIO-OBS-008 AC-2: the one guided session this page follows for the selected test, mounted
+   * once. It starts, polls, reads the question, finalizes automatically at `FINALIZING` and reads the
+   * result; the components below only render what it holds.
+   */
+  const guided = useGuidedSession(selectedScenario, guidedOptions);
+  const guidedView = guided.view;
+  const guidedState = guidedView?.session.state ?? null;
+  const guidedActive = guidedState !== null && !isGuidedTerminalState(guidedState);
+  const guidedTerminal = guidedState !== null && isGuidedTerminalState(guidedState);
+  /**
+   * The finalize was refused or is waiting for a new sign-in: the Run reads "Steps not ready to
+   * repeat." and no longer "Saving what this run learned…" beside it (W5 UX-16).
+   */
+  const finalizeHeld =
+    guidedState === 'FINALIZING' && (guided.pending === 'NOT_READY' || guided.pending === 'REAUTHENTICATION_REQUIRED');
+  /**
+   * Which Run the Proof tab shows. A replay accepted after a guided session (or after a refused
+   * guided start) replaces it on screen; a newer guided session or refusal shows again. Derived, so
+   * the first state of a new session is on screen from the render that receives it.
+   */
+  const [supersededByReplay, setSupersededByReplay] = useState<{
+    sessionId: string | null;
+    refusal: typeof guided.startRefusal;
+  }>({ sessionId: null, refusal: null });
+  const guidedSessionId = guidedView?.session.sessionId ?? null;
+  /** The session this page follows for the test, known from the pointer before its first read. */
+  const followedSessionId = useAppSelector((state) =>
+    selectedScenario ? (state.studio.guidedSessionByTestId[selectedScenario] ?? null) : null,
+  );
+  const guidedVisible = guidedView !== null && guidedSessionId !== supersededByReplay.sessionId;
+  const visibleStartRefusal =
+    guided.startRefusal !== null && guided.startRefusal !== supersededByReplay.refusal ? guided.startRefusal : null;
+  /** A replay in flight, or a guided session that has not ended. Either locks the editor. */
+  const running = isRunning || guidedActive;
+  const editorLocked = running || isPreparing;
+  /** STUDIO-OBS-008 AC-5: the server's capability for this saved test, never a build switch. */
+  const capabilities = useStudioCapabilities(selectedScenario);
+  const secretsOn = vaultSecretsEnabled(capabilities);
+  const secretsNotice = secretsUnavailableText(capabilities);
+  const quickStartTemplates = availableQuickStartTemplates(secretsOn);
+  const draftStepIds = useMemo(() => testSteps.map((step) => step.id), [testSteps]);
   /** The last snapshot the API returned, rendered by `ExecutionProgressView` (AC-18, AC-19). */
   const [snapshot, setSnapshot] = useState<ExecutionSnapshot | null>(null);
   /** Programmatic run requests: `?autorun=1` and the terminal-error surface's re-run. */
@@ -241,8 +338,10 @@ const ChecksStudioPageInner: React.FC = () => {
   const [stopError, setStopError] = useState<string | null>(null);
   // Removed legacy interval-based simulator in favor of API polling
   const [variablesList, setVariablesList] = useState<EditableVariable[]>([]);
+  /** The secret ID whose insert was refused because a variable of that name exists (W5-2). */
+  const [referenceRefusal, setReferenceRefusal] = useState<string | null>(null);
   const [environment, setEnvironment] = useState('');
-  const [rightTab, setRightTab] = useState<'proof' | 'logs' | 'code'>('proof');
+  const [rightTab, setRightTab] = useState<'proof' | 'logs'>('proof');
   const [coachStep, setCoachStep] = useState<number>(() => {
     try {
       const saved = localStorage.getItem('studio:coachStep');
@@ -252,7 +351,29 @@ const ChecksStudioPageInner: React.FC = () => {
   const [forceCoach, setForceCoach] = useState(false);
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [variablesOpen, setVariablesOpen] = useState(false);
+  const openVariables = useCallback(() => setVariablesOpen(true), []);
 
+  // W5 UX-02: a guided Run's status, question and result are on the Proof tab. No focus moves. The
+  // effects are keyed on identities, so an author who opens Logs is not pulled back on every poll,
+  // only by a new session or a new question.
+  useEffect(() => {
+    if (guidedSessionId !== null) setRightTab('proof');
+  }, [guidedSessionId]);
+  const questionKey =
+    guided.clarification === null ? null : `${guided.clarification.clarificationId}:${guided.clarification.generation}`;
+  useEffect(() => {
+    if (questionKey !== null) setRightTab('proof');
+  }, [questionKey]);
+
+  /**
+   * "Go to step N" and "None of these — I'll edit step N" move focus to that step's editor row
+   * (AC-4; T0 ruling A3). The step is found by stable ID in the current draft. A request waits while
+   * the editor is locked (a session still running) and is dropped if the step is not there.
+   */
+  const [focusRequest, setFocusRequest] = useState<{ stepId: string; token: number } | null>(null);
+  const requestStepFocus = useCallback((stepId: string) => {
+    setFocusRequest((previous) => ({ stepId, token: (previous?.token ?? 0) + 1 }));
+  }, []);
   // Subtle auto-advance for onboarding
   useEffect(() => {
     if (!forceCoach && coachStep === 0 && testSteps.length > 0) setCoachStep(1);
@@ -270,21 +391,22 @@ const ChecksStudioPageInner: React.FC = () => {
   const dispatch = useDispatch();
 
   /** Puts a draft the server returned into the editor. The server's copy is the only draft. */
-  const loadDraftIntoEditor = useCallback((test: TestDto) => {
-    setTestSteps(test.steps || []);
+  const loadDraftIntoEditor = useCallback((test: TestDetailDto) => {
+    setDraft(test);
+    setTestSteps(test.steps);
     setVariablesList(toEditableVariables(test.variables));
     setEnvironment(test.environment);
   }, []);
 
   const isDirty = useMemo(() => {
-    if (!selectedScenarioData) return false;
+    if (!draft || draft.id !== selectedScenario) return false;
     return (
-      JSON.stringify(testSteps) !== JSON.stringify(selectedScenarioData.steps ?? []) ||
+      stepsKey(testSteps) !== stepsKey(draft.steps) ||
       JSON.stringify(comparableVariables(toContractVariables(variablesList))) !==
-        JSON.stringify(comparableVariables(selectedScenarioData.variables ?? [])) ||
-      environment !== selectedScenarioData.environment
+        JSON.stringify(comparableVariables(draft.variables ?? [])) ||
+      environment !== draft.environment
     );
-  }, [environment, selectedScenarioData, testSteps, variablesList]);
+  }, [draft, environment, selectedScenario, testSteps, variablesList]);
 
   /**
    * VAL-036: text typed in "Add a test step" but not yet added. Save and Run add it as a step
@@ -298,16 +420,28 @@ const ChecksStudioPageInner: React.FC = () => {
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
   const pendingNavigationRef = useRef<(() => void) | null>(null);
 
+  useEffect(() => {
+    if (focusRequest === null || editorLocked) return;
+    setFocusRequest(null);
+    const index = testSteps.findIndex((step) => step.id === focusRequest.stepId);
+    if (index < 0) return;
+    const input = document.getElementById(stepInputId(index));
+    if (input instanceof HTMLElement) {
+      input.focus();
+      input.scrollIntoView?.({ block: 'center' });
+    }
+  }, [editorLocked, focusRequest, testSteps]);
+
   /**
    * Puts a Quick Start template into the editor.
    *
    * Steps are replaced; reference rows are **merged**. A template declares the `<var>` / `<secret>`
-   * names its steps mention so the first compile does not fail on an undeclared reference, but a
+   * names its steps mention so the first Run does not fail on an undeclared reference, but a
    * row the author already configured (a chosen vault entry, a filled-in value) is left exactly as
    * it is. The template names what is needed, it does not overwrite what is already known.
    */
   const applyTemplate = useCallback((template: QuickStartTemplate) => {
-    setTestSteps([...template.steps]);
+    setTestSteps(template.steps.map(newAuthoringStep));
     setVariablesList((rows) => {
       const known = new Set(rows.map((row) => row.name.trim()));
       const added = template.variables
@@ -317,7 +451,8 @@ const ChecksStudioPageInner: React.FC = () => {
           name: variable.name,
           type: variable.type,
           value: variable.type === 'plain' ? variable.value ?? '' : undefined,
-          secretId: undefined,
+          // A template's secret NAME is the Vault name the token resolves by (D-8).
+          secretId: variable.type === 'secret' ? variable.name : undefined,
         }));
       return [...rows, ...added];
     });
@@ -343,10 +478,11 @@ const ChecksStudioPageInner: React.FC = () => {
     return () => window.removeEventListener('beforeunload', warnBeforeUnload);
   }, [isDirty]);
 
-  const replaceScenario = useCallback((updated: TestDto) => {
+  const replaceScenario = useCallback((updated: TestDetailDto) => {
     setScenarios((previous) =>
       previous ? previous.map((test) => (test.id === updated.id ? updated : test)) : [updated],
     );
+    setDraft(updated);
   }, []);
 
   // Load drafts from the real `GET /studio/tests` API. Fixtures are test-only and never install a
@@ -371,7 +507,11 @@ const ChecksStudioPageInner: React.FC = () => {
         }
         if (chosen) {
           setSelectedScenario(chosen.id);
-          loadDraftIntoEditor(chosen);
+          latestSelectionRef.current = chosen.id;
+          // The list carries no step IDs; the single read does, and the editor is built on it.
+          const detail = await studioApi.getTest(chosen.id);
+          if (!mounted) return;
+          loadDraftIntoEditor(detail);
           if (autorun) {
             // Routed through `RunControl`, so the deep link is governed by the same server
             // readiness predicate as the button and cannot start a run the server would refuse.
@@ -426,7 +566,7 @@ const ChecksStudioPageInner: React.FC = () => {
   /**
    * The seam between the two halves of story 10.11, and the only run entry point on this page.
    *
-   * **10.11a owns whether a run may start.** `RunControl` holds the gate (`compileStatus ===
+   * **10.11a owns whether a run may start.** `RunControl` holds the gate (`readiness ===
    * 'READY'`, read from `GET /tests/{id}`) and owns the single `POST /tests/{id}/execute`; the page
    * has no `handleRunTest`, no `validation.isValid` gate and no execute call of its own, because a
    * second call site is a second dispatch path and one of them would be ungated.
@@ -438,6 +578,7 @@ const ChecksStudioPageInner: React.FC = () => {
    * is the substitution its own comment anticipated.
    */
   const beginRun = useCallback((executionId: string) => {
+    setSupersededByReplay({ sessionId: guidedSessionId, refusal: guided.startRefusal });
     dispatch(setExecuting(true));
     dispatch(clearLogs());
     setSnapshot(null);
@@ -478,7 +619,7 @@ const ChecksStudioPageInner: React.FC = () => {
         setIsStopping(false);
       },
     });
-  }, [closeSubscription, dispatch]);
+  }, [closeSubscription, dispatch, guidedSessionId, guided.startRefusal]);
 
   /*
    * Story 10.11a, AC-3(a): the client-side Python regeneration that used to run here on every
@@ -508,14 +649,30 @@ const ChecksStudioPageInner: React.FC = () => {
     setIsStopping(false);
     setStopError(null);
     setSaveConflict(null);
+    setSupersededByReplay({ sessionId: null, refusal: null });
+    setFocusRequest(null);
+    setReferenceRefusal(null);
     dispatch(setExecuting(false));
     setSelectedScenario(scenarioId);
+    latestSelectionRef.current = scenarioId;
     const scenario = scenarios?.find(s => s.id === scenarioId);
     if (scenario) {
-      loadDraftIntoEditor(scenario);
+      // The previous draft's steps must not stay on screen while the next one is read.
+      setDraft(null);
+      setTestSteps([]);
       dispatch(setCurrentStepAction(0));
       dispatch(setAllStepResults([] as any));
       dispatch(clearLogs());
+      studioApi.getTest(scenarioId).then(
+        (detail) => {
+          if (latestSelectionRef.current === scenarioId) loadDraftIntoEditor(detail);
+        },
+        (error: unknown) => {
+          if (latestSelectionRef.current !== scenarioId) return;
+          const message = (error as { message?: string })?.message;
+          setSaveSnack({ open: true, message: message || 'Failed to load the test', severity: 'error' });
+        },
+      );
     }
   };
 
@@ -548,13 +705,6 @@ const ChecksStudioPageInner: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, scenarios, selectedScenario]);
 
-  /** VAL-009: a refusal in the Run outcome links to its step by moving focus to that step's text. */
-  const showStep = useCallback((stepIndex: number) => {
-    const input = document.getElementById(stepInputId(stepIndex));
-    input?.scrollIntoView?.({ block: 'center' });
-    input?.focus();
-  }, []);
-
   /** The recording can be sought only when the panel has mounted one (AC-4's gate, AC-8). */
   const hasPlayableRecording =
     snapshot !== null && snapshot.video.status === 'AVAILABLE' && snapshot.videoPath !== null;
@@ -579,20 +729,24 @@ const ChecksStudioPageInner: React.FC = () => {
    * authors do not set it, so a save normalises a stored value to the default.
    */
   const saveDraft = useCallback(async (): Promise<SaveOutcome> => {
-    const test = selectedScenarioData;
+    const test = draft;
     if (!test) return 'error';
     // VAL-036: a step still sitting in the add field is added before the draft is saved.
-    const steps = newStep.trim() ? [...testSteps, newStep] : testSteps;
+    const steps = newStep.trim() ? [...testSteps, newAuthoringStep(newStep)] : testSteps;
     if (steps !== testSteps) {
       setTestSteps(steps);
       setNewStep('');
     }
-    const body: TestRequest = {
+    // The v2 write: every step under the ID it was read or inserted with, and the global context
+    // the editor never touches handed back unchanged, or the server would drop it.
+    const body: TestUpdateRequest = {
+      authoringSchemaVersion: 2,
       name: test.name,
       description: test.description ?? null,
       csiId: test.csiId,
       environment,
       steps,
+      ...(test.globalContext ? { globalContext: test.globalContext } : {}),
       variables: toContractVariables(variablesList),
       configuration: {
         ...defaultConfiguration(),
@@ -628,7 +782,7 @@ const ChecksStudioPageInner: React.FC = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [environment, newStep, replaceScenario, selectedScenarioData, testSteps, variablesList]);
+  }, [draft, environment, newStep, replaceScenario, testSteps, variablesList]);
 
   /** The conflict's way out: read the draft again and put the server's version in the editor. */
   const reloadSelectedTest = useCallback(async () => {
@@ -644,6 +798,187 @@ const ChecksStudioPageInner: React.FC = () => {
       setSaveSnack({ open: true, message: message || 'Failed to reload the test', severity: 'error' });
     }
   }, [loadDraftIntoEditor, replaceScenario, selectedScenarioData?.id]);
+
+  /**
+   * A guided session this page followed has just ended: read the test again, because its readiness
+   * may have changed (learned, or still not ready). This is a read, never a run: learning completion
+   * and finalization never cause a second execution (AC-2).
+   */
+  const [guidedRefresh, setGuidedRefresh] = useState(0);
+  const previousGuidedState = useRef<typeof guidedState>(null);
+  useEffect(() => {
+    const previous = previousGuidedState.current;
+    previousGuidedState.current = guidedState;
+    if (guidedState === null || !isGuidedTerminalState(guidedState)) return;
+    if (previous === null || isGuidedTerminalState(previous)) return;
+    const id = latestSelectionRef.current;
+    if (!id) return;
+    studioApi.getTest(id).then(
+      (fresh) => {
+        if (latestSelectionRef.current !== id) return;
+        replaceScenario(fresh);
+        setGuidedRefresh((count) => count + 1);
+      },
+      () => undefined,
+    );
+  }, [guidedState, replaceScenario]);
+
+  /**
+   * W5-1 (ruling `w5-unreadable-and-alias.md` §2): the followed session's read was refused before any
+   * view of it loaded, so the hook keeps the pointer and starts nothing. A fresh `GET /tests/{id}`,
+   * sent after that refusal, that answers `UNLEARNED` or `NEEDS_RELEARN` proves the session is no
+   * longer live (a live one reads `LEARNING`, or `READY` for a learn-again), so the pointer is dropped
+   * and the gate reads again. `LEARNING`, `READY` or a failed read change nothing. One read per
+   * unreadable transition or "Refresh test information" press: no timer, no poll. It never calls
+   * `replaceScenario`, which would overwrite a dirty draft, and never reuses an earlier body.
+   */
+  const [unreadableRecheck, setUnreadableRecheck] = useState(0);
+  const followedSessionRef = useRef<string | null>(null);
+  followedSessionRef.current = followedSessionId;
+  const unreadableRef = useRef(false);
+  unreadableRef.current = guided.unreadable;
+  const { clear: clearGuided } = guided;
+  useEffect(() => {
+    if (!guided.unreadable) return;
+    const id = selectedScenario;
+    const sid = followedSessionId;
+    if (!id || !sid) return;
+    studioApi.getTest(id).then(
+      (fresh) => {
+        // The answer must still be about the test and the session it was asked for.
+        if (latestSelectionRef.current !== id || followedSessionRef.current !== sid || !unreadableRef.current) return;
+        if (fresh.readiness === 'UNLEARNED' || fresh.readiness === 'NEEDS_RELEARN') {
+          clearGuided();
+          setGuidedRefresh((count) => count + 1);
+        }
+      },
+      () => undefined,
+    );
+    // One read per unreadable transition or Refresh press (ruling §2 "Re-check"); no timer, no poll.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [guided.unreadable, unreadableRecheck]);
+
+  /** One answer or cancel at a time for the pending question, so neither is sent twice. */
+  const [questionBusy, setQuestionBusy] = useState(false);
+  const { answer: answerGuided, cancel: cancelGuided } = guided;
+  const answerQuestion = useCallback(
+    async (choiceId: string) => {
+      setQuestionBusy(true);
+      try {
+        await answerGuided(choiceId);
+      } finally {
+        setQuestionBusy(false);
+      }
+    },
+    [answerGuided],
+  );
+  /**
+   * T0 ruling A3: "None of these — I'll edit step N", and declining a side-effect confirmation,
+   * cancel the session with `reason: userRequested` under its one stable key, and only then move
+   * focus to step N's editor row. Never a `clarify`, never a second cancel, never a new start. The
+   * server's answer is shown as it is (the existing `CANCELLED` narrative, or whatever state the
+   * session had already reached).
+   */
+  const noneOfThese = useCallback(
+    async (stepId: string) => {
+      setQuestionBusy(true);
+      try {
+        await cancelGuided();
+      } finally {
+        setQuestionBusy(false);
+      }
+      requestStepFocus(stepId);
+    },
+    [cancelGuided, requestStepFocus],
+  );
+
+  /** Stop during a guided session cancels it, once; the session's own terminal state ends it. */
+  const [guidedStopping, setGuidedStopping] = useState(false);
+  useEffect(() => {
+    if (!guidedActive) setGuidedStopping(false);
+  }, [guidedActive]);
+  const stopGuided = useCallback(() => {
+    if (guidedStopping) return;
+    setGuidedStopping(true);
+    void cancelGuided();
+  }, [cancelGuided, guidedStopping]);
+
+  /**
+   * "Learn again from step N" after a replay drift (T0 ruling A1.6): a request to the one Run gate,
+   * which saves if needed, re-reads the test, re-checks the A1 conditions and only then starts.
+   */
+  const [learnRequest, setLearnRequest] = useState<{ token: number; request: LearnFromRequest } | null>(null);
+  const learnAgain = useCallback((stepId: string, revisionId: string) => {
+    setLearnRequest((previous) => ({
+      token: (previous?.token ?? 0) + 1,
+      request: { kind: 'drift', stepId, revisionId },
+    }));
+  }, []);
+
+  /**
+   * "Insert reference" (AC-5(b)) puts a `<var NAME>` or `<secret ID>` token at the caret of the step
+   * edited last, or of the "Add a test step" field. A secret also gets its declaration, a `secretRef`
+   * whose `secretId` is that Vault name, unless the test already declares one (D-8).
+   */
+  const insertTargetRef = useRef<InsertTarget>({ kind: 'new' });
+  const selectionRef = useRef<{ start: number; end: number } | null>(null);
+  const trackCaret = useCallback(
+    (target: InsertTarget) =>
+      (event: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const field = event.currentTarget;
+        insertTargetRef.current = target;
+        selectionRef.current = {
+          start: field.selectionStart ?? field.value.length,
+          end: field.selectionEnd ?? field.value.length,
+        };
+      },
+    [],
+  );
+  const insertReference = useCallback(
+    (reference: InsertedReference) => {
+      // W5-2: a secret whose ID is already the name of another declaration is refused before anything
+      // is inserted, because the backend refuses such a set at start (no token, no row, no alias).
+      let declared: EditableVariable[] | null = null;
+      if (reference.kind === 'secret') {
+        const outcome = declareInsertedSecret(variablesList, reference.name);
+        if (!outcome.ok) {
+          setReferenceRefusal(reference.name);
+          return;
+        }
+        declared = outcome.rows;
+      }
+      setReferenceRefusal(null);
+      const target = insertTargetRef.current;
+      const selection = selectionRef.current;
+      const place = (text: string) => {
+        const placed = insertAtSelection(
+          text,
+          selection?.start ?? text.length,
+          selection?.end ?? text.length,
+          reference.token,
+        );
+        selectionRef.current = { start: placed.caret, end: placed.caret };
+        return placed.text;
+      };
+      const step = target.kind === 'step' ? testSteps.find((candidate) => candidate.id === target.stepId) : undefined;
+      if (step) {
+        const text = place(step.text);
+        setTestSteps((previous) =>
+          previous.map((candidate) => (candidate.id === step.id ? { ...candidate, text } : candidate)),
+        );
+      } else {
+        insertTargetRef.current = { kind: 'new' };
+        setNewStep((previous) => place(previous));
+      }
+      // F-L5b-4: declared by secretId (D-8 kept).
+      if (declared !== null) setVariablesList(declared);
+    },
+    [testSteps, variablesList],
+  );
+  const plainVariableNames = useMemo(
+    () => variablesList.filter((row) => row.type === 'plain').map((row) => row.name.trim()).filter(Boolean),
+    [variablesList],
+  );
 
   /**
    * Stop asks the server to cancel the run, and nothing more. The run is over only when its
@@ -671,7 +1006,7 @@ const ChecksStudioPageInner: React.FC = () => {
       // Stop any live subscription before mutating steps
       closeSubscription();
       dispatch(setExecuting(false));
-      setTestSteps(prev => [...prev, newStep]);
+      setTestSteps(prev => [...prev, newAuthoringStep(newStep)]);
       setNewStep('');
     }
   };
@@ -762,8 +1097,8 @@ const ChecksStudioPageInner: React.FC = () => {
           </Button>
           <RunControl
             testId={selectedScenarioData?.id ?? null}
-            refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.compileStatus ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}`}
-            isRunning={isRunning}
+            refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.readiness ?? ''}:${selectedScenarioData?.confirmedRevisionId ?? ''}:${guidedRefresh}`}
+            isRunning={running}
             onPreparingChange={setIsPreparing}
             isDirty={isDirty || hasPendingStep}
             onSaveBeforeRun={saveDraft}
@@ -773,10 +1108,15 @@ const ChecksStudioPageInner: React.FC = () => {
               setRightTab('proof');
               beginRun(executionId);
             }}
-            onStop={handleStop}
-            onShowStep={showStep}
-            isStopping={isStopping}
+            onStop={guidedActive ? stopGuided : handleStop}
+            isStopping={guidedActive ? guidedStopping : isStopping}
             alertsContainer={runAlertsSlot}
+            startLearn={guided.startLearn}
+            guidedStartRefusal={visibleStartRefusal}
+            onOpenVariables={openVariables}
+            learnRequest={learnRequest}
+            followsLearningSession={followedSessionId !== null && !guidedTerminal}
+            sessionUnreadable={guided.unreadable}
           />
         </Stack>
       </Paper>
@@ -862,9 +1202,11 @@ const ChecksStudioPageInner: React.FC = () => {
                     Variables
                   </Button>
                 </Stack>
-                <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                  Plain variables are available. Vault-backed secrets are disabled in this alpha.
-                </Typography>
+                {secretsNotice !== null && (
+                  <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }} data-testid="secrets-availability">
+                    {secretsNotice}
+                  </Typography>
+                )}
               </Box>
 
               {/* Test Steps */}
@@ -873,7 +1215,12 @@ const ChecksStudioPageInner: React.FC = () => {
                 {/* Lightweight onboarding to guide the flow */}
                 {/* The coach position (not test content) is kept in localStorage */}
                 {coachStep === 0 && (
-                  <OnboardingCoach step={0} onNext={() => setCoachStep(1)} onDismiss={() => setCoachStep(99)} />
+                  <OnboardingCoach
+                    step={0}
+                    onNext={() => setCoachStep(1)}
+                    onDismiss={() => setCoachStep(99)}
+                    capabilities={capabilities}
+                  />
                 )}
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
                   <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
@@ -889,13 +1236,19 @@ const ChecksStudioPageInner: React.FC = () => {
                  {testSteps.length === 0 && !scenariosLoading && (
                   <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                     <Typography variant="body2" fontWeight={600}>Add your first step</Typography>
+                    <Typography variant="body2" data-testid="never-learned-empty-state" sx={{ mb: 1 }}>
+                      {NEVER_LEARNED_EMPTY_STATE}
+                    </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Name every control in quotes and finish with something to check:
                       <br />• Go to &quot;https://www.saucedemo.com/&quot;
                       <br />• Type &quot;&lt;var USERNAME&gt;&quot; in the &quot;Username&quot; field
                       <br />• Click the &quot;Login&quot; button
                       <br />• Check that the URL contains &quot;/inventory.html&quot;
-                      <br />A name in &lt;var NAME&gt; or &lt;secret NAME&gt; has to match a row in Variables.
+                      <br />
+                      {secretsOn
+                        ? 'A name in <var NAME> or <secret NAME> has to match a row in Variables.'
+                        : 'A name in <var NAME> has to match a row in Variables.'}
                     </Typography>
                   </Paper>
                 )}
@@ -918,7 +1271,7 @@ const ChecksStudioPageInner: React.FC = () => {
                     
                     return (
                       <ListItem
-                        key={index}
+                        key={step.id}
                         sx={{
                           border: '1px solid',
                           borderColor: isCurrentStep && isRunning ? 'primary.main' : 
@@ -959,12 +1312,18 @@ const ChecksStudioPageInner: React.FC = () => {
                             multiline
                             minRows={2}
                             maxRows={8}
-                            inputProps={{ 'aria-label': `Step ${index + 1}`, id: stepInputId(index) }}
-                            value={step}
+                            inputProps={{
+                              'aria-label': `Step ${index + 1}`,
+                              id: stepInputId(index),
+                              'data-step-id': step.id,
+                              onSelect: trackCaret({ kind: 'step', stepId: step.id }),
+                              onFocus: trackCaret({ kind: 'step', stepId: step.id }),
+                            }}
+                            value={step.text}
                             disabled={editorLocked}
                             onChange={(e) => {
                               const next = [...testSteps];
-                              next[index] = e.target.value;
+                              next[index] = { ...next[index], text: e.target.value };
                               setTestSteps(next);
                             }}
                             InputProps={{
@@ -1047,6 +1406,10 @@ const ChecksStudioPageInner: React.FC = () => {
                     disabled={editorLocked}
                     onChange={(e) => setNewStep(e.target.value)}
                     helperText="Press Enter to add the step. Shift+Enter starts a new line."
+                    inputProps={{
+                      onSelect: trackCaret({ kind: 'new' }),
+                      onFocus: trackCaret({ kind: 'new' }),
+                    }}
                     onKeyDown={(event) => {
                       // VAL-036: Enter adds the step; Shift+Enter keeps the multiline newline.
                       if (event.key !== 'Enter' || event.shiftKey || event.nativeEvent.isComposing) return;
@@ -1061,6 +1424,25 @@ const ChecksStudioPageInner: React.FC = () => {
                       )
                     }}
                   />
+                  <Box sx={{ mt: 1 }}>
+                    <ReferencePicker
+                      testId={selectedScenarioData?.id ?? null}
+                      variableNames={plainVariableNames}
+                      capabilities={capabilities}
+                      onInsert={insertReference}
+                      disabled={editorLocked || !selectedScenarioData}
+                    />
+                    {referenceRefusal !== null && (
+                      <Typography
+                        variant="caption"
+                        color="error"
+                        data-testid="reference-insert-refused"
+                        sx={{ display: 'block', mt: 1, overflowWrap: 'anywhere' }}
+                      >
+                        {guidedCopy('secretNameTaken', { ID: referenceRefusal })}
+                      </Typography>
+                    )}
+                  </Box>
                 </Box>
               </Box>
             </CardContent>
@@ -1077,7 +1459,15 @@ const ChecksStudioPageInner: React.FC = () => {
               action={
                 <Tooltip title="Refresh test information">
                   <span>
-                    <IconButton size="small" onClick={reloadScenarios} disabled={scenariosLoading} aria-label="Refresh test information">
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        if (guided.unreadable) setUnreadableRecheck((count) => count + 1);
+                        void reloadScenarios();
+                      }}
+                      disabled={scenariosLoading}
+                      aria-label="Refresh test information"
+                    >
                       <Refresh />
                     </IconButton>
                   </span>
@@ -1095,7 +1485,6 @@ const ChecksStudioPageInner: React.FC = () => {
               >
                 <Tab value="proof" label="Proof" id="studio-tab-proof" aria-controls="studio-panel-proof" />
                 <Tab value="logs" label="Logs" id="studio-tab-logs" aria-controls="studio-panel-logs" />
-                <Tab value="code" label="Code" id="studio-tab-code" aria-controls="studio-panel-code" />
               </Tabs>
 
               <Box sx={{ p: 2, flex: 1 }}>
@@ -1133,14 +1522,14 @@ const ChecksStudioPageInner: React.FC = () => {
                       <AlertTitle>Unsaved changes</AlertTitle>
                       Run will save them first, then run the saved checklist.
                     </Alert>
-                  ) : !snapshot && !isRunning ? (
+                  ) : !snapshot && !running && !guidedVisible ? (
                     <Paper variant="outlined" sx={{ p: 3, textAlign: 'center', mb: 2 }}>
                       <PlayArrow color="primary" sx={{ fontSize: 44 }} />
                       <Typography variant="h6" component="h2">
                         Run your test
                       </Typography>
                       <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                        Run saves your steps, prepares them, and records proof.
+                        Run saves your steps and records proof.
                       </Typography>
                       {selectedScenarioData?.lastRunStatus && (
                         <Stack spacing={0.5} alignItems="center" sx={{ mt: 2 }}>
@@ -1157,41 +1546,120 @@ const ChecksStudioPageInner: React.FC = () => {
                     </Paper>
                   ) : null}
 
-                  {isRunning && currentStep < 0 && (
-                    <Box sx={{ mb: 2 }}>
-                      <LinearProgress aria-label="Waiting for execution progress" />
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                        Run accepted. Waiting for the browser to start.
-                      </Typography>
-                    </Box>
+                  {guidedVisible && guidedView ? (
+                    /*
+                     * STUDIO-OBS-008: the guided Run on screen. Live state (AC-3), the one pending
+                     * question (AC-3, A3), how it ended (AC-3, AC-4, AC-6), the plan as learned
+                     * (AC-6) and its recording with named seeks (AC-7). Pending, re-authentication and
+                     * a refused finalize read as not ready, never as published (AC-2).
+                     */
+                    <Stack spacing={2} data-testid="guided-run" sx={{ mb: 2, minWidth: 0 }}>
+                      {(guided.pending === 'NOT_READY' || guided.pending === 'REAUTHENTICATION_REQUIRED') && (
+                        <Alert severity="info" data-testid="guided-pending" data-pending={guided.pending}>
+                          {guidedCopy('notReadyNow')}
+                        </Alert>
+                      )}
+                      {!finalizeHeld && <GuidedRunStatus session={guidedView.session} draftStepIds={draftStepIds} />}
+                      {guidedState === 'AWAITING_CLARIFICATION' && guided.clarification !== null && (
+                        <GuidedClarification
+                          clarification={guided.clarification}
+                          step={guidedView.session.progress.activeStep}
+                          onAnswer={(choiceId) => { void answerQuestion(choiceId); }}
+                          onNoneOfThese={(stepId) => { void noneOfThese(stepId); }}
+                          disabled={questionBusy}
+                        />
+                      )}
+                      {guidedTerminal && guided.result !== null && (
+                        <>
+                          <GuidedCompletion
+                            input={{
+                              kind: 'guided',
+                              result: guided.result,
+                              firstLearnStepId: guidedView.session.firstLearnStepId ?? null,
+                            }}
+                            draftStepIds={draftStepIds}
+                            onGoToStep={requestStepFocus}
+                            onOpenVariables={openVariables}
+                            authoredLiteralHintStep={authoredLiteralHintStep(guided.result, testSteps)}
+                          />
+                          <PlanExplanation result={guided.result} />
+                        </>
+                      )}
+                      <Paper variant="outlined" sx={{ p: 2, minWidth: 0 }}>
+                        {guided.result !== null ? (
+                          <Stack spacing={1.5}>
+                            <VideoEvidencePanel
+                              ref={videoRef}
+                              guided={{ sessionId: guided.result.sessionId, result: guided.result }}
+                            />
+                            <GuidedSeekControls
+                              result={guided.result}
+                              onSeek={handleSeekStep}
+                              recording={{ durationMs: recordingDurationMs }}
+                            />
+                          </Stack>
+                        ) : (
+                          <VideoEvidencePanel ref={videoRef} snapshot={null} />
+                        )}
+                      </Paper>
+                    </Stack>
+                  ) : (
+                    <>
+                      {isRunning && currentStep < 0 && (
+                        <Box sx={{ mb: 2 }}>
+                          <LinearProgress aria-label="Waiting for execution progress" />
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Run accepted. Waiting for the browser to start.
+                          </Typography>
+                        </Box>
+                      )}
+                      {isRunning && currentStep >= 0 && (
+                        <Box sx={{ mb: 2 }}>
+                          <LinearProgress
+                            aria-label="Test execution progress"
+                            variant="determinate"
+                            value={testSteps.length ? ((currentStep + 1) / testSteps.length) * 100 : 0}
+                            sx={{ height: 8, borderRadius: 4 }}
+                          />
+                          <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                            Running step {Math.min(currentStep + 1, testSteps.length)} of {testSteps.length}
+                          </Typography>
+                        </Box>
+                      )}
+                      {snapshot && (
+                        <Box sx={{ mb: 2 }}>
+                          <ExecutionTime snapshot={snapshot} running={isRunning} />
+                          {snapshot.status === 'PASSED' && (
+                            <Box sx={{ mb: 1.5 }}>
+                              <GuidedCompletion
+                                input={{ kind: 'replay', snapshot }}
+                                draftStepIds={draftStepIds}
+                                onGoToStep={requestStepFocus}
+                                onOpenVariables={openVariables}
+                              />
+                            </Box>
+                          )}
+                          <ExecutionProgressView
+                            snapshot={snapshot}
+                            showLogs={false}
+                            onRerun={() => setRunRequest((token) => token + 1)}
+                            onSeekStep={hasPlayableRecording ? handleSeekStep : undefined}
+                            replayContext={{
+                              draftStepIds,
+                              test: draft,
+                              onGoToStep: requestStepFocus,
+                              onOpenVariables: openVariables,
+                              onLearnAgain: learnAgain,
+                              disabled: editorLocked,
+                            }}
+                          />
+                        </Box>
+                      )}
+                      <Paper variant="outlined" sx={{ p: 2 }}>
+                        <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
+                      </Paper>
+                    </>
                   )}
-                  {isRunning && currentStep >= 0 && (
-                    <Box sx={{ mb: 2 }}>
-                      <LinearProgress
-                        aria-label="Test execution progress"
-                        variant="determinate"
-                        value={testSteps.length ? ((currentStep + 1) / testSteps.length) * 100 : 0}
-                        sx={{ height: 8, borderRadius: 4 }}
-                      />
-                      <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                        Running step {Math.min(currentStep + 1, testSteps.length)} of {testSteps.length}
-                      </Typography>
-                    </Box>
-                  )}
-                  {snapshot && (
-                    <Box sx={{ mb: 2 }}>
-                      <ExecutionTime snapshot={snapshot} running={isRunning} />
-                      <ExecutionProgressView
-                        snapshot={snapshot}
-                        showLogs={false}
-                        onRerun={() => setRunRequest((token) => token + 1)}
-                        onSeekStep={hasPlayableRecording ? handleSeekStep : undefined}
-                      />
-                    </Box>
-                  )}
-                  <Paper variant="outlined" sx={{ p: 2 }}>
-                    <VideoEvidencePanel ref={videoRef} snapshot={snapshot} />
-                  </Paper>
                 </Box>
 
                 <Box role="tabpanel" id="studio-panel-logs" aria-labelledby="studio-tab-logs" hidden={rightTab !== 'logs'}>
@@ -1208,15 +1676,6 @@ const ChecksStudioPageInner: React.FC = () => {
                     {executionLogs.length === 0 && <Box sx={{ color: 'grey.400' }}>No logs yet. Run the test to see live output.</Box>}
                   </Paper>
                 </Box>
-
-                <Box role="tabpanel" id="studio-panel-code" aria-labelledby="studio-tab-code" hidden={rightTab !== 'code'}>
-                  <CodeTab
-                    testId={selectedScenarioData?.id ?? null}
-                    active={rightTab === 'code'}
-                    refreshToken={`${selectedScenarioData?.sourceRevision ?? 0}:${selectedScenarioData?.configurationRevision ?? 0}:${selectedScenarioData?.compileStatus ?? ''}`}
-                  />
-                </Box>
-
               </Box>
             </CardContent>
           </Card>
@@ -1246,9 +1705,13 @@ const ChecksStudioPageInner: React.FC = () => {
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
             Configure variables referenced in your steps using &lt;var NAME&gt;. Variables are saved
-            with the test, together with its steps. Vault-backed secret references are unavailable
-            in this production alpha.
+            with the test, together with its steps.
           </Typography>
+          {secretsNotice !== null && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }} data-testid="variables-secrets-availability">
+              {secretsNotice}
+            </Typography>
+          )}
           <Paper variant="outlined" sx={{ p: 1, overflowX: 'auto' }}>
             <Table size="small" sx={{ minWidth: 720 }}>
               <TableHead>
@@ -1277,8 +1740,8 @@ const ChecksStudioPageInner: React.FC = () => {
                           setVariablesList(next);
                         }}>
                           <MenuItem value="plain">Plain</MenuItem>
-                          {STUDIO_CAPABILITIES.vaultSecrets && (
-                            <MenuItem value="secret">Secret</MenuItem>
+                          {(secretsOn || v.type === 'secret') && (
+                            <MenuItem value="secret" disabled={!secretsOn}>Secret</MenuItem>
                           )}
                         </Select>
                       </FormControl>
@@ -1291,14 +1754,14 @@ const ChecksStudioPageInner: React.FC = () => {
                           setVariablesList(next);
                         }} placeholder="value" fullWidth />
                       ) : (
-                        STUDIO_CAPABILITIES.vaultSecrets ? (
+                        secretsOn ? (
                           <SecretInput label="Select secret" testId={selectedScenario} value={v.secretId ? { id: v.secretId } : null} onChange={(ref) => {
                             const next = [...variablesList];
                             next[i] = { ...v, secretId: ref?.id };
                             setVariablesList(next);
                           }} />
                         ) : (
-                          <Alert severity="info">Vault secrets are unavailable in this alpha.</Alert>
+                          <Alert severity="info">{secretsNotice}</Alert>
                         )
                       )}
                     </TableCell>
@@ -1315,7 +1778,9 @@ const ChecksStudioPageInner: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={4}>
                     <Button size="small" startIcon={<Add />} onClick={() => setVariablesList((prev) => [...prev, { id: `var_${Date.now()}`, name: '', type: 'plain', value: '' }])}>Add variable</Button>
-                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>Use in steps as: &lt;var NAME&gt;</Typography>
+                    <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                      {secretsOn ? 'Use in steps as: <var NAME> or <secret SECRET_ID>' : 'Use in steps as: <var NAME>'}
+                    </Typography>
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -1349,7 +1814,7 @@ const ChecksStudioPageInner: React.FC = () => {
             something. Replace the addresses and labels with your application&apos;s own.
           </Typography>
           <Stack spacing={1} mt={2}>
-            {PRODUCTION_ALPHA_TEMPLATES.map((template) => (
+            {quickStartTemplates.map((template) => (
               <Paper key={template.id} variant="outlined" sx={{ p: 2 }}>
                 <Typography variant="subtitle2" fontWeight={700}>{template.title}</Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -1440,11 +1905,11 @@ const ChecksStudioPageInner: React.FC = () => {
   );
 };
 
-const ChecksStudioPage: React.FC = () => {
+const ChecksStudioPage: React.FC<ChecksStudioPageProps> = (props) => {
   const uiTestEnabled = useAppSelector(selectIsSourceEnabled('UI_TEST'));
   const studioFeatureEnabled = useAppSelector(selectIsFeatureEnabled('STUDIO'));
   if (!uiTestEnabled || !studioFeatureEnabled) return <StudioUnavailable />;
-  return <ChecksStudioPageInner />;
+  return <ChecksStudioPageInner {...props} />;
 };
 
 export default ChecksStudioPage;

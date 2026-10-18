@@ -9,11 +9,12 @@ import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft, staleDraft, draftsByCompileStatus } from '@/services/mocks/studio/compileFixtures';
+import { fixtureDetail } from '@/services/mocks/studio/authoringState';
+import { readyDraft, unlearnedDraft } from '@/services/mocks/studio/readinessFixtures';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
-import ChecksStudioPage from './ChecksStudioPage';
+import ChecksStudioPage, { NEVER_LEARNED_EMPTY_STATE } from './ChecksStudioPage';
 
 /**
  * Story 10.11a — the **page's** Run affordance, and the retirement observed where a user meets it
@@ -138,7 +139,7 @@ function serveList(draft: typeof readyDraft) {
     http.get(`${STUDIO_BASE}/tests`, () =>
       HttpResponse.json({ data: [draft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
-    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(draft)),
+    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(draft))),
     http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
       HttpResponse.json(
         { executionId: '88888888-8888-8888-8888-888888888888', status: 'PENDING' },
@@ -180,30 +181,33 @@ describe('AC-2: the page’s own Run control is governed by the server and not b
     expect(executeRequests()).toHaveLength(1);
   }, AC2_TEST_TIMEOUT_MS);
 
-  it('shows only Save and Run while a saved test becomes runnable automatically', async () => {
-    const preparing = draftsByCompileStatus.COMPILING;
-    let reads = 0;
-    serveList(preparing);
-    studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id`, () => {
-        reads += 1;
-        return HttpResponse.json(reads > 1 ? readyDraft : preparing);
-      }),
-    );
+  it('STUDIO-OBS-008: an unlearned draft offers Run (it learns), with no Code tab and no review controls', async () => {
+    serveList(unlearnedDraft);
     renderPage();
 
-    const preparingControl = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
-    expect(preparingControl).toHaveTextContent('Getting ready…');
-    expect(preparingControl).toBeDisabled();
-    expect(screen.queryByTestId('compile-review-panel')).not.toBeInTheDocument();
-    expect(screen.getByRole('tab', { name: 'Code' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /confirm|translation/i })).not.toBeInTheDocument();
-    expect(executeRequests()).toHaveLength(0);
-
     const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    // The STUDIO-OBS-012B interim sentence is gone: Run learns an unlearned draft (AC-2).
     await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
-    await userEvent.click(control);
-    await waitFor(() => expect(executeRequests()).toHaveLength(1), pageWait);
+    expect(document.body.textContent).not.toMatch(/learning is not yet available/i);
+    expect(screen.queryByRole('tab', { name: 'Code' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /confirm|translation/i })).toBeNull();
+    expect(document.body.textContent).not.toMatch(/translation|candidate|confirm this exact/i);
+    // COPY-001: the Proof-tab empty state uses no retired compile-phase verb.
+    expect(screen.getByText('Run saves your steps and records proof.')).toBeInTheDocument();
+    expect(document.body.textContent).not.toMatch(/prepar/i);
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(executeRequests()).toHaveLength(0);
+  }, PAGE_TEST_TIMEOUT_MS);
+
+  it('STUDIO-OBS-012B: a draft with no steps shows the never-learned empty state verbatim', async () => {
+    serveList({ ...unlearnedDraft, steps: [] });
+    renderPage();
+
+    const empty = await screen.findByTestId('never-learned-empty-state', {}, pageWait);
+    expect(empty.textContent).toBe(
+      'Write your steps, then press Run. The first Run works through them on the live page and saves what it learned. Later Runs repeat it in seconds.',
+    );
+    expect(NEVER_LEARNED_EMPTY_STATE).toBe(empty.textContent);
   }, PAGE_TEST_TIMEOUT_MS);
 });
 
@@ -219,9 +223,9 @@ describe('the simple Save and Run workflow', () => {
     await userEvent.type(firstStep, 'Go to "https://www.citi.com/health"');
 
     expect(screen.getByTestId('studio-save-state')).toHaveTextContent('Unsaved changes');
-    // Run is no longer refused for a dirty draft: it saves the edits, prepares the saved
-    // revision and then dispatches it. Telling the author to save and press the same button
-    // again was a state the one-button flow removes, so the caption is gone too.
+    // Run is not refused for a dirty draft: it saves the edits first. Telling the author to save
+    // and press the same button again was a state the one-button flow removes, so the caption is
+    // gone too.
     expect(run).not.toBeDisabled();
     expect(screen.queryByText('Save your changes before running.')).toBeNull();
 
@@ -231,34 +235,6 @@ describe('the simple Save and Run workflow', () => {
     expect(screen.getByRole('button', { name: 'Save and continue' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Keep editing' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Discard changes' })).toBeInTheDocument();
-  }, PAGE_TEST_TIMEOUT_MS);
-});
-
-describe('the Code tab', () => {
-  it('shows saved source without restoring translation controls', async () => {
-    serveList(readyDraft);
-    renderPage();
-    await screen.findByRole('button', { name: 'Run Test' }, pageWait);
-
-    const editor = await screen.findByPlaceholderText('Add new test step...', {}, pageWait);
-    const NEW_STEP = 'Click "Continue"';
-    await userEvent.type(editor, NEW_STEP);
-    // The add affordance is an icon button with no accessible name of its own; this is the page
-    // as it stands, and naming it is 10.19's accessibility work rather than this story's.
-    const addButton = screen.getByTestId('AddIcon').closest('button');
-    expect(addButton).not.toBeNull();
-    await userEvent.click(addButton as HTMLButtonElement);
-    // Steps render as editable inputs, so the added step is a value rather than text.
-    await waitFor(
-      () => expect(screen.getAllByDisplayValue(NEW_STEP).length).toBeGreaterThan(0),
-      pageWait,
-    );
-
-    await userEvent.click(screen.getByRole('tab', { name: 'Code' }));
-    const codeView = await screen.findByTestId('confirmed-playwright-source', {}, pageWait);
-    expect(codeView.textContent).not.toContain(NEW_STEP);
-    expect(screen.queryByTestId('compile-review-panel')).not.toBeInTheDocument();
-    expect(document.body.textContent).not.toMatch(/translation|candidate|confirm this exact/i);
   }, PAGE_TEST_TIMEOUT_MS);
 });
 
@@ -305,48 +281,6 @@ describe('the draft the page sends carries a timeout the contract would accept',
     expect(configuration.timeoutSeconds).toBeGreaterThanOrEqual(TIMEOUT_BOUND.minimum);
     expect(configuration.timeoutSeconds).toBeLessThanOrEqual(TIMEOUT_BOUND.maximum);
   }, PAGE_TEST_TIMEOUT_MS);
-
-  it('VAL-009: a refused step in the Run outcome links to that step in the editor', async () => {
-    const base = draftsByCompileStatus.NEEDS_REVISION;
-    const refused = {
-      ...base,
-      compileDiagnostics: {
-        validatorSchemaVersion: '1.0.0',
-        artifact: [],
-        steps: base.steps.map((_, stepIndex) => ({
-          stepIndex,
-          ok: stepIndex !== 1,
-          truncated: false,
-          diagnostics:
-            stepIndex === 1
-              ? [{ code: 'UNSUPPORTED_CAPABILITY', stepIndex, message: 'Server CPU is not visible to a browser.', node: null, excerpt: null }]
-              : [],
-        })),
-        truncated: false,
-        attempts: 1,
-        exhausted: false,
-      },
-    };
-    serveList(refused);
-    studioMockServer.use(
-      http.post(`${STUDIO_BASE}/tests/:id/compile`, () =>
-        HttpResponse.json({ compileRequestId: 'r', compileStatus: 'COMPILING' }, { status: 202 }),
-      ),
-    );
-    renderPage();
-    const user = userEvent.setup({ delay: null });
-
-    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
-    await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
-    await user.click(control);
-
-    expect(await screen.findByTestId('run-compile-refusal-1', {}, pageWait)).toHaveTextContent(
-      "Step 2 can't be done in a browser test: Server CPU is not visible to a browser. Rewrite or remove it.",
-    );
-    await user.click(screen.getByRole('button', { name: 'Go to step 2' }));
-    expect(screen.getByRole('textbox', { name: 'Step 2' })).toHaveFocus();
-    expect(executeRequests()).toHaveLength(0);
-  }, PAGE_TEST_TIMEOUT_MS);
 });
 
 describe('VAL-042: the first Run press on a freshly opened saved test acts', () => {
@@ -363,31 +297,6 @@ describe('VAL-042: the first Run press on a freshly opened saved test acts', () 
     await user.click(control);
 
     await screen.findByRole('button', { name: 'Stop' }, pageWait);
-    expect(executeRequests()).toHaveLength(1);
-    expect(requestsTo('PUT', /\/studio\/tests\/[^/]+$/u)).toHaveLength(0);
-  }, PAGE_TEST_TIMEOUT_MS);
-
-  it('STALE: one press, with nothing touched first, compiles once and then executes once', async () => {
-    let compiled = false;
-    serveList(staleDraft);
-    studioMockServer.use(
-      http.get(`${STUDIO_BASE}/tests/:id`, () =>
-        HttpResponse.json(compiled ? { ...staleDraft, compileStatus: 'READY' } : staleDraft),
-      ),
-      http.post(`${STUDIO_BASE}/tests/:id/compile`, () => {
-        compiled = true;
-        return HttpResponse.json({ compileRequestId: 'c1', compileStatus: 'COMPILING' }, { status: 202 });
-      }),
-    );
-    const user = userEvent.setup({ delay: null });
-    renderPage();
-
-    const control = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
-    await waitFor(() => expect(control).not.toBeDisabled(), pageWait);
-    await user.click(control);
-
-    await screen.findByRole('button', { name: 'Stop' }, pageWait);
-    expect(requestsTo('POST', /\/compile$/u)).toHaveLength(1);
     expect(executeRequests()).toHaveLength(1);
     expect(requestsTo('PUT', /\/studio\/tests\/[^/]+$/u)).toHaveLength(0);
   }, PAGE_TEST_TIMEOUT_MS);

@@ -1,22 +1,19 @@
 import apiClient from './apiClient';
 import { createTest, getTest, updateTest } from './studioAuthoringTransport';
 import type {
-  CompileAccepted,
-  ConfirmCompileRequest,
   ExecuteAccepted,
   ExecutionPage,
   ExecutionSnapshot,
   ExecutionListQuery,
-  TestDto,
   TestListQuery,
   TestPage,
 } from '@/types/studio/studioTypes';
+import type { StudioCapabilities } from '@/types/studio/studioGuidedTypes';
 
 /**
  * Studio API client, typed against `docs/specs/studio/openapi.yaml` (story 10.1, AC-15).
  *
- * Every call here speaks the frozen contract. Legacy drafts are converted once, in
- * `@/types/studio/legacyTestIr`, before they reach this module.
+ * Every call here speaks the one public contract (ADR-SC-005, STUDIO-OBS-012A).
  */
 
 /** Per-request options for the list reads. */
@@ -81,6 +78,17 @@ export const studioApi = {
   deleteTest: async (id: string): Promise<void> => apiClient.delete(`/studio/tests/${id}`),
 
   /**
+   * `GET /tests/{id}/capabilities` (`getStudioTestCapabilities`, STUDIO-OBS-008 P1): what this
+   * deployment can do for one saved test. The persisted test id is the only selector. No retry
+   * (`__doNotRetry`): a client treats loading, an error and any non-200 as unavailable and never
+   * simulates a value, so the first answer is the one that counts.
+   */
+  getCapabilities: async (testId: string): Promise<StudioCapabilities> =>
+    apiClient.get(`/studio/tests/${encodeURIComponent(testId)}/capabilities`, {
+      __doNotRetry: true,
+    }),
+
+  /**
    * Accepts an execution. `idempotencyKey` is principal-scoped and durable: retrying with the
    * same key returns the same execution instead of starting a second run, whichever API replica
    * the retry reaches.
@@ -122,24 +130,9 @@ export const studioApi = {
   },
 
   /**
-   * Enqueues a compile of the draft's current source. The `202` means the attempt was *started*,
-   * not that it will succeed: pool saturation and gateway failure surface asynchronously as
-   * `compileStatus: STALE` carrying `compileError`, never as a status code here (§4.3).
-   *
-   * Declared refusals, and nothing else: `400` with one of the four authoring-bound codes, `409`
-   * with `TEST_DELETED` or `TEST_QUARANTINED`.
+   * `POST /tests/{id}/validate-variables` (`validateTestVariables`): reports how the draft's
+   * `<var NAME>` / `<secret ID>` references match its declared variables. Writes nothing.
    */
-  compileTest: async (id: string): Promise<CompileAccepted> =>
-    apiClient.post(`/studio/tests/${id}/compile`, undefined),
-
-  /**
-   * Confirms the candidate the caller was looking at. The server's transaction is conditional on
-   * all four fields, so the caller must send the four values it read together — not four values
-   * recombined from separate reads. A candidate that moved answers `409 STALE_CANDIDATE`.
-   */
-  confirmCompile: async (id: string, body: ConfirmCompileRequest): Promise<TestDto> =>
-    apiClient.post(`/studio/tests/${id}/confirm-compile`, body),
-
   validateVariables: async (
     id: string,
     variables: Record<string, unknown>,

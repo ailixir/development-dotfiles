@@ -7,7 +7,7 @@ import type { ExecutionErrorCode } from '@/types/studio/studioTypes';
  * This file exists because of two findings @qa measured on story 10.10 and the epic catalogued:
  *
  *  - **VAC-11** — *an assertion whose expected value is imported from the module under test.*
- *    10.10's AC-2 read the expected narrative out of `compileStateNarratives.ts`, the module the
+ *    10.10's AC-2 read the expected narrative out of the state-narratives module the
  *    component renders from, and then asserted the rendering contained it. True for any content.
  *    Blanking seven required facts to `'x'` left the whole suite green; **eight of fifteen
  *    required facts were pinned by nothing.**
@@ -76,6 +76,11 @@ export const PINNED_EXECUTION_ERROR_FACTS: Readonly<
   AUTHORIZATION_REVOKED: {
     browserPhrase: 'permission to execute for this CSI had been withdrawn',
     remedyPhrase: 'entitlements',
+    rerunOffered: false,
+  },
+  SECRET_TOO_LONG: {
+    browserPhrase: 'No browser started',
+    remedyPhrase: 'at most 4096 characters',
     rerunOffered: false,
   },
   CANCELLED: {

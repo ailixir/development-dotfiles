@@ -7,7 +7,7 @@ import path from 'node:path';
 import { parse as parseYaml } from 'yaml';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft } from '@/services/mocks/studio/compileFixtures';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import {
   CONTRADICTORY_QUARANTINE_BODY,
   DISPATCH_DISABLED_BODY,
@@ -76,7 +76,7 @@ async function refuse(body: Record<string, unknown>, status: number) {
 }
 
 describe('AC-4: every declared refusal of the execute route is handled distinctly', () => {
-  it('renders a narrative for every declared 409 — FX-EXECUTE-409-COMPILE_REQUIRED, FX-EXECUTE-409-RUNTIME_INCOMPATIBLE, FX-EXECUTE-409-IDEMPOTENCY_KEY_REUSED, FX-EXECUTE-409-TEST_DELETED, FX-EXECUTE-409-TEST_QUARANTINED', async () => {
+  it('renders a narrative for every declared 409 — FX-EXECUTE-409-LEARN_REQUIRED, FX-EXECUTE-409-RUNTIME_INCOMPATIBLE, FX-EXECUTE-409-IDEMPOTENCY_KEY_REUSED, FX-EXECUTE-409-TEST_DELETED, FX-EXECUTE-409-TEST_QUARANTINED', async () => {
     // Enumerated from the document rather than from a list written here: a sixth code added to an
     // in-test copy of `x-conflict-codes` reaches a real render and a real assertion.
     expect(DECLARED_EXECUTE_CONFLICTS.length).toBeGreaterThan(0);
@@ -174,7 +174,7 @@ describe('Story 10.48 AC-10a: a 403 on execute is worded, never the generic fail
     // (ADR-002 O-22), so the status is the key and the code is not read.
     expect(executeRefusalFor(403, 'STUDIO_FORBIDDEN')).toBe(EXECUTE_FORBIDDEN_NARRATIVE);
     expect(executeRefusalFor(403, null)).toBe(EXECUTE_FORBIDDEN_NARRATIVE);
-    expect(executeRefusalFor(403, 'COMPILE_REQUIRED')).toBe(EXECUTE_FORBIDDEN_NARRATIVE);
+    expect(executeRefusalFor(403, 'LEARN_REQUIRED')).toBe(EXECUTE_FORBIDDEN_NARRATIVE);
     expect(EXECUTE_FORBIDDEN_NARRATIVE.title).toBe(
       'You do not have permission to run tests for this CSI',
     );
@@ -200,7 +200,7 @@ describe('Story 10.48 AC-10a: a 403 on execute is worded, never the generic fail
 
 describe('Story 10.48: the mock server refuses execute and reports canManage false on a read-only CSI', () => {
   const runnable = mockTests.find(
-    (test) => test.compileStatus === 'READY' && test.csiId !== null && MOCK_READABLE_CSIS.includes(test.csiId),
+    (test) => test.readiness === 'READY' && test.csiId !== null && MOCK_READABLE_CSIS.includes(test.csiId),
   );
 
   it('answers the backend 403 body before readiness, and capabilities canManage false', async () => {
@@ -241,7 +241,7 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     }
   });
 
-  it('renders the browser claim and the remedy owner for FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-DISPATCH_UNKNOWN, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE, FX-ERRCODE-CANCELLED', () => {
+  it('renders the browser claim and the remedy owner for FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-DISPATCH_UNKNOWN, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE, FX-ERRCODE-SECRET_TOO_LONG, FX-ERRCODE-CANCELLED', () => {
     for (const code of EXECUTION_ERROR_CODES) {
       const facts = PINNED_EXECUTION_ERROR_FACTS[code];
       const view = render(<ExecutionProgressView snapshot={errorCodeExecutions[code]} />);
@@ -259,7 +259,7 @@ describe('AC-6: a terminal ERROR says what happened to the browser and who can c
     }
   });
 
-  it('offers a re-run only where the document clears the code with a new execution — FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE, FX-ERRCODE-CANCELLED', () => {
+  it('offers a re-run only where the document clears the code with a new execution — FX-ERRCODE-DISPATCH_FAILED, FX-ERRCODE-START_TIMEOUT, FX-ERRCODE-STALE, FX-ERRCODE-TIMEOUT, FX-ERRCODE-DISPATCH_DISABLED, FX-ERRCODE-AUTHORIZATION_REVOKED, FX-ERRCODE-REFERENCE_UNAVAILABLE, FX-ERRCODE-SECRET_TOO_LONG, FX-ERRCODE-CANCELLED', () => {
     const offering: string[] = [];
     for (const code of EXECUTION_ERROR_CODES) {
       const view = render(

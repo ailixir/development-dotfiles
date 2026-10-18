@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft } from '@/services/mocks/studio/compileFixtures';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import { createSchedulingHandlers, seedScheduleOccurrences } from '@/services/mocks/studio/schedulingHandlers';
 import { MOCK_SCHEDULE_POLICY } from '@/services/mocks/studio/schedulePreview';
 import { mockExecutions } from '@/services/mocks/studio/fixtures';
@@ -18,6 +18,7 @@ import TestRow from '@/components/studio/tests/TestRow';
 import type { ExecutionSnapshot, TestDto } from '@/types/studio/studioTypes';
 import { StudioScheduleSummary } from './StudioScheduleSummary';
 import { StudioScheduleDialog } from './StudioScheduleDialog';
+import { scheduleError } from './schedulePresentation';
 
 const BASE = '*/api/v1/studio';
 const write = { cronExpression: '0 */5 * * * *', timeZone: 'UTC', executionPrincipal: 'studio-local' };
@@ -31,6 +32,19 @@ const loaded = async () => {
 beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => { studioMockServer.resetHandlers(); resetStudioMocks(); });
 afterAll(() => studioMockServer.close());
+
+describe('STUDIO-OBS-012B COPY-002/COPY-003: schedule refusal copy uses learn vocabulary and stays true in the interim build', () => {
+  const messageFor = (code: string) => scheduleError({ response: { status: 409, data: { code } } }).message;
+  it('LEARN_REQUIRED, RUNTIME_INCOMPATIBLE and ACTIVATION_REVISION_MISMATCH read as the UX gate worded them', () => {
+    expect(messageFor('LEARN_REQUIRED')).toBe('The saved steps are not learned yet. Once a Run has learned them, reload and explicitly resume the schedule.');
+    expect(messageFor('RUNTIME_INCOMPATIBLE')).toBe('The runtime changed, so the steps must be learned again. Once a Run has relearned them, reload and explicitly resume the schedule.');
+    expect(messageFor('ACTIVATION_REVISION_MISMATCH')).toBe('The learned steps changed. Reload and review them before resuming.');
+    for (const code of ['LEARN_REQUIRED', 'RUNTIME_INCOMPATIBLE', 'ACTIVATION_REVISION_MISMATCH']) {
+      // No instruction to press Run (disabled for every non-READY state) and no compile-review word.
+      expect(messageFor(code), code).not.toMatch(/with Run|confirm|compil|prepar/i);
+    }
+  });
+});
 
 describe('Studio schedule operator flows', { timeout: 15000 }, () => {
   it('opens from the test row menu and returns focus to the row action after closing', async () => {
@@ -56,7 +70,7 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
     renderDialog(); await loaded();
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-labelledby', 'studio-schedule-title');
     expect(screen.getByText(/Local authorization only/)).toBeInTheDocument();
-    expect(screen.getAllByRole('listitem')).toHaveLength(5);
+    expect(await screen.findAllByRole('listitem')).toHaveLength(5);
     const createButton = screen.getByRole('button', { name: 'Create paused schedule' });
     createButton.focus(); await user().keyboard('{Enter}');
     await screen.findByText('Schedule: Paused');
@@ -87,13 +101,24 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
     studioMockServer.use(...createSchedulingHandlers({ getTest: () => saved, getExecutions: () => [] }));
     const s = await create();
     await studioSchedulesApi.enable(readyDraft.id, { expectedVersion: s.version, enabled: true, confirmedRevisionId: readyDraft.confirmedRevisionId! });
-    saved = { ...saved, sourceRevision: saved.sourceRevision + 1, compileStatus: 'STALE' };
+    saved = { ...saved, sourceRevision: saved.sourceRevision + 1, readiness: 'UNLEARNED' };
     renderDialog(); await loaded();
     expect(screen.getByText(/Schedule: Blocked/)).toBeInTheDocument();
+    // STUDIO-OBS-012B COPY-002: conditional wording, never an instruction to press a Run this build disables.
+    expect(screen.getByText('If the saved steps need learning, resume only after a Run has learned them: reload, then explicitly Resume. Learning alone does not restart scheduling.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Resume schedule' })).toBeDisabled();
     await user().click(screen.getByRole('button', { name: 'Pause schedule' }));
     await screen.findByText('Schedule: Paused');
     expect((await studioSchedulesApi.get(readyDraft.id))?.requestedEnabled).toBe(false);
+  });
+
+  it('STUDIO-OBS-012B COPY-002: a never-learned test says Resume waits for a learning Run, without sending the author to Run', async () => {
+    const neverLearned: TestDto = { ...readyDraft, confirmedRevisionId: null, readiness: 'UNLEARNED' };
+    studioMockServer.use(...createSchedulingHandlers({ getTest: () => neverLearned, getExecutions: () => [] }),
+      http.get(`${BASE}/tests/:id`, () => HttpResponse.json(neverLearned)));
+    renderDialog(); await loaded();
+    expect(screen.getByText('Resume becomes available once a Run has learned the saved steps.')).toBeInTheDocument();
+    expect(screen.getByRole('dialog').textContent).not.toMatch(/with Run/);
   });
 
   it('preserves edits on version conflict and reloads only when the operator chooses', async () => {
@@ -216,7 +241,7 @@ describe('Studio schedule operator flows', { timeout: 15000 }, () => {
       environment: readyDraft.environment, executionPrincipal: 'studio-local', activationId: 'activation-1', activatedRevisionId: readyDraft.confirmedRevisionId,
       activatedBy: 'earlier.operator@citi.com', activatedAt: '2026-09-30T12:00:00Z',
       scheduledAt: new Date(Date.UTC(2026, 9, 5, 12, 50 - index * 5)).toISOString(), localScheduledAt: '2026-10-05T12:00:00', timeZone: 'UTC', offsetSeconds: 0,
-      decision: index === 0 ? 'ACCEPTED' : 'REFUSED', code: index === 0 ? 'ACCEPTED' : 'COMPILE_REQUIRED', executionId: index === 0 ? 'real-run' : null,
+      decision: index === 0 ? 'ACCEPTED' : 'REFUSED', code: index === 0 ? 'ACCEPTED' : 'LEARN_REQUIRED', executionId: index === 0 ? 'real-run' : null,
       acceptedAt: index === 0 ? '2026-10-05T12:00:00Z' : null, retryAt: null, graceExpiresAt: '2026-10-05T13:00:00Z',
       createdAt: '2026-10-05T12:00:00Z', updatedAt: '2026-10-05T12:00:00Z', missedFrom: null, missedUntil: null, missedCount: null,
     }));

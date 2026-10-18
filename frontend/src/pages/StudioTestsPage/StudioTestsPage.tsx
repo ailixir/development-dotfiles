@@ -69,7 +69,8 @@ const StudioTestsPage: React.FC = () => {
     <Box>
       <StudioListLayout
         title="UI Tests"
-        description="Create and manage browser tests."
+        noun="tests"
+        description="Create and manage browser tests"
         icon={<Science aria-hidden="true" />}
         action={<Button variant="contained" startIcon={<Add />} onClick={openCreate} size="large">Create Test</Button>}
         query={list.query}

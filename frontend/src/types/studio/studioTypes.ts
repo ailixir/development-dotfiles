@@ -5,9 +5,6 @@
  * decorative: `studioContract.test.ts` validates the contract's own example payloads against
  * these shapes, so a rename on either side fails the build rather than surfacing as an undefined
  * field in the UI.
- *
- * The pre-10.1 `TestIR` shape now lives in `./legacyTestIr` and is only used to read drafts that
- * were authored before this contract existed.
  */
 
 export type ExecutionStatus = 'PENDING' | 'RUNNING' | 'PASSED' | 'FAILED' | 'ERROR';
@@ -43,6 +40,7 @@ export const EXECUTION_ERROR_CODES = [
   'DISPATCH_DISABLED',
   'AUTHORIZATION_REVOKED',
   'REFERENCE_UNAVAILABLE',
+  'SECRET_TOO_LONG',
   'CANCELLED',
 ] as const;
 
@@ -65,6 +63,31 @@ export type ExecutionErrorCodeIsDerivedFromItsCarrier = AssertTrue<
 >;
 
 /**
+ * `ReplayFailure.code` in `openapi.yaml`: the two named causes of a replay that stopped at a learned
+ * step (STUDIO-OBS-008 T0 ruling A1). `studioContract.test.ts` asserts this set against the
+ * document's enum in both directions, so a third code added to the document goes red there.
+ */
+export const REPLAY_FAILURE_CODES = ['LOGIN_REQUIRED', 'TARGET_DRIFT'] as const;
+
+export type ReplayFailureCode = (typeof REPLAY_FAILURE_CODES)[number];
+
+/**
+ * The one named cause of a replay that stopped at a learned step, derived by the API from the
+ * runner's terminal report. Value-free: a closed code, the confirmed revision's stable step ID, its
+ * 0-based position (the index space of {@link StepResult.stepIndex}) and, for login only, whether an
+ * earlier step of the run filled a secret. `loginStepsPresent` is present exactly with
+ * `LOGIN_REQUIRED` and absent with `TARGET_DRIFT`.
+ */
+export type ReplayFailure =
+  | { code: 'LOGIN_REQUIRED'; stepId: string; stepIndex: number; loginStepsPresent: boolean }
+  | { code: 'TARGET_DRIFT'; stepId: string; stepIndex: number };
+
+/** The type-level half of the enum parity: the union's codes are exactly {@link REPLAY_FAILURE_CODES}. */
+export type ReplayFailureCodesAreDerivedFromTheirCarrier = AssertTrue<
+  TypeEquals<ReplayFailure['code'], ReplayFailureCode>
+>;
+
+/**
  * The code a cancelled run ends with: `status: ERROR`, `errorCode: CANCELLED`.
  *
  * A member of {@link EXECUTION_ERROR_CODES} since Studio v1 WP4 amended the contract's enum
@@ -80,16 +103,37 @@ export type StepStatus = 'PENDING' | 'RUNNING' | 'PASS' | 'FAIL' | 'SKIPPED';
 /** Evidence state, deliberately independent of the check outcome (architecture §6.1). */
 export type VideoStatus = 'PROCESSING' | 'AVAILABLE' | 'FAILED' | 'UNAVAILABLE' | 'EXPIRED';
 
-export type CompileStatus =
-  | 'STALE'
-  | 'COMPILING'
-  | 'AWAITING_CONFIRMATION'
-  | 'READY'
-  | 'NEEDS_REVISION';
+/**
+ * The single-path readiness vocabulary (ADR-SC-005 defaults "Readiness vocabulary"; STUDIO-OBS-012A
+ * `TestDto.readiness`) as a **runtime** value, on the {@link EXECUTION_ERROR_CODES} pattern.
+ *
+ * `studioContract.test.ts` compares this constant against
+ * `components.schemas.TestDto.properties.readiness.enum`, parsed from `docs/specs/studio/openapi.yaml`;
+ * the expected value is read from the document, never from here. `readiness` is derived by the
+ * server on every read: `UNLEARNED` — no published revision matches the draft; `LEARNING` — a guided
+ * session for the draft is in progress; `READY` — the confirmed observed revision matches the draft
+ * and replays model-free; `NEEDS_RELEARN` — a published revision exists and a step changed (the
+ * server emits it only from STUDIO-OBS-015).
+ */
+export const TEST_READINESS_VALUES = ['UNLEARNED', 'LEARNING', 'READY', 'NEEDS_RELEARN'] as const;
+
+export type TestReadiness = (typeof TEST_READINESS_VALUES)[number];
+
+/** Same guard as {@link ExecutionErrorCodeIsDerivedFromItsCarrier}, for the readiness carrier. */
+export type TestReadinessIsDerivedFromItsCarrier = AssertTrue<
+  TypeEquals<TestReadiness, (typeof TEST_READINESS_VALUES)[number]>
+>;
+
+/**
+ * The `409` conflict code `POST /tests/{id}/execute` answers when no published revision matches the
+ * draft (ADR-SC-005). `studioContract.test.ts` asserts the execute route's `x-conflict-codes` against
+ * the refusal wording, so a rename in the document fails there.
+ */
+export const LEARN_REQUIRED_CONFLICT_CODE = 'LEARN_REQUIRED' as const;
 
 export type WaitStrategy = 'none' | 'networkidle' | 'domcontentloaded' | 'load';
 
-/** The canonical engine. Legacy `chrome` is normalized server-side; nothing else is accepted. */
+/** The canonical engine. `chromium` is the only engine a draft may name; any other is refused. */
 export const CANONICAL_BROWSER = 'chromium';
 
 export interface Viewport {
@@ -113,10 +157,6 @@ export interface StudioVariable {
 }
 
 /** Story 10.36 authoring-context v2 contract. Array position is presentation, never identity. */
-export interface LegacyAuthoringRequest {
-  steps: string[];
-}
-
 export interface ContextText {
   kind: 'text';
   value: string;
@@ -268,113 +308,33 @@ export interface AuthoringV2Response extends AuthoringV2Request {
   review?: ResolvedStepReview[];
 }
 
-export type StudioAuthoring = LegacyAuthoringRequest | AuthoringV2Request;
-
-/** Clients submit English steps only; the server generates the executable artifact. */
-export interface TestRequest {
+/**
+ * `TestRequest` in `openapi.yaml`: the one authoring write. Clients submit English steps with stable
+ * IDs and nothing executable; the server generates the executable artifact. A body without
+ * `authoringSchemaVersion: 2`, or with string steps, is refused `400 INVALID_AUTHORING`.
+ * `csiId` is required on create and immutable; both revisions are required on update.
+ */
+export interface TestRequest extends AuthoringV2Request {
   name: string;
   description?: string | null;
   csiId?: string | null;
   environment: string;
-  steps: string[];
   variables: StudioVariable[];
   configuration: TestConfiguration;
   sourceRevision?: number | null;
   configurationRevision?: number | null;
 }
 
-/**
- * Why a compile attempt ended without a candidate, for a reason that is **not** the author's
- * source. Mirrored from `CompileError` (ADR-002 §16.2). Non-null only with
- * `compileStatus: STALE`, and never non-null at the same time as `compileDiagnostics`.
- *
- * `code` is deliberately a free string, not a union: §14.7 lets the deployed API add a code in
- * its own PR, and a union narrowed here would turn a legitimate twelfth code into a runtime
- * conformance failure (§16.4). The exhaustive set the API can write today is
- * `x-compile-error-codes`, which `studioContract.test.ts` compares against the UI's explanations
- * in both directions (ADR-002 §18.3).
- */
-export interface CompileError {
-  code: string;
-}
-
-/**
- * One validator rejection, already bounded and redacted by the server. `message` and `excerpt`
- * are clamped to deployment-configured caps and a clamped string ends with a visible truncation
- * marker, so a cut diagnostic never reads as a complete one — which is why the marker must
- * survive rendering (ADR-002 §16.5).
- */
-export interface CompileDiagnostic {
-  code: string;
-  /** Null for artifact-level problems belonging to no single step. */
-  stepIndex: number | null;
-  message: string;
-  /** Syntax kind of the offending node, when the problem is a node. */
-  node: string | null;
-  /** Bounded excerpt of the offending node only — never the whole step (§9.2). */
-  excerpt: string | null;
-}
-
-/**
- * One entry per **original source step**, index aligned, present even where the validator
- * returned nothing for that step (§4.4). The entry count equals the length of `steps` on the
- * same `TestDto`.
- */
-export interface CompileStepDiagnostics {
-  stepIndex: number;
-  ok: boolean;
-  diagnostics: CompileDiagnostic[];
-  /**
-   * True when this step had more diagnostics than the per-step cap, or when its diagnostics were
-   * shed to fit the document cap. "There were no more problems" and "we stopped telling you" are
-   * different facts, and this is the field that tells them apart.
-   */
-  truncated: boolean;
-}
-
-/** The only reason the document declares for shedding whole steps' diagnostics. */
-export type TruncationReason = 'TOTAL_BYTES';
-
-/**
- * Why the last compile produced nothing runnable, in the author's own step order. Non-null only
- * with `compileStatus: NEEDS_REVISION`, and never non-null at the same time as `compileError`.
- *
- * The document describes **the last attempt only**: `attempts` says how many happened and
- * `exhausted` says whether the repair bound was reached with the artifact still invalid.
- */
-export interface CompileDiagnostics {
-  validatorSchemaVersion: string;
-  /** Artifact-level rejections belonging to no single step. */
-  artifact: CompileDiagnostic[];
-  steps: CompileStepDiagnostics[];
-  /** True when whole steps' diagnostics were shed to fit the document byte cap. */
-  truncated: boolean;
-  /** Present only when `truncated` is true. */
-  truncationReason?: TruncationReason | null;
-  attempts: number;
-  exhausted: boolean;
-}
-
-/** The `202` body of `POST /tests/{id}/compile`. Acceptance of an attempt, never its success. */
-export interface CompileAccepted {
-  compileRequestId: string;
-  compileStatus: string;
-  sourceRevision?: number | null;
-  configurationRevision?: number | null;
-}
-
-/**
- * The confirmation body, exactly the four fields `ConfirmCompileRequest.required` declares
- * (architecture §4.2, §8.3). The transaction is conditional on all four, so all four must come
- * from the one response the user was looking at.
- */
-export interface ConfirmCompileRequest {
-  revisionId: string;
-  artifactHash: string;
+/** `PUT /tests/{id}`: the same body, carrying the revisions the optimistic check compares. */
+export interface TestUpdateRequest extends TestRequest {
   sourceRevision: number;
   configurationRevision: number;
 }
 
+/**
+ * The list projection (`TestDto` in `openapi.yaml`): ordered display text only. A client that edits
+ * steps reads {@link TestDetailDto} instead, because only it carries the stable step IDs.
+ */
 export interface TestDto {
   id: string;
   name: string;
@@ -393,43 +353,33 @@ export interface TestDto {
   lastRunStatus: 'PASSED' | 'FAILED' | 'ERROR' | null;
   sourceRevision: number;
   configurationRevision: number;
-  compileStatus: CompileStatus;
-  currentCandidateRevisionId: string | null;
-  /**
-   * The canonical artifact hash of the revision `currentCandidateRevisionId` names, and the value
-   * `ConfirmCompileRequest.artifactHash` is read from (ADR-002 §21.2). Null when there is no
-   * candidate, and **always null on `GET /tests`** — the list projection drops it alongside
-   * `currentCandidateArtifact` and `compileDiagnostics` (§21.2, on §16.5's precedent).
-   *
-   * Never fabricated, never recomputed client-side, never defaulted. A client-computed hash would
-   * be the client asserting what the server canonicalized, which is the one thing the conditional
-   * transaction exists to check (§21.8).
-   */
-  currentCandidateArtifactHash?: string | null;
-  /**
-   * The candidate revision's immutable validated artifact. Null when there is no candidate, and
-   * always null on `GET /tests`.
-   *
-   * This is the **candidate's**, and `steps` is the draft's current English. Where a surface
-   * claims to show what was validated it renders this, never `steps` (ADR-002 §21.7).
-   */
-  currentCandidateArtifact?: SourceArtifact | null;
+  /** Derived on every read, never stored (ADR-SC-005). */
+  readiness: TestReadiness;
+  /** The first changed step's stable ID; non-null only with `NEEDS_RELEARN`. */
+  firstChangedStepId: string | null;
   confirmedRevisionId: string | null;
-  /** Canonical hash of `confirmedRevisionId`; null on list responses or without confirmation. */
+  /** Canonical hash of `confirmedRevisionId`; null on list responses or without a confirmation. */
   confirmedRevisionArtifactHash?: string | null;
-  /** Immutable executable artifact of `confirmedRevisionId`; null on list responses. */
-  confirmedRevisionArtifact?: SourceArtifact | null;
   /**
-   * Non-null only with `compileStatus: STALE`. Present on both `GET /tests` and `GET /tests/{id}`
-   * (ADR-002 §16.5).
+   * The immutable published artifact of `confirmedRevisionId`, typed as the document declares it
+   * (`object`, nullable). Its normative schema is the observed
+   * `contracts/v3/replay-artifact.schema.json`; plan types derived from it belong to STUDIO-OBS-008.
+   * Null on list responses.
    */
-  compileError?: CompileError | null;
-  /**
-   * Non-null only with `compileStatus: NEEDS_REVISION`, and **always null on `GET /tests`** — the
-   * list projection drops it deliberately (ADR-002 §16.5), so the review surface reads the
-   * single-draft route regardless of what the list already holds.
-   */
-  compileDiagnostics?: CompileDiagnostics | null;
+  confirmedRevisionArtifact?: Record<string, unknown> | null;
+}
+
+/** A draft's header fields, common to the list projection and the single read. */
+export type TestDraftHeader = Omit<TestDto, 'steps'>;
+
+/**
+ * `GET /tests/{id}` and the success bodies of `POST /tests` and `PUT /tests/{id}` (`TestDetailDto`
+ * in `openapi.yaml`): one v2 draft with `AuthoringStep` objects, read together with its immutable
+ * confirmed revision.
+ */
+export interface TestDetailDto extends TestDraftHeader, AuthoringV2Response {
+  /** Present with `NEEDS_RELEARN` when the immutable base lacks complete input identity. */
+  readinessReason?: 'BASE_IDENTITY_INCOMPLETE';
 }
 
 /**
@@ -515,6 +465,12 @@ export interface ExecutionSnapshot {
   revision: number;
   /** True once outcome and evidence disposition are both settled. */
   streamComplete: boolean;
+  /**
+   * The API's named cause for a replay that stopped at a learned step. Absent or null means the API
+   * names none; a client never derives one from `stepResults[].message`, `logs` or `status`, and a
+   * non-null value selects the narrative before `status` or `errorCode` do (STUDIO-OBS-008 A1).
+   */
+  replayFailure?: ReplayFailure | null;
 }
 
 export interface Page<T> {
@@ -615,18 +571,6 @@ export interface ExecuteAccepted {
 export interface StudioErrorResponse {
   error: string;
   message: string;
-}
-
-/** The compiled artifact, mirrored from `docs/specs/studio/artifact.schema.json`. */
-export interface ArtifactStep {
-  stepIndex: number;
-  originalText: string;
-  code: string;
-}
-
-export interface SourceArtifact {
-  version: number;
-  steps: ArtifactStep[];
 }
 
 /**

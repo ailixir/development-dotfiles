@@ -14,7 +14,7 @@ export interface TestRowMenuProps {
 
 /**
  * The row's secondary actions. "Run now" is intentionally absent: running goes through the editor's
- * run gate (`useRunGate` — save-before-run, compile-then-execute, idempotency, refusal narratives),
+ * run gate (`useRunGate` — save-before-run, readiness, idempotency, refusal narratives),
  * which a list row cannot reuse without re-implementing it. "Open" leads there.
  */
 const TestRowMenu: React.FC<TestRowMenuProps> = ({ test, href, disabled = false, onDelete, onSchedule }) => {

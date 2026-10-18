@@ -6,7 +6,7 @@ import { EXECUTION_FIXTURE_MATRIX } from './executionFixtures';
 /**
  * Story 10.11a AC-22 — the required fixture set, made enumerable and self-checking.
  *
- * The pattern is story 10.10's `compileFixtureMatrix.test.ts`, extended rather than re-invented,
+ * The pattern is story 10.10's fixture-matrix test, extended rather than re-invented,
  * and the reason is @po's own naming of 10.10's AC-20 as that story's weakest criterion: *"If the
  * level-2 truncation fixture is never written, AC-7 does not go red; the test simply does not
  * exist, and a green suite is indistinguishable from a covered one."*

@@ -15,7 +15,7 @@ export function scheduleLabel(schedule: StudioSchedule | null): string {
 }
 export function reasonLabel(code: string | null): string {
   const labels: Record<string, string> = {
-    COMPILE_REQUIRED: 'Needs preparation and confirmation', ACTIVATION_REVISION_MISMATCH: 'Needs explicit Resume',
+    LEARN_REQUIRED: 'Steps need learning', ACTIVATION_REVISION_MISMATCH: 'Needs explicit Resume',
     UNCERTAIN_EXECUTION: 'Previous run needs investigation', RUNTIME_INCOMPATIBLE: 'Runtime changed',
     BACKGROUND_AUTHORIZATION_DENIED: 'Execution permission withdrawn', BACKGROUND_AUTHORIZATION_UNAVAILABLE: 'Authorization unavailable',
     REFERENCE_UNAVAILABLE: 'Variable or secret unavailable', PENDING_QUOTA_EXCEEDED: 'Capacity unavailable',
@@ -43,10 +43,10 @@ export function scheduleError(failure: unknown): { message: string; conflict: bo
     INVALID_TIME_ZONE: 'Enter a valid IANA time zone, such as UTC or America/New_York.',
     SCHEDULE_EXISTS: 'A schedule already exists. Reload to review it.',
     SCHEDULE_VERSION_CONFLICT: 'This schedule changed since you opened it. Reload to review the latest settings.',
-    ACTIVATION_REVISION_MISMATCH: 'The confirmed test changed. Reload and review it before resuming.',
+    ACTIVATION_REVISION_MISMATCH: 'The learned steps changed. Reload and review them before resuming.',
     UNCERTAINTY_ACKNOWLEDGEMENT_REQUIRED: 'The uncertain runs changed. Reload and investigate them before resuming.',
-    COMPILE_REQUIRED: 'Prepare and confirm the saved test, then reload and explicitly resume its schedule.',
-    RUNTIME_INCOMPATIBLE: 'Prepare and confirm the test for the supported runtime before resuming.',
+    LEARN_REQUIRED: 'The saved steps are not learned yet. Once a Run has learned them, reload and explicitly resume the schedule.',
+    RUNTIME_INCOMPATIBLE: 'The runtime changed, so the steps must be learned again. Once a Run has relearned them, reload and explicitly resume the schedule.',
     SCHEDULING_DISABLED: 'Scheduling is disabled in this environment. Existing schedule and history remain inspectable.',
     BACKGROUND_AUTHORIZATION_DENIED: 'This execution identity is not authorized for the test and environment.',
     BACKGROUND_AUTHORIZATION_UNAVAILABLE: 'Execution authorization could not be verified. Try again later.',

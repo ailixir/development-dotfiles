@@ -1,13 +1,45 @@
-import type { AuthoringV2Request, AuthoringV2Response, TestDto } from '@/types/studio/studioTypes';
-import { validateStudioAuthoring } from '@/types/studio/legacyStudioAuthoringAdapter';
-import type { AuthoringTestRequest, AuthoringTestDto } from '@/services/api/studioAuthoringTransport';
+import type {
+  AuthoringV2Request,
+  AuthoringV2Response,
+  TestDetailDto,
+  TestDto,
+  TestRequest,
+} from '@/types/studio/studioTypes';
+import { validateStudioAuthoring } from '@/types/studio/studioAuthoringValidation';
 
 const sources = new Map<string, AuthoringV2Request>();
 export const resetAuthoringMocks = (): void => sources.clear();
-export const hasAuthoring = (id: string): boolean => sources.has(id);
 const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T;
 
-export function authoringSource(body: AuthoringTestRequest): AuthoringV2Request {
+/**
+ * The stable ID the mock gives step `index` (0-based) of a fixture draft, which the list fixtures
+ * hold as display text only. Deterministic, so two reads of one draft agree, and shaped like the
+ * document's own examples (`…0001`, `…0002`, …): `readinessFixtures.ts` names the second step of
+ * the `NEEDS_RELEARN` draft by exactly that ID.
+ */
+export const fixtureStepId = (index: number): string =>
+  `00000000-0000-4000-8000-${(index + 1).toString(16).padStart(12, '0')}`;
+
+/** A fixture draft as the single read serves it: its list steps, each under its fixture ID. */
+export function fixtureDetail(test: TestDto): TestDetailDto {
+  return {
+    ...test,
+    authoringSchemaVersion: 2,
+    steps: test.steps.map((text, index) => ({ id: fixtureStepId(index), text })),
+  };
+}
+
+/** What the mock holds as a draft's authoring source: the last v2 write, else the fixture's steps. */
+function sourceOf(test: TestDto): AuthoringV2Request {
+  return sources.get(test.id) ?? normalizedSource(fixtureDetail(test));
+}
+
+/** A draft's current steps by stable ID, as the guided mirror learns them. */
+export function stepRefsOf(test: TestDto): Array<{ stepId: string; text: string }> {
+  return sourceOf(test).steps.map((step) => ({ stepId: step.id, text: step.text }));
+}
+
+export function authoringSource(body: TestRequest): AuthoringV2Request {
   return {
     authoringSchemaVersion: 2,
     globalContext: body.globalContext,
@@ -15,7 +47,7 @@ export function authoringSource(body: AuthoringTestRequest): AuthoringV2Request 
   };
 }
 
-export function validateAuthoringWrite(body: AuthoringTestRequest, csiId: string): string | undefined {
+export function validateAuthoringWrite(body: TestRequest, csiId: string): string | undefined {
   const errors = validateStudioAuthoring(authoringSource(body));
   if (errors.length) {
     const category = errors[0].category;
@@ -72,14 +104,14 @@ function canonical(value: unknown): string {
   return JSON.stringify(value);
 }
 
-export function changesFor(id: string, previous: TestDto, next: AuthoringTestRequest) {
+export function changesFor(previous: TestDto, next: TestRequest) {
   const source = normalizedSource(authoringSource(next));
-  const old = sources.get(id);
+  const old = sourceOf(previous);
   return {
-    source: old
-      ? canonical(old.steps.map(step => [step.id, step.text])) !== canonical(source.steps.map(step => [step.id, step.text]))
-      : canonical(previous.steps) !== canonical(source.steps.map(step => step.text)),
-    configuration: !old || canonical(contextIdentity(old)) !== canonical(contextIdentity(source)) ||
+    source:
+      canonical(old.steps.map(step => [step.id, step.text])) !==
+      canonical(source.steps.map(step => [step.id, step.text])),
+    configuration: canonical(contextIdentity(old)) !== canonical(contextIdentity(source)) ||
       canonical(previous.configuration) !== canonical(next.configuration) ||
       canonical(previous.variables) !== canonical(next.variables ?? []) || previous.environment !== next.environment,
   };
@@ -96,9 +128,8 @@ async function hash(value: unknown): Promise<string> {
 }
 
 /** Hashes are mock provenance only, never a client-generated execution/confirmation authority. */
-export async function authoringProjection(test: TestDto): Promise<AuthoringTestDto | undefined> {
-  const source = sources.get(test.id);
-  if (!source) return undefined;
+export async function authoringProjection(test: TestDto): Promise<TestDetailDto> {
+  const source = sourceOf(test);
   const contexts = [source.globalContext, ...source.steps.map(step => step.context)];
   const references = new Map<string, string | null>();
   const evidence = new Map<string, { id: string; revision: number; hash: string }>();

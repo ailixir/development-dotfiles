@@ -10,7 +10,10 @@ describe('saveErrorMessage', () => {
     ['INVALID_STEPS', 'Step 2 is blank. Write what the step should do, or remove it.'],
     ['INVALID_CONFIGURATION', 'configuration.timeoutSeconds must be between 1 and 120.'],
     ['INLINE_CREDENTIAL', 'Step 1 has a password in its address. Store it as a secret and use {{secret.NAME}}.'],
-    ['SOURCE_LINE_TOO_LONG', 'Step 3 is longer than 1024 characters. Shorten it.'],
+    [
+      'SOURCE_LINE_TOO_LONG',
+      'Step 2 is 501 characters long; the maximum is 500. Shorten it or split it into two steps.',
+    ],
     ['SOURCE_TOO_MANY_STEPS', 'This test has more than 100 steps. Split it into smaller tests.'],
   ])('shows the server message for a 400 %s', (error, message) => {
     expect(AUTHOR_FACING_SAVE_ERRORS.has(error)).toBe(true);

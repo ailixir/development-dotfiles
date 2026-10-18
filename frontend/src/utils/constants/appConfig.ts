@@ -3,7 +3,6 @@ import { AppConfig } from '../../types/common/commonTypes';
 type RuntimeChecksConfig = {
   apiBaseUrl?: string;
   debugMode?: boolean;
-  studioAuthoringV2?: boolean;
 };
 
 declare global {
@@ -51,10 +50,6 @@ export const APP_CONFIG: AppConfig = {
   version: '1.0.0',
   buildDate: new Date().toISOString(),
 };
-
-/** Deployment-controlled; enabling the UI requires the compatible v2 API and schema cutover. */
-export const STUDIO_AUTHORING_V2 = typeof window !== 'undefined'
-  && window.__CHECKS_CONFIG__?.studioAuthoringV2 === true;
 
 export const API_ENDPOINTS = {
   // Check sources (feature flags)

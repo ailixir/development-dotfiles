@@ -1,4 +1,10 @@
-import { EXECUTION_ERROR_CODES, type ExecutionErrorCode } from '@/types/studio/studioTypes';
+import {
+  EXECUTION_ERROR_CODES,
+  type ExecutionErrorCode,
+  type ExecutionSnapshot,
+  type ReplayFailure,
+  type TestDetailDto,
+} from '@/types/studio/studioTypes';
 
 /**
  * What a terminal `ERROR` means, per code (story 10.11a, AC-6).
@@ -28,7 +34,7 @@ import { EXECUTION_ERROR_CODES, type ExecutionErrorCode } from '@/types/studio/s
  * `callerCanClear`, one surface over.
  *
  * There is **no fallback**. {@link executionErrorNarrative} throws on anything the document does
- * not declare, for the reason `narrativeFor` throws on a sixth `compileStatus`: a ninth code the
+ * not declare, for the reason `runModeFor` throws on an undeclared `readiness`: a ninth code the
  * server starts sending must be a loud failure, not a generic panel that hides which of the eight
  * is true. `studioContract.test.ts` reads the enum from `openapi.yaml` and asserts this record
  * covers it exactly, in both directions.
@@ -100,6 +106,14 @@ export const EXECUTION_ERROR_NARRATIVES: Readonly<
       'Whoever administers entitlements clears this by restoring that access, out of band. Retrying cannot.',
     offersRerun: false,
   },
+  SECRET_TOO_LONG: {
+    title: 'A secret exceeds the supported size',
+    browserClaim:
+      'No browser started. The dispatcher refused a secret longer than 4096 characters without truncating it.',
+    remedyOwner:
+      'Whoever owns the secret clears this by rotating it to a supported value of at most 4096 characters before starting a new run.',
+    offersRerun: false,
+  },
   CANCELLED: {
     title: 'The run was stopped on request',
     browserClaim:
@@ -139,3 +153,72 @@ export function executionErrorNarrative(code: string): ExecutionErrorNarrative {
 
 /** The carrier's order, so a rendering that enumerates does so in the document's order. */
 export const EXECUTION_ERROR_KEYS: readonly ExecutionErrorCode[] = EXECUTION_ERROR_CODES;
+
+/*
+ * ---------------------------------------------------------------------------------------------
+ * STUDIO-OBS-008 T0 ruling A1: the replay's named cause takes precedence
+ * ---------------------------------------------------------------------------------------------
+ */
+
+/**
+ * Which narrative a terminal replay snapshot gets (T0 ruling A1.6, "Precedence").
+ *
+ *  - `replayFailure` non-null **selects the narrative before `status` and `errorCode`**: the login
+ *    notice for `LOGIN_REQUIRED`, the drift sentence for `TARGET_DRIFT`. The API derives it only from
+ *    a final report whose `errorCode` is null (A1.2), and drift arrives as `status: ERROR` (OBS-A1-2),
+ *    so without this precedence a drift would read as the unnamed-error statement.
+ *  - `replayFailure` null or absent: the existing narratives apply unchanged (`errorCode`, the
+ *    unnamed `ERROR`, or nothing).
+ *
+ * Nothing is derived from `stepResults[].message`, `logs` or `status` (A1.1: "A client never derives
+ * it from …"). This function reads exactly one field.
+ */
+export type ReplayFailureNarrative =
+  | { readonly kind: 'login'; readonly failure: Extract<ReplayFailure, { code: 'LOGIN_REQUIRED' }> }
+  | { readonly kind: 'drift'; readonly failure: Extract<ReplayFailure, { code: 'TARGET_DRIFT' }> };
+
+export function replayFailureNarrative(
+  snapshot: Pick<ExecutionSnapshot, 'replayFailure'>,
+): ReplayFailureNarrative | null {
+  const failure = snapshot.replayFailure;
+  if (failure === null || failure === undefined) return null;
+  switch (failure.code) {
+    case 'LOGIN_REQUIRED':
+      return { kind: 'login', failure };
+    case 'TARGET_DRIFT':
+      return { kind: 'drift', failure };
+    default: {
+      // The carrier is closed; a third code is a contract change and must be loud, as for errorCode.
+      const unknown: never = failure;
+      throw new Error(`Unknown ReplayFailure code "${(unknown as { code: string }).code}".`);
+    }
+  }
+}
+
+/**
+ * Whether the drift narrative offers "Learn again from step N" (T0 ruling A1.6, all three must hold):
+ *  1. the test's current readiness, as `GET /tests/{id}` served it, is `READY`;
+ *  2. the replayed revision is the test's confirmed revision (`snapshot.revisionId ===
+ *     confirmedRevisionId`), so the step being re-learned is the one that drifted;
+ *  3. the drifted step is still in the current draft, by stable ID.
+ *
+ * In every other case (`NEEDS_RELEARN`, a superseded revision, a missing step) the narrative is shown
+ * with no action: the ordinary Run already learns from the server's k, and the client never sends a
+ * step after k. The action never repairs anything automatically.
+ */
+export function learnAgainOffered(
+  test: Pick<TestDetailDto, 'readiness' | 'confirmedRevisionId'> | null,
+  snapshot: Pick<ExecutionSnapshot, 'replayFailure' | 'revisionId'>,
+  draftStepIds: readonly string[],
+): boolean {
+  const failure = snapshot.replayFailure;
+  if (test === null || failure === null || failure === undefined || failure.code !== 'TARGET_DRIFT') {
+    return false;
+  }
+  return (
+    test.readiness === 'READY' &&
+    test.confirmedRevisionId !== null &&
+    snapshot.revisionId === test.confirmedRevisionId &&
+    draftStepIds.includes(failure.stepId)
+  );
+}

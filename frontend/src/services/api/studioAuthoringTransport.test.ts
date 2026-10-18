@@ -2,10 +2,15 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import studioApi from './studioApi';
-import type { AuthoringTestRequest, AuthoringTestUpdate } from './studioAuthoringTransport';
-import { defaultConfiguration, type AuthoringV2Request } from '@/types/studio/studioTypes';
+import {
+  defaultConfiguration,
+  type AuthoringV2Request,
+  type TestRequest,
+  type TestUpdateRequest,
+} from '@/types/studio/studioTypes';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
+import { mockTests } from '@/services/mocks/studio/fixtures';
 import { normalizedSource } from '@/services/mocks/studio/authoringState';
 
 const examples = JSON.parse(
@@ -13,7 +18,7 @@ const examples = JSON.parse(
     path.resolve(__dirname, '../../../../docs/specs/studio/examples/context-authoring-valid.json'),
     'utf8',
   ),
-) as { cases: Array<{ name: string; request?: AuthoringV2Request; legacy?: { steps: string[] } }> };
+) as { cases: Array<{ name: string; request?: AuthoringV2Request }> };
 
 beforeAll(() => studioMockServer.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => {
@@ -29,10 +34,11 @@ describe('Studio authoring v2 transport', () => {
     expect(created.authoringSchemaVersion).toBe(2);
     expect(created.steps).toEqual(normalizedSource(request).steps);
 
-    const read = await studioApi.getTest(created.id, { authoringSchemaVersion: 2 });
+    const read = await studioApi.getTest(created.id);
+    expect(read.authoringSchemaVersion).toBe(2);
     expect(read.steps).toEqual(created.steps);
 
-    const update: AuthoringTestUpdate = {
+    const update: TestUpdateRequest = {
       ...request,
       globalContext: { entries: [{ kind: 'text', value: '  updated 東京\n  ' }] },
       sourceRevision: created.sourceRevision,
@@ -50,7 +56,7 @@ describe('Studio authoring v2 transport', () => {
     );
 
     await expect(studioApi.updateTest(created.id, update)).rejects.toThrow('STALE_REVISION');
-    const afterStale = await studioApi.getTest(created.id, { authoringSchemaVersion: 2 });
+    const afterStale = await studioApi.getTest(created.id);
     expect(afterStale.configurationRevision).toBe(saved.configurationRevision);
     expect(afterStale.globalContext).toEqual(saved.globalContext);
   });
@@ -65,17 +71,13 @@ describe('Studio authoring v2 transport', () => {
     expect(json).toContain('/reports/protected');
   });
 
-  it('keeps legacy GET non-mutating until the client explicitly saves v2', async () => {
-    const legacy = examples.cases.find(({ name }) => name === 'legacy-empty-context')?.legacy;
-    if (!legacy) throw new Error('Missing legacy fixture');
-    const created = await studioApi.createTest({
-      name: 'Legacy', csiId: '60406', environment: 'Production', steps: legacy.steps,
-      variables: [], configuration: defaultConfiguration(),
-    });
-    await expect(
-      studioApi.getTest(created.id, { authoringSchemaVersion: 2 }),
-    ).rejects.toThrow('LEGACY_AUTHORING');
-    expect((await studioApi.getTest(created.id)).steps).toEqual(legacy.steps);
+  it('reads a fixture draft with stable step IDs and the same IDs on every read', async () => {
+    const first = await studioApi.getTest(mockTests[0].id);
+    const second = await studioApi.getTest(mockTests[0].id);
+    expect(first.steps.map(({ text }) => text)).toEqual(mockTests[0].steps);
+    expect(first.steps.every(({ id }) => /^[0-9a-f-]{36}$/.test(id))).toBe(true);
+    expect(new Set(first.steps.map(({ id }) => id)).size).toBe(first.steps.length);
+    expect(second.steps).toEqual(first.steps);
   });
 });
 
@@ -85,7 +87,7 @@ function valid(name: string): AuthoringV2Request {
   return structuredClone(request);
 }
 
-function body(source: AuthoringV2Request): AuthoringTestRequest {
+function body(source: AuthoringV2Request): TestRequest {
   return {
     ...source,
     name: 'Context authoring',

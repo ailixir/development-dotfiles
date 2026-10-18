@@ -5,7 +5,7 @@ import { Alert, Box, Button, Checkbox, CircularProgress, Dialog, DialogActions, 
 import { Link as RouterLink, useLocation } from 'react-router-dom';
 import studioApi from '@/services/api/studioApi';
 import { studioSchedulesApi } from '@/services/api/studioSchedulesApi';
-import type { TestDto } from '@/types/studio/studioTypes';
+import type { TestDraftHeader } from '@/types/studio/studioTypes';
 import type { ScheduleCapabilities, ScheduleOccurrencePage, SchedulePreview, StudioSchedule } from '@/types/studio/studioScheduling';
 import { notifyScheduleChanged, occurrenceLabel, offsetLabel, scheduleError, scheduleLabel } from './schedulePresentation';
 import { runDetailsPath } from '@/components/studio/runs/runLinks';
@@ -17,16 +17,16 @@ const PRESETS = [
 const EMPTY_HISTORY: ScheduleOccurrencePage = { data: [], page: 0, size: 10, totalElements: 0, totalPages: 0 };
 
 export interface StudioScheduleDialogProps {
-  test: TestDto | null;
+  test: TestDraftHeader | null;
   dirty?: boolean;
   onClose: () => void;
 }
 
-function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChange }: StudioScheduleDialogProps & { test: TestDto; onBusyChange: (busy: boolean) => void }) {
+function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChange }: StudioScheduleDialogProps & { test: TestDraftHeader; onBusyChange: (busy: boolean) => void }) {
   const location = useLocation();
   const studioIndex = location.pathname.indexOf('/studio');
   const runsPath = `${studioIndex >= 0 ? location.pathname.slice(0, studioIndex) : '/checks'}/studio/runs`;
-  const [test, setTest] = useState(initialTest);
+  const [test, setTest] = useState<TestDraftHeader>(initialTest);
   const [schedule, setSchedule] = useState<StudioSchedule | null>(null);
   const [capabilities, setCapabilities] = useState<ScheduleCapabilities | null>(null);
   const [loading, setLoading] = useState(true);
@@ -102,8 +102,9 @@ function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChan
   // The API can reveal newly terminal uncertainty before the producer persists BLOCKED.
   // Presentation blocks immediately, without writing schedule state or changing author intent.
   const effectiveBlocked = schedule?.state === 'BLOCKED' || (!!schedule?.requestedEnabled && uncertainty.length > 0);
-  const confirmedSourceChanged = !!test.confirmedRevisionArtifact && JSON.stringify(test.confirmedRevisionArtifact.steps.map(step => step.originalText)) !== JSON.stringify(test.steps);
-  const blockedWithoutNewConfirmation = schedule?.blockedCode === 'COMPILE_REQUIRED' && schedule.activatedRevisionId === test.confirmedRevisionId;
+  // The server derives readiness: a confirmed revision that is no longer READY no longer matches the saved steps.
+  const confirmedSourceChanged = !!test.confirmedRevisionId && test.readiness !== 'READY';
+  const blockedWithoutNewConfirmation = schedule?.blockedCode === 'LEARN_REQUIRED' && schedule.activatedRevisionId === test.confirmedRevisionId;
   const canSave = canManage && !busy && !dirty && capabilities.availableExecutionPrincipals.includes(principal) && preview !== null && !previewLoading;
   const canResume = canManage && !busy && !dirty && !configChanged && !confirmedSourceChanged && !blockedWithoutNewConfirmation && !!test.confirmedRevisionId &&
     capabilities.availableExecutionPrincipals.includes(principal) && (uncertainty.length === 0 || acknowledged);
@@ -140,7 +141,7 @@ function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChan
           <Typography variant="subtitle2" component="p">Schedule: {scheduleLabel(schedule)}</Typography>
           {schedule && effectiveBlocked && <Alert severity="warning">{uncertainty.length > 0 || schedule.blockedCode === 'UNCERTAIN_EXECUTION'
             ? 'Investigate the uncertain runs before explicitly resuming future slots.'
-            : 'Prepare and confirm the saved test if required, then reload and explicitly Resume. Confirmation alone does not restart scheduling.'}</Alert>}
+            : 'If the saved steps need learning, resume only after a Run has learned them: reload, then explicitly Resume. Learning alone does not restart scheduling.'}</Alert>}
           {schedule?.state === 'ENABLED' && !effectiveBlocked && schedule.nextDueAt && <Typography variant="body2">Next scheduled due: {new Date(schedule.nextDueAt).toISOString()} · {schedule.timeZone}</Typography>}
           <TextField select label="Frequency" value={preset} disabled={!canManage || busy} onChange={event => {
             const value = event.target.value;
@@ -168,9 +169,9 @@ function ScheduleContent({ test: initialTest, dirty = false, onClose, onBusyChan
             </Typography>)}</Box>}
             {preview && <Typography variant="caption" component="div">Rule: {preview.normalizedCronExpression}</Typography>}
           </Box>
-          <Typography variant="body2">Scheduled runs use saved, confirmed steps and settings. Changing scheduling settings leaves the schedule Paused; explicitly Resume when ready.</Typography>
-          {test.confirmedRevisionId ? <Typography variant="caption" sx={{ overflowWrap: 'anywhere' }}>Current confirmed revision: {test.confirmedRevisionId}</Typography>
-            : <Alert severity="info">Prepare and confirm the saved test before resuming its schedule.</Alert>}
+          <Typography variant="body2">Scheduled runs repeat the saved, learned steps and settings. Changing scheduling settings leaves the schedule Paused; explicitly Resume when ready.</Typography>
+          {test.confirmedRevisionId ? <Typography variant="caption" sx={{ overflowWrap: 'anywhere' }}>Current learned revision: {test.confirmedRevisionId}</Typography>
+            : <Alert severity="info">Resume becomes available once a Run has learned the saved steps.</Alert>}
           {schedule?.activatedBy && <Typography variant="caption">Last activated by {schedule.activatedBy} at {schedule.activatedAt}</Typography>}
           {configChanged && <Alert severity="info">Save scheduling changes before resuming.</Alert>}
           {!!uncertainty.length && <Box>

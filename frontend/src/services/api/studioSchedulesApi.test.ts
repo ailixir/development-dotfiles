@@ -1,7 +1,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft } from '@/services/mocks/studio/compileFixtures';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import { mockSchedulePreview } from '@/services/mocks/studio/schedulePreview';
 import { studioSchedulesApi } from './studioSchedulesApi';
 import { createSchedulingHandlers, seedScheduleOccurrences } from '@/services/mocks/studio/schedulingHandlers';

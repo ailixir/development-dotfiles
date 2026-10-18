@@ -8,6 +8,7 @@ import {
   type TransportImplementation,
 } from '@/services/api/studioExecutionTransport';
 import { mockExecutions } from './fixtures';
+import { replayFailureExecutions } from './executionFixtures';
 
 /**
  * Story 10.11b — the scripted transport scenarios.
@@ -282,6 +283,54 @@ export const TERMINAL_EVIDENCE_SETTLED: ExecutionSnapshot = frame(12, {
   streamComplete: true,
 });
 
+/**
+ * **STUDIO-OBS-008 T0 ruling A1.** One scripted run per `replayFailure` case, so a replay Run can
+ * end in each of them over the class-B stream: a pending frame, a frame with the failing step
+ * running, and the terminal frame, which is the document example's own snapshot
+ * ({@link replayFailureExecutions}). The two earlier frames carry no `replayFailure`: the API
+ * derives it from the FINAL report only, and a non-terminal snapshot never names a cause.
+ */
+function replayFailureScenario(terminal: ExecutionSnapshot): readonly ExecutionSnapshot[] {
+  const failing = terminal.stepResults.findIndex((step) => step.status === 'FAIL');
+  const unstarted = (step: StepResult): StepResult => ({
+    ...step, status: 'PENDING', offsetMs: null, durationMs: null, message: null,
+  });
+  const common = {
+    ...terminal,
+    errorCode: null,
+    endedAt: null,
+    durationMs: null,
+    logs: [],
+    video: { status: 'PROCESSING' as const, error: null, expiresAt: null, partial: false },
+    videoPath: null,
+    streamComplete: false,
+  };
+  const pending: ExecutionSnapshot = {
+    ...common,
+    status: 'PENDING',
+    startedAt: null,
+    stepResults: terminal.stepResults.map(unstarted),
+    revision: terminal.revision - 2,
+  };
+  const running: ExecutionSnapshot = {
+    ...common,
+    status: 'RUNNING',
+    stepResults: terminal.stepResults.map((step, index) =>
+      index < failing ? step : index === failing ? { ...unstarted(step), status: 'RUNNING', offsetMs: step.offsetMs } : unstarted(step)),
+    revision: terminal.revision - 1,
+  };
+  delete pending.replayFailure;
+  delete running.replayFailure;
+  return Object.freeze([pending, running, terminal]);
+}
+
+/** The three scripted replay-failure runs, keyed by the document example each one ends in. */
+export const REPLAY_FAILURE_SCENARIOS = Object.freeze({
+  loginRequiredNoLoginSteps: replayFailureScenario(replayFailureExecutions.loginRequiredNoLoginSteps),
+  loginRequiredLoginStepsFailed: replayFailureScenario(replayFailureExecutions.loginRequiredLoginStepsFailed),
+  targetDrift: replayFailureScenario(replayFailureExecutions.targetDrift),
+});
+
 /** Every frame this module publishes, for the contract harness to validate in one pass. */
 export const ALL_SCENARIO_FRAMES: readonly ExecutionSnapshot[] = Object.freeze([
   ...DEV_TRANSPORT_SCENARIO,
@@ -290,6 +339,7 @@ export const ALL_SCENARIO_FRAMES: readonly ExecutionSnapshot[] = Object.freeze([
   TERMINAL_EVIDENCE_PROCESSING,
   TERMINAL_EVIDENCE_FAILED,
   TERMINAL_EVIDENCE_SETTLED,
+  ...Object.values(REPLAY_FAILURE_SCENARIOS).flat(),
 ]);
 
 /**

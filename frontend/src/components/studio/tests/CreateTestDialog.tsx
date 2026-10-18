@@ -17,14 +17,14 @@ import {
 } from '@mui/material';
 import studioApi from '@/services/api/studioApi';
 import { useAppSelector } from '@/store';
-import { defaultConfiguration, type TestDto, type TestRequest } from '@/types/studio/studioTypes';
+import { defaultConfiguration, type TestDraftHeader, type TestRequest } from '@/types/studio/studioTypes';
 import { STUDIO_TEST_ENVIRONMENTS, TEST_NAME_MAX_LENGTH } from './testListPresentation';
 import { createErrorMessage } from './testErrors';
 
 export interface CreateTestDialogProps {
   open: boolean;
   onClose: () => void;
-  onCreated: (test: TestDto) => void;
+  onCreated: (test: TestDraftHeader) => void;
 }
 
 const EMPTY_FORM = { name: '', csiId: '', environment: 'Development', description: '' };
@@ -77,7 +77,10 @@ const CreateTestDialog: React.FC<CreateTestDialogProps> = ({ open, onClose, onCr
     setCreating(true);
     setError(null);
     try {
+      // A new draft has no steps yet, so there is no step ID to mint: the editor mints each one as
+      // the author inserts it (STUDIO-OBS-008 item a) and the first save writes them.
       const payload: TestRequest = {
+        authoringSchemaVersion: 2,
         name: form.name.trim(),
         csiId: form.csiId,
         description: form.description,

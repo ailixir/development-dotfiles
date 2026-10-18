@@ -6,7 +6,10 @@ import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft, draftsByCompileStatus } from '@/services/mocks/studio/compileFixtures';
+import { fixtureDetail, fixtureStepId } from '@/services/mocks/studio/authoringState';
+import { availableQuickStartTemplates } from '@/components/studio/templates';
+import { setVaultSecrets } from '@/services/mocks/studio/capabilityHandlers';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
 import { fetchFeatures } from '@/store/slices/featuresSlice';
@@ -97,7 +100,7 @@ function serveList(draft: typeof readyDraft) {
     http.get(`${STUDIO_BASE}/tests`, () =>
       HttpResponse.json({ data: [draft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
-    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(draft)),
+    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(draft))),
     http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
       HttpResponse.json(
         { executionId: '88888888-8888-8888-8888-888888888888', status: 'PENDING' },
@@ -114,6 +117,9 @@ function serveList(draft: typeof readyDraft) {
  */
 
 const PENDING = 'Check the server CPU is below 50%';
+
+/** The display text of the `AuthoringStep` objects a save carries. */
+const textsOf = (steps: unknown) => (steps as Array<{ text: string }>).map((step) => step.text);
 
 function capturePuts() {
   const saved: Array<Record<string, unknown>> = [];
@@ -160,7 +166,7 @@ describe('VAL-036: the add-step field', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
     await waitFor(() => expect(saved).toHaveLength(1), pageWait);
-    expect(saved[0].steps).toEqual([...readyDraft.steps, PENDING]);
+    expect(textsOf(saved[0].steps)).toEqual([...readyDraft.steps, PENDING]);
     expect(screen.getByRole('textbox', { name: 'Add a test step' })).toHaveValue('');
   }, PAGE_TEST_TIMEOUT_MS);
 });
@@ -177,7 +183,7 @@ describe('VAL-036 + VAL-039: Run with pending text in a focused add-step field',
     await user.click(run);
     await screen.findByRole('button', { name: 'Stop' }, pageWait);
     expect(saved).toHaveLength(1);
-    expect(saved[0].steps).toEqual([...readyDraft.steps, PENDING]);
+    expect(textsOf(saved[0].steps)).toEqual([...readyDraft.steps, PENDING]);
     // Settle on the end of the run, so a late duplicate would be counted too.
     await screen.findByRole('button', { name: 'Run Test' }, runEndWait);
     expect(executeRequests()).toHaveLength(1);
@@ -199,31 +205,14 @@ describe('VAL-037: the unsaved notice matches what Run does', () => {
 });
 
 describe('VAL-038: the refusal alert renders below the header, not inside it', () => {
-  it('keeps the title and actions in the header and links the step', async () => {
-    const base = draftsByCompileStatus.NEEDS_REVISION;
-    const refused = {
-      ...base,
-      compileDiagnostics: {
-        validatorSchemaVersion: '1.0.0',
-        artifact: [],
-        steps: base.steps.map((_, stepIndex) => ({
-          stepIndex,
-          ok: stepIndex !== 1,
-          truncated: false,
-          diagnostics:
-            stepIndex === 1
-              ? [{ code: 'UNSUPPORTED_CAPABILITY', stepIndex, message: 'Not visible.', node: null, excerpt: null }]
-              : [],
-        })),
-        truncated: false,
-        attempts: 1,
-        exhausted: false,
-      },
-    };
-    serveList(refused);
+  it('keeps the title and actions in the header and puts the refusal in the slot below it', async () => {
+    serveList(readyDraft);
     studioMockServer.use(
-      http.post(`${STUDIO_BASE}/tests/:id/compile`, () =>
-        HttpResponse.json({ compileRequestId: 'r', compileStatus: 'COMPILING' }, { status: 202 }),
+      http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
+        HttpResponse.json(
+          { error: 'LEARN_REQUIRED', message: 'No published revision matches the draft; run it to learn it' },
+          { status: 409 },
+        ),
       ),
     );
     renderPage();
@@ -232,14 +221,91 @@ describe('VAL-038: the refusal alert renders below the header, not inside it', (
     await waitFor(() => expect(run).not.toBeDisabled(), pageWait);
     await user.click(run);
 
-    const outcome = await screen.findByTestId('run-compile-outcome', {}, pageWait);
+    const refusal = await screen.findByTestId('run-refusal', {}, pageWait);
     const header = screen.getByRole('heading', { level: 1 }).closest('.MuiPaper-root') as HTMLElement;
     expect(header).toContainElement(run);
-    expect(header).not.toContainElement(outcome);
-    expect(screen.getByTestId('run-alerts-slot')).toContainElement(outcome);
-    expect(within(outcome).getByText('Some steps need attention')).toBeInTheDocument();
+    expect(header).not.toContainElement(refusal);
+    expect(screen.getByTestId('run-alerts-slot')).toContainElement(refusal);
+    expect(within(refusal).getByText('This test has not learned its current steps')).toBeInTheDocument();
+  }, PAGE_TEST_TIMEOUT_MS);
+});
 
-    await user.click(within(outcome).getByRole('button', { name: 'Go to step 2' }));
-    expect(screen.getByRole('textbox', { name: 'Step 2' })).toHaveFocus();
+/**
+ * STUDIO-OBS-008 inherited item a. The server computes the first changed step from stable step IDs,
+ * so an editor that re-minted every ID on save would make every edit look like a change at step 1.
+ * The IDs below are the ones `GET /tests/{id}` served; the save must hand them back.
+ */
+describe('item a: step IDs survive edit and reorder, and are minted on insert and template', () => {
+  const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u;
+  const originalIds = readyDraft.steps.map((_, index) => fixtureStepId(index));
+  type SavedStep = { id: string; text: string };
+
+  it('keeps each ID through an edit and a reorder, mints one for an insert and drops a deleted step', async () => {
+    const saved = capturePuts();
+    await readyPage();
+    const user = userEvent.setup({ delay: null });
+
+    await user.type(screen.getByRole('textbox', { name: 'Step 2' }), ' edited');
+    await user.click(screen.getByRole('button', { name: 'Move step 1 down' }));
+    await user.click(screen.getByRole('button', { name: 'Remove step 4' }));
+    await user.type(screen.getByRole('textbox', { name: 'Add a test step' }), 'Click "Done"{Enter}');
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(saved).toHaveLength(1), pageWait);
+
+    const steps = saved[0].steps as SavedStep[];
+    expect(saved[0].authoringSchemaVersion).toBe(2);
+    // The edited step moved to the front under its own ID; the first step followed it; the third is untouched.
+    expect(steps.slice(0, 3).map((step) => step.id)).toEqual([originalIds[1], originalIds[0], originalIds[2]]);
+    expect(steps[0].text).toBe(`${readyDraft.steps[1]} edited`);
+    expect(steps[1].text).toBe(readyDraft.steps[0]);
+    // The insert is new; the deleted step's ID is gone.
+    expect(steps).toHaveLength(4);
+    expect(steps[3]).toMatchObject({ text: 'Click "Done"' });
+    expect(steps[3].id).toMatch(UUID);
+    expect(originalIds).not.toContain(steps[3].id);
+    expect(steps.map((step) => step.id)).not.toContain(originalIds[3]);
+    expect(new Set(steps.map((step) => step.id)).size).toBe(steps.length);
+  }, PAGE_TEST_TIMEOUT_MS);
+
+  it('mints a new ID for every step a template inserts, and none repeats an ID the draft held', async () => {
+    // The capability decides which templates are offered (STUDIO-OBS-008 AC-5); with Vault off the
+    // offer is the same whether or not the capability answer has arrived yet.
+    setVaultSecrets(false);
+    const saved = capturePuts();
+    await readyPage();
+    const user = userEvent.setup({ delay: null });
+
+    await user.click(screen.getByRole('button', { name: 'Templates' }));
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getAllByRole('button', { name: 'Use this template' })[0]);
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull(), pageWait);
+    await user.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(saved).toHaveLength(1), pageWait);
+
+    const steps = saved[0].steps as SavedStep[];
+    expect(steps.map((step) => step.text)).toEqual([...availableQuickStartTemplates(false)[0].steps]);
+    for (const step of steps) {
+      expect(step.id).toMatch(UUID);
+      expect(originalIds).not.toContain(step.id);
+    }
+    expect(new Set(steps.map((step) => step.id)).size).toBe(steps.length);
+  }, PAGE_TEST_TIMEOUT_MS);
+
+  it('hands the global context back unchanged on a save, so the server does not drop it', async () => {
+    const context = { entries: [{ kind: 'text' as const, value: 'Production only' }] };
+    serveList(readyDraft);
+    studioMockServer.use(
+      http.get(`${STUDIO_BASE}/tests/:id`, () =>
+        HttpResponse.json({ ...fixtureDetail(readyDraft), globalContext: context }),
+      ),
+    );
+    const saved = capturePuts();
+    renderPage();
+    const run = await screen.findByRole('button', { name: 'Run Test' }, pageWait);
+    await waitFor(() => expect(run).not.toBeDisabled(), pageWait);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(saved).toHaveLength(1), pageWait);
+    expect(saved[0].globalContext).toEqual(context);
   }, PAGE_TEST_TIMEOUT_MS);
 });

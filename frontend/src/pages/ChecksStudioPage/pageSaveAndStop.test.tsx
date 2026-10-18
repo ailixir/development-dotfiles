@@ -6,7 +6,9 @@ import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft } from '@/services/mocks/studio/compileFixtures';
+import { fixtureDetail } from '@/services/mocks/studio/authoringState';
+import { setVaultSecrets } from '@/services/mocks/studio/capabilityHandlers';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import {
   createPollTransport,
   resetExecutionTransportSeam,
@@ -15,8 +17,9 @@ import {
 import {
   CANCELLED_ERROR_CODE,
   type ExecutionSnapshot,
+  type TestDetailDto,
   type TestDto,
-  type TestRequest,
+  type TestUpdateRequest,
 } from '@/types/studio/studioTypes';
 import { CANCELLED_LABEL, STOPPING_LABEL } from '@/components/studio/run';
 import { store } from '@/store';
@@ -57,33 +60,38 @@ const bootstrapHandlers = [
   http.get(`${API_BASE}/features`, () => HttpResponse.json({ sources: [], features: [] })),
 ];
 
-/** Serves one draft. `current` is what the list and the single read return right now. */
+/**
+ * Serves one draft. `current` is what the list returns right now, and the single read returns it as
+ * the v2 detail under fixture step IDs, unless a save has set `detail`: the server echoes the step
+ * IDs it was sent, so after a save the single read carries those.
+ */
 function serveDraft(initial: TestDto) {
-  const state = { current: initial };
+  const state: { current: TestDto; detail?: TestDetailDto } = { current: initial };
   studioMockServer.use(
     ...bootstrapHandlers,
     http.get(`${STUDIO_BASE}/tests`, () =>
       HttpResponse.json({ data: [state.current], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
-    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(state.current)),
+    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(state.detail ?? fixtureDetail(state.current))),
   );
   return state;
 }
 
 /** A PUT handler that accepts at the current revisions and records every body. */
-function acceptSaves(state: { current: TestDto }) {
-  const bodies: TestRequest[] = [];
+function acceptSaves(state: { current: TestDto; detail?: TestDetailDto }) {
+  const bodies: TestUpdateRequest[] = [];
   studioMockServer.use(
     http.put(`${STUDIO_BASE}/tests/:id`, async ({ request }) => {
-      const body = (await request.json()) as TestRequest;
+      const body = (await request.json()) as TestUpdateRequest;
       bodies.push(body);
       state.current = {
         ...state.current,
-        steps: body.steps,
+        steps: body.steps.map((step) => step.text),
         variables: body.variables,
         sourceRevision: state.current.sourceRevision + 1,
       };
-      return HttpResponse.json(state.current);
+      state.detail = { ...fixtureDetail(state.current), steps: body.steps };
+      return HttpResponse.json(state.detail);
     }),
   );
   return bodies;
@@ -157,7 +165,8 @@ describe('Save', () => {
     expect(requests('PUT', /\/studio\/tests\/[^/]+$/)[0].path).toMatch(new RegExp(`${readyDraft.id}$`));
 
     const body = bodies[0];
-    expect(body.steps).toEqual([...readyDraft.steps, NEW_STEP]);
+    expect(body.authoringSchemaVersion).toBe(2);
+    expect(body.steps.map((step) => step.text)).toEqual([...readyDraft.steps, NEW_STEP]);
     expect(body.sourceRevision).toBe(readyDraft.sourceRevision);
     expect(body.configurationRevision).toBe(readyDraft.configurationRevision);
     // The draft's own CSI, never a fallback.
@@ -244,6 +253,8 @@ describe('Save', () => {
 
 describe('Variables', () => {
   it('are saved in the test through the same PUT and restored from the DTO on reload', async () => {
+    // STUDIO-OBS-008 AC-5: secrets follow the server capability; here it says Vault is not configured.
+    setVaultSecrets(false);
     const state = serveDraft(readyDraft);
     const bodies = acceptSaves(state);
     const first = renderPage();
@@ -252,7 +263,12 @@ describe('Variables', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Variables' }));
     const dialog = await screen.findByRole('dialog', {}, WAIT);
     expect(within(dialog).queryByRole('option', { name: 'Secret' })).toBeNull();
-    expect(within(dialog).getByText('Vault secrets are unavailable in this alpha.')).toBeVisible();
+    // The reason is stated in visible text, from the capability; the retired "alpha" copy is gone.
+    await waitFor(
+      () => expect(within(dialog).getAllByText('Vault is not connected for this environment.').length).toBeGreaterThan(0),
+      WAIT,
+    );
+    expect(within(dialog).queryByText(/alpha/i)).toBeNull();
     // Loaded from the DTO, not from the browser.
     const plainValue = within(dialog).getByDisplayValue('pilot-user');
     await userEvent.clear(plainValue);
@@ -262,7 +278,7 @@ describe('Variables', () => {
     await waitFor(() => expect(bodies).toHaveLength(1), WAIT);
     expect(bodies[0].variables).toEqual([
       { name: 'USER_ID', kind: 'plain', value: 'other-user' },
-      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'vault://studio/pilot-pw' },
+      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'LOGIN_PW' },
     ]);
     expect(requests('POST', /\/studio\/tests$/)).toHaveLength(0);
 

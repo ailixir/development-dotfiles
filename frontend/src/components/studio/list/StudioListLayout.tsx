@@ -100,6 +100,8 @@ export interface StudioListEmptyAction {
 
 export interface StudioListLayoutProps {
   title: string;
+  /** Lower-case plural for labels, e.g. "tests" → "Search tests...". Defaults to the lower-cased title. */
+  noun?: string;
   description: string;
   icon: ReactNode;
   action?: ReactNode;
@@ -152,6 +154,7 @@ export interface StudioListLayoutProps {
 /** Shared list chrome and request states for Studio tests and run history. */
 export function StudioListLayout({
   title,
+  noun,
   description,
   icon,
   action,
@@ -185,7 +188,7 @@ export function StudioListLayout({
   const clearLabel = onClearFilters ? 'Clear Filters' : 'Clear search';
   const firstLoad = loading && count === 0;
   const refreshing = loading && count > 0;
-  const lowerTitle = title.toLowerCase();
+  const lowerTitle = noun ?? title.toLowerCase();
 
   let body: ReactNode;
   if (error) {

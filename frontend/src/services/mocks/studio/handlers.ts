@@ -1,17 +1,18 @@
-import { studioInferenceHandlers, resetInferenceMocks, inferenceMockTests } from './inferenceHandlers';
 import { http, HttpResponse } from 'msw';
 import { createAuthoringHandlers } from './authoringHandlers';
-import { resetAuthoringMocks } from './authoringState';
+import { resetAuthoringMocks, stepRefsOf } from './authoringState';
+import { createCapabilityHandlers, resetCapabilityMocks } from './capabilityHandlers';
+import { createGuidedHandlers, guidedSessionsForTest, resetGuidedMocks } from './guidedHandlers';
+import { resetSecretsMocks, secretsHandlers } from './secretsHandlers';
 import { createSchedulingHandlers, resetSchedulingMocks } from './schedulingHandlers';
 import {
   CANCELLED_ERROR_CODE,
-  defaultConfiguration,
   isTerminalExecutionStatus,
-  type ConfirmCompileRequest,
+  LEARN_REQUIRED_CONFLICT_CODE,
   type ExecutionSnapshot,
   type Page,
   type TestDto,
-  type TestRequest,
+  type StudioVariable,
 } from '@/types/studio/studioTypes';
 import {
   MOCK_EXECUTE_DENIED_CSIS,
@@ -28,8 +29,8 @@ import {
   isExecutionSort,
   isTestSort,
 } from '@/types/studio/studioTypes';
-import { compileReviewDrafts, conflictResponse } from './compileFixtures';
-import { executeConflictResponse } from './executionFixtures';
+import { executeConflictResponse, replayFailureExecutions } from './executionFixtures';
+import { readinessDrafts } from './readinessFixtures';
 
 /**
  * Studio request handlers for standalone development and Vitest (story 10.1, AC-16).
@@ -117,7 +118,9 @@ const idempotency = new Map<string, string>();
 export function resetStudioMocks(): void {
   resetSchedulingMocks();
   resetAuthoringMocks();
-  resetInferenceMocks();
+  resetGuidedMocks();
+  resetCapabilityMocks();
+  resetSecretsMocks();
   created = [];
   deletedTestIds.clear();
   acceptedExecutions = [];
@@ -126,8 +129,7 @@ export function resetStudioMocks(): void {
 }
 
 const allTests = (): TestDto[] => {
-  const inference = inferenceMockTests();
-  return [...inference, ...created, ...mockTests, ...demoTests]
+  return [...created, ...mockTests, ...demoTests]
     .filter((test,index,all) => all.findIndex(item => item.id === test.id) === index)
     .filter((test) => !deletedTestIds.has(test.id));
 };
@@ -135,28 +137,94 @@ const allTests = (): TestDto[] => {
 /** Mirrors the backend's bounded `GET /tests` projection. */
 const forList = (test: TestDto): TestDto => ({
   ...test,
-  currentCandidateArtifactHash: null,
-  currentCandidateArtifact: null,
   confirmedRevisionArtifactHash: null,
   confirmedRevisionArtifact: null,
-  compileDiagnostics: null,
 });
 
-/**
- * Story 10.10's compile-review corpus. Reachable by id from `GET /tests/{id}` — the single-draft
- * read, which is the only route that carries `compileDiagnostics` (ADR-002 §16.5) — and
- * deliberately **not** folded into the list, so the list projection keeps the shape the contract
- * declares for it and the existing scoping fixtures keep their counts.
- */
-const reviewDraft = (id: unknown): TestDto | undefined =>
-  compileReviewDrafts.find((draft) => draft.id === id);
+const VARIABLE_TOKEN = /<var\s+([A-Za-z0-9_.-]{1,64})>/g;
+const SECRET_TOKEN = /<secret\s+([A-Za-z0-9_.-]{1,64})>/g;
 
-function conflict(code: string) {
-  return HttpResponse.json(conflictResponse(code), { status: 409 });
+function tokensOf(pattern: RegExp, steps: readonly string[]): string[] {
+  const names: string[] = [];
+  for (const step of steps) {
+    for (const match of step.matchAll(pattern)) {
+      if (!names.includes(match[1])) names.push(match[1]);
+    }
+  }
+  return names;
 }
+
+const isBlank = (value: unknown): boolean =>
+  value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
+
+/**
+ * `POST /tests/{id}/validate-variables` (`validateTestVariables`, kept by STUDIO-OBS-012A AC-2,
+ * cleanup inventory CLN-12). Mirrors the document's description: `<var NAME>` and `<secret ID>`
+ * references in the steps are matched against the declared variables (a `secretRef` by its
+ * `secretId`, falling back to its name); only a supplied value's presence is read and no value is
+ * echoed. Nothing is written.
+ */
+function validateVariableReferences(
+  test: TestDto,
+  supplied: Record<string, unknown>,
+) {
+  const referencedVariables = tokensOf(VARIABLE_TOKEN, test.steps);
+  const referencedSecrets = tokensOf(SECRET_TOKEN, test.steps);
+  const plainValues = new Map<string, StudioVariable['value']>();
+  const secretIds: string[] = [];
+  for (const variable of test.variables) {
+    if (variable.kind === 'secretRef') {
+      const id = variable.secretId ?? variable.name;
+      if (id && !secretIds.includes(id)) secretIds.push(id);
+    } else if (variable.name) {
+      plainValues.set(variable.name, variable.value);
+    }
+  }
+  const undeclared: string[] = [];
+  const unvalued: string[] = [];
+  for (const name of referencedVariables) {
+    if (!plainValues.has(name)) undeclared.push(`<var ${name}>`);
+    else if (isBlank(plainValues.get(name)) && isBlank(supplied[name])) unvalued.push(name);
+  }
+  for (const id of referencedSecrets) {
+    if (!secretIds.includes(id)) undeclared.push(`<secret ${id}>`);
+  }
+  const conflicting = [...plainValues.keys()].filter((name) => secretIds.includes(name));
+  const unused = [
+    ...[...plainValues.keys()].filter((name) => !referencedVariables.includes(name)),
+    ...secretIds.filter((id) => !referencedSecrets.includes(id)),
+  ];
+  const valid = undeclared.length === 0 && unvalued.length === 0 && conflicting.length === 0;
+  return {
+    testId: test.id,
+    isValid: valid,
+    valid,
+    hasVariables: test.variables.length > 0,
+    missing: [...undeclared, ...unvalued],
+    undeclared,
+    unvalued,
+    conflicting,
+    unused,
+  };
+}
+
+/**
+ * The run-gate corpus (`readinessFixtures.ts`). Reachable by id from `GET /tests/{id}` and the
+ * scheduling handlers, and deliberately **not** folded into the list, so the list projection and
+ * the existing scoping fixtures keep their counts.
+ */
+const readinessDraft = (id: unknown): TestDto | undefined =>
+  readinessDrafts.find((draft) => draft.id === id);
+
+/**
+ * Reachable by id from `GET /executions/{id}` and present in the history list: the three terminal
+ * snapshots that carry a `replayFailure` (STUDIO-OBS-008 T0 ruling A1), equal to the document's
+ * `getExecution` examples. They hold the other snapshots' ordinary place in the corpus.
+ */
 const allExecutions = (): ExecutionSnapshot[] => [
   ...acceptedExecutions,
   ...mockExecutions,
+  ...Object.values(replayFailureExecutions),
   ...demoExecutions,
 ];
 
@@ -283,12 +351,19 @@ function serveExecutionVideo(execution: ExecutionSnapshot | undefined, request: 
 }
 
 export const studioHandlers = [
-  ...createSchedulingHandlers({ getTest: id => allTests().find(test => test.id === id) ?? reviewDraft(id), getExecutions: () => allExecutions() }),
+  ...createSchedulingHandlers({ getTest: id => allTests().find(test => test.id === id) ?? readinessDraft(id), getExecutions: () => allExecutions() }),
+  // The guided, capability and secrets mirrors (STUDIO-OBS-008 lanes L2b and L4), over the same
+  // draft store the authoring routes write, so a draft created or saved here is the one they learn.
+  ...createGuidedHandlers({
+    getTest: id => allTests().find(test => test.id === id) ?? readinessDraft(id),
+    stepsOf: stepRefsOf,
+  }),
+  ...createCapabilityHandlers({ getTest: id => allTests().find(test => test.id === id) ?? readinessDraft(id) }),
+  ...secretsHandlers,
   ...createAuthoringHandlers({
-    get: id => allTests().find(test => test.id === id) ?? reviewDraft(id),
+    get: id => allTests().find(test => test.id === id) ?? readinessDraft(id),
     put: test => { created = [test, ...created.filter(candidate => candidate.id !== test.id)]; },
   }),
-  ...studioInferenceHandlers,
   http.get(`${BASE}/tests`, ({ request }) => {
     const url = new URL(request.url);
     const params = url.searchParams;
@@ -328,107 +403,8 @@ export const studioHandlers = [
     return HttpResponse.json(paginate(items.map(forList), url));
   }),
 
-  http.get(`${BASE}/tests/:id`, ({ params }) => {
-    const test =
-      readable(allTests()).find((candidate) => candidate.id === params.id) ?? reviewDraft(params.id);
-    if (!test) {
-      return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
-    }
-    return HttpResponse.json(test);
-  }),
-
-  http.post(`${BASE}/tests`, async ({ request }) => {
-    const body = (await request.json()) as TestRequest;
-    const rejection = rejectUnsupportedEngine(body);
-    if (rejection) {
-      return rejection;
-    }
-    if (!body.csiId) {
-      return badRequest('BAD_REQUEST', 'csiId is required');
-    }
-    const test: TestDto = {
-      id: crypto.randomUUID(),
-      name: body.name,
-      description: body.description ?? null,
-      csiId: body.csiId,
-      environment: body.environment,
-      steps: body.steps ?? [],
-      variables: body.variables ?? [],
-      configuration: body.configuration ?? defaultConfiguration(),
-      status: 'PAUSED',
-      schedule: null,
-      createdBy: 'pilot.user@citi.com',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      lastRunAt: null,
-      lastRunStatus: null,
-      sourceRevision: 1,
-      configurationRevision: 1,
-      compileStatus: 'STALE',
-      currentCandidateRevisionId: null,
-      confirmedRevisionId: null,
-    };
-    created = [test, ...created];
-    return HttpResponse.json(test, {
-      status: 201,
-      headers: { Location: `/api/v1/studio/tests/${test.id}` },
-    });
-  }),
-
-  http.put(`${BASE}/tests/:id`, async ({ params, request }) => {
-    const body = (await request.json()) as TestRequest;
-    const rejection = rejectUnsupportedEngine(body);
-    if (rejection) {
-      return rejection;
-    }
-    const test = readable(allTests()).find((candidate) => candidate.id === params.id);
-    if (!test) {
-      return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
-    }
-    if (body.sourceRevision == null || body.configurationRevision == null) {
-      return badRequest(
-        'BAD_REQUEST',
-        'sourceRevision and configurationRevision are required on update',
-      );
-    }
-    if (
-      body.sourceRevision !== test.sourceRevision ||
-      body.configurationRevision !== test.configurationRevision
-    ) {
-      return HttpResponse.json(
-        {
-          error: 'STALE_REVISION',
-          message: `Test ${test.id} is at sourceRevision ${test.sourceRevision}/configurationRevision ${test.configurationRevision}; reload before saving`,
-        },
-        { status: 409 },
-      );
-    }
-    if (body.csiId && body.csiId !== test.csiId) {
-      return HttpResponse.json(
-        {
-          error: 'CSI_IMMUTABLE',
-          message: `Test ${test.id} belongs to CSI ${test.csiId} and cannot be moved`,
-        },
-        { status: 409 },
-      );
-    }
-    const sourceChanged = JSON.stringify(body.steps) !== JSON.stringify(test.steps);
-    const updated: TestDto = {
-      ...test,
-      name: body.name,
-      description: body.description ?? null,
-      environment: body.environment,
-      steps: body.steps,
-      variables: body.variables ?? [],
-      configuration: body.configuration,
-      updatedAt: new Date().toISOString(),
-      sourceRevision: test.sourceRevision + (sourceChanged ? 1 : 0),
-      compileStatus: sourceChanged ? 'STALE' : test.compileStatus,
-      currentCandidateRevisionId: sourceChanged ? null : test.currentCandidateRevisionId,
-    };
-    created = [updated, ...created.filter((candidate) => candidate.id !== updated.id)];
-    return HttpResponse.json(updated);
-  }),
+  // `GET /tests/{id}`, `POST /tests` and `PUT /tests/{id}` are `createAuthoringHandlers`' alone
+  // (STUDIO-OBS-008 inherited item g1): the one v2 contract, with no v1 route to fall through to.
 
   http.delete(`${BASE}/tests/:id`, ({ params }) => {
     created = created.filter((candidate) => candidate.id !== params.id);
@@ -436,60 +412,24 @@ export const studioHandlers = [
     return new HttpResponse(null, { status: 204 });
   }),
 
-  http.post(`${BASE}/tests/:id/compile`, ({ params }) => {
-    const test =
-      readable(allTests()).find((candidate) => candidate.id === params.id) ?? reviewDraft(params.id);
+  http.post(`${BASE}/tests/:id/validate-variables`, async ({ params, request }) => {
+    const test = readable(allTests()).find((candidate) => candidate.id === params.id);
     if (!test) {
-      return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
+      // An unknown id and an unreadable CSI answer the same refusal (`GET /tests/{id}`'s rule).
+      return HttpResponse.json(STUDIO_FORBIDDEN_BODY, { status: 403 });
     }
-    // The `202` means the attempt was started, never that it will succeed: pool saturation and
-    // gateway failure surface asynchronously as `compileStatus: STALE` (§4.3).
-    return HttpResponse.json(
-      {
-        compileRequestId: crypto.randomUUID(),
-        compileStatus: 'COMPILING',
-        sourceRevision: test.sourceRevision,
-        configurationRevision: test.configurationRevision,
-      },
-      { status: 202 },
-    );
-  }),
-
-  http.post(`${BASE}/tests/:id/confirm-compile`, async ({ params, request }) => {
-    const test =
-      readable(allTests()).find((candidate) => candidate.id === params.id) ?? reviewDraft(params.id);
-    if (!test) {
-      return badRequest('BAD_REQUEST', `UI Test not found: ${params.id}`);
+    const text = await request.text();
+    let body: { variables?: unknown } | null = null;
+    try {
+      body = text ? (JSON.parse(text) as { variables?: unknown }) : null;
+    } catch {
+      return badRequest('BAD_REQUEST', 'The request body is not valid JSON');
     }
-    const body = (await request.json()) as Partial<ConfirmCompileRequest> | null;
-    // The server's transaction is conditional on all four, so the mock refuses a body that is
-    // short of them rather than teaching the UI that three will do (§4.2, §8.3).
-    const missing = (['revisionId', 'artifactHash', 'sourceRevision', 'configurationRevision'] as const)
-      .filter((field) => body?.[field] === undefined || body?.[field] === null);
-    if (missing.length > 0) {
-      return badRequest('BAD_REQUEST', `confirm-compile requires ${missing.join(', ')}`);
-    }
-    if (test.compileStatus !== 'AWAITING_CONFIRMATION') {
-      return conflict('STALE_CANDIDATE');
-    }
-    if (
-      body!.revisionId !== test.currentCandidateRevisionId ||
-      body!.sourceRevision !== test.sourceRevision ||
-      body!.configurationRevision !== test.configurationRevision
-    ) {
-      return conflict('STALE_CANDIDATE');
-    }
-    const confirmed: TestDto = {
-      ...test,
-      compileStatus: 'READY',
-      confirmedRevisionId: test.currentCandidateRevisionId,
-      confirmedRevisionArtifactHash: test.currentCandidateArtifactHash ?? null,
-      confirmedRevisionArtifact: test.currentCandidateArtifact ?? null,
-      compileError: null,
-      compileDiagnostics: null,
-    };
-    created = [confirmed, ...created.filter((candidate) => candidate.id !== confirmed.id)];
-    return HttpResponse.json(confirmed);
+    const supplied =
+      body?.variables && typeof body.variables === 'object' && !Array.isArray(body.variables)
+        ? (body.variables as Record<string, unknown>)
+        : {};
+    return HttpResponse.json(validateVariableReferences(test, supplied));
   }),
 
   http.post(`${BASE}/tests/:id/execute`, ({ params, request }) => {
@@ -506,17 +446,16 @@ export const studioHandlers = [
       return HttpResponse.json(STUDIO_FORBIDDEN_BODY, { status: 403 });
     }
     /*
-     * Story 10.11a — the mock refuses an unconfirmed draft, because the server does.
+     * Story 10.11a — the mock refuses a draft the server would refuse.
      *
-     * Story 10.8's AC-26 makes the server-side readiness gate unconditional, and a mock that
-     * accepts what the server refuses teaches the UI that the client's own opinion is the gate.
-     * That is the exact defect this story removes from the page, so leaving it in the mock would
-     * leave the lesson in place. The lifecycle codes are not folded in here for the reason the
-     * document gives: `COMPILE_REQUIRED` tells an author to confirm a candidate, which is work a
-     * deleted or quarantined draft would refuse too.
+     * The server-side readiness gate is unconditional, and a mock that accepts what the server
+     * refuses teaches the UI that the client's own opinion is the gate. Only `READY` replays
+     * (ADR-SC-005); every other readiness answers `409 LEARN_REQUIRED`. The lifecycle codes are not
+     * folded in here for the reason the document gives: `LEARN_REQUIRED` tells an author to run a
+     * guided session, which is work a deleted or quarantined draft would refuse too.
      */
-    if (test.compileStatus !== 'READY') {
-      return HttpResponse.json(executeConflictResponse('COMPILE_REQUIRED'), { status: 409 });
+    if (test.readiness !== 'READY') {
+      return HttpResponse.json(executeConflictResponse(LEARN_REQUIRED_CONFLICT_CODE), { status: 409 });
     }
     const key = request.headers.get('Idempotency-Key');
     if (key && idempotency.has(key)) {
@@ -634,6 +573,22 @@ export const studioHandlers = [
     ),
   ),
 
+  /**
+   * `GET /guided-sessions/{id}/video` (`getGuidedSessionVideo`). The recording is the same fixture
+   * bytes and the same status, range and refusal rules as the execution video; a session the mirror
+   * never started, like an unreadable one, answers `403 STUDIO_FORBIDDEN`. The guided mirror's
+   * `result.evidence.video.status` is what a client checks before it builds this path, so this
+   * route serves the recording for every session it knows (a mirror simplification: it does not
+   * re-derive `404`/`410` from the scenario).
+   */
+  http.get(`${BASE}/guided-sessions/:id/video`, ({ params, request }) => {
+    const sessionId = String(params.id);
+    const known = [...allTests(), ...readinessDrafts].some((test) =>
+      guidedSessionsForTest(test.id).includes(sessionId));
+    const recorded = mockExecutions.find((execution) => execution.video.status === 'AVAILABLE');
+    return serveExecutionVideo(known && recorded ? { ...recorded, executionId: sessionId } : undefined, request);
+  }),
+
   http.get(`${BASE}/executions`, ({ request }) => {
     const url = new URL(request.url);
     const params = url.searchParams;
@@ -676,17 +631,5 @@ export const studioHandlers = [
     return HttpResponse.json(paginate(items, url));
   }),
 ];
-
-/** The canonical engine is the only one that reaches a draft; see architecture §8.3. */
-function rejectUnsupportedEngine(body: TestRequest) {
-  const browser = body.configuration?.browser;
-  if (browser && browser !== 'chromium') {
-    return badRequest(
-      'INVALID_CONFIGURATION',
-      `browser '${browser}' is not supported; the canonical engine is 'chromium'`,
-    );
-  }
-  return null;
-}
 
 export default studioHandlers;

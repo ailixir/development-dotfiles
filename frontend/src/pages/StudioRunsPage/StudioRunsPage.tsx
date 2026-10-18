@@ -36,7 +36,7 @@ import { useStudioRuns } from '@/components/studio/runs/useStudioRuns';
 import { useLiveRunsRefresh } from '@/components/studio/runs/useLiveRunsRefresh';
 import { RunRow } from '@/components/studio/runs/RunRow';
 import { RunDetailsDrawer } from '@/components/studio/runs/RunDetailsDrawer';
-import { copyText, runDetailsPath, runsListPath, studioTestPath, studioTestsPath } from '@/components/studio/runs/runLinks';
+import { copyText, runDetailsPath, runsListPath, studioTestPath } from '@/components/studio/runs/runLinks';
 import { isActiveRunStatus } from '@/components/studio/runs/runSnapshots';
 
 export const RUNS_PAGE_SIZE = 25;
@@ -127,7 +127,7 @@ const StudioRunsPage: React.FC = () => {
     <Box>
       <StudioListLayout
         title="Runs"
-        description="Browser test results, live progress and recordings."
+        description="Browser test results, live progress and recordings"
         icon={<Movie aria-hidden="true" />}
         action={
           <>
@@ -169,7 +169,7 @@ const StudioRunsPage: React.FC = () => {
         onRefresh={() => { void reload(); }}
         emptyTitle={filterActive ? 'No matching runs' : 'No runs yet'}
         emptyMessage={filterActive ? 'No runs match your filters.' : 'Run a test from the Studio editor and its result appears here.'}
-        emptyAction={filterActive ? undefined : { label: 'Go to tests', onClick: () => navigate(studioTestsPath(listPath)) }}
+        emptyAction={filterActive ? undefined : { label: 'Create Test', onClick: () => setCreateOpen(true) }}
         hasActiveFilters={list.hasActiveFilters}
         onClearFilters={list.clearAll}
         count={totalElements}

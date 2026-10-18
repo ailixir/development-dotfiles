@@ -24,7 +24,7 @@ import { STUDIO_TEST_ENVIRONMENTS } from './testListPresentation';
  * the latest, so a slow earlier response can never overwrite a newer one.
  */
 
-export const TESTS_PAGE_SIZE = 10;
+export const TESTS_PAGE_SIZE = 25;
 
 export type TestListFilters = {
   lastRun: '' | TestLastRunFilter;

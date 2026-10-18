@@ -3,7 +3,7 @@ import { CssBaseline, ThemeProvider } from '@mui/material';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, onTestFailed } from 'vitest';
 import SplunkPrototypePage from './SplunkPrototypePage';
 
 const renderPage = () =>
@@ -126,24 +126,43 @@ describe('SplunkPrototypePage', () => {
   }, SLOW);
 
   it('combines thresholds across columns', async () => {
-    const user = userEvent.setup();
+    const startedAt = performance.now();
+    const stages: [number, number][] = [];
+    const stage = (ordinal: number) => {
+      if (stages.length < 10) stages.push([ordinal, Math.floor(performance.now() - startedAt)]);
+    };
+    onTestFailed(() => {
+      console.info('OBS007_SPLUNK_COMBINE_STAGE', JSON.stringify(stages));
+    });
+    const user = userEvent.setup({ skipHover: true });
     renderPage();
+    stage(1);
     await goToConfig(user);
 
+    stage(2);
     await user.click(screen.getByRole('button', { name: /Metrics/i }));
+    stage(3);
     await user.click(screen.getByRole('button', { name: /CPU \+ memory by host/i }));
+    stage(4);
     await user.click(screen.getByRole('button', { name: /Run query/i }));
 
-    await user.click(await screen.findByRole('button', { name: /Add threshold on avg\(cpu_pct\)/i }));
+    stage(5);
+    const cpuThreshold = await screen.findByRole('button', { name: /Add threshold on avg\(cpu_pct\)/i });
+    stage(6);
+    await user.click(cpuThreshold);
+    stage(7);
     await user.click(screen.getByRole('button', { name: /Add threshold on avg\(mem_pct\)/i }));
 
+    stage(8);
     expect(
       screen.getByText(
         'PASS if every row has avg(cpu_pct) < 100 and avg(mem_pct) < 75 over the last 15m',
       ),
     ).toBeInTheDocument();
 
+    stage(9);
     await user.click(screen.getByRole('button', { name: /^and$/i }));
+    stage(10);
     expect(
       screen.getByText(
         'PASS if every row has avg(cpu_pct) < 100 or avg(mem_pct) < 75 over the last 15m',

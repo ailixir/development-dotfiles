@@ -9,7 +9,8 @@ import path from 'node:path';
 import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft } from '@/services/mocks/studio/compileFixtures';
+import { fixtureDetail } from '@/services/mocks/studio/authoringState';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import {
   TERMINAL_EVIDENCE_PROCESSING,
   TERMINAL_EVIDENCE_SETTLED,
@@ -51,7 +52,7 @@ function serveDraft() {
     http.get(`${STUDIO_BASE}/tests`, () =>
       HttpResponse.json({ data: [readyDraft], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
-    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(readyDraft)),
+    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(readyDraft))),
     http.post(`${STUDIO_BASE}/tests/:id/execute`, () =>
       HttpResponse.json(
         { executionId: TERMINAL_EVIDENCE_SETTLED.executionId, status: 'PENDING' },
@@ -124,7 +125,7 @@ describe('AC-21: the page has exactly one playback path', () => {
       </Provider>,
     );
     await screen.findByRole('button', { name: 'Run Test' });
-    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Proof', 'Logs', 'Code']);
+    expect(screen.getAllByRole('tab').map((tab) => tab.textContent)).toEqual(['Proof', 'Logs']);
     expect(screen.getByRole('tab', { name: 'Proof' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.queryByRole('tab', { name: 'Run' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Change…' })).toBeNull();

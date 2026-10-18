@@ -6,8 +6,8 @@ import { MemoryRouter, useLocation } from 'react-router-dom';
 import { delay, http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft } from '@/services/mocks/studio/compileFixtures';
-import type { CompileStatus, TestDto, TestRequest } from '@/types/studio/studioTypes';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
+import type { TestDto, TestReadiness, TestRequest } from '@/types/studio/studioTypes';
 import { CREATE_ERRORS, DELETE_ERRORS } from '@/components/studio/tests/testErrors';
 import { store } from '@/store';
 import StudioTestsPage from './StudioTestsPage';
@@ -106,7 +106,7 @@ describe('Tests page — server list', { timeout: 15_000 }, () => {
       environment: 'UAT',
       sort: 'updatedAt,desc',
       page: '0',
-      size: '10',
+      size: '25',
     });
     expect(screen.getByText('CSI: 178672')).toBeInTheDocument();
     expect(screen.getByText('Env: UAT')).toBeInTheDocument();
@@ -114,7 +114,7 @@ describe('Tests page — server list', { timeout: 15_000 }, () => {
 
   it('restores search, filters, sort and page from the URL and sends them', async () => {
     serve(() => ({ data: [makeTest('eleven')], totalElements: 11, totalPages: 2 }));
-    renderPage('/checks/studio/tests?q=login&lastRun=FAILED&environment=Staging&sort=name,asc&page=2');
+    renderPage('/checks/studio/tests?q=login&lastRun=FAILED&environment=Staging&sort=name,asc&page=2&size=10');
 
     await screen.findByRole('link', { name: 'Test eleven' }, WAIT);
     expect(Object.fromEntries(lastRequest())).toEqual({
@@ -125,7 +125,7 @@ describe('Tests page — server list', { timeout: 15_000 }, () => {
       page: '1',
       size: '10',
     });
-    expect(screen.getByRole('textbox', { name: 'Search ui tests' })).toHaveValue('login');
+    expect(screen.getByRole('textbox', { name: 'Search tests' })).toHaveValue('login');
     expect(screen.getByText('11–11 of 11')).toBeInTheDocument();
     expect(screen.getByRole('columnheader', { name: /Test/ })).toHaveAttribute('aria-sort', 'ascending');
   });
@@ -135,7 +135,7 @@ describe('Tests page — server list', { timeout: 15_000 }, () => {
     renderPage();
     await screen.findByRole('link', { name: 'Test one' }, WAIT);
 
-    await user.click(screen.getByRole('textbox', { name: 'Search ui tests' }));
+    await user.click(screen.getByRole('textbox', { name: 'Search tests' }));
     await user.paste('checkout');
 
     await waitFor(() => expect(lastRequest().get('q')).toBe('checkout'), WAIT);
@@ -232,14 +232,13 @@ describe('Tests page — rows', { timeout: 15_000 }, () => {
     expect(within(row).getByText('Development')).toBeInTheDocument();
   });
 
-  it.each<[CompileStatus, string]>([
-    ['READY', 'Ready to run'],
-    ['AWAITING_CONFIRMATION', 'Needs confirmation'],
-    ['COMPILING', 'Translating'],
-    ['NEEDS_REVISION', 'Needs changes'],
-    ['STALE', 'Not translated'],
-  ])('labels readiness %s as "%s"', async (compileStatus, label) => {
-    serve(() => ({ data: [makeTest('one', { compileStatus })] }));
+  it.each<[TestReadiness, string]>([
+    ['READY', 'Learned · ready to repeat'],
+    ['UNLEARNED', 'Not learned yet'],
+    ['LEARNING', 'Learning'],
+    ['NEEDS_RELEARN', 'Steps changed'],
+  ])('labels readiness %s as "%s"', async (readiness, label) => {
+    serve(() => ({ data: [makeTest('one', { readiness })] }));
     renderPage();
 
     expect(await screen.findByTestId('readiness-one', {}, WAIT)).toHaveTextContent(label);

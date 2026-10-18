@@ -6,6 +6,13 @@ import { parse as parseYaml } from 'yaml';
 /**
  * Story 10.11c AC-32 — a Class C escalation, carried as a live contract test and **committed red**.
  *
+ * **Closed by ADR-SC-005 / STUDIO-OBS-012A, recorded by STUDIO-OBS-012B.** The single path removed
+ * the candidate revision from `TestDto`, and the confirmed revision's hash and artifact are read
+ * with the draft (`confirmedRevisionArtifactHash`, `confirmedRevisionArtifact`). The two assertions
+ * below went green with no edit; only the guard that named the retired candidate identifier was
+ * re-pointed to the one identifier the surface still publishes. The history below is kept as it
+ * was written.
+ *
  * ADR-002 §12: *"A story that finds a divergence it may not fix leaves the contract test failing
  * and refers the question."* §19 narrows who holds the diff, never who decides. This story
  * **proposes nothing and amends nothing here**: it lands ADR-002 §21's authorized shape and
@@ -61,13 +68,69 @@ const openapi = parseYaml(fs.readFileSync(path.join(SPEC_DIR, 'openapi.yaml'), '
 
 const TAG = 'tests';
 
-function resolveRef(ref: string): Record<string, unknown> {
-  const segments = ref.replace(/^#\//, '').split('/');
-  let node: Record<string, unknown> = openapi;
-  for (const segment of segments) {
-    node = node[segment] as Record<string, unknown>;
+/**
+ * A document a `$ref` can point into, and where it lives: a ref inside a loaded file is relative to
+ * that file, so the file travels with every step of the walk.
+ */
+interface RefContext {
+  readonly doc: unknown;
+  readonly file: string;
+}
+
+const ROOT: RefContext = { doc: openapi, file: path.join(SPEC_DIR, 'openapi.yaml') };
+const loaded = new Map<string, unknown>();
+
+/**
+ * The v3 contract schemas reference one another by absolute `$id` URL as well as by relative path.
+ * Both name the same file, so the URL is mapped to it through the files' own `$id`s.
+ */
+const V3_DIR = path.resolve(SPEC_DIR, '../studio-observed-authoring/contracts/v3');
+let fileById: Map<string, string> | null = null;
+function fileForId(id: string): string {
+  if (fileById === null) {
+    fileById = new Map();
+    for (const name of fs.readdirSync(V3_DIR).filter((entry) => entry.endsWith('.schema.json'))) {
+      const file = path.join(V3_DIR, name);
+      const schemaId = (JSON.parse(fs.readFileSync(file, 'utf8')) as { $id?: string }).$id;
+      if (schemaId) fileById.set(schemaId, file);
+    }
   }
-  return node;
+  const file = fileById.get(id);
+  if (!file) throw new Error(`$ref ${id} names no v3 contract schema`);
+  return file;
+}
+
+/** Loaded once per file, so the `seen` cycle guard compares the same objects on every visit. */
+function loadDocument(file: string): unknown {
+  if (!loaded.has(file)) {
+    const text = fs.readFileSync(file, 'utf8');
+    loaded.set(file, /\.ya?ml$/u.test(file) ? parseYaml(text) : JSON.parse(text));
+  }
+  return loaded.get(file);
+}
+
+/**
+ * Follows a local (`#/components/...`) or cross-file (`../x/y.schema.json#/definitions/Z`) ref. The
+ * file part is relative to the referring document; the returned context is the target's, so refs
+ * inside it resolve against it.
+ */
+function resolveRef(ref: string, from: RefContext = ROOT): { node: Record<string, unknown>; context: RefContext } {
+  const [filePart, fragment = ''] = ref.split('#');
+  const context: RefContext =
+    filePart === ''
+      ? from
+      : (() => {
+          const file = /^https?:/u.test(filePart)
+            ? fileForId(filePart)
+            : path.resolve(path.dirname(from.file), filePart);
+          return { doc: loadDocument(file), file };
+        })();
+  const segments = fragment.split('/').filter((segment) => segment !== '');
+  let node = context.doc as Record<string, unknown>;
+  for (const segment of segments) {
+    node = node[segment.replace(/~1/gu, '/').replace(/~0/gu, '~')] as Record<string, unknown>;
+  }
+  return { node, context };
 }
 
 /** Every property name reachable from a schema, following `$ref`, `items`, and composition. */
@@ -75,6 +138,7 @@ function reachableProperties(
   schema: unknown,
   seen: Set<unknown> = new Set(),
   found: Set<string> = new Set(),
+  context: RefContext = ROOT,
 ): Set<string> {
   if (!schema || typeof schema !== 'object' || seen.has(schema)) {
     return found;
@@ -83,21 +147,22 @@ function reachableProperties(
   const node = schema as Record<string, unknown>;
 
   if (typeof node.$ref === 'string') {
-    return reachableProperties(resolveRef(node.$ref), seen, found);
+    const target = resolveRef(node.$ref, context);
+    return reachableProperties(target.node, seen, found, target.context);
   }
   if (node.properties && typeof node.properties === 'object') {
     for (const [name, child] of Object.entries(node.properties as Record<string, unknown>)) {
       found.add(name);
-      reachableProperties(child, seen, found);
+      reachableProperties(child, seen, found, context);
     }
   }
   for (const key of ['items', 'additionalProperties']) {
-    reachableProperties(node[key], seen, found);
+    reachableProperties(node[key], seen, found, context);
   }
   for (const key of ['allOf', 'anyOf', 'oneOf']) {
     const branches = node[key];
     if (Array.isArray(branches)) {
-      branches.forEach((branch) => reachableProperties(branch, seen, found));
+      branches.forEach((branch) => reachableProperties(branch, seen, found, context));
     }
   }
   return found;
@@ -177,12 +242,13 @@ describe('ADR-002 §12 escalation: a revision a client may act on must have a re
 
     expect(readable.size, 'the tests surface returns almost nothing; re-check this guard')
       .toBeGreaterThan(10);
-    expect(revisions.length, 'the tests surface no longer publishes two revision identifiers')
-      .toBeGreaterThanOrEqual(2);
+    expect(revisions.length, 'the tests surface no longer publishes a revision identifier')
+      .toBeGreaterThanOrEqual(1);
     // Named, because an escalation that cannot say what it is about is one nobody acts on. This
-    // is the escalation's *subject*, not a derived expectation.
+    // is the escalation's *subject*, not a derived expectation. The candidate identifier left the
+    // surface with the single path (ADR-SC-005).
     expect(revisions).toContain('confirmedRevisionId');
-    expect(revisions).toContain('currentCandidateRevisionId');
+    expect(revisions).not.toContain('currentCandidateRevisionId');
   });
 
   it('the capitalized-suffix qualification is live, not dead code', () => {

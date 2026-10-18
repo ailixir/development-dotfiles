@@ -13,10 +13,10 @@
 import {
   defaultConfiguration,
   type ExecutionSnapshot,
-  type SourceArtifact,
   type TestDto,
 } from '@/types/studio/studioTypes';
 import { DEMO_CSIS } from './demoFixtures';
+import publicationFixtures from '../../../../../docs/specs/studio-observed-authoring/contracts/v3/publication-fixtures.json';
 
 /**
  * The CSIs the mock principal may read. Anything else must stay invisible. `60406` holds the
@@ -43,26 +43,21 @@ export const OTHER_CSI = '60499';
 
 const VIDEO_PATH = (executionId: string) => `/api/v1/studio/executions/${executionId}/video`;
 
-export const mockArtifact: SourceArtifact = {
-  version: 1,
-  steps: [
-    {
-      stepIndex: 0,
-      originalText: 'Go to "https://www.citi.com"',
-      code: "await page.goto('https://www.citi.com');",
-    },
-    {
-      stepIndex: 1,
-      originalText: 'Click "Sign On"',
-      code: "await page.getByRole('button', { name: 'Sign On' }).click();",
-    },
-    {
-      stepIndex: 2,
-      originalText: 'Check that the URL contains "dashboard"',
-      code: 'await expect(page).toHaveURL(/dashboard/);',
-    },
-  ],
-};
+/**
+ * The published observed artifact the confirmed fixtures carry. Derived from the v3 contract's own
+ * example (`contracts/v3/publication-fixtures.json#/artifact`), never hand-written: its normative
+ * schema is `contracts/v3/replay-artifact.schema.json`, which `openapi.yaml` names for
+ * `TestDto.confirmedRevisionArtifact` and `studioContract.test.ts` validates every non-null fixture
+ * against (PO ruling 2026-10-13, STUDIO-OBS-012B).
+ */
+export const CONFIRMED_REVISION_ARTIFACT: Record<string, unknown> = publicationFixtures.artifact;
+
+/** The contract fixture's English steps, in order; the execution fixtures quote them per step. */
+export const MOCK_STEPS: readonly string[] = [
+  'Go to "https://www.citi.com"',
+  'Click "Sign On"',
+  'Check that the URL contains "dashboard"',
+];
 
 const mockTestsUnordered: TestDto[] = [
   {
@@ -71,14 +66,10 @@ const mockTestsUnordered: TestDto[] = [
     description: 'Verifies the login page still accepts the pilot account',
     csiId: '60406',
     environment: 'Production',
-    steps: [
-      'Go to "https://www.citi.com"',
-      'Click "Sign On"',
-      'Check that the URL contains "dashboard"',
-    ],
+    steps: [...MOCK_STEPS],
     variables: [
       { name: 'USER_ID', kind: 'plain', value: 'pilot-user' },
-      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'vault://studio/pilot-pw' },
+      { name: 'LOGIN_PW', kind: 'secretRef', secretId: 'LOGIN_PW' },
     ],
     configuration: defaultConfiguration(),
     status: 'PAUSED',
@@ -90,18 +81,16 @@ const mockTestsUnordered: TestDto[] = [
     lastRunStatus: 'PASSED',
     sourceRevision: 3,
     configurationRevision: 1,
-    compileStatus: 'READY',
-    currentCandidateRevisionId: '22222222-2222-2222-2222-222222222222',
-    currentCandidateArtifactHash: 'a'.repeat(64),
-    currentCandidateArtifact: mockArtifact,
+    readiness: 'READY',
+    firstChangedStepId: null,
     confirmedRevisionId: '22222222-2222-2222-2222-222222222222',
     confirmedRevisionArtifactHash: 'a'.repeat(64),
-    confirmedRevisionArtifact: mockArtifact,
+    confirmedRevisionArtifact: CONFIRMED_REVISION_ARTIFACT,
   },
   {
     id: '11111111-1111-1111-1111-111111111112',
     name: 'Statements download',
-    description: 'A draft that has been edited since its last confirmation',
+    description: 'A draft that has been edited since its steps were learned',
     csiId: '60406',
     environment: 'Staging',
     steps: ['Go to "https://www.citi.com/statements"'],
@@ -116,13 +105,13 @@ const mockTestsUnordered: TestDto[] = [
     lastRunStatus: null,
     sourceRevision: 5,
     configurationRevision: 2,
-    compileStatus: 'STALE',
-    currentCandidateRevisionId: null,
+    // The server reports `NEEDS_RELEARN` only from STUDIO-OBS-015; until then an edited draft
+    // with a published revision is `UNLEARNED`.
+    readiness: 'UNLEARNED',
+    firstChangedStepId: null,
     confirmedRevisionId: '22222222-2222-2222-2222-222222222223',
     confirmedRevisionArtifactHash: 'b'.repeat(64),
-    confirmedRevisionArtifact: { version: 1, steps: [
-      {stepIndex:0,originalText:'Open the previously confirmed statement page',code:"await page.goto('https://www.citi.com/previous-statements');"},
-    ]},
+    confirmedRevisionArtifact: CONFIRMED_REVISION_ARTIFACT,
   },
   {
     // Belongs to a CSI the mock principal cannot read. No list handler may ever return it.
@@ -143,8 +132,8 @@ const mockTestsUnordered: TestDto[] = [
     lastRunStatus: null,
     sourceRevision: 1,
     configurationRevision: 1,
-    compileStatus: 'STALE',
-    currentCandidateRevisionId: null,
+    readiness: 'UNLEARNED',
+    firstChangedStepId: null,
     confirmedRevisionId: null,
   },
 ];
@@ -187,9 +176,9 @@ export const mockExecutions: ExecutionSnapshot[] = [
     startedAt: null,
     endedAt: null,
     durationMs: null,
-    stepResults: mockArtifact.steps.map((step) => ({
-      stepIndex: step.stepIndex,
-      originalText: step.originalText,
+    stepResults: MOCK_STEPS.map((originalText, stepIndex) => ({
+      stepIndex,
+      originalText,
       status: 'PENDING' as const,
       offsetMs: null,
       durationMs: null,
@@ -217,7 +206,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
     stepResults: [
       {
         stepIndex: 0,
-        originalText: mockArtifact.steps[0].originalText,
+        originalText: MOCK_STEPS[0],
         status: 'PASS',
         offsetMs: 120,
         durationMs: 1840,
@@ -225,7 +214,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
       },
       {
         stepIndex: 1,
-        originalText: mockArtifact.steps[1].originalText,
+        originalText: MOCK_STEPS[1],
         status: 'RUNNING',
         offsetMs: 1960,
         durationMs: null,
@@ -233,7 +222,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
       },
       {
         stepIndex: 2,
-        originalText: mockArtifact.steps[2].originalText,
+        originalText: MOCK_STEPS[2],
         status: 'PENDING',
         offsetMs: null,
         durationMs: null,
@@ -261,9 +250,9 @@ export const mockExecutions: ExecutionSnapshot[] = [
     startedAt: '2026-09-10T10:00:02Z',
     endedAt: '2026-09-10T10:00:39Z',
     durationMs: 37000,
-    stepResults: mockArtifact.steps.map((step, index) => ({
-      stepIndex: step.stepIndex,
-      originalText: step.originalText,
+    stepResults: MOCK_STEPS.map((originalText, index) => ({
+      stepIndex: index,
+      originalText,
       status: 'PASS' as const,
       offsetMs: 120 + index * 12000,
       durationMs: 12000,
@@ -303,7 +292,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
     stepResults: [
       {
         stepIndex: 0,
-        originalText: mockArtifact.steps[0].originalText,
+        originalText: MOCK_STEPS[0],
         status: 'PASS',
         offsetMs: 110,
         durationMs: 1700,
@@ -311,7 +300,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
       },
       {
         stepIndex: 1,
-        originalText: mockArtifact.steps[1].originalText,
+        originalText: MOCK_STEPS[1],
         status: 'FAIL',
         offsetMs: 1810,
         durationMs: 30000,
@@ -320,7 +309,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
       // Everything after the first failure is skipped, with null timings and no seek.
       {
         stepIndex: 2,
-        originalText: mockArtifact.steps[2].originalText,
+        originalText: MOCK_STEPS[2],
         status: 'SKIPPED',
         offsetMs: null,
         durationMs: null,
@@ -361,7 +350,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
     stepResults: [
       {
         stepIndex: 0,
-        originalText: mockArtifact.steps[0].originalText,
+        originalText: MOCK_STEPS[0],
         status: 'PASS',
         offsetMs: 100,
         durationMs: 1500,
@@ -369,7 +358,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
       },
       {
         stepIndex: 1,
-        originalText: mockArtifact.steps[1].originalText,
+        originalText: MOCK_STEPS[1],
         status: 'RUNNING',
         offsetMs: 1600,
         durationMs: null,
@@ -377,7 +366,7 @@ export const mockExecutions: ExecutionSnapshot[] = [
       },
       {
         stepIndex: 2,
-        originalText: mockArtifact.steps[2].originalText,
+        originalText: MOCK_STEPS[2],
         status: 'SKIPPED',
         offsetMs: null,
         durationMs: null,

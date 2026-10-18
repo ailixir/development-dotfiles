@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
-  PRODUCTION_ALPHA_TEMPLATES,
   QUICK_START_TEMPLATES,
   TEMPLATE_STEP_PREFIXES,
+  availableQuickStartTemplates,
   referencedNames,
 } from './quickStartTemplates';
 
@@ -13,13 +13,30 @@ import {
  * and the reference rule that rejected the previous `<secret sec_abc123>` template.
  */
 describe('quick start templates', () => {
-  it('the production alpha exposes no template that requires Vault secrets', () => {
-    expect(PRODUCTION_ALPHA_TEMPLATES).not.toHaveLength(0);
-    expect(
-      PRODUCTION_ALPHA_TEMPLATES.flatMap((template) => template.variables).some(
-        (variable) => variable.type === 'secret',
-      ),
-    ).toBe(false);
+  // STUDIO-OBS-008 AC-5 / GA C-7: secret templates follow the server capability, never a build flag.
+  it('with secrets unavailable, offers no template that declares or references a secret', () => {
+    const offered = availableQuickStartTemplates(false);
+    expect(offered).not.toHaveLength(0);
+    expect(offered.flatMap((template) => template.variables).some((variable) => variable.type === 'secret')).toBe(false);
+    for (const template of offered) {
+      expect(referencedNames(template).secrets, template.id).toEqual([]);
+      expect(template.steps.join('\n')).not.toMatch(/<secret\s/u);
+    }
+    expect(offered.map((template) => template.id)).not.toContain('daily-sign-on');
+  });
+
+  it('with secrets available, offers every template, the sign-on check included', () => {
+    const offered = availableQuickStartTemplates(true);
+    expect(offered).toEqual(QUICK_START_TEMPLATES);
+    expect(offered.map((template) => template.id)).toContain('daily-sign-on');
+  });
+
+  it('carries no struck secret-fill copy (ruling A2)', () => {
+    for (const template of QUICK_START_TEMPLATES) {
+      for (const text of [template.title, template.purpose, ...template.steps]) {
+        expect(text).not.toMatch(/password box/iu);
+      }
+    }
   });
 
   it('offers three distinct templates', () => {
@@ -55,8 +72,8 @@ describe('quick start templates', () => {
     (_title, template) => {
       for (const step of template.steps) {
         if (!/<secret\s/u.test(step)) continue;
-        // The runner permits `vars.secret(...)` in exactly one argument position: the value of
-        // `fill`. A secret named anywhere but a "Type ..." line cannot compile.
+        // A secret is only ever typed into a field: the value of `fill`. A secret named anywhere
+        // but a "Type ..." line has no place to go.
         expect(step.startsWith('Type '), `secret outside a typed value: ${step}`).toBe(true);
       }
     },

@@ -1,5 +1,6 @@
 import SecretInput from '@/components/studio/SecretInput';
-import { STUDIO_CAPABILITIES } from '@/utils/config/studioCapabilities';
+import { secretsUnavailableText } from '@/components/studio/references';
+import { useStudioCapabilities, vaultSecretsEnabled } from '@/utils/config/studioCapabilities';
 import { Delete } from '@mui/icons-material';
 import {
   Alert,
@@ -22,12 +23,34 @@ import {
 } from '@mui/material';
 import React, { useState } from 'react';
 
+/** One check-level parameter row. A `secret` row carries the secret's Vault name, never a value. */
+interface UiVariable {
+  kind?: string;
+  value?: unknown;
+  secretId?: string;
+}
+
+/** The wizard's form state, as far as this step reads it. The page owns the rest. */
+interface UiTestFormData {
+  uiTestId?: unknown;
+  uiVariables?: unknown;
+  [field: string]: unknown;
+}
+
 interface UiTestConfigProps {
-  formData: any;
-  onChange: (field: string, value: any) => void;
+  formData: UiTestFormData;
+  onChange: (field: string, value: unknown) => void;
   availableTests: Array<{ id: string; name: string }>;
   onValidateVariables: () => void;
 }
+
+const asVariables = (value: unknown): Record<string, UiVariable> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value)
+    ? (value as Record<string, UiVariable>)
+    : {};
+
+/** Shown in a secret row while secrets are unavailable and no Studio test is selected yet. */
+const NO_STUDIO_TEST_HINT = 'Select a Studio test first';
 
 const UiTestConfig: React.FC<UiTestConfigProps> = ({
   formData,
@@ -36,7 +59,13 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
   onValidateVariables,
 }) => {
   const [newVarName, setNewVarName] = useState('');
-  const uiVariables: Record<string, any> = formData.uiVariables || {};
+  const uiVariables = asVariables(formData.uiVariables);
+  const uiTestId = typeof formData.uiTestId === 'string' && formData.uiTestId !== '' ? formData.uiTestId : null;
+  // The server's per-test capability (STUDIO-OBS-008 P1): secrets are offered only on a ready
+  // `vaultSecrets: true` answer for the selected Studio test. Anything else is unavailable.
+  const capabilities = useStudioCapabilities(uiTestId);
+  const secretsOn = vaultSecretsEnabled(capabilities);
+  const secretsNotice = secretsUnavailableText(capabilities, NO_STUDIO_TEST_HINT);
 
   const handleVariableKindChange = (name: string, kind: string) => {
     const updated = {
@@ -46,7 +75,7 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
     onChange('uiVariables', updated);
   };
 
-  const handleVariableValueChange = (name: string, value: any) => {
+  const handleVariableValueChange = (name: string, value: string) => {
     const updated = {
       ...uiVariables,
       [name]: { ...(uiVariables[name] || {}), value },
@@ -54,12 +83,12 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
     onChange('uiVariables', updated);
   };
 
+  /** Writes the picked Vault name (D-8). Clearing the choice removes `secretId`; it is never null or empty. */
   const handleSecretChange = (name: string, ref: { id: string } | null) => {
-    const updated = {
-      ...uiVariables,
-      [name]: { ...(uiVariables[name] || {}), secretId: ref?.id },
-    };
-    onChange('uiVariables', updated);
+    const row: UiVariable = { ...(uiVariables[name] || {}) };
+    delete row.secretId;
+    if (ref) row.secretId = ref.id;
+    onChange('uiVariables', { ...uiVariables, [name]: row });
   };
 
   const handleDeleteVariable = (name: string) => {
@@ -86,7 +115,7 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
         <FormControl fullWidth required>
           <InputLabel>Studio Test</InputLabel>
           <Select
-            value={formData.uiTestId || ''}
+            value={uiTestId ?? ''}
             label="Studio Test"
             onChange={(e) => onChange('uiTestId', e.target.value)}
           >
@@ -115,7 +144,7 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {Object.entries(uiVariables).map(([name, v]: [string, any]) => (
+              {Object.entries(uiVariables).map(([name, v]) => (
                 <TableRow key={name} hover>
                   <TableCell>
                     <TextField size="small" fullWidth label="Name" value={name} disabled />
@@ -129,24 +158,24 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
                         <MenuItem value="plain">Plain</MenuItem>
                         <MenuItem value="number">Number</MenuItem>
                         <MenuItem value="boolean">Boolean</MenuItem>
-                        {STUDIO_CAPABILITIES.vaultSecrets && (
-                          <MenuItem value="secret">Secret</MenuItem>
+                        {(secretsOn || v?.kind === 'secret') && (
+                          <MenuItem value="secret" disabled={!secretsOn}>Secret</MenuItem>
                         )}
                       </Select>
                     </FormControl>
                   </TableCell>
                   <TableCell>
                     {v?.kind === 'secret' ? (
-                      STUDIO_CAPABILITIES.vaultSecrets ? (
+                      secretsOn ? (
                         <SecretInput
                           label="Select secret"
-                          testId={formData.uiTestId || null}
-                          disabledHint="Select a Studio test first"
+                          testId={uiTestId}
+                          disabledHint={NO_STUDIO_TEST_HINT}
                           value={v?.secretId ? { id: v.secretId } : null}
                           onChange={(ref) => handleSecretChange(name, ref)}
                         />
                       ) : (
-                        <Alert severity="info">Vault secrets are unavailable in this alpha.</Alert>
+                        <Alert severity="info">{secretsNotice}</Alert>
                       )
                     ) : (
                       <TextField
@@ -191,7 +220,9 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
                       Add variable
                     </Button>
                     <Typography variant="caption" color="text.secondary">
-                      Use in Studio steps as &lt;var NAME&gt; or &lt;secret SECRET_ID&gt;
+                      {secretsOn
+                        ? 'Use in Studio steps as <var NAME> or <secret SECRET_ID>'
+                        : 'Use in Studio steps as <var NAME>'}
                     </Typography>
                   </Stack>
                 </TableCell>
@@ -208,7 +239,7 @@ const UiTestConfig: React.FC<UiTestConfigProps> = ({
             size="small"
             variant="outlined"
             onClick={onValidateVariables}
-            disabled={!formData.uiTestId}
+            disabled={uiTestId === null}
           >
             Validate variables
           </Button>

@@ -1,20 +1,33 @@
 import React, { useEffect, useRef } from 'react';
 import { Box, Paper, Typography, Button, Fade } from '@mui/material';
+import {
+  CAPABILITIES_UNKNOWN,
+  vaultSecretsEnabled,
+  type StudioCapabilitiesState,
+} from '@/utils/config/studioCapabilities';
 
 interface OnboardingCoachProps {
   step: number;
   onNext: () => void;
   onDismiss: () => void;
+  /**
+   * The host's `useStudioCapabilities(testId)` answer. Secrets are described only when it is a ready
+   * `vaultSecrets: true` answer (STUDIO-OBS-008 AC-5, GA C-7). Absent means unknown, so secrets are
+   * not mentioned.
+   */
+  capabilities?: StudioCapabilitiesState;
 }
 
-const MESSAGES = [
+const messagesFor = (secretsAvailable: boolean) => [
   {
     title: 'Write your steps',
     body: 'Start by describing your flow in simple lines. Use actions like "Go to", "Click", "Type".',
   },
   {
     title: 'Save your checklist',
-    body: 'Save keeps your steps, environment, variables, and secure secret references together.',
+    body: secretsAvailable
+      ? 'Save keeps your steps, environment, variables, and secure secret references together.'
+      : 'Save keeps your steps, environment, and variables together.',
   },
   {
     title: 'Run and watch',
@@ -22,13 +35,19 @@ const MESSAGES = [
   },
 ];
 
-const OnboardingCoach: React.FC<OnboardingCoachProps> = ({ step, onNext, onDismiss }) => {
+const OnboardingCoach: React.FC<OnboardingCoachProps> = ({
+  step,
+  onNext,
+  onDismiss,
+  capabilities = CAPABILITIES_UNKNOWN,
+}) => {
   const anchorRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     // Imperative focus on change
     anchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, [step]);
-  const msg = MESSAGES[step] || MESSAGES[0];
+  const messages = messagesFor(vaultSecretsEnabled(capabilities));
+  const msg = messages[step] || messages[0];
   return (
     <Fade in timeout={400}>
       <Paper elevation={0} variant="outlined" sx={{ p: 2, borderStyle: 'dashed', bgcolor: 'background.paper' }}>

@@ -6,13 +6,14 @@ import { MemoryRouter } from 'react-router-dom';
 import { http, HttpResponse } from 'msw';
 import { studioMockServer } from '@/services/mocks/studio/server';
 import { resetStudioMocks } from '@/services/mocks/studio/handlers';
-import { readyDraft } from '@/services/mocks/studio/compileFixtures';
+import { fixtureDetail } from '@/services/mocks/studio/authoringState';
+import { readyDraft } from '@/services/mocks/studio/readinessFixtures';
 import { resetExecutionTransportSeam } from '@/services/api/studioTransportWiring';
 import {
   DEFAULT_STEP_TIMEOUT_SECONDS,
   defaultConfiguration,
   type TestDto,
-  type TestRequest,
+  type TestUpdateRequest,
 } from '@/types/studio/studioTypes';
 import { store } from '@/store';
 import { fetchSources } from '@/store/slices/sourcesSlice';
@@ -38,15 +39,15 @@ const bootstrapHandlers = [
 
 function serveDraft(initial: TestDto) {
   const state = { current: initial };
-  const bodies: TestRequest[] = [];
+  const bodies: TestUpdateRequest[] = [];
   studioMockServer.use(
     ...bootstrapHandlers,
     http.get(`${STUDIO_BASE}/tests`, () =>
       HttpResponse.json({ data: [state.current], page: 0, size: 20, totalElements: 1, totalPages: 1 }),
     ),
-    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(state.current)),
+    http.get(`${STUDIO_BASE}/tests/:id`, () => HttpResponse.json(fixtureDetail(state.current))),
     http.put(`${STUDIO_BASE}/tests/:id`, async ({ request }) => {
-      const body = (await request.json()) as TestRequest;
+      const body = (await request.json()) as TestUpdateRequest;
       bodies.push(body);
       // The server owns the revision; the mock stands in for it.
       state.current = {
@@ -105,7 +106,7 @@ afterAll(() => {
   studioMockServer.close();
 });
 
-async function saveAndCapture(bodies: TestRequest[]) {
+async function saveAndCapture(bodies: TestUpdateRequest[]) {
   await screen.findByRole('button', { name: 'Run Test' }, WAIT);
   await userEvent.click(screen.getByRole('button', { name: 'Save' }));
   await waitFor(() => expect(bodies).toHaveLength(1), WAIT);

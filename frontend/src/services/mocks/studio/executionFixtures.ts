@@ -1,4 +1,4 @@
-import { draftsByCompileStatus } from './compileFixtures';
+import { draftsByReadiness } from './readinessFixtures';
 import { EXECUTE_CONFLICT_NARRATIVES } from '@/components/studio/run/executeRefusals';
 import {
   EXECUTION_ERROR_CODES,
@@ -12,11 +12,11 @@ import {
  * The execution corpus story 10.11a renders, and the enumerable required set that keeps it honest
  * (AC-22).
  *
- * The pattern is story 10.10's `COMPILE_FIXTURE_MATRIX`, adopted for the same reason @po gave when
- * naming 10.10's AC-20 that story's weakest criterion: *"If the level-2 truncation fixture is never
+ * The pattern is story 10.10's fixture matrix, adopted for the same reason @po gave when naming
+ * 10.10's AC-20 that story's weakest criterion: *"If the level-2 truncation fixture is never
  * written, AC-7 does not go red; the test simply does not exist, and a green suite is
  * indistinguishable from a covered one."* Two of this story's criteria read their own enumeration
- * out of `openapi.yaml` and police themselves — AC-1's five compile states and AC-5's eight error
+ * out of `openapi.yaml` and police themselves — AC-1's readiness states and AC-5's error
  * codes. **Nothing else here does.** So the required shapes are listed below with the
  * discriminating property each exists to carry, and `executionFixtureMatrix.test.ts` asserts both
  * halves: that every entry still carries its property, and that every entry is named by the title
@@ -242,6 +242,136 @@ export const cleanlyFlushedTimeoutExecution: ExecutionSnapshot = baseSnapshot({
   video: { status: 'AVAILABLE', error: null, expiresAt: '2026-10-14T10:02:02Z', partial: false },
 });
 
+// ---------------------------------------------------------------------------------------------
+// STUDIO-OBS-008 T0 ruling A1 — the three terminal snapshots that carry a `replayFailure`.
+// ---------------------------------------------------------------------------------------------
+
+/** The runtime block the document's three `replayFailure` examples share. */
+const replayRuntime = {
+  playwright: '1.47.2',
+  chromium: '1187',
+  validator: '3:3b1f0c52d9e84a6711c0a5f2e8d4b69037a1c2e5f4d8b6a09c7e3f15d2a48b60',
+  executor: 'c8a2f6e1d0b94735a6c1e8f2d7b30954e1a6c8d2f0b74e395a1d6c8f2e0b7943',
+  image: 'studio-runner@sha256:0f1e2d3c4b5a6978',
+};
+
+/**
+ * Three snapshots, equal field for field to the document's three `getExecution` examples
+ * (`loginRequiredNoLoginSteps`, `loginRequiredLoginStepsFailed`, `targetDrift`);
+ * `studioContract.test.ts` compares them to the examples it reads from `openapi.yaml`, so a drift
+ * in either direction goes red. They are the only fixtures whose `replayFailure` is non-null.
+ *
+ * The step IDs in `replayFailure.stepId` are the fixture draft's stable IDs
+ * (`00000000-0000-4000-8000-00000000000N`), so a surface that joins `stepId` to a draft's current
+ * steps finds the step at the position `stepIndex` names.
+ */
+
+/** Terminal `FAILED` at a login wall; no earlier step of the run filled a secret. */
+export const loginRequiredNoLoginStepsExecution: ExecutionSnapshot = {
+  executionId: 'dddddddd-dddd-dddd-dddd-dddddddddddd',
+  testId: TEST_ID,
+  csiId: CSI,
+  revisionId: '22222222-2222-2222-2222-222222222222',
+  status: 'FAILED',
+  errorCode: null,
+  acceptedAt: '2026-10-10T09:00:00Z',
+  startedAt: '2026-10-10T09:00:03Z',
+  endedAt: '2026-10-10T09:00:12Z',
+  durationMs: 9000,
+  stepResults: [
+    { stepIndex: 0, originalText: 'Go to "https://app.example.test/accounts"', status: 'PASS', offsetMs: 110, durationMs: 1500, message: null },
+    { stepIndex: 1, originalText: 'Click "Account summary"', status: 'FAIL', offsetMs: 1610, durationMs: 6000, message: 'LOGIN_REQUIRED' },
+    { stepIndex: 2, originalText: 'Check that the page shows "Balance"', status: 'SKIPPED', offsetMs: null, durationMs: null, message: null },
+  ],
+  logs: [],
+  logsTruncated: false,
+  video: { status: 'AVAILABLE', error: null, expiresAt: '2026-11-09T09:00:12Z', partial: false },
+  videoPath: '/api/v1/studio/executions/dddddddd-dddd-dddd-dddd-dddddddddddd/video',
+  runtime: replayRuntime,
+  revision: 13,
+  streamComplete: true,
+  replayFailure: {
+    code: 'LOGIN_REQUIRED',
+    stepId: '00000000-0000-4000-8000-000000000002',
+    stepIndex: 1,
+    loginStepsPresent: false,
+  },
+};
+
+/** Terminal `FAILED` at a login wall after an earlier step of the run filled a secret. */
+export const loginRequiredLoginStepsFailedExecution: ExecutionSnapshot = {
+  executionId: 'eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee',
+  testId: TEST_ID,
+  csiId: CSI,
+  revisionId: '22222222-2222-2222-2222-222222222222',
+  status: 'FAILED',
+  errorCode: null,
+  acceptedAt: '2026-10-10T09:00:00Z',
+  startedAt: '2026-10-10T09:00:03Z',
+  endedAt: '2026-10-10T09:00:12Z',
+  durationMs: 9000,
+  stepResults: [
+    { stepIndex: 0, originalText: 'Go to "https://app.example.test/login"', status: 'PASS', offsetMs: 110, durationMs: 1400, message: null },
+    { stepIndex: 1, originalText: 'Fill "Password" with <secret LOGIN_PW>', status: 'PASS', offsetMs: 1510, durationMs: 900, message: null },
+    { stepIndex: 2, originalText: 'Click "Account summary"', status: 'FAIL', offsetMs: 2410, durationMs: 5200, message: 'LOGIN_REQUIRED' },
+    { stepIndex: 3, originalText: 'Check that the page shows "Balance"', status: 'SKIPPED', offsetMs: null, durationMs: null, message: null },
+  ],
+  logs: [],
+  logsTruncated: false,
+  video: { status: 'AVAILABLE', error: null, expiresAt: '2026-11-09T09:00:12Z', partial: false },
+  videoPath: '/api/v1/studio/executions/eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee/video',
+  runtime: replayRuntime,
+  revision: 14,
+  streamComplete: true,
+  replayFailure: {
+    code: 'LOGIN_REQUIRED',
+    stepId: '00000000-0000-4000-8000-000000000003',
+    stepIndex: 2,
+    loginStepsPresent: true,
+  },
+};
+
+/**
+ * Terminal `ERROR` because a learned step's target no longer matches the page. `errorCode` stays
+ * null: the cause is `replayFailure`, and the status alone would not name it.
+ */
+export const targetDriftExecution: ExecutionSnapshot = {
+  executionId: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
+  testId: TEST_ID,
+  csiId: CSI,
+  revisionId: '22222222-2222-2222-2222-222222222222',
+  status: 'ERROR',
+  errorCode: null,
+  acceptedAt: '2026-10-10T09:00:00Z',
+  startedAt: '2026-10-10T09:00:03Z',
+  endedAt: '2026-10-10T09:00:12Z',
+  durationMs: 9000,
+  stepResults: [
+    { stepIndex: 0, originalText: 'Go to "https://app.example.test/accounts"', status: 'PASS', offsetMs: 110, durationMs: 1500, message: null },
+    { stepIndex: 1, originalText: 'Click "Transfer"', status: 'FAIL', offsetMs: 1610, durationMs: 5000, message: 'TARGET_DRIFT' },
+    { stepIndex: 2, originalText: 'Check that the page shows "Confirmation"', status: 'SKIPPED', offsetMs: null, durationMs: null, message: null },
+  ],
+  logs: [],
+  logsTruncated: false,
+  video: { status: 'AVAILABLE', error: null, expiresAt: '2026-11-09T09:00:12Z', partial: false },
+  videoPath: '/api/v1/studio/executions/ffffffff-ffff-ffff-ffff-ffffffffffff/video',
+  runtime: replayRuntime,
+  revision: 15,
+  streamComplete: true,
+  replayFailure: {
+    code: 'TARGET_DRIFT',
+    stepId: '00000000-0000-4000-8000-000000000002',
+    stepIndex: 1,
+  },
+};
+
+/** The three, keyed by the name of the document example each one equals. */
+export const replayFailureExecutions = {
+  loginRequiredNoLoginSteps: loginRequiredNoLoginStepsExecution,
+  loginRequiredLoginStepsFailed: loginRequiredLoginStepsFailedExecution,
+  targetDrift: targetDriftExecution,
+} as const;
+
 export const executionCorpus: ExecutionSnapshot[] = [
   ...Object.values(errorCodeExecutions),
   passedExecution,
@@ -250,6 +380,7 @@ export const executionCorpus: ExecutionSnapshot[] = [
   logsCompleteExecution,
   partialRecordingOnPassedExecution,
   cleanlyFlushedTimeoutExecution,
+  ...Object.values(replayFailureExecutions),
 ];
 
 // ---------------------------------------------------------------------------------------------
@@ -266,7 +397,7 @@ export const executionCorpus: ExecutionSnapshot[] = [
  */
 export function executeConflictResponse(code: string): { error: string; message: string } {
   const messages: Record<string, string> = {
-    COMPILE_REQUIRED: 'The draft changed since its last confirmation',
+    LEARN_REQUIRED: 'No published revision matches the draft; run it to learn it',
     RUNTIME_INCOMPATIBLE:
       'The confirmed revision is not compatible with the current runner runtime',
     IDEMPOTENCY_KEY_REUSED:
@@ -314,7 +445,7 @@ export const DISPATCH_DISABLED_BODY = {
 
 /**
  * **VAC-18, found by @qa on this half's own matrix: a coverage matrix whose required set is an
- * editable literal.** Deleting `AWAITING_CONFIRMATION` from the list below left the whole suite
+ * editable literal.** Deleting one run-gate state from the list below left the whole suite
  * green — the `it.each` rows simply vanished, nothing read the total, and the file's own
  * `>= 20` floor sat under an actual 26, so four entries could disappear in silence. Two of the
  * three families were transcribed literals rather than reads.
@@ -322,7 +453,7 @@ export const DISPATCH_DISABLED_BODY = {
  * The repair is in `studioContract.test.ts`, where the parsed document and `assertSameSet` already
  * live: the id set below is compared **both ways** against the ids the document's own vocabularies
  * imply. The three families here are now derived from the records those vocabularies are already
- * asserted against — `draftsByCompileStatus`, `EXECUTION_ERROR_CODES` and
+ * asserted against — `draftsByReadiness`, `EXECUTION_ERROR_CODES` and
  * `EXECUTE_CONFLICT_NARRATIVES` — so a deletion here contradicts the document rather than
  * shrinking the enumeration.
  *
@@ -359,19 +490,18 @@ const timingsOf = (snapshot: ExecutionSnapshot): StepResult[] => snapshot.stepRe
 
 export const EXECUTION_FIXTURE_MATRIX: readonly RequiredExecutionFixture[] = [
   /*
-   * AC-1's five compile states. The fixtures are story 10.10's and are **referenced, not copied**
-   * — ADR-002 §18.3's rule about one mechanism rather than two, applied to a corpus. A second set
-   * of five drafts would drift from the first the moment either was edited, and the enumeration
-   * that consumes them reads the five names from `openapi.yaml` regardless.
+   * AC-1's readiness states (ADR-SC-005). The fixtures are `readinessFixtures.ts`'s and are
+   * **referenced, not copied** — ADR-002 §18.3's rule about one mechanism rather than two, applied
+   * to a corpus. The enumeration that consumes them reads the names from `openapi.yaml` regardless.
    */
-  ...Object.keys(draftsByCompileStatus).map((state) => ({
+  ...(Object.keys(draftsByReadiness) as (keyof typeof draftsByReadiness)[]).map((state) => ({
     id: `FX-RUNGATE-STATE-${state}`,
     description: `the run gate enumerated over a draft in ${state}`,
-    resolve: () => draftsByCompileStatus[state],
+    resolve: () => draftsByReadiness[state],
     satisfies: () =>
-      draftsByCompileStatus[state]?.compileStatus === state
+      draftsByReadiness[state]?.readiness === state
         ? null
-        : `no fixture carries compileStatus ${state}`,
+        : `no fixture carries readiness ${state}`,
   })),
   ...EXECUTION_ERROR_CODES.map((code) => ({
     id: `FX-ERRCODE-${code}`,
@@ -476,7 +606,7 @@ export const EXECUTION_FIXTURE_MATRIX: readonly RequiredExecutionFixture[] = [
     resolve: () => UNDECLARED_CONFLICT_BODY,
     satisfies: () =>
       [
-        'COMPILE_REQUIRED',
+        'LEARN_REQUIRED',
         'RUNTIME_INCOMPATIBLE',
         'IDEMPOTENCY_KEY_REUSED',
         'TEST_DELETED',

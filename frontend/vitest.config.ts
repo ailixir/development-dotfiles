@@ -1,4 +1,4 @@
-import { defineConfig } from 'vitest/config';
+import { configDefaults, defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
@@ -25,6 +25,8 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
+    // Playwright owns `e2e/` (STUDIO-OBS-008, P5); Vitest's default include would collect its specs.
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     // `*.node.test.*` files need a real socket and a real `EventSource`; they run in forked
     // processes so the flag above can be passed. Everything else keeps the default pool.
     poolMatchGlobs: [

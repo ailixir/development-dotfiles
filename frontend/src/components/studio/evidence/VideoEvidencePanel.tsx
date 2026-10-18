@@ -1,6 +1,8 @@
 import { forwardRef, useEffect, useState } from 'react';
 import { Alert, Box, Stack, Typography } from '@mui/material';
-import type { ExecutionSnapshot } from '@/types/studio/studioTypes';
+import type { ExecutionErrorCode, ExecutionSnapshot, VideoEvidence, VideoStatus } from '@/types/studio/studioTypes';
+import type { GuidedResult } from '@/types/studio/studioGuidedTypes';
+import { studioGuidedApi } from '@/services/api/studioGuidedApi';
 import {
   NO_RUN_EVIDENCE_MESSAGE,
   PARTIAL_RECORDING_QUALIFIER,
@@ -37,18 +39,85 @@ import { formatEvidenceInstant } from './formatEvidenceInstant';
  *    exposes no HTTP status, so a cause-specific explanation would be invented (AC-12).
  *  - **No `crossOrigin` attribute.** `anonymous` would strip the ambient session §6.3 relies on,
  *    and whether `use-credentials` is needed cross-host is SPK-02's question, not this story's.
+ *
+ * **Two recordings, one panel** (STUDIO-OBS-008 AC-7). The input is either a replay `snapshot` or
+ * a `guided` session result; which one is discriminated by the prop that is present, so the
+ * existing replay call sites are unchanged. A guided Run is never dressed up as a replay snapshot:
+ *
+ *  - its state is `result.evidence.video`, read by the same narratives (PLAYBACK-COPY, neutral
+ *    guided wording, is descoped by the user, 2026-10-17, so the existing wording is used as is);
+ *  - its URL is `studioGuidedApi.videoPath(sessionId)` (`getGuidedSessionVideo`, D-2), built only
+ *    for `AVAILABLE`, through the same `studioVideoUrl` composition;
+ *  - it carries no replay `errorCode`, so the stopped-run line, which is keyed on that code, is never
+ *    claimed for it.
+ *
+ * A recording with no status at all (a reaper-closed replay, 015 H9 observation) shows the
+ * `UNAVAILABLE` narrative (D-10) instead of failing the panel.
  */
-export interface VideoEvidencePanelProps {
-  /** Null before any run is on screen. */
-  readonly snapshot: ExecutionSnapshot | null;
+
+/** The guided half of the input: the session and its result (`readResult`). */
+export interface GuidedVideoEvidence {
+  readonly sessionId: string;
+  readonly result: Pick<GuidedResult, 'executionId' | 'evidence'>;
+}
+
+export type VideoEvidencePanelProps =
+  | {
+      /** Null before any run is on screen. */
+      readonly snapshot: ExecutionSnapshot | null;
+      readonly guided?: undefined;
+    }
+  | {
+      readonly guided: GuidedVideoEvidence;
+      readonly snapshot?: undefined;
+    };
+
+/** What the panel renders, whichever recording it is. */
+interface EvidenceSource {
+  readonly video: VideoEvidence;
+  readonly status: VideoStatus;
+  readonly playbackUrl: string | null;
+  readonly executionId: string;
+  readonly errorCode: ExecutionErrorCode | null;
+}
+
+/** D-10 / 015 H9: a recording the server gave no status is shown as having no usable recording. */
+function statusOf(video: VideoEvidence): VideoStatus {
+  return (video.status as VideoStatus | null | undefined) ?? 'UNAVAILABLE';
+}
+
+function evidenceSource(props: VideoEvidencePanelProps): EvidenceSource | null {
+  if (props.guided !== undefined) {
+    const { sessionId, result } = props.guided;
+    const { video } = result.evidence;
+    const status = statusOf(video);
+    return {
+      video,
+      status,
+      playbackUrl: status === 'AVAILABLE' ? studioGuidedApi.videoPath(sessionId) : null,
+      executionId: result.executionId,
+      errorCode: null,
+    };
+  }
+  const { snapshot } = props;
+  if (snapshot === null) {
+    return null;
+  }
+  const status = statusOf(snapshot.video);
+  return {
+    video: snapshot.video,
+    status,
+    playbackUrl:
+      status === 'AVAILABLE' && snapshot.videoPath !== null ? studioVideoUrl(snapshot.videoPath) : null,
+    executionId: snapshot.executionId,
+    errorCode: snapshot.errorCode,
+  };
 }
 
 export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePanelProps>(
-  function VideoEvidencePanel({ snapshot }, videoRef) {
-    const playbackUrl =
-      snapshot !== null && snapshot.video.status === 'AVAILABLE' && snapshot.videoPath !== null
-        ? studioVideoUrl(snapshot.videoPath)
-        : null;
+  function VideoEvidencePanel(props, videoRef) {
+    const source = evidenceSource(props);
+    const playbackUrl = source?.playbackUrl ?? null;
 
     const [playbackFailed, setPlaybackFailed] = useState(false);
     // A new recording starts with no failure carried over from the previous one.
@@ -56,7 +125,7 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
       setPlaybackFailed(false);
     }, [playbackUrl]);
 
-    if (snapshot === null) {
+    if (source === null) {
       return (
         <Box data-testid="video-evidence-empty">
           <Typography variant="body2" color="text.secondary">
@@ -66,16 +135,16 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
       );
     }
 
-    const { video } = snapshot;
-    const narrative = videoEvidenceNarrative(video.status);
+    const { video, status } = source;
+    const narrative = videoEvidenceNarrative(status);
     const statement =
       narrative.usesServerError && video.error !== null ? video.error : narrative.statement;
-    const isAvailable = video.status === 'AVAILABLE';
+    const isAvailable = status === 'AVAILABLE';
     const isPartial = isAvailable && video.partial;
     // Keyed on the run outcome, not on `partial`: an orderly stop leaves `partial: false`.
-    const stoppedRunStatement = isAvailable ? stoppedRunRecordingStatement(snapshot.errorCode) : null;
+    const stoppedRunStatement = isAvailable ? stoppedRunRecordingStatement(source.errorCode) : null;
     const expiry =
-      (video.status === 'AVAILABLE' || video.status === 'EXPIRED') && video.expiresAt !== null
+      (status === 'AVAILABLE' || status === 'EXPIRED') && video.expiresAt !== null
         ? formatEvidenceInstant(video.expiresAt)
         : null;
 
@@ -85,7 +154,8 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
         role="region"
         aria-label={narrative.title}
         data-testid="video-evidence"
-        data-video-status={video.status}
+        data-video-status={status}
+        data-evidence-kind={props.guided !== undefined ? 'guided' : 'replay'}
       >
         <Stack spacing={1}>
           <Typography variant="subtitle2" component="h3" data-testid="video-evidence-title">
@@ -106,7 +176,7 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
           )}
           {expiry !== null && (
             <Typography variant="caption" color="text.secondary" data-testid="video-evidence-expiry">
-              {video.status === 'EXPIRED'
+              {status === 'EXPIRED'
                 ? `Expired on ${expiry}`
                 : `Available until ${expiry}`}
             </Typography>
@@ -118,7 +188,7 @@ export const VideoEvidencePanel = forwardRef<HTMLVideoElement, VideoEvidencePane
               src={playbackUrl}
               controls
               preload="metadata"
-              aria-label={`Recording of execution ${snapshot.executionId}`}
+              aria-label={`Recording of execution ${source.executionId}`}
               data-testid="video-evidence-player"
               style={{ width: '100%', maxHeight: 360, backgroundColor: 'black' }}
               onError={() => setPlaybackFailed(true)}

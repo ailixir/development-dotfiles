@@ -106,7 +106,8 @@ const CreateCheckPage: React.FC = () => {
         if (formData.checkType === 'UI_TEST' && (formData as any).uiTestId) {
           const studio = (await import('@/services/api/studioApi')).default;
           const test = await studio.getTest((formData as any).uiTestId);
-          const vars = (test as any).variables as Array<{ name: string; type: string } | undefined>;
+          // `TestDetailDto.variables` are `StudioVariable`s: `kind` is `plain` or `secretRef`.
+          const vars = test.variables;
           if (Array.isArray(vars) && vars.length > 0) {
             setFormData((prev) => {
               const existing = (prev as any).uiVariables || {};
@@ -115,10 +116,7 @@ const CreateCheckPage: React.FC = () => {
                 if (!v || !v.name) continue;
                 const key = v.name.toUpperCase();
                 if (next[key]) continue;
-                if (v.type === 'secret') next[key] = { kind: 'secret', secretId: '' };
-                else if (v.type === 'number') next[key] = { kind: 'number', value: '' };
-                else if (v.type === 'boolean') next[key] = { kind: 'boolean', value: false };
-                else next[key] = { kind: 'plain', value: '' };
+                next[key] = v.kind === 'secretRef' ? { kind: 'secret', secretId: '' } : { kind: 'plain', value: '' };
               }
               return { ...prev, uiVariables: next } as any;
             });

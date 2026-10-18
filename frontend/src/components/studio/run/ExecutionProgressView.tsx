@@ -10,10 +10,22 @@ import {
   Stack,
   Typography,
 } from '@mui/material';
-import type { ExecutionSnapshot, StepResult } from '@/types/studio/studioTypes';
-import { executionErrorNarrative } from './executionErrorNarratives';
+import type { ExecutionSnapshot, StepResult, TestDetailDto } from '@/types/studio/studioTypes';
+import {
+  executionErrorNarrative,
+  learnAgainOffered,
+  replayFailureNarrative,
+  type ReplayFailureNarrative,
+} from './executionErrorNarratives';
 import { executionStatusLabel, isCancelledOutcome } from './executionStatus';
 import { seekEligibility } from '@/components/studio/evidence/seekEligibility';
+import { guidedCopy, stepNumberIn } from '@/components/studio/guided/guidedNarratives';
+import {
+  InlineCopy,
+  LoginRequiredNotice,
+  loginNoticeFrom,
+  loginNoticeSentences,
+} from '@/components/studio/guided/LoginRequiredNotice';
 
 /**
  * What a snapshot says, rendered without turning a bounded report into a false one
@@ -39,13 +51,25 @@ import { seekEligibility } from '@/components/studio/evidence/seekEligibility';
  *  - **A terminal `ERROR` says what happened to the browser and who can clear it (AC-6).** Before
  *    this story `errorCode` was rendered nowhere at all, which is why ADR-002 §15.5 could record
  *    the frontend union's drift as having no runtime effect.
+ *  - **A named replay cause comes first (STUDIO-OBS-008 T0 ruling A1.6).** A non-null
+ *    `replayFailure` selects the narrative before `status` and `errorCode`: the same login notice the
+ *    guided result uses, or "Step N no longer matches the page…". Nothing is read from step messages,
+ *    logs or status. "Learn again from step N" is offered only under the three A1 conditions
+ *    ({@link learnAgainOffered}); otherwise the sentence stands alone.
  */
 
 export const NOT_ATTEMPTED = 'not attempted';
 export const LOGS_TRUNCATED_STATEMENT =
   'Earlier log lines were dropped before this report reached you: the run produced more than the server retains.';
 export const RERUN_LABEL = 'Run again';
-export const SEEK_LABEL = 'Show in recording';
+/**
+ * The replay per-step seek's visible label (STUDIO-OBS-008 AC-7): "Seek to step N", the same cited
+ * copy the guided recording's per-step seek uses (`guidedNarratives.ts` `seekToStep`). It replaced
+ * the 10.16a label "Show in recording" (L5b-F1, 2026-10-17).
+ */
+function seekStepLabel(stepIndex: number): string {
+  return guidedCopy('seekToStep', { N: stepIndex + 1 });
+}
 /** VAL-025: the failed step's pointer to the evidence of where the browser was. */
 export const WATCH_FAILURE_LABEL = 'Watch the recording at this step';
 export const UNNAMED_ERROR_STATEMENT =
@@ -63,6 +87,28 @@ export interface ExecutionProgressViewProps {
    * null. The caller passes it only when there is a recording to seek.
    */
   readonly onSeekStep?: (offsetMs: number) => void;
+  /**
+   * STUDIO-OBS-008 (T0 ruling A1.6): the editor a replay's named cause acts on. The Studio page
+   * passes it; a surface without an editor (the runs drawer) does not, and then the cause is worded
+   * with the snapshot's own step numbers and offers no action.
+   */
+  readonly replayContext?: ReplayFailureContext;
+}
+
+/** What the page lends the replay-failure narrative (T0 ruling A1.6). */
+export interface ReplayFailureContext {
+  /** The current draft's stable step IDs, in order. N is the step's 1-based position here. */
+  readonly draftStepIds: readonly string[];
+  /** The test as `GET /tests/{id}` served it, for the "Learn again" conditions. */
+  readonly test: Pick<TestDetailDto, 'readiness' | 'confirmedRevisionId'> | null;
+  /** "Go to step N": the page moves focus to that step's editor row. */
+  readonly onGoToStep: (stepId: string) => void;
+  /** "Open Variables": the page opens its saved-inputs dialog. */
+  readonly onOpenVariables: () => void;
+  /** "Learn again from step N": a guided start from that step on the confirmed revision. */
+  readonly onLearnAgain: (stepId: string, revisionId: string) => void;
+  /** True while a Run is being prepared or is in flight. */
+  readonly disabled?: boolean;
 }
 
 /**
@@ -87,12 +133,16 @@ const StepTimings: React.FC<{ step: StepResult }> = ({ step }) => (
   </Stack>
 );
 
-/** The seek control's accessible name, per step. The disabled wording reuses {@link NOT_ATTEMPTED}. */
+/**
+ * The seek control's accessible name, per step: its visible label, and for a step with no reading the
+ * visible label followed by {@link NOT_ATTEMPTED} (story 10.16a AC-9: named as not attempted rather
+ * than silently inert). Before L5b-F1 it read "Jump to step N in the recording".
+ */
 export function seekControlLabel(step: Pick<StepResult, 'stepIndex' | 'offsetMs'>): string {
   const eligibility = seekEligibility(step);
   return eligibility.seekable
-    ? `Jump to step ${step.stepIndex + 1} in the recording`
-    : `Jump to step ${step.stepIndex + 1}: ${NOT_ATTEMPTED}`;
+    ? seekStepLabel(step.stepIndex)
+    : `${seekStepLabel(step.stepIndex)}: ${NOT_ATTEMPTED}`;
 }
 
 /**
@@ -119,7 +169,7 @@ const StepSeekControl: React.FC<{ step: StepResult; onSeekStep: (offsetMs: numbe
           }
         }}
       >
-        {SEEK_LABEL}
+        {seekStepLabel(step.stepIndex)}
       </Button>
     </Box>
   );
@@ -159,11 +209,121 @@ const WatchFailureControl: React.FC<{
   );
 };
 
+/** `width: 100%` below `sm`, `auto` from it up: actions stack on a narrow screen (AC-8 a). */
+const narrowFullWidth = { width: { xs: '100%', sm: 'auto' } } as const;
+
+/**
+ * The replay's named cause (T0 ruling A1.6). Login reuses the guided `LoginRequiredNotice` through
+ * the one adapter; drift says "Step N no longer matches the page…". Both carry a "Seek to step N"
+ * control on the existing replay seek path (`seekEligibility` + `onSeekStep`), shown only when the
+ * failing step has a reading on an available recording.
+ */
+const ReplayFailureNotice: React.FC<{
+  snapshot: ExecutionSnapshot;
+  narrative: ReplayFailureNarrative;
+  context?: ReplayFailureContext;
+  onSeekStep?: (offsetMs: number) => void;
+}> = ({ snapshot, narrative, context, onSeekStep }) => {
+  const { failure } = narrative;
+  const draftNumber = context ? stepNumberIn(context.draftStepIds, failure.stepId) : null;
+  // Without an editor, or for a step the draft no longer has, the snapshot's own numbering is used:
+  // it is the numbering of the step list rendered just below.
+  const shownNumber = draftNumber ?? failure.stepIndex + 1;
+
+  const step = snapshot.stepResults.find((candidate) => candidate.stepIndex === failure.stepIndex);
+  const seek =
+    onSeekStep && step && snapshot.video.status === 'AVAILABLE' ? seekEligibility(step) : null;
+  const seekControl =
+    seek && seek.seekable ? (
+      <Button
+        size="small"
+        variant="outlined"
+        data-testid="replay-failure-seek"
+        onClick={() => onSeekStep?.(seek.offsetMs)}
+        sx={narrowFullWidth}
+      >
+        {guidedCopy('seekToStep', { N: shownNumber })}
+      </Button>
+    ) : null;
+
+  if (narrative.kind === 'login') {
+    const notice = loginNoticeFrom(narrative.failure);
+    if (context) {
+      return (
+        <Box data-testid="replay-failure" data-kind="login" sx={{ mb: 2 }}>
+          <LoginRequiredNotice
+            notice={notice}
+            draftStepIds={context.draftStepIds}
+            onGoToStep={context.onGoToStep}
+            onOpenVariables={context.onOpenVariables}
+            disabled={context.disabled}
+          />
+          {seekControl && <Box sx={{ mt: 1 }}>{seekControl}</Box>}
+        </Box>
+      );
+    }
+    return (
+      <Alert severity="warning" data-testid="replay-failure" data-kind="login" sx={{ mb: 2 }}>
+        <Stack spacing={1}>
+          {loginNoticeSentences(notice, shownNumber).map((sentence) => (
+            <Typography key={sentence} variant="body2" sx={{ overflowWrap: 'anywhere' }}>
+              <InlineCopy text={sentence} />
+            </Typography>
+          ))}
+          {seekControl}
+        </Stack>
+      </Alert>
+    );
+  }
+
+  const offerLearnAgain =
+    context !== undefined &&
+    snapshot.revisionId !== null &&
+    learnAgainOffered(context.test, snapshot, context.draftStepIds);
+  return (
+    <Alert
+      severity="error"
+      data-testid="replay-failure"
+      data-kind="drift"
+      sx={{ mb: 2, '& .MuiAlert-message': { width: '100%', minWidth: 0 } }}
+    >
+      <Stack spacing={1}>
+        <Typography variant="body2" data-testid="replay-drift" sx={{ overflowWrap: 'anywhere' }}>
+          {guidedCopy('replayDrift', { N: shownNumber })}
+        </Typography>
+        {context !== undefined && draftNumber === null && (
+          // W5 UX-07: the run's step N is not the editor's step N when the step is gone from the draft.
+          <Typography variant="body2" data-testid="replay-drift-step-gone" sx={{ overflowWrap: 'anywhere' }}>
+            {guidedCopy('loginStepGone')}
+          </Typography>
+        )}
+        {(offerLearnAgain || seekControl) && (
+          <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1} data-testid="replay-failure-actions">
+            {offerLearnAgain && context && (
+              <Button
+                size="small"
+                variant="outlined"
+                disabled={context.disabled}
+                onClick={() => context.onLearnAgain(failure.stepId, snapshot.revisionId as string)}
+                sx={narrowFullWidth}
+              >
+                {guidedCopy('learnAgainFromStep', { N: shownNumber })}
+              </Button>
+            )}
+            {seekControl}
+          </Stack>
+        )}
+      </Stack>
+    </Alert>
+  );
+};
+
 export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   snapshot,
   onRerun,
   onSeekStep,
   showLogs = true,
+  replayContext,
 }) => {
   if (!snapshot) {
     return (
@@ -179,11 +339,13 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
   // status renders nothing at all — §8.2 puts a step locator or assertion timeout at `FAIL`/
   // `FAILED` with no code, and inventing a region for it would name a cause the server did not.
   const code = snapshot.errorCode;
+  // T0 ruling A1.6: a named replay cause is chosen before `status` and `errorCode`.
+  const replayFailure = replayFailureNarrative(snapshot);
   // A cancelled run is named, not explained as a failure: the person who pressed Stop caused it.
   // Its narrative is the contract's like every other code's (ADR-002 §29); only the region differs
   // — a status, not an alert — so the two facts render in the same slots either way.
-  const cancelled = isCancelledOutcome(snapshot.status, code);
-  const narrative = code !== null ? executionErrorNarrative(code) : null;
+  const cancelled = replayFailure === null && isCancelledOutcome(snapshot.status, code);
+  const narrative = replayFailure === null && code !== null ? executionErrorNarrative(code) : null;
 
   return (
     <Box data-testid="execution-progress">
@@ -194,6 +356,15 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
           data-testid="execution-status"
         />
       </Stack>
+
+      {replayFailure !== null && (
+        <ReplayFailureNotice
+          snapshot={snapshot}
+          narrative={replayFailure}
+          context={replayContext}
+          onSeekStep={onSeekStep}
+        />
+      )}
 
       {cancelled && narrative && (
         <Alert
@@ -215,7 +386,7 @@ export const ExecutionProgressView: React.FC<ExecutionProgressViewProps> = ({
         </Alert>
       )}
 
-      {snapshot.status === 'ERROR' && code === null && (
+      {replayFailure === null && snapshot.status === 'ERROR' && code === null && (
         <Alert severity="error" sx={{ mb: 2 }} data-testid="execution-error-unnamed">
           <Typography variant="body2">{UNNAMED_ERROR_STATEMENT}</Typography>
         </Alert>

@@ -195,3 +195,29 @@ describe('AC-20: seek controls are keyboard-operable and distinctly named per st
     expect(screen.queryByTestId('step-seek-0')).toBeNull();
   });
 });
+
+describe('STUDIO-OBS-008 AC-7 (L5b-F1): the replay per-step seek is named "Seek to step N", like the guided one', () => {
+  it('an attempted step reads and is named "Seek to step N"; one with no reading adds "not attempted"; the retired label is gone', () => {
+    render(<SeekHarness snapshot={failedWithSkipped} />);
+    const failIndex = failedWithSkipped.stepResults.findIndex((step) => step.status === 'FAIL');
+    for (const step of failedWithSkipped.stepResults) {
+      const control = screen.queryByTestId(`step-seek-${step.stepIndex}`);
+      if (control === null) {
+        // The failed step carries the failure-specific control instead (VAL-025).
+        expect(step.stepIndex).toBe(failIndex);
+        continue;
+      }
+      const label = `Seek to step ${step.stepIndex + 1}`;
+      expect(control).toHaveTextContent(label);
+      expect(control.getAttribute('aria-label')).toBe(step.offsetMs === null ? `${label}: ${NOT_ATTEMPTED}` : label);
+    }
+    expect(screen.queryByText('Show in recording')).toBeNull();
+    expect(document.body.innerHTML).not.toContain('Jump to step');
+    const attempted = failedWithSkipped.stepResults.find(
+      (step) => step.offsetMs !== null && step.stepIndex !== failIndex,
+    )!;
+    expect(screen.getByRole('button', { name: `Seek to step ${attempted.stepIndex + 1}` })).toBe(
+      screen.getByTestId(`step-seek-${attempted.stepIndex}`),
+    );
+  });
+});

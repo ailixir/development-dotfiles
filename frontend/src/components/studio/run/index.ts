@@ -6,10 +6,9 @@ export {
   LOGS_TRUNCATED_STATEMENT,
   RERUN_LABEL,
   UNNAMED_ERROR_STATEMENT,
-  SEEK_LABEL,
   seekControlLabel,
 } from './ExecutionProgressView';
-export type { ExecutionProgressViewProps } from './ExecutionProgressView';
+export type { ExecutionProgressViewProps, ReplayFailureContext } from './ExecutionProgressView';
 export {
   EXECUTE_CONFLICT_NARRATIVES,
   EXECUTE_CONFLICT_KEYS,
@@ -23,24 +22,27 @@ export {
   EXECUTION_ERROR_NARRATIVES,
   EXECUTION_ERROR_KEYS,
   executionErrorNarrative,
+  replayFailureNarrative,
+  learnAgainOffered,
 } from './executionErrorNarratives';
-export type { ExecutionErrorNarrative } from './executionErrorNarratives';
+export type { ExecutionErrorNarrative, ReplayFailureNarrative } from './executionErrorNarratives';
 export {
-  RUN_ACTION,
-  EXECUTABLE_COMPILE_STATUS,
-  WAITING_COMPILE_STATUS,
-  runActionFor,
+  RUN_MODE,
+  EXECUTABLE_READINESS,
+  LEARNED_READY_LABEL,
+  runModeFor,
   runAvailableFor,
 } from './runEnablement';
-export type { RunAction } from './runEnablement';
+export type { RunMode } from './runEnablement';
 export { useRunGate } from './useRunGate';
 export type {
   RunGateState,
   RunRefusalState,
   RunPhase,
   RunSaveOutcome,
-  RunCompileOutcome,
   RunGateOptions,
+  LearnFromRequest,
+  LearnStartBlock,
 } from './useRunGate';
 export {
   EXECUTION_STATUS_LABELS,

@@ -30,7 +30,7 @@ function stepsLabel(count: number): string {
 
 const TestRow: React.FC<TestRowProps> = ({ test, csiName, now, actionsDisabled = false, onDelete, onSchedule }) => {
   const href = testHref(test.id);
-  const readiness = readinessFor(test.compileStatus);
+  const readiness = readinessFor(test.readiness);
   const outcome = test.lastRunStatus;
 
   return (
@@ -49,7 +49,7 @@ const TestRow: React.FC<TestRowProps> = ({ test, csiName, now, actionsDisabled =
           variant="caption"
           color="text.secondary"
           component="div"
-          sx={{ maxWidth: 360, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+          sx={{ display: { xs: 'none', sm: 'block' } }}
         >
           {test.description ? `${test.description} · ` : ''}
           {stepsLabel(test.steps?.length ?? 0)}

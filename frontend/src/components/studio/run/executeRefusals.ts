@@ -27,8 +27,10 @@
  * One narrative is derived rather than quoted and is marked as such below: `RUNTIME_INCOMPATIBLE`
  * has no row in the `tests` tag table. Its *condition* is the document's
  * (`docs/architecture/studio-execution.md`: *"current target/runtime policy permits it"*); its
- * *remedy* is architecture §4.2's ordinary save-and-prepare path, stated as the action
- * available rather than as a promise about the outcome.
+ * *remedy* is the ordinary save-and-run path, stated as the action available rather than as a
+ * promise about the outcome. `LEARN_REQUIRED` (ADR-SC-005) names the learning Run as the remedy.
+ * STUDIO-OBS-008 removed the STUDIO-OBS-012B interim clause ("learning is not yet available in this
+ * build"): Run now learns an unlearned draft itself (AC-2).
  */
 
 /** Which surface a refusal belongs on. `503` is platform-wide; the others are about this run. */
@@ -48,13 +50,13 @@ export interface ExecuteRefusalNarrative {
 
 /** The five codes `executeTest`'s `409` declares in `x-conflict-codes`. */
 export const EXECUTE_CONFLICT_NARRATIVES: Readonly<Record<string, ExecuteRefusalNarrative>> = {
-  COMPILE_REQUIRED: {
-    title: 'Save this test before running',
+  LEARN_REQUIRED: {
+    title: 'This test has not learned its current steps',
     explanation:
-      'The saved test is not ready to run. Nothing was started and nothing was changed.',
+      'No learned version matches the saved steps, so there is nothing to repeat yet. Nothing was started and nothing was changed.',
     whoClearsIt:
-      'Check the steps, save the test, then run it again.',
-    callerCanRetry: true,
+      'A Run that learns the steps clears this.',
+    callerCanRetry: false,
     scope: 'draft',
   },
   RUNTIME_INCOMPATIBLE: {

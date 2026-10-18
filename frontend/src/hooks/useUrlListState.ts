@@ -234,12 +234,13 @@ export function useUrlListState<F extends Record<string, string>, S extends stri
       timer.current = null;
     }
     setQueryState('');
+    // Nothing to clear: no history entry, so Back keeps working as expected.
+    const owned = [Q, PAGE, ...Object.keys(specsRef.current)];
+    if (!owned.some((key) => searchParams.has(key))) return;
     update((next) => {
-      next.delete(Q);
-      for (const key of Object.keys(specsRef.current)) next.delete(key);
-      next.delete(PAGE);
+      for (const key of owned) next.delete(key);
     }, false);
-  }, [update]);
+  }, [searchParams, update]);
 
   const hasActiveFilters =
     urlQuery !== '' ||

@@ -144,6 +144,24 @@ describe('useUrlListState', () => {
     expect(search().toString()).toBe('sort=name%2Casc&run=abc');
   });
 
+  it('clearAll with nothing to clear adds no history entry', () => {
+    const { router } = setup('/list?sort=name,asc');
+    const key = router.state.location.key;
+    act(() => state.clearAll());
+    expect(router.state.location.key).toBe(key);
+  });
+
+  it('reads and sets the page size, resetting the page; invalid sizes read as the default', () => {
+    const { search } = setup('/list?size=50&page=3');
+    expect(state.pageSize).toBe(50);
+    expect(state.pageSizeOptions).toEqual([10, 25, 50, 100]);
+    act(() => state.setPageSize(100));
+    expect(search().get('size')).toBe('100');
+    expect(search().get('page')).toBeNull();
+    act(() => state.setPageSize(25));
+    expect(search().get('size')).toBeNull();
+  });
+
   it('a pending search keeps a sort or filter changed while it was debouncing', () => {
     const { search } = setup();
     act(() => state.setQuery('smoke'));

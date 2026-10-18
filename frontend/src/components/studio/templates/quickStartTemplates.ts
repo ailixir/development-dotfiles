@@ -10,23 +10,21 @@
  *    `Press`, `Check that`) that maps to an operation in the runner's allowlist. `Scroll` and
  *    `Upload` have no runner operation, so no template uses them.
  * 2. **Every control is named in quotes, with its kind said out loud** ("the *Sign On* button",
- *    "the *User ID* field"). That is the single highest-leverage thing a template can teach: the
- *    compiler turns a named control into `getByRole` / `getByLabel`, and turns an unnamed one
- *    ("log in") into a guess. The validator will happily accept a confidently wrong locator.
+ *    "the *User ID* field"). That is the single highest-leverage thing a template can teach: a
+ *    named control is found by its role or label on the live page, and an unnamed one ("log in")
+ *    is a guess.
  * 3. **Every template ends with an assertion**, because without one a test passes as long as the
  *    browser loaded something. The closing lines map to the only five assertions the runner
  *    permits: `toHaveURL`, `toHaveTitle`, `toBeVisible`, `toContainText`, `toHaveValue`.
  * 4. **No credential is ever inlined.** A password is `<secret NAME>` where `NAME` is a reference
- *    the template also declares, so the reference resolves on the first compile instead of being
+ *    the template also declares, so the reference resolves on the first Run instead of being
  *    rejected as undeclared. This is the defect the previous "Login flow" template shipped: it
- *    referenced `<secret sec_abc123>`, which no draft declares and no vault row matches.
+ *    referenced `<secret sec_abc123>`, which no draft declares and no vault row matches. NAME is
+ *    also the secret's Vault name, its `secretId` (ruling D-8), so the author stores a secret under
+ *    that name before the first Run. Such a template is offered only while the server capability
+ *    says Vault is configured (see {@link availableQuickStartTemplates}).
  * 5. **One page, one tab, no frames.** V1 runs a single page; nothing here opens a pop-up, a new
- *    tab or an embedded frame (see `UNSUPPORTED_WORKFLOW_LIMITS`).
- *
- * The canonical phrasing is the worked example in `backend/src/main/resources/studio/
- * syntax-reference.md`, the same document the compile prompt carries. Templates deliberately
- * echo it, because a checklist written in the shape the prompt was shown is the one the model
- * translates most predictably.
+ *    tab or an embedded frame.
  */
 
 /** A reference a template needs. Secret rows carry no value; the author points them at a vault entry. */
@@ -95,11 +93,20 @@ export const QUICK_START_TEMPLATES: readonly QuickStartTemplate[] = [
   },
 ];
 
-/** Templates exposed by the production alpha; Vault-dependent examples remain test fixtures. */
-export const PRODUCTION_ALPHA_TEMPLATES: readonly QuickStartTemplate[] =
-  QUICK_START_TEMPLATES.filter(
-    (template) => template.variables.every((variable) => variable.type !== 'secret'),
-  );
+/**
+ * The templates to offer for one test (STUDIO-OBS-008 AC-5, GA C-7). A template that declares a
+ * secret is offered only when the server capability says a Vault provider is configured:
+ * pass `vaultSecretsEnabled(useStudioCapabilities(testId))`, never a build-time switch. Any other
+ * capability state (no saved test, loading, refused, `vaultSecrets: false`) is `false`, so no
+ * template asks for a secret the author cannot create.
+ */
+export function availableQuickStartTemplates(secretsAvailable: boolean): readonly QuickStartTemplate[] {
+  return secretsAvailable
+    ? QUICK_START_TEMPLATES
+    : QUICK_START_TEMPLATES.filter((template) =>
+        template.variables.every((variable) => variable.type !== 'secret'),
+      );
+}
 
 /** Step prefixes the runner has an operation for. Guarded by tests. */
 export const TEMPLATE_STEP_PREFIXES: readonly string[] = [
